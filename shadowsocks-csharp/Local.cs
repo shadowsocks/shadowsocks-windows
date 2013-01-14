@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Text;
 using System.Net.Sockets;
 using System.Net;
-using System.Threading;
 
 namespace shadowsocks_csharp
 {
@@ -49,23 +48,30 @@ namespace shadowsocks_csharp
 
         public void AcceptCallback(IAsyncResult ar)
         {
+            try
+            {
 
-            // Get the socket that handles the client request.
-            Socket listener = (Socket)ar.AsyncState;
-            listener.BeginAccept(
-                new AsyncCallback(AcceptCallback),
-                listener);
+                // Get the socket that handles the client request.
+                Socket listener = (Socket)ar.AsyncState;
+                listener.BeginAccept(
+                    new AsyncCallback(AcceptCallback),
+                    listener);
 
-            Socket conn = listener.EndAccept(ar);
+                Socket conn = listener.EndAccept(ar);
 
-            // Create the state object.
-            Handler handler = new Handler();
-            handler.connection = conn;
-            handler.encryptor = encryptor;
+                // Create the state object.
+                Handler handler = new Handler();
+                handler.connection = conn;
+                handler.encryptor = encryptor;
 
-            handler.Start();
-            //handler.BeginReceive(state.buffer, 0, StateObject.BufferSize, 0,
-            //    new AsyncCallback(ReadCallback), state);
+                handler.Start();
+                //handler.BeginReceive(state.buffer, 0, StateObject.BufferSize, 0,
+                //    new AsyncCallback(ReadCallback), state);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.ToString());
+            }
         }
 
     }
@@ -110,7 +116,6 @@ namespace shadowsocks_csharp
 
                 Console.WriteLine("Socket connected to {0}",
                     remote.RemoteEndPoint.ToString());
-                Console.WriteLine(Thread.CurrentThread.ManagedThreadId);
 
                 handshakeReceive();
             }

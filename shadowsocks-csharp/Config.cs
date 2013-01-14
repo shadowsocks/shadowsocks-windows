@@ -25,14 +25,14 @@ namespace shadowsocks_csharp
                     return config;
                 }
             }
-            catch (IOException e)
+            catch (IOException)
             {
                 return new Config
                 {
                     server = "127.0.0.1",
                     server_port = 8388,
-                    local_port = 1080,
-                    password = "foobar!"
+                    local_port = 1081,
+                    password = "barfoo!"
                 };
             }
         }
@@ -42,7 +42,7 @@ namespace shadowsocks_csharp
             DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof(Config));
             try
             {
-                using (FileStream fs = File.Open(@"config.json",FileMode.Create))
+                using (FileStream fs = File.Open(@"config.json", FileMode.Create))
                 {
                     ser.WriteObject(fs, config);
                 }

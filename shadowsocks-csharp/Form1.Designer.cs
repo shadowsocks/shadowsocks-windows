@@ -45,8 +45,8 @@
             this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
             this.notifyIcon1 = new System.Windows.Forms.NotifyIcon(this.components);
             this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.Config = new System.Windows.Forms.ToolStripMenuItem();
-            this.Quit = new System.Windows.Forms.ToolStripMenuItem();
+            this.ConfigItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.QuitItem = new System.Windows.Forms.ToolStripMenuItem();
             this.tableLayoutPanel1.SuspendLayout();
             this.panel1.SuspendLayout();
             this.tableLayoutPanel2.SuspendLayout();
@@ -178,6 +178,7 @@
             this.button2.TabIndex = 1;
             this.button2.Text = "Cancel";
             this.button2.UseVisualStyleBackColor = true;
+            this.button2.Click += new System.EventHandler(this.button2_Click);
             // 
             // button1
             // 
@@ -188,6 +189,7 @@
             this.button1.TabIndex = 0;
             this.button1.Text = "OK";
             this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
             // tableLayoutPanel2
             // 
@@ -217,26 +219,26 @@
             // contextMenuStrip1
             // 
             this.contextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.Config,
-            this.Quit});
+            this.ConfigItem,
+            this.QuitItem});
             this.contextMenuStrip1.Name = "contextMenuStrip1";
             this.contextMenuStrip1.RenderMode = System.Windows.Forms.ToolStripRenderMode.System;
             this.contextMenuStrip1.ShowImageMargin = false;
             this.contextMenuStrip1.Size = new System.Drawing.Size(86, 48);
             // 
-            // Config
+            // ConfigItem
             // 
-            this.Config.Name = "Config";
-            this.Config.Size = new System.Drawing.Size(127, 22);
-            this.Config.Text = "Config";
-            this.Config.Click += new System.EventHandler(this.Config_Click);
+            this.ConfigItem.Name = "ConfigItem";
+            this.ConfigItem.Size = new System.Drawing.Size(127, 22);
+            this.ConfigItem.Text = "Config";
+            this.ConfigItem.Click += new System.EventHandler(this.Config_Click);
             // 
-            // Quit
+            // QuitItem
             // 
-            this.Quit.Name = "Quit";
-            this.Quit.Size = new System.Drawing.Size(127, 22);
-            this.Quit.Text = "Quit";
-            this.Quit.Click += new System.EventHandler(this.Quit_Click);
+            this.QuitItem.Name = "QuitItem";
+            this.QuitItem.Size = new System.Drawing.Size(127, 22);
+            this.QuitItem.Text = "Quit";
+            this.QuitItem.Click += new System.EventHandler(this.Quit_Click);
             // 
             // Form1
             // 
@@ -251,6 +253,7 @@
             this.Controls.Add(this.tableLayoutPanel1);
             this.Name = "Form1";
             this.Text = "Shadowsocks";
+            this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.Form1_FormClosed);
             this.tableLayoutPanel1.ResumeLayout(false);
             this.tableLayoutPanel1.PerformLayout();
             this.panel1.ResumeLayout(false);
@@ -279,8 +282,8 @@
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel2;
         private System.Windows.Forms.NotifyIcon notifyIcon1;
         private System.Windows.Forms.ContextMenuStrip contextMenuStrip1;
-        private System.Windows.Forms.ToolStripMenuItem Config;
-        private System.Windows.Forms.ToolStripMenuItem Quit;
+        private System.Windows.Forms.ToolStripMenuItem ConfigItem;
+        private System.Windows.Forms.ToolStripMenuItem QuitItem;
     }
 }
 
