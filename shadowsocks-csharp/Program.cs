@@ -13,7 +13,7 @@ namespace shadowsocks_csharp
         [STAThread]
         static void Main()
         {
-            Test.Test1();
+            new Local(1081).Start();
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new Form1());

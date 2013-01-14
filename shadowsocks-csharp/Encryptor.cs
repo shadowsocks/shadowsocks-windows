@@ -75,16 +75,16 @@ namespace shadowsocks_csharp
             }
         }
 
-        public void Encrypt(byte[] buf)
+        public void Encrypt(byte[] buf, int length)
         {
-            for (int i = 0; i < buf.Length; i++)
+            for (int i = 0; i < length; i++)
             {
                 buf[i] = encryptTable[buf[i]];
             }
         }
-        public void Decrypt(byte[] buf)
+        public void Decrypt(byte[] buf, int length)
         {
-            for (int i = 0; i < buf.Length; i++)
+            for (int i = 0; i < length; i++)
             {
                 buf[i] = decryptTable[buf[i]];
             }
