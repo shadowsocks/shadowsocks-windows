@@ -53,7 +53,7 @@ namespace shadowsocks_csharp
             {
                 local.Stop();
             }
-            local = new Local(config.local_port);
+            local = new Local(config);
             local.Start();
 
         }

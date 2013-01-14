@@ -10,13 +10,13 @@ namespace shadowsocks_csharp
 
     class Local
     {
-        private int port;
+        private Config config;
         private Encryptor encryptor;
         Socket listener;
-        public Local(int port)
+        public Local(Config config)
         {
-            this.port = port;
-            this.encryptor = new Encryptor("barfoo!");
+            this.config = config;
+            this.encryptor = new Encryptor(config.password);
         }
 
         public void Start()
@@ -25,7 +25,7 @@ namespace shadowsocks_csharp
             // Create a TCP/IP socket.
             listener = new Socket(AddressFamily.InterNetwork,
                 SocketType.Stream, ProtocolType.Tcp);
-            IPEndPoint localEndPoint = new IPEndPoint(0, port);
+            IPEndPoint localEndPoint = new IPEndPoint(0, config.local_port);
 
             // Bind the socket to the local endpoint and listen for incoming connections.
                 listener.Bind(localEndPoint);
@@ -63,6 +63,7 @@ namespace shadowsocks_csharp
                 Handler handler = new Handler();
                 handler.connection = conn;
                 handler.encryptor = encryptor;
+                handler.config = config;
 
                 handler.Start();
                 //handler.BeginReceive(state.buffer, 0, StateObject.BufferSize, 0,
@@ -79,6 +80,7 @@ namespace shadowsocks_csharp
     class Handler
     {
         public Encryptor encryptor;
+        public Config config;
         // Client  socket.
         public Socket remote;
         public Socket connection;
@@ -94,9 +96,9 @@ namespace shadowsocks_csharp
         public void Start()
         {
             // TODO async resolving
-            IPHostEntry ipHostInfo = Dns.GetHostEntry("127.0.0.1");
+            IPHostEntry ipHostInfo = Dns.GetHostEntry(config.server);
             IPAddress ipAddress = ipHostInfo.AddressList[0];
-            IPEndPoint remoteEP = new IPEndPoint(ipAddress, 8388);
+            IPEndPoint remoteEP = new IPEndPoint(ipAddress, config.server_port);
 
 
             remote = new Socket(AddressFamily.InterNetwork,
@@ -105,6 +107,12 @@ namespace shadowsocks_csharp
             // Connect to the remote endpoint.
             remote.BeginConnect(remoteEP,
                 new AsyncCallback(connectCallback), null);
+        }
+
+        public void Close()
+        {
+            connection.Close();
+            remote.Close();
         }
 
         private void connectCallback(IAsyncResult ar)
@@ -122,6 +130,7 @@ namespace shadowsocks_csharp
             catch (Exception e)
             {
                 Console.WriteLine(e.ToString());
+                this.Close();
             }
         }
 
@@ -135,6 +144,7 @@ namespace shadowsocks_csharp
             catch (Exception e)
             {
                 Console.WriteLine(e.ToString());
+                this.Close();
             }
         }
 
@@ -151,12 +161,13 @@ namespace shadowsocks_csharp
                 }
                 else
                 {
-                    // TODO error
+                    this.Close();
                 }
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.ToString());
+                this.Close();
             }
         }
 
@@ -179,6 +190,7 @@ namespace shadowsocks_csharp
             catch (Exception e)
             {
                 Console.WriteLine(e.ToString());
+                this.Close();
             }
         }
 
@@ -195,12 +207,14 @@ namespace shadowsocks_csharp
                 }
                 else
                 {
-                    // TODO error
+                    Console.WriteLine("bytesRead: " + bytesRead.ToString());
+                    this.Close();
                 }
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.ToString());
+                this.Close();
             }
         }
 
@@ -235,12 +249,14 @@ namespace shadowsocks_csharp
                 }
                 else
                 {
-                    // TODO error
+                    Console.WriteLine("bytesRead: " + bytesRead.ToString());
+                    this.Close();
                 }
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.ToString());
+                this.Close();
             }
         }
 
@@ -258,12 +274,14 @@ namespace shadowsocks_csharp
                 }
                 else
                 {
-                    // TODO error
+                    Console.WriteLine("bytesRead: " + bytesRead.ToString());
+                    this.Close();
                 }
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.ToString());
+                this.Close();
             }
         }
 
@@ -278,6 +296,7 @@ namespace shadowsocks_csharp
             catch (Exception e)
             {
                 Console.WriteLine(e.ToString());
+                this.Close();
             }
         }
 
@@ -292,6 +311,7 @@ namespace shadowsocks_csharp
             catch (Exception e)
             {
                 Console.WriteLine(e.ToString());
+                this.Close();
             }
         }
     }
