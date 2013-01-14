@@ -5,6 +5,7 @@ using System.Data;
 using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
+using System.Diagnostics;
 
 namespace shadowsocks_csharp
 {
@@ -16,12 +17,34 @@ namespace shadowsocks_csharp
         public Form1()
         {
             config = Config.Load();
-            reload(config);
             InitializeComponent();
+            configToTextBox();
+        }
+
+        private void showWindow()
+        {
+            this.Opacity = 1;
+            this.Show();
+        }
+
+        private void configToTextBox()
+        {
             textBox1.Text = config.server;
             textBox2.Text = config.server_port.ToString();
             textBox3.Text = config.password;
             textBox4.Text = config.local_port.ToString();
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            if (!config.isDefault)
+            {
+                this.Opacity = 0;
+                reload(config); BeginInvoke(new MethodInvoker(delegate
+                {
+                    this.Hide();
+                }));
+            }
         }
 
         private void reload(Config config)
@@ -37,27 +60,60 @@ namespace shadowsocks_csharp
 
         private void Config_Click(object sender, EventArgs e)
         {
-
+            showWindow();
         }
 
         private void Quit_Click(object sender, EventArgs e)
         {
-
+            this.Close();
         }
 
-        private void button1_Click(object sender, EventArgs e)
+        private void OKButton_Click(object sender, EventArgs e)
         {
-            reload(Config.Load());
+            try
+            {
+                Config config = new Config
+                {
+                    server = textBox1.Text,
+                    server_port = int.Parse(textBox2.Text),
+                    password = textBox3.Text,
+                    local_port = int.Parse(textBox4.Text),
+                    isDefault = false
+                };
+                Config.Save(config);
+                this.config = config;
+                reload(config);
+                this.Hide();
+            }
+            catch (FormatException)
+            {
+                MessageBox.Show("there is format problem");
+            }
+            catch (Exception)
+            {
+                MessageBox.Show("there is some problem with parameters");
+            }
         }
 
-        private void button2_Click(object sender, EventArgs e)
+        private void cancelButton_Click(object sender, EventArgs e)
         {
-
+            this.Hide();
+            configToTextBox();
         }
 
         private void Form1_FormClosed(object sender, FormClosedEventArgs e)
         {
             local.Stop();
+        }
+
+        private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Process.Start("https://github.com/clowwindy/shadowsocks-csharp");
+        }
+
+        private void notifyIcon1_DoubleClick(object sender, EventArgs e)
+        {
+            showWindow();
         }
 
     }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Runtime.Serialization.Json;
 using System.Text;
 using System.IO;
+using System.Diagnostics;
 
 namespace shadowsocks_csharp
 {
@@ -14,6 +15,17 @@ namespace shadowsocks_csharp
         public int local_port;
         public string password;
 
+        [NonSerialized]
+        public bool isDefault;
+
+        private static void assert(bool condition)
+        {
+            if(!condition) 
+            {
+                throw new Exception("assertion failure");
+            }
+        }
+
         public static Config Load()
         {
             DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof(Config));
@@ -22,17 +34,24 @@ namespace shadowsocks_csharp
                 using (FileStream fs = File.OpenRead(@"config.json"))
                 {
                     Config config = ser.ReadObject(fs) as Config;
+                    assert(!string.IsNullOrEmpty(config.server));
+                    assert(!string.IsNullOrEmpty(config.password));
+                    assert(config.local_port > 0);
+                    assert(config.server_port > 0);
+                    config.isDefault = false;
                     return config;
                 }
             }
-            catch (IOException)
+            catch (Exception e)
             {
+                Console.WriteLine(e);
                 return new Config
                 {
                     server = "127.0.0.1",
                     server_port = 8388,
                     local_port = 1081,
-                    password = "barfoo!"
+                    password = "barfoo!",
+                    isDefault = true
                 };
             }
         }
