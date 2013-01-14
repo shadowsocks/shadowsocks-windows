@@ -12,10 +12,12 @@ namespace shadowsocks_csharp
         [STAThread]
         static void Main()
         {
-            new Local(1081).Start();
+            Local local = new Local(1081);
+            local.Start();
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new Form1());
+            local.Stop();
         }
     }
 }

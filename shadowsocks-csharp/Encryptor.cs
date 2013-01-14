@@ -10,11 +10,12 @@ namespace shadowsocks_csharp
         public byte[] encryptTable = new byte[256];
         public byte[] decryptTable = new byte[256];
 
-        private Int64 compare(byte x, byte y, UInt64 a, int i) {
-            return (Int64)(a % (UInt64)(x + i)) - (Int64)(a % (UInt64)(y + i));
+        private long compare(byte x, byte y, ulong a, int i)
+        {
+            return (long)(a % (ulong)(x + i)) - (long)(a % (ulong)(y + i));
         }
 
-        private byte[] mergeSort(byte[] array, UInt64 a, int j)
+        private byte[] mergeSort(byte[] array, ulong a, int j)
         {
             if (array.Length == 1)
                 return array;

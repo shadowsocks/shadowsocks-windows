@@ -13,6 +13,7 @@ namespace shadowsocks_csharp
     {
         private int port;
         private Encryptor encryptor;
+        Socket listener;
         public Local(int port)
         {
             this.port = port;
@@ -23,7 +24,7 @@ namespace shadowsocks_csharp
         {
 
             // Create a TCP/IP socket.
-            Socket listener = new Socket(AddressFamily.InterNetwork,
+            listener = new Socket(AddressFamily.InterNetwork,
                 SocketType.Stream, ProtocolType.Tcp);
             IPEndPoint localEndPoint = new IPEndPoint(0, port);
 
@@ -38,6 +39,11 @@ namespace shadowsocks_csharp
                 new AsyncCallback(AcceptCallback),
                 listener);
 
+        }
+
+        public void Stop()
+        {
+            listener.Close();
         }
 
 
