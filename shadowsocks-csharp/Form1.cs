@@ -14,5 +14,15 @@ namespace shadowsocks_csharp
         {
             InitializeComponent();
         }
+
+        private void Config_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void Quit_Click(object sender, EventArgs e)
+        {
+
+        }
     }
 }
