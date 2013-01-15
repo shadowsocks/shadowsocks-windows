@@ -10,6 +10,6 @@ Other ports and clients can be found [here](https://github.com/clowwindy/shadows
 usage
 -----------
 
-Use Visual Studio 2008 or higher to build.
+Use Visual Studio 2012 Express or higher to build.
 
 Need .Net 3.5.
