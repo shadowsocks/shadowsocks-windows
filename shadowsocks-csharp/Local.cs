@@ -101,7 +101,7 @@ namespace shadowsocks_csharp
             IPEndPoint remoteEP = new IPEndPoint(ipAddress, config.server_port);
 
 
-            remote = new Socket(AddressFamily.InterNetwork,
+            remote = new Socket(ipAddress.AddressFamily,
                 SocketType.Stream, ProtocolType.Tcp);
 
             // Connect to the remote endpoint.
