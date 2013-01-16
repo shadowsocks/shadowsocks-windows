@@ -6,7 +6,7 @@ using System.Net;
 
 namespace shadowsocks_csharp
 {
-    
+
 
     class Local
     {
@@ -28,8 +28,8 @@ namespace shadowsocks_csharp
             IPEndPoint localEndPoint = new IPEndPoint(0, config.local_port);
 
             // Bind the socket to the local endpoint and listen for incoming connections.
-                listener.Bind(localEndPoint);
-                listener.Listen(100);
+            listener.Bind(localEndPoint);
+            listener.Listen(100);
 
 
             // Start an asynchronous socket to listen for connections.
@@ -95,24 +95,40 @@ namespace shadowsocks_csharp
 
         public void Start()
         {
-            // TODO async resolving
-            IPHostEntry ipHostInfo = Dns.GetHostEntry(config.server);
-            IPAddress ipAddress = ipHostInfo.AddressList[0];
-            IPEndPoint remoteEP = new IPEndPoint(ipAddress, config.server_port);
+            try
+            {
+                // TODO async resolving
+                IPAddress ipAddress;
+                bool parsed = IPAddress.TryParse(config.server, out ipAddress);
+                if (!parsed)
+                {
+                    IPHostEntry ipHostInfo = Dns.GetHostEntry(config.server);
+                    ipAddress = ipHostInfo.AddressList[0];
+                }
+                IPEndPoint remoteEP = new IPEndPoint(ipAddress, config.server_port);
 
 
-            remote = new Socket(ipAddress.AddressFamily,
-                SocketType.Stream, ProtocolType.Tcp);
+                remote = new Socket(ipAddress.AddressFamily,
+                    SocketType.Stream, ProtocolType.Tcp);
 
-            // Connect to the remote endpoint.
-            remote.BeginConnect(remoteEP,
-                new AsyncCallback(connectCallback), null);
+                // Connect to the remote endpoint.
+                remote.BeginConnect(remoteEP,
+                    new AsyncCallback(connectCallback), null);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.ToString());
+                this.Close();
+            }
         }
 
         public void Close()
         {
             connection.Close();
-            remote.Close();
+            if (remote != null)
+            {
+                remote.Close();
+            }
         }
 
         private void connectCallback(IAsyncResult ar)
@@ -207,7 +223,6 @@ namespace shadowsocks_csharp
                 }
                 else
                 {
-                    Console.WriteLine("bytesRead: " + bytesRead.ToString());
                     this.Close();
                 }
             }
@@ -232,6 +247,7 @@ namespace shadowsocks_csharp
             catch (Exception e)
             {
                 Console.WriteLine(e.ToString());
+                this.Close();
             }
         }
 

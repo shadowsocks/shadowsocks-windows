@@ -10,6 +10,10 @@ Other ports and clients can be found [here](https://github.com/clowwindy/shadows
 usage
 -----------
 
+First, clone the code:
+
+    git clone --recurse-submodules git://github.com/shadowsocks/shadowsocks-iOS.git
+
 Use Visual Studio 2012 Express or higher to build.
 
-Need .Net 3.5.
+Need .Net 2.0.

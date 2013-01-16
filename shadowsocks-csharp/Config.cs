@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Runtime.Serialization.Json;
 using System.Text;
 using System.IO;
 using System.Diagnostics;
+using SimpleJson;
 
 namespace shadowsocks_csharp
 {
@@ -15,7 +15,6 @@ namespace shadowsocks_csharp
         public int local_port;
         public string password;
 
-        [NonSerialized]
         public bool isDefault;
 
         private static void assert(bool condition)
@@ -28,12 +27,11 @@ namespace shadowsocks_csharp
 
         public static Config Load()
         {
-            DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof(Config));
             try
             {
-                using (FileStream fs = File.OpenRead(@"config.json"))
+                using (StreamReader sr = new StreamReader(File.OpenRead(@"config.json")))
                 {
-                    Config config = ser.ReadObject(fs) as Config;
+                    Config config = SimpleJson.SimpleJson.DeserializeObject<Config>(sr.ReadToEnd());
                     assert(!string.IsNullOrEmpty(config.server));
                     assert(!string.IsNullOrEmpty(config.password));
                     assert(config.local_port > 0);
@@ -58,12 +56,19 @@ namespace shadowsocks_csharp
 
         public static void Save(Config config)
         {
-            DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof(Config));
             try
             {
-                using (FileStream fs = File.Open(@"config.json", FileMode.Create))
+                using (StreamWriter sw = new StreamWriter(File.Open(@"config.json", FileMode.Create)))
                 {
-                    ser.WriteObject(fs, config);
+                    string jsonString = SimpleJson.SimpleJson.SerializeObject(new
+                    {
+                        server = config.server,
+                        server_port = config.server_port,
+                        local_port = config.local_port,
+                        password = config.password
+                    });
+                    sw.Write(jsonString);
+                    sw.Flush();
                 }
             }
             catch (IOException e)
