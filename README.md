@@ -7,7 +7,12 @@ This is C# version of shadowsocks.
 
 Other ports and clients can be found [here](https://github.com/clowwindy/shadowsocks/wiki/Ports-and-Clients).
 
-usage
+Download
+-----------
+
+Binaries can be found here: https://code.google.com/p/shadowsocks-csharp/downloads/list
+
+Build
 -----------
 
 First, clone the code:
