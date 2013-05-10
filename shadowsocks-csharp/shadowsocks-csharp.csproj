@@ -62,6 +62,7 @@
     <Reference Include="System.Windows.Forms" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="RC4.cs" />
     <Compile Include="Config.cs" />
     <Compile Include="Encryptor.cs" />
     <Compile Include="Form1.cs">
