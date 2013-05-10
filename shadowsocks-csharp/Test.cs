@@ -12,7 +12,7 @@ namespace shadowsocks_csharp
 
         public static void Test1()
         {
-            Encryptor encryptor = new Encryptor("foobar!");
+            Encryptor encryptor = new Encryptor("table", "foobar!");
 
             for (int i = 0; i < 256; i++)
             {

@@ -32,6 +32,7 @@ namespace shadowsocks_csharp
             textBox2.Text = config.server_port.ToString();
             textBox3.Text = config.password;
             textBox4.Text = config.local_port.ToString();
+            comboBox1.Text = config.method == null ? "table" : config.method;
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -77,6 +78,7 @@ namespace shadowsocks_csharp
                     server_port = int.Parse(textBox2.Text),
                     password = textBox3.Text,
                     local_port = int.Parse(textBox4.Text),
+                    method = comboBox1.Text,
                     isDefault = false
                 };
                 Config.Save(config);
@@ -102,7 +104,7 @@ namespace shadowsocks_csharp
 
         private void Form1_FormClosed(object sender, FormClosedEventArgs e)
         {
-            local.Stop();
+            if (local != null) local.Stop();
         }
 
         private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
