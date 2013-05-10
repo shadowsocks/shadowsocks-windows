@@ -14,6 +14,7 @@ namespace shadowsocks_csharp
         public int server_port;
         public int local_port;
         public string password;
+        public string method;
 
         public bool isDefault;
 
@@ -49,6 +50,7 @@ namespace shadowsocks_csharp
                     server_port = 8388,
                     local_port = 1081,
                     password = "barfoo!",
+                    method = "table",
                     isDefault = true
                 };
             }
@@ -65,7 +67,8 @@ namespace shadowsocks_csharp
                         server = config.server,
                         server_port = config.server_port,
                         local_port = config.local_port,
-                        password = config.password
+                        password = config.password,
+                        method = config.method
                     });
                     sw.Write(jsonString);
                     sw.Flush();

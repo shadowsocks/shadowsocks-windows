@@ -16,7 +16,7 @@ namespace shadowsocks_csharp
         public Local(Config config)
         {
             this.config = config;
-            this.encryptor = new Encryptor(config.password);
+            this.encryptor = new Encryptor(config.method, config.password);
         }
 
         public void Start()
@@ -62,7 +62,11 @@ namespace shadowsocks_csharp
                 // Create the state object.
                 Handler handler = new Handler();
                 handler.connection = conn;
-                handler.encryptor = encryptor;
+                if (encryptor.method == Encryptor.TYPE_TABLE) {
+                    handler.encryptor = encryptor;
+                } else {
+                    handler.encryptor = new Encryptor(config.method, config.password);
+                }
                 handler.config = config;
 
                 handler.Start();

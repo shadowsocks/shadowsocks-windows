@@ -7,8 +7,13 @@ namespace shadowsocks_csharp
 {
     class Encryptor
     {
+        public const int TYPE_TABLE = 1;
+        public const int TYPE_RC4 = 2;
+
         public byte[] encryptTable = new byte[256];
         public byte[] decryptTable = new byte[256];
+        public int method = TYPE_TABLE;
+        public RC4 rc4 = null;
 
         private long compare(byte x, byte y, ulong a, int i)
         {
@@ -53,43 +58,65 @@ namespace shadowsocks_csharp
             return sorted;
         }
 
-        public Encryptor(string password)
+        public Encryptor(string method, string password)
         {
             MD5 md5 = System.Security.Cryptography.MD5.Create();
             byte[] inputBytes = System.Text.Encoding.UTF8.GetBytes(password);
             byte[] hash = md5.ComputeHash(inputBytes);
 
-            // TODO endian
-            var a = BitConverter.ToUInt64(hash, 0);
-            for (int i = 0; i < 256; i++)
-            {
-                encryptTable[i] = (byte)i;
-            }
-            for (int i = 1; i < 1024; i++)
-            {
-                encryptTable = mergeSort(encryptTable, a, i);
-            }
-            for (int i = 0; i < 256; i++)
-            {
-                decryptTable[encryptTable[i]] = (byte)i;
+            if (method != null && method.ToLowerInvariant().Equals("rc4")) {
+                Console.WriteLine("init rc4");
+                this.method = TYPE_RC4;
+
+                rc4 = new RC4();
+                encryptTable = rc4.EncryptInitalize(hash);
+                decryptTable = rc4.EncryptInitalize(hash);
+            } else {
+                Console.WriteLine("init table");
+                this.method = TYPE_TABLE;
+
+                // TODO endian
+                var a = BitConverter.ToUInt64(hash, 0);
+                for (int i = 0; i < 256; i++)
+                {
+                    encryptTable[i] = (byte)i;
+                }
+                for (int i = 1; i < 1024; i++)
+                {
+                    encryptTable = mergeSort(encryptTable, a, i);
+                }
+                for (int i = 0; i < 256; i++)
+                {
+                    decryptTable[encryptTable[i]] = (byte)i;
+                }
             }
         }
 
         public void Encrypt(byte[] buf, int length)
         {
-            for (int i = 0; i < length; i++)
+            switch (method)
             {
-                buf[i] = encryptTable[buf[i]];
+                case TYPE_TABLE:
+                    for (int i = 0; i < length; i++)
+                        buf[i] = encryptTable[buf[i]];
+                    break;
+                case TYPE_RC4:
+                    rc4.Encrypt(encryptTable, buf, length);
+                    break;
             }
         }
         public void Decrypt(byte[] buf, int length)
         {
-            for (int i = 0; i < length; i++)
+            switch (method)
             {
-                buf[i] = decryptTable[buf[i]];
+                case TYPE_TABLE:
+                    for (int i = 0; i < length; i++)
+                        buf[i] = decryptTable[buf[i]];
+                    break;
+                case TYPE_RC4:
+                    rc4.Decrypt(decryptTable, buf, length);
+                    break;
             }
         }
-
-
     }
 }
