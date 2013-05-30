@@ -5,7 +5,7 @@ Current version: 1.0.0.1
 
 This is C# version of shadowsocks.
 
-Warning: This C# version is deprecated. Please use [shadowsocks-gui](https://github.com/shadowsocks/shadowsocks-gui) instead.
+***Warning: This C# version is deprecated. Please use [shadowsocks-gui](https://github.com/shadowsocks/shadowsocks-gui) instead.***
 
 Other ports and clients can be found [here](https://github.com/clowwindy/shadowsocks/wiki/Ports-and-Clients).
 
