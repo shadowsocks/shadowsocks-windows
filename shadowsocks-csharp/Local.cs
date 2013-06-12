@@ -62,7 +62,7 @@ namespace shadowsocks_csharp
                 // Create the state object.
                 Handler handler = new Handler();
                 handler.connection = conn;
-                if (encryptor.method == Encryptor.TYPE_TABLE) {
+                if (encryptor.method == "table") {
                     handler.encryptor = encryptor;
                 } else {
                     handler.encryptor = new Encryptor(config.method, config.password);
@@ -128,11 +128,12 @@ namespace shadowsocks_csharp
 
         public void Close()
         {
-            connection.Close();
+            connection.Shutdown(SocketShutdown.Send);
             if (remote != null)
             {
-                remote.Close();
+                remote.Shutdown(SocketShutdown.Send);
             }
+            encryptor.Dispose();
         }
 
         private void connectCallback(IAsyncResult ar)
@@ -264,8 +265,8 @@ namespace shadowsocks_csharp
 
                 if (bytesRead > 0)
                 {
-                    encryptor.Decrypt(remoteBuffer, bytesRead);
-                    connection.BeginSend(remoteBuffer, 0, bytesRead, 0, new AsyncCallback(pipeConnectionSendCallback), null);
+                    byte[] buf = encryptor.Decrypt(remoteBuffer, bytesRead);
+                    connection.BeginSend(buf, 0, buf.Length, 0, new AsyncCallback(pipeConnectionSendCallback), null);
                 }
                 else
                 {
@@ -289,8 +290,8 @@ namespace shadowsocks_csharp
 
                 if (bytesRead > 0)
                 {
-                    encryptor.Encrypt(connetionBuffer, bytesRead);
-                    remote.BeginSend(connetionBuffer, 0, bytesRead, 0, new AsyncCallback(pipeRemoteSendCallback), null);
+                    byte[] buf = encryptor.Encrypt(connetionBuffer, bytesRead);
+                    remote.BeginSend(buf, 0, buf.Length, 0, new AsyncCallback(pipeRemoteSendCallback), null);
                 }
                 else
                 {

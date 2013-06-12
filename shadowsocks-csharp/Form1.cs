@@ -90,9 +90,9 @@ namespace shadowsocks_csharp
             {
                 MessageBox.Show("there is format problem");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                MessageBox.Show("there is some problem with parameters");
+                MessageBox.Show(ex.ToString());
             }
         }
 
