@@ -14,6 +14,10 @@ Download
 
 Binaries can be found here: https://code.google.com/p/shadowsocks-csharp/downloads/list
 
+If errors occurs (DLL not found), you need one more package. Make sure to download x86 32-bit version, not 64-bit version.
+
+http://www.microsoft.com/en-us/download/details.aspx?id=5555
+
 Build
 -----------
 
