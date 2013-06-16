@@ -228,6 +228,17 @@ namespace shadowsocks_csharp
             }
         }
 
+        public byte[] byteArrayWith(byte[] buf, int length)
+        {
+            if (buf.Length == length)
+            {
+                return buf;
+            }
+            byte[] result = new byte[length];
+            System.Buffer.BlockCopy(buf, 0, result, 0, length);
+            return result;
+        }
+
         public byte[] Encrypt(byte[] buf, int length)
         {
             switch (method)
@@ -235,11 +246,11 @@ namespace shadowsocks_csharp
                 case "table":
                     for (int i = 0; i < length; i++)
                         buf[i] = encryptTable[buf[i]];
-                    return buf;
+                    return byteArrayWith(buf, length);
                     break;
                 case "rc4":
                     rc4.Encrypt(encryptTable, buf, length);
-                    return buf;
+                    return byteArrayWith(buf, length);
                     break;
                 default:
                     return sslEncrypt(buf, length);
@@ -252,11 +263,11 @@ namespace shadowsocks_csharp
                 case "table":
                     for (int i = 0; i < length; i++)
                         buf[i] = decryptTable[buf[i]];
-                    return buf;
+                    return byteArrayWith(buf, length);
                     break;
                 case "rc4":
                     rc4.Decrypt(decryptTable, buf, length);
-                    return buf;
+                    return byteArrayWith(buf, length);
                     break;
                 default:
                     return sslDecrypt(buf, length);

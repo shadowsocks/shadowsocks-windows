@@ -131,7 +131,14 @@ namespace shadowsocks_csharp
             connection.Shutdown(SocketShutdown.Send);
             if (remote != null)
             {
-                remote.Shutdown(SocketShutdown.Send);
+                try
+                {
+                    remote.Shutdown(SocketShutdown.Send);
+                }
+                catch (SocketException e)
+                {
+                    Console.WriteLine(e.ToString());
+                }
             }
             encryptor.Dispose();
         }
