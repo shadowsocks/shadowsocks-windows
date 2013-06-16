@@ -1,7 +1,7 @@
 shadowsocks-csharp
 ===========
 
-Current version: 1.1
+Current version: 1.1.2
 
 This is C# version of shadowsocks.
 
