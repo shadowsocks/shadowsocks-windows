@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Net.Sockets;
 using System.Net;
+using shadowsocks_csharp.Encrypt;
 
 namespace shadowsocks_csharp
 {
@@ -11,12 +12,12 @@ namespace shadowsocks_csharp
     class Local
     {
         private Config config;
-        private Encryptor encryptor;
+        //private Encryptor encryptor;
         Socket listener;
         public Local(Config config)
         {
             this.config = config;
-            this.encryptor = new Encryptor(config.method, config.password);
+            //this.encryptor = new Encryptor(config.method, config.password);
         }
 
         public void Start()
@@ -53,6 +54,11 @@ namespace shadowsocks_csharp
 
                 // Get the socket that handles the client request.
                 Socket listener = (Socket)ar.AsyncState;
+                if (!listener.Connected)
+                {
+                    return;
+                }
+
                 listener.BeginAccept(
                     new AsyncCallback(AcceptCallback),
                     listener);
@@ -62,11 +68,15 @@ namespace shadowsocks_csharp
                 // Create the state object.
                 Handler handler = new Handler();
                 handler.connection = conn;
-                if (encryptor.method == "table") {
-                    handler.encryptor = encryptor;
-                } else {
-                    handler.encryptor = new Encryptor(config.method, config.password);
-                }
+                //if (encryptor.method == "table")
+                //{
+                //    handler.encryptor = encryptor;
+                //}
+                //else
+                //{
+                //    handler.encryptor = new Encryptor(config.method, config.password);
+                //}
+                handler.encryptor = EncryptorFactory.GetEncryptor(config.method, config.password);
                 handler.config = config;
 
                 handler.Start();
@@ -83,7 +93,8 @@ namespace shadowsocks_csharp
 
     class Handler
     {
-        public Encryptor encryptor;
+        //public Encryptor encryptor;
+        public IEncryptor encryptor;
         public Config config;
         // Client  socket.
         public Socket remote;
@@ -140,7 +151,7 @@ namespace shadowsocks_csharp
                     Console.WriteLine(e.ToString());
                 }
             }
-            encryptor.Dispose();
+            //encryptor.Dispose();
         }
 
         private void connectCallback(IAsyncResult ar)
