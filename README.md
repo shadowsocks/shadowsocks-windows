@@ -23,7 +23,7 @@ Build
 
 First, clone the code:
 
-    git clone --recurse-submodules git://github.com/shadowsocks/shadowsocks-iOS.git
+    git clone --recurse-submodules git://github.com/clowwindy/shadowsocks-csharp.git
 
 Use Visual Studio 2012 Express or higher to build.
 
