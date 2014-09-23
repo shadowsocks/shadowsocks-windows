@@ -13,7 +13,7 @@ namespace shadowsocks_csharp.Encrypt
         public OpensslEncryptor(string method, string password)
             : base(method, password)
         {
-            InitKey(Method, Password);
+            InitKey(method, password);
         }
 
         public override byte[] Encrypt(byte[] buf, int length)
@@ -79,7 +79,7 @@ namespace shadowsocks_csharp.Encrypt
         private IntPtr _encryptCtx;
         private IntPtr _decryptCtx;
 
-        private void InitKey(string password, string method)
+        private void InitKey(string method, string password)
         {
             string k = method + ":" + password;
             if (CachedKeys.ContainsKey(k))

@@ -54,10 +54,10 @@ namespace shadowsocks_csharp
 
                 // Get the socket that handles the client request.
                 Socket listener = (Socket)ar.AsyncState;
-                if (!listener.Connected)
-                {
-                    return;
-                }
+                //if (!listener.Connected)
+                //{
+                //    return;
+                //}
 
                 listener.BeginAccept(
                     new AsyncCallback(AcceptCallback),
