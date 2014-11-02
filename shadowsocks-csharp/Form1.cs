@@ -11,6 +11,7 @@ namespace shadowsocks_csharp
     public partial class Form1 : Form
     {
         Local local;
+        PACServer pacServer;
         Config config;
 
         public Form1()
@@ -45,6 +46,8 @@ namespace shadowsocks_csharp
                     this.Hide();
                 }));
             }
+            pacServer = new PACServer();
+            pacServer.Start();
         }
 
         private void reload(Config config)

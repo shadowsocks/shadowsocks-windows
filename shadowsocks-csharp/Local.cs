@@ -144,7 +144,17 @@ namespace shadowsocks_csharp
 
         public void Close()
         {
-            connection.Shutdown(SocketShutdown.Send);
+            if (connection != null)
+            {
+                try
+                {
+                    connection.Shutdown(SocketShutdown.Send);
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e.ToString());
+                }
+            }
             if (remote != null)
             {
                 try
@@ -198,9 +208,14 @@ namespace shadowsocks_csharp
             {
                 int bytesRead = connection.EndReceive(ar);
 
-                if (bytesRead > 0)
+                if (bytesRead > 1)
                 {
                     byte[] response = { 5, 0 };
+                    if (connetionRecvBuffer[0] != 5)
+                    {
+                        // reject socks 4
+                        response = new byte[]{ 0, 91 };
+                    }
                     connection.BeginSend(response, 0, response.Length, 0, new AsyncCallback(handshakeSendCallback), null);
                 }
                 else

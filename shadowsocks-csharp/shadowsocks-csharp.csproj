@@ -87,6 +87,7 @@
     <Compile Include="Encrypt\OpensslEncryptor.cs" />
     <Compile Include="Encrypt\TableEncryptor.cs" />
     <Compile Include="Encrypt\IEncryptor.cs" />
+    <Compile Include="PACServer.cs" />
     <Compile Include="RC4.cs" />
     <Compile Include="Config.cs" />
     <Compile Include="Form1.cs">
@@ -126,6 +127,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="icon144.ico" />
+    <None Include="proxy.pac.txt" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">

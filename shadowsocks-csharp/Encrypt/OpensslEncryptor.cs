@@ -149,13 +149,13 @@ namespace shadowsocks_csharp.Encrypt
 
                 }
 
-                if (_encryptCtx != IntPtr.Zero)
+                if (_encryptCtx.ToInt64() != 0)
                 {
                     OpenSSL.EVP_CIPHER_CTX_cleanup(_encryptCtx);
                     OpenSSL.EVP_CIPHER_CTX_free(_encryptCtx);
                     _encryptCtx = IntPtr.Zero;
                 }
-                if (_decryptCtx != IntPtr.Zero)
+                if (_decryptCtx.ToInt64() != 0)
                 {
                     OpenSSL.EVP_CIPHER_CTX_cleanup(_decryptCtx);
                     OpenSSL.EVP_CIPHER_CTX_free(_decryptCtx);
