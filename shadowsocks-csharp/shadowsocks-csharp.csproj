@@ -88,7 +88,6 @@
     <Compile Include="Encrypt\TableEncryptor.cs" />
     <Compile Include="Encrypt\IEncryptor.cs" />
     <Compile Include="PACServer.cs" />
-    <Compile Include="RC4.cs" />
     <Compile Include="Config.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
@@ -126,6 +125,8 @@
     <Compile Include="simple-json\src\SimpleJson\SimpleJson.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="polipo.exe" />
+    <None Include="config.txt" />
     <Content Include="icon144.ico" />
     <None Include="proxy.pac.txt" />
   </ItemGroup>
