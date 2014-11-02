@@ -4,9 +4,9 @@ using System.Text;
 
 namespace shadowsocks_csharp.Encrypt
 {
-    public interface IEncryptor
+    public interface IEncryptor : IDisposable
     {
-        byte[] Encrypt(byte[] buf, int length);
-        byte[] Decrypt(byte[] buf, int length);
+        void Encrypt(byte[] buf, int length, byte[] outbuf, out int outlength);
+        void Decrypt(byte[] buf, int length, byte[] outbuf, out int outlength);
     }
 }

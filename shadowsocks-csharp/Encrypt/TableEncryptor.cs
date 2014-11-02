@@ -25,24 +25,25 @@ namespace shadowsocks_csharp.Encrypt
             }
         }
 
-        public override byte[] Encrypt(byte[] buf, int length)
+        public override void Encrypt(byte[] buf, int length, byte[] outbuf, out int outlength)
         {
             byte[] result = new byte[length];
             for (int i = 0; i < length; i++)
             {
-                result[i] = _encryptTable[buf[i]];
+                outbuf[i] = _encryptTable[buf[i]];
             }
-            return result;
+            outlength = length;
         }
 
-        public override byte[] Decrypt(byte[] buf, int length)
+
+        public override void Decrypt(byte[] buf, int length, byte[] outbuf, out int outlength)
         {
             byte[] result = new byte[length];
             for (int i = 0; i < length; i++)
             {
-                result[i] = _decryptTable[buf[i]];
+                outbuf[i] = _decryptTable[buf[i]];
             }
-            return result;
+            outlength = length;
         }
 
         private readonly byte[] _encryptTable = new byte[256];
@@ -91,6 +92,11 @@ namespace shadowsocks_csharp.Encrypt
                 }
             }
             return sorted;
+        }
+
+
+        public override void Dispose()
+        {
         }
     }
 }

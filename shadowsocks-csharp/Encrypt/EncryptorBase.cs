@@ -22,8 +22,10 @@ namespace shadowsocks_csharp.Encrypt
             return hash;
         }
 
-        public abstract byte[] Encrypt(byte[] buf, int length);
+        public abstract void Encrypt(byte[] buf, int length, byte[] outbuf, out int outlength);
 
-        public abstract byte[] Decrypt(byte[] buf, int length);
+        public abstract void Decrypt(byte[] buf, int length, byte[] outbuf, out int outlength);
+
+        public abstract void Dispose();
     }
 }

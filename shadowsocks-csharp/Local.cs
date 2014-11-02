@@ -100,11 +100,16 @@ namespace shadowsocks_csharp
         public Socket remote;
         public Socket connection;
         // Size of receive buffer.
-        public const int BufferSize = 1500;
+        public const int RecvSize = 16384;
+        public const int BufferSize = RecvSize + 32;
         // remote receive buffer
-        public byte[] remoteBuffer = new byte[BufferSize];
+        public byte[] remoteRecvBuffer = new byte[RecvSize];
+        // remote send buffer
+        public byte[] remoteSendBuffer = new byte[BufferSize];
         // connection receive buffer
-        public byte[] connetionBuffer = new byte[BufferSize];
+        public byte[] connetionRecvBuffer = new byte[RecvSize];
+        // connection send buffer
+        public byte[] connetionSendBuffer = new byte[BufferSize];
         // Received data string.
         public StringBuilder sb = new StringBuilder();
 
@@ -151,7 +156,7 @@ namespace shadowsocks_csharp
                     Console.WriteLine(e.ToString());
                 }
             }
-            //encryptor.Dispose();
+            ((IDisposable)encryptor).Dispose();
         }
 
         private void connectCallback(IAsyncResult ar)
@@ -177,7 +182,7 @@ namespace shadowsocks_csharp
         {
             try
             {
-                connection.BeginReceive(new byte[256], 0, 256, 0,
+                connection.BeginReceive(connetionRecvBuffer, 0, 256, 0,
                     new AsyncCallback(handshakeReceiveCallback), null);
             }
             catch (Exception e)
@@ -223,7 +228,7 @@ namespace shadowsocks_csharp
                 // +----+-----+-------+------+----------+----------+
                 // Skip first 3 bytes
                 // TODO validate
-                connection.BeginReceive(new byte[3], 0, 3, 0,
+                connection.BeginReceive(connetionRecvBuffer, 0, 3, 0,
                     new AsyncCallback(handshakeReceive2Callback), null);
             }
             catch (Exception e)
@@ -262,9 +267,9 @@ namespace shadowsocks_csharp
             try
             {
                 connection.EndReceive(ar);
-                remote.BeginReceive(remoteBuffer, 0, BufferSize, 0,
+                remote.BeginReceive(remoteRecvBuffer, 0, RecvSize, 0,
                     new AsyncCallback(pipeRemoteReceiveCallback), null);
-                connection.BeginReceive(connetionBuffer, 0, BufferSize, 0,
+                connection.BeginReceive(connetionRecvBuffer, 0, RecvSize, 0,
                     new AsyncCallback(pipeConnectionReceiveCallback), null);
             }
             catch (Exception e)
@@ -283,8 +288,9 @@ namespace shadowsocks_csharp
 
                 if (bytesRead > 0)
                 {
-                    byte[] buf = encryptor.Decrypt(remoteBuffer, bytesRead);
-                    connection.BeginSend(buf, 0, buf.Length, 0, new AsyncCallback(pipeConnectionSendCallback), null);
+                    int bytesToSend;
+                    encryptor.Decrypt(remoteRecvBuffer, bytesRead, remoteSendBuffer, out bytesToSend);
+                    connection.BeginSend(remoteSendBuffer, 0, bytesToSend, 0, new AsyncCallback(pipeConnectionSendCallback), null);
                 }
                 else
                 {
@@ -308,8 +314,9 @@ namespace shadowsocks_csharp
 
                 if (bytesRead > 0)
                 {
-                    byte[] buf = encryptor.Encrypt(connetionBuffer, bytesRead);
-                    remote.BeginSend(buf, 0, buf.Length, 0, new AsyncCallback(pipeRemoteSendCallback), null);
+                    int bytesToSend;
+                    encryptor.Encrypt(connetionRecvBuffer, bytesRead, connetionSendBuffer, out bytesToSend);
+                    remote.BeginSend(connetionSendBuffer, 0, bytesToSend, 0, new AsyncCallback(pipeRemoteSendCallback), null);
                 }
                 else
                 {
@@ -329,7 +336,7 @@ namespace shadowsocks_csharp
             try
             {
                 remote.EndSend(ar);
-                connection.BeginReceive(this.connetionBuffer, 0, BufferSize, 0,
+                connection.BeginReceive(this.connetionRecvBuffer, 0, RecvSize, 0,
                     new AsyncCallback(pipeConnectionReceiveCallback), null);
             }
             catch (Exception e)
@@ -344,7 +351,7 @@ namespace shadowsocks_csharp
             try
             {
                 connection.EndSend(ar);
-                remote.BeginReceive(this.remoteBuffer, 0, BufferSize, 0,
+                remote.BeginReceive(this.remoteRecvBuffer, 0, RecvSize, 0,
                     new AsyncCallback(pipeRemoteReceiveCallback), null);
             }
             catch (Exception e)

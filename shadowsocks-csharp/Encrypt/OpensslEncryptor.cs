@@ -28,57 +28,40 @@ namespace shadowsocks_csharp.Encrypt
             InitKey(method, password);
         }
 
-        public override byte[] Encrypt(byte[] buf, int length)
+
+        static byte[] tempbuf = new byte[32768];
+
+        public override void Encrypt(byte[] buf, int length, byte[] outbuf, out int outlength)
         {
             if (_encryptCtx == IntPtr.Zero)
             {
-                byte[] iv = new byte[ivLen];
-                OpenSSL.RAND_bytes(iv, iv.Length);
-                InitCipher(ref _encryptCtx, iv, true);
-                int outLen = length + ivLen;
-                byte[] cipherText = new byte[outLen];
-                OpenSSL.EVP_CipherUpdate(_encryptCtx, cipherText, out outLen, buf, length);
-                byte[] result = new byte[outLen + ivLen];
-                Buffer.BlockCopy(iv, 0, result, 0, ivLen);
-                Buffer.BlockCopy(cipherText, 0, result, ivLen, outLen);
-                return result;
+                OpenSSL.RAND_bytes(outbuf, ivLen);
+                InitCipher(ref _encryptCtx, outbuf, true);
+                outlength = length + ivLen;
+                OpenSSL.EVP_CipherUpdate(_encryptCtx, tempbuf, out outlength, buf, length);
+                outlength = length + ivLen;
+                Buffer.BlockCopy(tempbuf, 0, outbuf, ivLen, outlength);
             }
             else
             {
-                int outLen = length + ivLen;
-                byte[] cipherText = new byte[outLen];
-                OpenSSL.EVP_CipherUpdate(_encryptCtx, cipherText, out outLen, buf, length);
-                byte[] result = new byte[outLen];
-                Buffer.BlockCopy(cipherText, 0, result, 0, outLen);
-                return result;
+                outlength = length;
+                OpenSSL.EVP_CipherUpdate(_encryptCtx, outbuf, out outlength, buf, length);
             }
         }
 
-        public override byte[] Decrypt(byte[] buf, int length)
+        public override void Decrypt(byte[] buf, int length, byte[] outbuf, out int outlength)
         {
             if (_decryptCtx == IntPtr.Zero)
             {
-                byte[] iv = new byte[ivLen];
-                Buffer.BlockCopy(buf, 0, iv, 0, ivLen);
-                InitCipher(ref _decryptCtx, iv, false);
-                int outLen = length + ivLen;
-                outLen -= ivLen;
-                byte[] cipherText = new byte[outLen];
-                byte[] subset = new byte[length - ivLen];
-                Buffer.BlockCopy(buf, ivLen, subset, 0, length - ivLen);
-                OpenSSL.EVP_CipherUpdate(_decryptCtx, cipherText, out outLen, subset, length - ivLen);
-                byte[] result = new byte[outLen];
-                Buffer.BlockCopy(cipherText, 0, result, 0, outLen);
-                return result;
+                InitCipher(ref _decryptCtx, buf, false);
+                outlength = length - ivLen;
+                Buffer.BlockCopy(buf, ivLen, tempbuf, 0, length - ivLen);
+                OpenSSL.EVP_CipherUpdate(_decryptCtx, outbuf, out outlength, tempbuf, length - ivLen);
             }
             else
             {
-                int outLen = length + ivLen;
-                byte[] cipherText = new byte[outLen];
-                OpenSSL.EVP_CipherUpdate(_decryptCtx, cipherText, out outLen, buf, length);
-                byte[] result = new byte[outLen];
-                Buffer.BlockCopy(cipherText, 0, result, 0, outLen);
-                return result;
+                outlength = length;
+                OpenSSL.EVP_CipherUpdate(_decryptCtx, outbuf, out outlength, buf, length);
             }
         }
 
@@ -146,7 +129,7 @@ namespace shadowsocks_csharp.Encrypt
         #region IDisposable
         private bool _disposed;
 
-        public void Dispose()
+        public override void Dispose()
         {
             Dispose(true);
             GC.SuppressFinalize(this);
