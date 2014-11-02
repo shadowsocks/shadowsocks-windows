@@ -38,7 +38,7 @@
 
 # Uncomment this if you want to use a parent SOCKS proxy:
 
-socksParentProxy = "127.0.0.1:1080"
+socksParentProxy = "127.0.0.1:__SOCKS_PORT__"
 socksProxyType = socks5
 
 # Uncomment this if you want to scrub private information from the log:

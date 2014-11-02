@@ -13,6 +13,7 @@ namespace shadowsocks_csharp
         Local local;
         PACServer pacServer;
         Config config;
+        PolipoRunner polipoRunner;
 
         public Form1()
         {
@@ -55,9 +56,18 @@ namespace shadowsocks_csharp
             if (local != null)
             {
                 local.Stop();
+                if (polipoRunner != null)
+                {
+                    polipoRunner.Stop();
+                }
             }
             local = new Local(config);
             local.Start();
+            if (polipoRunner == null)
+            {
+                polipoRunner = new PolipoRunner();
+            }
+            polipoRunner.Start(config);
 
         }
 
@@ -108,6 +118,7 @@ namespace shadowsocks_csharp
         private void Form1_FormClosed(object sender, FormClosedEventArgs e)
         {
             if (local != null) local.Stop();
+            if (polipoRunner != null) polipoRunner.Stop();
         }
 
         private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
