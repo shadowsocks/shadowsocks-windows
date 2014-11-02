@@ -76,9 +76,6 @@
     <CodeAnalysisRuleSet>ManagedMinimumRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="ManagedOpenSsl">
-      <HintPath>..\openssl\openssl-net-0.5\ManagedOpenSsl.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
@@ -86,13 +83,12 @@
   <ItemGroup>
     <Compile Include="Encrypt\EncryptorBase.cs" />
     <Compile Include="Encrypt\EncryptorFactory.cs" />
+    <Compile Include="Encrypt\OpenSSL.cs" />
     <Compile Include="Encrypt\OpensslEncryptor.cs" />
-    <Compile Include="Encrypt\Rc4Encryptor.cs" />
     <Compile Include="Encrypt\TableEncryptor.cs" />
     <Compile Include="Encrypt\IEncryptor.cs" />
     <Compile Include="RC4.cs" />
     <Compile Include="Config.cs" />
-    <Compile Include="Encryptor.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -127,7 +123,6 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
     <Compile Include="simple-json\src\SimpleJson\SimpleJson.cs" />
-    <Compile Include="Test.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="icon144.ico" />

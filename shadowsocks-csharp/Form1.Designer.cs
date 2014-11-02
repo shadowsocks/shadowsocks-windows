@@ -122,12 +122,11 @@
             this.comboBox1.ItemHeight = 13;
             this.comboBox1.Items.AddRange(new object[] {
             "table",
+            "rc4-md5",
             "aes-256-cfb",
             "aes-192-cfb",
             "aes-128-cfb",
             "bf-cfb",
-            "cast5-cfb",
-            "des-cfb",
             "rc4"});
             this.comboBox1.Location = new System.Drawing.Point(69, 107);
             this.comboBox1.Name = "comboBox1";

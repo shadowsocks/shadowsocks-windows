@@ -10,11 +10,6 @@ namespace shadowsocks_csharp.Encrypt
                 return new TableEncryptor(method, password);
             }
 
-            if (method.ToLowerInvariant() == "rc4")
-            {
-                return new Rc4Encryptor(method, password);
-            }
-
             return new OpensslEncryptor(method, password);
         }
     }
