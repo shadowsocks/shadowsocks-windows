@@ -39,6 +39,7 @@ namespace shadowsocks_csharp.Encrypt
         [DllImport(DLLNAME, CallingConvention = CallingConvention.Cdecl)]
         public extern static int EVP_CipherUpdate(IntPtr ctx, byte[] outb, out int outl, byte[] inb, int inl);
 
-
+        [DllImport(DLLNAME, CallingConvention = CallingConvention.Cdecl)]
+        public extern static IntPtr MD5(byte[] d, long n, byte[] md);
     }
 }

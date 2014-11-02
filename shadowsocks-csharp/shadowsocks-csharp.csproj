@@ -9,7 +9,7 @@
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>shadowsocks_csharp</RootNamespace>
-    <AssemblyName>shadowsocks-csharp</AssemblyName>
+    <AssemblyName>Shadowsocks</AssemblyName>
     <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <StartupObject>

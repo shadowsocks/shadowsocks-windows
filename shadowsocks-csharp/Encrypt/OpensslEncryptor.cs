@@ -14,6 +14,7 @@ namespace shadowsocks_csharp.Encrypt
             {"aes-256-cfb", new int[]{32, 16}},
             {"bf-cfb", new int[]{16, 8}},
             {"rc4", new int[]{16, 0}},
+            {"rc4-md5", new int[]{16, 16}},
         };
 
         static OpensslEncryptor()
@@ -86,20 +87,26 @@ namespace shadowsocks_csharp.Encrypt
         private IntPtr _encryptCtx;
         private IntPtr _decryptCtx;
         private IntPtr _cipher;
+        private string _method;
         private int keyLen;
         private int ivLen;
 
         private void InitKey(string method, string password)
         {
             method = method.ToLower();
+            _method = method;
             string k = method + ":" + password;
+            if (method == "rc4-md5")
+            {
+                method = "rc4";
+            }
             _cipher = OpenSSL.EVP_get_cipherbyname(System.Text.Encoding.UTF8.GetBytes(method));
             if (_cipher == null)
             {
                 throw new Exception("method not found");
             }
-            keyLen = ciphers[method][0];
-            ivLen = ciphers[method][1];
+            keyLen = ciphers[_method][0];
+            ivLen = ciphers[_method][1];
             if (CachedKeys.ContainsKey(k))
             {
                 _key = CachedKeys[k];
@@ -118,7 +125,22 @@ namespace shadowsocks_csharp.Encrypt
         {
             ctx = OpenSSL.EVP_CIPHER_CTX_new();
             int enc = isCipher ? 1 : 0;
-            OpenSSL.EVP_CipherInit_ex(ctx, _cipher, IntPtr.Zero, _key, iv, enc);
+            byte[] realkey;
+            IntPtr r = IntPtr.Zero;
+            if (_method == "rc4-md5")
+            {
+                byte[] temp = new byte[keyLen + ivLen];
+                realkey = new byte[keyLen];
+                Array.Copy(_key, 0, temp, 0, keyLen);
+                Array.Copy(iv, 0, temp, keyLen, ivLen);
+                r = OpenSSL.MD5(temp, keyLen + ivLen, null);
+                Marshal.Copy(r, realkey, 0, keyLen);
+            }
+            else
+            {
+                realkey = _key;
+            }
+            OpenSSL.EVP_CipherInit_ex(ctx, _cipher, IntPtr.Zero, realkey, iv, enc);
         }
 
         #region IDisposable
