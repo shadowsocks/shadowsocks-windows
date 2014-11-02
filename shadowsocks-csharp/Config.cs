@@ -48,7 +48,7 @@ namespace shadowsocks_csharp
                 {
                     server = "127.0.0.1",
                     server_port = 8388,
-                    local_port = 1081,
+                    local_port = 1080,
                     password = "barfoo!",
                     method = "table",
                     isDefault = true

@@ -15,6 +15,12 @@ namespace shadowsocks_csharp.Encrypt
             {"bf-cfb", new int[]{16, 8}},
             {"rc4", new int[]{16, 0}},
         };
+
+        static OpensslEncryptor()
+        {
+            OpenSSL.OpenSSL_add_all_ciphers();
+        }
+
         public OpensslEncryptor(string method, string password)
             : base(method, password)
         {
@@ -85,7 +91,6 @@ namespace shadowsocks_csharp.Encrypt
 
         private void InitKey(string method, string password)
         {
-            OpenSSL.OpenSSL_add_all_ciphers();
             method = method.ToLower();
             string k = method + ":" + password;
             _cipher = OpenSSL.EVP_get_cipherbyname(System.Text.Encoding.UTF8.GetBytes(method));
