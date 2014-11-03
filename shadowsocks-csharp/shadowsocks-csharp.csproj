@@ -128,7 +128,6 @@
     <Compile Include="simple-json\src\SimpleJson\SimpleJson.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="polipo.exe" />
     <None Include="config.txt" />
     <Content Include="icon144.ico" />
     <None Include="proxy.pac.txt" />

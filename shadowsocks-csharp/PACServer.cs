@@ -55,6 +55,10 @@ namespace shadowsocks_csharp
 
                 string pac = Resources.proxy_pac;
 
+                string proxy = "PROXY 127.0.0.1:8123; DIRECT;";
+
+                pac = pac.Replace("__PROXY__", proxy);
+
                 if (bytesRead > 0)
                 {
                     string text = String.Format(@"HTTP/1.1 200 OK
