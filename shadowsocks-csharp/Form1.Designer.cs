@@ -51,6 +51,7 @@
             this.button1 = new System.Windows.Forms.Button();
             this.button2 = new System.Windows.Forms.Button();
             this.panel1 = new System.Windows.Forms.Panel();
+            this.EnableItem = new System.Windows.Forms.ToolStripMenuItem();
             this.tableLayoutPanel1.SuspendLayout();
             this.contextMenuStrip1.SuspendLayout();
             this.panel1.SuspendLayout();
@@ -200,38 +201,38 @@
             // contextMenuStrip1
             // 
             this.contextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.EnableItem,
             this.ConfigItem,
             this.aboutToolStripMenuItem,
             this.toolStripSeparator2,
             this.QuitItem});
             this.contextMenuStrip1.Name = "contextMenuStrip1";
             this.contextMenuStrip1.RenderMode = System.Windows.Forms.ToolStripRenderMode.System;
-            this.contextMenuStrip1.Size = new System.Drawing.Size(112, 76);
+            this.contextMenuStrip1.Size = new System.Drawing.Size(153, 120);
             // 
             // ConfigItem
             // 
-            this.ConfigItem.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
             this.ConfigItem.Name = "ConfigItem";
-            this.ConfigItem.Size = new System.Drawing.Size(111, 22);
+            this.ConfigItem.Size = new System.Drawing.Size(152, 22);
             this.ConfigItem.Text = "Config";
             this.ConfigItem.Click += new System.EventHandler(this.Config_Click);
             // 
             // aboutToolStripMenuItem
             // 
             this.aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
-            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(111, 22);
+            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.aboutToolStripMenuItem.Text = "About";
             this.aboutToolStripMenuItem.Click += new System.EventHandler(this.aboutToolStripMenuItem_Click);
             // 
             // toolStripSeparator2
             // 
             this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(108, 6);
+            this.toolStripSeparator2.Size = new System.Drawing.Size(149, 6);
             // 
             // QuitItem
             // 
             this.QuitItem.Name = "QuitItem";
-            this.QuitItem.Size = new System.Drawing.Size(111, 22);
+            this.QuitItem.Size = new System.Drawing.Size(152, 22);
             this.QuitItem.Text = "Quit";
             this.QuitItem.Click += new System.EventHandler(this.Quit_Click);
             // 
@@ -278,6 +279,15 @@
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(164, 30);
             this.panel1.TabIndex = 1;
+            // 
+            // EnableItem
+            // 
+            this.EnableItem.Checked = true;
+            this.EnableItem.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.EnableItem.Name = "EnableItem";
+            this.EnableItem.Size = new System.Drawing.Size(152, 22);
+            this.EnableItem.Text = "Enable";
+            this.EnableItem.Click += new System.EventHandler(this.EnableItem_Click);
             // 
             // Form1
             // 
@@ -329,6 +339,7 @@
         private System.Windows.Forms.Button button1;
         private System.Windows.Forms.Button button2;
         private System.Windows.Forms.Panel panel1;
+        private System.Windows.Forms.ToolStripMenuItem EnableItem;
     }
 }
 

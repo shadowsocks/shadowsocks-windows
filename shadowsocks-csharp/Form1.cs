@@ -131,5 +131,18 @@ namespace shadowsocks_csharp
             showWindow();
         }
 
+        private void EnableItem_Click(object sender, EventArgs e)
+        {
+            EnableItem.Checked = !EnableItem.Checked;
+            if (EnableItem.Checked)
+            {
+                SystemProxy.Enable();
+            }
+            else
+            {
+                SystemProxy.Disable();
+            }
+        }
+
     }
 }
