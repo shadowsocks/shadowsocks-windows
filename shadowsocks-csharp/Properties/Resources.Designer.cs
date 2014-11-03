@@ -61,16 +61,6 @@ namespace shadowsocks_csharp.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized resource of type System.Byte[].
-        /// </summary>
-        internal static byte[] polipo {
-            get {
-                object obj = ResourceManager.GetObject("polipo", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to # Sample configuration file for Polipo. -*-sh-*-
         ///
         ///# You should not need to use a configuration file; all configuration
@@ -92,6 +82,16 @@ namespace shadowsocks_csharp.Properties {
         internal static string polipo_config {
             get {
                 return ResourceManager.GetString("polipo_config", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] polipo_exe {
+            get {
+                object obj = ResourceManager.GetObject("polipo_exe", resourceCulture);
+                return ((byte[])(obj));
             }
         }
         
