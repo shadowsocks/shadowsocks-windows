@@ -61,13 +61,14 @@ namespace shadowsocks_csharp
                     polipoRunner.Stop();
                 }
             }
-            local = new Local(config);
-            local.Start();
             if (polipoRunner == null)
             {
                 polipoRunner = new PolipoRunner();
             }
             polipoRunner.Start(config);
+
+            local = new Local(config);
+            local.Start();
 
         }
 

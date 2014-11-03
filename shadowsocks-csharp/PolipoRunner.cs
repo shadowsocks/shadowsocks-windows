@@ -32,15 +32,21 @@ namespace shadowsocks_csharp
         {
             if (process == null)
             {
+                Process[] existingPolipo = Process.GetProcessesByName("ss_polipo");
+                foreach (Process p in existingPolipo)
+                {
+                    p.Kill();
+                    p.WaitForExit();
+                }
                 string temppath = Path.GetTempPath();
                 string polipoConfig = Resources.polipo_config;
                 polipoConfig = polipoConfig.Replace("__SOCKS_PORT__", config.local_port.ToString());
                 ByteArrayToFile(temppath + "/polipo.conf", System.Text.Encoding.UTF8.GetBytes(polipoConfig));
-                ByteArrayToFile(temppath + "/polipo.exe", Resources.polipo);
+                ByteArrayToFile(temppath + "/ss_polipo.exe", Resources.polipo);
 
                 process = new Process();
                 // Configure the process using the StartInfo properties.
-                process.StartInfo.FileName = temppath + "/polipo.exe";
+                process.StartInfo.FileName = temppath + "/ss_polipo.exe";
                 process.StartInfo.Arguments = "-c \"" + temppath + "/polipo.conf\"";
                 process.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
                 process.StartInfo.UseShellExecute = false;
