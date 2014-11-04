@@ -15,7 +15,7 @@ namespace shadowsocks_csharp
         public const int INTERNET_OPTION_REFRESH = 37;
         static bool settingsReturn, refreshReturn;
 
-        public static void UpdateIE()
+        public static void NotifyIE()
         {
             // These lines implement the Interface in the beginning of program 
             // They cause the OS to refresh the settings, causing IP to realy update
@@ -26,9 +26,10 @@ namespace shadowsocks_csharp
         public static void Enable()
         {
             RegistryKey registry = Registry.CurrentUser.OpenSubKey("Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings", true);
-            registry.SetValue("ProxyEnable", 1);
-            registry.SetValue("ProxyServer", "127.0.0.1:8123");
-            SystemProxy.UpdateIE();
+            registry.SetValue("ProxyEnable", 0);
+            registry.SetValue("ProxyServer", "");
+            registry.SetValue("AutoConfigURL", "http://127.0.0.1:8090/pac");
+            SystemProxy.NotifyIE();
         }
 
         public static void Disable()
@@ -36,7 +37,8 @@ namespace shadowsocks_csharp
             RegistryKey registry = Registry.CurrentUser.OpenSubKey("Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings", true);
             registry.SetValue("ProxyEnable", 0);
             registry.SetValue("ProxyServer", "");
-            SystemProxy.UpdateIE();
+            registry.SetValue("AutoConfigURL", "");
+            SystemProxy.NotifyIE();
         }
     }
 }
