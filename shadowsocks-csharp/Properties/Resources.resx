@@ -124,7 +124,7 @@
   <data name="polipo_exe" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\polipo.exe.gz;System.Byte[], mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="proxy_pac" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\proxy.pac.txt;System.String, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;gb2312</value>
+  <data name="proxy_pac_txt" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\proxy.pac.txt.gz;System.Byte[], mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
 </root>

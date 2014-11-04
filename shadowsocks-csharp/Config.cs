@@ -10,6 +10,7 @@ namespace shadowsocks_csharp
     [Serializable]
     public class Config
     {
+        public bool enabled;
         public string server;
         public int server_port;
         public int local_port;
@@ -51,6 +52,7 @@ namespace shadowsocks_csharp
                     local_port = 1080,
                     password = "barfoo!",
                     method = "table",
+                    enabled = true,
                     isDefault = true
                 };
             }
@@ -68,7 +70,8 @@ namespace shadowsocks_csharp
                         server_port = config.server_port,
                         local_port = config.local_port,
                         password = config.password,
-                        method = config.method
+                        method = config.method,
+                        enabled = config.enabled
                     });
                     sw.Write(jsonString);
                     sw.Flush();

@@ -126,6 +126,7 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
     <Compile Include="simple-json\src\SimpleJson\SimpleJson.cs" />
+    <None Include="proxy.pac.txt.gz" />
   </ItemGroup>
   <ItemGroup>
     <None Include="config.txt" />

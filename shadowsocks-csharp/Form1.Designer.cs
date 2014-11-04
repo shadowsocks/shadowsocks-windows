@@ -42,18 +42,17 @@
             this.textBox3 = new System.Windows.Forms.TextBox();
             this.textBox4 = new System.Windows.Forms.TextBox();
             this.notifyIcon1 = new System.Windows.Forms.NotifyIcon(this.components);
-            this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.ConfigItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
-            this.QuitItem = new System.Windows.Forms.ToolStripMenuItem();
             this.panel2 = new System.Windows.Forms.Panel();
             this.button1 = new System.Windows.Forms.Button();
             this.button2 = new System.Windows.Forms.Button();
             this.panel1 = new System.Windows.Forms.Panel();
-            this.EnableItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.contextMenu1 = new System.Windows.Forms.ContextMenu();
+            this.enableItem = new System.Windows.Forms.MenuItem();
+            this.aboutItem = new System.Windows.Forms.MenuItem();
+            this.menuItem3 = new System.Windows.Forms.MenuItem();
+            this.quitItem = new System.Windows.Forms.MenuItem();
+            this.configItem = new System.Windows.Forms.MenuItem();
             this.tableLayoutPanel1.SuspendLayout();
-            this.contextMenuStrip1.SuspendLayout();
             this.panel1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -192,49 +191,10 @@
             // 
             // notifyIcon1
             // 
-            this.notifyIcon1.ContextMenuStrip = this.contextMenuStrip1;
             this.notifyIcon1.Icon = ((System.Drawing.Icon)(resources.GetObject("notifyIcon1.Icon")));
             this.notifyIcon1.Text = "shadowsocks";
             this.notifyIcon1.Visible = true;
             this.notifyIcon1.DoubleClick += new System.EventHandler(this.notifyIcon1_DoubleClick);
-            // 
-            // contextMenuStrip1
-            // 
-            this.contextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.EnableItem,
-            this.ConfigItem,
-            this.aboutToolStripMenuItem,
-            this.toolStripSeparator2,
-            this.QuitItem});
-            this.contextMenuStrip1.Name = "contextMenuStrip1";
-            this.contextMenuStrip1.RenderMode = System.Windows.Forms.ToolStripRenderMode.System;
-            this.contextMenuStrip1.Size = new System.Drawing.Size(153, 120);
-            // 
-            // ConfigItem
-            // 
-            this.ConfigItem.Name = "ConfigItem";
-            this.ConfigItem.Size = new System.Drawing.Size(152, 22);
-            this.ConfigItem.Text = "Config";
-            this.ConfigItem.Click += new System.EventHandler(this.Config_Click);
-            // 
-            // aboutToolStripMenuItem
-            // 
-            this.aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
-            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
-            this.aboutToolStripMenuItem.Text = "About";
-            this.aboutToolStripMenuItem.Click += new System.EventHandler(this.aboutToolStripMenuItem_Click);
-            // 
-            // toolStripSeparator2
-            // 
-            this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(149, 6);
-            // 
-            // QuitItem
-            // 
-            this.QuitItem.Name = "QuitItem";
-            this.QuitItem.Size = new System.Drawing.Size(152, 22);
-            this.QuitItem.Text = "Quit";
-            this.QuitItem.Click += new System.EventHandler(this.Quit_Click);
             // 
             // panel2
             // 
@@ -280,14 +240,43 @@
             this.panel1.Size = new System.Drawing.Size(164, 30);
             this.panel1.TabIndex = 1;
             // 
-            // EnableItem
+            // contextMenu1
             // 
-            this.EnableItem.Checked = true;
-            this.EnableItem.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.EnableItem.Name = "EnableItem";
-            this.EnableItem.Size = new System.Drawing.Size(152, 22);
-            this.EnableItem.Text = "Enable";
-            this.EnableItem.Click += new System.EventHandler(this.EnableItem_Click);
+            this.contextMenu1.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
+            this.enableItem,
+            this.configItem,
+            this.aboutItem,
+            this.menuItem3,
+            this.quitItem});
+            // 
+            // enableItem
+            // 
+            this.enableItem.Index = 0;
+            this.enableItem.Text = "Enable";
+            this.enableItem.Click += new System.EventHandler(this.EnableItem_Click);
+            // 
+            // aboutItem
+            // 
+            this.aboutItem.Index = 2;
+            this.aboutItem.Text = "About";
+            this.aboutItem.Click += new System.EventHandler(this.aboutToolStripMenuItem_Click);
+            // 
+            // menuItem3
+            // 
+            this.menuItem3.Index = 3;
+            this.menuItem3.Text = "-";
+            // 
+            // quitItem
+            // 
+            this.quitItem.Index = 4;
+            this.quitItem.Text = "Quit";
+            this.quitItem.Click += new System.EventHandler(this.Quit_Click);
+            // 
+            // configItem
+            // 
+            this.configItem.Index = 1;
+            this.configItem.Text = "Options...";
+            this.configItem.Click += new System.EventHandler(this.Config_Click);
             // 
             // Form1
             // 
@@ -309,7 +298,6 @@
             this.Load += new System.EventHandler(this.Form1_Load);
             this.tableLayoutPanel1.ResumeLayout(false);
             this.tableLayoutPanel1.PerformLayout();
-            this.contextMenuStrip1.ResumeLayout(false);
             this.panel1.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -328,18 +316,18 @@
         private System.Windows.Forms.TextBox textBox3;
         private System.Windows.Forms.TextBox textBox4;
         private System.Windows.Forms.NotifyIcon notifyIcon1;
-        private System.Windows.Forms.ContextMenuStrip contextMenuStrip1;
-        private System.Windows.Forms.ToolStripMenuItem ConfigItem;
-        private System.Windows.Forms.ToolStripMenuItem QuitItem;
-        private System.Windows.Forms.ToolStripMenuItem aboutToolStripMenuItem;
-        private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.ComboBox comboBox1;
         private System.Windows.Forms.Panel panel2;
         private System.Windows.Forms.Button button1;
         private System.Windows.Forms.Button button2;
         private System.Windows.Forms.Panel panel1;
-        private System.Windows.Forms.ToolStripMenuItem EnableItem;
+        private System.Windows.Forms.ContextMenu contextMenu1;
+        private System.Windows.Forms.MenuItem enableItem;
+        private System.Windows.Forms.MenuItem aboutItem;
+        private System.Windows.Forms.MenuItem menuItem3;
+        private System.Windows.Forms.MenuItem quitItem;
+        private System.Windows.Forms.MenuItem configItem;
     }
 }
 

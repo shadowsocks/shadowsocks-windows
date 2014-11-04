@@ -1,6 +1,8 @@
 ﻿using shadowsocks_csharp.Properties;
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.IO.Compression;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -46,6 +48,26 @@ namespace shadowsocks_csharp
             }
         }
 
+        private string getPACContent()
+        {
+            // TODO try pac.txt in current directory
+            byte[] pacGZ = Resources.proxy_pac_txt;
+
+            byte[] buffer = new byte[1024 * 1024];  // builtin pac gzip size: maximum 1M
+            int n;
+
+            using (GZipStream input = new GZipStream(new MemoryStream(pacGZ),
+                CompressionMode.Decompress, false))
+            {
+                n = input.Read(buffer, 0, buffer.Length);
+                if (n == 0)
+                {
+                    throw new IOException("can not decompress pac");
+                }
+                return System.Text.Encoding.UTF8.GetString(buffer, 0, n);
+            }
+        }
+
         private void receiveCallback(IAsyncResult ar)
         {
             Socket conn = (Socket)ar.AsyncState;
@@ -53,7 +75,7 @@ namespace shadowsocks_csharp
             {
                 int bytesRead = conn.EndReceive(ar);
 
-                string pac = Resources.proxy_pac;
+                string pac = getPACContent();
 
                 string proxy = "PROXY 127.0.0.1:8123; DIRECT;";
 

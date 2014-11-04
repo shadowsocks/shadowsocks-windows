@@ -19,9 +19,11 @@ namespace shadowsocks_csharp
         {
             config = Config.Load();
             InitializeComponent();
+            notifyIcon1.ContextMenu = contextMenu1;
+            enableItem.Checked = config.enabled;
             configToTextBox();
         }
-
+        
         private void showWindow()
         {
             this.Opacity = 1;
@@ -49,6 +51,7 @@ namespace shadowsocks_csharp
             }
             pacServer = new PACServer();
             pacServer.Start();
+            updateSystemProxy();
         }
 
         private void reload(Config config)
@@ -120,6 +123,10 @@ namespace shadowsocks_csharp
         {
             if (local != null) local.Stop();
             if (polipoRunner != null) polipoRunner.Stop();
+            if (config.enabled)
+            {
+                SystemProxy.Disable();
+            }
         }
 
         private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
@@ -132,10 +139,9 @@ namespace shadowsocks_csharp
             showWindow();
         }
 
-        private void EnableItem_Click(object sender, EventArgs e)
+        private void updateSystemProxy()
         {
-            EnableItem.Checked = !EnableItem.Checked;
-            if (EnableItem.Checked)
+            if (config.enabled)
             {
                 SystemProxy.Enable();
             }
@@ -143,6 +149,14 @@ namespace shadowsocks_csharp
             {
                 SystemProxy.Disable();
             }
+        }
+
+        private void EnableItem_Click(object sender, EventArgs e)
+        {
+            enableItem.Checked = !enableItem.Checked;
+            config.enabled = enableItem.Checked;
+            Config.Save(config);
+            updateSystemProxy();
         }
 
     }
