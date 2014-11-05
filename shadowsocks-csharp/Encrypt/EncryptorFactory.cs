@@ -10,7 +10,7 @@ namespace shadowsocks_csharp.Encrypt
                 return new TableEncryptor(method, password);
             }
 
-            return new OpensslEncryptor(method, password);
+            return new PolarSSLEncryptor(method, password);
         }
     }
 }

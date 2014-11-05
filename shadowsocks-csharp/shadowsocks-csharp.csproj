@@ -85,6 +85,8 @@
     <Compile Include="Encrypt\EncryptorFactory.cs" />
     <Compile Include="Encrypt\OpenSSL.cs" />
     <Compile Include="Encrypt\OpensslEncryptor.cs" />
+    <Compile Include="Encrypt\PolarSSL.cs" />
+    <Compile Include="Encrypt\PolarSSLEncryptor.cs" />
     <Compile Include="Encrypt\TableEncryptor.cs" />
     <Compile Include="Encrypt\IEncryptor.cs" />
     <Compile Include="PACServer.cs" />
