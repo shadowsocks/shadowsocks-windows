@@ -8,14 +8,14 @@ using System.Diagnostics;
 
 namespace shadowsocks_csharp
 {
-    public partial class Form1 : Form
+    public partial class ConfigForm : Form
     {
         Local local;
         PACServer pacServer;
         Config config;
         PolipoRunner polipoRunner;
 
-        public Form1()
+        public ConfigForm()
         {
             config = Config.Load();
             InitializeComponent();

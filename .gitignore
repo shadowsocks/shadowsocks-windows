@@ -1,0 +1,6 @@
+Backup/
+shadowsocks-csharp/bin/
+shadowsocks-csharp/obj/
+shadowsocks-csharp/shadowsocks-csharp.csproj.user
+*.suo
+
