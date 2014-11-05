@@ -211,9 +211,58 @@ namespace shadowsocks_csharp.Encrypt
             }
         }
 
+        #region IDisposable
+        private bool _disposed;
 
         public override void Dispose()
         {
+            Dispose(true);
+            GC.SuppressFinalize(this);
         }
+
+        ~PolarSSLEncryptor()
+        {
+            Dispose(false);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!_disposed)
+            {
+                if (disposing)
+                {
+
+                }
+
+                if (_encryptCtx != null)
+                {
+                    switch (_cipher)
+                    {
+                        case CIPHER_AES:
+                            PolarSSL.aes_free(_encryptCtx);
+                            break;
+                        case CIPHER_RC4:
+                            PolarSSL.arc4_free(_encryptCtx);
+                            break;
+                    }
+                }
+                if (_decryptCtx != null)
+                {
+                    switch (_cipher)
+                    {
+                        case CIPHER_AES:
+                            PolarSSL.aes_free(_decryptCtx);
+                            break;
+                        case CIPHER_RC4:
+                            PolarSSL.arc4_free(_decryptCtx);
+                            break;
+                    }
+                }
+                _encryptCtx = null;
+                _decryptCtx = null;
+                _disposed = true;
+            }
+        }
+        #endregion
     }
 }

@@ -112,6 +112,7 @@ namespace shadowsocks_csharp
         public byte[] connetionSendBuffer = new byte[BufferSize];
         // Received data string.
         public StringBuilder sb = new StringBuilder();
+        private bool closed = false;
 
         public void Start()
         {
@@ -144,6 +145,11 @@ namespace shadowsocks_csharp
 
         public void Close()
         {
+            if (closed)
+            {
+                return;
+            }
+            closed = true;
             if (connection != null)
             {
                 try
