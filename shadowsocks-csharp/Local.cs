@@ -34,7 +34,7 @@ namespace shadowsocks_csharp
 
 
             // Start an asynchronous socket to listen for connections.
-            Console.WriteLine("Waiting for a connection...");
+            Console.WriteLine("Shadowsocks started");
             listener.BeginAccept(
                 new AsyncCallback(AcceptCallback),
                 listener);
@@ -85,7 +85,7 @@ namespace shadowsocks_csharp
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.ToString());
+                //Console.WriteLine(e.ToString());
             }
         }
 

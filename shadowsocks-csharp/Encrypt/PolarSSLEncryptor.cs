@@ -17,7 +17,7 @@ namespace shadowsocks_csharp.Encrypt
             {"aes-128-cfb", new int[]{16, 16, CIPHER_AES, PolarSSL.AES_CTX_SIZE}},
             {"aes-192-cfb", new int[]{24, 16, CIPHER_AES, PolarSSL.AES_CTX_SIZE}},
             {"aes-256-cfb", new int[]{32, 16, CIPHER_AES, PolarSSL.AES_CTX_SIZE}},
-            //{"bf-cfb", new int[]{16, 8, CIPHER_BF, PolarSSL.BF_CTX_SIZE}},
+            {"bf-cfb", new int[]{16, 8, CIPHER_BF, PolarSSL.BLOWFISH_CTX_SIZE}},
             {"rc4", new int[]{16, 0, CIPHER_RC4, PolarSSL.ARC4_CTX_SIZE}},
             {"rc4-md5", new int[]{16, 16, CIPHER_RC4, PolarSSL.ARC4_CTX_SIZE}},
         };
@@ -118,18 +118,32 @@ namespace shadowsocks_csharp.Encrypt
             if (_cipher == CIPHER_AES)
             {
                 PolarSSL.aes_init(ctx);
+                // PolarSSL takes key length by bit
+                // since we'll use CFB mode, here we both do enc, not dec
+                PolarSSL.aes_setkey_enc(ctx, realkey, keyLen * 8);
                 if (isCipher)
                 {
-                    // PolarSSL takes key length by bit
-                    PolarSSL.aes_setkey_enc(ctx, realkey, keyLen * 8);
                     _encryptIV = new byte[ivLen];
                     Array.Copy(iv, _encryptIV, ivLen);
                 }
                 else
                 {
-                    // PolarSSL takes key length by bit
-                    // since we'll use CFB mode, here we also do enc, not dec
-                    PolarSSL.aes_setkey_enc(ctx, realkey, keyLen * 8);
+                    _decryptIV = new byte[ivLen];
+                    Array.Copy(iv, _decryptIV, ivLen);
+                }
+            }
+            else if (_cipher == CIPHER_BF)
+            {
+                PolarSSL.blowfish_init(ctx);
+                // PolarSSL takes key length by bit
+                PolarSSL.blowfish_setkey(ctx, realkey, keyLen * 8);
+                if (isCipher)
+                {
+                    _encryptIV = new byte[ivLen];
+                    Array.Copy(iv, _encryptIV, ivLen);
+                }
+                else
+                {
                     _decryptIV = new byte[ivLen];
                     Array.Copy(iv, _decryptIV, ivLen);
                 }
@@ -157,6 +171,9 @@ namespace shadowsocks_csharp.Encrypt
                     case CIPHER_AES:
                         PolarSSL.aes_crypt_cfb128(_encryptCtx, PolarSSL.AES_ENCRYPT, length, ref _encryptIVOffset, _encryptIV, buf, tempbuf);
                         break;
+                    case CIPHER_BF:
+                        PolarSSL.blowfish_crypt_cfb64(_encryptCtx, PolarSSL.BLOWFISH_ENCRYPT, length, ref _encryptIVOffset, _encryptIV, buf, tempbuf);
+                        break;
                     case CIPHER_RC4:
                         PolarSSL.arc4_crypt(_encryptCtx, length, buf, tempbuf);
                         break;
@@ -171,6 +188,9 @@ namespace shadowsocks_csharp.Encrypt
                 {
                     case CIPHER_AES:
                         PolarSSL.aes_crypt_cfb128(_encryptCtx, PolarSSL.AES_ENCRYPT, length, ref _encryptIVOffset, _encryptIV, buf, outbuf);
+                        break;
+                    case CIPHER_BF:
+                        PolarSSL.blowfish_crypt_cfb64(_encryptCtx, PolarSSL.BLOWFISH_ENCRYPT, length, ref _encryptIVOffset, _encryptIV, buf, outbuf);
                         break;
                     case CIPHER_RC4:
                         PolarSSL.arc4_crypt(_encryptCtx, length, buf, outbuf);
@@ -191,6 +211,9 @@ namespace shadowsocks_csharp.Encrypt
                     case CIPHER_AES:
                         PolarSSL.aes_crypt_cfb128(_decryptCtx, PolarSSL.AES_DECRYPT, length - ivLen, ref _decryptIVOffset, _decryptIV, tempbuf, outbuf);
                         break;
+                    case CIPHER_BF:
+                        PolarSSL.blowfish_crypt_cfb64(_decryptCtx, PolarSSL.BLOWFISH_DECRYPT, length - ivLen, ref _decryptIVOffset, _decryptIV, tempbuf, outbuf);
+                        break;
                     case CIPHER_RC4:
                         PolarSSL.arc4_crypt(_decryptCtx, length - ivLen, tempbuf, outbuf);
                         break;
@@ -203,6 +226,9 @@ namespace shadowsocks_csharp.Encrypt
                 {
                     case CIPHER_AES:
                         PolarSSL.aes_crypt_cfb128(_decryptCtx, PolarSSL.AES_DECRYPT, length, ref _decryptIVOffset, _decryptIV, buf, outbuf);
+                        break;
+                    case CIPHER_BF:
+                        PolarSSL.blowfish_crypt_cfb64(_decryptCtx, PolarSSL.BLOWFISH_DECRYPT, length, ref _decryptIVOffset, _decryptIV, buf, outbuf);
                         break;
                     case CIPHER_RC4:
                         PolarSSL.arc4_crypt(_decryptCtx, length, buf, outbuf);
@@ -241,6 +267,9 @@ namespace shadowsocks_csharp.Encrypt
                         case CIPHER_AES:
                             PolarSSL.aes_free(_encryptCtx);
                             break;
+                        case CIPHER_BF:
+                            PolarSSL.blowfish_free(_encryptCtx);
+                            break;
                         case CIPHER_RC4:
                             PolarSSL.arc4_free(_encryptCtx);
                             break;
@@ -252,6 +281,9 @@ namespace shadowsocks_csharp.Encrypt
                     {
                         case CIPHER_AES:
                             PolarSSL.aes_free(_decryptCtx);
+                            break;
+                        case CIPHER_BF:
+                            PolarSSL.blowfish_free(_decryptCtx);
                             break;
                         case CIPHER_RC4:
                             PolarSSL.arc4_free(_decryptCtx);
