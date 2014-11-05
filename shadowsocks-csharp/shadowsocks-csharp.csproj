@@ -83,8 +83,6 @@
   <ItemGroup>
     <Compile Include="Encrypt\EncryptorBase.cs" />
     <Compile Include="Encrypt\EncryptorFactory.cs" />
-    <Compile Include="Encrypt\OpenSSL.cs" />
-    <Compile Include="Encrypt\OpensslEncryptor.cs" />
     <Compile Include="Encrypt\PolarSSL.cs" />
     <Compile Include="Encrypt\PolarSSLEncryptor.cs" />
     <Compile Include="Encrypt\TableEncryptor.cs" />
