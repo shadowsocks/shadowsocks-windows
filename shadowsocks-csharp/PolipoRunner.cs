@@ -90,7 +90,14 @@ namespace shadowsocks_csharp
             if (process != null)
             {
                 process.Kill();
-                process.WaitForExit();
+                try
+                {
+                    process.WaitForExit();
+                }
+                catch (InvalidOperationException)
+                {
+                    // do nothing
+                }
                 process = null;
             }
         }

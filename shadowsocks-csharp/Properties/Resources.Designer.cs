@@ -61,6 +61,16 @@ namespace shadowsocks_csharp.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] polarssl_dll {
+            get {
+                object obj = ResourceManager.GetObject("polarssl_dll", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to # Sample configuration file for Polipo. -*-sh-*-
         ///
         ///# You should not need to use a configuration file; all configuration
