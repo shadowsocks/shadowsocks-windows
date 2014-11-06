@@ -24,7 +24,6 @@ namespace shadowsocks_csharp
             {
                 string tempPath = Path.GetTempPath();
                 string dllPath = tempPath + "/polarssl.dll";
-                // TODO: PolipoRunner should not do this job
                 FileManager.UncompressFile(dllPath, Resources.polarssl_dll);
                 LoadLibrary(dllPath);
 
