@@ -59,11 +59,11 @@ namespace shadowsocks_csharp
                 //    return;
                 //}
 
+                Socket conn = listener.EndAccept(ar);
+
                 listener.BeginAccept(
                     new AsyncCallback(AcceptCallback),
                     listener);
-
-                Socket conn = listener.EndAccept(ar);
 
                 // Create the state object.
                 Handler handler = new Handler();
@@ -83,7 +83,7 @@ namespace shadowsocks_csharp
                 //handler.BeginReceive(state.buffer, 0, StateObject.BufferSize, 0,
                 //    new AsyncCallback(ReadCallback), state);
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 //Console.WriteLine(e.ToString());
             }
