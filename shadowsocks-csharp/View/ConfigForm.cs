@@ -93,11 +93,11 @@ namespace shadowsocks_csharp
             }
             catch (FormatException)
             {
-                MessageBox.Show("there is format problem");
+                MessageBox.Show("illegal port number format");
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.ToString());
+                MessageBox.Show(ex.Message);
             }
         }
 

@@ -58,8 +58,36 @@ namespace shadowsocks_csharp
             }
         }
 
+        private static void checkPort(int port)
+        {
+            if (port <= 0 || port > 65535)
+            {
+                throw new ArgumentException("port out of range");
+            }
+        }
+
+        private static void checkPassword(string password)
+        {
+            if (string.IsNullOrEmpty(password))
+            {
+                throw new ArgumentException("password can not be blank");
+            }
+        }
+
+        private static void checkServer(string server)
+        {
+            if (string.IsNullOrEmpty(server))
+            {
+                throw new ArgumentException("server can not be blank");
+            }
+        }
+
         public static void Save(Config config)
         {
+            checkPort(config.local_port);
+            checkPort(config.server_port);
+            checkPassword(config.password);
+            checkServer(config.server);
             try
             {
                 using (StreamWriter sw = new StreamWriter(File.Open(@"config.json", FileMode.Create)))
