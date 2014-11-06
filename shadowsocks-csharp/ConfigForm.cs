@@ -10,18 +10,28 @@ namespace shadowsocks_csharp
 {
     public partial class ConfigForm : Form
     {
-        Local local;
-        PACServer pacServer;
-        Config config;
-        PolipoRunner polipoRunner;
+        ShadowsocksController controller;
 
-        public ConfigForm()
+        public ConfigForm(ShadowsocksController controller)
         {
-            config = Config.Load();
             InitializeComponent();
             notifyIcon1.ContextMenu = contextMenu1;
-            enableItem.Checked = config.enabled;
-            configToTextBox();
+
+            this.controller = controller;
+            controller.EnableStatusChanged += controller_EnableStatusChanged;
+            controller.ConfigChanged += controller_ConfigChanged;
+
+            updateUI();
+        }
+
+        private void controller_ConfigChanged(object sender, EventArgs e)
+        {
+            updateUI();
+        }
+
+        private void controller_EnableStatusChanged(object sender, EventArgs e)
+        {
+            updateUI();
         }
         
         private void showWindow()
@@ -30,49 +40,29 @@ namespace shadowsocks_csharp
             this.Show();
         }
 
-        private void configToTextBox()
+        private void updateUI()
         {
+            Config config = controller.GetConfig();
+
             textBox1.Text = config.server;
             textBox2.Text = config.server_port.ToString();
             textBox3.Text = config.password;
             textBox4.Text = config.local_port.ToString();
-            comboBox1.Text = config.method == null ? "table" : config.method;
+            comboBox1.Text = config.method == null ? "aes-256-cfb" : config.method;
+
+            enableItem.Checked = config.enabled;
         }
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            if (!config.isDefault)
+            if (!controller.GetConfig().isDefault)
             {
                 this.Opacity = 0;
-                reload(config); BeginInvoke(new MethodInvoker(delegate
+                BeginInvoke(new MethodInvoker(delegate
                 {
                     this.Hide();
                 }));
             }
-            pacServer = new PACServer();
-            pacServer.Start();
-            updateSystemProxy();
-        }
-
-        private void reload(Config config)
-        {
-            if (local != null)
-            {
-                local.Stop();
-                if (polipoRunner != null)
-                {
-                    polipoRunner.Stop();
-                }
-            }
-            if (polipoRunner == null)
-            {
-                polipoRunner = new PolipoRunner();
-            }
-            polipoRunner.Start(config);
-
-            local = new Local(config);
-            local.Start();
-
         }
 
         private void Config_Click(object sender, EventArgs e)
@@ -98,9 +88,7 @@ namespace shadowsocks_csharp
                     method = comboBox1.Text,
                     isDefault = false
                 };
-                Config.Save(config);
-                this.config = config;
-                reload(config);
+                controller.SaveConfig(config);
                 this.Hide();
             }
             catch (FormatException)
@@ -116,17 +104,12 @@ namespace shadowsocks_csharp
         private void cancelButton_Click(object sender, EventArgs e)
         {
             this.Hide();
-            configToTextBox();
+            updateUI();
         }
 
         private void Form1_FormClosed(object sender, FormClosedEventArgs e)
         {
-            if (local != null) local.Stop();
-            if (polipoRunner != null) polipoRunner.Stop();
-            if (config.enabled)
-            {
-                SystemProxy.Disable();
-            }
+            controller.Stop();
         }
 
         private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
@@ -139,24 +122,11 @@ namespace shadowsocks_csharp
             showWindow();
         }
 
-        private void updateSystemProxy()
-        {
-            if (config.enabled)
-            {
-                SystemProxy.Enable();
-            }
-            else
-            {
-                SystemProxy.Disable();
-            }
-        }
 
         private void EnableItem_Click(object sender, EventArgs e)
         {
             enableItem.Checked = !enableItem.Checked;
-            config.enabled = enableItem.Checked;
-            Config.Save(config);
-            updateSystemProxy();
+            controller.ToggleEnable(enableItem.Checked);
         }
 
     }

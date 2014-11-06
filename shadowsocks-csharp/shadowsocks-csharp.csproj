@@ -99,6 +99,7 @@
     <Compile Include="PolipoRunner.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ShadowsocksController.cs" />
     <Compile Include="SystemProxy.cs" />
     <EmbeddedResource Include="ConfigForm.resx">
       <DependentUpon>ConfigForm.cs</DependentUpon>

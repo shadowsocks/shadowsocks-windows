@@ -38,7 +38,8 @@ namespace shadowsocks_csharp
             }
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new ConfigForm());
+            ShadowsocksController controller = new ShadowsocksController();
+            Application.Run(new ConfigForm(controller));
 
 
         }
