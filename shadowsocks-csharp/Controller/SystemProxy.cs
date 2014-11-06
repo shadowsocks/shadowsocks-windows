@@ -28,7 +28,7 @@ namespace shadowsocks_csharp
             RegistryKey registry = Registry.CurrentUser.OpenSubKey("Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings", true);
             registry.SetValue("ProxyEnable", 0);
             registry.SetValue("ProxyServer", "");
-            registry.SetValue("AutoConfigURL", "http://127.0.0.1:8090/pac");
+            registry.SetValue("AutoConfigURL", "http://127.0.0.1:8090/pac?t=" + GetTimestamp(DateTime.Now));
             SystemProxy.NotifyIE();
         }
 
@@ -39,6 +39,11 @@ namespace shadowsocks_csharp
             registry.SetValue("ProxyServer", "");
             registry.SetValue("AutoConfigURL", "");
             SystemProxy.NotifyIE();
+        }
+
+        private static String GetTimestamp(DateTime value)
+        {
+            return value.ToString("yyyyMMddHHmmssffff");
         }
     }
 }
