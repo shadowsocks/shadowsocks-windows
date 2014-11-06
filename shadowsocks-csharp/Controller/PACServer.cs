@@ -7,7 +7,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 
-namespace shadowsocks_csharp
+namespace shadowsocks_csharp.Controller
 {
     class PACServer
     {

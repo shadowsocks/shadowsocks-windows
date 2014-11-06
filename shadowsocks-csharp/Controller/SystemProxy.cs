@@ -4,9 +4,9 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace shadowsocks_csharp
+namespace shadowsocks_csharp.Controller
 {
-    class SystemProxy
+    public class SystemProxy
     {
 
         [DllImport("wininet.dll")]

@@ -5,8 +5,10 @@ using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
 using System.Diagnostics;
+using shadowsocks_csharp.Controller;
+using shadowsocks_csharp.Model;
 
-namespace shadowsocks_csharp
+namespace shadowsocks_csharp.View
 {
     public partial class ConfigForm : Form
     {

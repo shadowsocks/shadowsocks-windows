@@ -5,7 +5,7 @@ using System.IO;
 using System.Diagnostics;
 using SimpleJson;
 
-namespace shadowsocks_csharp
+namespace shadowsocks_csharp.Model
 {
     [Serializable]
     public class Config

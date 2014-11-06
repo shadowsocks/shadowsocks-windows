@@ -1,4 +1,6 @@
-﻿using shadowsocks_csharp.Properties;
+﻿using shadowsocks_csharp.Controller;
+using shadowsocks_csharp.Properties;
+using shadowsocks_csharp.View;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -22,7 +24,8 @@ namespace shadowsocks_csharp
             {
                 string tempPath = Path.GetTempPath();
                 string dllPath = tempPath + "/polarssl.dll";
-                PolipoRunner.UncompressFile(dllPath, Resources.polarssl_dll);
+                // TODO: PolipoRunner should not do this job
+                FileManager.UncompressFile(dllPath, Resources.polarssl_dll);
                 LoadLibrary(dllPath);
 
                 FileStream fs = new FileStream("shadowsocks.log", FileMode.Append);

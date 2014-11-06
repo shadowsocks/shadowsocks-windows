@@ -4,10 +4,10 @@ using System.Text;
 using System.Net.Sockets;
 using System.Net;
 using shadowsocks_csharp.Encrypt;
+using shadowsocks_csharp.Model;
 
-namespace shadowsocks_csharp
+namespace shadowsocks_csharp.Controller
 {
-
 
     class Local
     {

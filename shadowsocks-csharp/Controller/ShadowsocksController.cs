@@ -1,8 +1,9 @@
-﻿using System;
+﻿using shadowsocks_csharp.Model;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace shadowsocks_csharp
+namespace shadowsocks_csharp.Controller
 {
     public class ShadowsocksController
     {
@@ -17,8 +18,16 @@ namespace shadowsocks_csharp
         private PolipoRunner polipoRunner;
         private bool stopped = false;
 
+        public class PathEventArgs : EventArgs
+        {
+            public string Path;
+        }
+
         public event EventHandler ConfigChanged;
         public event EventHandler EnableStatusChanged;
+        
+        // when user clicked Edit PAC, and PAC file has already created
+        public event EventHandler<PathEventArgs> PACFileReadyToOpen;
 
         public ShadowsocksController()
         {
@@ -37,6 +46,14 @@ namespace shadowsocks_csharp
         {
             Config.Save(newConfig);
             config = newConfig;
+
+            local.Stop();
+            polipoRunner.Stop();
+            polipoRunner.Start(config);
+
+            local = new Local(config);
+            local.Start();
+
             if (ConfigChanged != null)
             {
                 ConfigChanged(this, new EventArgs());
@@ -72,6 +89,10 @@ namespace shadowsocks_csharp
             {
                 SystemProxy.Disable();
             }
+        }
+
+        public void TouchPACFile()
+        {
         }
 
         private void updateSystemProxy()
