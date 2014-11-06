@@ -14,7 +14,7 @@
     <FileAlignment>512</FileAlignment>
     <StartupObject>
     </StartupObject>
-    <ApplicationIcon>icon144.ico</ApplicationIcon>
+    <ApplicationIcon>Data\icon144.ico</ApplicationIcon>
     <IsWebBootstrapper>false</IsWebBootstrapper>
     <FileUpgradeFlags>
     </FileUpgradeFlags>
@@ -87,21 +87,21 @@
     <Compile Include="Encrypt\PolarSSLEncryptor.cs" />
     <Compile Include="Encrypt\TableEncryptor.cs" />
     <Compile Include="Encrypt\IEncryptor.cs" />
-    <Compile Include="PACServer.cs" />
-    <Compile Include="Config.cs" />
-    <Compile Include="ConfigForm.cs">
+    <Compile Include="Controller\PACServer.cs" />
+    <Compile Include="Model\Config.cs" />
+    <Compile Include="View\ConfigForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="ConfigForm.Designer.cs">
+    <Compile Include="View\ConfigForm.Designer.cs">
       <DependentUpon>ConfigForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Local.cs" />
-    <Compile Include="PolipoRunner.cs" />
+    <Compile Include="Controller\Local.cs" />
+    <Compile Include="Controller\PolipoRunner.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ShadowsocksController.cs" />
-    <Compile Include="SystemProxy.cs" />
-    <EmbeddedResource Include="ConfigForm.resx">
+    <Compile Include="Controller\ShadowsocksController.cs" />
+    <Compile Include="Controller\SystemProxy.cs" />
+    <EmbeddedResource Include="View\ConfigForm.resx">
       <DependentUpon>ConfigForm.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
@@ -116,8 +116,8 @@
       <DesignTime>True</DesignTime>
     </Compile>
     <None Include="app.config" />
-    <None Include="polarssl.dll.gz" />
-    <None Include="polipo.exe.gz" />
+    <None Include="Data\polarssl.dll.gz" />
+    <None Include="Data\polipo.exe.gz" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -128,12 +128,11 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
     <Compile Include="simple-json\src\SimpleJson\SimpleJson.cs" />
-    <None Include="proxy.pac.txt.gz" />
+    <None Include="Data\proxy.pac.txt.gz" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="config.txt" />
-    <Content Include="icon144.ico" />
-    <None Include="proxy.pac.txt" />
+    <None Include="Data\polipo_config.txt" />
+    <Content Include="Data\icon144.ico" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">

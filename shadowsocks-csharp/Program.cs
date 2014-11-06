@@ -39,6 +39,8 @@ namespace shadowsocks_csharp
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             ShadowsocksController controller = new ShadowsocksController();
+
+            // TODO run without a main form to save RAM
             Application.Run(new ConfigForm(controller));
 
 
