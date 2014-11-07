@@ -123,7 +123,7 @@ namespace Shadowsocks.Model
         {
             if (string.IsNullOrEmpty(server))
             {
-                throw new ArgumentException("server can not be blank");
+                throw new ArgumentException("server IP can not be blank");
             }
         }
 

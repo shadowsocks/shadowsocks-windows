@@ -12,7 +12,11 @@ namespace Shadowsocks.View
 {
     public partial class ConfigForm : Form
     {
-        ShadowsocksController controller;
+        private ShadowsocksController controller;
+
+        // this is a copy of configuration that we are working on
+        private Configuration modifiedConfiguration;
+        private int oldSelectedIndex = -1;
 
         public ConfigForm(ShadowsocksController controller)
         {
@@ -24,17 +28,17 @@ namespace Shadowsocks.View
             controller.ConfigChanged += controller_ConfigChanged;
             controller.PACFileReadyToOpen += controller_PACFileReadyToOpen;
 
-            updateUI();
+            loadCurrentConfiguration();
         }
 
         private void controller_ConfigChanged(object sender, EventArgs e)
         {
-            updateUI();
+            loadCurrentConfiguration();
         }
 
         private void controller_EnableStatusChanged(object sender, EventArgs e)
         {
-            updateUI();
+            enableItem.Checked = controller.GetConfiguration().enabled;
         }
 
         void controller_PACFileReadyToOpen(object sender, ShadowsocksController.PathEventArgs e)
@@ -51,20 +55,64 @@ namespace Shadowsocks.View
             this.Show();
         }
 
-        private void updateUI()
+        private bool saveOldSelectedServer()
         {
-            Server server = controller.GetCurrentServer();
+            try
+            {
+                if (oldSelectedIndex == -1 || oldSelectedIndex >= modifiedConfiguration.configs.Count)
+                {
+                    return true;
+                }
+                Server server = new Server
+                {
+                    server = IPTextBox.Text,
+                    server_port = int.Parse(ServerPortTextBox.Text),
+                    password = PasswordTextBox.Text,
+                    local_port = int.Parse(ProxyPortTextBox.Text),
+                    method = EncryptionSelect.Text
+                };
+                Configuration.CheckServer(server);
+                modifiedConfiguration.configs[oldSelectedIndex] = server;
+                return true;
+            }
+            catch (FormatException)
+            {
+                MessageBox.Show("illegal port number format");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+            return false;
+        }
+
+        private void loadSelectedServer()
+        {
+            Server server = modifiedConfiguration.configs[ServersListBox.SelectedIndex];
 
             IPTextBox.Text = server.server;
             ServerPortTextBox.Text = server.server_port.ToString();
             PasswordTextBox.Text = server.password;
             ProxyPortTextBox.Text = server.local_port.ToString();
             EncryptionSelect.Text = server.method == null ? "aes-256-cfb" : server.method;
-
-            enableItem.Checked = controller.GetConfiguration().enabled;
         }
 
-        private void CinfigForm_Load(object sender, EventArgs e)
+        private void loadCurrentConfiguration()
+        {
+            modifiedConfiguration = controller.GetConfiguration();
+            
+            ServersListBox.Items.Clear();
+            foreach (Server server in modifiedConfiguration.configs)
+            {
+                ServersListBox.Items.Add(server.server);
+            }
+            ServersListBox.SelectedIndex = modifiedConfiguration.index;
+            oldSelectedIndex = ServersListBox.SelectedIndex;
+
+            enableItem.Checked = modifiedConfiguration.enabled;
+        }
+
+        private void ConfigForm_Load(object sender, EventArgs e)
         {
             if (!controller.GetConfiguration().isDefault)
             {
@@ -74,6 +122,23 @@ namespace Shadowsocks.View
                     this.Hide();
                 }));
             }
+        }
+
+        private void ServersListBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (oldSelectedIndex == ServersListBox.SelectedIndex)
+            {
+                // we are moving back to oldSelectedIndex
+                return;
+            }
+            if (!saveOldSelectedServer())
+            {
+                // why this won't cause stack overflow?
+                ServersListBox.SelectedIndex = oldSelectedIndex;
+                return;
+            }
+            loadSelectedServer();
+            oldSelectedIndex = ServersListBox.SelectedIndex;
         }
 
         private void Config_Click(object sender, EventArgs e)
@@ -88,37 +153,16 @@ namespace Shadowsocks.View
 
         private void OKButton_Click(object sender, EventArgs e)
         {
-            try
-            {
-                Server server = new Server
-                {
-                    server = IPTextBox.Text,
-                    server_port = int.Parse(ServerPortTextBox.Text),
-                    password = PasswordTextBox.Text,
-                    local_port = int.Parse(ProxyPortTextBox.Text),
-                    method = EncryptionSelect.Text
-                };
-                Configuration config = controller.GetConfiguration();
-                config.configs.Clear();
-                config.configs.Add(server);
-                config.index = 0;
-                controller.SaveConfig(config);
-                this.Hide();
-            }
-            catch (FormatException)
-            {
-                MessageBox.Show("illegal port number format");
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message);
-            }
+            // TODO
+            Configuration config = controller.GetConfiguration();
+            controller.SaveConfig(config);
+            this.Hide();
         }
 
         private void CancelButton_Click(object sender, EventArgs e)
         {
             this.Hide();
-            updateUI();
+            loadCurrentConfiguration();
         }
 
         private void ConfigForm_FormClosed(object sender, FormClosedEventArgs e)
