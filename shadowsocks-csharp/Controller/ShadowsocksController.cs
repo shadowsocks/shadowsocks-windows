@@ -51,7 +51,7 @@ namespace shadowsocks_csharp.Controller
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.ToString());
+                Console.WriteLine(e.Message);
             }
 
             updateSystemProxy();
