@@ -271,7 +271,7 @@ namespace shadowsocks_csharp.Encrypt
                             PolarSSL.blowfish_free(_encryptCtx);
                             break;
                         case CIPHER_RC4:
-                            //PolarSSL.arc4_free(_encryptCtx);
+                            PolarSSL.arc4_free(_encryptCtx);
                             break;
                     }
                 }
@@ -286,7 +286,7 @@ namespace shadowsocks_csharp.Encrypt
                             PolarSSL.blowfish_free(_decryptCtx);
                             break;
                         case CIPHER_RC4:
-                            //PolarSSL.arc4_free(_decryptCtx);
+                            PolarSSL.arc4_free(_decryptCtx);
                             break;
                     }
                 }
