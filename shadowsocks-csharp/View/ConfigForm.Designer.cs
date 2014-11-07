@@ -339,9 +339,6 @@
             // ServersListBox
             // 
             this.ServersListBox.FormattingEnabled = true;
-            this.ServersListBox.Items.AddRange(new object[] {
-            "123.123.23.23",
-            "8.8.8.8"});
             this.ServersListBox.Location = new System.Drawing.Point(12, 12);
             this.ServersListBox.Name = "ServersListBox";
             this.ServersListBox.Size = new System.Drawing.Size(164, 186);
