@@ -43,11 +43,8 @@ namespace shadowsocks_csharp.Model
         {
             try
             {
-                var json = "[0,1,2]";
-                var result = SimpleJson.SimpleJson.DeserializeObject<List<int>>(json);
-
                 string configContent = File.ReadAllText(CONFIG_FILE);
-                Configuration config = SimpleJson.SimpleJson.DeserializeObject<Configuration>(configContent);
+                Configuration config = SimpleJson.SimpleJson.DeserializeObject<Configuration>(configContent, new JsonSerializerStrategy());
                 config.isDefault = false;
                 return config;
             }
@@ -127,6 +124,19 @@ namespace shadowsocks_csharp.Model
             if (string.IsNullOrEmpty(server))
             {
                 throw new ArgumentException("server can not be blank");
+            }
+        }
+
+        private class JsonSerializerStrategy : SimpleJson.PocoJsonSerializerStrategy
+        {
+            // convert string to int
+            public override object DeserializeObject(object value, Type type)
+            {
+                if (type == typeof(Int32) && value.GetType() == typeof(string))
+                {
+                    return Int32.Parse(value.ToString());
+                }
+                return base.DeserializeObject(value, type);
             }
         }
     }
