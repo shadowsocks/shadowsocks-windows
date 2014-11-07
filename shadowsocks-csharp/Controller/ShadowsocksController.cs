@@ -46,6 +46,7 @@ namespace shadowsocks_csharp.Controller
             {
                 local.Start();
                 pacServer = new PACServer();
+                pacServer.PACFileChanged += pacServer_PACFileChanged;
                 pacServer.Start();
             }
             catch (Exception e)
@@ -125,5 +126,11 @@ namespace shadowsocks_csharp.Controller
                 SystemProxy.Disable();
             }
         }
+
+        private void pacServer_PACFileChanged(object sender, EventArgs e)
+        {
+            updateSystemProxy();
+        }
+
     }
 }

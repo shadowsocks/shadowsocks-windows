@@ -1,6 +1,7 @@
 ﻿using shadowsocks_csharp.Properties;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Net;
@@ -14,6 +15,10 @@ namespace shadowsocks_csharp.Controller
         private static string PAC_FILE = "pac.txt";
 
         Socket listener;
+        FileSystemWatcher watcher;
+
+        public event EventHandler PACFileChanged;
+
         public void Start()
         {
             // Create a TCP/IP socket.
@@ -69,6 +74,7 @@ namespace shadowsocks_csharp.Controller
             
             if (File.Exists(PAC_FILE))
             {
+                watchPACFile();
                 return File.ReadAllText(PAC_FILE, Encoding.UTF8);
             }
             else
@@ -134,5 +140,28 @@ Connection: Close
             conn.Shutdown(SocketShutdown.Send);
         }
 
+        private void watchPACFile()
+        {
+            if (watcher != null)
+            {
+                watcher.Dispose();
+            }
+            watcher = new FileSystemWatcher(Directory.GetCurrentDirectory());
+            watcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.DirectoryName;
+            watcher.Filter = PAC_FILE;
+            watcher.Changed += watcher_Changed;
+            watcher.Created += watcher_Changed;
+            watcher.Deleted += watcher_Changed;
+            watcher.Renamed += watcher_Changed;
+            watcher.EnableRaisingEvents = true;
+        }
+
+        void watcher_Changed(object sender, FileSystemEventArgs e)
+        {
+            if (PACFileChanged != null)
+            {
+                PACFileChanged(this, new EventArgs());
+            }
+        }
     }
 }
