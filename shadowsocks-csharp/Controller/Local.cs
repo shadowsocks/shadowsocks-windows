@@ -11,10 +11,10 @@ namespace shadowsocks_csharp.Controller
 
     class Local
     {
-        private Config config;
+        private Server config;
         //private Encryptor encryptor;
         Socket listener;
-        public Local(Config config)
+        public Local(Server config)
         {
             this.config = config;
             //this.encryptor = new Encryptor(config.method, config.password);
@@ -102,7 +102,7 @@ namespace shadowsocks_csharp.Controller
     {
         //public Encryptor encryptor;
         public IEncryptor encryptor;
-        public Config config;
+        public Server config;
         // Client  socket.
         public Socket remote;
         public Socket connection;

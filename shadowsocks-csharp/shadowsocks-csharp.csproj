@@ -60,7 +60,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>bin\x86\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;SIMPLE_JSON_NO_LINQ_EXPRESSION</DefineConstants>
+    <DefineConstants>TRACE;DEBUG</DefineConstants>
     <DebugType>full</DebugType>
     <PlatformTarget>x86</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
@@ -89,7 +89,8 @@
     <Compile Include="Encrypt\TableEncryptor.cs" />
     <Compile Include="Encrypt\IEncryptor.cs" />
     <Compile Include="Controller\PACServer.cs" />
-    <Compile Include="Model\Config.cs" />
+    <Compile Include="Model\Server.cs" />
+    <Compile Include="Model\Configuration.cs" />
     <Compile Include="View\ConfigForm.cs">
       <SubType>Form</SubType>
     </Compile>

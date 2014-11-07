@@ -53,20 +53,20 @@ namespace shadowsocks_csharp.View
 
         private void updateUI()
         {
-            Config config = controller.GetConfig();
+            Server server = controller.GetCurrentServer();
 
-            textBox1.Text = config.server;
-            textBox2.Text = config.server_port.ToString();
-            textBox3.Text = config.password;
-            textBox4.Text = config.local_port.ToString();
-            comboBox1.Text = config.method == null ? "aes-256-cfb" : config.method;
+            textBox1.Text = server.server;
+            textBox2.Text = server.server_port.ToString();
+            textBox3.Text = server.password;
+            textBox4.Text = server.local_port.ToString();
+            comboBox1.Text = server.method == null ? "aes-256-cfb" : server.method;
 
-            enableItem.Checked = config.enabled;
+            enableItem.Checked = controller.GetConfiguration().enabled;
         }
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            if (!controller.GetConfig().isDefault)
+            if (!controller.GetConfiguration().isDefault)
             {
                 this.Opacity = 0;
                 BeginInvoke(new MethodInvoker(delegate
@@ -90,15 +90,18 @@ namespace shadowsocks_csharp.View
         {
             try
             {
-                Config config = new Config
+                Server server = new Server
                 {
                     server = textBox1.Text,
                     server_port = int.Parse(textBox2.Text),
                     password = textBox3.Text,
                     local_port = int.Parse(textBox4.Text),
-                    method = comboBox1.Text,
-                    isDefault = false
+                    method = comboBox1.Text
                 };
+                Configuration config = controller.GetConfiguration();
+                config.configs.Clear();
+                config.configs.Add(server);
+                config.index = 0;
                 controller.SaveConfig(config);
                 this.Hide();
             }

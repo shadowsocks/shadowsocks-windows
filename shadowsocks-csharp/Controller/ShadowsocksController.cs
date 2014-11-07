@@ -14,7 +14,7 @@ namespace shadowsocks_csharp.Controller
 
         private Local local;
         private PACServer pacServer;
-        private Config config;
+        private Configuration config;
         private PolipoRunner polipoRunner;
         private bool stopped = false;
 
@@ -38,10 +38,10 @@ namespace shadowsocks_csharp.Controller
 
         public ShadowsocksController()
         {
-            config = Config.Load();
+            config = Configuration.Load();
             polipoRunner = new PolipoRunner();
-            polipoRunner.Start(config);
-            local = new Local(config);
+            polipoRunner.Start(config.GetCurrentServer());
+            local = new Local(config.GetCurrentServer());
             try
             {
                 local.Start();
@@ -57,16 +57,16 @@ namespace shadowsocks_csharp.Controller
             updateSystemProxy();
         }
 
-        public void SaveConfig(Config newConfig)
+        public void SaveConfig(Configuration newConfig)
         {
-            Config.Save(newConfig);
+            Configuration.Save(newConfig);
             config = newConfig;
 
             local.Stop();
             polipoRunner.Stop();
-            polipoRunner.Start(config);
+            polipoRunner.Start(config.GetCurrentServer());
 
-            local = new Local(config);
+            local = new Local(config.GetCurrentServer());
             local.Start();
 
             if (ConfigChanged != null)
@@ -75,10 +75,16 @@ namespace shadowsocks_csharp.Controller
             }
         }
 
-        public Config GetConfig()
+        public Server GetCurrentServer()
+        {
+            return config.GetCurrentServer();
+        }
+
+        public Configuration GetConfiguration()
         {
             return config;
         }
+
 
         public void ToggleEnable(bool enabled)
         {

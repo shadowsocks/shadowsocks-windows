@@ -13,7 +13,7 @@ namespace shadowsocks_csharp.Controller
     {
         private Process process;
 
-        public void Start(Config config)
+        public void Start(Server config)
         {
             if (process == null)
             {
