@@ -1,13 +1,13 @@
-﻿using shadowsocks_csharp.Controller;
-using shadowsocks_csharp.Properties;
-using shadowsocks_csharp.View;
+﻿using shadowsocks.Controller;
+using shadowsocks.Properties;
+using shadowsocks.View;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
-namespace shadowsocks_csharp
+namespace shadowsocks
 {
     static class Program
     {

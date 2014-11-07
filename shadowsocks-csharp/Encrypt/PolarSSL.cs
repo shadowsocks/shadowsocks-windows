@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace shadowsocks_csharp.Encrypt
+namespace shadowsocks.Encrypt
 {
     public class PolarSSL
     {

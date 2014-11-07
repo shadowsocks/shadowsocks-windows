@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
-namespace shadowsocks_csharp.Model
+namespace shadowsocks.Model
 {
     [Serializable]
     public class Configuration

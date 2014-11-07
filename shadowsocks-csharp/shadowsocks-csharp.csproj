@@ -8,7 +8,7 @@
     <ProjectGuid>{8C02D2F7-7CDB-4D55-9F25-CD03EF4AA062}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>shadowsocks_csharp</RootNamespace>
+    <RootNamespace>shadowsocks</RootNamespace>
     <AssemblyName>Shadowsocks</AssemblyName>
     <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>

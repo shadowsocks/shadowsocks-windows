@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace shadowsocks_csharp.Encrypt
+namespace shadowsocks.Encrypt
 {
     public class TableEncryptor
         : EncryptorBase

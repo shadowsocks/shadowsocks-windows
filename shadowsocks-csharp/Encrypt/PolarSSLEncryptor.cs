@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace shadowsocks_csharp.Encrypt
+namespace shadowsocks.Encrypt
 {
     public class PolarSSLEncryptor
         : EncryptorBase, IDisposable

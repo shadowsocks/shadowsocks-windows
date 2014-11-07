@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace shadowsocks_csharp.Properties {
+namespace shadowsocks.Properties {
     using System;
     
     
@@ -39,7 +39,7 @@ namespace shadowsocks_csharp.Properties {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("shadowsocks_csharp.Properties.Resources", typeof(Resources).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("shadowsocks.Properties.Resources", typeof(Resources).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -71,23 +71,13 @@ namespace shadowsocks_csharp.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to # Sample configuration file for Polipo. -*-sh-*-
+        ///   Looks up a localized string similar to proxyAddress = &quot;127.0.0.1&quot;
         ///
-        ///# You should not need to use a configuration file; all configuration
-        ///# variables have reasonable defaults.  If you want to use one, you
-        ///# can copy this to /etc/polipo/config or to ~/.polipo and modify.
-        ///
-        ///# This file only contains some of the configuration variables; see the
-        ///# list given by ``polipo -v&apos;&apos; and the manual for more.
-        ///
-        ///
-        ///### Basic configuration
-        ///### *******************
-        ///
-        ///# Uncomment one of these if you want to allow remote clients to
-        ///# connect:
-        ///
-        ///# prox [rest of string was truncated]&quot;;.
+        ///socksParentProxy = &quot;127.0.0.1:__SOCKS_PORT__&quot;
+        ///socksProxyType = socks5
+        ///diskCacheRoot = &quot;&quot;
+        ///localDocumentRoot = &quot;&quot;
+        ///.
         /// </summary>
         internal static string polipo_config {
             get {

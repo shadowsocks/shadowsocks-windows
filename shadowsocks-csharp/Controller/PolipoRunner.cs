@@ -1,5 +1,5 @@
-﻿using shadowsocks_csharp.Model;
-using shadowsocks_csharp.Properties;
+﻿using shadowsocks.Model;
+using shadowsocks.Properties;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -7,7 +7,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Text;
 
-namespace shadowsocks_csharp.Controller
+namespace shadowsocks.Controller
 {
     class PolipoRunner
     {

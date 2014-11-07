@@ -1,5 +1,5 @@
 ﻿
-namespace shadowsocks_csharp.Encrypt
+namespace shadowsocks.Encrypt
 {
     public static class EncryptorFactory
     {

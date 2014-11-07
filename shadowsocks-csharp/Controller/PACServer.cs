@@ -1,4 +1,4 @@
-﻿using shadowsocks_csharp.Properties;
+﻿using shadowsocks.Properties;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -8,7 +8,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 
-namespace shadowsocks_csharp.Controller
+namespace shadowsocks.Controller
 {
     class PACServer
     {

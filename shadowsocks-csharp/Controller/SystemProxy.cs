@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace shadowsocks_csharp.Controller
+namespace shadowsocks.Controller
 {
     public class SystemProxy
     {
