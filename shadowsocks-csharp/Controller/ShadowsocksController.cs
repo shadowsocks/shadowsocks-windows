@@ -23,15 +23,8 @@ namespace shadowsocks_csharp.Controller
             public string Path;
         }
 
-        public class ErrorEventArgs : EventArgs
-        {
-            public string Error;
-        }
-
         public event EventHandler ConfigChanged;
         public event EventHandler EnableStatusChanged;
-
-        public event EventHandler<ErrorEventArgs> LocalFailToStart;
         
         // when user clicked Edit PAC, and PAC file has already created
         public event EventHandler<PathEventArgs> PACFileReadyToOpen;

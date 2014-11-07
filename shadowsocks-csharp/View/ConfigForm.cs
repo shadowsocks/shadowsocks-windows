@@ -55,16 +55,16 @@ namespace shadowsocks_csharp.View
         {
             Server server = controller.GetCurrentServer();
 
-            textBox1.Text = server.server;
-            textBox2.Text = server.server_port.ToString();
-            textBox3.Text = server.password;
-            textBox4.Text = server.local_port.ToString();
-            comboBox1.Text = server.method == null ? "aes-256-cfb" : server.method;
+            IPTextBox.Text = server.server;
+            ServerPortTextBox.Text = server.server_port.ToString();
+            PasswordTextBox.Text = server.password;
+            ProxyPortTextBox.Text = server.local_port.ToString();
+            EncryptionSelect.Text = server.method == null ? "aes-256-cfb" : server.method;
 
             enableItem.Checked = controller.GetConfiguration().enabled;
         }
 
-        private void Form1_Load(object sender, EventArgs e)
+        private void CinfigForm_Load(object sender, EventArgs e)
         {
             if (!controller.GetConfiguration().isDefault)
             {
@@ -92,11 +92,11 @@ namespace shadowsocks_csharp.View
             {
                 Server server = new Server
                 {
-                    server = textBox1.Text,
-                    server_port = int.Parse(textBox2.Text),
-                    password = textBox3.Text,
-                    local_port = int.Parse(textBox4.Text),
-                    method = comboBox1.Text
+                    server = IPTextBox.Text,
+                    server_port = int.Parse(ServerPortTextBox.Text),
+                    password = PasswordTextBox.Text,
+                    local_port = int.Parse(ProxyPortTextBox.Text),
+                    method = EncryptionSelect.Text
                 };
                 Configuration config = controller.GetConfiguration();
                 config.configs.Clear();
@@ -115,18 +115,18 @@ namespace shadowsocks_csharp.View
             }
         }
 
-        private void cancelButton_Click(object sender, EventArgs e)
+        private void CancelButton_Click(object sender, EventArgs e)
         {
             this.Hide();
             updateUI();
         }
 
-        private void Form1_FormClosed(object sender, FormClosedEventArgs e)
+        private void ConfigForm_FormClosed(object sender, FormClosedEventArgs e)
         {
             controller.Stop();
         }
 
-        private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
+        private void AboutItem_Click(object sender, EventArgs e)
         {
             Process.Start("https://github.com/clowwindy/shadowsocks-csharp");
         }
@@ -143,7 +143,7 @@ namespace shadowsocks_csharp.View
             controller.ToggleEnable(enableItem.Checked);
         }
 
-        private void editPACFileItem_Click(object sender, EventArgs e)
+        private void EditPACFileItem_Click(object sender, EventArgs e)
         {
             controller.TouchPACFile();
         }
