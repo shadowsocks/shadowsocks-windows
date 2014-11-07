@@ -23,8 +23,15 @@ namespace shadowsocks_csharp.Controller
             public string Path;
         }
 
+        public class ErrorEventArgs : EventArgs
+        {
+            public string Error;
+        }
+
         public event EventHandler ConfigChanged;
         public event EventHandler EnableStatusChanged;
+
+        public event EventHandler<ErrorEventArgs> LocalFailToStart;
         
         // when user clicked Edit PAC, and PAC file has already created
         public event EventHandler<PathEventArgs> PACFileReadyToOpen;
@@ -35,9 +42,16 @@ namespace shadowsocks_csharp.Controller
             polipoRunner = new PolipoRunner();
             polipoRunner.Start(config);
             local = new Local(config);
-            local.Start();
-            pacServer = new PACServer();
-            pacServer.Start();
+            try
+            {
+                local.Start();
+                pacServer = new PACServer();
+                pacServer.Start();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.ToString());
+            }
 
             updateSystemProxy();
         }
@@ -93,6 +107,11 @@ namespace shadowsocks_csharp.Controller
 
         public void TouchPACFile()
         {
+            string pacFilename = pacServer.TouchPACFile();
+            if (PACFileReadyToOpen != null)
+            {
+                PACFileReadyToOpen(this, new PathEventArgs() { Path = pacFilename });
+            }
         }
 
         private void updateSystemProxy()

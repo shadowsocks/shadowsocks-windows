@@ -22,6 +22,7 @@ namespace shadowsocks_csharp.View
             this.controller = controller;
             controller.EnableStatusChanged += controller_EnableStatusChanged;
             controller.ConfigChanged += controller_ConfigChanged;
+            controller.PACFileReadyToOpen += controller_PACFileReadyToOpen;
 
             updateUI();
         }
@@ -35,6 +36,14 @@ namespace shadowsocks_csharp.View
         {
             updateUI();
         }
+
+        void controller_PACFileReadyToOpen(object sender, ShadowsocksController.PathEventArgs e)
+        {
+            string argument = @"/select, " + e.Path;
+
+            System.Diagnostics.Process.Start("explorer.exe", argument);
+        }
+
         
         private void showWindow()
         {
@@ -129,6 +138,11 @@ namespace shadowsocks_csharp.View
         {
             enableItem.Checked = !enableItem.Checked;
             controller.ToggleEnable(enableItem.Checked);
+        }
+
+        private void editPACFileItem_Click(object sender, EventArgs e)
+        {
+            controller.TouchPACFile();
         }
 
     }

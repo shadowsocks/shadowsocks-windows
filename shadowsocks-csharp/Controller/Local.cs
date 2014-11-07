@@ -22,22 +22,29 @@ namespace shadowsocks_csharp.Controller
 
         public void Start()
         {
+            try
+            {
+                // Create a TCP/IP socket.
+                listener = new Socket(AddressFamily.InterNetwork,
+                    SocketType.Stream, ProtocolType.Tcp);
+                IPEndPoint localEndPoint = new IPEndPoint(0, config.local_port);
 
-            // Create a TCP/IP socket.
-            listener = new Socket(AddressFamily.InterNetwork,
-                SocketType.Stream, ProtocolType.Tcp);
-            IPEndPoint localEndPoint = new IPEndPoint(0, config.local_port);
-
-            // Bind the socket to the local endpoint and listen for incoming connections.
-            listener.Bind(localEndPoint);
-            listener.Listen(100);
+                // Bind the socket to the local endpoint and listen for incoming connections.
+                listener.Bind(localEndPoint);
+                listener.Listen(100);
 
 
-            // Start an asynchronous socket to listen for connections.
-            Console.WriteLine("Shadowsocks started");
-            listener.BeginAccept(
-                new AsyncCallback(AcceptCallback),
-                listener);
+                // Start an asynchronous socket to listen for connections.
+                Console.WriteLine("Shadowsocks started");
+                listener.BeginAccept(
+                    new AsyncCallback(AcceptCallback),
+                    listener);
+            }
+            catch(SocketException)
+            {
+                listener.Close();
+                throw;
+            }
 
         }
 

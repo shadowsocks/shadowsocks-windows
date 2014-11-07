@@ -44,7 +44,10 @@ namespace shadowsocks_csharp.Model
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
+                if (!(e is FileNotFoundException))
+                {
+                    Console.WriteLine(e);
+                }
                 return new Config
                 {
                     server = "127.0.0.1",

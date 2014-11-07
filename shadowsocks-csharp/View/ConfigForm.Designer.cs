@@ -52,6 +52,7 @@
             this.aboutItem = new System.Windows.Forms.MenuItem();
             this.menuItem3 = new System.Windows.Forms.MenuItem();
             this.quitItem = new System.Windows.Forms.MenuItem();
+            this.editPACFileItem = new System.Windows.Forms.MenuItem();
             this.tableLayoutPanel1.SuspendLayout();
             this.panel1.SuspendLayout();
             this.SuspendLayout();
@@ -249,6 +250,7 @@
             this.contextMenu1.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
             this.enableItem,
             this.configItem,
+            this.editPACFileItem,
             this.aboutItem,
             this.menuItem3,
             this.quitItem});
@@ -267,20 +269,26 @@
             // 
             // aboutItem
             // 
-            this.aboutItem.Index = 2;
+            this.aboutItem.Index = 3;
             this.aboutItem.Text = "About";
             this.aboutItem.Click += new System.EventHandler(this.aboutToolStripMenuItem_Click);
             // 
             // menuItem3
             // 
-            this.menuItem3.Index = 3;
+            this.menuItem3.Index = 4;
             this.menuItem3.Text = "-";
             // 
             // quitItem
             // 
-            this.quitItem.Index = 4;
+            this.quitItem.Index = 5;
             this.quitItem.Text = "Quit";
             this.quitItem.Click += new System.EventHandler(this.Quit_Click);
+            // 
+            // editPACFileItem
+            // 
+            this.editPACFileItem.Index = 2;
+            this.editPACFileItem.Text = "Edit PAC File...";
+            this.editPACFileItem.Click += new System.EventHandler(this.editPACFileItem_Click);
             // 
             // ConfigForm
             // 
@@ -332,6 +340,7 @@
         private System.Windows.Forms.MenuItem menuItem3;
         private System.Windows.Forms.MenuItem quitItem;
         private System.Windows.Forms.MenuItem configItem;
+        private System.Windows.Forms.MenuItem editPACFileItem;
     }
 }
 

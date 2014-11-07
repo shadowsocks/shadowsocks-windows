@@ -20,13 +20,20 @@ namespace shadowsocks_csharp
         [STAThread]
         static void Main()
         {
+            string tempPath = Path.GetTempPath();
+            string dllPath = tempPath + "/polarssl.dll";
             try
             {
-                string tempPath = Path.GetTempPath();
-                string dllPath = tempPath + "/polarssl.dll";
                 FileManager.UncompressFile(dllPath, Resources.polarssl_dll);
-                LoadLibrary(dllPath);
+            }
+            catch (IOException e)
+            {
+                Console.WriteLine(e.ToString());
+            }
+            LoadLibrary(dllPath);
 
+            try
+            {
                 FileStream fs = new FileStream("shadowsocks.log", FileMode.Append);
                 TextWriter tmp = Console.Out;
                 StreamWriter sw = new StreamWriter(fs);

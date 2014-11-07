@@ -11,6 +11,8 @@ namespace shadowsocks_csharp.Controller
 {
     class PACServer
     {
+        private static string PAC_FILE = "pac.txt";
+
         Socket listener;
         public void Start()
         {
@@ -26,6 +28,19 @@ namespace shadowsocks_csharp.Controller
             listener.BeginAccept(
                 new AsyncCallback(AcceptCallback),
                 listener);
+        }
+
+        public string TouchPACFile()
+        {
+            if (File.Exists(PAC_FILE))
+            {
+                return PAC_FILE;
+            }
+            else
+            {
+                FileManager.UncompressFile(PAC_FILE, Resources.proxy_pac_txt);
+                return PAC_FILE;
+            }
         }
 
 
@@ -51,21 +66,29 @@ namespace shadowsocks_csharp.Controller
         private string getPACContent()
         {
             // TODO try pac.txt in current directory
-            byte[] pacGZ = Resources.proxy_pac_txt;
-
-            byte[] buffer = new byte[1024 * 1024];  // builtin pac gzip size: maximum 1M
-            int n;
-
-            using (GZipStream input = new GZipStream(new MemoryStream(pacGZ),
-                CompressionMode.Decompress, false))
+            
+            if (File.Exists(PAC_FILE))
             {
-                n = input.Read(buffer, 0, buffer.Length);
-                if (n == 0)
-                {
-                    throw new IOException("can not decompress pac");
-                }
-                return System.Text.Encoding.UTF8.GetString(buffer, 0, n);
+                return File.ReadAllText(PAC_FILE, Encoding.UTF8);
             }
+            else
+            {
+                byte[] pacGZ = Resources.proxy_pac_txt;
+                byte[] buffer = new byte[1024 * 1024];  // builtin pac gzip size: maximum 1M
+                int n;
+
+                using (GZipStream input = new GZipStream(new MemoryStream(pacGZ),
+                    CompressionMode.Decompress, false))
+                {
+                    n = input.Read(buffer, 0, buffer.Length);
+                    if (n == 0)
+                    {
+                        throw new IOException("can not decompress pac");
+                    }
+                    return System.Text.Encoding.UTF8.GetString(buffer, 0, n);
+                }
+            }
+
         }
 
         private void receiveCallback(IAsyncResult ar)
