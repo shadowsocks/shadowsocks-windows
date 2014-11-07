@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Text;
 using System.Net.Sockets;
 using System.Net;
-using shadowsocks.Encrypt;
-using shadowsocks.Model;
+using Shadowsocks.Encrypt;
+using Shadowsocks.Model;
 
-namespace shadowsocks.Controller
+namespace Shadowsocks.Controller
 {
 
     class Local

@@ -4,7 +4,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Text;
 
-namespace shadowsocks.Controller
+namespace Shadowsocks.Controller
 {
     public class FileManager
     {

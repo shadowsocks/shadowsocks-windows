@@ -5,7 +5,7 @@ using System.IO;
 using System.Diagnostics;
 using SimpleJson;
 
-namespace shadowsocks.Model
+namespace Shadowsocks.Model
 {
     [Serializable]
     public class Server

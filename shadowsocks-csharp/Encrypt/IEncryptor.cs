@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace shadowsocks.Encrypt
+namespace Shadowsocks.Encrypt
 {
     public interface IEncryptor : IDisposable
     {

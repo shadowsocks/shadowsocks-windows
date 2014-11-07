@@ -1,9 +1,9 @@
-﻿using shadowsocks.Model;
+﻿using Shadowsocks.Model;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace shadowsocks.Controller
+namespace Shadowsocks.Controller
 {
     public class ShadowsocksController
     {
