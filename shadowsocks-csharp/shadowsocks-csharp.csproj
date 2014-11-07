@@ -14,7 +14,7 @@
     <FileAlignment>512</FileAlignment>
     <StartupObject>
     </StartupObject>
-    <ApplicationIcon>Data\icon144.ico</ApplicationIcon>
+    <ApplicationIcon>shadowsocks.ico</ApplicationIcon>
     <IsWebBootstrapper>false</IsWebBootstrapper>
     <FileUpgradeFlags>
     </FileUpgradeFlags>
@@ -132,6 +132,7 @@
     <None Include="Data\proxy.pac.txt.gz" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="shadowsocks.ico" />
     <None Include="Data\polipo_config.txt" />
     <Content Include="Data\icon144.ico" />
   </ItemGroup>
