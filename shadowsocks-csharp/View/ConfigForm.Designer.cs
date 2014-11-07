@@ -53,11 +53,11 @@
             this.aboutItem = new System.Windows.Forms.MenuItem();
             this.menuItem3 = new System.Windows.Forms.MenuItem();
             this.quitItem = new System.Windows.Forms.MenuItem();
-            this.ServersListView = new System.Windows.Forms.ListView();
             this.panel3 = new System.Windows.Forms.Panel();
             this.AddButton = new System.Windows.Forms.Button();
             this.DeleteButton = new System.Windows.Forms.Button();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.ServersListBox = new System.Windows.Forms.ListBox();
             this.tableLayoutPanel1.SuspendLayout();
             this.panel1.SuspendLayout();
             this.panel3.SuspendLayout();
@@ -297,20 +297,12 @@
             this.quitItem.Text = "Quit";
             this.quitItem.Click += new System.EventHandler(this.Quit_Click);
             // 
-            // ServersListView
-            // 
-            this.ServersListView.Location = new System.Drawing.Point(12, 12);
-            this.ServersListView.Name = "ServersListView";
-            this.ServersListView.Size = new System.Drawing.Size(164, 190);
-            this.ServersListView.TabIndex = 2;
-            this.ServersListView.UseCompatibleStateImageBehavior = false;
-            // 
             // panel3
             // 
             this.panel3.AutoSize = true;
             this.panel3.Controls.Add(this.DeleteButton);
             this.panel3.Controls.Add(this.AddButton);
-            this.panel3.Location = new System.Drawing.Point(12, 208);
+            this.panel3.Location = new System.Drawing.Point(12, 207);
             this.panel3.Margin = new System.Windows.Forms.Padding(0);
             this.panel3.Name = "panel3";
             this.panel3.Size = new System.Drawing.Size(164, 30);
@@ -339,10 +331,21 @@
             this.groupBox1.Controls.Add(this.tableLayoutPanel1);
             this.groupBox1.Location = new System.Drawing.Point(182, 12);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(257, 192);
+            this.groupBox1.Size = new System.Drawing.Size(257, 186);
             this.groupBox1.TabIndex = 6;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Server";
+            // 
+            // ServersListBox
+            // 
+            this.ServersListBox.FormattingEnabled = true;
+            this.ServersListBox.Items.AddRange(new object[] {
+            "123.123.23.23",
+            "8.8.8.8"});
+            this.ServersListBox.Location = new System.Drawing.Point(12, 12);
+            this.ServersListBox.Name = "ServersListBox";
+            this.ServersListBox.Size = new System.Drawing.Size(164, 186);
+            this.ServersListBox.TabIndex = 2;
             // 
             // ConfigForm
             // 
@@ -351,8 +354,8 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.AutoSize = true;
             this.ClientSize = new System.Drawing.Size(445, 286);
+            this.Controls.Add(this.ServersListBox);
             this.Controls.Add(this.groupBox1);
-            this.Controls.Add(this.ServersListView);
             this.Controls.Add(this.panel1);
             this.Controls.Add(this.panel3);
             this.Controls.Add(this.panel2);
@@ -400,11 +403,11 @@
         private System.Windows.Forms.MenuItem quitItem;
         private System.Windows.Forms.MenuItem configItem;
         private System.Windows.Forms.MenuItem editPACFileItem;
-        private System.Windows.Forms.ListView ServersListView;
         private System.Windows.Forms.Panel panel3;
         private System.Windows.Forms.Button DeleteButton;
         private System.Windows.Forms.Button AddButton;
         private System.Windows.Forms.GroupBox groupBox1;
+        private System.Windows.Forms.ListBox ServersListBox;
     }
 }
 
