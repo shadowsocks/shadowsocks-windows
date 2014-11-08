@@ -33,20 +33,25 @@
             // 
             // QRCodeWebBrowser
             // 
-            this.QRCodeWebBrowser.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.QRCodeWebBrowser.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.QRCodeWebBrowser.Location = new System.Drawing.Point(0, 0);
+            this.QRCodeWebBrowser.Margin = new System.Windows.Forms.Padding(0);
             this.QRCodeWebBrowser.MinimumSize = new System.Drawing.Size(20, 20);
             this.QRCodeWebBrowser.Name = "QRCodeWebBrowser";
             this.QRCodeWebBrowser.ScriptErrorsSuppressed = true;
             this.QRCodeWebBrowser.ScrollBarsEnabled = false;
-            this.QRCodeWebBrowser.Size = new System.Drawing.Size(184, 182);
+            this.QRCodeWebBrowser.Size = new System.Drawing.Size(200, 200);
             this.QRCodeWebBrowser.TabIndex = 0;
             // 
             // QRCodeForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(184, 182);
+            this.AutoSize = true;
+            this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.ClientSize = new System.Drawing.Size(204, 202);
             this.Controls.Add(this.QRCodeWebBrowser);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.MaximizeBox = false;
