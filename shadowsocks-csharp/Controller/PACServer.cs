@@ -29,10 +29,11 @@ namespace Shadowsocks.Controller
             // Bind the socket to the local endpoint and listen for incoming connections.
             listener.Bind(localEndPoint);
             listener.Listen(100);
-
             listener.BeginAccept(
                 new AsyncCallback(AcceptCallback),
                 listener);
+
+            watchPACFile();
         }
 
         public string TouchPACFile()
@@ -70,11 +71,8 @@ namespace Shadowsocks.Controller
 
         private string getPACContent()
         {
-            // TODO try pac.txt in current directory
-            
             if (File.Exists(PAC_FILE))
             {
-                watchPACFile();
                 return File.ReadAllText(PAC_FILE, Encoding.UTF8);
             }
             else
@@ -94,7 +92,7 @@ namespace Shadowsocks.Controller
                     return System.Text.Encoding.UTF8.GetString(buffer, 0, n);
                 }
             }
-
+            watchPACFile();
         }
 
         private void receiveCallback(IAsyncResult ar)
