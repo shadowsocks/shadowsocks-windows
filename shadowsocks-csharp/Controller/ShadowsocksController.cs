@@ -34,6 +34,7 @@ namespace Shadowsocks.Controller
         public ShadowsocksController()
         {
             _config = Configuration.Load();
+            openOnLan = _config.openOnLan;
             polipoRunner = new PolipoRunner();
             polipoRunner.Start(_config);
             local = new Local(_config);
