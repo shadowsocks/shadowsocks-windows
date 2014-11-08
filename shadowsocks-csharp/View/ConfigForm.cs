@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Forms;
 using System.Diagnostics;
@@ -15,9 +16,10 @@ namespace Shadowsocks.View
         private ShadowsocksController controller;
 
         // this is a copy of configuration that we are working on
-        private Configuration modifiedConfiguration;
-        private int oldSelectedIndex = -1;
-        private bool isFirstRun;
+        private Configuration _modifiedConfiguration;
+        private int _oldSelectedIndex = -1;
+        private bool _isFirstRun;
+        private bool _lockStatus;
 
         public ConfigForm(ShadowsocksController controller)
         {
@@ -29,12 +31,12 @@ namespace Shadowsocks.View
             controller.ConfigChanged += controller_ConfigChanged;
             controller.PACFileReadyToOpen += controller_PACFileReadyToOpen;
 
-            loadCurrentConfiguration();
+            LoadCurrentConfiguration();
         }
 
         private void controller_ConfigChanged(object sender, EventArgs e)
         {
-            loadCurrentConfiguration();
+            LoadCurrentConfiguration();
         }
 
         private void controller_EnableStatusChanged(object sender, EventArgs e)
@@ -50,18 +52,31 @@ namespace Shadowsocks.View
         }
 
         
-        private void showWindow()
+        private void ShowWindow()
         {
             this.Opacity = 1;
             this.Show();
             IPTextBox.Focus();
+            if (_lockStatus)
+            {
+                IPTextBox.Enabled = false;
+                ServerPortTextBox.Enabled = false;
+                PasswordTextBox.Enabled = false;
+                EncryptionSelect.Enabled = false;
+                ProxyPortTextBox.Enabled = false;
+                RemarksTextBox.Enabled = false;
+                AddButton.Enabled = false;
+                DeleteButton.Enabled = false;
+                _lockStatus = true;
+                LockButton.Text = "&Unlock Settings";
+            }
         }
 
-        private bool saveOldSelectedServer()
+        private bool SaveOldSelectedServer()
         {
             try
             {
-                if (oldSelectedIndex == -1 || oldSelectedIndex >= modifiedConfiguration.configs.Count)
+                if (_oldSelectedIndex == -1 || _oldSelectedIndex >= _modifiedConfiguration.configs.Count)
                 {
                     return true;
                 }
@@ -75,7 +90,7 @@ namespace Shadowsocks.View
                     remarks = RemarksTextBox.Text
                 };
                 Configuration.CheckServer(server);
-                modifiedConfiguration.configs[oldSelectedIndex] = server;
+                _modifiedConfiguration.configs[_oldSelectedIndex] = server;
                 return true;
             }
             catch (FormatException)
@@ -89,17 +104,17 @@ namespace Shadowsocks.View
             return false;
         }
 
-        private void loadSelectedServer()
+        private void LoadSelectedServer()
         {
-            if (ServersListBox.SelectedIndex >= 0 && ServersListBox.SelectedIndex < modifiedConfiguration.configs.Count)
+            if (ServersListBox.SelectedIndex >= 0 && ServersListBox.SelectedIndex < _modifiedConfiguration.configs.Count)
             {
-                Server server = modifiedConfiguration.configs[ServersListBox.SelectedIndex];
+                Server server = _modifiedConfiguration.configs[ServersListBox.SelectedIndex];
 
                 IPTextBox.Text = server.server;
                 ServerPortTextBox.Text = server.server_port.ToString();
                 PasswordTextBox.Text = server.password;
                 ProxyPortTextBox.Text = server.local_port.ToString();
-                EncryptionSelect.Text = server.method == null ? "aes-256-cfb" : server.method;
+                EncryptionSelect.Text = server.method ?? "aes-256-cfb";
                 RemarksTextBox.Text = server.remarks;
                 ServerGroupBox.Visible = true;
                 IPTextBox.Focus();
@@ -110,28 +125,29 @@ namespace Shadowsocks.View
             }
         }
 
-        private void loadConfiguration(Configuration configuration)
+        private void LoadConfiguration(Configuration configuration)
         {
             ServersListBox.Items.Clear();
-            foreach (Server server in modifiedConfiguration.configs)
+            foreach (Server server in _modifiedConfiguration.configs)
             {
                 ServersListBox.Items.Add(string.IsNullOrEmpty(server.server) ? "New server" : string.IsNullOrEmpty(server.remarks)? server.server + ":" + server.server_port : server.server + ":" + server.server_port + " (" + server.remarks + ")");
             }
         }
 
-        private void loadCurrentConfiguration()
+        private void LoadCurrentConfiguration()
         {
-            modifiedConfiguration = controller.GetConfiguration();
-            loadConfiguration(modifiedConfiguration);
-            oldSelectedIndex = modifiedConfiguration.index;
-            ServersListBox.SelectedIndex = modifiedConfiguration.index;
-            loadSelectedServer();
+            _modifiedConfiguration = controller.GetConfiguration();
+            LoadConfiguration(_modifiedConfiguration);
+            _oldSelectedIndex = _modifiedConfiguration.index;
+            _lockStatus = _modifiedConfiguration.lockStatus;
+            ServersListBox.SelectedIndex = _modifiedConfiguration.index;
+            LoadSelectedServer();
 
-            updateServersMenu();
-            enableItem.Checked = modifiedConfiguration.enabled;
+            UpdateServersMenu();
+            enableItem.Checked = _modifiedConfiguration.enabled;
         }
 
-        private void updateServersMenu()
+        private void UpdateServersMenu()
         {
             var items = ServersItem.MenuItems;
 
@@ -157,71 +173,68 @@ namespace Shadowsocks.View
 
         private void ConfigForm_Load(object sender, EventArgs e)
         {
-            if (!controller.GetConfiguration().isDefault)
+            if (controller == null || controller.GetConfiguration().isDefault)
             {
-                this.Opacity = 0;
-                BeginInvoke(new MethodInvoker(delegate
-                {
-                    this.Hide();
-                }));
+                _isFirstRun = true;
             }
             else
             {
-                isFirstRun = true;
+                this.Opacity = 0;
+                BeginInvoke(new MethodInvoker(delegate { this.Hide(); }));
             }
         }
 
         private void ServersListBox_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (oldSelectedIndex == ServersListBox.SelectedIndex)
+            if (_oldSelectedIndex == ServersListBox.SelectedIndex)
             {
                 // we are moving back to oldSelectedIndex or doing a force move
                 return;
             }
-            if (!saveOldSelectedServer())
+            if (!SaveOldSelectedServer())
             {
                 // why this won't cause stack overflow?
-                ServersListBox.SelectedIndex = oldSelectedIndex;
+                ServersListBox.SelectedIndex = _oldSelectedIndex;
                 return;
             }
-            loadSelectedServer();
-            oldSelectedIndex = ServersListBox.SelectedIndex;
+            LoadSelectedServer();
+            _oldSelectedIndex = ServersListBox.SelectedIndex;
         }
 
         private void AddButton_Click(object sender, EventArgs e)
         {
-            if (!saveOldSelectedServer())
+            if (!SaveOldSelectedServer())
             {
                 return;
             }
             Server server = Configuration.GetDefaultServer();
-            modifiedConfiguration.configs.Add(server);
-            loadConfiguration(modifiedConfiguration);
-            ServersListBox.SelectedIndex = modifiedConfiguration.configs.Count - 1;
-            oldSelectedIndex = ServersListBox.SelectedIndex;
+            _modifiedConfiguration.configs.Add(server);
+            LoadConfiguration(_modifiedConfiguration);
+            ServersListBox.SelectedIndex = _modifiedConfiguration.configs.Count - 1;
+            _oldSelectedIndex = ServersListBox.SelectedIndex;
         }
 
         private void DeleteButton_Click(object sender, EventArgs e)
         {
-            oldSelectedIndex = ServersListBox.SelectedIndex;
-            if (oldSelectedIndex >= 0 && oldSelectedIndex < modifiedConfiguration.configs.Count)
+            _oldSelectedIndex = ServersListBox.SelectedIndex;
+            if (_oldSelectedIndex >= 0 && _oldSelectedIndex < _modifiedConfiguration.configs.Count)
             {
-                modifiedConfiguration.configs.RemoveAt(oldSelectedIndex);
+                _modifiedConfiguration.configs.RemoveAt(_oldSelectedIndex);
             }
-            if (oldSelectedIndex >= modifiedConfiguration.configs.Count)
+            if (_oldSelectedIndex >= _modifiedConfiguration.configs.Count)
             {
                 // can be -1
-                oldSelectedIndex = modifiedConfiguration.configs.Count - 1;
+                _oldSelectedIndex = _modifiedConfiguration.configs.Count - 1;
             }
-            ServersListBox.SelectedIndex = oldSelectedIndex;
-            loadConfiguration(modifiedConfiguration);
-            ServersListBox.SelectedIndex = oldSelectedIndex;
-            loadSelectedServer();
+            ServersListBox.SelectedIndex = _oldSelectedIndex;
+            LoadConfiguration(_modifiedConfiguration);
+            ServersListBox.SelectedIndex = _oldSelectedIndex;
+            LoadSelectedServer();
         }
 
         private void Config_Click(object sender, EventArgs e)
         {
-            showWindow();
+            ShowWindow();
         }
 
         private void Quit_Click(object sender, EventArgs e)
@@ -229,38 +242,39 @@ namespace Shadowsocks.View
             this.Close();
         }
 
-        private void showFirstTimeBalloon()
+        private void ShowFirstTimeBalloon()
         {
-            if (isFirstRun)
+            if (_isFirstRun)
             {
                 notifyIcon1.BalloonTipTitle = "Shadowsocks is here";
                 notifyIcon1.BalloonTipText = "You can turn on/off Shadowsocks in the context menu";
                 notifyIcon1.ShowBalloonTip(0);
-                isFirstRun = false;
+                _isFirstRun = false;
             }
         }
 
         private void OKButton_Click(object sender, EventArgs e)
         {
-            if (!saveOldSelectedServer())
+            if (!SaveOldSelectedServer())
             {
                 return;
             }
-            if (modifiedConfiguration.configs.Count == 0)
+            if (_modifiedConfiguration.configs.Count == 0)
             {
                 MessageBox.Show("Please add at least one server");
                 return;
             }
-            controller.SaveConfig(modifiedConfiguration);
+            _modifiedConfiguration.lockStatus = _lockStatus;
+            controller.SaveConfig(_modifiedConfiguration);
             this.Hide();
-            showFirstTimeBalloon();
+            ShowFirstTimeBalloon();
         }
 
         private void CancelButton_Click(object sender, EventArgs e)
         {
             this.Hide();
-            loadCurrentConfiguration();
-            showFirstTimeBalloon();
+            LoadCurrentConfiguration();
+            ShowFirstTimeBalloon();
         }
 
         private void ConfigForm_FormClosed(object sender, FormClosedEventArgs e)
@@ -275,7 +289,7 @@ namespace Shadowsocks.View
 
         private void notifyIcon1_DoubleClick(object sender, EventArgs e)
         {
-            showWindow();
+            ShowWindow();
         }
 
 
@@ -306,6 +320,32 @@ namespace Shadowsocks.View
         private void QRCodeItem_Click(object sender, EventArgs e)
         {
             new QRCodeForm(controller.GetQRCodeForCurrentServer()).Show();
+        }
+
+        private void ChangeLockStatus(bool lockStatus)
+        {
+            IPTextBox.Enabled = lockStatus;
+            ServerPortTextBox.Enabled = lockStatus;
+            PasswordTextBox.Enabled = lockStatus;
+            EncryptionSelect.Enabled = lockStatus;
+            ProxyPortTextBox.Enabled = lockStatus;
+            RemarksTextBox.Enabled = lockStatus;
+            AddButton.Enabled = lockStatus;
+            DeleteButton.Enabled = lockStatus;
+            _lockStatus = !lockStatus;
+            if (lockStatus)
+            {
+                LockButton.Text = "&Lock";
+            }
+            else
+            {
+                LockButton.Text = "&Unlock";
+            }
+        }
+
+        private void LockButton_Click(object sender, EventArgs e)
+        {
+            ChangeLockStatus(_lockStatus);
         }
     }
 }
