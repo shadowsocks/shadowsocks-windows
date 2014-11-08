@@ -110,7 +110,7 @@ namespace Shadowsocks.View
             ServersListBox.Items.Clear();
             foreach (Server server in modifiedConfiguration.configs)
             {
-                ServersListBox.Items.Add(string.IsNullOrEmpty(server.server) ? "New server" : server.server);
+                ServersListBox.Items.Add(string.IsNullOrEmpty(server.server) ? "New server" : server.server + ":" + server.server_port);
             }
         }
 
@@ -122,7 +122,32 @@ namespace Shadowsocks.View
             ServersListBox.SelectedIndex = modifiedConfiguration.index;
             loadSelectedServer();
 
+            updateServersMenu();
             enableItem.Checked = modifiedConfiguration.enabled;
+        }
+
+        private void updateServersMenu()
+        {
+            var items = ServersItem.MenuItems;
+
+            items.Clear();
+
+            Configuration configuration = controller.GetConfiguration();
+            for (int i = 0; i < configuration.configs.Count; i++)
+            {
+                Server server = configuration.configs[i];
+                MenuItem item = new MenuItem(server.server + ":" + server.server_port);
+                item.Tag = i;
+                item.Click += AServerItem_Click;
+                items.Add(item);
+            }
+            items.Add(SeperatorItem);
+            items.Add(ConfigItem);
+
+            if (configuration.index >= 0 && configuration.index < configuration.configs.Count)
+            {
+                items[configuration.index].Checked = true;
+            }
         }
 
         private void ConfigForm_Load(object sender, EventArgs e)
@@ -243,5 +268,12 @@ namespace Shadowsocks.View
             controller.TouchPACFile();
         }
 
+        private void AServerItem_Click(object sender, EventArgs e)
+        {
+            MenuItem item = (MenuItem)sender;
+            Configuration configuration = controller.GetConfiguration();
+            configuration.index = (int)item.Tag;
+            controller.SaveConfig(configuration);
+        }
     }
 }

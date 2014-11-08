@@ -48,7 +48,10 @@
             this.panel1 = new System.Windows.Forms.Panel();
             this.contextMenu1 = new System.Windows.Forms.ContextMenu();
             this.enableItem = new System.Windows.Forms.MenuItem();
-            this.configItem = new System.Windows.Forms.MenuItem();
+            this.ServersItem = new System.Windows.Forms.MenuItem();
+            this.SeperatorItem = new System.Windows.Forms.MenuItem();
+            this.ConfigItem = new System.Windows.Forms.MenuItem();
+            this.menuItem4 = new System.Windows.Forms.MenuItem();
             this.editPACFileItem = new System.Windows.Forms.MenuItem();
             this.aboutItem = new System.Windows.Forms.MenuItem();
             this.menuItem3 = new System.Windows.Forms.MenuItem();
@@ -256,7 +259,8 @@
             // 
             this.contextMenu1.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
             this.enableItem,
-            this.configItem,
+            this.ServersItem,
+            this.menuItem4,
             this.editPACFileItem,
             this.aboutItem,
             this.menuItem3,
@@ -265,36 +269,54 @@
             // enableItem
             // 
             this.enableItem.Index = 0;
-            this.enableItem.Text = "Enable";
+            this.enableItem.Text = "&Enable";
             this.enableItem.Click += new System.EventHandler(this.EnableItem_Click);
             // 
-            // configItem
+            // ServersItem
             // 
-            this.configItem.Index = 1;
-            this.configItem.Text = "Options...";
-            this.configItem.Click += new System.EventHandler(this.Config_Click);
+            this.ServersItem.Index = 1;
+            this.ServersItem.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
+            this.SeperatorItem,
+            this.ConfigItem});
+            this.ServersItem.Text = "&Servers";
+            // 
+            // SeperatorItem
+            // 
+            this.SeperatorItem.Index = 0;
+            this.SeperatorItem.Text = "-";
+            // 
+            // ConfigItem
+            // 
+            this.ConfigItem.Index = 1;
+            this.ConfigItem.Text = "Edit Servers...";
+            this.ConfigItem.Click += new System.EventHandler(this.Config_Click);
+            // 
+            // menuItem4
+            // 
+            this.menuItem4.Index = 2;
+            this.menuItem4.Text = "-";
             // 
             // editPACFileItem
             // 
-            this.editPACFileItem.Index = 2;
-            this.editPACFileItem.Text = "Edit PAC File...";
+            this.editPACFileItem.Index = 3;
+            this.editPACFileItem.Text = "Edit &PAC File...";
             this.editPACFileItem.Click += new System.EventHandler(this.EditPACFileItem_Click);
             // 
             // aboutItem
             // 
-            this.aboutItem.Index = 3;
-            this.aboutItem.Text = "About";
+            this.aboutItem.Index = 4;
+            this.aboutItem.Text = "About...";
             this.aboutItem.Click += new System.EventHandler(this.AboutItem_Click);
             // 
             // menuItem3
             // 
-            this.menuItem3.Index = 4;
+            this.menuItem3.Index = 5;
             this.menuItem3.Text = "-";
             // 
             // quitItem
             // 
-            this.quitItem.Index = 5;
-            this.quitItem.Text = "Quit";
+            this.quitItem.Index = 6;
+            this.quitItem.Text = "&Quit";
             this.quitItem.Click += new System.EventHandler(this.Quit_Click);
             // 
             // panel3
@@ -401,13 +423,16 @@
         private System.Windows.Forms.MenuItem aboutItem;
         private System.Windows.Forms.MenuItem menuItem3;
         private System.Windows.Forms.MenuItem quitItem;
-        private System.Windows.Forms.MenuItem configItem;
+        private System.Windows.Forms.MenuItem ConfigItem;
         private System.Windows.Forms.MenuItem editPACFileItem;
         private System.Windows.Forms.Panel panel3;
         private System.Windows.Forms.Button DeleteButton;
         private System.Windows.Forms.Button AddButton;
         private System.Windows.Forms.GroupBox ServerGroupBox;
         private System.Windows.Forms.ListBox ServersListBox;
+        private System.Windows.Forms.MenuItem ServersItem;
+        private System.Windows.Forms.MenuItem SeperatorItem;
+        private System.Windows.Forms.MenuItem menuItem4;
     }
 }
 
