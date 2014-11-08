@@ -16,6 +16,10 @@ Shadowsocks for Windows
 
 Download [latest release].
 
+For Windows 7 and older, please download Shadowsocks-win-x.x.x.zip.
+
+For Windows 8.1 and newer, please download Shadowsocks-win-dotnet4.0-x.x.x.zip.
+
 ### Usage
 
 1. Find Shadowsocks icon in notification tray
@@ -25,8 +29,8 @@ Download [latest release].
 about the change automatically
 5. Please disable other proxy addons in your browser, or set them to use
 system proxy
-6. You may need to install VC 2008 Runtime and .Net 2.0 if Shadowsocks failed to
-start
+6. You may need to install VC 2008 Runtime and .Net framework if Shadowsocks
+failed to start
 
 ### License
 
