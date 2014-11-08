@@ -73,9 +73,10 @@ namespace Shadowsocks.Controller
             return config.GetCurrentServer();
         }
 
+        // always return copy
         public Configuration GetConfiguration()
         {
-            return config;
+            return Configuration.Load();
         }
 
 

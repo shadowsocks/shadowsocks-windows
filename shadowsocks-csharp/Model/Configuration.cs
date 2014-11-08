@@ -27,7 +27,7 @@ namespace Shadowsocks.Model
             }
             else
             {
-                return getDefaultServer();
+                return GetDefaultServer();
             }
         }
 
@@ -59,7 +59,7 @@ namespace Shadowsocks.Model
                     index = 0,
                     configs = new List<Server>()
                     {
-                        getDefaultServer()
+                        GetDefaultServer()
                     }
                 };
             }
@@ -83,7 +83,7 @@ namespace Shadowsocks.Model
             }
         }
 
-        private static Server getDefaultServer()
+        public static Server GetDefaultServer()
         {
             return new Server()
             {

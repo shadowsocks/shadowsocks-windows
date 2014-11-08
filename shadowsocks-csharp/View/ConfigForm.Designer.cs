@@ -316,6 +316,7 @@
             this.DeleteButton.TabIndex = 4;
             this.DeleteButton.Text = "&Delete";
             this.DeleteButton.UseVisualStyleBackColor = true;
+            this.DeleteButton.Click += new System.EventHandler(this.DeleteButton_Click);
             // 
             // AddButton
             // 
@@ -325,6 +326,7 @@
             this.AddButton.TabIndex = 3;
             this.AddButton.Text = "&Add";
             this.AddButton.UseVisualStyleBackColor = true;
+            this.AddButton.Click += new System.EventHandler(this.AddButton_Click);
             // 
             // groupBox1
             // 

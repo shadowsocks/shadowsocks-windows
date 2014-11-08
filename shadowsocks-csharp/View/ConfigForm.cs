@@ -97,17 +97,22 @@ namespace Shadowsocks.View
             EncryptionSelect.Text = server.method == null ? "aes-256-cfb" : server.method;
         }
 
-        private void loadCurrentConfiguration()
+        private void loadConfiguration(Configuration configuration)
         {
-            modifiedConfiguration = controller.GetConfiguration();
-            
             ServersListBox.Items.Clear();
             foreach (Server server in modifiedConfiguration.configs)
             {
-                ServersListBox.Items.Add(server.server);
+                ServersListBox.Items.Add(string.IsNullOrEmpty(server.server) ? "New server" : server.server);
             }
+        }
+
+        private void loadCurrentConfiguration()
+        {
+            modifiedConfiguration = controller.GetConfiguration();
+            loadConfiguration(modifiedConfiguration);
+            oldSelectedIndex = modifiedConfiguration.index;
             ServersListBox.SelectedIndex = modifiedConfiguration.index;
-            oldSelectedIndex = ServersListBox.SelectedIndex;
+            loadSelectedServer();
 
             enableItem.Checked = modifiedConfiguration.enabled;
         }
@@ -128,7 +133,7 @@ namespace Shadowsocks.View
         {
             if (oldSelectedIndex == ServersListBox.SelectedIndex)
             {
-                // we are moving back to oldSelectedIndex
+                // we are moving back to oldSelectedIndex or doing a force move
                 return;
             }
             if (!saveOldSelectedServer())
@@ -139,6 +144,24 @@ namespace Shadowsocks.View
             }
             loadSelectedServer();
             oldSelectedIndex = ServersListBox.SelectedIndex;
+        }
+
+        private void AddButton_Click(object sender, EventArgs e)
+        {
+            if (!saveOldSelectedServer())
+            {
+                return;
+            }
+            Server server = Configuration.GetDefaultServer();
+            modifiedConfiguration.configs.Add(server);
+            loadConfiguration(modifiedConfiguration);
+            ServersListBox.SelectedIndex = modifiedConfiguration.configs.Count - 1;
+            oldSelectedIndex = ServersListBox.SelectedIndex;
+        }
+
+        private void DeleteButton_Click(object sender, EventArgs e)
+        {
+
         }
 
         private void Config_Click(object sender, EventArgs e)
