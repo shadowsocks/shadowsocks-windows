@@ -305,7 +305,9 @@ namespace Shadowsocks.View
 
         private void QRCodeItem_Click(object sender, EventArgs e)
         {
-            new QRCodeForm(controller.GetQRCodeForCurrentServer()).Show();
+            QRCodeForm qrCodeForm = new QRCodeForm(controller.GetQRCodeForCurrentServer());
+            qrCodeForm.Icon = this.Icon;
+            qrCodeForm.Show();
         }
     }
 }
