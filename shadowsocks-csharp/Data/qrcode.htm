@@ -1,28 +1,37 @@
 <!doctype html>
-<script src="jquery.min.js">
-</script>
-<script src="qrcode.min.js">
+<html>
+<head>
+<script>
+  __QRCODELIB__
 </script>
 <style>
-    body {
-        padding: 10px;
-        margin: 0;
+    html, body, table, div {
+        padding: 0px;
+        margin: 0 !important;
     }
+	div#qrcode {
+        margin: 10px !important;
+	}
     #qrcode {
         width:300px;
         height:300px;
     }
 </style>
-<div id="qrcode"></div>
+</head>
+<body>
+<div id="qrcode" name="qrcode"></div>
 <script type="text/javascript">
     function genCode(code) {
         new QRCode("qrcode", {
                    text: code,
-                   width: 300,
-                   height: 300,
+                   width: 200,
+                   height: 200,
                    colorDark : "#000000",
                    colorLight : "#ffffff",
                    correctLevel : QRCode.CorrectLevel.H
                    });
     }
+    genCode("__SSURL__");
 </script>
+</body>
+</html>

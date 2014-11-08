@@ -116,6 +116,14 @@ namespace Shadowsocks.Controller
             }
         }
 
+        public string GetQRCodeForCurrentServer()
+        {
+            Server server = GetCurrentServer();
+            string parts = server.method + ":" + server.password + "@" + server.server + ":" + server.server_port;
+            string base64 = System.Convert.ToBase64String(Encoding.UTF8.GetBytes(parts));
+            return "ss://" + base64;
+        }
+
         private void updateSystemProxy()
         {
             if (config.enabled)

@@ -302,5 +302,10 @@ namespace Shadowsocks.View
         {
             IPTextBox.Focus();
         }
+
+        private void QRCodeItem_Click(object sender, EventArgs e)
+        {
+            new QRCodeForm(controller.GetQRCodeForCurrentServer()).Show();
+        }
     }
 }
