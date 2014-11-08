@@ -373,5 +373,10 @@ namespace Shadowsocks.View
             qrCodeForm.Icon = this.Icon;
             qrCodeForm.Show();
         }
+
+        private void enableLogBox_CheckedChanged(object sender, EventArgs e)
+        {
+            MessageBox.Show("This option only works on next startup.");
+        }
     }
 }
