@@ -65,6 +65,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="3rd\QRCodeCS.cs" />
     <Compile Include="3rd\SimpleJson.cs" />
     <Compile Include="Controller\FileManager.cs" />
     <Compile Include="Encrypt\EncryptorBase.cs" />
