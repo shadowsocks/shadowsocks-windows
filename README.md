@@ -10,6 +10,10 @@ Shadowsocks for Windows
 5. QRCode generation
 6. Only a single exe file of 200KB size
 
+### Download
+
+Download [latest release].
+
 ### Usage
 
 1. Find Shadowsocks icon in notification tray
@@ -21,3 +25,5 @@ system proxy
 5. You may need to install VC runtime and .Net 2.0 if Shadowsocks failed to
 start
 
+
+[latest release]: https://sourceforge.net/projects/shadowsocksgui/files/dist/
