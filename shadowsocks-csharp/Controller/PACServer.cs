@@ -60,7 +60,7 @@ namespace Shadowsocks.Controller
                     listener);
                 Socket conn = listener.EndAccept(ar);
 
-                conn.BeginReceive(new byte[1024], 0, 256, 0,
+                conn.BeginReceive(new byte[1024], 0, 1024, 0,
                     new AsyncCallback(receiveCallback), conn);
             }
             catch (Exception e)
@@ -104,7 +104,7 @@ namespace Shadowsocks.Controller
 
                 string pac = getPACContent();
 
-                string proxy = "PROXY 127.0.0.1:8123; DIRECT;";
+                string proxy = "PROXY 127.0.0.1:8123;";
 
                 pac = pac.Replace("__PROXY__", proxy);
 
