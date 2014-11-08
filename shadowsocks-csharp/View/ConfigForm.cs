@@ -352,7 +352,10 @@ namespace Shadowsocks.View
 
         private void enableLogBox_CheckedChanged(object sender, EventArgs e)
         {
-            MessageBox.Show("This option only works on next startup.");
+            if (this.Visible)
+            {
+                MessageBox.Show("This option only works on next startup.");
+            }
         }
     }
 }
