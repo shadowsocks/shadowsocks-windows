@@ -104,54 +104,5 @@ namespace Shadowsocks.Properties {
                 return ((byte[])(obj));
             }
         }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to &lt;!doctype html&gt;
-        ///&lt;html&gt;
-        ///&lt;head&gt;
-        ///&lt;script&gt;
-        ///  __QRCODELIB__
-        ///&lt;/script&gt;
-        ///&lt;style&gt;
-        ///    html, body, table, div {
-        ///        padding: 0px;
-        ///        margin: 0 !important;
-        ///    }
-        ///	div#qrcode {
-        ///        margin: 5px !important;
-        ///		text-align: center;
-        ///		vertical-align: center;
-        ///	}
-        ///    #qrcode {
-        ///        width:190px;
-        ///        height:190px;
-        ///    }
-        ///	table {
-        ///		width: 100%;
-        ///		height:100%;
-        ///	}
-        ///&lt;/style&gt;
-        ///&lt;/head&gt;
-        ///&lt;body&gt;
-        ///&lt;div id=&quot;qrcode&quot; name=&quot;qrcode&quot;&gt;&lt;/div&gt;
-        ///&lt;script type=&quot;text/javascript&quot;&gt;
-        ///    function genCode(code) {
-        ///        new QRCode(&quot;qrcode&quot; [rest of string was truncated]&quot;;.
-        /// </summary>
-        internal static string qrcode {
-            get {
-                return ResourceManager.GetString("qrcode", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Byte[].
-        /// </summary>
-        internal static byte[] qrcode_min_js {
-            get {
-                object obj = ResourceManager.GetObject("qrcode_min_js", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
     }
 }

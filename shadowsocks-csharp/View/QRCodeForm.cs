@@ -25,7 +25,7 @@ namespace Shadowsocks.View
         private void GenQR(string ssconfig)
         {
             string qrText = ssconfig;
-            QRCode4CS.QRCode qrCoded = new QRCode4CS.QRCode(6, QRErrorCorrectLevel.M);
+            QRCode4CS.QRCode qrCoded = new QRCode4CS.QRCode(6, QRErrorCorrectLevel.H);
             qrCoded.AddData(qrText);
             qrCoded.Make();
             int blockSize = 5;
@@ -62,32 +62,8 @@ namespace Shadowsocks.View
             pictureBox1.Image = drawArea;
         }
 
-        private string QRCodeHTML(string ssURL)
-        {
-            string html = Resources.qrcode;
-            string qrcodeLib;
-
-            byte[] qrcodeGZ = Resources.qrcode_min_js;
-            byte[] buffer = new byte[1024 * 1024];  // builtin pac gzip size: maximum 1M
-            int n;
-
-            using (GZipStream input = new GZipStream(new MemoryStream(qrcodeGZ),
-                CompressionMode.Decompress, false))
-            {
-                n = input.Read(buffer, 0, buffer.Length);
-                if (n == 0)
-                {
-                    throw new IOException("can not decompress qrcode lib");
-                }
-                qrcodeLib = System.Text.Encoding.UTF8.GetString(buffer, 0, n);
-            }
-            string result = html.Replace("__QRCODELIB__", qrcodeLib);
-            return result.Replace("__SSURL__", ssURL);
-        }
-
         private void QRCodeForm_Load(object sender, EventArgs e)
         {
-            //QRCodeWebBrowser.DocumentText = QRCodeHTML(code);
             GenQR(code);
         }
     }
