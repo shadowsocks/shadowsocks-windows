@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Express 2012 for Windows Desktop
+# Visual Studio 2012
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "shadowsocks-csharp", "shadowsocks-csharp\shadowsocks-csharp.csproj", "{8C02D2F7-7CDB-4D55-9F25-CD03EF4AA062}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "test", "test\test.csproj", "{45913187-0685-4903-B250-DCEF0479CD86}"
