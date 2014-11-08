@@ -7,7 +7,7 @@ Shadowsocks for Windows
 2. Fast system proxy switching
 3. Compatible with IE
 4. Builtin PAC server with user editable PAC
-5. QRCode generation
+5. QRCode generation (in progress)
 6. Only a single exe file of 200KB size
 
 ### Download
