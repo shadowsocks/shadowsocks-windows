@@ -23,7 +23,7 @@ Download [latest release].
 about the change automatically
 5. Please disable other proxy addons in your browser, or set them to use
 system proxy
-6. You may need to install VC runtime and .Net 2.0 if Shadowsocks failed to
+6. You may need to install VC 2008 Runtime and .Net 2.0 if Shadowsocks failed to
 start
 
 ### License
