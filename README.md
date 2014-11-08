@@ -18,11 +18,12 @@ Download [latest release].
 
 1. Find Shadowsocks icon in notification tray
 2. You can add multiple servers in servers menu
-3. After you saved PAC file with any editor, Shadowsocks will notify browsers
+3. After servers are added, click Enable menu item to enable system proxy
+4. After you saved PAC file with any editor, Shadowsocks will notify browsers
 about the change automatically
-4. Please disable other proxy addons in your browser, or set them to use
+5. Please disable other proxy addons in your browser, or set them to use
 system proxy
-5. You may need to install VC runtime and .Net 2.0 if Shadowsocks failed to
+6. You may need to install VC runtime and .Net 2.0 if Shadowsocks failed to
 start
 
 ### License
