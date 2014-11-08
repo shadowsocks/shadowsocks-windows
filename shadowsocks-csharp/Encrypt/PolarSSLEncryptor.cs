@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading;
 
 namespace Shadowsocks.Encrypt
 {
@@ -166,20 +167,24 @@ namespace Shadowsocks.Encrypt
                 randBytes(outbuf, ivLen);
                 InitCipher(ref _encryptCtx, outbuf, true);
                 outlength = length + ivLen;
-                switch (_cipher)
+                lock (tempbuf)
                 {
-                    case CIPHER_AES:
-                        PolarSSL.aes_crypt_cfb128(_encryptCtx, PolarSSL.AES_ENCRYPT, length, ref _encryptIVOffset, _encryptIV, buf, tempbuf);
-                        break;
-                    case CIPHER_BF:
-                        PolarSSL.blowfish_crypt_cfb64(_encryptCtx, PolarSSL.BLOWFISH_ENCRYPT, length, ref _encryptIVOffset, _encryptIV, buf, tempbuf);
-                        break;
-                    case CIPHER_RC4:
-                        PolarSSL.arc4_crypt(_encryptCtx, length, buf, tempbuf);
-                        break;
+                    // C# could be multi-threaded
+                    switch (_cipher)
+                    {
+                        case CIPHER_AES:
+                            PolarSSL.aes_crypt_cfb128(_encryptCtx, PolarSSL.AES_ENCRYPT, length, ref _encryptIVOffset, _encryptIV, buf, tempbuf);
+                            break;
+                        case CIPHER_BF:
+                            PolarSSL.blowfish_crypt_cfb64(_encryptCtx, PolarSSL.BLOWFISH_ENCRYPT, length, ref _encryptIVOffset, _encryptIV, buf, tempbuf);
+                            break;
+                        case CIPHER_RC4:
+                            PolarSSL.arc4_crypt(_encryptCtx, length, buf, tempbuf);
+                            break;
+                    }
+                    outlength = length + ivLen;
+                    Buffer.BlockCopy(tempbuf, 0, outbuf, ivLen, outlength);
                 }
-                outlength = length + ivLen;
-                Buffer.BlockCopy(tempbuf, 0, outbuf, ivLen, outlength);
             }
             else
             {
@@ -205,18 +210,22 @@ namespace Shadowsocks.Encrypt
             {
                 InitCipher(ref _decryptCtx, buf, false);
                 outlength = length - ivLen;
-                Buffer.BlockCopy(buf, ivLen, tempbuf, 0, length - ivLen);
-                switch (_cipher)
+                lock (tempbuf)
                 {
-                    case CIPHER_AES:
-                        PolarSSL.aes_crypt_cfb128(_decryptCtx, PolarSSL.AES_DECRYPT, length - ivLen, ref _decryptIVOffset, _decryptIV, tempbuf, outbuf);
-                        break;
-                    case CIPHER_BF:
-                        PolarSSL.blowfish_crypt_cfb64(_decryptCtx, PolarSSL.BLOWFISH_DECRYPT, length - ivLen, ref _decryptIVOffset, _decryptIV, tempbuf, outbuf);
-                        break;
-                    case CIPHER_RC4:
-                        PolarSSL.arc4_crypt(_decryptCtx, length - ivLen, tempbuf, outbuf);
-                        break;
+                    // C# could be multi-threaded
+                    Buffer.BlockCopy(buf, ivLen, tempbuf, 0, length - ivLen);
+                    switch (_cipher)
+                    {
+                        case CIPHER_AES:
+                            PolarSSL.aes_crypt_cfb128(_decryptCtx, PolarSSL.AES_DECRYPT, length - ivLen, ref _decryptIVOffset, _decryptIV, tempbuf, outbuf);
+                            break;
+                        case CIPHER_BF:
+                            PolarSSL.blowfish_crypt_cfb64(_decryptCtx, PolarSSL.BLOWFISH_DECRYPT, length - ivLen, ref _decryptIVOffset, _decryptIV, tempbuf, outbuf);
+                            break;
+                        case CIPHER_RC4:
+                            PolarSSL.arc4_crypt(_decryptCtx, length - ivLen, tempbuf, outbuf);
+                            break;
+                    }
                 }
             }
             else

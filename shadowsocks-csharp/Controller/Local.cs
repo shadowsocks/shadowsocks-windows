@@ -189,8 +189,8 @@ namespace Shadowsocks.Controller
                 // Complete the connection.
                 remote.EndConnect(ar);
 
-                Console.WriteLine("Socket connected to {0}",
-                    remote.RemoteEndPoint.ToString());
+                //Console.WriteLine("Socket connected to {0}",
+                //    remote.RemoteEndPoint.ToString());
 
                 handshakeReceive();
             }
@@ -348,7 +348,6 @@ namespace Shadowsocks.Controller
                 }
                 else
                 {
-                    Console.WriteLine("bytesRead: " + bytesRead.ToString());
                     this.Close();
                 }
             }
