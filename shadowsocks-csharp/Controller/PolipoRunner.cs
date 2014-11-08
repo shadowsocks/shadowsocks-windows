@@ -20,8 +20,15 @@ namespace Shadowsocks.Controller
                 Process[] existingPolipo = Process.GetProcessesByName("ss_polipo");
                 foreach (Process p in existingPolipo)
                 {
-                    p.Kill();
-                    p.WaitForExit();
+                    try
+                    {
+                        p.Kill();
+                        p.WaitForExit();
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine(e.ToString());
+                    }
                 }
                 string temppath = Path.GetTempPath();
                 string polipoConfig = Resources.polipo_config;
