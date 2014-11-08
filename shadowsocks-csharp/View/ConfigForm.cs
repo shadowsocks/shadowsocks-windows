@@ -71,7 +71,8 @@ namespace Shadowsocks.View
                     server_port = int.Parse(ServerPortTextBox.Text),
                     password = PasswordTextBox.Text,
                     local_port = int.Parse(ProxyPortTextBox.Text),
-                    method = EncryptionSelect.Text
+                    method = EncryptionSelect.Text,
+                    remark = RemarkTextBox.Text
                 };
                 Configuration.CheckServer(server);
                 modifiedConfiguration.configs[oldSelectedIndex] = server;
@@ -99,6 +100,7 @@ namespace Shadowsocks.View
                 PasswordTextBox.Text = server.password;
                 ProxyPortTextBox.Text = server.local_port.ToString();
                 EncryptionSelect.Text = server.method == null ? "aes-256-cfb" : server.method;
+                RemarkTextBox.Text = server.remark;
                 ServerGroupBox.Visible = true;
                 IPTextBox.Focus();
             }
@@ -113,7 +115,7 @@ namespace Shadowsocks.View
             ServersListBox.Items.Clear();
             foreach (Server server in modifiedConfiguration.configs)
             {
-                ServersListBox.Items.Add(string.IsNullOrEmpty(server.server) ? "New server" : server.server + ":" + server.server_port);
+                ServersListBox.Items.Add(string.IsNullOrEmpty(server.server) ? "New server" : string.IsNullOrEmpty(server.remark)? server.server + ":" + server.server_port : server.server + ":" + server.server_port + " (" + server.remark + ")");
             }
         }
 
@@ -139,7 +141,7 @@ namespace Shadowsocks.View
             for (int i = 0; i < configuration.configs.Count; i++)
             {
                 Server server = configuration.configs[i];
-                MenuItem item = new MenuItem(server.server + ":" + server.server_port);
+                MenuItem item = new MenuItem(string.IsNullOrEmpty(server.remark) ? server.server + ":" + server.server_port : server.server + ":" + server.server_port + " (" + server.remark + ")");
                 item.Tag = i;
                 item.Click += AServerItem_Click;
                 items.Add(item);

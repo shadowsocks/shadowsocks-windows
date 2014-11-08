@@ -37,6 +37,7 @@ namespace Shadowsocks.Model
             checkPort(server.server_port);
             checkPassword(server.password);
             checkServer(server.server);
+            checkRemark(server.remark);
         }
 
         public static Configuration Load()
@@ -100,7 +101,8 @@ namespace Shadowsocks.Model
                 server_port = 8388,
                 local_port = 1080,
                 method = "aes-256-cfb",
-                password = ""
+                password = "",
+                remark = ""
             };
         }
 
@@ -134,6 +136,11 @@ namespace Shadowsocks.Model
             {
                 throw new ArgumentException("server IP can not be blank");
             }
+        }
+
+        private static void checkRemark(string remark)
+        {
+            //remark is optional
         }
 
         private class JsonSerializerStrategy : SimpleJson.PocoJsonSerializerStrategy
