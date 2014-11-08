@@ -117,7 +117,7 @@ namespace Shadowsocks.View
                 EncryptionSelect.Text = server.method ?? "aes-256-cfb";
                 RemarksTextBox.Text = server.remarks;
                 ServerGroupBox.Visible = true;
-                IPTextBox.Focus();
+                //IPTextBox.Focus();
             }
             else
             {

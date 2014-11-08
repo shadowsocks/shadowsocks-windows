@@ -256,7 +256,7 @@
             this.OKButton.Location = new System.Drawing.Point(4, 4);
             this.OKButton.Name = "OKButton";
             this.OKButton.Size = new System.Drawing.Size(75, 23);
-            this.OKButton.TabIndex = 8;
+            this.OKButton.TabIndex = 6;
             this.OKButton.Text = "OK";
             this.OKButton.UseVisualStyleBackColor = true;
             this.OKButton.Click += new System.EventHandler(this.OKButton_Click);
@@ -267,7 +267,7 @@
             this.MyCancelButton.Location = new System.Drawing.Point(86, 4);
             this.MyCancelButton.Name = "MyCancelButton";
             this.MyCancelButton.Size = new System.Drawing.Size(75, 23);
-            this.MyCancelButton.TabIndex = 9;
+            this.MyCancelButton.TabIndex = 7;
             this.MyCancelButton.Text = "Cancel";
             this.MyCancelButton.UseVisualStyleBackColor = true;
             this.MyCancelButton.Click += new System.EventHandler(this.CancelButton_Click);
@@ -371,7 +371,7 @@
             this.DeleteButton.Location = new System.Drawing.Point(100, 4);
             this.DeleteButton.Name = "DeleteButton";
             this.DeleteButton.Size = new System.Drawing.Size(89, 23);
-            this.DeleteButton.TabIndex = 7;
+            this.DeleteButton.TabIndex = 9;
             this.DeleteButton.Text = "&Delete";
             this.DeleteButton.UseVisualStyleBackColor = true;
             this.DeleteButton.Click += new System.EventHandler(this.DeleteButton_Click);
@@ -381,7 +381,7 @@
             this.AddButton.Location = new System.Drawing.Point(4, 4);
             this.AddButton.Name = "AddButton";
             this.AddButton.Size = new System.Drawing.Size(89, 23);
-            this.AddButton.TabIndex = 6;
+            this.AddButton.TabIndex = 8;
             this.AddButton.Text = "&Add";
             this.AddButton.UseVisualStyleBackColor = true;
             this.AddButton.Click += new System.EventHandler(this.AddButton_Click);
@@ -410,7 +410,7 @@
             this.LockButton.Location = new System.Drawing.Point(4, 4);
             this.LockButton.Name = "LockButton";
             this.LockButton.Size = new System.Drawing.Size(89, 23);
-            this.LockButton.TabIndex = 6;
+            this.LockButton.TabIndex = 10;
             this.LockButton.Text = "&Lock";
             this.LockButton.UseVisualStyleBackColor = true;
             this.LockButton.Click += new System.EventHandler(this.LockButton_Click);
@@ -431,6 +431,7 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.AutoSize = true;
+            this.CancelButton = this.MyCancelButton;
             this.ClientSize = new System.Drawing.Size(489, 286);
             this.Controls.Add(this.panel4);
             this.Controls.Add(this.ServersListBox);
