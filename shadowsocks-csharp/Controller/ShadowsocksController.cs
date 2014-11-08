@@ -1,4 +1,5 @@
-﻿using Shadowsocks.Model;
+﻿using System.IO;
+using Shadowsocks.Model;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -33,6 +34,11 @@ namespace Shadowsocks.Controller
         public ShadowsocksController()
         {
             _config = Configuration.Load();
+            if (_config.enableLog)
+            {
+                SetLog();
+            }
+
             openOnLan = _config.openOnLan;
             polipoRunner = new PolipoRunner();
             polipoRunner.openOnLan = openOnLan;
@@ -59,6 +65,10 @@ namespace Shadowsocks.Controller
         public void SaveConfig(Configuration newConfig)
         {
             Configuration.Save(newConfig);
+            if (newConfig.noChange && newConfig.openOnLan == openOnLan)
+            {
+                return;
+            }
             // some logic in configuration updated the config when saving, we need to read it again
             _config = Configuration.Load();
             openOnLan = _config.openOnLan;
@@ -152,6 +162,23 @@ namespace Shadowsocks.Controller
         private void pacServer_PACFileChanged(object sender, EventArgs e)
         {
             UpdateSystemProxy();
+        }
+
+        private void SetLog()
+        {
+                try
+                {
+                    FileStream fs = new FileStream("shadowsocks.log", FileMode.Append);
+                    TextWriter tmp = Console.Out;
+                    StreamWriter sw = new StreamWriter(fs);
+                    sw.AutoFlush = true;
+                    Console.SetOut(sw);
+                    Console.SetError(sw);
+                }
+                catch (IOException e)
+                {
+                    Console.WriteLine(e.ToString());
+                }
         }
 
     }

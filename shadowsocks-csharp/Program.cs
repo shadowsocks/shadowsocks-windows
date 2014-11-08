@@ -47,26 +47,12 @@ namespace Shadowsocks
                 }
                 LoadLibrary(dllPath);
 
-                try
-                {
-                    FileStream fs = new FileStream("shadowsocks.log", FileMode.Append);
-                    TextWriter tmp = Console.Out;
-                    StreamWriter sw = new StreamWriter(fs);
-                    sw.AutoFlush = true;
-                    Console.SetOut(sw);
-                    Console.SetError(sw);
-                }
-                catch (IOException e)
-                {
-                    Console.WriteLine(e.ToString());
-                }
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
                 ShadowsocksController controller = new ShadowsocksController();
 
                 // TODO run without a main form to save RAM
                 Application.Run(new ConfigForm(controller));
-
             }
         }
     }
