@@ -15,6 +15,6 @@ namespace Shadowsocks.Model
         public int local_port;
         public string password;
         public string method;
-
+        public string remark;
     }
 }
