@@ -3,8 +3,11 @@ using Shadowsocks.Properties;
 using Shadowsocks.View;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
+using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Threading;
 using System.Windows.Forms;
 
 namespace Shadowsocks
@@ -20,39 +23,51 @@ namespace Shadowsocks
         [STAThread]
         static void Main()
         {
-            string tempPath = Path.GetTempPath();
-            string dllPath = tempPath + "/polarssl.dll";
-            try
+            using (Mutex mutex = new Mutex(false, "Global\\" + Assembly.GetExecutingAssembly().GetType().GUID.ToString()))
             {
-                FileManager.UncompressFile(dllPath, Resources.polarssl_dll);
-            }
-            catch (IOException e)
-            {
-                Console.WriteLine(e.ToString());
-            }
-            LoadLibrary(dllPath);
+                if (!mutex.WaitOne(0, false))
+                {
+                    Process[] oldProcesses = Process.GetProcessesByName("Shadowsocks");
+                    if (oldProcesses.Length > 0)
+                    {
+                        Process oldProcess = oldProcesses[0];
+                    }
+                    MessageBox.Show("Shadowsocks is already running.\n\nFind Shadowsocks icon in your notify tray.");
+                    return;
+                }
+                string tempPath = Path.GetTempPath();
+                string dllPath = tempPath + "/polarssl.dll";
+                try
+                {
+                    FileManager.UncompressFile(dllPath, Resources.polarssl_dll);
+                }
+                catch (IOException e)
+                {
+                    Console.WriteLine(e.ToString());
+                }
+                LoadLibrary(dllPath);
 
-            try
-            {
-                FileStream fs = new FileStream("shadowsocks.log", FileMode.Append);
-                TextWriter tmp = Console.Out;
-                StreamWriter sw = new StreamWriter(fs);
-                sw.AutoFlush = true;
-                Console.SetOut(sw);
-                Console.SetError(sw);
+                try
+                {
+                    FileStream fs = new FileStream("shadowsocks.log", FileMode.Append);
+                    TextWriter tmp = Console.Out;
+                    StreamWriter sw = new StreamWriter(fs);
+                    sw.AutoFlush = true;
+                    Console.SetOut(sw);
+                    Console.SetError(sw);
+                }
+                catch (IOException e)
+                {
+                    Console.WriteLine(e.ToString());
+                }
+                Application.EnableVisualStyles();
+                Application.SetCompatibleTextRenderingDefault(false);
+                ShadowsocksController controller = new ShadowsocksController();
+
+                // TODO run without a main form to save RAM
+                Application.Run(new ConfigForm(controller));
+
             }
-            catch (IOException e)
-            {
-                Console.WriteLine(e.ToString());
-            }
-            Application.EnableVisualStyles();
-            Application.SetCompatibleTextRenderingDefault(false);
-            ShadowsocksController controller = new ShadowsocksController();
-
-            // TODO run without a main form to save RAM
-            Application.Run(new ConfigForm(controller));
-
-
         }
     }
 }

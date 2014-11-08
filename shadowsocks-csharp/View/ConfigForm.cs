@@ -17,6 +17,7 @@ namespace Shadowsocks.View
         // this is a copy of configuration that we are working on
         private Configuration modifiedConfiguration;
         private int oldSelectedIndex = -1;
+        private bool isFirstRun;
 
         public ConfigForm(ShadowsocksController controller)
         {
@@ -162,6 +163,10 @@ namespace Shadowsocks.View
                     this.Hide();
                 }));
             }
+            else
+            {
+                isFirstRun = true;
+            }
         }
 
         private void ServersListBox_SelectedIndexChanged(object sender, EventArgs e)
@@ -222,6 +227,17 @@ namespace Shadowsocks.View
             this.Close();
         }
 
+        private void showFirstTimeBalloon()
+        {
+            if (isFirstRun)
+            {
+                notifyIcon1.BalloonTipTitle = "Shadowsocks is here";
+                notifyIcon1.BalloonTipText = "You can find turn on/off Shadowsocks in the context menu";
+                notifyIcon1.ShowBalloonTip(0);
+                isFirstRun = false;
+            }
+        }
+
         private void OKButton_Click(object sender, EventArgs e)
         {
             if (!saveOldSelectedServer())
@@ -235,12 +251,14 @@ namespace Shadowsocks.View
             }
             controller.SaveConfig(modifiedConfiguration);
             this.Hide();
+            showFirstTimeBalloon();
         }
 
         private void CancelButton_Click(object sender, EventArgs e)
         {
             this.Hide();
             loadCurrentConfiguration();
+            showFirstTimeBalloon();
         }
 
         private void ConfigForm_FormClosed(object sender, FormClosedEventArgs e)
