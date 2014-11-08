@@ -152,6 +152,7 @@ namespace Shadowsocks.View
             UpdateServersMenu();
             enableItem.Checked = _modifiedConfiguration.enabled;
             openOnLanBox.Checked = _modifiedConfiguration.openOnLan;
+            enableLogBox.Checked = _modifiedConfiguration.enableLog;
         }
 
         private void UpdateServersMenu()
@@ -275,6 +276,7 @@ namespace Shadowsocks.View
                 return;
             }
             _modifiedConfiguration.openOnLan = openOnLanBox.Checked;
+            _modifiedConfiguration.enableLog = enableLogBox.Checked;
             controller.SaveConfig(_modifiedConfiguration);
             this.Hide();
             ShowFirstTimeBalloon();
@@ -336,7 +338,10 @@ namespace Shadowsocks.View
 
         private void enableLogBox_CheckedChanged(object sender, EventArgs e)
         {
-            MessageBox.Show("This option only works on next startup.");
+            if (this.Visible)
+            {
+                MessageBox.Show("This option only works on next startup.");
+            }
         }
     }
 }
