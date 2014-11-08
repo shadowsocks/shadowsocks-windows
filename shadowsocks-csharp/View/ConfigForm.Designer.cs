@@ -55,6 +55,7 @@
             this.ConfigItem = new System.Windows.Forms.MenuItem();
             this.menuItem4 = new System.Windows.Forms.MenuItem();
             this.editPACFileItem = new System.Windows.Forms.MenuItem();
+            this.QRCodeItem = new System.Windows.Forms.MenuItem();
             this.aboutItem = new System.Windows.Forms.MenuItem();
             this.menuItem3 = new System.Windows.Forms.MenuItem();
             this.quitItem = new System.Windows.Forms.MenuItem();
@@ -63,7 +64,6 @@
             this.AddButton = new System.Windows.Forms.Button();
             this.ServerGroupBox = new System.Windows.Forms.GroupBox();
             this.ServersListBox = new System.Windows.Forms.ListBox();
-            this.QRCodeItem = new System.Windows.Forms.MenuItem();
             this.tableLayoutPanel1.SuspendLayout();
             this.panel1.SuspendLayout();
             this.panel3.SuspendLayout();
@@ -329,6 +329,12 @@
             this.editPACFileItem.Text = "Edit &PAC File...";
             this.editPACFileItem.Click += new System.EventHandler(this.EditPACFileItem_Click);
             // 
+            // QRCodeItem
+            // 
+            this.QRCodeItem.Index = 4;
+            this.QRCodeItem.Text = "Show &QRCode...";
+            this.QRCodeItem.Click += new System.EventHandler(this.QRCodeItem_Click);
+            // 
             // aboutItem
             // 
             this.aboutItem.Index = 5;
@@ -396,18 +402,13 @@
             this.ServersListBox.TabIndex = 5;
             this.ServersListBox.SelectedIndexChanged += new System.EventHandler(this.ServersListBox_SelectedIndexChanged);
             // 
-            // QRCodeItem
-            // 
-            this.QRCodeItem.Index = 4;
-            this.QRCodeItem.Text = "Show &QRCode...";
-            this.QRCodeItem.Click += new System.EventHandler(this.QRCodeItem_Click);
-            // 
             // ConfigForm
             // 
             this.AcceptButton = this.OKButton;
             this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.AutoSize = true;
+            this.CancelButton = this.MyCancelButton;
             this.ClientSize = new System.Drawing.Size(489, 286);
             this.Controls.Add(this.ServersListBox);
             this.Controls.Add(this.ServerGroupBox);
