@@ -13,7 +13,7 @@ namespace Shadowsocks.Controller
     {
         private Server config;
         //private Encryptor encryptor;
-        Socket listener;
+        Socket _listener;
         public Local(Server config)
         {
             this.config = config;
@@ -25,24 +25,24 @@ namespace Shadowsocks.Controller
             try
             {
                 // Create a TCP/IP socket.
-                listener = new Socket(AddressFamily.InterNetwork,
+                _listener = new Socket(AddressFamily.InterNetwork,
                     SocketType.Stream, ProtocolType.Tcp);
                 IPEndPoint localEndPoint = new IPEndPoint(0, config.local_port);
 
                 // Bind the socket to the local endpoint and listen for incoming connections.
-                listener.Bind(localEndPoint);
-                listener.Listen(100);
+                _listener.Bind(localEndPoint);
+                _listener.Listen(100);
 
 
                 // Start an asynchronous socket to listen for connections.
                 Console.WriteLine("Shadowsocks started");
-                listener.BeginAccept(
+                _listener.BeginAccept(
                     new AsyncCallback(AcceptCallback),
-                    listener);
+                    _listener);
             }
             catch(SocketException)
             {
-                listener.Close();
+                _listener.Close();
                 throw;
             }
 
@@ -50,7 +50,7 @@ namespace Shadowsocks.Controller
 
         public void Stop()
         {
-            listener.Close();
+            _listener.Close();
         }
 
 
@@ -90,7 +90,7 @@ namespace Shadowsocks.Controller
                 //handler.BeginReceive(state.buffer, 0, StateObject.BufferSize, 0,
                 //    new AsyncCallback(ReadCallback), state);
             }
-            catch (Exception)
+            catch
             {
                 //Console.WriteLine(e.Message);
             }
@@ -141,7 +141,7 @@ namespace Shadowsocks.Controller
 
                 // Connect to the remote endpoint.
                 remote.BeginConnect(remoteEP,
-                    new AsyncCallback(connectCallback), null);
+                    new AsyncCallback(ConnectCallback), null);
             }
             catch (Exception e)
             {
@@ -182,7 +182,7 @@ namespace Shadowsocks.Controller
             ((IDisposable)encryptor).Dispose();
         }
 
-        private void connectCallback(IAsyncResult ar)
+        private void ConnectCallback(IAsyncResult ar)
         {
             try
             {
@@ -192,7 +192,7 @@ namespace Shadowsocks.Controller
                 //Console.WriteLine("Socket connected to {0}",
                 //    remote.RemoteEndPoint.ToString());
 
-                handshakeReceive();
+                HandshakeReceive();
             }
             catch (Exception e)
             {
@@ -201,12 +201,12 @@ namespace Shadowsocks.Controller
             }
         }
 
-        private void handshakeReceive()
+        private void HandshakeReceive()
         {
             try
             {
                 connection.BeginReceive(connetionRecvBuffer, 0, 256, 0,
-                    new AsyncCallback(handshakeReceiveCallback), null);
+                    new AsyncCallback(HandshakeReceiveCallback), null);
             }
             catch (Exception e)
             {
@@ -215,7 +215,7 @@ namespace Shadowsocks.Controller
             }
         }
 
-        private void handshakeReceiveCallback(IAsyncResult ar)
+        private void HandshakeReceiveCallback(IAsyncResult ar)
         {
             try
             {

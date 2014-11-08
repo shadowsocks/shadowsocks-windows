@@ -33,11 +33,11 @@ namespace Shadowsocks.Model
 
         public static void CheckServer(Server server)
         {
-            checkPort(server.local_port);
-            checkPort(server.server_port);
-            checkPassword(server.password);
-            checkServer(server.server);
-            checkRemark(server.remarks);
+            CheckPort(server.local_port);
+            CheckPort(server.server_port);
+            CheckPassword(server.password);
+            CheckServer(server.server);
+            CheckRemark(server.remarks);
         }
 
         public static Configuration Load()
@@ -106,7 +106,7 @@ namespace Shadowsocks.Model
             };
         }
 
-        private static void assert(bool condition)
+        private static void Assert(bool condition)
         {
             if (!condition)
             {
@@ -114,7 +114,7 @@ namespace Shadowsocks.Model
             }
         }
 
-        private static void checkPort(int port)
+        private static void CheckPort(int port)
         {
             if (port <= 0 || port > 65535)
             {
@@ -122,7 +122,7 @@ namespace Shadowsocks.Model
             }
         }
 
-        private static void checkPassword(string password)
+        private static void CheckPassword(string password)
         {
             if (string.IsNullOrEmpty(password))
             {
@@ -130,7 +130,7 @@ namespace Shadowsocks.Model
             }
         }
 
-        private static void checkServer(string server)
+        private static void CheckServer(string server)
         {
             if (string.IsNullOrEmpty(server))
             {
@@ -138,7 +138,7 @@ namespace Shadowsocks.Model
             }
         }
 
-        private static void checkRemark(string remark)
+        private static void CheckRemark(string remark)
         {
             //remark is optional
         }
