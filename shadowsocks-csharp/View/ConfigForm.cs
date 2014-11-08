@@ -53,6 +53,7 @@ namespace Shadowsocks.View
         {
             this.Opacity = 1;
             this.Show();
+            IPTextBox.Focus();
         }
 
         private bool saveOldSelectedServer()
@@ -98,6 +99,7 @@ namespace Shadowsocks.View
                 ProxyPortTextBox.Text = server.local_port.ToString();
                 EncryptionSelect.Text = server.method == null ? "aes-256-cfb" : server.method;
                 ServerGroupBox.Visible = true;
+                IPTextBox.Focus();
             }
             else
             {
@@ -274,6 +276,11 @@ namespace Shadowsocks.View
             Configuration configuration = controller.GetConfiguration();
             configuration.index = (int)item.Tag;
             controller.SaveConfig(configuration);
+        }
+
+        private void ConfigForm_Shown(object sender, EventArgs e)
+        {
+            IPTextBox.Focus();
         }
     }
 }

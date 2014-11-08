@@ -123,7 +123,7 @@
             this.ProxyPortTextBox.Location = new System.Drawing.Point(74, 113);
             this.ProxyPortTextBox.Name = "ProxyPortTextBox";
             this.ProxyPortTextBox.Size = new System.Drawing.Size(160, 20);
-            this.ProxyPortTextBox.TabIndex = 9;
+            this.ProxyPortTextBox.TabIndex = 4;
             this.ProxyPortTextBox.WordWrap = false;
             // 
             // label4
@@ -152,7 +152,7 @@
             this.IPTextBox.Location = new System.Drawing.Point(74, 8);
             this.IPTextBox.Name = "IPTextBox";
             this.IPTextBox.Size = new System.Drawing.Size(160, 20);
-            this.IPTextBox.TabIndex = 5;
+            this.IPTextBox.TabIndex = 0;
             this.IPTextBox.WordWrap = false;
             // 
             // ServerPortTextBox
@@ -161,7 +161,7 @@
             this.ServerPortTextBox.Location = new System.Drawing.Point(74, 34);
             this.ServerPortTextBox.Name = "ServerPortTextBox";
             this.ServerPortTextBox.Size = new System.Drawing.Size(160, 20);
-            this.ServerPortTextBox.TabIndex = 6;
+            this.ServerPortTextBox.TabIndex = 1;
             this.ServerPortTextBox.WordWrap = false;
             // 
             // PasswordTextBox
@@ -171,7 +171,7 @@
             this.PasswordTextBox.Name = "PasswordTextBox";
             this.PasswordTextBox.PasswordChar = '*';
             this.PasswordTextBox.Size = new System.Drawing.Size(160, 20);
-            this.PasswordTextBox.TabIndex = 7;
+            this.PasswordTextBox.TabIndex = 2;
             this.PasswordTextBox.WordWrap = false;
             // 
             // label5
@@ -203,7 +203,7 @@
             this.EncryptionSelect.Location = new System.Drawing.Point(74, 86);
             this.EncryptionSelect.Name = "EncryptionSelect";
             this.EncryptionSelect.Size = new System.Drawing.Size(160, 21);
-            this.EncryptionSelect.TabIndex = 8;
+            this.EncryptionSelect.TabIndex = 3;
             // 
             // notifyIcon1
             // 
@@ -228,7 +228,7 @@
             this.OKButton.Location = new System.Drawing.Point(4, 4);
             this.OKButton.Name = "OKButton";
             this.OKButton.Size = new System.Drawing.Size(75, 23);
-            this.OKButton.TabIndex = 0;
+            this.OKButton.TabIndex = 8;
             this.OKButton.Text = "OK";
             this.OKButton.UseVisualStyleBackColor = true;
             this.OKButton.Click += new System.EventHandler(this.OKButton_Click);
@@ -239,7 +239,7 @@
             this.MyCancelButton.Location = new System.Drawing.Point(86, 4);
             this.MyCancelButton.Name = "MyCancelButton";
             this.MyCancelButton.Size = new System.Drawing.Size(75, 23);
-            this.MyCancelButton.TabIndex = 1;
+            this.MyCancelButton.TabIndex = 9;
             this.MyCancelButton.Text = "Cancel";
             this.MyCancelButton.UseVisualStyleBackColor = true;
             this.MyCancelButton.Click += new System.EventHandler(this.CancelButton_Click);
@@ -336,7 +336,7 @@
             this.DeleteButton.Location = new System.Drawing.Point(86, 4);
             this.DeleteButton.Name = "DeleteButton";
             this.DeleteButton.Size = new System.Drawing.Size(75, 23);
-            this.DeleteButton.TabIndex = 4;
+            this.DeleteButton.TabIndex = 7;
             this.DeleteButton.Text = "&Delete";
             this.DeleteButton.UseVisualStyleBackColor = true;
             this.DeleteButton.Click += new System.EventHandler(this.DeleteButton_Click);
@@ -346,7 +346,7 @@
             this.AddButton.Location = new System.Drawing.Point(4, 4);
             this.AddButton.Name = "AddButton";
             this.AddButton.Size = new System.Drawing.Size(75, 23);
-            this.AddButton.TabIndex = 3;
+            this.AddButton.TabIndex = 6;
             this.AddButton.Text = "&Add";
             this.AddButton.UseVisualStyleBackColor = true;
             this.AddButton.Click += new System.EventHandler(this.AddButton_Click);
@@ -367,7 +367,7 @@
             this.ServersListBox.Location = new System.Drawing.Point(12, 12);
             this.ServersListBox.Name = "ServersListBox";
             this.ServersListBox.Size = new System.Drawing.Size(164, 186);
-            this.ServersListBox.TabIndex = 2;
+            this.ServersListBox.TabIndex = 5;
             this.ServersListBox.SelectedIndexChanged += new System.EventHandler(this.ServersListBox_SelectedIndexChanged);
             // 
             // ConfigForm
@@ -390,6 +390,7 @@
             this.Text = "Shadowsocks";
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.ConfigForm_FormClosed);
             this.Load += new System.EventHandler(this.ConfigForm_Load);
+            this.Shown += new System.EventHandler(this.ConfigForm_Shown);
             this.tableLayoutPanel1.ResumeLayout(false);
             this.tableLayoutPanel1.PerformLayout();
             this.panel1.ResumeLayout(false);

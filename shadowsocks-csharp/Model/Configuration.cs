@@ -57,6 +57,7 @@ namespace Shadowsocks.Model
                 return new Configuration
                 {
                     index = 0,
+                    isDefault = true,
                     configs = new List<Server>()
                     {
                         GetDefaultServer()
