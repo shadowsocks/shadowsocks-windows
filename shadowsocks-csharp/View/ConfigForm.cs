@@ -88,13 +88,21 @@ namespace Shadowsocks.View
 
         private void loadSelectedServer()
         {
-            Server server = modifiedConfiguration.configs[ServersListBox.SelectedIndex];
+            if (ServersListBox.SelectedIndex >= 0 && ServersListBox.SelectedIndex < modifiedConfiguration.configs.Count)
+            {
+                Server server = modifiedConfiguration.configs[ServersListBox.SelectedIndex];
 
-            IPTextBox.Text = server.server;
-            ServerPortTextBox.Text = server.server_port.ToString();
-            PasswordTextBox.Text = server.password;
-            ProxyPortTextBox.Text = server.local_port.ToString();
-            EncryptionSelect.Text = server.method == null ? "aes-256-cfb" : server.method;
+                IPTextBox.Text = server.server;
+                ServerPortTextBox.Text = server.server_port.ToString();
+                PasswordTextBox.Text = server.password;
+                ProxyPortTextBox.Text = server.local_port.ToString();
+                EncryptionSelect.Text = server.method == null ? "aes-256-cfb" : server.method;
+                ServerGroupBox.Visible = true;
+            }
+            else
+            {
+                ServerGroupBox.Visible = false;
+            }
         }
 
         private void loadConfiguration(Configuration configuration)
@@ -161,7 +169,20 @@ namespace Shadowsocks.View
 
         private void DeleteButton_Click(object sender, EventArgs e)
         {
-
+            oldSelectedIndex = ServersListBox.SelectedIndex;
+            if (oldSelectedIndex >= 0 && oldSelectedIndex < modifiedConfiguration.configs.Count)
+            {
+                modifiedConfiguration.configs.RemoveAt(oldSelectedIndex);
+            }
+            if (oldSelectedIndex >= modifiedConfiguration.configs.Count)
+            {
+                // can be -1
+                oldSelectedIndex = modifiedConfiguration.configs.Count - 1;
+            }
+            ServersListBox.SelectedIndex = oldSelectedIndex;
+            loadConfiguration(modifiedConfiguration);
+            ServersListBox.SelectedIndex = oldSelectedIndex;
+            loadSelectedServer();
         }
 
         private void Config_Click(object sender, EventArgs e)
@@ -176,9 +197,16 @@ namespace Shadowsocks.View
 
         private void OKButton_Click(object sender, EventArgs e)
         {
-            // TODO
-            Configuration config = controller.GetConfiguration();
-            controller.SaveConfig(config);
+            if (!saveOldSelectedServer())
+            {
+                return;
+            }
+            if (modifiedConfiguration.configs.Count == 0)
+            {
+                MessageBox.Show("Please add at least one server");
+                return;
+            }
+            controller.SaveConfig(modifiedConfiguration);
             this.Hide();
         }
 

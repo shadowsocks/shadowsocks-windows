@@ -56,12 +56,12 @@
             this.panel3 = new System.Windows.Forms.Panel();
             this.DeleteButton = new System.Windows.Forms.Button();
             this.AddButton = new System.Windows.Forms.Button();
-            this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.ServerGroupBox = new System.Windows.Forms.GroupBox();
             this.ServersListBox = new System.Windows.Forms.ListBox();
             this.tableLayoutPanel1.SuspendLayout();
             this.panel1.SuspendLayout();
             this.panel3.SuspendLayout();
-            this.groupBox1.SuspendLayout();
+            this.ServerGroupBox.SuspendLayout();
             this.SuspendLayout();
             // 
             // tableLayoutPanel1
@@ -328,15 +328,15 @@
             this.AddButton.UseVisualStyleBackColor = true;
             this.AddButton.Click += new System.EventHandler(this.AddButton_Click);
             // 
-            // groupBox1
+            // ServerGroupBox
             // 
-            this.groupBox1.Controls.Add(this.tableLayoutPanel1);
-            this.groupBox1.Location = new System.Drawing.Point(182, 12);
-            this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(257, 186);
-            this.groupBox1.TabIndex = 6;
-            this.groupBox1.TabStop = false;
-            this.groupBox1.Text = "Server";
+            this.ServerGroupBox.Controls.Add(this.tableLayoutPanel1);
+            this.ServerGroupBox.Location = new System.Drawing.Point(182, 12);
+            this.ServerGroupBox.Name = "ServerGroupBox";
+            this.ServerGroupBox.Size = new System.Drawing.Size(257, 186);
+            this.ServerGroupBox.TabIndex = 6;
+            this.ServerGroupBox.TabStop = false;
+            this.ServerGroupBox.Text = "Server";
             // 
             // ServersListBox
             // 
@@ -355,7 +355,7 @@
             this.AutoSize = true;
             this.ClientSize = new System.Drawing.Size(445, 286);
             this.Controls.Add(this.ServersListBox);
-            this.Controls.Add(this.groupBox1);
+            this.Controls.Add(this.ServerGroupBox);
             this.Controls.Add(this.panel1);
             this.Controls.Add(this.panel3);
             this.Controls.Add(this.panel2);
@@ -371,8 +371,8 @@
             this.tableLayoutPanel1.PerformLayout();
             this.panel1.ResumeLayout(false);
             this.panel3.ResumeLayout(false);
-            this.groupBox1.ResumeLayout(false);
-            this.groupBox1.PerformLayout();
+            this.ServerGroupBox.ResumeLayout(false);
+            this.ServerGroupBox.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -406,7 +406,7 @@
         private System.Windows.Forms.Panel panel3;
         private System.Windows.Forms.Button DeleteButton;
         private System.Windows.Forms.Button AddButton;
-        private System.Windows.Forms.GroupBox groupBox1;
+        private System.Windows.Forms.GroupBox ServerGroupBox;
         private System.Windows.Forms.ListBox ServersListBox;
     }
 }

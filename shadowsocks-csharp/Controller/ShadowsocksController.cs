@@ -53,7 +53,8 @@ namespace Shadowsocks.Controller
         public void SaveConfig(Configuration newConfig)
         {
             Configuration.Save(newConfig);
-            config = newConfig;
+            // some logic in configuration updated the config when saving, we need to read it again
+            config = Configuration.Load();
 
             local.Stop();
             polipoRunner.Stop();

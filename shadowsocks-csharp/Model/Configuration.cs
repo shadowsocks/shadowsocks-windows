@@ -67,9 +67,17 @@ namespace Shadowsocks.Model
 
         public static void Save(Configuration config)
         {
+            if (config.index >= config.configs.Count)
+            {
+                config.index = config.configs.Count - 1;
+            }
+            if (config.index < 0)
+            {
+                config.index = 0;
+            }
+            config.isDefault = false;
             try
             {
-                config.isDefault = false;
                 using (StreamWriter sw = new StreamWriter(File.Open(CONFIG_FILE, FileMode.Create)))
                 {
                     string jsonString = SimpleJson.SimpleJson.SerializeObject(config);
