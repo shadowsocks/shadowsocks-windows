@@ -129,6 +129,7 @@ namespace Shadowsocks.View
 
             UpdateServersMenu();
             enableItem.Checked = modifiedConfiguration.enabled;
+            OpenOnLanBox.Checked = modifiedConfiguration.openOnLan;
         }
 
         private void UpdateServersMenu()
@@ -251,6 +252,7 @@ namespace Shadowsocks.View
                 MessageBox.Show("Please add at least one server");
                 return;
             }
+            modifiedConfiguration.openOnLan = OpenOnLanBox.Checked;
             controller.SaveConfig(modifiedConfiguration);
             this.Hide();
             ShowFirstTimeBalloon();

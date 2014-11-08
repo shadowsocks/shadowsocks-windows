@@ -13,8 +13,9 @@ namespace Shadowsocks.Controller
     class PACServer
     {
         private static string PAC_FILE = "pac.txt";
+        public bool openOnLan;
 
-        Socket listener;
+        Socket _listener;
         FileSystemWatcher watcher;
 
         public event EventHandler PACFileChanged;
@@ -22,18 +23,40 @@ namespace Shadowsocks.Controller
         public void Start()
         {
             // Create a TCP/IP socket.
-            listener = new Socket(AddressFamily.InterNetwork,
+            _listener = new Socket(AddressFamily.InterNetwork,
                 SocketType.Stream, ProtocolType.Tcp);
-            IPEndPoint localEndPoint = new IPEndPoint(0, 8090);
+            _listener.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
+            IPEndPoint localEndPoint = null;
+            if (openOnLan)
+            {
+                localEndPoint = new IPEndPoint(IPAddress.Parse("0.0.0.0"), 8090);
+            }
+            else
+            {
+                localEndPoint = new IPEndPoint(IPAddress.Loopback, 8090);
+            }
 
             // Bind the socket to the local endpoint and listen for incoming connections.
-            listener.Bind(localEndPoint);
-            listener.Listen(100);
-            listener.BeginAccept(
+            _listener.Bind(localEndPoint);
+            _listener.Listen(100);
+            _listener.BeginAccept(
                 new AsyncCallback(AcceptCallback),
-                listener);
+                _listener);
 
             WatchPacFile();
+        }
+
+        public void Stop()
+        {
+            try
+            {
+                _listener.Close();
+            }
+            catch (Exception)
+            {
+                
+                throw;
+            }
         }
 
         public string TouchPACFile()

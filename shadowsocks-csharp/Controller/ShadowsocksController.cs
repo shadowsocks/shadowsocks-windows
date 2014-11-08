@@ -17,6 +17,7 @@ namespace Shadowsocks.Controller
         private Configuration _config;
         private PolipoRunner polipoRunner;
         private bool stopped = false;
+        private bool openOnLan;
 
         public class PathEventArgs : EventArgs
         {
@@ -32,14 +33,19 @@ namespace Shadowsocks.Controller
         public ShadowsocksController()
         {
             _config = Configuration.Load();
+            openOnLan = _config.openOnLan;
             polipoRunner = new PolipoRunner();
+            polipoRunner.openOnLan = openOnLan;
             polipoRunner.Start(_config.GetCurrentServer());
             local = new Local(_config.GetCurrentServer());
+            local.openOnLan = openOnLan;
+
             try
             {
                 local.Start();
                 pacServer = new PACServer();
                 pacServer.PACFileChanged += pacServer_PACFileChanged;
+                pacServer.openOnLan = openOnLan;
                 pacServer.Start();
             }
             catch (Exception e)
@@ -55,13 +61,20 @@ namespace Shadowsocks.Controller
             Configuration.Save(newConfig);
             // some logic in configuration updated the config when saving, we need to read it again
             _config = Configuration.Load();
+            openOnLan = _config.openOnLan;
 
             local.Stop();
             polipoRunner.Stop();
+            polipoRunner.openOnLan = openOnLan;
             polipoRunner.Start(_config.GetCurrentServer());
 
             local = new Local(_config.GetCurrentServer());
+            local.openOnLan = openOnLan;
             local.Start();
+
+            pacServer.Stop();
+            pacServer.openOnLan = openOnLan;
+            pacServer.Start();
 
             if (ConfigChanged != null)
             {

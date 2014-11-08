@@ -64,6 +64,7 @@
             this.AddButton = new System.Windows.Forms.Button();
             this.ServerGroupBox = new System.Windows.Forms.GroupBox();
             this.ServersListBox = new System.Windows.Forms.ListBox();
+            this.OpenOnLanBox = new System.Windows.Forms.CheckBox();
             this.tableLayoutPanel1.SuspendLayout();
             this.panel1.SuspendLayout();
             this.panel3.SuspendLayout();
@@ -402,6 +403,16 @@
             this.ServersListBox.TabIndex = 5;
             this.ServersListBox.SelectedIndexChanged += new System.EventHandler(this.ServersListBox_SelectedIndexChanged);
             // 
+            // OpenOnLanBox
+            // 
+            this.OpenOnLanBox.AutoSize = true;
+            this.OpenOnLanBox.Location = new System.Drawing.Point(16, 260);
+            this.OpenOnLanBox.Name = "OpenOnLanBox";
+            this.OpenOnLanBox.Size = new System.Drawing.Size(90, 17);
+            this.OpenOnLanBox.TabIndex = 7;
+            this.OpenOnLanBox.Text = "Open On Lan";
+            this.OpenOnLanBox.UseVisualStyleBackColor = true;
+            // 
             // ConfigForm
             // 
             this.AcceptButton = this.OKButton;
@@ -410,6 +421,7 @@
             this.AutoSize = true;
             this.CancelButton = this.MyCancelButton;
             this.ClientSize = new System.Drawing.Size(489, 286);
+            this.Controls.Add(this.OpenOnLanBox);
             this.Controls.Add(this.ServersListBox);
             this.Controls.Add(this.ServerGroupBox);
             this.Controls.Add(this.panel1);
@@ -418,6 +430,7 @@
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
+            this.MinimizeBox = false;
             this.Name = "ConfigForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Shadowsocks";
@@ -471,6 +484,7 @@
         private System.Windows.Forms.TextBox RemarksTextBox;
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.MenuItem QRCodeItem;
+        private System.Windows.Forms.CheckBox OpenOnLanBox;
     }
 }
 

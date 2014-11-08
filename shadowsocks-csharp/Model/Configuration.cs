@@ -16,6 +16,7 @@ namespace Shadowsocks.Model
         public int index;
         public bool enabled;
         public bool isDefault;
+        public bool openOnLan;
 
         private static string CONFIG_FILE = "gui-config.json";
 

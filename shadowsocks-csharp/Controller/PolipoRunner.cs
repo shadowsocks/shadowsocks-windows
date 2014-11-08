@@ -12,6 +12,7 @@ namespace Shadowsocks.Controller
     class PolipoRunner
     {
         private Process _process;
+        public bool openOnLan;
 
         public void Start(Server config)
         {
@@ -33,6 +34,14 @@ namespace Shadowsocks.Controller
                 string temppath = Path.GetTempPath();
                 string polipoConfig = Resources.polipo_config;
                 polipoConfig = polipoConfig.Replace("__SOCKS_PORT__", config.local_port.ToString());
+                if (openOnLan)
+                {
+                    polipoConfig = polipoConfig.Replace("\"127.0.0.1\"", "\"0.0.0.0\"");
+                }
+                else
+                {
+                    polipoConfig = polipoConfig.Replace("\"0.0.0.0\"", "\"127.0.0.1\"");
+                }
                 FileManager.ByteArrayToFile(temppath + "/polipo.conf", System.Text.Encoding.UTF8.GetBytes(polipoConfig));
                 FileManager.UncompressFile(temppath + "/ss_polipo.exe", Resources.polipo_exe);
 
