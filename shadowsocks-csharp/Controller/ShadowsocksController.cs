@@ -1,4 +1,5 @@
-﻿using Shadowsocks.Model;
+﻿using System.IO;
+using Shadowsocks.Model;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -34,7 +35,11 @@ namespace Shadowsocks.Controller
         public ShadowsocksController()
         {
             _config = Configuration.Load();
-            openOnLan = _config.openOnLan;
+            if (_config.enableLog)
+            {
+                SetLog();
+            }
+
             polipoRunner = new PolipoRunner();
             polipoRunner.Start(_config);
             local = new Local(_config);
@@ -172,6 +177,23 @@ namespace Shadowsocks.Controller
         private void pacServer_PACFileChanged(object sender, EventArgs e)
         {
             UpdateSystemProxy();
+        }
+
+        private void SetLog()
+        {
+                try
+                {
+                    FileStream fs = new FileStream("shadowsocks.log", FileMode.Append);
+                    TextWriter tmp = Console.Out;
+                    StreamWriter sw = new StreamWriter(fs);
+                    sw.AutoFlush = true;
+                    Console.SetOut(sw);
+                    Console.SetError(sw);
+                }
+                catch (IOException e)
+                {
+                    Console.WriteLine(e.ToString());
+                }
         }
 
     }
