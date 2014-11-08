@@ -1,0 +1,13 @@
+2.0.3
+- Support QRCode generation
+- Fix compatibility issues with some Chrome version
+
+2.0.2
+- Add remarks
+- Fix error when polipo is killed
+
+2.0.1 2014-11-08
+- Check already running
+
+2.0 2014-11-08
+- Initial release
