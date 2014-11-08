@@ -16,8 +16,6 @@ namespace Shadowsocks.Model
         public int index;
         public bool enabled;
         public bool isDefault;
-        public bool lockStatus;
-        public bool enableLog;
 
         private static string CONFIG_FILE = "gui-config.json";
 
@@ -35,11 +33,11 @@ namespace Shadowsocks.Model
 
         public static void CheckServer(Server server)
         {
-            CheckPort(server.local_port);
-            CheckPort(server.server_port);
-            CheckPassword(server.password);
-            CheckServer(server.server);
-            CheckRemark(server.remarks);
+            checkPort(server.local_port);
+            checkPort(server.server_port);
+            checkPassword(server.password);
+            checkServer(server.server);
+            checkRemark(server.remarks);
         }
 
         public static Configuration Load()
@@ -108,7 +106,7 @@ namespace Shadowsocks.Model
             };
         }
 
-        private static void Assert(bool condition)
+        private static void assert(bool condition)
         {
             if (!condition)
             {
@@ -116,7 +114,7 @@ namespace Shadowsocks.Model
             }
         }
 
-        private static void CheckPort(int port)
+        private static void checkPort(int port)
         {
             if (port <= 0 || port > 65535)
             {
@@ -124,7 +122,7 @@ namespace Shadowsocks.Model
             }
         }
 
-        private static void CheckPassword(string password)
+        private static void checkPassword(string password)
         {
             if (string.IsNullOrEmpty(password))
             {
@@ -132,7 +130,7 @@ namespace Shadowsocks.Model
             }
         }
 
-        private static void CheckServer(string server)
+        private static void checkServer(string server)
         {
             if (string.IsNullOrEmpty(server))
             {
@@ -140,7 +138,7 @@ namespace Shadowsocks.Model
             }
         }
 
-        private static void CheckRemark(string remark)
+        private static void checkRemark(string remark)
         {
             //remark is optional
         }

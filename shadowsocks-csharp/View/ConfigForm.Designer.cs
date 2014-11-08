@@ -55,7 +55,6 @@
             this.ConfigItem = new System.Windows.Forms.MenuItem();
             this.menuItem4 = new System.Windows.Forms.MenuItem();
             this.editPACFileItem = new System.Windows.Forms.MenuItem();
-            this.QRCodeItem = new System.Windows.Forms.MenuItem();
             this.aboutItem = new System.Windows.Forms.MenuItem();
             this.menuItem3 = new System.Windows.Forms.MenuItem();
             this.quitItem = new System.Windows.Forms.MenuItem();
@@ -64,13 +63,11 @@
             this.AddButton = new System.Windows.Forms.Button();
             this.ServerGroupBox = new System.Windows.Forms.GroupBox();
             this.ServersListBox = new System.Windows.Forms.ListBox();
-            this.LockButton = new System.Windows.Forms.Button();
-            this.panel4 = new System.Windows.Forms.Panel();
+            this.QRCodeItem = new System.Windows.Forms.MenuItem();
             this.tableLayoutPanel1.SuspendLayout();
             this.panel1.SuspendLayout();
             this.panel3.SuspendLayout();
             this.ServerGroupBox.SuspendLayout();
-            this.panel4.SuspendLayout();
             this.SuspendLayout();
             // 
             // tableLayoutPanel1
@@ -256,7 +253,7 @@
             this.OKButton.Location = new System.Drawing.Point(4, 4);
             this.OKButton.Name = "OKButton";
             this.OKButton.Size = new System.Drawing.Size(75, 23);
-            this.OKButton.TabIndex = 6;
+            this.OKButton.TabIndex = 8;
             this.OKButton.Text = "OK";
             this.OKButton.UseVisualStyleBackColor = true;
             this.OKButton.Click += new System.EventHandler(this.OKButton_Click);
@@ -267,7 +264,7 @@
             this.MyCancelButton.Location = new System.Drawing.Point(86, 4);
             this.MyCancelButton.Name = "MyCancelButton";
             this.MyCancelButton.Size = new System.Drawing.Size(75, 23);
-            this.MyCancelButton.TabIndex = 7;
+            this.MyCancelButton.TabIndex = 9;
             this.MyCancelButton.Text = "Cancel";
             this.MyCancelButton.UseVisualStyleBackColor = true;
             this.MyCancelButton.Click += new System.EventHandler(this.CancelButton_Click);
@@ -332,12 +329,6 @@
             this.editPACFileItem.Text = "Edit &PAC File...";
             this.editPACFileItem.Click += new System.EventHandler(this.EditPACFileItem_Click);
             // 
-            // QRCodeItem
-            // 
-            this.QRCodeItem.Index = 4;
-            this.QRCodeItem.Text = "Show &QRCode...";
-            this.QRCodeItem.Click += new System.EventHandler(this.QRCodeItem_Click);
-            // 
             // aboutItem
             // 
             this.aboutItem.Index = 5;
@@ -371,7 +362,7 @@
             this.DeleteButton.Location = new System.Drawing.Point(100, 4);
             this.DeleteButton.Name = "DeleteButton";
             this.DeleteButton.Size = new System.Drawing.Size(89, 23);
-            this.DeleteButton.TabIndex = 9;
+            this.DeleteButton.TabIndex = 7;
             this.DeleteButton.Text = "&Delete";
             this.DeleteButton.UseVisualStyleBackColor = true;
             this.DeleteButton.Click += new System.EventHandler(this.DeleteButton_Click);
@@ -381,7 +372,7 @@
             this.AddButton.Location = new System.Drawing.Point(4, 4);
             this.AddButton.Name = "AddButton";
             this.AddButton.Size = new System.Drawing.Size(89, 23);
-            this.AddButton.TabIndex = 8;
+            this.AddButton.TabIndex = 6;
             this.AddButton.Text = "&Add";
             this.AddButton.UseVisualStyleBackColor = true;
             this.AddButton.Click += new System.EventHandler(this.AddButton_Click);
@@ -405,25 +396,11 @@
             this.ServersListBox.TabIndex = 5;
             this.ServersListBox.SelectedIndexChanged += new System.EventHandler(this.ServersListBox_SelectedIndexChanged);
             // 
-            // LockButton
+            // QRCodeItem
             // 
-            this.LockButton.Location = new System.Drawing.Point(4, 4);
-            this.LockButton.Name = "LockButton";
-            this.LockButton.Size = new System.Drawing.Size(89, 23);
-            this.LockButton.TabIndex = 10;
-            this.LockButton.Text = "&Lock";
-            this.LockButton.UseVisualStyleBackColor = true;
-            this.LockButton.Click += new System.EventHandler(this.LockButton_Click);
-            // 
-            // panel4
-            // 
-            this.panel4.AutoSize = true;
-            this.panel4.Controls.Add(this.LockButton);
-            this.panel4.Location = new System.Drawing.Point(12, 251);
-            this.panel4.Margin = new System.Windows.Forms.Padding(0);
-            this.panel4.Name = "panel4";
-            this.panel4.Size = new System.Drawing.Size(192, 30);
-            this.panel4.TabIndex = 7;
+            this.QRCodeItem.Index = 4;
+            this.QRCodeItem.Text = "Show &QRCode...";
+            this.QRCodeItem.Click += new System.EventHandler(this.QRCodeItem_Click);
             // 
             // ConfigForm
             // 
@@ -431,9 +408,7 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.AutoSize = true;
-            this.CancelButton = this.MyCancelButton;
             this.ClientSize = new System.Drawing.Size(489, 286);
-            this.Controls.Add(this.panel4);
             this.Controls.Add(this.ServersListBox);
             this.Controls.Add(this.ServerGroupBox);
             this.Controls.Add(this.panel1);
@@ -445,7 +420,6 @@
             this.Name = "ConfigForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Shadowsocks";
-            this.TopMost = true;
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.ConfigForm_FormClosed);
             this.Load += new System.EventHandler(this.ConfigForm_Load);
             this.Shown += new System.EventHandler(this.ConfigForm_Shown);
@@ -455,7 +429,6 @@
             this.panel3.ResumeLayout(false);
             this.ServerGroupBox.ResumeLayout(false);
             this.ServerGroupBox.PerformLayout();
-            this.panel4.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -497,8 +470,6 @@
         private System.Windows.Forms.TextBox RemarksTextBox;
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.MenuItem QRCodeItem;
-        private System.Windows.Forms.Button LockButton;
-        private System.Windows.Forms.Panel panel4;
     }
 }
 
