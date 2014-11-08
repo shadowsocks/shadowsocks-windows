@@ -1,3 +1,0 @@
-[submodule "shadowsocks-csharp/simple-json"]
-	path = shadowsocks-csharp/simple-json
-	url = git@github.com:facebook-csharp-sdk/simple-json.git
