@@ -47,9 +47,9 @@ namespace Shadowsocks.Controller
         {
             if (process != null)
             {
-                process.Kill();
                 try
                 {
+                    process.Kill();
                     process.WaitForExit();
                 }
                 catch (InvalidOperationException)
