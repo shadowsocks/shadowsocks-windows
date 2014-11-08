@@ -418,6 +418,7 @@
             this.ServersListBox.TabIndex = 5;
             this.ServersListBox.SelectedIndexChanged += new System.EventHandler(this.ServersListBox_SelectedIndexChanged);
             // 
+            // 
             // ConfigForm
             // 
             this.AcceptButton = this.OKButton;

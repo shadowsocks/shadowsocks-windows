@@ -1,4 +1,5 @@
-﻿using Shadowsocks.Model;
+﻿using System.IO;
+using Shadowsocks.Model;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -129,7 +130,7 @@ namespace Shadowsocks.Controller
         }
 
 
-        protected void SaveConfig(Configuration newConfig)
+        public void SaveConfig(Configuration newConfig)
         {
             Configuration.Save(newConfig);
             // some logic in configuration updated the config when saving, we need to read it again
@@ -171,6 +172,23 @@ namespace Shadowsocks.Controller
         private void pacServer_PACFileChanged(object sender, EventArgs e)
         {
             UpdateSystemProxy();
+        }
+
+        private void SetLog()
+        {
+                try
+                {
+                    FileStream fs = new FileStream("shadowsocks.log", FileMode.Append);
+                    TextWriter tmp = Console.Out;
+                    StreamWriter sw = new StreamWriter(fs);
+                    sw.AutoFlush = true;
+                    Console.SetOut(sw);
+                    Console.SetError(sw);
+                }
+                catch (IOException e)
+                {
+                    Console.WriteLine(e.ToString());
+                }
         }
 
     }
