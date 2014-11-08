@@ -11,11 +11,11 @@ namespace Shadowsocks.Controller
 {
     class PolipoRunner
     {
-        private Process process;
+        private Process _process;
 
         public void Start(Server config)
         {
-            if (process == null)
+            if (_process == null)
             {
                 Process[] existingPolipo = Process.GetProcessesByName("ss_polipo");
                 foreach (Process p in existingPolipo)
@@ -36,34 +36,34 @@ namespace Shadowsocks.Controller
                 FileManager.ByteArrayToFile(temppath + "/polipo.conf", System.Text.Encoding.UTF8.GetBytes(polipoConfig));
                 FileManager.UncompressFile(temppath + "/ss_polipo.exe", Resources.polipo_exe);
 
-                process = new Process();
+                _process = new Process();
                 // Configure the process using the StartInfo properties.
-                process.StartInfo.FileName = temppath + "/ss_polipo.exe";
-                process.StartInfo.Arguments = "-c \"" + temppath + "/polipo.conf\"";
-                process.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
-                process.StartInfo.UseShellExecute = false;
-                process.StartInfo.CreateNoWindow = true;
-                process.StartInfo.RedirectStandardOutput = true;
-                process.StartInfo.RedirectStandardError = true;
+                _process.StartInfo.FileName = temppath + "/ss_polipo.exe";
+                _process.StartInfo.Arguments = "-c \"" + temppath + "/polipo.conf\"";
+                _process.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
+                _process.StartInfo.UseShellExecute = false;
+                _process.StartInfo.CreateNoWindow = true;
+                _process.StartInfo.RedirectStandardOutput = true;
+                _process.StartInfo.RedirectStandardError = true;
                 //process.StandardOutput
-                process.Start();
+                _process.Start();
             }
         }
 
         public void Stop()
         {
-            if (process != null)
+            if (_process != null)
             {
                 try
                 {
-                    process.Kill();
-                    process.WaitForExit();
+                    _process.Kill();
+                    _process.WaitForExit();
                 }
                 catch (InvalidOperationException)
                 {
                     // do nothing
                 }
-                process = null;
+                _process = null;
             }
         }
     }

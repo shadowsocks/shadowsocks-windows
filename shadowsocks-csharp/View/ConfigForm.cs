@@ -29,12 +29,12 @@ namespace Shadowsocks.View
             controller.ConfigChanged += controller_ConfigChanged;
             controller.PACFileReadyToOpen += controller_PACFileReadyToOpen;
 
-            loadCurrentConfiguration();
+            LoadCurrentConfiguration();
         }
 
         private void controller_ConfigChanged(object sender, EventArgs e)
         {
-            loadCurrentConfiguration();
+            LoadCurrentConfiguration();
         }
 
         private void controller_EnableStatusChanged(object sender, EventArgs e)
@@ -50,14 +50,14 @@ namespace Shadowsocks.View
         }
 
         
-        private void showWindow()
+        private void ShowWindow()
         {
             this.Opacity = 1;
             this.Show();
             IPTextBox.Focus();
         }
 
-        private bool saveOldSelectedServer()
+        private bool SaveOldSelectedServer()
         {
             try
             {
@@ -89,7 +89,7 @@ namespace Shadowsocks.View
             return false;
         }
 
-        private void loadSelectedServer()
+        private void LoadSelectedServer()
         {
             if (ServersListBox.SelectedIndex >= 0 && ServersListBox.SelectedIndex < modifiedConfiguration.configs.Count)
             {
@@ -110,7 +110,7 @@ namespace Shadowsocks.View
             }
         }
 
-        private void loadConfiguration(Configuration configuration)
+        private void LoadConfiguration(Configuration configuration)
         {
             ServersListBox.Items.Clear();
             foreach (Server server in modifiedConfiguration.configs)
@@ -119,19 +119,19 @@ namespace Shadowsocks.View
             }
         }
 
-        private void loadCurrentConfiguration()
+        private void LoadCurrentConfiguration()
         {
             modifiedConfiguration = controller.GetConfiguration();
-            loadConfiguration(modifiedConfiguration);
+            LoadConfiguration(modifiedConfiguration);
             oldSelectedIndex = modifiedConfiguration.index;
             ServersListBox.SelectedIndex = modifiedConfiguration.index;
-            loadSelectedServer();
+            LoadSelectedServer();
 
-            updateServersMenu();
+            UpdateServersMenu();
             enableItem.Checked = modifiedConfiguration.enabled;
         }
 
-        private void updateServersMenu()
+        private void UpdateServersMenu()
         {
             var items = ServersItem.MenuItems;
 
@@ -178,25 +178,25 @@ namespace Shadowsocks.View
                 // we are moving back to oldSelectedIndex or doing a force move
                 return;
             }
-            if (!saveOldSelectedServer())
+            if (!SaveOldSelectedServer())
             {
                 // why this won't cause stack overflow?
                 ServersListBox.SelectedIndex = oldSelectedIndex;
                 return;
             }
-            loadSelectedServer();
+            LoadSelectedServer();
             oldSelectedIndex = ServersListBox.SelectedIndex;
         }
 
         private void AddButton_Click(object sender, EventArgs e)
         {
-            if (!saveOldSelectedServer())
+            if (!SaveOldSelectedServer())
             {
                 return;
             }
             Server server = Configuration.GetDefaultServer();
             modifiedConfiguration.configs.Add(server);
-            loadConfiguration(modifiedConfiguration);
+            LoadConfiguration(modifiedConfiguration);
             ServersListBox.SelectedIndex = modifiedConfiguration.configs.Count - 1;
             oldSelectedIndex = ServersListBox.SelectedIndex;
         }
@@ -214,14 +214,14 @@ namespace Shadowsocks.View
                 oldSelectedIndex = modifiedConfiguration.configs.Count - 1;
             }
             ServersListBox.SelectedIndex = oldSelectedIndex;
-            loadConfiguration(modifiedConfiguration);
+            LoadConfiguration(modifiedConfiguration);
             ServersListBox.SelectedIndex = oldSelectedIndex;
-            loadSelectedServer();
+            LoadSelectedServer();
         }
 
         private void Config_Click(object sender, EventArgs e)
         {
-            showWindow();
+            ShowWindow();
         }
 
         private void Quit_Click(object sender, EventArgs e)
@@ -229,7 +229,7 @@ namespace Shadowsocks.View
             this.Close();
         }
 
-        private void showFirstTimeBalloon()
+        private void ShowFirstTimeBalloon()
         {
             if (isFirstRun)
             {
@@ -242,7 +242,7 @@ namespace Shadowsocks.View
 
         private void OKButton_Click(object sender, EventArgs e)
         {
-            if (!saveOldSelectedServer())
+            if (!SaveOldSelectedServer())
             {
                 return;
             }
@@ -253,14 +253,14 @@ namespace Shadowsocks.View
             }
             controller.SaveConfig(modifiedConfiguration);
             this.Hide();
-            showFirstTimeBalloon();
+            ShowFirstTimeBalloon();
         }
 
         private void CancelButton_Click(object sender, EventArgs e)
         {
             this.Hide();
-            loadCurrentConfiguration();
-            showFirstTimeBalloon();
+            LoadCurrentConfiguration();
+            ShowFirstTimeBalloon();
         }
 
         private void ConfigForm_FormClosed(object sender, FormClosedEventArgs e)
@@ -275,7 +275,7 @@ namespace Shadowsocks.View
 
         private void notifyIcon1_DoubleClick(object sender, EventArgs e)
         {
-            showWindow();
+            ShowWindow();
         }
 
 
