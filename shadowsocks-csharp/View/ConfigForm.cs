@@ -72,7 +72,7 @@ namespace Shadowsocks.View
                     password = PasswordTextBox.Text,
                     local_port = int.Parse(ProxyPortTextBox.Text),
                     method = EncryptionSelect.Text,
-                    remark = RemarkTextBox.Text
+                    remarks = RemarksTextBox.Text
                 };
                 Configuration.CheckServer(server);
                 modifiedConfiguration.configs[oldSelectedIndex] = server;
@@ -100,7 +100,7 @@ namespace Shadowsocks.View
                 PasswordTextBox.Text = server.password;
                 ProxyPortTextBox.Text = server.local_port.ToString();
                 EncryptionSelect.Text = server.method == null ? "aes-256-cfb" : server.method;
-                RemarkTextBox.Text = server.remark;
+                RemarksTextBox.Text = server.remarks;
                 ServerGroupBox.Visible = true;
                 IPTextBox.Focus();
             }
@@ -115,7 +115,7 @@ namespace Shadowsocks.View
             ServersListBox.Items.Clear();
             foreach (Server server in modifiedConfiguration.configs)
             {
-                ServersListBox.Items.Add(string.IsNullOrEmpty(server.server) ? "New server" : string.IsNullOrEmpty(server.remark)? server.server + ":" + server.server_port : server.server + ":" + server.server_port + " (" + server.remark + ")");
+                ServersListBox.Items.Add(string.IsNullOrEmpty(server.server) ? "New server" : string.IsNullOrEmpty(server.remarks)? server.server + ":" + server.server_port : server.server + ":" + server.server_port + " (" + server.remarks + ")");
             }
         }
 
@@ -141,7 +141,7 @@ namespace Shadowsocks.View
             for (int i = 0; i < configuration.configs.Count; i++)
             {
                 Server server = configuration.configs[i];
-                MenuItem item = new MenuItem(string.IsNullOrEmpty(server.remark) ? server.server + ":" + server.server_port : server.server + ":" + server.server_port + " (" + server.remark + ")");
+                MenuItem item = new MenuItem(string.IsNullOrEmpty(server.remarks) ? server.server + ":" + server.server_port : server.server + ":" + server.server_port + " (" + server.remarks + ")");
                 item.Tag = i;
                 item.Click += AServerItem_Click;
                 items.Add(item);

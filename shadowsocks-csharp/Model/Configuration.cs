@@ -37,7 +37,7 @@ namespace Shadowsocks.Model
             checkPort(server.server_port);
             checkPassword(server.password);
             checkServer(server.server);
-            checkRemark(server.remark);
+            checkRemark(server.remarks);
         }
 
         public static Configuration Load()
@@ -102,7 +102,7 @@ namespace Shadowsocks.Model
                 local_port = 1080,
                 method = "aes-256-cfb",
                 password = "",
-                remark = ""
+                remarks = ""
             };
         }
 
