@@ -234,7 +234,7 @@ namespace Shadowsocks.View
             if (isFirstRun)
             {
                 notifyIcon1.BalloonTipTitle = "Shadowsocks is here";
-                notifyIcon1.BalloonTipText = "You can find turn on/off Shadowsocks in the context menu";
+                notifyIcon1.BalloonTipText = "You can turn on/off Shadowsocks in the context menu";
                 notifyIcon1.ShowBalloonTip(0);
                 isFirstRun = false;
             }
