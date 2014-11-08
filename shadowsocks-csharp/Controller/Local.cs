@@ -224,7 +224,7 @@ namespace Shadowsocks.Controller
                         // reject socks 4
                         response = new byte[]{ 0, 91 };
                     }
-                    connection.BeginSend(response, 0, response.Length, 0, new AsyncCallback(handshakeSendCallback), null);
+                    connection.BeginSend(response, 0, response.Length, 0, new AsyncCallback(HandshakeSendCallback), null);
                 }
                 else
                 {
@@ -238,7 +238,7 @@ namespace Shadowsocks.Controller
             }
         }
 
-        private void handshakeSendCallback(IAsyncResult ar)
+        private void HandshakeSendCallback(IAsyncResult ar)
         {
             try
             {
@@ -270,7 +270,7 @@ namespace Shadowsocks.Controller
                 if (bytesRead > 0)
                 {
                     byte[] response = { 5, 0, 0, 1, 0, 0, 0, 0, 0, 0 };
-                    connection.BeginSend(response, 0, response.Length, 0, new AsyncCallback(startPipe), null);
+                    connection.BeginSend(response, 0, response.Length, 0, new AsyncCallback(StartPipe), null);
                 }
                 else
                 {
@@ -285,15 +285,15 @@ namespace Shadowsocks.Controller
         }
 
 
-        private void startPipe(IAsyncResult ar)
+        private void StartPipe(IAsyncResult ar)
         {
             try
             {
                 connection.EndReceive(ar);
                 remote.BeginReceive(remoteRecvBuffer, 0, RecvSize, 0,
-                    new AsyncCallback(pipeRemoteReceiveCallback), null);
+                    new AsyncCallback(PipeRemoteReceiveCallback), null);
                 connection.BeginReceive(connetionRecvBuffer, 0, RecvSize, 0,
-                    new AsyncCallback(pipeConnectionReceiveCallback), null);
+                    new AsyncCallback(PipeConnectionReceiveCallback), null);
             }
             catch (Exception e)
             {
@@ -302,7 +302,7 @@ namespace Shadowsocks.Controller
             }
         }
 
-        private void pipeRemoteReceiveCallback(IAsyncResult ar)
+        private void PipeRemoteReceiveCallback(IAsyncResult ar)
         {
 
             try
@@ -313,7 +313,7 @@ namespace Shadowsocks.Controller
                 {
                     int bytesToSend;
                     encryptor.Decrypt(remoteRecvBuffer, bytesRead, remoteSendBuffer, out bytesToSend);
-                    connection.BeginSend(remoteSendBuffer, 0, bytesToSend, 0, new AsyncCallback(pipeConnectionSendCallback), null);
+                    connection.BeginSend(remoteSendBuffer, 0, bytesToSend, 0, new AsyncCallback(PipeConnectionSendCallback), null);
                 }
                 else
                 {
@@ -328,7 +328,7 @@ namespace Shadowsocks.Controller
             }
         }
 
-        private void pipeConnectionReceiveCallback(IAsyncResult ar)
+        private void PipeConnectionReceiveCallback(IAsyncResult ar)
         {
 
             try
@@ -339,7 +339,7 @@ namespace Shadowsocks.Controller
                 {
                     int bytesToSend;
                     encryptor.Encrypt(connetionRecvBuffer, bytesRead, connetionSendBuffer, out bytesToSend);
-                    remote.BeginSend(connetionSendBuffer, 0, bytesToSend, 0, new AsyncCallback(pipeRemoteSendCallback), null);
+                    remote.BeginSend(connetionSendBuffer, 0, bytesToSend, 0, new AsyncCallback(PipeRemoteSendCallback), null);
                 }
                 else
                 {
@@ -353,13 +353,13 @@ namespace Shadowsocks.Controller
             }
         }
 
-        private void pipeRemoteSendCallback(IAsyncResult ar)
+        private void PipeRemoteSendCallback(IAsyncResult ar)
         {
             try
             {
                 remote.EndSend(ar);
                 connection.BeginReceive(this.connetionRecvBuffer, 0, RecvSize, 0,
-                    new AsyncCallback(pipeConnectionReceiveCallback), null);
+                    new AsyncCallback(PipeConnectionReceiveCallback), null);
             }
             catch (Exception e)
             {
@@ -368,13 +368,13 @@ namespace Shadowsocks.Controller
             }
         }
 
-        private void pipeConnectionSendCallback(IAsyncResult ar)
+        private void PipeConnectionSendCallback(IAsyncResult ar)
         {
             try
             {
                 connection.EndSend(ar);
                 remote.BeginReceive(this.remoteRecvBuffer, 0, RecvSize, 0,
-                    new AsyncCallback(pipeRemoteReceiveCallback), null);
+                    new AsyncCallback(PipeRemoteReceiveCallback), null);
             }
             catch (Exception e)
             {
