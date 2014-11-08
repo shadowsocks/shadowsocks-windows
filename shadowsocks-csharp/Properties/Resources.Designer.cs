@@ -113,26 +113,30 @@ namespace Shadowsocks.Properties {
         ///  __QRCODELIB__
         ///&lt;/script&gt;
         ///&lt;style&gt;
-        ///    body {
-        ///        padding: 10px;
-        ///        margin: 0;
+        ///    html, body, table, div {
+        ///        padding: 0px;
+        ///        margin: 0 !important;
         ///    }
+        ///	div#qrcode {
+        ///        margin: 5px !important;
+        ///		text-align: center;
+        ///		vertical-align: center;
+        ///	}
         ///    #qrcode {
-        ///        width:300px;
-        ///        height:300px;
+        ///        width:190px;
+        ///        height:190px;
         ///    }
+        ///	table {
+        ///		width: 100%;
+        ///		height:100%;
+        ///	}
         ///&lt;/style&gt;
         ///&lt;/head&gt;
         ///&lt;body&gt;
         ///&lt;div id=&quot;qrcode&quot; name=&quot;qrcode&quot;&gt;&lt;/div&gt;
         ///&lt;script type=&quot;text/javascript&quot;&gt;
         ///    function genCode(code) {
-        ///        new QRCode(&quot;qrcode&quot;, {
-        ///                   text: code,
-        ///                   width: 300,
-        ///                   height: 300,
-        ///                   colorDark : &quot;#000000&quot;,
-        ///                   colorLig [rest of string was truncated]&quot;;.
+        ///        new QRCode(&quot;qrcode&quot; [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string qrcode {
             get {
