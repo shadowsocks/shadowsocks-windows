@@ -1,6 +1,8 @@
 Shadowsocks for Windows
 =======================
 
+[![Build Status]][Appveyor]
+
 ### Features
 
 1. Native Windows UI
@@ -44,4 +46,6 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
+[Appveyor]:       https://ci.appveyor.com/project/clowwindy/shadowsocks-csharp
+[Build Status]:   https://ci.appveyor.com/api/projects/status/gknc8l1lxy423ehv?svg=true
 [latest release]: https://sourceforge.net/projects/shadowsocksgui/files/dist/
