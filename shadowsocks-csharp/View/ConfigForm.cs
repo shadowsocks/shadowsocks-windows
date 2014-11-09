@@ -298,6 +298,13 @@ namespace Shadowsocks.View
             controller.SaveConfig(configuration);
         }
 
+        private void ShowLogItem_Click(object sender, EventArgs e)
+        {
+            string argument = Logging.LogFile;
+
+            System.Diagnostics.Process.Start("notepad.exe", argument);
+        }
+
         private void ConfigForm_Shown(object sender, EventArgs e)
         {
             IPTextBox.Focus();

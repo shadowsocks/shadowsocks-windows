@@ -64,6 +64,7 @@
             this.AddButton = new System.Windows.Forms.Button();
             this.ServerGroupBox = new System.Windows.Forms.GroupBox();
             this.ServersListBox = new System.Windows.Forms.ListBox();
+            this.ShowLogItem = new System.Windows.Forms.MenuItem();
             this.tableLayoutPanel1.SuspendLayout();
             this.panel1.SuspendLayout();
             this.panel3.SuspendLayout();
@@ -289,6 +290,7 @@
             this.menuItem4,
             this.editPACFileItem,
             this.QRCodeItem,
+            this.ShowLogItem,
             this.aboutItem,
             this.menuItem3,
             this.quitItem});
@@ -337,18 +339,18 @@
             // 
             // aboutItem
             // 
-            this.aboutItem.Index = 5;
+            this.aboutItem.Index = 6;
             this.aboutItem.Text = "About...";
             this.aboutItem.Click += new System.EventHandler(this.AboutItem_Click);
             // 
             // menuItem3
             // 
-            this.menuItem3.Index = 6;
+            this.menuItem3.Index = 7;
             this.menuItem3.Text = "-";
             // 
             // quitItem
             // 
-            this.quitItem.Index = 7;
+            this.quitItem.Index = 8;
             this.quitItem.Text = "&Quit";
             this.quitItem.Click += new System.EventHandler(this.Quit_Click);
             // 
@@ -401,6 +403,12 @@
             this.ServersListBox.Size = new System.Drawing.Size(192, 186);
             this.ServersListBox.TabIndex = 5;
             this.ServersListBox.SelectedIndexChanged += new System.EventHandler(this.ServersListBox_SelectedIndexChanged);
+            // 
+            // ShowLogItem
+            // 
+            this.ShowLogItem.Index = 5;
+            this.ShowLogItem.Text = "Show Logs...";
+            this.ShowLogItem.Click += new System.EventHandler(this.ShowLogItem_Click);
             // 
             // ConfigForm
             // 
@@ -471,6 +479,7 @@
         private System.Windows.Forms.TextBox RemarksTextBox;
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.MenuItem QRCodeItem;
+        private System.Windows.Forms.MenuItem ShowLogItem;
     }
 }
 
