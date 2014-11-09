@@ -151,30 +151,30 @@ namespace Shadowsocks.Controller
                     return;
                 }
                 closed = true;
+                if (connection != null)
+                {
+                    try
+                    {
+                        connection.Shutdown(SocketShutdown.Send);
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine(e.Message);
+                    }
+                }
+                if (remote != null)
+                {
+                    try
+                    {
+                        remote.Shutdown(SocketShutdown.Send);
+                    }
+                    catch (SocketException e)
+                    {
+                        Console.WriteLine(e.Message);
+                    }
+                }
+                ((IDisposable)encryptor).Dispose();
             }
-            if (connection != null)
-            {
-                try
-                {
-                    connection.Shutdown(SocketShutdown.Send);
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine(e.Message);
-                }
-            }
-            if (remote != null)
-            {
-                try
-                {
-                    remote.Shutdown(SocketShutdown.Send);
-                }
-                catch (SocketException e)
-                {
-                    Console.WriteLine(e.Message);
-                }
-            }
-            ((IDisposable)encryptor).Dispose();
         }
 
         private void ConnectCallback(IAsyncResult ar)

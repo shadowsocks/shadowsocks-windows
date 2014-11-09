@@ -165,38 +165,38 @@ namespace Shadowsocks.Encrypt
 
         public override void Encrypt(byte[] buf, int length, byte[] outbuf, out int outlength)
         {
-            if (_encryptCtx == null)
+            lock (this)
             {
-                randBytes(outbuf, ivLen);
-                InitCipher(ref _encryptCtx, outbuf, true);
-                outlength = length + ivLen;
-                lock (tempbuf)
+                if (_disposed)
                 {
-                    // C# could be multi-threaded
-                    lock (_encryptCtx)
-                    {
-                        switch (_cipher)
-                        {
-                            case CIPHER_AES:
-                                PolarSSL.aes_crypt_cfb128(_encryptCtx, PolarSSL.AES_ENCRYPT, length, ref _encryptIVOffset, _encryptIV, buf, tempbuf);
-                                break;
-                            case CIPHER_BF:
-                                PolarSSL.blowfish_crypt_cfb64(_encryptCtx, PolarSSL.BLOWFISH_ENCRYPT, length, ref _encryptIVOffset, _encryptIV, buf, tempbuf);
-                                break;
-                            case CIPHER_RC4:
-                                PolarSSL.arc4_crypt(_encryptCtx, length, buf, tempbuf);
-                                break;
-                        }
-                        outlength = length + ivLen;
-                        Buffer.BlockCopy(tempbuf, 0, outbuf, ivLen, outlength);
-                    }
+                    outbuf = null;
+                    outlength = 0;
+                    return;
                 }
-            }
-            else
-            {
-                outlength = length;
-                lock (_encryptCtx)
+                if (_encryptCtx == null)
                 {
+                    randBytes(outbuf, ivLen);
+                    InitCipher(ref _encryptCtx, outbuf, true);
+                    outlength = length + ivLen;
+                    // C# could be multi-threaded
+                    switch (_cipher)
+                    {
+                        case CIPHER_AES:
+                            PolarSSL.aes_crypt_cfb128(_encryptCtx, PolarSSL.AES_ENCRYPT, length, ref _encryptIVOffset, _encryptIV, buf, tempbuf);
+                            break;
+                        case CIPHER_BF:
+                            PolarSSL.blowfish_crypt_cfb64(_encryptCtx, PolarSSL.BLOWFISH_ENCRYPT, length, ref _encryptIVOffset, _encryptIV, buf, tempbuf);
+                            break;
+                        case CIPHER_RC4:
+                            PolarSSL.arc4_crypt(_encryptCtx, length, buf, tempbuf);
+                            break;
+                    }
+                    outlength = length + ivLen;
+                    Buffer.BlockCopy(tempbuf, 0, outbuf, ivLen, outlength);
+                }
+                else
+                {
+                    outlength = length;
                     switch (_cipher)
                     {
                         case CIPHER_AES:
@@ -215,36 +215,36 @@ namespace Shadowsocks.Encrypt
 
         public override void Decrypt(byte[] buf, int length, byte[] outbuf, out int outlength)
         {
-            if (_decryptCtx == null)
+            lock (this)
             {
-                InitCipher(ref _decryptCtx, buf, false);
-                outlength = length - ivLen;
-                lock (tempbuf)
+                if (_disposed)
                 {
+                    outbuf = null;
+                    outlength = 0;
+                    return;
+                }
+                if (_decryptCtx == null)
+                {
+                    InitCipher(ref _decryptCtx, buf, false);
+                    outlength = length - ivLen;
                     // C# could be multi-threaded
                     Buffer.BlockCopy(buf, ivLen, tempbuf, 0, length - ivLen);
-                    lock (_decryptCtx)
+                    switch (_cipher)
                     {
-                        switch (_cipher)
-                        {
-                            case CIPHER_AES:
-                                PolarSSL.aes_crypt_cfb128(_decryptCtx, PolarSSL.AES_DECRYPT, length - ivLen, ref _decryptIVOffset, _decryptIV, tempbuf, outbuf);
-                                break;
-                            case CIPHER_BF:
-                                PolarSSL.blowfish_crypt_cfb64(_decryptCtx, PolarSSL.BLOWFISH_DECRYPT, length - ivLen, ref _decryptIVOffset, _decryptIV, tempbuf, outbuf);
-                                break;
-                            case CIPHER_RC4:
-                                PolarSSL.arc4_crypt(_decryptCtx, length - ivLen, tempbuf, outbuf);
-                                break;
-                        }
+                        case CIPHER_AES:
+                            PolarSSL.aes_crypt_cfb128(_decryptCtx, PolarSSL.AES_DECRYPT, length - ivLen, ref _decryptIVOffset, _decryptIV, tempbuf, outbuf);
+                            break;
+                        case CIPHER_BF:
+                            PolarSSL.blowfish_crypt_cfb64(_decryptCtx, PolarSSL.BLOWFISH_DECRYPT, length - ivLen, ref _decryptIVOffset, _decryptIV, tempbuf, outbuf);
+                            break;
+                        case CIPHER_RC4:
+                            PolarSSL.arc4_crypt(_decryptCtx, length - ivLen, tempbuf, outbuf);
+                            break;
                     }
                 }
-            }
-            else
-            {
-                outlength = length;
-                lock (_decryptCtx)
+                else
                 {
+                    outlength = length;
                     switch (_cipher)
                     {
                         case CIPHER_AES:
@@ -284,46 +284,46 @@ namespace Shadowsocks.Encrypt
                     return;
                 }
                 _disposed = true;
-            }
 
-            if (disposing)
-            {
-                if (_encryptCtx != null)
+                if (disposing)
                 {
-                    lock (_encryptCtx)
+                    if (_encryptCtx != null)
                     {
-                        switch (_cipher)
+                        lock (_encryptCtx)
                         {
-                            case CIPHER_AES:
-                                PolarSSL.aes_free(_encryptCtx);
-                                break;
-                            case CIPHER_BF:
-                                PolarSSL.blowfish_free(_encryptCtx);
-                                break;
-                            case CIPHER_RC4:
-                                PolarSSL.arc4_free(_encryptCtx);
-                                break;
+                            switch (_cipher)
+                            {
+                                case CIPHER_AES:
+                                    PolarSSL.aes_free(_encryptCtx);
+                                    break;
+                                case CIPHER_BF:
+                                    PolarSSL.blowfish_free(_encryptCtx);
+                                    break;
+                                case CIPHER_RC4:
+                                    PolarSSL.arc4_free(_encryptCtx);
+                                    break;
+                            }
+                            _encryptCtx = null;
                         }
-                        _encryptCtx = null;
                     }
-                }
-                if (_decryptCtx != null)
-                {
-                    lock (_decryptCtx)
+                    if (_decryptCtx != null)
                     {
-                        switch (_cipher)
+                        lock (_decryptCtx)
                         {
-                            case CIPHER_AES:
-                                PolarSSL.aes_free(_decryptCtx);
-                                break;
-                            case CIPHER_BF:
-                                PolarSSL.blowfish_free(_decryptCtx);
-                                break;
-                            case CIPHER_RC4:
-                                PolarSSL.arc4_free(_decryptCtx);
-                                break;
+                            switch (_cipher)
+                            {
+                                case CIPHER_AES:
+                                    PolarSSL.aes_free(_decryptCtx);
+                                    break;
+                                case CIPHER_BF:
+                                    PolarSSL.blowfish_free(_decryptCtx);
+                                    break;
+                                case CIPHER_RC4:
+                                    PolarSSL.arc4_free(_decryptCtx);
+                                    break;
+                            }
+                            _decryptCtx = null;
                         }
-                        _decryptCtx = null;
                     }
                 }
             }
