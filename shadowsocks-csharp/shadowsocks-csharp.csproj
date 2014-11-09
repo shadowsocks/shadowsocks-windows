@@ -68,6 +68,7 @@
     <Compile Include="3rd\QRCodeCS.cs" />
     <Compile Include="3rd\SimpleJson.cs" />
     <Compile Include="Controller\FileManager.cs" />
+    <Compile Include="Controller\Logging.cs" />
     <Compile Include="Encrypt\EncryptorBase.cs" />
     <Compile Include="Encrypt\EncryptorFactory.cs" />
     <Compile Include="Encrypt\PolarSSL.cs" />

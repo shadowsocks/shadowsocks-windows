@@ -3,6 +3,7 @@ using Shadowsocks.Model;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading;
 
 namespace Shadowsocks.Controller
 {
@@ -27,6 +28,7 @@ namespace Shadowsocks.Controller
 
         public event EventHandler ConfigChanged;
         public event EventHandler EnableStatusChanged;
+        public event EventHandler ShareOverLANStatusChanged;
         
         // when user clicked Edit PAC, and PAC file has already created
         public event EventHandler<PathEventArgs> PACFileReadyToOpen;
@@ -41,18 +43,14 @@ namespace Shadowsocks.Controller
 
             openOnLan = _config.openOnLan;
             polipoRunner = new PolipoRunner();
-            polipoRunner.openOnLan = openOnLan;
-            polipoRunner.Start(_config.GetCurrentServer());
-            local = new Local(_config.GetCurrentServer());
-            local.openOnLan = openOnLan;
-
+            polipoRunner.Start(_config);
+            local = new Local(_config);
             try
             {
                 local.Start();
                 pacServer = new PACServer();
                 pacServer.PACFileChanged += pacServer_PACFileChanged;
-                pacServer.openOnLan = openOnLan;
-                pacServer.Start();
+                pacServer.Start(_config);
             }
             catch (Exception e)
             {
@@ -75,11 +73,9 @@ namespace Shadowsocks.Controller
 
             local.Stop();
             polipoRunner.Stop();
-            polipoRunner.openOnLan = openOnLan;
-            polipoRunner.Start(_config.GetCurrentServer());
+            polipoRunner.Start(_config);
 
-            local = new Local(_config.GetCurrentServer());
-            local.openOnLan = openOnLan;
+            local = new Local(_config);
             local.Start();
 
             pacServer.Stop();
@@ -112,6 +108,18 @@ namespace Shadowsocks.Controller
             if (EnableStatusChanged != null)
             {
                 EnableStatusChanged(this, new EventArgs());
+            }
+        }
+
+        public void ToggleShareOverLAN(bool enabled)
+        {
+            _config.shareOverLan = enabled;
+            SaveConfig(_config);
+            pacServer.Stop();
+            pacServer.Start(_config);
+            if (ShareOverLANStatusChanged != null)
+            {
+                ShareOverLANStatusChanged(this, new EventArgs());
             }
         }
 

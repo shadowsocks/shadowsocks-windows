@@ -29,6 +29,7 @@ namespace Shadowsocks.View
             controller.EnableStatusChanged += controller_EnableStatusChanged;
             controller.ConfigChanged += controller_ConfigChanged;
             controller.PACFileReadyToOpen += controller_PACFileReadyToOpen;
+            controller.ShareOverLANStatusChanged += controller_ShareOverLANStatusChanged;
 
             LoadCurrentConfiguration();
         }
@@ -41,6 +42,11 @@ namespace Shadowsocks.View
         private void controller_EnableStatusChanged(object sender, EventArgs e)
         {
             enableItem.Checked = controller.GetConfiguration().enabled;
+        }
+
+        void controller_ShareOverLANStatusChanged(object sender, EventArgs e)
+        {
+            ShareOverLANItem.Checked = controller.GetConfiguration().shareOverLan;
         }
 
         void controller_PACFileReadyToOpen(object sender, ShadowsocksController.PathEventArgs e)
@@ -150,9 +156,8 @@ namespace Shadowsocks.View
             LoadSelectedServer();
 
             UpdateServersMenu();
-            enableItem.Checked = _modifiedConfiguration.enabled;
-            openOnLanBox.Checked = _modifiedConfiguration.openOnLan;
-            enableLogBox.Checked = _modifiedConfiguration.enableLog;
+            enableItem.Checked = modifiedConfiguration.enabled;
+            ShareOverLANItem.Checked = modifiedConfiguration.shareOverLan;
         }
 
         private void UpdateServersMenu()
@@ -311,6 +316,12 @@ namespace Shadowsocks.View
             controller.ToggleEnable(enableItem.Checked);
         }
 
+        private void ShareOverLANItem_Click(object sender, EventArgs e)
+        {
+            ShareOverLANItem.Checked = !ShareOverLANItem.Checked;
+            controller.ToggleShareOverLAN(ShareOverLANItem.Checked);
+        }
+
         private void EditPACFileItem_Click(object sender, EventArgs e)
         {
             controller.TouchPACFile();
@@ -322,6 +333,13 @@ namespace Shadowsocks.View
             Configuration configuration = controller.GetConfiguration();
             configuration.index = (int)item.Tag;
             controller.SaveConfig(configuration);
+        }
+
+        private void ShowLogItem_Click(object sender, EventArgs e)
+        {
+            string argument = Logging.LogFile;
+
+            System.Diagnostics.Process.Start("notepad.exe", argument);
         }
 
         private void ConfigForm_Shown(object sender, EventArgs e)

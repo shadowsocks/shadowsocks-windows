@@ -15,6 +15,7 @@ namespace Shadowsocks.Model
         public List<Server> configs;
         public int index;
         public bool enabled;
+        public bool shareOverLan;
         public bool isDefault;
         public bool openOnLan;
         public bool enableLog;
