@@ -43,10 +43,10 @@ namespace Shadowsocks.Controller
                 _process.StartInfo.FileName = temppath + "/ss_polipo.exe";
                 _process.StartInfo.Arguments = "-c \"" + temppath + "/polipo.conf\"";
                 _process.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
-                _process.StartInfo.UseShellExecute = false;
+                _process.StartInfo.UseShellExecute = true;
                 _process.StartInfo.CreateNoWindow = true;
-                _process.StartInfo.RedirectStandardOutput = true;
-                _process.StartInfo.RedirectStandardError = true;
+                //_process.StartInfo.RedirectStandardOutput = true;
+                //_process.StartInfo.RedirectStandardError = true;
                 _process.Start();
             }
         }

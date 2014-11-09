@@ -58,12 +58,19 @@ namespace Shadowsocks.Controller
             // some logic in configuration updated the config when saving, we need to read it again
             _config = Configuration.Load();
 
+            pacServer.Stop();
             local.Stop();
+                        
+            // don't put polipoRunner.Start() before pacServer.Stop()
+            // or bind will fail when switching bind address from 0.0.0.0 to 127.0.0.1
+            // though UseShellExecute is set to true now
+            // http://stackoverflow.com/questions/10235093/socket-doesnt-close-after-application-exits-if-a-launched-process-is-open
             polipoRunner.Stop();
             polipoRunner.Start(_config);
 
             local = new Local(_config);
             local.Start();
+            pacServer.Start(_config);
 
             if (ConfigChanged != null)
             {
@@ -98,8 +105,6 @@ namespace Shadowsocks.Controller
         {
             _config.shareOverLan = enabled;
             SaveConfig(_config);
-            pacServer.Stop();
-            pacServer.Start(_config);
             if (ShareOverLANStatusChanged != null)
             {
                 ShareOverLANStatusChanged(this, new EventArgs());
