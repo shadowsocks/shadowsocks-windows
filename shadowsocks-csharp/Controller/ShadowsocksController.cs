@@ -19,6 +19,7 @@ namespace Shadowsocks.Controller
         private Configuration _config;
         private PolipoRunner polipoRunner;
         private bool stopped = false;
+        private bool openOnLan;
 
         public class PathEventArgs : EventArgs
         {
@@ -57,7 +58,7 @@ namespace Shadowsocks.Controller
 
             UpdateSystemProxy();
         }
-
+        
         public Server GetCurrentServer()
         {
             return _config.GetCurrentServer();
