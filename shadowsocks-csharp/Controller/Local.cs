@@ -144,11 +144,14 @@ namespace Shadowsocks.Controller
 
         public void Close()
         {
-            if (closed)
+            lock (this)
             {
-                return;
+                if (closed)
+                {
+                    return;
+                }
+                closed = true;
             }
-            closed = true;
             if (connection != null)
             {
                 try
