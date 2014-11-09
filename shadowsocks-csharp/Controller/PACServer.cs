@@ -61,19 +61,6 @@ namespace Shadowsocks.Controller
             _listener = null;
         }
 
-        public void Stop()
-        {
-            try
-            {
-                _listener.Close();
-            }
-            catch (Exception)
-            {
-                
-                throw;
-            }
-        }
-
         public string TouchPACFile()
         {
             if (File.Exists(PAC_FILE))

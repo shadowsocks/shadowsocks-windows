@@ -66,8 +66,6 @@
             this.AddButton = new System.Windows.Forms.Button();
             this.ServerGroupBox = new System.Windows.Forms.GroupBox();
             this.ServersListBox = new System.Windows.Forms.ListBox();
-            this.openOnLanBox = new System.Windows.Forms.CheckBox();
-            this.enableLogBox = new System.Windows.Forms.CheckBox();
             this.tableLayoutPanel1.SuspendLayout();
             this.panel1.SuspendLayout();
             this.panel3.SuspendLayout();
@@ -420,27 +418,6 @@
             this.ServersListBox.TabIndex = 5;
             this.ServersListBox.SelectedIndexChanged += new System.EventHandler(this.ServersListBox_SelectedIndexChanged);
             // 
-            // openOnLanBox
-            // 
-            this.openOnLanBox.AutoSize = true;
-            this.openOnLanBox.Location = new System.Drawing.Point(16, 260);
-            this.openOnLanBox.Name = "openOnLanBox";
-            this.openOnLanBox.Size = new System.Drawing.Size(90, 17);
-            this.openOnLanBox.TabIndex = 7;
-            this.openOnLanBox.Text = "Open On Lan";
-            this.openOnLanBox.UseVisualStyleBackColor = true;
-            // 
-            // enableLogBox
-            // 
-            this.enableLogBox.AutoSize = true;
-            this.enableLogBox.Location = new System.Drawing.Point(112, 260);
-            this.enableLogBox.Name = "enableLogBox";
-            this.enableLogBox.Size = new System.Drawing.Size(80, 17);
-            this.enableLogBox.TabIndex = 7;
-            this.enableLogBox.Text = "Enable Log";
-            this.enableLogBox.UseVisualStyleBackColor = true;
-            this.enableLogBox.CheckedChanged += new System.EventHandler(this.enableLogBox_CheckedChanged);
-            // 
             // ConfigForm
             // 
             this.AcceptButton = this.OKButton;
@@ -449,8 +426,6 @@
             this.AutoSize = true;
             this.CancelButton = this.MyCancelButton;
             this.ClientSize = new System.Drawing.Size(489, 286);
-            this.Controls.Add(this.enableLogBox);
-            this.Controls.Add(this.openOnLanBox);
             this.Controls.Add(this.ServersListBox);
             this.Controls.Add(this.ServerGroupBox);
             this.Controls.Add(this.panel1);
@@ -459,7 +434,6 @@
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
-            this.MinimizeBox = false;
             this.Name = "ConfigForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Edit Servers";

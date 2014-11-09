@@ -156,8 +156,8 @@ namespace Shadowsocks.View
             LoadSelectedServer();
 
             UpdateServersMenu();
-            enableItem.Checked = modifiedConfiguration.enabled;
-            ShareOverLANItem.Checked = modifiedConfiguration.shareOverLan;
+            enableItem.Checked = _modifiedConfiguration.enabled;
+            ShareOverLANItem.Checked = _modifiedConfiguration.shareOverLan;
         }
 
         private void UpdateServersMenu()
@@ -280,7 +280,7 @@ namespace Shadowsocks.View
                 MessageBox.Show("Please add at least one server");
                 return;
             }
-            controller.SaveServers(modifiedConfiguration.configs);
+            controller.SaveServers(_modifiedConfiguration.configs, _modifiedConfiguration.noChange);
             this.Hide();
             ShowFirstTimeBalloon();
         }
