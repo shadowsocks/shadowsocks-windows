@@ -314,7 +314,7 @@ namespace Shadowsocks.Controller
                 }
                 else
                 {
-                    Console.WriteLine("bytesRead: " + bytesRead.ToString());
+                    //Console.WriteLine("bytesRead: " + bytesRead.ToString());
                     this.Close();
                 }
             }
