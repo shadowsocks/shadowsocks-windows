@@ -25,7 +25,7 @@ namespace Shadowsocks.View
         private void GenQR(string ssconfig)
         {
             string qrText = ssconfig;
-            QRCode4CS.QRCode qrCoded = new QRCode4CS.QRCode(6, QRErrorCorrectLevel.M);
+            QRCode4CS.QRCode qrCoded = new QRCode4CS.QRCode(10, QRErrorCorrectLevel.M);
             qrCoded.AddData(qrText);
             qrCoded.Make();
             int blockSize = 5;
