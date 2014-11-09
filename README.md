@@ -3,6 +3,8 @@ Shadowsocks for Windows
 
 [![Build Status]][Appveyor]
 
+Currently beta. Please file an issue if you find any bugs.
+
 ### Features
 
 1. Native Windows UI
@@ -19,9 +21,6 @@ Download [latest release].
 For Windows 7 and older, please download Shadowsocks-win-x.x.x.zip.
 
 For Windows 8.1 and newer, please download Shadowsocks-win-dotnet4.0-x.x.x.zip.
-
-Notice there's a bug on .Net 4.0 version. If you encounter crashes, try using
-.Net 2.0 version. Please help us resolve this issue if you have any clue.
 
 ### Usage
 
