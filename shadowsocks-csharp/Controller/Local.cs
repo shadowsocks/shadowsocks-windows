@@ -112,6 +112,9 @@ namespace Shadowsocks.Controller
         public byte[] connetionSendBuffer = new byte[BufferSize];
         // Received data string.
         public StringBuilder sb = new StringBuilder();
+
+        private bool connectionShutdown = false;
+        private bool remoteShutdown = false;
         private bool closed = false;
 
         public void Start()
@@ -144,6 +147,14 @@ namespace Shadowsocks.Controller
             }
         }
 
+        private void CheckClose()
+        {
+            if (connectionShutdown && remoteShutdown)
+            {
+                this.Close();
+            }
+        }
+
         public void Close()
         {
             lock (this)
@@ -158,7 +169,8 @@ namespace Shadowsocks.Controller
             {
                 try
                 {
-                    connection.Shutdown(SocketShutdown.Send);
+                    connection.Shutdown(SocketShutdown.Both);
+                    connection.Close();
                 }
                 catch (Exception e)
                 {
@@ -169,7 +181,8 @@ namespace Shadowsocks.Controller
             {
                 try
                 {
-                    remote.Shutdown(SocketShutdown.Send);
+                    remote.Shutdown(SocketShutdown.Both);
+                    remote.Close();
                 }
                 catch (SocketException e)
                 {
@@ -320,7 +333,9 @@ namespace Shadowsocks.Controller
                 else
                 {
                     //Console.WriteLine("bytesRead: " + bytesRead.ToString());
-                    this.Close();
+                    connection.Shutdown(SocketShutdown.Send);
+                    connectionShutdown = true;
+                    CheckClose();
                 }
             }
             catch (Exception e)
@@ -345,7 +360,9 @@ namespace Shadowsocks.Controller
                 }
                 else
                 {
-                    this.Close();
+                    remote.Shutdown(SocketShutdown.Send);
+                    remoteShutdown = true;
+                    CheckClose();
                 }
             }
             catch (Exception e)
