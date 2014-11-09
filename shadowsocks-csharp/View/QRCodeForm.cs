@@ -25,35 +25,51 @@ namespace Shadowsocks.View
         private void GenQR(string ssconfig)
         {
             string qrText = ssconfig;
-            QRCode4CS.QRCode qrCoded = new QRCode4CS.QRCode(6, QRErrorCorrectLevel.H);
-            qrCoded.AddData(qrText);
-            qrCoded.Make();
-            int blockSize = 5;
-            Bitmap drawArea = new Bitmap((qrCoded.GetModuleCount() * blockSize), (qrCoded.GetModuleCount() * blockSize));
-            for (int row = 0; row < qrCoded.GetModuleCount(); row++)
+            QRCode4CS.Options options = new QRCode4CS.Options();
+            options.Text = qrText;
+            QRCode4CS.QRCode qrCoded = null;
+            bool success = false;
+            foreach (var level in new QRErrorCorrectLevel[]{QRErrorCorrectLevel.H, QRErrorCorrectLevel.Q, QRErrorCorrectLevel.M, QRErrorCorrectLevel.L})
             {
-                for (int col = 0; col < qrCoded.GetModuleCount(); col++)
+                for (int i = 3; i < 10; i++)
                 {
-                    bool isDark = qrCoded.IsDark(row, col);
-                    if (isDark)
+                    try
                     {
-                        for (int y = 0; y < blockSize; y++)
-                        {
-                            int myCol = (blockSize * (col - 1)) + (y + blockSize);
-                            for (int x = 0; x < blockSize; x++)
-                            {
-                                drawArea.SetPixel((blockSize * (row - 1)) + (x + blockSize), myCol, Color.Black);
-                            }
-                        }
+                        options.TypeNumber = i;
+                        options.CorrectLevel = level;
+                        qrCoded = new QRCode4CS.QRCode(options);
+                        qrCoded.Make();
+                        success = true;
+                        break;
                     }
-                    else
+                    catch
                     {
-                        for (int y = 0; y < blockSize; y++)
+                        qrCoded = null;
+                        continue;
+                    }
+                }
+                if (success)
+                    break;
+            }
+            if (qrCoded == null)
+            {
+                return;
+            }
+            int blockSize = Math.Max(200 / qrCoded.GetModuleCount(), 1);
+            Bitmap drawArea = new Bitmap((qrCoded.GetModuleCount() * blockSize), (qrCoded.GetModuleCount() * blockSize));
+            using (Graphics g = Graphics.FromImage(drawArea))
+            {
+                g.Clear(Color.White);
+                using (Brush b = new SolidBrush(Color.Black))
+                {
+                    for (int row = 0; row < qrCoded.GetModuleCount(); row++)
+                    {
+                        for (int col = 0; col < qrCoded.GetModuleCount(); col++)
                         {
-                            int myCol = (blockSize * (col - 1)) + (y + blockSize);
-                            for (int x = 0; x < blockSize; x++)
+                            bool isDark = qrCoded.IsDark(row, col);
+                            if (isDark)
                             {
-                                drawArea.SetPixel((blockSize * (row - 1)) + (x + blockSize), myCol, Color.White);
+                                g.FillRectangle(b, blockSize * row, blockSize * col, blockSize, blockSize);
                             }
                         }
                     }
