@@ -1,4 +1,5 @@
-﻿using Shadowsocks.Model;
+﻿using System.IO;
+using Shadowsocks.Model;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -18,6 +19,7 @@ namespace Shadowsocks.Controller
         private Configuration _config;
         private PolipoRunner polipoRunner;
         private bool stopped = false;
+        private bool openOnLan;
 
         public class PathEventArgs : EventArgs
         {
@@ -34,6 +36,12 @@ namespace Shadowsocks.Controller
         public ShadowsocksController()
         {
             _config = Configuration.Load();
+            if (_config.enableLog)
+            {
+                SetLog();
+            }
+
+            openOnLan = _config.openOnLan;
             polipoRunner = new PolipoRunner();
             polipoRunner.Start(_config);
             local = new Local(_config);
@@ -51,7 +59,7 @@ namespace Shadowsocks.Controller
 
             UpdateSystemProxy();
         }
-
+        
         public Server GetCurrentServer()
         {
             return _config.GetCurrentServer();
@@ -63,9 +71,10 @@ namespace Shadowsocks.Controller
             return Configuration.Load();
         }
 
-        public void SaveServers(List<Server> servers)
+        public void SaveServers(List<Server> servers, bool noChange)
         {
             _config.configs = servers;
+            _config.noChange = noChange;
             SaveConfig(_config);
         }
 
@@ -83,6 +92,7 @@ namespace Shadowsocks.Controller
         public void ToggleShareOverLAN(bool enabled)
         {
             _config.shareOverLan = enabled;
+            _config.noChange = false;
             SaveConfig(_config);
             if (ShareOverLANStatusChanged != null)
             {
@@ -132,6 +142,10 @@ namespace Shadowsocks.Controller
         protected void SaveConfig(Configuration newConfig)
         {
             Configuration.Save(newConfig);
+            if (newConfig.noChange)
+            {
+                return;
+            }
             // some logic in configuration updated the config when saving, we need to read it again
             _config = Configuration.Load();
 
@@ -171,6 +185,23 @@ namespace Shadowsocks.Controller
         private void pacServer_PACFileChanged(object sender, EventArgs e)
         {
             UpdateSystemProxy();
+        }
+
+        private void SetLog()
+        {
+                try
+                {
+                    FileStream fs = new FileStream("shadowsocks.log", FileMode.Append);
+                    TextWriter tmp = Console.Out;
+                    StreamWriter sw = new StreamWriter(fs);
+                    sw.AutoFlush = true;
+                    Console.SetOut(sw);
+                    Console.SetError(sw);
+                }
+                catch (IOException e)
+                {
+                    Console.WriteLine(e.ToString());
+                }
         }
 
     }

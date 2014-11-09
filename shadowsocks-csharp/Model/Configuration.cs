@@ -17,6 +17,9 @@ namespace Shadowsocks.Model
         public bool enabled;
         public bool shareOverLan;
         public bool isDefault;
+        public bool openOnLan;
+        public bool enableLog;
+        public bool noChange;
 
         private static string CONFIG_FILE = "gui-config.json";
 
