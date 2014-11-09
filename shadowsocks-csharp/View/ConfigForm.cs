@@ -14,6 +14,7 @@ namespace Shadowsocks.View
     {
         private ShadowsocksController controller;
         private UpdateChecker updateChecker;
+        private AboutForm aboutForm;
 
         // this is a copy of configuration that we are working on
         private Configuration _modifiedConfiguration;
@@ -320,7 +321,9 @@ namespace Shadowsocks.View
 
         private void AboutItem_Click(object sender, EventArgs e)
         {
-            Process.Start("https://github.com/clowwindy/shadowsocks-csharp");
+            aboutForm = new AboutForm();
+            aboutForm.Show();
+            //Process.Start("https://github.com/clowwindy/shadowsocks-csharp");
         }
 
         private void notifyIcon1_DoubleClick(object sender, EventArgs e)
