@@ -23,7 +23,7 @@ namespace Shadowsocks
         [STAThread]
         static void Main()
         {
-            using (Mutex mutex = new Mutex(false, "Global\\" + Assembly.GetExecutingAssembly().GetType().GUID.ToString()))
+            using (Mutex mutex = new Mutex(false, "Global\\" + "71981632-A427-497F-AB91-241CD227EC1F"))
             {
                 if (!mutex.WaitOne(0, false))
                 {
