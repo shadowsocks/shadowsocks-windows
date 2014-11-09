@@ -33,7 +33,7 @@ namespace Shadowsocks.Controller
                 new AsyncCallback(AcceptCallback),
                 listener);
 
-            watchPACFile();
+            WatchPacFile();
         }
 
         public string TouchPACFile()
@@ -61,7 +61,7 @@ namespace Shadowsocks.Controller
                 Socket conn = listener.EndAccept(ar);
 
                 conn.BeginReceive(new byte[1024], 0, 1024, 0,
-                    new AsyncCallback(receiveCallback), conn);
+                    new AsyncCallback(ReceiveCallback), conn);
             }
             catch (Exception e)
             {
@@ -69,7 +69,7 @@ namespace Shadowsocks.Controller
             }
         }
 
-        private string getPACContent()
+        private string GetPACContent()
         {
             if (File.Exists(PAC_FILE))
             {
@@ -92,17 +92,17 @@ namespace Shadowsocks.Controller
                     return System.Text.Encoding.UTF8.GetString(buffer, 0, n);
                 }
             }
-            watchPACFile();
+            WatchPacFile();
         }
 
-        private void receiveCallback(IAsyncResult ar)
+        private void ReceiveCallback(IAsyncResult ar)
         {
             Socket conn = (Socket)ar.AsyncState;
             try
             {
                 int bytesRead = conn.EndReceive(ar);
 
-                string pac = getPACContent();
+                string pac = GetPACContent();
 
                 string proxy = "PROXY 127.0.0.1:8123;";
 
@@ -118,7 +118,7 @@ Connection: Close
 
 ", System.Text.Encoding.UTF8.GetBytes(pac).Length) + pac;
                     byte[] response = System.Text.Encoding.UTF8.GetBytes(text);
-                    conn.BeginSend(response, 0, response.Length, 0, new AsyncCallback(sendCallback), conn);
+                    conn.BeginSend(response, 0, response.Length, 0, new AsyncCallback(SendCallback), conn);
                 }
                 else
                 {
@@ -132,13 +132,13 @@ Connection: Close
             }
         }
 
-        private void sendCallback(IAsyncResult ar)
+        private void SendCallback(IAsyncResult ar)
         {
             Socket conn = (Socket)ar.AsyncState;
             conn.Shutdown(SocketShutdown.Send);
         }
 
-        private void watchPACFile()
+        private void WatchPacFile()
         {
             if (watcher != null)
             {
@@ -147,14 +147,14 @@ Connection: Close
             watcher = new FileSystemWatcher(Directory.GetCurrentDirectory());
             watcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.DirectoryName;
             watcher.Filter = PAC_FILE;
-            watcher.Changed += watcher_Changed;
-            watcher.Created += watcher_Changed;
-            watcher.Deleted += watcher_Changed;
-            watcher.Renamed += watcher_Changed;
+            watcher.Changed += Watcher_Changed;
+            watcher.Created += Watcher_Changed;
+            watcher.Deleted += Watcher_Changed;
+            watcher.Renamed += Watcher_Changed;
             watcher.EnableRaisingEvents = true;
         }
 
-        void watcher_Changed(object sender, FileSystemEventArgs e)
+        private void Watcher_Changed(object sender, FileSystemEventArgs e)
         {
             if (PACFileChanged != null)
             {

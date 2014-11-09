@@ -130,10 +130,4 @@
   <data name="proxy_pac_txt" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Data\proxy.pac.txt.gz;System.Byte[], mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="qrcode" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Data\qrcode.htm;System.String, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;gb2312</value>
-  </data>
-  <data name="qrcode_min_js" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Data\qrcode.min.js.gz;System.Byte[], mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
 </root>

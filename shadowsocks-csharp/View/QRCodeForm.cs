@@ -1,4 +1,5 @@
-﻿using Shadowsocks.Properties;
+﻿using QRCode4CS;
+using Shadowsocks.Properties;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -21,32 +22,49 @@ namespace Shadowsocks.View
             InitializeComponent();
         }
 
-        private string QRCodeHTML(string ssURL)
+        private void GenQR(string ssconfig)
         {
-            string html = Resources.qrcode;
-            string qrcodeLib;
-
-            byte[] qrcodeGZ = Resources.qrcode_min_js;
-            byte[] buffer = new byte[1024 * 1024];  // builtin pac gzip size: maximum 1M
-            int n;
-
-            using (GZipStream input = new GZipStream(new MemoryStream(qrcodeGZ),
-                CompressionMode.Decompress, false))
+            string qrText = ssconfig;
+            QRCode4CS.QRCode qrCoded = new QRCode4CS.QRCode(6, QRErrorCorrectLevel.H);
+            qrCoded.AddData(qrText);
+            qrCoded.Make();
+            int blockSize = 5;
+            Bitmap drawArea = new Bitmap((qrCoded.GetModuleCount() * blockSize), (qrCoded.GetModuleCount() * blockSize));
+            for (int row = 0; row < qrCoded.GetModuleCount(); row++)
             {
-                n = input.Read(buffer, 0, buffer.Length);
-                if (n == 0)
+                for (int col = 0; col < qrCoded.GetModuleCount(); col++)
                 {
-                    throw new IOException("can not decompress qrcode lib");
+                    bool isDark = qrCoded.IsDark(row, col);
+                    if (isDark)
+                    {
+                        for (int y = 0; y < blockSize; y++)
+                        {
+                            int myCol = (blockSize * (col - 1)) + (y + blockSize);
+                            for (int x = 0; x < blockSize; x++)
+                            {
+                                drawArea.SetPixel((blockSize * (row - 1)) + (x + blockSize), myCol, Color.Black);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        for (int y = 0; y < blockSize; y++)
+                        {
+                            int myCol = (blockSize * (col - 1)) + (y + blockSize);
+                            for (int x = 0; x < blockSize; x++)
+                            {
+                                drawArea.SetPixel((blockSize * (row - 1)) + (x + blockSize), myCol, Color.White);
+                            }
+                        }
+                    }
                 }
-                qrcodeLib = System.Text.Encoding.UTF8.GetString(buffer, 0, n);
             }
-            string result = html.Replace("__QRCODELIB__", qrcodeLib);
-            return result.Replace("__SSURL__", ssURL);
+            pictureBox1.Image = drawArea;
         }
 
         private void QRCodeForm_Load(object sender, EventArgs e)
         {
-            QRCodeWebBrowser.DocumentText = QRCodeHTML(code);
+            GenQR(code);
         }
     }
 }

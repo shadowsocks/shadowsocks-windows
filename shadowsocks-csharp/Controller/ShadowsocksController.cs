@@ -14,7 +14,7 @@ namespace Shadowsocks.Controller
 
         private Local local;
         private PACServer pacServer;
-        private Configuration config;
+        private Configuration _config;
         private PolipoRunner polipoRunner;
         private bool stopped = false;
 
@@ -31,10 +31,10 @@ namespace Shadowsocks.Controller
 
         public ShadowsocksController()
         {
-            config = Configuration.Load();
+            _config = Configuration.Load();
             polipoRunner = new PolipoRunner();
-            polipoRunner.Start(config.GetCurrentServer());
-            local = new Local(config.GetCurrentServer());
+            polipoRunner.Start(_config.GetCurrentServer());
+            local = new Local(_config.GetCurrentServer());
             try
             {
                 local.Start();
@@ -47,20 +47,20 @@ namespace Shadowsocks.Controller
                 Console.WriteLine(e.Message);
             }
 
-            updateSystemProxy();
+            UpdateSystemProxy();
         }
 
         public void SaveConfig(Configuration newConfig)
         {
             Configuration.Save(newConfig);
             // some logic in configuration updated the config when saving, we need to read it again
-            config = Configuration.Load();
+            _config = Configuration.Load();
 
             local.Stop();
             polipoRunner.Stop();
-            polipoRunner.Start(config.GetCurrentServer());
+            polipoRunner.Start(_config.GetCurrentServer());
 
-            local = new Local(config.GetCurrentServer());
+            local = new Local(_config.GetCurrentServer());
             local.Start();
 
             if (ConfigChanged != null)
@@ -71,7 +71,7 @@ namespace Shadowsocks.Controller
 
         public Server GetCurrentServer()
         {
-            return config.GetCurrentServer();
+            return _config.GetCurrentServer();
         }
 
         // always return copy
@@ -83,9 +83,9 @@ namespace Shadowsocks.Controller
 
         public void ToggleEnable(bool enabled)
         {
-            config.enabled = enabled;
-            updateSystemProxy();
-            SaveConfig(config);
+            _config.enabled = enabled;
+            UpdateSystemProxy();
+            SaveConfig(_config);
             if (EnableStatusChanged != null)
             {
                 EnableStatusChanged(this, new EventArgs());
@@ -101,7 +101,7 @@ namespace Shadowsocks.Controller
             stopped = true;
             local.Stop();
             polipoRunner.Stop();
-            if (config.enabled)
+            if (_config.enabled)
             {
                 SystemProxy.Disable();
             }
@@ -124,9 +124,9 @@ namespace Shadowsocks.Controller
             return "ss://" + base64;
         }
 
-        private void updateSystemProxy()
+        private void UpdateSystemProxy()
         {
-            if (config.enabled)
+            if (_config.enabled)
             {
                 SystemProxy.Enable();
             }
@@ -138,7 +138,7 @@ namespace Shadowsocks.Controller
 
         private void pacServer_PACFileChanged(object sender, EventArgs e)
         {
-            updateSystemProxy();
+            UpdateSystemProxy();
         }
 
     }

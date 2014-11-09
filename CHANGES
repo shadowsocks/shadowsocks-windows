@@ -1,3 +1,7 @@
+2.0.4
+- Try to fix data corruption
+- Remove all configuration except x86
+
 2.0.3
 - Support QRCode generation
 - Fix compatibility issues with some Chrome version
