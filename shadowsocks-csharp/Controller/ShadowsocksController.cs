@@ -34,21 +34,6 @@ namespace Shadowsocks.Controller
 
         public ShadowsocksController()
         {
-            _config = Configuration.Load();
-            if (_config.enableLog)
-            {
-                SetLog();
-            }
-<<<<<<< HEAD
-=======
-
-            openOnLan = _config.openOnLan;
-            polipoRunner = new PolipoRunner();
-            polipoRunner.openOnLan = openOnLan;
-            polipoRunner.Start(_config.GetCurrentServer());
-            local = new Local(_config.GetCurrentServer());
-            local.openOnLan = openOnLan;
->>>>>>> 835265b... add log switch and modify detector
 
             polipoRunner = new PolipoRunner();
             polipoRunner.Start(_config);
@@ -68,39 +53,6 @@ namespace Shadowsocks.Controller
             UpdateSystemProxy();
         }
 
-<<<<<<< HEAD
-=======
-        public void SaveConfig(Configuration newConfig)
-        {
-            Configuration.Save(newConfig);
-            if (newConfig.noChange && newConfig.openOnLan == openOnLan)
-            {
-                return;
-            }
-            // some logic in configuration updated the config when saving, we need to read it again
-            _config = Configuration.Load();
-            openOnLan = _config.openOnLan;
-
-            local.Stop();
-            polipoRunner.Stop();
-            polipoRunner.openOnLan = openOnLan;
-            polipoRunner.Start(_config.GetCurrentServer());
-
-            local = new Local(_config.GetCurrentServer());
-            local.openOnLan = openOnLan;
-            local.Start();
-
-            pacServer.Stop();
-            pacServer.openOnLan = openOnLan;
-            pacServer.Start();
-
-            if (ConfigChanged != null)
-            {
-                ConfigChanged(this, new EventArgs());
-            }
-        }
-
->>>>>>> 835265b... add log switch and modify detector
         public Server GetCurrentServer()
         {
             return _config.GetCurrentServer();
@@ -227,23 +179,5 @@ namespace Shadowsocks.Controller
         {
             UpdateSystemProxy();
         }
-
-        private void SetLog()
-        {
-                try
-                {
-                    FileStream fs = new FileStream("shadowsocks.log", FileMode.Append);
-                    TextWriter tmp = Console.Out;
-                    StreamWriter sw = new StreamWriter(fs);
-                    sw.AutoFlush = true;
-                    Console.SetOut(sw);
-                    Console.SetError(sw);
-                }
-                catch (IOException e)
-                {
-                    Console.WriteLine(e.ToString());
-                }
-        }
-
     }
 }

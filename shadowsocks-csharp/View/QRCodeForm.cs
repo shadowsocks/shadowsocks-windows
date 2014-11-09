@@ -24,22 +24,12 @@ namespace Shadowsocks.View
 
         private void GenQR(string ssconfig)
         {
-<<<<<<< HEAD
             string qrText = ssconfig;
             QRCode4CS.Options options = new QRCode4CS.Options();
             options.Text = qrText;
             QRCode4CS.QRCode qrCoded = null;
             bool success = false;
             foreach (var level in new QRErrorCorrectLevel[]{QRErrorCorrectLevel.H, QRErrorCorrectLevel.Q, QRErrorCorrectLevel.M, QRErrorCorrectLevel.L})
-=======
-            string qrText = ssconfig;
-            QRCode4CS.QRCode qrCoded = new QRCode4CS.QRCode(6, QRErrorCorrectLevel.L);
-            qrCoded.AddData(qrText);
-            qrCoded.Make();
-            int blockSize = 5;
-            Bitmap drawArea = new Bitmap((qrCoded.GetModuleCount() * blockSize), (qrCoded.GetModuleCount() * blockSize));
-            for (int row = 0; row < qrCoded.GetModuleCount(); row++)
->>>>>>> 7d539d3... add modify detector
             {
                 for (int i = 3; i < 10; i++)
                 {

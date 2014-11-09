@@ -68,7 +68,7 @@ namespace Shadowsocks.View
             notifyIcon1.BalloonTipIcon = ToolTipIcon.Info;
             notifyIcon1.BalloonTipClicked += notifyIcon1_BalloonTipClicked;
             notifyIcon1.ShowBalloonTip(5000);
-            isFirstRun = false;
+            _isFirstRun = false;
         }
 
         void notifyIcon1_BalloonTipClicked(object sender, EventArgs e)

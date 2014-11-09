@@ -46,12 +46,8 @@ namespace Shadowsocks
                     Console.WriteLine(e.ToString());
                 }
                 LoadLibrary(dllPath);
-<<<<<<< HEAD
 
                 Logging.OpenLogFile();
-=======
-
->>>>>>> 835265b... add log switch and modify detector
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
                 ShadowsocksController controller = new ShadowsocksController();
