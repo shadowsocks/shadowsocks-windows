@@ -59,35 +59,7 @@ namespace Shadowsocks.Controller
 
             UpdateSystemProxy();
         }
-
-        public void SaveConfig(Configuration newConfig)
-        {
-            Configuration.Save(newConfig);
-            if (newConfig.noChange && newConfig.openOnLan == openOnLan)
-            {
-                return;
-            }
-            // some logic in configuration updated the config when saving, we need to read it again
-            _config = Configuration.Load();
-            openOnLan = _config.openOnLan;
-
-            local.Stop();
-            polipoRunner.Stop();
-            polipoRunner.Start(_config);
-
-            local = new Local(_config);
-            local.Start();
-
-            pacServer.Stop();
-            pacServer.openOnLan = openOnLan;
-            pacServer.Start();
-
-            if (ConfigChanged != null)
-            {
-                ConfigChanged(this, new EventArgs());
-            }
-        }
-
+        
         public Server GetCurrentServer()
         {
             return _config.GetCurrentServer();
@@ -99,6 +71,11 @@ namespace Shadowsocks.Controller
             return Configuration.Load();
         }
 
+        public void SaveServers(List<Server> servers)
+        {
+            _config.configs = servers;
+            SaveConfig(_config);
+        }
 
         public void ToggleEnable(bool enabled)
         {
@@ -115,12 +92,16 @@ namespace Shadowsocks.Controller
         {
             _config.shareOverLan = enabled;
             SaveConfig(_config);
-            pacServer.Stop();
-            pacServer.Start(_config);
             if (ShareOverLANStatusChanged != null)
             {
                 ShareOverLANStatusChanged(this, new EventArgs());
             }
+        }
+
+        public void SelectServerIndex(int index)
+        {
+            _config.index = index;
+            SaveConfig(_config);
         }
 
         public void Stop()
@@ -154,6 +135,34 @@ namespace Shadowsocks.Controller
             string base64 = System.Convert.ToBase64String(Encoding.UTF8.GetBytes(parts));
             return "ss://" + base64;
         }
+
+
+        protected void SaveConfig(Configuration newConfig)
+        {
+            Configuration.Save(newConfig);
+            // some logic in configuration updated the config when saving, we need to read it again
+            _config = Configuration.Load();
+
+            pacServer.Stop();
+            local.Stop();
+
+            // don't put polipoRunner.Start() before pacServer.Stop()
+            // or bind will fail when switching bind address from 0.0.0.0 to 127.0.0.1
+            // though UseShellExecute is set to true now
+            // http://stackoverflow.com/questions/10235093/socket-doesnt-close-after-application-exits-if-a-launched-process-is-open
+            polipoRunner.Stop();
+            polipoRunner.Start(_config);
+
+            local = new Local(_config);
+            local.Start();
+            pacServer.Start(_config);
+
+            if (ConfigChanged != null)
+            {
+                ConfigChanged(this, new EventArgs());
+            }
+        }
+
 
         private void UpdateSystemProxy()
         {

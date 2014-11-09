@@ -280,9 +280,7 @@ namespace Shadowsocks.View
                 MessageBox.Show("Please add at least one server");
                 return;
             }
-            _modifiedConfiguration.openOnLan = openOnLanBox.Checked;
-            _modifiedConfiguration.enableLog = enableLogBox.Checked;
-            controller.SaveConfig(_modifiedConfiguration);
+            controller.SaveServers(modifiedConfiguration.configs);
             this.Hide();
             ShowFirstTimeBalloon();
         }
@@ -330,9 +328,7 @@ namespace Shadowsocks.View
         private void AServerItem_Click(object sender, EventArgs e)
         {
             MenuItem item = (MenuItem)sender;
-            Configuration configuration = controller.GetConfiguration();
-            configuration.index = (int)item.Tag;
-            controller.SaveConfig(configuration);
+            controller.SelectServerIndex((int)item.Tag);
         }
 
         private void ShowLogItem_Click(object sender, EventArgs e)
