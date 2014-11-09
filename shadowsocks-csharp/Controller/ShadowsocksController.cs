@@ -19,7 +19,6 @@ namespace Shadowsocks.Controller
         private Configuration _config;
         private PolipoRunner polipoRunner;
         private bool stopped = false;
-        private bool openOnLan;
 
         public class PathEventArgs : EventArgs
         {
@@ -36,12 +35,6 @@ namespace Shadowsocks.Controller
         public ShadowsocksController()
         {
             _config = Configuration.Load();
-            if (_config.enableLog)
-            {
-                SetLog();
-            }
-
-            openOnLan = _config.openOnLan;
             polipoRunner = new PolipoRunner();
             polipoRunner.Start(_config);
             local = new Local(_config);
