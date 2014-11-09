@@ -62,7 +62,7 @@ namespace Shadowsocks.View
         void updateChecker_NewVersionFound(object sender, EventArgs e)
         {
             notifyIcon1.BalloonTipTitle = "Shadowsocks " + updateChecker.LatestVersionNumber + " Update Found";
-            notifyIcon1.BalloonTipText = "You can click here to download";
+            notifyIcon1.BalloonTipText = "Click here to download";
             notifyIcon1.BalloonTipIcon = ToolTipIcon.Info;
             notifyIcon1.BalloonTipClicked += notifyIcon1_BalloonTipClicked;
             notifyIcon1.ShowBalloonTip(5000);
