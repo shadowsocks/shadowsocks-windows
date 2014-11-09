@@ -301,7 +301,7 @@ namespace Shadowsocks.View
                 MessageBox.Show("Please add at least one server");
                 return;
             }
-            controller.SaveConfig(_modifiedConfiguration);
+            controller.SaveServers(_modifiedConfiguration.configs, _modifiedConfiguration.noChange);
             this.Hide();
             ShowFirstTimeBalloon();
         }
