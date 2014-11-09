@@ -179,23 +179,5 @@ namespace Shadowsocks.Controller
         {
             UpdateSystemProxy();
         }
-
-        private void SetLog()
-        {
-                try
-                {
-                    FileStream fs = new FileStream("shadowsocks.log", FileMode.Append);
-                    TextWriter tmp = Console.Out;
-                    StreamWriter sw = new StreamWriter(fs);
-                    sw.AutoFlush = true;
-                    Console.SetOut(sw);
-                    Console.SetError(sw);
-                }
-                catch (IOException e)
-                {
-                    Console.WriteLine(e.ToString());
-                }
-        }
-
     }
 }
