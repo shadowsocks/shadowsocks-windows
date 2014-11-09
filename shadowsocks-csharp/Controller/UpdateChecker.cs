@@ -121,7 +121,6 @@ namespace Shadowsocks.Controller
                     {
                         if (attr.Name == "url")
                         {
-                            Console.WriteLine(attr.Value);
                             if (IsNewVersion(attr.Value))
                             {
                                 versions.Add(attr.Value);

@@ -70,6 +70,7 @@ namespace Shadowsocks.Controller
             {
                 Socket listener = (Socket)ar.AsyncState;
                 Socket conn = listener.EndAccept(ar);
+                conn.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.NoDelay, true);
 
                 listener.BeginAccept(
                     new AsyncCallback(AcceptCallback),
@@ -130,6 +131,7 @@ namespace Shadowsocks.Controller
 
                 remote = new Socket(ipAddress.AddressFamily,
                     SocketType.Stream, ProtocolType.Tcp);
+                remote.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.NoDelay, true);
 
                 // Connect to the remote endpoint.
                 remote.BeginConnect(remoteEP,
