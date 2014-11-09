@@ -66,8 +66,7 @@ namespace Shadowsocks.View
                     {
                         for (int col = 0; col < qrCoded.GetModuleCount(); col++)
                         {
-                            bool isDark = qrCoded.IsDark(row, col);
-                            if (isDark)
+                            if (qrCoded.IsDark(row, col))
                             {
                                 g.FillRectangle(b, blockSize * row, blockSize * col, blockSize, blockSize);
                             }
