@@ -1,4 +1,5 @@
-﻿using Shadowsocks.Properties;
+﻿using Shadowsocks.Model;
+using Shadowsocks.Properties;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -12,28 +13,51 @@ namespace Shadowsocks.Controller
 {
     class PACServer
     {
+        private static int PORT = 8090;
         private static string PAC_FILE = "pac.txt";
 
-        Socket listener;
+        Socket _listener;
         FileSystemWatcher watcher;
 
         public event EventHandler PACFileChanged;
 
-        public void Start()
+        public void Start(Configuration configuration)
         {
-            // Create a TCP/IP socket.
-            listener = new Socket(AddressFamily.InterNetwork,
-                SocketType.Stream, ProtocolType.Tcp);
-            IPEndPoint localEndPoint = new IPEndPoint(0, 8090);
+            try
+            {
+                // Create a TCP/IP socket.
+                _listener = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                _listener.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
+                IPEndPoint localEndPoint = null;
+                if (configuration.shareOverLan)
+                {
+                    localEndPoint = new IPEndPoint(IPAddress.Any, PORT);
+                }
+                else
+                {
+                    localEndPoint = new IPEndPoint(IPAddress.Loopback, PORT);
+                }
 
-            // Bind the socket to the local endpoint and listen for incoming connections.
-            listener.Bind(localEndPoint);
-            listener.Listen(100);
-            listener.BeginAccept(
-                new AsyncCallback(AcceptCallback),
-                listener);
+                // Bind the socket to the local endpoint and listen for incoming connections.
+                _listener.Bind(localEndPoint);
+                _listener.Listen(100);
+                _listener.BeginAccept(
+                    new AsyncCallback(AcceptCallback),
+                    _listener);
 
-            WatchPacFile();
+                WatchPacFile();
+            }
+            catch (SocketException)
+            {
+                _listener.Close();
+                throw;
+            }
+        }
+
+        public void Stop()
+        {
+            _listener.Close();
+            _listener = null;
         }
 
         public string TouchPACFile()
@@ -55,10 +79,10 @@ namespace Shadowsocks.Controller
             try
             {
                 Socket listener = (Socket)ar.AsyncState;
+                Socket conn = listener.EndAccept(ar);
                 listener.BeginAccept(
                     new AsyncCallback(AcceptCallback),
                     listener);
-                Socket conn = listener.EndAccept(ar);
 
                 conn.BeginReceive(new byte[1024], 0, 1024, 0,
                     new AsyncCallback(ReceiveCallback), conn);
@@ -92,7 +116,6 @@ namespace Shadowsocks.Controller
                     return System.Text.Encoding.UTF8.GetString(buffer, 0, n);
                 }
             }
-            WatchPacFile();
         }
 
         private void ReceiveCallback(IAsyncResult ar)
@@ -104,7 +127,9 @@ namespace Shadowsocks.Controller
 
                 string pac = GetPACContent();
 
-                string proxy = "PROXY 127.0.0.1:8123;";
+                IPEndPoint localEndPoint = (IPEndPoint)conn.LocalEndPoint;
+
+                string proxy = "PROXY " + localEndPoint.Address + ":8123;";
 
                 pac = pac.Replace("__PROXY__", proxy);
 

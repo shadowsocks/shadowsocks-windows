@@ -28,6 +28,7 @@ namespace Shadowsocks.View
             controller.EnableStatusChanged += controller_EnableStatusChanged;
             controller.ConfigChanged += controller_ConfigChanged;
             controller.PACFileReadyToOpen += controller_PACFileReadyToOpen;
+            controller.ShareOverLANStatusChanged += controller_ShareOverLANStatusChanged;
 
             LoadCurrentConfiguration();
         }
@@ -40,6 +41,11 @@ namespace Shadowsocks.View
         private void controller_EnableStatusChanged(object sender, EventArgs e)
         {
             enableItem.Checked = controller.GetConfiguration().enabled;
+        }
+
+        void controller_ShareOverLANStatusChanged(object sender, EventArgs e)
+        {
+            ShareOverLANItem.Checked = controller.GetConfiguration().shareOverLan;
         }
 
         void controller_PACFileReadyToOpen(object sender, ShadowsocksController.PathEventArgs e)
@@ -129,6 +135,7 @@ namespace Shadowsocks.View
 
             UpdateServersMenu();
             enableItem.Checked = modifiedConfiguration.enabled;
+            ShareOverLANItem.Checked = modifiedConfiguration.shareOverLan;
         }
 
         private void UpdateServersMenu()
@@ -283,6 +290,12 @@ namespace Shadowsocks.View
         {
             enableItem.Checked = !enableItem.Checked;
             controller.ToggleEnable(enableItem.Checked);
+        }
+
+        private void ShareOverLANItem_Click(object sender, EventArgs e)
+        {
+            ShareOverLANItem.Checked = !ShareOverLANItem.Checked;
+            controller.ToggleShareOverLAN(ShareOverLANItem.Checked);
         }
 
         private void EditPACFileItem_Click(object sender, EventArgs e)

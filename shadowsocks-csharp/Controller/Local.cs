@@ -11,12 +11,14 @@ namespace Shadowsocks.Controller
 
     class Local
     {
-        private Server config;
+        private Server _server;
+        private bool _shareOverLAN;
         //private Encryptor encryptor;
         Socket _listener;
-        public Local(Server config)
+        public Local(Configuration config)
         {
-            this.config = config;
+            this._server = config.GetCurrentServer();
+            _shareOverLAN = config.shareOverLan;
             //this.encryptor = new Encryptor(config.method, config.password);
         }
 
@@ -25,9 +27,17 @@ namespace Shadowsocks.Controller
             try
             {
                 // Create a TCP/IP socket.
-                _listener = new Socket(AddressFamily.InterNetwork,
-                    SocketType.Stream, ProtocolType.Tcp);
-                IPEndPoint localEndPoint = new IPEndPoint(0, config.local_port);
+                _listener = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                _listener.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
+                IPEndPoint localEndPoint = null;
+                if (_shareOverLAN)
+                {
+                    localEndPoint = new IPEndPoint(IPAddress.Any, _server.local_port);
+                }
+                else
+                {
+                    localEndPoint = new IPEndPoint(IPAddress.Loopback, _server.local_port);
+                }
 
                 // Bind the socket to the local endpoint and listen for incoming connections.
                 _listener.Bind(localEndPoint);
@@ -58,37 +68,19 @@ namespace Shadowsocks.Controller
         {
             try
             {
-
-                // Get the socket that handles the client request.
                 Socket listener = (Socket)ar.AsyncState;
-                //if (!listener.Connected)
-                //{
-                //    return;
-                //}
-
                 Socket conn = listener.EndAccept(ar);
 
                 listener.BeginAccept(
                     new AsyncCallback(AcceptCallback),
                     listener);
 
-                // Create the state object.
                 Handler handler = new Handler();
                 handler.connection = conn;
-                //if (encryptor.method == "table")
-                //{
-                //    handler.encryptor = encryptor;
-                //}
-                //else
-                //{
-                //    handler.encryptor = new Encryptor(config.method, config.password);
-                //}
-                handler.encryptor = EncryptorFactory.GetEncryptor(config.method, config.password);
-                handler.config = config;
+                handler.encryptor = EncryptorFactory.GetEncryptor(_server.method, _server.password);
+                handler.config = _server;
 
                 handler.Start();
-                //handler.BeginReceive(state.buffer, 0, StateObject.BufferSize, 0,
-                //    new AsyncCallback(ReadCallback), state);
             }
             catch
             {
