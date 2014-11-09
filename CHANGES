@@ -1,12 +1,17 @@
-2.0.4
+2.0.5 2014-11-09
+- Fix QRCode size
+- Share over LAN option
+- Log to temp path instead
+
+2.0.4 2014-11-09
 - Try to fix data corruption
 - Remove all configuration except x86
 
-2.0.3
+2.0.3 2014-11-08
 - Support QRCode generation
 - Fix compatibility issues with some Chrome version
 
-2.0.2
+2.0.2 2014-11-08
 - Add remarks
 - Fix error when polipo is killed
 

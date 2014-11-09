@@ -13,6 +13,7 @@ namespace Shadowsocks.View
     public partial class ConfigForm : Form
     {
         private ShadowsocksController controller;
+        private UpdateChecker updateChecker;
 
         // this is a copy of configuration that we are working on
         private Configuration _modifiedConfiguration;
@@ -29,6 +30,10 @@ namespace Shadowsocks.View
             controller.EnableStatusChanged += controller_EnableStatusChanged;
             controller.ConfigChanged += controller_ConfigChanged;
             controller.PACFileReadyToOpen += controller_PACFileReadyToOpen;
+            controller.ShareOverLANStatusChanged += controller_ShareOverLANStatusChanged;
+
+            this.updateChecker = new UpdateChecker();
+            updateChecker.NewVersionFound += updateChecker_NewVersionFound;
 
             LoadCurrentConfiguration();
         }
@@ -43,11 +48,31 @@ namespace Shadowsocks.View
             enableItem.Checked = controller.GetConfiguration().enabled;
         }
 
+        void controller_ShareOverLANStatusChanged(object sender, EventArgs e)
+        {
+            ShareOverLANItem.Checked = controller.GetConfiguration().shareOverLan;
+        }
+
         void controller_PACFileReadyToOpen(object sender, ShadowsocksController.PathEventArgs e)
         {
             string argument = @"/select, " + e.Path;
 
             System.Diagnostics.Process.Start("explorer.exe", argument);
+        }
+
+        void updateChecker_NewVersionFound(object sender, EventArgs e)
+        {
+            notifyIcon1.BalloonTipTitle = "Shadowsocks " + updateChecker.LatestVersionNumber + " Update Found";
+            notifyIcon1.BalloonTipText = "You can click here to download";
+            notifyIcon1.BalloonTipIcon = ToolTipIcon.Info;
+            notifyIcon1.BalloonTipClicked += notifyIcon1_BalloonTipClicked;
+            notifyIcon1.ShowBalloonTip(5000);
+            _isFirstRun = false;
+        }
+
+        void notifyIcon1_BalloonTipClicked(object sender, EventArgs e)
+        {
+            Process.Start(updateChecker.LatestVersionURL);
         }
 
         
@@ -151,7 +176,7 @@ namespace Shadowsocks.View
 
             UpdateServersMenu();
             enableItem.Checked = _modifiedConfiguration.enabled;
-            openOnLanBox.Checked = _modifiedConfiguration.openOnLan;
+            ShareOverLANItem.Checked = _modifiedConfiguration.shareOverLan;
         }
 
         private void UpdateServersMenu()
@@ -192,6 +217,7 @@ namespace Shadowsocks.View
             {
                 _isFirstRun = true;
             }
+            updateChecker.CheckUpdate();
         }
 
         private void ServersListBox_SelectedIndexChanged(object sender, EventArgs e)
@@ -258,6 +284,7 @@ namespace Shadowsocks.View
             {
                 notifyIcon1.BalloonTipTitle = "Shadowsocks is here";
                 notifyIcon1.BalloonTipText = "You can turn on/off Shadowsocks in the context menu";
+                notifyIcon1.BalloonTipIcon = ToolTipIcon.Info;
                 notifyIcon1.ShowBalloonTip(0);
                 _isFirstRun = false;
             }
@@ -274,8 +301,7 @@ namespace Shadowsocks.View
                 MessageBox.Show("Please add at least one server");
                 return;
             }
-            _modifiedConfiguration.openOnLan = openOnLanBox.Checked;
-            controller.SaveConfig(_modifiedConfiguration);
+            controller.SaveServers(_modifiedConfiguration.configs);
             this.Hide();
             ShowFirstTimeBalloon();
         }
@@ -309,6 +335,12 @@ namespace Shadowsocks.View
             controller.ToggleEnable(enableItem.Checked);
         }
 
+        private void ShareOverLANItem_Click(object sender, EventArgs e)
+        {
+            ShareOverLANItem.Checked = !ShareOverLANItem.Checked;
+            controller.ToggleShareOverLAN(ShareOverLANItem.Checked);
+        }
+
         private void EditPACFileItem_Click(object sender, EventArgs e)
         {
             controller.TouchPACFile();
@@ -317,9 +349,14 @@ namespace Shadowsocks.View
         private void AServerItem_Click(object sender, EventArgs e)
         {
             MenuItem item = (MenuItem)sender;
-            Configuration configuration = controller.GetConfiguration();
-            configuration.index = (int)item.Tag;
-            controller.SaveConfig(configuration);
+            controller.SelectServerIndex((int)item.Tag);
+        }
+
+        private void ShowLogItem_Click(object sender, EventArgs e)
+        {
+            string argument = Logging.LogFile;
+
+            System.Diagnostics.Process.Start("notepad.exe", argument);
         }
 
         private void ConfigForm_Shown(object sender, EventArgs e)

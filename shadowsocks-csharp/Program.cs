@@ -47,6 +47,7 @@ namespace Shadowsocks
                 }
                 LoadLibrary(dllPath);
 
+                Logging.OpenLogFile();
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
                 ShadowsocksController controller = new ShadowsocksController();

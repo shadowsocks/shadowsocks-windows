@@ -71,7 +71,7 @@ namespace Shadowsocks.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to proxyAddress = &quot;127.0.0.1&quot;
+        ///   Looks up a localized string similar to proxyAddress = &quot;__POLIPO_BIND_IP__&quot;
         ///
         ///socksParentProxy = &quot;127.0.0.1:__SOCKS_PORT__&quot;
         ///socksProxyType = socks5

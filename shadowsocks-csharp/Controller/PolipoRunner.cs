@@ -14,8 +14,9 @@ namespace Shadowsocks.Controller
         private Process _process;
         public bool openOnLan;
 
-        public void Start(Server config)
+        public void Start(Configuration configuration)
         {
+            Server server = configuration.GetCurrentServer();
             if (_process == null)
             {
                 Process[] existingPolipo = Process.GetProcessesByName("ss_polipo");
@@ -32,16 +33,9 @@ namespace Shadowsocks.Controller
                     }
                 }
                 string temppath = Path.GetTempPath();
-                string polipoConfig = Resources.polipo_config;
-                polipoConfig = polipoConfig.Replace("__SOCKS_PORT__", config.local_port.ToString());
-                if (openOnLan)
-                {
-                    polipoConfig = polipoConfig.Replace("\"127.0.0.1\"", "\"0.0.0.0\"");
-                }
-                else
-                {
-                    polipoConfig = polipoConfig.Replace("\"0.0.0.0\"", "\"127.0.0.1\"");
-                }
+                string polipoConfig = Resources.polipo_config; 
+                polipoConfig = polipoConfig.Replace("__SOCKS_PORT__", server.local_port.ToString());
+                polipoConfig = polipoConfig.Replace("__POLIPO_BIND_IP__", configuration.shareOverLan ? "0.0.0.0" : "127.0.0.1");
                 FileManager.ByteArrayToFile(temppath + "/polipo.conf", System.Text.Encoding.UTF8.GetBytes(polipoConfig));
                 FileManager.UncompressFile(temppath + "/ss_polipo.exe", Resources.polipo_exe);
 
@@ -50,11 +44,10 @@ namespace Shadowsocks.Controller
                 _process.StartInfo.FileName = temppath + "/ss_polipo.exe";
                 _process.StartInfo.Arguments = "-c \"" + temppath + "/polipo.conf\"";
                 _process.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
-                _process.StartInfo.UseShellExecute = false;
+                _process.StartInfo.UseShellExecute = true;
                 _process.StartInfo.CreateNoWindow = true;
-                _process.StartInfo.RedirectStandardOutput = true;
-                _process.StartInfo.RedirectStandardError = true;
-                //process.StandardOutput
+                //_process.StartInfo.RedirectStandardOutput = true;
+                //_process.StartInfo.RedirectStandardError = true;
                 _process.Start();
             }
         }
