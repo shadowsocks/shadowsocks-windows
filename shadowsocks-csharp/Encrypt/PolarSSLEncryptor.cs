@@ -175,6 +175,10 @@ namespace Shadowsocks.Encrypt
                     // C# could be multi-threaded
                     lock (_encryptCtx)
                     {
+                        if (_disposed)
+                        {
+                            throw new ObjectDisposedException(this.ToString());
+                        }
                         switch (_cipher)
                         {
                             case CIPHER_AES:
@@ -197,6 +201,10 @@ namespace Shadowsocks.Encrypt
                 outlength = length;
                 lock (_encryptCtx)
                 {
+                    if (_disposed)
+                    {
+                        throw new ObjectDisposedException(this.ToString());
+                    }
                     switch (_cipher)
                     {
                         case CIPHER_AES:
@@ -225,6 +233,10 @@ namespace Shadowsocks.Encrypt
                     Buffer.BlockCopy(buf, ivLen, tempbuf, 0, length - ivLen);
                     lock (_decryptCtx)
                     {
+                        if (_disposed)
+                        {
+                            throw new ObjectDisposedException(this.ToString());
+                        }
                         switch (_cipher)
                         {
                             case CIPHER_AES:
@@ -245,6 +257,10 @@ namespace Shadowsocks.Encrypt
                 outlength = length;
                 lock (_decryptCtx)
                 {
+                    if (_disposed)
+                    {
+                        throw new ObjectDisposedException(this.ToString());
+                    }
                     switch (_cipher)
                     {
                         case CIPHER_AES:
@@ -304,7 +320,6 @@ namespace Shadowsocks.Encrypt
                                 PolarSSL.arc4_free(_encryptCtx);
                                 break;
                         }
-                        _encryptCtx = null;
                     }
                 }
                 if (_decryptCtx != null)
@@ -323,7 +338,6 @@ namespace Shadowsocks.Encrypt
                                 PolarSSL.arc4_free(_decryptCtx);
                                 break;
                         }
-                        _decryptCtx = null;
                     }
                 }
             }
