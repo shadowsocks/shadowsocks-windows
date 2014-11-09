@@ -54,7 +54,6 @@ namespace Shadowsocks
 
                 // TODO run without a main form to save RAM
                 Application.Run(new ConfigForm(controller));
-
             }
         }
     }

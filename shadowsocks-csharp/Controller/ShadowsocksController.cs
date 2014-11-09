@@ -1,4 +1,5 @@
-﻿using Shadowsocks.Model;
+﻿using System.IO;
+using Shadowsocks.Model;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -172,6 +173,5 @@ namespace Shadowsocks.Controller
         {
             UpdateSystemProxy();
         }
-
     }
 }
