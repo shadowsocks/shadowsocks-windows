@@ -13,6 +13,7 @@ namespace Shadowsocks.View
     public partial class ConfigForm : Form
     {
         private ShadowsocksController controller;
+        private UpdateChecker updateChecker;
 
         // this is a copy of configuration that we are working on
         private Configuration modifiedConfiguration;
@@ -29,6 +30,9 @@ namespace Shadowsocks.View
             controller.ConfigChanged += controller_ConfigChanged;
             controller.PACFileReadyToOpen += controller_PACFileReadyToOpen;
             controller.ShareOverLANStatusChanged += controller_ShareOverLANStatusChanged;
+
+            this.updateChecker = new UpdateChecker();
+            updateChecker.NewVersionFound += updateChecker_NewVersionFound;
 
             LoadCurrentConfiguration();
         }
@@ -53,6 +57,21 @@ namespace Shadowsocks.View
             string argument = @"/select, " + e.Path;
 
             System.Diagnostics.Process.Start("explorer.exe", argument);
+        }
+
+        void updateChecker_NewVersionFound(object sender, EventArgs e)
+        {
+            notifyIcon1.BalloonTipTitle = "Shadowsocks " + updateChecker.LatestVersionNumber + " Update Found";
+            notifyIcon1.BalloonTipText = "You can click here to download";
+            notifyIcon1.BalloonTipIcon = ToolTipIcon.Info;
+            notifyIcon1.BalloonTipClicked += notifyIcon1_BalloonTipClicked;
+            notifyIcon1.ShowBalloonTip(5000);
+            isFirstRun = false;
+        }
+
+        void notifyIcon1_BalloonTipClicked(object sender, EventArgs e)
+        {
+            Process.Start(updateChecker.LatestVersionURL);
         }
 
         
@@ -176,6 +195,7 @@ namespace Shadowsocks.View
             {
                 isFirstRun = true;
             }
+            updateChecker.CheckUpdate();
         }
 
         private void ServersListBox_SelectedIndexChanged(object sender, EventArgs e)
@@ -242,6 +262,7 @@ namespace Shadowsocks.View
             {
                 notifyIcon1.BalloonTipTitle = "Shadowsocks is here";
                 notifyIcon1.BalloonTipText = "You can turn on/off Shadowsocks in the context menu";
+                notifyIcon1.BalloonTipIcon = ToolTipIcon.Info;
                 notifyIcon1.ShowBalloonTip(0);
                 isFirstRun = false;
             }

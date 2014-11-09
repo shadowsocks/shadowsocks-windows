@@ -10,7 +10,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Shadowsocks</RootNamespace>
     <AssemblyName>Shadowsocks</AssemblyName>
-    <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <StartupObject>
     </StartupObject>
@@ -21,8 +21,7 @@
     <UpgradeBackupLocation>
     </UpgradeBackupLocation>
     <OldToolsVersion>3.5</OldToolsVersion>
-    <TargetFrameworkProfile>
-    </TargetFrameworkProfile>
+    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
@@ -63,12 +62,14 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.XML" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="3rd\QRCodeCS.cs" />
     <Compile Include="3rd\SimpleJson.cs" />
     <Compile Include="Controller\FileManager.cs" />
     <Compile Include="Controller\Logging.cs" />
+    <Compile Include="Controller\UpdateChecker.cs" />
     <Compile Include="Encrypt\EncryptorBase.cs" />
     <Compile Include="Encrypt\EncryptorFactory.cs" />
     <Compile Include="Encrypt\PolarSSL.cs" />
