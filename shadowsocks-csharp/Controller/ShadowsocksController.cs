@@ -71,9 +71,10 @@ namespace Shadowsocks.Controller
             return Configuration.Load();
         }
 
-        public void SaveServers(List<Server> servers)
+        public void SaveServers(List<Server> servers, bool noChange)
         {
             _config.configs = servers;
+            _config.noChange = noChange;
             SaveConfig(_config);
         }
 
@@ -91,6 +92,7 @@ namespace Shadowsocks.Controller
         public void ToggleShareOverLAN(bool enabled)
         {
             _config.shareOverLan = enabled;
+            _config.noChange = false;
             SaveConfig(_config);
             if (ShareOverLANStatusChanged != null)
             {
@@ -142,6 +144,10 @@ namespace Shadowsocks.Controller
             Configuration.Save(newConfig);
             // some logic in configuration updated the config when saving, we need to read it again
             _config = Configuration.Load();
+            if (newConfig.noChange)
+            {
+                return;
+            }
 
             pacServer.Stop();
             local.Stop();

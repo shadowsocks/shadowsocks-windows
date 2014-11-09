@@ -122,6 +122,10 @@ namespace Shadowsocks.View
                         _oldConfiguration = _modifiedConfiguration;
                     }
                 }
+                else
+                {
+                    _modifiedConfiguration.noChange = false;
+                }
                 return true;
             }
             catch (FormatException)
@@ -301,7 +305,7 @@ namespace Shadowsocks.View
                 MessageBox.Show("Please add at least one server");
                 return;
             }
-            controller.SaveServers(_modifiedConfiguration.configs);
+            controller.SaveServers(_modifiedConfiguration.configs, _modifiedConfiguration.noChange);
             this.Hide();
             ShowFirstTimeBalloon();
         }
