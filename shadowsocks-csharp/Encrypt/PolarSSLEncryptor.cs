@@ -289,41 +289,35 @@ namespace Shadowsocks.Encrypt
                 {
                     if (_encryptCtx != null)
                     {
-                        lock (_encryptCtx)
+                        switch (_cipher)
                         {
-                            switch (_cipher)
-                            {
-                                case CIPHER_AES:
-                                    PolarSSL.aes_free(_encryptCtx);
-                                    break;
-                                case CIPHER_BF:
-                                    PolarSSL.blowfish_free(_encryptCtx);
-                                    break;
-                                case CIPHER_RC4:
-                                    PolarSSL.arc4_free(_encryptCtx);
-                                    break;
-                            }
-                            _encryptCtx = null;
+                            case CIPHER_AES:
+                                PolarSSL.aes_free(_encryptCtx);
+                                break;
+                            case CIPHER_BF:
+                                PolarSSL.blowfish_free(_encryptCtx);
+                                break;
+                            case CIPHER_RC4:
+                                PolarSSL.arc4_free(_encryptCtx);
+                                break;
                         }
+                        _encryptCtx = null;
                     }
                     if (_decryptCtx != null)
                     {
-                        lock (_decryptCtx)
+                        switch (_cipher)
                         {
-                            switch (_cipher)
-                            {
-                                case CIPHER_AES:
-                                    PolarSSL.aes_free(_decryptCtx);
-                                    break;
-                                case CIPHER_BF:
-                                    PolarSSL.blowfish_free(_decryptCtx);
-                                    break;
-                                case CIPHER_RC4:
-                                    PolarSSL.arc4_free(_decryptCtx);
-                                    break;
-                            }
-                            _decryptCtx = null;
+                            case CIPHER_AES:
+                                PolarSSL.aes_free(_decryptCtx);
+                                break;
+                            case CIPHER_BF:
+                                PolarSSL.blowfish_free(_decryptCtx);
+                                break;
+                            case CIPHER_RC4:
+                                PolarSSL.arc4_free(_decryptCtx);
+                                break;
                         }
+                        _decryptCtx = null;
                     }
                 }
             }
