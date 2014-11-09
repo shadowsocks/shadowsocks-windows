@@ -35,6 +35,7 @@ namespace Shadowsocks.Controller
         public ShadowsocksController()
         {
             _config = Configuration.Load();
+
             polipoRunner = new PolipoRunner();
             polipoRunner.Start(_config);
             local = new Local(_config);

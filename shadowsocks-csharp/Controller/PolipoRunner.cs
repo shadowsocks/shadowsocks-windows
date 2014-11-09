@@ -12,6 +12,7 @@ namespace Shadowsocks.Controller
     class PolipoRunner
     {
         private Process _process;
+        public bool openOnLan;
 
         public void Start(Configuration configuration)
         {

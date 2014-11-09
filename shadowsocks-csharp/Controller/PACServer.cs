@@ -15,6 +15,7 @@ namespace Shadowsocks.Controller
     {
         private static int PORT = 8090;
         private static string PAC_FILE = "pac.txt";
+        public bool openOnLan;
 
         Socket _listener;
         FileSystemWatcher watcher;
