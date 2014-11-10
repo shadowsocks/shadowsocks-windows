@@ -119,7 +119,9 @@
       <DependentUpon>QRCodeForm.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="app.config" />
-    <None Include="app.manifest" />
+    <None Include="app.manifest">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="Data\polarssl.dll.gz" />
     <None Include="Data\polipo.exe.gz" />
     <None Include="Properties\Settings.settings">
