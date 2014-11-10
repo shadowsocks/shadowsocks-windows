@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Windows.Forms;
 
 namespace Shadowsocks.Model
 {
@@ -10,6 +11,7 @@ namespace Shadowsocks.Model
     {
         public Configuration()
         {
+			Configuration.CONFIG_FILE = Application.StartupPath + @"\gui-config.json";
         }
 
         public List<Server> configs;
