@@ -35,6 +35,8 @@ namespace Shadowsocks.Controller
                 registry.SetValue("ProxyServer", "");
                 registry.SetValue("AutoConfigURL", "http://127.0.0.1:8090/pac?t=" + GetTimestamp(DateTime.Now));
                 SystemProxy.NotifyIE();
+                //Must Notify IE first, or the connections do not chanage
+                CopyProxySettingFromLan();
             }
             catch (Exception)
             {
@@ -54,12 +56,32 @@ namespace Shadowsocks.Controller
                 registry.SetValue("ProxyServer", "");
                 registry.SetValue("AutoConfigURL", "");
                 SystemProxy.NotifyIE();
+                CopyProxySettingFromLan();
             }
             catch (Exception)
             {
                 MessageBox.Show("can not change registry!");
                 throw;
             }
+        }
+
+        private static void CopyProxySettingFromLan()
+        {
+            RegistryKey registry =
+                Registry.CurrentUser.OpenSubKey("Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings\\Connections",
+                    true);
+            var defulatValue = registry.GetValue("DefaultConnectionSettings");
+            var connections = registry.GetValueNames();
+            foreach (String each in connections){
+                if (!(each.Equals("DefaultConnectionSettings")
+                    || each.Equals("LAN Connection")
+                    || each.Equals("SavedLegacySettings")))
+                {
+                    //set all the connections's proxy as the lan
+                    registry.SetValue(each, defulatValue);
+                }
+            }
+            NotifyIE();
         }
 
         private static String GetTimestamp(DateTime value)
