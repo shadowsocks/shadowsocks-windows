@@ -5,6 +5,7 @@ using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
 using System.Diagnostics;
+using Microsoft.Win32;
 using Shadowsocks.Controller;
 using Shadowsocks.Model;
 using Shadowsocks.Properties;
@@ -377,5 +378,48 @@ namespace Shadowsocks.View
             qrCodeForm.Icon = this.Icon;
             qrCodeForm.Show();
         }
+
+		private bool setAutoStartup(bool enabled) {
+			try {
+				string path = Application.ExecutablePath;
+				RegistryKey runKey = Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Run", true);
+				if (enabled) {
+					runKey.SetValue("Shadowsocks-CSharp", path);
+				} else {
+					runKey.DeleteValue("Shadowsocks-CSharp");
+				}
+				runKey.Close();
+				return true;
+			} catch (Exception e) {
+				return false;
+			}
+		}
+
+		private bool checkAutoStartup() {
+			try {
+				string path = Application.ExecutablePath;
+				RegistryKey runKey = Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Run");
+				string[] runList = runKey.GetValueNames();
+				runKey.Close();
+				foreach(string item in runList){
+					if (item.Equals("Shadowsocks-CSharp"))
+						return true;
+				}
+				return false;
+			} catch (Exception e) {
+				return false;
+			}
+		}
+
+		private void autoStartup_Click(object sender, EventArgs e) {
+			autoStartup.Checked = !autoStartup.Checked;
+			if (!setAutoStartup(autoStartup.Checked)) {
+				//MessageBox.Show("Failed to edit registry");
+			}
+		}
+
+		private void contextMenu1_Popup(object sender, EventArgs e) {
+			autoStartup.Checked = checkAutoStartup();
+		}
     }
 }

@@ -65,6 +65,7 @@
             this.AddButton = new System.Windows.Forms.Button();
             this.ServerGroupBox = new System.Windows.Forms.GroupBox();
             this.ServersListBox = new System.Windows.Forms.ListBox();
+			this.autoStartup = new System.Windows.Forms.MenuItem();
             this.tableLayoutPanel1.SuspendLayout();
             this.panel1.SuspendLayout();
             this.panel3.SuspendLayout();
@@ -299,6 +300,7 @@
             // 
             this.contextMenu1.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
             this.enableItem,
+            this.autoStartup,
             this.ShareOverLANItem,
             this.ServersItem,
             this.menuItem4,
@@ -308,6 +310,7 @@
             this.aboutItem,
             this.menuItem3,
             this.quitItem});
+			this.contextMenu1.Popup += new System.EventHandler(this.contextMenu1_Popup);
             // 
             // enableItem
             // 
@@ -317,13 +320,13 @@
             // 
             // ShareOverLANItem
             // 
-            this.ShareOverLANItem.Index = 1;
+			this.ShareOverLANItem.Index = 2;
             this.ShareOverLANItem.Text = "Share over LAN";
             this.ShareOverLANItem.Click += new System.EventHandler(this.ShareOverLANItem_Click);
             // 
             // ServersItem
             // 
-            this.ServersItem.Index = 2;
+			this.ServersItem.Index = 3;
             this.ServersItem.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
             this.SeperatorItem,
             this.ConfigItem});
@@ -342,41 +345,41 @@
             // 
             // menuItem4
             // 
-            this.menuItem4.Index = 3;
+			this.menuItem4.Index = 4;
             this.menuItem4.Text = "-";
             // 
             // editPACFileItem
             // 
-            this.editPACFileItem.Index = 4;
+			this.editPACFileItem.Index = 5;
             this.editPACFileItem.Text = "Edit &PAC File...";
             this.editPACFileItem.Click += new System.EventHandler(this.EditPACFileItem_Click);
             // 
             // QRCodeItem
             // 
-            this.QRCodeItem.Index = 5;
+			this.QRCodeItem.Index = 6;
             this.QRCodeItem.Text = "Show &QRCode...";
             this.QRCodeItem.Click += new System.EventHandler(this.QRCodeItem_Click);
             // 
             // ShowLogItem
             // 
-            this.ShowLogItem.Index = 6;
+			this.ShowLogItem.Index = 7;
             this.ShowLogItem.Text = "Show Logs...";
             this.ShowLogItem.Click += new System.EventHandler(this.ShowLogItem_Click);
             // 
             // aboutItem
             // 
-            this.aboutItem.Index = 7;
+			this.aboutItem.Index = 8;
             this.aboutItem.Text = "About...";
             this.aboutItem.Click += new System.EventHandler(this.AboutItem_Click);
             // 
             // menuItem3
             // 
-            this.menuItem3.Index = 8;
+			this.menuItem3.Index = 9;
             this.menuItem3.Text = "-";
             // 
             // quitItem
             // 
-            this.quitItem.Index = 9;
+			this.quitItem.Index = 10;
             this.quitItem.Text = "&Quit";
             this.quitItem.Click += new System.EventHandler(this.Quit_Click);
             // 
@@ -435,7 +438,13 @@
             this.ServersListBox.Size = new System.Drawing.Size(286, 264);
             this.ServersListBox.TabIndex = 5;
             this.ServersListBox.SelectedIndexChanged += new System.EventHandler(this.ServersListBox_SelectedIndexChanged);
-            // 
+			// 
+			// autoStartup
+			// 
+			this.autoStartup.Index = 1;
+			this.autoStartup.Text = "Start on boot";
+			this.autoStartup.Click += new System.EventHandler(this.autoStartup_Click);
+			// 
             // ConfigForm
             // 
             this.AcceptButton = this.OKButton;
@@ -508,6 +517,7 @@
         private System.Windows.Forms.MenuItem QRCodeItem;
         private System.Windows.Forms.MenuItem ShowLogItem;
         private System.Windows.Forms.MenuItem ShareOverLANItem;
+		private System.Windows.Forms.MenuItem autoStartup;
     }
 }
 
