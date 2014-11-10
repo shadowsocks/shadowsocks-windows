@@ -7,6 +7,7 @@ using System.Windows.Forms;
 using System.Diagnostics;
 using Shadowsocks.Controller;
 using Shadowsocks.Model;
+using Shadowsocks.Properties;
 
 namespace Shadowsocks.View
 {
@@ -23,6 +24,7 @@ namespace Shadowsocks.View
         public ConfigForm(ShadowsocksController controller)
         {
             InitializeComponent();
+            LoadTrayIcon();
             notifyIcon1.ContextMenu = contextMenu1;
 
             this.controller = controller;
@@ -35,6 +37,32 @@ namespace Shadowsocks.View
             updateChecker.NewVersionFound += updateChecker_NewVersionFound;
 
             LoadCurrentConfiguration();
+        }
+
+        private void LoadTrayIcon()
+        {
+            int dpi;
+            Graphics graphics = this.CreateGraphics();
+            dpi = (int)graphics.DpiX;
+            graphics.Dispose();
+            Bitmap icon = null;
+            if (dpi < 97)
+            {
+                // dpi = 96;
+                icon = Resources.ss16;
+            }
+            else if (dpi < 121)
+            {
+                // dpi = 120;
+                icon = Resources.ss20;
+            }
+            else
+            {
+                icon = Resources.ss24;
+            }
+            notifyIcon1.Icon = Icon.FromHandle(icon.GetHicon());
+            notifyIcon1.Visible = true;
+            this.Icon = Icon.FromHandle(Resources.ssw128.GetHicon());
         }
 
         private void controller_ConfigChanged(object sender, EventArgs e)

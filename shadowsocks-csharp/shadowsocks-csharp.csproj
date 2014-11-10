@@ -58,6 +58,9 @@
     <CodeAnalysisRuleSet>ManagedMinimumRules.ruleset</CodeAnalysisRuleSet>
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Data" />
@@ -116,6 +119,7 @@
       <DependentUpon>QRCodeForm.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="app.config" />
+    <None Include="app.manifest" />
     <None Include="Data\polarssl.dll.gz" />
     <None Include="Data\polipo.exe.gz" />
     <None Include="Properties\Settings.settings">
@@ -130,6 +134,10 @@
     <None Include="Data\proxy.pac.txt.gz" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Resources\ss20.png" />
+    <None Include="Resources\ss16.png" />
+    <None Include="Resources\ss24.png" />
+    <None Include="Resources\ssw128.png" />
     <Content Include="shadowsocks.ico" />
     <None Include="Data\polipo_config.txt" />
   </ItemGroup>
