@@ -1,7 +1,9 @@
-﻿using Shadowsocks.Model;
+﻿using System.IO;
+using Shadowsocks.Model;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading;
 
 namespace Shadowsocks.Controller
 {
@@ -25,6 +27,7 @@ namespace Shadowsocks.Controller
 
         public event EventHandler ConfigChanged;
         public event EventHandler EnableStatusChanged;
+        public event EventHandler ShareOverLANStatusChanged;
         
         // when user clicked Edit PAC, and PAC file has already created
         public event EventHandler<PathEventArgs> PACFileReadyToOpen;
@@ -33,14 +36,14 @@ namespace Shadowsocks.Controller
         {
             _config = Configuration.Load();
             polipoRunner = new PolipoRunner();
-            polipoRunner.Start(_config.GetCurrentServer());
-            local = new Local(_config.GetCurrentServer());
+            polipoRunner.Start(_config);
+            local = new Local(_config);
             try
             {
                 local.Start();
                 pacServer = new PACServer();
                 pacServer.PACFileChanged += pacServer_PACFileChanged;
-                pacServer.Start();
+                pacServer.Start(_config);
             }
             catch (Exception e)
             {
@@ -48,25 +51,6 @@ namespace Shadowsocks.Controller
             }
 
             UpdateSystemProxy();
-        }
-
-        public void SaveConfig(Configuration newConfig)
-        {
-            Configuration.Save(newConfig);
-            // some logic in configuration updated the config when saving, we need to read it again
-            _config = Configuration.Load();
-
-            local.Stop();
-            polipoRunner.Stop();
-            polipoRunner.Start(_config.GetCurrentServer());
-
-            local = new Local(_config.GetCurrentServer());
-            local.Start();
-
-            if (ConfigChanged != null)
-            {
-                ConfigChanged(this, new EventArgs());
-            }
         }
 
         public Server GetCurrentServer()
@@ -80,6 +64,11 @@ namespace Shadowsocks.Controller
             return Configuration.Load();
         }
 
+        public void SaveServers(List<Server> servers)
+        {
+            _config.configs = servers;
+            SaveConfig(_config);
+        }
 
         public void ToggleEnable(bool enabled)
         {
@@ -90,6 +79,22 @@ namespace Shadowsocks.Controller
             {
                 EnableStatusChanged(this, new EventArgs());
             }
+        }
+
+        public void ToggleShareOverLAN(bool enabled)
+        {
+            _config.shareOverLan = enabled;
+            SaveConfig(_config);
+            if (ShareOverLANStatusChanged != null)
+            {
+                ShareOverLANStatusChanged(this, new EventArgs());
+            }
+        }
+
+        public void SelectServerIndex(int index)
+        {
+            _config.index = index;
+            SaveConfig(_config);
         }
 
         public void Stop()
@@ -124,6 +129,34 @@ namespace Shadowsocks.Controller
             return "ss://" + base64;
         }
 
+
+        protected void SaveConfig(Configuration newConfig)
+        {
+            Configuration.Save(newConfig);
+            // some logic in configuration updated the config when saving, we need to read it again
+            _config = Configuration.Load();
+
+            pacServer.Stop();
+            local.Stop();
+
+            // don't put polipoRunner.Start() before pacServer.Stop()
+            // or bind will fail when switching bind address from 0.0.0.0 to 127.0.0.1
+            // though UseShellExecute is set to true now
+            // http://stackoverflow.com/questions/10235093/socket-doesnt-close-after-application-exits-if-a-launched-process-is-open
+            polipoRunner.Stop();
+            polipoRunner.Start(_config);
+
+            local = new Local(_config);
+            local.Start();
+            pacServer.Start(_config);
+
+            if (ConfigChanged != null)
+            {
+                ConfigChanged(this, new EventArgs());
+            }
+        }
+
+
         private void UpdateSystemProxy()
         {
             if (_config.enabled)
@@ -140,6 +173,5 @@ namespace Shadowsocks.Controller
         {
             UpdateSystemProxy();
         }
-
     }
 }

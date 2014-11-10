@@ -1,6 +1,7 @@
 Backup/
-shadowsocks-csharp/bin/
-shadowsocks-csharp/obj/
+bin/
+obj/
 shadowsocks-csharp/shadowsocks-csharp.csproj.user
+TestResults
 *.suo
 

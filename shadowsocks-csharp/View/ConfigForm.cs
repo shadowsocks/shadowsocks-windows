@@ -13,11 +13,12 @@ namespace Shadowsocks.View
     public partial class ConfigForm : Form
     {
         private ShadowsocksController controller;
+        private UpdateChecker updateChecker;
 
         // this is a copy of configuration that we are working on
-        private Configuration modifiedConfiguration;
-        private int oldSelectedIndex = -1;
-        private bool isFirstRun;
+        private Configuration _modifiedConfiguration;
+        private int _oldSelectedIndex = -1;
+        private bool _isFirstRun;
 
         public ConfigForm(ShadowsocksController controller)
         {
@@ -28,6 +29,10 @@ namespace Shadowsocks.View
             controller.EnableStatusChanged += controller_EnableStatusChanged;
             controller.ConfigChanged += controller_ConfigChanged;
             controller.PACFileReadyToOpen += controller_PACFileReadyToOpen;
+            controller.ShareOverLANStatusChanged += controller_ShareOverLANStatusChanged;
+
+            this.updateChecker = new UpdateChecker();
+            updateChecker.NewVersionFound += updateChecker_NewVersionFound;
 
             LoadCurrentConfiguration();
         }
@@ -42,11 +47,31 @@ namespace Shadowsocks.View
             enableItem.Checked = controller.GetConfiguration().enabled;
         }
 
+        void controller_ShareOverLANStatusChanged(object sender, EventArgs e)
+        {
+            ShareOverLANItem.Checked = controller.GetConfiguration().shareOverLan;
+        }
+
         void controller_PACFileReadyToOpen(object sender, ShadowsocksController.PathEventArgs e)
         {
             string argument = @"/select, " + e.Path;
 
             System.Diagnostics.Process.Start("explorer.exe", argument);
+        }
+
+        void updateChecker_NewVersionFound(object sender, EventArgs e)
+        {
+            notifyIcon1.BalloonTipTitle = "Shadowsocks " + updateChecker.LatestVersionNumber + " Update Found";
+            notifyIcon1.BalloonTipText = "Click here to download";
+            notifyIcon1.BalloonTipIcon = ToolTipIcon.Info;
+            notifyIcon1.BalloonTipClicked += notifyIcon1_BalloonTipClicked;
+            notifyIcon1.ShowBalloonTip(5000);
+            _isFirstRun = false;
+        }
+
+        void notifyIcon1_BalloonTipClicked(object sender, EventArgs e)
+        {
+            Process.Start(updateChecker.LatestVersionURL);
         }
 
         
@@ -61,7 +86,7 @@ namespace Shadowsocks.View
         {
             try
             {
-                if (oldSelectedIndex == -1 || oldSelectedIndex >= modifiedConfiguration.configs.Count)
+                if (_oldSelectedIndex == -1 || _oldSelectedIndex >= _modifiedConfiguration.configs.Count)
                 {
                     return true;
                 }
@@ -75,7 +100,8 @@ namespace Shadowsocks.View
                     remarks = RemarksTextBox.Text
                 };
                 Configuration.CheckServer(server);
-                modifiedConfiguration.configs[oldSelectedIndex] = server;
+                _modifiedConfiguration.configs[_oldSelectedIndex] = server;
+                
                 return true;
             }
             catch (FormatException)
@@ -91,15 +117,15 @@ namespace Shadowsocks.View
 
         private void LoadSelectedServer()
         {
-            if (ServersListBox.SelectedIndex >= 0 && ServersListBox.SelectedIndex < modifiedConfiguration.configs.Count)
+            if (ServersListBox.SelectedIndex >= 0 && ServersListBox.SelectedIndex < _modifiedConfiguration.configs.Count)
             {
-                Server server = modifiedConfiguration.configs[ServersListBox.SelectedIndex];
+                Server server = _modifiedConfiguration.configs[ServersListBox.SelectedIndex];
 
                 IPTextBox.Text = server.server;
                 ServerPortTextBox.Text = server.server_port.ToString();
                 PasswordTextBox.Text = server.password;
                 ProxyPortTextBox.Text = server.local_port.ToString();
-                EncryptionSelect.Text = server.method == null ? "aes-256-cfb" : server.method;
+                EncryptionSelect.Text = server.method ?? "aes-256-cfb";
                 RemarksTextBox.Text = server.remarks;
                 ServerGroupBox.Visible = true;
                 //IPTextBox.Focus();
@@ -113,7 +139,7 @@ namespace Shadowsocks.View
         private void LoadConfiguration(Configuration configuration)
         {
             ServersListBox.Items.Clear();
-            foreach (Server server in modifiedConfiguration.configs)
+            foreach (Server server in _modifiedConfiguration.configs)
             {
                 ServersListBox.Items.Add(string.IsNullOrEmpty(server.server) ? "New server" : string.IsNullOrEmpty(server.remarks)? server.server + ":" + server.server_port : server.server + ":" + server.server_port + " (" + server.remarks + ")");
             }
@@ -121,14 +147,15 @@ namespace Shadowsocks.View
 
         private void LoadCurrentConfiguration()
         {
-            modifiedConfiguration = controller.GetConfiguration();
-            LoadConfiguration(modifiedConfiguration);
-            oldSelectedIndex = modifiedConfiguration.index;
-            ServersListBox.SelectedIndex = modifiedConfiguration.index;
+            _modifiedConfiguration = controller.GetConfiguration();
+            LoadConfiguration(_modifiedConfiguration);
+            _oldSelectedIndex = _modifiedConfiguration.index;
+            ServersListBox.SelectedIndex = _modifiedConfiguration.index;
             LoadSelectedServer();
 
             UpdateServersMenu();
-            enableItem.Checked = modifiedConfiguration.enabled;
+            enableItem.Checked = _modifiedConfiguration.enabled;
+            ShareOverLANItem.Checked = _modifiedConfiguration.shareOverLan;
         }
 
         private void UpdateServersMenu()
@@ -167,13 +194,14 @@ namespace Shadowsocks.View
             }
             else
             {
-                isFirstRun = true;
+                _isFirstRun = true;
             }
+            updateChecker.CheckUpdate();
         }
 
         private void ServersListBox_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (oldSelectedIndex == ServersListBox.SelectedIndex)
+            if (_oldSelectedIndex == ServersListBox.SelectedIndex)
             {
                 // we are moving back to oldSelectedIndex or doing a force move
                 return;
@@ -181,11 +209,11 @@ namespace Shadowsocks.View
             if (!SaveOldSelectedServer())
             {
                 // why this won't cause stack overflow?
-                ServersListBox.SelectedIndex = oldSelectedIndex;
+                ServersListBox.SelectedIndex = _oldSelectedIndex;
                 return;
             }
             LoadSelectedServer();
-            oldSelectedIndex = ServersListBox.SelectedIndex;
+            _oldSelectedIndex = ServersListBox.SelectedIndex;
         }
 
         private void AddButton_Click(object sender, EventArgs e)
@@ -195,27 +223,27 @@ namespace Shadowsocks.View
                 return;
             }
             Server server = Configuration.GetDefaultServer();
-            modifiedConfiguration.configs.Add(server);
-            LoadConfiguration(modifiedConfiguration);
-            ServersListBox.SelectedIndex = modifiedConfiguration.configs.Count - 1;
-            oldSelectedIndex = ServersListBox.SelectedIndex;
+            _modifiedConfiguration.configs.Add(server);
+            LoadConfiguration(_modifiedConfiguration);
+            ServersListBox.SelectedIndex = _modifiedConfiguration.configs.Count - 1;
+            _oldSelectedIndex = ServersListBox.SelectedIndex;
         }
 
         private void DeleteButton_Click(object sender, EventArgs e)
         {
-            oldSelectedIndex = ServersListBox.SelectedIndex;
-            if (oldSelectedIndex >= 0 && oldSelectedIndex < modifiedConfiguration.configs.Count)
+            _oldSelectedIndex = ServersListBox.SelectedIndex;
+            if (_oldSelectedIndex >= 0 && _oldSelectedIndex < _modifiedConfiguration.configs.Count)
             {
-                modifiedConfiguration.configs.RemoveAt(oldSelectedIndex);
+                _modifiedConfiguration.configs.RemoveAt(_oldSelectedIndex);
             }
-            if (oldSelectedIndex >= modifiedConfiguration.configs.Count)
+            if (_oldSelectedIndex >= _modifiedConfiguration.configs.Count)
             {
                 // can be -1
-                oldSelectedIndex = modifiedConfiguration.configs.Count - 1;
+                _oldSelectedIndex = _modifiedConfiguration.configs.Count - 1;
             }
-            ServersListBox.SelectedIndex = oldSelectedIndex;
-            LoadConfiguration(modifiedConfiguration);
-            ServersListBox.SelectedIndex = oldSelectedIndex;
+            ServersListBox.SelectedIndex = _oldSelectedIndex;
+            LoadConfiguration(_modifiedConfiguration);
+            ServersListBox.SelectedIndex = _oldSelectedIndex;
             LoadSelectedServer();
         }
 
@@ -231,12 +259,13 @@ namespace Shadowsocks.View
 
         private void ShowFirstTimeBalloon()
         {
-            if (isFirstRun)
+            if (_isFirstRun)
             {
                 notifyIcon1.BalloonTipTitle = "Shadowsocks is here";
                 notifyIcon1.BalloonTipText = "You can turn on/off Shadowsocks in the context menu";
+                notifyIcon1.BalloonTipIcon = ToolTipIcon.Info;
                 notifyIcon1.ShowBalloonTip(0);
-                isFirstRun = false;
+                _isFirstRun = false;
             }
         }
 
@@ -246,12 +275,12 @@ namespace Shadowsocks.View
             {
                 return;
             }
-            if (modifiedConfiguration.configs.Count == 0)
+            if (_modifiedConfiguration.configs.Count == 0)
             {
                 MessageBox.Show("Please add at least one server");
                 return;
             }
-            controller.SaveConfig(modifiedConfiguration);
+            controller.SaveServers(_modifiedConfiguration.configs);
             this.Hide();
             ShowFirstTimeBalloon();
         }
@@ -285,6 +314,12 @@ namespace Shadowsocks.View
             controller.ToggleEnable(enableItem.Checked);
         }
 
+        private void ShareOverLANItem_Click(object sender, EventArgs e)
+        {
+            ShareOverLANItem.Checked = !ShareOverLANItem.Checked;
+            controller.ToggleShareOverLAN(ShareOverLANItem.Checked);
+        }
+
         private void EditPACFileItem_Click(object sender, EventArgs e)
         {
             controller.TouchPACFile();
@@ -293,9 +328,14 @@ namespace Shadowsocks.View
         private void AServerItem_Click(object sender, EventArgs e)
         {
             MenuItem item = (MenuItem)sender;
-            Configuration configuration = controller.GetConfiguration();
-            configuration.index = (int)item.Tag;
-            controller.SaveConfig(configuration);
+            controller.SelectServerIndex((int)item.Tag);
+        }
+
+        private void ShowLogItem_Click(object sender, EventArgs e)
+        {
+            string argument = Logging.LogFile;
+
+            System.Diagnostics.Process.Start("notepad.exe", argument);
         }
 
         private void ConfigForm_Shown(object sender, EventArgs e)
