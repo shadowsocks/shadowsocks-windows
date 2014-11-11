@@ -192,7 +192,7 @@ namespace Shadowsocks.Encrypt
                                 break;
                         }
                         outlength = length + ivLen;
-                        Buffer.BlockCopy(tempbuf, 0, outbuf, ivLen, outlength);
+                        Buffer.BlockCopy(tempbuf, 0, outbuf, ivLen, length);
                     }
                 }
             }

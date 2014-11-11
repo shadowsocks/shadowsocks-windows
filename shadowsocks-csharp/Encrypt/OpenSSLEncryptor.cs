@@ -40,7 +40,7 @@ namespace Shadowsocks.Encrypt
                 outlength = length + ivLen;
                 OpenSSL.EVP_CipherUpdate(_encryptCtx, tempbuf, out outlength, buf, length);
                 outlength = length + ivLen;
-                Buffer.BlockCopy(tempbuf, 0, outbuf, ivLen, outlength);
+                Buffer.BlockCopy(tempbuf, 0, outbuf, ivLen, length);
             }
             else
             {
