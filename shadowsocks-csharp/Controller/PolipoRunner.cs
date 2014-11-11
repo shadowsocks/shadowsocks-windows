@@ -60,9 +60,9 @@ namespace Shadowsocks.Controller
                     _process.Kill();
                     _process.WaitForExit();
                 }
-                catch (InvalidOperationException)
+                catch (Exception e)
                 {
-                    // do nothing
+                    Console.WriteLine(e.ToString());
                 }
                 _process = null;
             }

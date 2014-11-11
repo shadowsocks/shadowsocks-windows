@@ -70,7 +70,7 @@ namespace Shadowsocks.Controller
             {
                 Socket listener = (Socket)ar.AsyncState;
                 Socket conn = listener.EndAccept(ar);
-                conn.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.NoDelay, true);
+                conn.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, true);
 
                 listener.BeginAccept(
                     new AsyncCallback(AcceptCallback),
@@ -103,15 +103,14 @@ namespace Shadowsocks.Controller
         public const int RecvSize = 16384;
         public const int BufferSize = RecvSize + 32;
         // remote receive buffer
-        public byte[] remoteRecvBuffer = new byte[RecvSize];
+        private byte[] remoteRecvBuffer = new byte[RecvSize];
         // remote send buffer
-        public byte[] remoteSendBuffer = new byte[BufferSize];
+        private byte[] remoteSendBuffer = new byte[BufferSize];
         // connection receive buffer
-        public byte[] connetionRecvBuffer = new byte[RecvSize];
+        private byte[] connetionRecvBuffer = new byte[RecvSize];
         // connection send buffer
-        public byte[] connetionSendBuffer = new byte[BufferSize];
+        private byte[] connetionSendBuffer = new byte[BufferSize];
         // Received data string.
-        public StringBuilder sb = new StringBuilder();
 
         private bool connectionShutdown = false;
         private bool remoteShutdown = false;
@@ -134,7 +133,7 @@ namespace Shadowsocks.Controller
 
                 remote = new Socket(ipAddress.AddressFamily,
                     SocketType.Stream, ProtocolType.Tcp);
-                remote.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.NoDelay, true);
+                remote.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, true);
 
                 // Connect to the remote endpoint.
                 remote.BeginConnect(remoteEP,
@@ -238,6 +237,7 @@ namespace Shadowsocks.Controller
                     {
                         // reject socks 4
                         response = new byte[]{ 0, 91 };
+                        Console.WriteLine("socks 5 protocol error");
                     }
                     connection.BeginSend(response, 0, response.Length, 0, new AsyncCallback(HandshakeSendCallback), null);
                 }
@@ -289,6 +289,7 @@ namespace Shadowsocks.Controller
                 }
                 else
                 {
+                    Console.WriteLine("failed to recv data in handshakeReceive2Callback");
                     this.Close();
                 }
             }

@@ -63,6 +63,16 @@ namespace Shadowsocks.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
+        internal static byte[] libeay32_dll {
+            get {
+                object obj = ResourceManager.GetObject("libeay32_dll", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
         internal static byte[] polarssl_dll {
             get {
                 object obj = ResourceManager.GetObject("polarssl_dll", resourceCulture);
@@ -102,6 +112,46 @@ namespace Shadowsocks.Properties {
             get {
                 object obj = ResourceManager.GetObject("proxy_pac_txt", resourceCulture);
                 return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap ss16 {
+            get {
+                object obj = ResourceManager.GetObject("ss16", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap ss20 {
+            get {
+                object obj = ResourceManager.GetObject("ss20", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap ss24 {
+            get {
+                object obj = ResourceManager.GetObject("ss24", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap ssw128 {
+            get {
+                object obj = ResourceManager.GetObject("ssw128", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
             }
         }
     }
