@@ -45,7 +45,7 @@ namespace Shadowsocks
                 {
                     Console.WriteLine(e.ToString());
                 }
-                LoadLibrary(dllPath);
+                //LoadLibrary(dllPath);
 
 #if !DEBUG
                 Logging.OpenLogFile();

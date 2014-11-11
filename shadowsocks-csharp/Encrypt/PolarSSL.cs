@@ -7,7 +7,7 @@ namespace Shadowsocks.Encrypt
 {
     public class PolarSSL
     {
-        const string DLLNAME = "polarssl";
+        const string DLLNAME = "libpolarssl";
 
         public const int AES_CTX_SIZE = 8 + 4 * 68;
         public const int AES_ENCRYPT = 1;
