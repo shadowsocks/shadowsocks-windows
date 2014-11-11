@@ -1,4 +1,6 @@
-﻿using System;
+#define CASE2
+
+using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Shadowsocks.Controller;
 using Shadowsocks.Encrypt;
@@ -10,6 +12,9 @@ namespace test
     [TestClass]
     public class UnitTest
     {
+        static IEncryptor encryptor;
+        static IEncryptor decryptor;
+
         [TestMethod]
         public void TestCompareVersion()
         {
@@ -25,6 +30,15 @@ namespace test
         [TestMethod]
         public void TestEncryption()
         {
+            //Test init encryptor in main thread but use in other thread situation
+#if CASE1
+            encryptor = new PolarSSLEncryptor("aes-256-cfb", "barfoo!");
+            decryptor = new PolarSSLEncryptor("aes-256-cfb", "barfoo!");
+#endif
+#if CASE2
+            encryptor = new OpenSSLEncryptor("aes-256-cfb", "barfoo!");
+            decryptor = new OpenSSLEncryptor("aes-256-cfb", "barfoo!");
+#endif
             // run it once before the multi-threading test to initialize global tables
             RunSingleEncryptionThread();
 
@@ -44,20 +58,22 @@ namespace test
 
         private static bool encryptionFailed = false;
         private static object locker = new object();
+        private static object locker2 = new object();
 
         private void RunSingleEncryptionThread()
         {
             try
             {
-                    for (int i = 0; i < 1000; i++)
+                    for (int i = 0; i < 100; i++)
                     {
                         var random = new Random();
-                        IEncryptor encryptor;
-                        IEncryptor decryptor;
+
                         lock (locker)
                         {
-                            encryptor = new PolarSSLEncryptor("aes-256-cfb", "barfoo!");
-                            decryptor = new PolarSSLEncryptor("aes-256-cfb", "barfoo!");
+                            //encryptor = new PolarSSLEncryptor("aes-256-cfb", "barfoo!");
+                            //decryptor = new PolarSSLEncryptor("aes-256-cfb", "barfoo!");
+                            //encryptor = new OpenSSLEncryptor("aes-256-cfb", "barfoo!");
+                            //decryptor = new OpenSSLEncryptor("aes-256-cfb", "barfoo!");
                         }
                         byte[] plain = new byte[16384];
                         byte[] cipher = new byte[plain.Length + 16];
@@ -65,17 +81,17 @@ namespace test
                         int outLen = 0;
                         int outLen2 = 0;
                         random.NextBytes(plain);
-                        //lock (locker)
-                        //{
+                        lock (locker)
+                        {
                             encryptor.Encrypt(plain, plain.Length, cipher, out outLen);
                             decryptor.Decrypt(cipher, outLen, plain2, out outLen2);
                             Assert.AreEqual(plain.Length, outLen2);
                             encryptor.Encrypt(plain, 1000, cipher, out outLen);
                             decryptor.Decrypt(cipher, outLen, plain2, out outLen2);
                             Assert.AreEqual(1000, outLen2);
-                            encryptor.Encrypt(plain, 12333, cipher, out outLen);
+                            encryptor.Encrypt(plain, 12333, cipher, out outLen);                      
                             decryptor.Decrypt(cipher, outLen, plain2, out outLen2);
-                        //}
+                        }
                         Assert.AreEqual(12333, outLen2);
                         for (int j = 0; j < plain.Length; j++)
                         {
