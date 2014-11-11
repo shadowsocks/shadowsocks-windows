@@ -141,7 +141,7 @@ namespace Shadowsocks.Controller
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.Message);
+                Console.WriteLine(e);
                 this.Close();
             }
         }
@@ -173,7 +173,7 @@ namespace Shadowsocks.Controller
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine(e.Message);
+                    Console.WriteLine(e);
                 }
             }
             if (remote != null)
@@ -185,7 +185,7 @@ namespace Shadowsocks.Controller
                 }
                 catch (SocketException e)
                 {
-                    Console.WriteLine(e.Message);
+                    Console.WriteLine(e);
                 }
             }
             ((IDisposable)encryptor).Dispose();
@@ -205,7 +205,7 @@ namespace Shadowsocks.Controller
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.Message);
+                Console.WriteLine(e);
                 this.Close();
             }
         }
@@ -219,7 +219,7 @@ namespace Shadowsocks.Controller
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.Message);
+                Console.WriteLine(e);
                 this.Close();
             }
         }
@@ -248,7 +248,7 @@ namespace Shadowsocks.Controller
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.Message);
+                Console.WriteLine(e);
                 this.Close();
             }
         }
@@ -271,7 +271,7 @@ namespace Shadowsocks.Controller
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.Message);
+                Console.WriteLine(e);
                 this.Close();
             }
         }
@@ -295,7 +295,7 @@ namespace Shadowsocks.Controller
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.Message);
+                Console.WriteLine(e);
                 this.Close();
             }
         }
@@ -313,7 +313,7 @@ namespace Shadowsocks.Controller
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.Message);
+                Console.WriteLine(e);
                 this.Close();
             }
         }
@@ -341,7 +341,7 @@ namespace Shadowsocks.Controller
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.Message);
+                Console.WriteLine(e);
                 this.Close();
             }
         }
@@ -368,7 +368,7 @@ namespace Shadowsocks.Controller
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.Message);
+                Console.WriteLine(e);
                 this.Close();
             }
         }
@@ -383,7 +383,7 @@ namespace Shadowsocks.Controller
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.Message);
+                Console.WriteLine(e);
                 this.Close();
             }
         }
@@ -398,7 +398,7 @@ namespace Shadowsocks.Controller
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.Message);
+                Console.WriteLine(e);
                 this.Close();
             }
         }

@@ -36,16 +36,16 @@ namespace Shadowsocks
                     return;
                 }
                 string tempPath = Path.GetTempPath();
-                string dllPath = tempPath + "/libeay32.dll";
+                string dllPath = tempPath + "/polarssl.dll";
                 try
                 {
-                    FileManager.UncompressFile(dllPath, Resources.libeay32_dll);
+                    FileManager.UncompressFile(dllPath, Resources.polarssl_dll);
                 }
                 catch (IOException e)
                 {
                     Console.WriteLine(e.ToString());
                 }
-                //LoadLibrary(dllPath);
+                LoadLibrary(dllPath);
 
 #if !DEBUG
                 Logging.OpenLogFile();
