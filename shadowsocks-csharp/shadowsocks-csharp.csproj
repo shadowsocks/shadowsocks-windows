@@ -76,6 +76,8 @@
     <Compile Include="Controller\UpdateChecker.cs" />
     <Compile Include="Encrypt\EncryptorBase.cs" />
     <Compile Include="Encrypt\EncryptorFactory.cs" />
+    <Compile Include="Encrypt\OpenSSL.cs" />
+    <Compile Include="Encrypt\OpenSSLEncryptor.cs" />
     <Compile Include="Encrypt\PolarSSL.cs" />
     <Compile Include="Encrypt\PolarSSLEncryptor.cs" />
     <Compile Include="Encrypt\TableEncryptor.cs" />
@@ -122,6 +124,7 @@
     <None Include="app.manifest">
       <SubType>Designer</SubType>
     </None>
+    <None Include="Data\libeay32.dll.gz" />
     <None Include="Data\polarssl.dll.gz" />
     <None Include="Data\polipo.exe.gz" />
     <None Include="Properties\Settings.settings">
