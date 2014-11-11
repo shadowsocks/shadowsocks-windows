@@ -27,7 +27,6 @@ namespace test
         {
             // run it once before the multi-threading test to initialize global tables
             RunSingleEncryptionThread();
-
             List<Thread> threads = new List<Thread>();
             for (int i = 0; i < 10; i++)
             {
@@ -54,11 +53,8 @@ namespace test
                         var random = new Random();
                         IEncryptor encryptor;
                         IEncryptor decryptor;
-                        lock (locker)
-                        {
-                            encryptor = new PolarSSLEncryptor("aes-256-cfb", "barfoo!");
-                            decryptor = new PolarSSLEncryptor("aes-256-cfb", "barfoo!");
-                        }
+                        encryptor = new PolarSSLEncryptor("aes-256-cfb", "barfoo!");
+                        decryptor = new PolarSSLEncryptor("aes-256-cfb", "barfoo!");
                         byte[] plain = new byte[16384];
                         byte[] cipher = new byte[plain.Length + 16];
                         byte[] plain2 = new byte[plain.Length + 16];
@@ -70,22 +66,31 @@ namespace test
                             encryptor.Encrypt(plain, plain.Length, cipher, out outLen);
                             decryptor.Decrypt(cipher, outLen, plain2, out outLen2);
                             Assert.AreEqual(plain.Length, outLen2);
+                            for (int j = 0; j < plain.Length; j++)
+                            {
+                                Assert.AreEqual(plain[j], plain2[j]);
+                            }
                             encryptor.Encrypt(plain, 1000, cipher, out outLen);
                             decryptor.Decrypt(cipher, outLen, plain2, out outLen2);
                             Assert.AreEqual(1000, outLen2);
+                            for (int j = 0; j < outLen2; j++)
+                            {
+                                Assert.AreEqual(plain[j], plain2[j]);
+                            }
                             encryptor.Encrypt(plain, 12333, cipher, out outLen);
                             decryptor.Decrypt(cipher, outLen, plain2, out outLen2);
+                            Assert.AreEqual(12333, outLen2);
+                            for (int j = 0; j < outLen2; j++)
+                            {
+                                Assert.AreEqual(plain[j], plain2[j]);
+                            }
                         //}
-                        Assert.AreEqual(12333, outLen2);
-                        for (int j = 0; j < plain.Length; j++)
-                        {
-                            Assert.AreEqual(plain[j], plain2[j]);
-                        }
                     }
             }
             catch
             {
                 encryptionFailed = true;
+                throw;
             }
         }
     }
