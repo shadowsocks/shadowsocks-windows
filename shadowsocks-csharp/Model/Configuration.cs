@@ -9,11 +9,6 @@ namespace Shadowsocks.Model
     [Serializable]
     public class Configuration
     {
-        public Configuration()
-        {
-			Configuration.CONFIG_FILE = Application.StartupPath + @"\gui-config.json";
-        }
-
         public List<Server> configs;
         public int index;
         public bool enabled;

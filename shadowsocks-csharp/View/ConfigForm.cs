@@ -185,6 +185,7 @@ namespace Shadowsocks.View
             UpdateServersMenu();
             enableItem.Checked = _modifiedConfiguration.enabled;
             ShareOverLANItem.Checked = _modifiedConfiguration.shareOverLan;
+            AutoStartupItem.Checked = AutoStartup.Check();
         }
 
         private void UpdateServersMenu()
@@ -379,15 +380,11 @@ namespace Shadowsocks.View
             qrCodeForm.Show();
         }
 
-		private void autoStartup_Click(object sender, EventArgs e) {
-			autoStartup.Checked = !autoStartup.Checked;
-			if (!AutoStartup.Set(autoStartup.Checked)) {
+		private void AutoStartupItem_Click(object sender, EventArgs e) {
+			AutoStartupItem.Checked = !AutoStartupItem.Checked;
+			if (!AutoStartup.Set(AutoStartupItem.Checked)) {
 				MessageBox.Show("Failed to edit registry");
 			}
-		}
-
-		private void contextMenu1_Popup(object sender, EventArgs e) {
-			autoStartup.Checked = AutoStartup.Check();
 		}
     }
 }
