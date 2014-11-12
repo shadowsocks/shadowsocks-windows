@@ -5,6 +5,7 @@ using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
 using System.Diagnostics;
+using Microsoft.Win32;
 using Shadowsocks.Controller;
 using Shadowsocks.Model;
 using Shadowsocks.Properties;
@@ -377,5 +378,16 @@ namespace Shadowsocks.View
             qrCodeForm.Icon = this.Icon;
             qrCodeForm.Show();
         }
+
+		private void autoStartup_Click(object sender, EventArgs e) {
+			autoStartup.Checked = !autoStartup.Checked;
+			if (!AutoStartup.Set(autoStartup.Checked)) {
+				MessageBox.Show("Failed to edit registry");
+			}
+		}
+
+		private void contextMenu1_Popup(object sender, EventArgs e) {
+			autoStartup.Checked = AutoStartup.Check();
+		}
     }
 }
