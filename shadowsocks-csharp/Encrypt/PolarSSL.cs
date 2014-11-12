@@ -1,5 +1,8 @@
-﻿using System;
+﻿using Shadowsocks.Controller;
+using Shadowsocks.Properties;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
 
@@ -12,6 +15,24 @@ namespace Shadowsocks.Encrypt
         public const int AES_CTX_SIZE = 8 + 4 * 68;
         public const int AES_ENCRYPT = 1;
         public const int AES_DECRYPT = 0;
+
+        static PolarSSL()
+        {
+            string tempPath = Path.GetTempPath();
+            string dllPath = tempPath + "/polarssl.dll";
+            try
+            {
+                FileManager.UncompressFile(dllPath, Resources.polarssl_dll);
+            }
+            catch (IOException e)
+            {
+                Console.WriteLine(e.ToString());
+            }
+            LoadLibrary(dllPath);
+        }
+
+        [DllImport("Kernel32.dll")]
+        private static extern IntPtr LoadLibrary(string path);
 
         [DllImport(DLLNAME, CallingConvention = CallingConvention.Cdecl)]
         public extern static void aes_init(IntPtr ctx);
