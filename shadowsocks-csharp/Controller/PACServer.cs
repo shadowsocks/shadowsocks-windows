@@ -87,9 +87,12 @@ namespace Shadowsocks.Controller
                 conn.BeginReceive(new byte[1024], 0, 1024, 0,
                     new AsyncCallback(ReceiveCallback), conn);
             }
+            catch (ObjectDisposedException)
+            {
+            }
             catch (Exception e)
             {
-                Console.WriteLine(e.Message);
+                Console.WriteLine(e);
             }
         }
 
@@ -152,7 +155,7 @@ Connection: Close
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.Message);
+                Console.WriteLine(e);
                 conn.Close();
             }
         }

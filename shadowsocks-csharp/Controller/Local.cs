@@ -115,6 +115,9 @@ namespace Shadowsocks.Controller
         private bool connectionShutdown = false;
         private bool remoteShutdown = false;
         private bool closed = false;
+        
+        private object encryptionLock = new object();
+        private object decryptionLock = new object();
 
         public void Start()
         {
@@ -188,11 +191,21 @@ namespace Shadowsocks.Controller
                     Console.WriteLine(e);
                 }
             }
-            ((IDisposable)encryptor).Dispose();
+            lock (encryptionLock)
+            {
+                lock (decryptionLock)
+                {
+                    ((IDisposable)encryptor).Dispose();
+                }
+            }
         }
 
         private void ConnectCallback(IAsyncResult ar)
         {
+            if (closed)
+            {
+                return;
+            }
             try
             {
                 // Complete the connection.
@@ -212,6 +225,10 @@ namespace Shadowsocks.Controller
 
         private void HandshakeReceive()
         {
+            if (closed)
+            {
+                return;
+            }
             try
             {
                 connection.BeginReceive(connetionRecvBuffer, 0, 256, 0,
@@ -226,6 +243,10 @@ namespace Shadowsocks.Controller
 
         private void HandshakeReceiveCallback(IAsyncResult ar)
         {
+            if (closed)
+            {
+                return;
+            }
             try
             {
                 int bytesRead = connection.EndReceive(ar);
@@ -255,6 +276,10 @@ namespace Shadowsocks.Controller
 
         private void HandshakeSendCallback(IAsyncResult ar)
         {
+            if (closed)
+            {
+                return;
+            }
             try
             {
                 connection.EndSend(ar);
@@ -278,6 +303,10 @@ namespace Shadowsocks.Controller
 
         private void handshakeReceive2Callback(IAsyncResult ar)
         {
+            if (closed)
+            {
+                return;
+            }
             try
             {
                 int bytesRead = connection.EndReceive(ar);
@@ -303,6 +332,10 @@ namespace Shadowsocks.Controller
 
         private void StartPipe(IAsyncResult ar)
         {
+            if (closed)
+            {
+                return;
+            }
             try
             {
                 connection.EndReceive(ar);
@@ -320,7 +353,10 @@ namespace Shadowsocks.Controller
 
         private void PipeRemoteReceiveCallback(IAsyncResult ar)
         {
-
+            if (closed)
+            {
+                return;
+            }
             try
             {
                 int bytesRead = remote.EndReceive(ar);
@@ -328,7 +364,14 @@ namespace Shadowsocks.Controller
                 if (bytesRead > 0)
                 {
                     int bytesToSend;
-                    encryptor.Decrypt(remoteRecvBuffer, bytesRead, remoteSendBuffer, out bytesToSend);
+                    lock (decryptionLock)
+                    {
+                        if (closed)
+                        {
+                            return;
+                        }
+                        encryptor.Decrypt(remoteRecvBuffer, bytesRead, remoteSendBuffer, out bytesToSend);
+                    }
                     connection.BeginSend(remoteSendBuffer, 0, bytesToSend, 0, new AsyncCallback(PipeConnectionSendCallback), null);
                 }
                 else
@@ -348,7 +391,10 @@ namespace Shadowsocks.Controller
 
         private void PipeConnectionReceiveCallback(IAsyncResult ar)
         {
-
+            if (closed)
+            {
+                return;
+            }
             try
             {
                 int bytesRead = connection.EndReceive(ar);
@@ -356,7 +402,14 @@ namespace Shadowsocks.Controller
                 if (bytesRead > 0)
                 {
                     int bytesToSend;
-                    encryptor.Encrypt(connetionRecvBuffer, bytesRead, connetionSendBuffer, out bytesToSend);
+                    lock (encryptionLock)
+                    {
+                        if (closed)
+                        {
+                            return;
+                        }
+                        encryptor.Encrypt(connetionRecvBuffer, bytesRead, connetionSendBuffer, out bytesToSend);
+                    }
                     remote.BeginSend(connetionSendBuffer, 0, bytesToSend, 0, new AsyncCallback(PipeRemoteSendCallback), null);
                 }
                 else
@@ -375,6 +428,10 @@ namespace Shadowsocks.Controller
 
         private void PipeRemoteSendCallback(IAsyncResult ar)
         {
+            if (closed)
+            {
+                return;
+            }
             try
             {
                 remote.EndSend(ar);
@@ -390,6 +447,10 @@ namespace Shadowsocks.Controller
 
         private void PipeConnectionSendCallback(IAsyncResult ar)
         {
+            if (closed)
+            {
+                return;
+            }
             try
             {
                 connection.EndSend(ar);
