@@ -15,6 +15,7 @@ namespace Shadowsocks.Controller
     {
         private static int PORT = 8090;
         private static string PAC_FILE = "pac.txt";
+        private static Configuration config;
 
         Socket _listener;
         FileSystemWatcher watcher;
@@ -25,6 +26,7 @@ namespace Shadowsocks.Controller
         {
             try
             {
+                config = configuration;
                 // Create a TCP/IP socket.
                 _listener = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
                 _listener.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
@@ -84,8 +86,14 @@ namespace Shadowsocks.Controller
                     new AsyncCallback(AcceptCallback),
                     listener);
 
-                conn.BeginReceive(new byte[1024], 0, 1024, 0,
-                    new AsyncCallback(ReceiveCallback), conn);
+                byte[] buf = new byte[2048];
+                object[] state = new object[] {
+                    conn,
+                    buf
+                };
+                
+                conn.BeginReceive(buf, 0, 1024, 0,
+                    new AsyncCallback(ReceiveCallback), state);
             }
             catch (ObjectDisposedException)
             {
@@ -123,7 +131,10 @@ namespace Shadowsocks.Controller
 
         private void ReceiveCallback(IAsyncResult ar)
         {
-            Socket conn = (Socket)ar.AsyncState;
+            object[] state = (object[])ar.AsyncState;
+
+            Socket conn = (Socket)state[0];
+            byte[] requestBuf = (byte[])state[1];
             try
             {
                 int bytesRead = conn.EndReceive(ar);
@@ -132,7 +143,7 @@ namespace Shadowsocks.Controller
 
                 IPEndPoint localEndPoint = (IPEndPoint)conn.LocalEndPoint;
 
-                string proxy = "PROXY " + localEndPoint.Address + ":8123;";
+                string proxy = GetPACAddress(requestBuf, localEndPoint);
 
                 pac = pac.Replace("__PROXY__", proxy);
 
@@ -188,6 +199,25 @@ Connection: Close
             {
                 PACFileChanged(this, new EventArgs());
             }
+        }
+
+        private string GetPACAddress(byte[] requestBuf, IPEndPoint localEndPoint)
+        {
+            string proxy = "PROXY " + localEndPoint.Address + ":8123;";
+            //try
+            //{
+            //    string requestString = Encoding.UTF8.GetString(requestBuf);
+            //    if (requestString.IndexOf("AppleWebKit") >= 0)
+            //    {
+            //        string address = "" + localEndPoint.Address + ":" + config.GetCurrentServer().local_port;
+            //        proxy = "SOCKS5 " + address + "; SOCKS " + address + ";";
+            //    }
+            //}
+            //catch (Exception e)
+            //{
+            //    Console.WriteLine(e);
+            //}
+            return proxy;
         }
     }
 }
