@@ -4,6 +4,7 @@ using Shadowsocks.View;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Threading;
 using System.Windows.Forms;
 
@@ -30,7 +31,7 @@ namespace Shadowsocks
                     MessageBox.Show("Shadowsocks is already running.\n\nFind Shadowsocks icon in your notify tray.");
                     return;
                 }
-
+                Directory.SetCurrentDirectory(Application.StartupPath);
 #if !DEBUG
                 Logging.OpenLogFile();
 #endif
