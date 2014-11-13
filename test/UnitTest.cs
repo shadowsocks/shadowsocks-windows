@@ -48,7 +48,7 @@ namespace test
         {
             try
             {
-                    for (int i = 0; i < 1000; i++)
+                    for (int i = 0; i < 100; i++)
                     {
                         var random = new Random();
                         IEncryptor encryptor;
