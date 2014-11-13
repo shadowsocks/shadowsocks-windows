@@ -15,7 +15,8 @@ namespace Shadowsocks.Model
         public bool shareOverLan;
         public bool isDefault;
 
-        private static string CONFIG_FILE = "gui-config.json";
+        private static string EXE_PATH = Application.StartupPath + "\\";
+        private static string CONFIG_FILE = EXE_PATH + "gui-config.json";
 
         public Server GetCurrentServer()
         {
