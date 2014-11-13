@@ -2,16 +2,13 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Windows.Forms;
 
 namespace Shadowsocks.Model
 {
     [Serializable]
     public class Configuration
     {
-        public Configuration()
-        {
-        }
-
         public List<Server> configs;
         public int index;
         public bool enabled;

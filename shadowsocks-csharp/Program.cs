@@ -5,8 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Reflection;
-using System.Runtime.InteropServices;
 using System.Threading;
 using System.Windows.Forms;
 
@@ -14,8 +12,6 @@ namespace Shadowsocks
 {
     static class Program
     {
-        [DllImport("Kernel32.dll")]
-        private static extern IntPtr LoadLibrary(string path);
 
         /// <summary>
         /// 应用程序的主入口点。
@@ -35,18 +31,7 @@ namespace Shadowsocks
                     MessageBox.Show("Shadowsocks is already running.\n\nFind Shadowsocks icon in your notify tray.");
                     return;
                 }
-                string tempPath = Path.GetTempPath();
-                string dllPath = tempPath + "/libeay32.dll";
-                try
-                {
-                    FileManager.UncompressFile(dllPath, Resources.libeay32_dll);
-                }
-                catch (IOException e)
-                {
-                    Console.WriteLine(e.ToString());
-                }
-                LoadLibrary(dllPath);
-
+                Directory.SetCurrentDirectory(Application.StartupPath);
 #if !DEBUG
                 Logging.OpenLogFile();
 #endif

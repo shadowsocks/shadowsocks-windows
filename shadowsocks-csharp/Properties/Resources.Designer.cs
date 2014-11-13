@@ -63,16 +63,6 @@ namespace Shadowsocks.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
-        internal static byte[] libeay32_dll {
-            get {
-                object obj = ResourceManager.GetObject("libeay32_dll", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Byte[].
-        /// </summary>
         internal static byte[] polarssl_dll {
             get {
                 object obj = ResourceManager.GetObject("polarssl_dll", resourceCulture);

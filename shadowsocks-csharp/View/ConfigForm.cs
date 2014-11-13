@@ -5,6 +5,7 @@ using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
 using System.Diagnostics;
+using Microsoft.Win32;
 using Shadowsocks.Controller;
 using Shadowsocks.Model;
 using Shadowsocks.Properties;
@@ -184,6 +185,7 @@ namespace Shadowsocks.View
             UpdateServersMenu();
             enableItem.Checked = _modifiedConfiguration.enabled;
             ShareOverLANItem.Checked = _modifiedConfiguration.shareOverLan;
+            AutoStartupItem.Checked = AutoStartup.Check();
         }
 
         private void UpdateServersMenu()
@@ -377,5 +379,12 @@ namespace Shadowsocks.View
             qrCodeForm.Icon = this.Icon;
             qrCodeForm.Show();
         }
+
+		private void AutoStartupItem_Click(object sender, EventArgs e) {
+			AutoStartupItem.Checked = !AutoStartupItem.Checked;
+			if (!AutoStartup.Set(AutoStartupItem.Checked)) {
+				MessageBox.Show("Failed to edit registry");
+			}
+		}
     }
 }
