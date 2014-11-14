@@ -28,7 +28,6 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.RemarksTextBox = new System.Windows.Forms.TextBox();
             this.label6 = new System.Windows.Forms.Label();
@@ -42,31 +41,15 @@
             this.PasswordTextBox = new System.Windows.Forms.TextBox();
             this.label5 = new System.Windows.Forms.Label();
             this.EncryptionSelect = new System.Windows.Forms.ComboBox();
-            this.notifyIcon1 = new System.Windows.Forms.NotifyIcon(this.components);
             this.panel2 = new System.Windows.Forms.Panel();
             this.OKButton = new System.Windows.Forms.Button();
             this.MyCancelButton = new System.Windows.Forms.Button();
             this.panel1 = new System.Windows.Forms.Panel();
-            this.contextMenu1 = new System.Windows.Forms.ContextMenu();
-            this.enableItem = new System.Windows.Forms.MenuItem();
-            this.AutoStartupItem = new System.Windows.Forms.MenuItem();
-            this.ShareOverLANItem = new System.Windows.Forms.MenuItem();
-            this.ServersItem = new System.Windows.Forms.MenuItem();
-            this.SeperatorItem = new System.Windows.Forms.MenuItem();
-            this.ConfigItem = new System.Windows.Forms.MenuItem();
-            this.menuItem4 = new System.Windows.Forms.MenuItem();
-            this.editPACFileItem = new System.Windows.Forms.MenuItem();
-            this.QRCodeItem = new System.Windows.Forms.MenuItem();
-            this.ShowLogItem = new System.Windows.Forms.MenuItem();
-            this.aboutItem = new System.Windows.Forms.MenuItem();
-            this.menuItem3 = new System.Windows.Forms.MenuItem();
-            this.quitItem = new System.Windows.Forms.MenuItem();
             this.panel3 = new System.Windows.Forms.Panel();
             this.DeleteButton = new System.Windows.Forms.Button();
             this.AddButton = new System.Windows.Forms.Button();
             this.ServerGroupBox = new System.Windows.Forms.GroupBox();
             this.ServersListBox = new System.Windows.Forms.ListBox();
-            this.menuItem1 = new System.Windows.Forms.MenuItem();
             this.tableLayoutPanel1.SuspendLayout();
             this.panel1.SuspendLayout();
             this.panel3.SuspendLayout();
@@ -93,9 +76,9 @@
             this.tableLayoutPanel1.Controls.Add(this.label5, 0, 3);
             this.tableLayoutPanel1.Controls.Add(this.EncryptionSelect, 1, 3);
             this.tableLayoutPanel1.Location = new System.Drawing.Point(8, 21);
-            this.tableLayoutPanel1.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.tableLayoutPanel1.Margin = new System.Windows.Forms.Padding(5);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
-            this.tableLayoutPanel1.Padding = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.tableLayoutPanel1.Padding = new System.Windows.Forms.Padding(5);
             this.tableLayoutPanel1.RowCount = 6;
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
@@ -233,11 +216,6 @@
             this.EncryptionSelect.Size = new System.Drawing.Size(160, 21);
             this.EncryptionSelect.TabIndex = 3;
             // 
-            // notifyIcon1
-            // 
-            this.notifyIcon1.Text = "Shadowsocks";
-            this.notifyIcon1.DoubleClick += new System.EventHandler(this.notifyIcon1_DoubleClick);
-            // 
             // panel2
             // 
             this.panel2.Anchor = System.Windows.Forms.AnchorStyles.Top;
@@ -281,99 +259,6 @@
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(165, 30);
             this.panel1.TabIndex = 1;
-            // 
-            // contextMenu1
-            // 
-            this.contextMenu1.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
-            this.enableItem,
-            this.ServersItem,
-            this.menuItem1,
-            this.AutoStartupItem,
-            this.ShareOverLANItem,
-            this.editPACFileItem,
-            this.menuItem4,
-            this.QRCodeItem,
-            this.ShowLogItem,
-            this.aboutItem,
-            this.menuItem3,
-            this.quitItem});
-            // 
-            // enableItem
-            // 
-            this.enableItem.Index = 0;
-            this.enableItem.Text = "&Enable";
-            this.enableItem.Click += new System.EventHandler(this.EnableItem_Click);
-            // 
-            // AutoStartupItem
-            // 
-            this.AutoStartupItem.Index = 3;
-            this.AutoStartupItem.Text = "Start on Boot";
-            this.AutoStartupItem.Click += new System.EventHandler(this.AutoStartupItem_Click);
-            // 
-            // ShareOverLANItem
-            // 
-            this.ShareOverLANItem.Index = 4;
-            this.ShareOverLANItem.Text = "Share over LAN";
-            this.ShareOverLANItem.Click += new System.EventHandler(this.ShareOverLANItem_Click);
-            // 
-            // ServersItem
-            // 
-            this.ServersItem.Index = 1;
-            this.ServersItem.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
-            this.SeperatorItem,
-            this.ConfigItem});
-            this.ServersItem.Text = "&Servers";
-            // 
-            // SeperatorItem
-            // 
-            this.SeperatorItem.Index = 0;
-            this.SeperatorItem.Text = "-";
-            // 
-            // ConfigItem
-            // 
-            this.ConfigItem.Index = 1;
-            this.ConfigItem.Text = "Edit Servers...";
-            this.ConfigItem.Click += new System.EventHandler(this.Config_Click);
-            // 
-            // menuItem4
-            // 
-            this.menuItem4.Index = 6;
-            this.menuItem4.Text = "-";
-            // 
-            // editPACFileItem
-            // 
-            this.editPACFileItem.Index = 5;
-            this.editPACFileItem.Text = "Edit &PAC File...";
-            this.editPACFileItem.Click += new System.EventHandler(this.EditPACFileItem_Click);
-            // 
-            // QRCodeItem
-            // 
-            this.QRCodeItem.Index = 7;
-            this.QRCodeItem.Text = "Show &QRCode...";
-            this.QRCodeItem.Click += new System.EventHandler(this.QRCodeItem_Click);
-            // 
-            // ShowLogItem
-            // 
-            this.ShowLogItem.Index = 8;
-            this.ShowLogItem.Text = "Show Logs...";
-            this.ShowLogItem.Click += new System.EventHandler(this.ShowLogItem_Click);
-            // 
-            // aboutItem
-            // 
-            this.aboutItem.Index = 9;
-            this.aboutItem.Text = "About...";
-            this.aboutItem.Click += new System.EventHandler(this.AboutItem_Click);
-            // 
-            // menuItem3
-            // 
-            this.menuItem3.Index = 10;
-            this.menuItem3.Text = "-";
-            // 
-            // quitItem
-            // 
-            this.quitItem.Index = 11;
-            this.quitItem.Text = "&Quit";
-            this.quitItem.Click += new System.EventHandler(this.Quit_Click);
             // 
             // panel3
             // 
@@ -425,11 +310,6 @@
             this.ServersListBox.TabIndex = 5;
             this.ServersListBox.SelectedIndexChanged += new System.EventHandler(this.ServersListBox_SelectedIndexChanged);
             // 
-            // menuItem1
-            // 
-            this.menuItem1.Index = 2;
-            this.menuItem1.Text = "-";
-            // 
             // ConfigForm
             // 
             this.AcceptButton = this.OKButton;
@@ -474,35 +354,19 @@
         private System.Windows.Forms.TextBox ServerPortTextBox;
         private System.Windows.Forms.TextBox PasswordTextBox;
         private System.Windows.Forms.TextBox ProxyPortTextBox;
-        private System.Windows.Forms.NotifyIcon notifyIcon1;
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.ComboBox EncryptionSelect;
         private System.Windows.Forms.Panel panel2;
         private System.Windows.Forms.Button OKButton;
         private System.Windows.Forms.Button MyCancelButton;
         private System.Windows.Forms.Panel panel1;
-        private System.Windows.Forms.ContextMenu contextMenu1;
-        private System.Windows.Forms.MenuItem enableItem;
-        private System.Windows.Forms.MenuItem aboutItem;
-        private System.Windows.Forms.MenuItem menuItem3;
-        private System.Windows.Forms.MenuItem quitItem;
-        private System.Windows.Forms.MenuItem ConfigItem;
-        private System.Windows.Forms.MenuItem editPACFileItem;
         private System.Windows.Forms.Panel panel3;
         private System.Windows.Forms.Button DeleteButton;
         private System.Windows.Forms.Button AddButton;
         private System.Windows.Forms.GroupBox ServerGroupBox;
         private System.Windows.Forms.ListBox ServersListBox;
-        private System.Windows.Forms.MenuItem ServersItem;
-        private System.Windows.Forms.MenuItem SeperatorItem;
-        private System.Windows.Forms.MenuItem menuItem4;
         private System.Windows.Forms.TextBox RemarksTextBox;
         private System.Windows.Forms.Label label6;
-        private System.Windows.Forms.MenuItem QRCodeItem;
-        private System.Windows.Forms.MenuItem ShowLogItem;
-        private System.Windows.Forms.MenuItem ShareOverLANItem;
-		private System.Windows.Forms.MenuItem AutoStartupItem;
-        private System.Windows.Forms.MenuItem menuItem1;
     }
 }
 

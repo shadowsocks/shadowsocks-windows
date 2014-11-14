@@ -25,77 +25,17 @@ namespace Shadowsocks.View
         public ConfigForm(ShadowsocksController controller)
         {
             InitializeComponent();
-            LoadTrayIcon();
-            notifyIcon1.ContextMenu = contextMenu1;
+            this.Icon = Icon.FromHandle(Resources.ssw128.GetHicon());
 
             this.controller = controller;
-            controller.EnableStatusChanged += controller_EnableStatusChanged;
             controller.ConfigChanged += controller_ConfigChanged;
-            controller.PACFileReadyToOpen += controller_PACFileReadyToOpen;
-            controller.ShareOverLANStatusChanged += controller_ShareOverLANStatusChanged;
-
-            this.updateChecker = new UpdateChecker();
-            updateChecker.NewVersionFound += updateChecker_NewVersionFound;
 
             LoadCurrentConfiguration();
-        }
-
-        private void LoadTrayIcon()
-        {
-            int dpi;
-            Graphics graphics = this.CreateGraphics();
-            dpi = (int)graphics.DpiX;
-            graphics.Dispose();
-            Bitmap icon = null;
-            if (dpi < 97)
-            {
-                // dpi = 96;
-                icon = Resources.ss16;
-            }
-            else if (dpi < 121)
-            {
-                // dpi = 120;
-                icon = Resources.ss20;
-            }
-            else
-            {
-                icon = Resources.ss24;
-            }
-            notifyIcon1.Icon = Icon.FromHandle(icon.GetHicon());
-            notifyIcon1.Visible = true;
-            this.Icon = Icon.FromHandle(Resources.ssw128.GetHicon());
         }
 
         private void controller_ConfigChanged(object sender, EventArgs e)
         {
             LoadCurrentConfiguration();
-        }
-
-        private void controller_EnableStatusChanged(object sender, EventArgs e)
-        {
-            enableItem.Checked = controller.GetConfiguration().enabled;
-        }
-
-        void controller_ShareOverLANStatusChanged(object sender, EventArgs e)
-        {
-            ShareOverLANItem.Checked = controller.GetConfiguration().shareOverLan;
-        }
-
-        void controller_PACFileReadyToOpen(object sender, ShadowsocksController.PathEventArgs e)
-        {
-            string argument = @"/select, " + e.Path;
-
-            System.Diagnostics.Process.Start("explorer.exe", argument);
-        }
-
-        void updateChecker_NewVersionFound(object sender, EventArgs e)
-        {
-            notifyIcon1.BalloonTipTitle = "Shadowsocks " + updateChecker.LatestVersionNumber + " Update Found";
-            notifyIcon1.BalloonTipText = "Click here to download";
-            notifyIcon1.BalloonTipIcon = ToolTipIcon.Info;
-            notifyIcon1.BalloonTipClicked += notifyIcon1_BalloonTipClicked;
-            notifyIcon1.ShowBalloonTip(5000);
-            _isFirstRun = false;
         }
 
         void notifyIcon1_BalloonTipClicked(object sender, EventArgs e)
@@ -181,52 +121,11 @@ namespace Shadowsocks.View
             _oldSelectedIndex = _modifiedConfiguration.index;
             ServersListBox.SelectedIndex = _modifiedConfiguration.index;
             LoadSelectedServer();
-
-            UpdateServersMenu();
-            enableItem.Checked = _modifiedConfiguration.enabled;
-            ShareOverLANItem.Checked = _modifiedConfiguration.shareOverLan;
-            AutoStartupItem.Checked = AutoStartup.Check();
-        }
-
-        private void UpdateServersMenu()
-        {
-            var items = ServersItem.MenuItems;
-
-            items.Clear();
-
-            Configuration configuration = controller.GetConfiguration();
-            for (int i = 0; i < configuration.configs.Count; i++)
-            {
-                Server server = configuration.configs[i];
-                MenuItem item = new MenuItem(string.IsNullOrEmpty(server.remarks) ? server.server + ":" + server.server_port : server.server + ":" + server.server_port + " (" + server.remarks + ")");
-                item.Tag = i;
-                item.Click += AServerItem_Click;
-                items.Add(item);
-            }
-            items.Add(SeperatorItem);
-            items.Add(ConfigItem);
-
-            if (configuration.index >= 0 && configuration.index < configuration.configs.Count)
-            {
-                items[configuration.index].Checked = true;
-            }
         }
 
         private void ConfigForm_Load(object sender, EventArgs e)
         {
-            if (!controller.GetConfiguration().isDefault)
-            {
-                this.Opacity = 0;
-                BeginInvoke(new MethodInvoker(delegate
-                {
-                    this.Hide();
-                }));
-            }
-            else
-            {
-                _isFirstRun = true;
-            }
-            updateChecker.CheckUpdate();
+
         }
 
         private void ServersListBox_SelectedIndexChanged(object sender, EventArgs e)
@@ -277,28 +176,6 @@ namespace Shadowsocks.View
             LoadSelectedServer();
         }
 
-        private void Config_Click(object sender, EventArgs e)
-        {
-            ShowWindow();
-        }
-
-        private void Quit_Click(object sender, EventArgs e)
-        {
-            this.Close();
-        }
-
-        private void ShowFirstTimeBalloon()
-        {
-            if (_isFirstRun)
-            {
-                notifyIcon1.BalloonTipTitle = "Shadowsocks is here";
-                notifyIcon1.BalloonTipText = "You can turn on/off Shadowsocks in the context menu";
-                notifyIcon1.BalloonTipIcon = ToolTipIcon.Info;
-                notifyIcon1.ShowBalloonTip(0);
-                _isFirstRun = false;
-            }
-        }
-
         private void OKButton_Click(object sender, EventArgs e)
         {
             if (!SaveOldSelectedServer())
@@ -312,60 +189,11 @@ namespace Shadowsocks.View
             }
             controller.SaveServers(_modifiedConfiguration.configs);
             this.Hide();
-            ShowFirstTimeBalloon();
         }
 
         private void CancelButton_Click(object sender, EventArgs e)
         {
-            this.Hide();
-            LoadCurrentConfiguration();
-            ShowFirstTimeBalloon();
-        }
-
-        private void ConfigForm_FormClosed(object sender, FormClosedEventArgs e)
-        {
-            controller.Stop();
-        }
-
-        private void AboutItem_Click(object sender, EventArgs e)
-        {
-            Process.Start("https://github.com/clowwindy/shadowsocks-csharp");
-        }
-
-        private void notifyIcon1_DoubleClick(object sender, EventArgs e)
-        {
-            ShowWindow();
-        }
-
-
-        private void EnableItem_Click(object sender, EventArgs e)
-        {
-            enableItem.Checked = !enableItem.Checked;
-            controller.ToggleEnable(enableItem.Checked);
-        }
-
-        private void ShareOverLANItem_Click(object sender, EventArgs e)
-        {
-            ShareOverLANItem.Checked = !ShareOverLANItem.Checked;
-            controller.ToggleShareOverLAN(ShareOverLANItem.Checked);
-        }
-
-        private void EditPACFileItem_Click(object sender, EventArgs e)
-        {
-            controller.TouchPACFile();
-        }
-
-        private void AServerItem_Click(object sender, EventArgs e)
-        {
-            MenuItem item = (MenuItem)sender;
-            controller.SelectServerIndex((int)item.Tag);
-        }
-
-        private void ShowLogItem_Click(object sender, EventArgs e)
-        {
-            string argument = Logging.LogFile;
-
-            System.Diagnostics.Process.Start("notepad.exe", argument);
+            this.Close();
         }
 
         private void ConfigForm_Shown(object sender, EventArgs e)
@@ -373,18 +201,10 @@ namespace Shadowsocks.View
             IPTextBox.Focus();
         }
 
-        private void QRCodeItem_Click(object sender, EventArgs e)
+        private void ConfigForm_FormClosed(object sender, FormClosedEventArgs e)
         {
-            QRCodeForm qrCodeForm = new QRCodeForm(controller.GetQRCodeForCurrentServer());
-            qrCodeForm.Icon = this.Icon;
-            qrCodeForm.Show();
+            controller.ConfigChanged -= controller_ConfigChanged;
         }
 
-		private void AutoStartupItem_Click(object sender, EventArgs e) {
-			AutoStartupItem.Checked = !AutoStartupItem.Checked;
-			if (!AutoStartup.Set(AutoStartupItem.Checked)) {
-				MessageBox.Show("Failed to edit registry");
-			}
-		}
     }
 }
