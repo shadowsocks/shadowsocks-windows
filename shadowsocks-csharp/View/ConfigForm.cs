@@ -15,12 +15,10 @@ namespace Shadowsocks.View
     public partial class ConfigForm : Form
     {
         private ShadowsocksController controller;
-        private UpdateChecker updateChecker;
 
         // this is a copy of configuration that we are working on
         private Configuration _modifiedConfiguration;
         private int _oldSelectedIndex = -1;
-        private bool _isFirstRun;
 
         public ConfigForm(ShadowsocksController controller)
         {
@@ -37,12 +35,6 @@ namespace Shadowsocks.View
         {
             LoadCurrentConfiguration();
         }
-
-        void notifyIcon1_BalloonTipClicked(object sender, EventArgs e)
-        {
-            Process.Start(updateChecker.LatestVersionURL);
-        }
-
         
         private void ShowWindow()
         {
