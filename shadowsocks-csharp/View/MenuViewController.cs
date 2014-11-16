@@ -22,7 +22,6 @@ namespace Shadowsocks.View
         private NotifyIcon notifyIcon1;
         private ContextMenu contextMenu1;
 
-        // this is a copy of configuration that we are working on
         private bool _isFirstRun;
         private MenuItem enableItem;
         private MenuItem AutoStartupItem;
