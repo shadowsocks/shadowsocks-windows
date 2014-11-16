@@ -41,13 +41,20 @@ namespace Shadowsocks.Controller
             try
             {
                 local.Start();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+            try
+            {
                 pacServer = new PACServer();
                 pacServer.PACFileChanged += pacServer_PACFileChanged;
                 pacServer.Start(_config);
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.Message);
+                Console.WriteLine(e);
             }
 
             UpdateSystemProxy();

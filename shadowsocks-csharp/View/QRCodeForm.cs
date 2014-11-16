@@ -20,6 +20,7 @@ namespace Shadowsocks.View
         {
             this.code = code;
             InitializeComponent();
+            this.Icon = Icon.FromHandle(Resources.ssw128.GetHicon());
         }
 
         private void GenQR(string ssconfig)

@@ -77,7 +77,9 @@ namespace Shadowsocks.Properties {
         ///socksProxyType = socks5
         ///diskCacheRoot = &quot;&quot;
         ///localDocumentRoot = &quot;&quot;
-        ///.
+        ///
+        ///allowedPorts = 1-65535
+        ///tunnelAllowedPorts = 1-65535.
         /// </summary>
         internal static string polipo_config {
             get {

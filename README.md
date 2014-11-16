@@ -11,7 +11,7 @@ Currently beta. Please file an issue if you find any bugs.
 2. Fast system proxy switching
 3. Compatible with IE
 4. Builtin PAC server with user editable PAC
-5. QRCode generation (in progress)
+5. QRCode generation
 6. Only a single exe file of 200KB size
 
 ### Download
@@ -20,7 +20,7 @@ Download [latest release].
 
 For Windows 7 and older, please download Shadowsocks-win-x.x.x.zip.
 
-For Windows 8.1 and newer, please download Shadowsocks-win-dotnet4.0-x.x.x.zip.
+For Windows 8 and newer, please download Shadowsocks-win-dotnet4.0-x.x.x.zip.
 
 ### Usage
 
@@ -36,20 +36,7 @@ failed to start
 
 ### License
 
-Copyright (C) 2014 clowwindy
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
+GPLv3
 
 
 [Appveyor]:       https://ci.appveyor.com/project/clowwindy/shadowsocks-csharp
