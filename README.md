@@ -3,8 +3,6 @@ Shadowsocks for Windows
 
 [![Build Status]][Appveyor]
 
-Currently beta. Please file an issue if you find any bugs.
-
 ### Features
 
 1. Native Windows UI
