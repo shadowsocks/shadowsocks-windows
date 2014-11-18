@@ -1,3 +1,7 @@
+2.0.10 2014-11-18
+- Minor fixes
+- Optimize code
+
 2.0.9 2014-11-13
 - Fix startup path
 - Fix allowed port range for polipo
