@@ -299,8 +299,7 @@ namespace Shadowsocks.View
         void configForm_FormClosed(object sender, FormClosedEventArgs e)
         {
             configForm = null;
-            GC.Collect();
-            GC.WaitForPendingFinalizers();
+            Util.Util.ReleaseMemory();
             ShowFirstTimeBalloon();
         }
 
