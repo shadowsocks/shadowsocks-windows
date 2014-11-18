@@ -86,6 +86,7 @@ namespace Shadowsocks.View
                 icon = Resources.ss24;
             }
             notifyIcon1 = new NotifyIcon();
+            notifyIcon1.Text = "Shadowsocks";
             notifyIcon1.Icon = Icon.FromHandle(icon.GetHicon());
             notifyIcon1.Visible = true;
 
