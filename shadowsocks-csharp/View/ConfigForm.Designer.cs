@@ -209,7 +209,6 @@
             "aes-256-cfb",
             "aes-192-cfb",
             "aes-128-cfb",
-            "bf-cfb",
             "rc4"});
             this.EncryptionSelect.Location = new System.Drawing.Point(74, 86);
             this.EncryptionSelect.Name = "EncryptionSelect";
