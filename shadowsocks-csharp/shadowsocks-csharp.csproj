@@ -84,6 +84,7 @@
     <Compile Include="Controller\PACServer.cs" />
     <Compile Include="Model\Server.cs" />
     <Compile Include="Model\Configuration.cs" />
+    <Compile Include="Util\Util.cs" />
     <Compile Include="View\ConfigForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -124,7 +125,6 @@
     <None Include="app.manifest">
       <SubType>Designer</SubType>
     </None>
-    <None Include="Data\libeay32.dll.gz" />
     <None Include="Data\polarssl.dll.gz" />
     <None Include="Data\polipo.exe.gz" />
     <None Include="Properties\Settings.settings">

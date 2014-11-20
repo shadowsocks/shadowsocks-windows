@@ -180,7 +180,7 @@ namespace Shadowsocks.View
                 return;
             }
             controller.SaveServers(_modifiedConfiguration.configs);
-            this.Hide();
+            this.Close();
         }
 
         private void CancelButton_Click(object sender, EventArgs e)

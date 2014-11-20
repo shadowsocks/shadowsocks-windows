@@ -86,6 +86,7 @@ namespace Shadowsocks.View
                 icon = Resources.ss24;
             }
             notifyIcon1 = new NotifyIcon();
+            notifyIcon1.Text = "Shadowsocks";
             notifyIcon1.Icon = Icon.FromHandle(icon.GetHicon());
             notifyIcon1.Visible = true;
 
@@ -299,8 +300,7 @@ namespace Shadowsocks.View
         void configForm_FormClosed(object sender, FormClosedEventArgs e)
         {
             configForm = null;
-            GC.Collect();
-            GC.WaitForPendingFinalizers();
+            Util.Util.ReleaseMemory();
             ShowFirstTimeBalloon();
         }
 

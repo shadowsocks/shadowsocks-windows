@@ -14,6 +14,8 @@ namespace Shadowsocks.Controller
         // manipulates UI
         // interacts with low level logic
 
+        private Thread _ramThread;
+
         private Local local;
         private PACServer pacServer;
         private Configuration _config;
@@ -58,6 +60,7 @@ namespace Shadowsocks.Controller
             }
 
             UpdateSystemProxy();
+            StartReleasingMemory();
         }
 
         public Server GetCurrentServer()
@@ -161,6 +164,8 @@ namespace Shadowsocks.Controller
             {
                 ConfigChanged(this, new EventArgs());
             }
+
+            Util.Util.ReleaseMemory();
         }
 
 
@@ -179,6 +184,22 @@ namespace Shadowsocks.Controller
         private void pacServer_PACFileChanged(object sender, EventArgs e)
         {
             UpdateSystemProxy();
+        }
+
+        private void StartReleasingMemory()
+        {
+            _ramThread = new Thread(new ThreadStart(ReleaseMemory));
+            _ramThread.IsBackground = true;
+            _ramThread.Start();
+        }
+
+        private void ReleaseMemory()
+        {
+            while (true)
+            {
+                Util.Util.ReleaseMemory();
+                Thread.Sleep(30 * 1000);
+            }
         }
     }
 }

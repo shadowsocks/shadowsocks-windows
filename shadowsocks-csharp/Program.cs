@@ -12,13 +12,13 @@ namespace Shadowsocks
 {
     static class Program
     {
-
         /// <summary>
         /// 应用程序的主入口点。
         /// </summary>
         [STAThread]
         static void Main()
         {
+            Util.Util.ReleaseMemory();
             using (Mutex mutex = new Mutex(false, "Global\\" + "71981632-A427-497F-AB91-241CD227EC1F"))
             {
                 Application.EnableVisualStyles();
@@ -41,6 +41,7 @@ namespace Shadowsocks
                 ShadowsocksController controller = new ShadowsocksController();
 
                 MenuViewController viewController = new MenuViewController(controller);
+                Util.Util.ReleaseMemory();
                 Application.Run();
             }
         }
