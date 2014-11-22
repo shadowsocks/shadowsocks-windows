@@ -1,3 +1,7 @@
+2.0.11 2014-11-23
+- Fix a crash
+- Only switch the system proxy off if we have switched it on
+
 2.0.10 2014-11-18
 - Minor fixes
 - Optimize code
