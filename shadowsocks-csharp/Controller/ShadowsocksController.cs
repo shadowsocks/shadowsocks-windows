@@ -22,6 +22,8 @@ namespace Shadowsocks.Controller
         private PolipoRunner polipoRunner;
         private bool stopped = false;
 
+        private bool _systemProxyIsDirty = false;
+
         public class PathEventArgs : EventArgs
         {
             public string Path;
@@ -174,10 +176,16 @@ namespace Shadowsocks.Controller
             if (_config.enabled)
             {
                 SystemProxy.Enable();
+                _systemProxyIsDirty = true;
             }
             else
             {
-                SystemProxy.Disable();
+                // only switch it off if we have switched it on
+                if (_systemProxyIsDirty)
+                {
+                    SystemProxy.Disable();
+                    _systemProxyIsDirty = false;
+                }
             }
         }
 

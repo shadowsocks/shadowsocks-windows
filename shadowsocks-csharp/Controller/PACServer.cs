@@ -174,7 +174,12 @@ Connection: Close
         private void SendCallback(IAsyncResult ar)
         {
             Socket conn = (Socket)ar.AsyncState;
-            conn.Shutdown(SocketShutdown.Send);
+            try
+            {
+                conn.Shutdown(SocketShutdown.Send);
+            }
+            catch
+            { }
         }
 
         private void WatchPacFile()
