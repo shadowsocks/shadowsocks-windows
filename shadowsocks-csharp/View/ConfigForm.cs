@@ -180,7 +180,8 @@ namespace Shadowsocks.View
                 return;
             }
             controller.SaveServers(_modifiedConfiguration.configs);
-            this.Close();
+            // delete it for some inconvenience.
+            //this.Close();
         }
 
         private void CancelButton_Click(object sender, EventArgs e)
@@ -198,5 +199,19 @@ namespace Shadowsocks.View
             controller.ConfigChanged -= controller_ConfigChanged;
         }
 
+        private void ParseURIButton_Click(object sender, EventArgs e)
+        {
+            if (!SaveOldSelectedServer())
+            {
+                return;
+            }
+            Server server = Configuration.GetDefaultServer();
+            if (true == Configuration.load_uri(URITextBox.Text, ref server))
+                URITextBox.Text = "";
+            _modifiedConfiguration.configs.Add(server);
+            LoadConfiguration(_modifiedConfiguration);
+            ServersListBox.SelectedIndex = _modifiedConfiguration.configs.Count - 1;
+            _oldSelectedIndex = ServersListBox.SelectedIndex;
+        }
     }
 }
