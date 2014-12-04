@@ -13,7 +13,7 @@ namespace Shadowsocks.Controller
 {
     class PACServer
     {
-        private static int PORT = 8090;
+        private static int PORT = 8093;
         private static string PAC_FILE = "pac.txt";
         private static Configuration config;
 

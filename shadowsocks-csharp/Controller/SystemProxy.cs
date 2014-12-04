@@ -33,7 +33,7 @@ namespace Shadowsocks.Controller
                         true);
                 registry.SetValue("ProxyEnable", 0);
                 registry.SetValue("ProxyServer", "");
-                registry.SetValue("AutoConfigURL", "http://127.0.0.1:8090/pac?t=" + GetTimestamp(DateTime.Now));
+                registry.SetValue("AutoConfigURL", "http://127.0.0.1:8093/pac?t=" + GetTimestamp(DateTime.Now));
                 SystemProxy.NotifyIE();
                 //Must Notify IE first, or the connections do not chanage
                 CopyProxySettingFromLan();
