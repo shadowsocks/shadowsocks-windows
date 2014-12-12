@@ -8,32 +8,13 @@ using System.Threading;
 namespace Shadowsocks.Encrypt
 {
     public class PolarSSLEncryptor
-        : EncryptorBase, IDisposable
+        : IVEncryptor, IDisposable
     {
         const int CIPHER_AES = 1;
         const int CIPHER_RC4 = 2;
 
-        static Dictionary<string, int[]> ciphers = new Dictionary<string, int[]> {
-            {"aes-128-cfb", new int[]{16, 16, CIPHER_AES, PolarSSL.AES_CTX_SIZE}},
-            {"aes-192-cfb", new int[]{24, 16, CIPHER_AES, PolarSSL.AES_CTX_SIZE}},
-            {"aes-256-cfb", new int[]{32, 16, CIPHER_AES, PolarSSL.AES_CTX_SIZE}},
-            {"rc4", new int[]{16, 0, CIPHER_RC4, PolarSSL.ARC4_CTX_SIZE}},
-            {"rc4-md5", new int[]{16, 16, CIPHER_RC4, PolarSSL.ARC4_CTX_SIZE}},
-        };
-
-        private static readonly Dictionary<string, byte[]> CachedKeys = new Dictionary<string, byte[]>();
-        private int _cipher;
-        private int[] _cipherInfo;
-        private byte[] _key;
         private IntPtr _encryptCtx = IntPtr.Zero;
         private IntPtr _decryptCtx = IntPtr.Zero;
-        private byte[] _encryptIV;
-        private byte[] _decryptIV;
-        private int _encryptIVOffset = 0;
-        private int _decryptIVOffset = 0;
-        private string _method;
-        private int keyLen;
-        private int ivLen;
 
         public PolarSSLEncryptor(string method, string password)
             : base(method, password)
@@ -41,66 +22,31 @@ namespace Shadowsocks.Encrypt
             InitKey(method, password);
         }
 
-        private static void randBytes(byte[] buf, int length)
+        protected override Dictionary<string, int[]> getCiphers()
         {
-            byte[] temp = new byte[length];
-            new Random().NextBytes(temp);
-            temp.CopyTo(buf, 0);
+            return new Dictionary<string, int[]> {
+                {"aes-128-cfb", new int[]{16, 16, CIPHER_AES, PolarSSL.AES_CTX_SIZE}},
+                {"aes-192-cfb", new int[]{24, 16, CIPHER_AES, PolarSSL.AES_CTX_SIZE}},
+                {"aes-256-cfb", new int[]{32, 16, CIPHER_AES, PolarSSL.AES_CTX_SIZE}},
+                {"rc4", new int[]{16, 0, CIPHER_RC4, PolarSSL.ARC4_CTX_SIZE}},
+                {"rc4-md5", new int[]{16, 16, CIPHER_RC4, PolarSSL.ARC4_CTX_SIZE}},
+            };
         }
 
-        private void bytesToKey(byte[] password, byte[] key)
+        protected override void initCipher(byte[] iv, bool isCipher)
         {
-            byte[] result = new byte[password.Length + 16];
-            int i = 0;
-            byte[] md5sum = null;
-            while (i < key.Length)
-            {
-                MD5 md5 = MD5.Create();
-                if (i == 0)
-                {
-                    md5sum = md5.ComputeHash(password);
-                }
-                else
-                {
-                    md5sum.CopyTo(result, 0);
-                    password.CopyTo(result, md5sum.Length);
-                    md5sum = md5.ComputeHash(result);
-                }
-                md5sum.CopyTo(key, i);
-                i += md5sum.Length;
-            }
-        }
+            base.initCipher(iv, isCipher);
 
-        private void InitKey(string method, string password)
-        {
-            method = method.ToLower();
-            _method = method;
-            string k = method + ":" + password;
-            _cipherInfo = ciphers[_method];
-            _cipher = _cipherInfo[2];
-            if (_cipher == 0)
+            IntPtr ctx;
+            ctx = Marshal.AllocHGlobal(_cipherInfo[3]);
+            if (isCipher)
             {
-                throw new Exception("method not found");
-            }
-            keyLen = ciphers[_method][0];
-            ivLen = ciphers[_method][1];
-            if (CachedKeys.ContainsKey(k))
-            {
-                _key = CachedKeys[k];
+                _encryptCtx = ctx;
             }
             else
             {
-                byte[] passbuf = Encoding.UTF8.GetBytes(password);
-                _key = new byte[32];
-                byte[] iv = new byte[16];
-                bytesToKey(passbuf, _key);
-                CachedKeys[k] = _key;
+                _decryptCtx = ctx;
             }
-        }
-
-        private void InitCipher(ref IntPtr ctx, byte[] iv, bool isCipher)
-        {
-            ctx = Marshal.AllocHGlobal(_cipherInfo[3]);
             byte[] realkey;
             if (_method == "rc4-md5")
             {
@@ -120,16 +66,6 @@ namespace Shadowsocks.Encrypt
                 // PolarSSL takes key length by bit
                 // since we'll use CFB mode, here we both do enc, not dec
                 PolarSSL.aes_setkey_enc(ctx, realkey, keyLen * 8);
-                if (isCipher)
-                {
-                    _encryptIV = new byte[ivLen];
-                    Array.Copy(iv, _encryptIV, ivLen);
-                }
-                else
-                {
-                    _decryptIV = new byte[ivLen];
-                    Array.Copy(iv, _decryptIV, ivLen);
-                }
             }
             else if (_cipher == CIPHER_RC4)
             {
@@ -139,98 +75,41 @@ namespace Shadowsocks.Encrypt
             }
         }
 
-
-
-        static byte[] tempbuf = new byte[32768];
-
-        public override void Encrypt(byte[] buf, int length, byte[] outbuf, out int outlength)
+        protected override void cipherUpdate(bool isCipher, int length, byte[] buf, byte[] outbuf)
         {
-            if (_encryptCtx == IntPtr.Zero)
+            // C# could be multi-threaded
+            if (_disposed)
             {
-                randBytes(outbuf, ivLen);
-                InitCipher(ref _encryptCtx, outbuf, true);
-                outlength = length + ivLen;
-                lock (tempbuf)
-                {
-                    // C# could be multi-threaded
-                    if (_disposed)
-                    {
-                        throw new ObjectDisposedException(this.ToString());
-                    }
-                    switch (_cipher)
-                    {
-                        case CIPHER_AES:
-                            PolarSSL.aes_crypt_cfb128(_encryptCtx, PolarSSL.AES_ENCRYPT, length, ref _encryptIVOffset, _encryptIV, buf, tempbuf);
-                            break;
-                        case CIPHER_RC4:
-                            PolarSSL.arc4_crypt(_encryptCtx, length, buf, tempbuf);
-                            break;
-                    }
-                    outlength = length + ivLen;
-                    Buffer.BlockCopy(tempbuf, 0, outbuf, ivLen, length);
-
-                }
+                throw new ObjectDisposedException(this.ToString());
+            }
+            byte[] iv;
+            int ivOffset;
+            if (isCipher)
+            {
+                iv = _encryptIV;
+                ivOffset = _encryptIVOffset;
             }
             else
             {
-                outlength = length;
-                if (_disposed)
-                {
-                    throw new ObjectDisposedException(this.ToString());
-                }
-                switch (_cipher)
-                {
-                    case CIPHER_AES:
-                        PolarSSL.aes_crypt_cfb128(_encryptCtx, PolarSSL.AES_ENCRYPT, length, ref _encryptIVOffset, _encryptIV, buf, outbuf);
-                        break;
-                    case CIPHER_RC4:
-                        PolarSSL.arc4_crypt(_encryptCtx, length, buf, outbuf);
-                        break;
-                }
+                iv = _decryptIV;
+                ivOffset = _decryptIVOffset;
             }
-        }
-
-        public override void Decrypt(byte[] buf, int length, byte[] outbuf, out int outlength)
-        {
-            if (_decryptCtx == IntPtr.Zero)
+            switch (_cipher)
             {
-                InitCipher(ref _decryptCtx, buf, false);
-                outlength = length - ivLen;
-                lock (tempbuf)
-                {
-                    // C# could be multi-threaded
-                    Buffer.BlockCopy(buf, ivLen, tempbuf, 0, length - ivLen);
-                    if (_disposed)
+                case CIPHER_AES:
+                    PolarSSL.aes_crypt_cfb128(_encryptCtx, isCipher ? PolarSSL.AES_ENCRYPT : PolarSSL.AES_DECRYPT, length, ref ivOffset, iv, buf, outbuf);
+                    if (isCipher)
                     {
-                        throw new ObjectDisposedException(this.ToString());
+                        _encryptIVOffset = ivOffset;
                     }
-                    switch (_cipher)
+                    else
                     {
-                        case CIPHER_AES:
-                            PolarSSL.aes_crypt_cfb128(_decryptCtx, PolarSSL.AES_DECRYPT, length - ivLen, ref _decryptIVOffset, _decryptIV, tempbuf, outbuf);
-                            break;
-                        case CIPHER_RC4:
-                            PolarSSL.arc4_crypt(_decryptCtx, length - ivLen, tempbuf, outbuf);
-                            break;
+                        _decryptIVOffset = ivOffset;
                     }
-                }
-            }
-            else
-            {
-                outlength = length;
-                if (_disposed)
-                {
-                    throw new ObjectDisposedException(this.ToString());
-                }
-                switch (_cipher)
-                {
-                    case CIPHER_AES:
-                        PolarSSL.aes_crypt_cfb128(_decryptCtx, PolarSSL.AES_DECRYPT, length, ref _decryptIVOffset, _decryptIV, buf, outbuf);
-                        break;
-                    case CIPHER_RC4:
-                        PolarSSL.arc4_crypt(_decryptCtx, length, buf, outbuf);
-                        break;
-                }
+                    break;
+                case CIPHER_RC4:
+                    PolarSSL.arc4_crypt(_encryptCtx, length, buf, outbuf);
+                    break;
             }
         }
 

@@ -77,8 +77,11 @@
     <Compile Include="Controller\UpdateChecker.cs" />
     <Compile Include="Encrypt\EncryptorBase.cs" />
     <Compile Include="Encrypt\EncryptorFactory.cs" />
+    <Compile Include="Encrypt\IVEncryptor.cs" />
     <Compile Include="Encrypt\PolarSSL.cs" />
     <Compile Include="Encrypt\PolarSSLEncryptor.cs" />
+    <Compile Include="Encrypt\Sodium.cs" />
+    <Compile Include="Encrypt\SodiumEncryptor.cs" />
     <Compile Include="Encrypt\TableEncryptor.cs" />
     <Compile Include="Encrypt\IEncryptor.cs" />
     <Compile Include="Controller\PACServer.cs" />
@@ -125,6 +128,7 @@
     <None Include="app.manifest">
       <SubType>Designer</SubType>
     </None>
+    <None Include="Data\libsodium.dll.gz" />
     <None Include="Data\polarssl.dll.gz" />
     <None Include="Data\polipo.exe.gz" />
     <None Include="Properties\Settings.settings">
