@@ -91,20 +91,23 @@ namespace Shadowsocks.Encrypt
             }
             byte[] iv;
             int ivOffset;
+            IntPtr ctx;
             if (isCipher)
             {
                 iv = _encryptIV;
                 ivOffset = _encryptIVOffset;
+                ctx = _encryptCtx;
             }
             else
             {
                 iv = _decryptIV;
                 ivOffset = _decryptIVOffset;
+                ctx = _decryptCtx;
             }
             switch (_cipher)
             {
                 case CIPHER_AES:
-                    PolarSSL.aes_crypt_cfb128(_encryptCtx, isCipher ? PolarSSL.AES_ENCRYPT : PolarSSL.AES_DECRYPT, length, ref ivOffset, iv, buf, outbuf);
+                    PolarSSL.aes_crypt_cfb128(ctx, isCipher ? PolarSSL.AES_ENCRYPT : PolarSSL.AES_DECRYPT, length, ref ivOffset, iv, buf, outbuf);
                     if (isCipher)
                     {
                         _encryptIVOffset = ivOffset;
