@@ -22,15 +22,22 @@ namespace Shadowsocks.Encrypt
             InitKey(method, password);
         }
 
-        protected override Dictionary<string, int[]> getCiphers()
-        {
-            return new Dictionary<string, int[]> {
+        private static Dictionary<string, int[]> _ciphers = new Dictionary<string, int[]> {
                 {"aes-128-cfb", new int[]{16, 16, CIPHER_AES, PolarSSL.AES_CTX_SIZE}},
                 {"aes-192-cfb", new int[]{24, 16, CIPHER_AES, PolarSSL.AES_CTX_SIZE}},
                 {"aes-256-cfb", new int[]{32, 16, CIPHER_AES, PolarSSL.AES_CTX_SIZE}},
                 {"rc4", new int[]{16, 0, CIPHER_RC4, PolarSSL.ARC4_CTX_SIZE}},
                 {"rc4-md5", new int[]{16, 16, CIPHER_RC4, PolarSSL.ARC4_CTX_SIZE}},
-            };
+        };
+
+        public static List<string> SupportedCiphers()
+        {
+            return new List<string>(_ciphers.Keys);
+        }
+
+        protected override Dictionary<string, int[]> getCiphers()
+        {
+            return _ciphers;
         }
 
         protected override void initCipher(byte[] iv, bool isCipher)

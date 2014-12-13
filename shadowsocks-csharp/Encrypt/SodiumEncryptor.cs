@@ -27,12 +27,19 @@ namespace Shadowsocks.Encrypt
             _decryptBuf = new byte[MAX_INPUT_SIZE + SODIUM_BLOCK_SIZE];
         }
 
-        protected override Dictionary<string, int[]> getCiphers()
-        {
-            return new Dictionary<string, int[]> {
+        private static Dictionary<string, int[]> _ciphers = new Dictionary<string, int[]> {
                 {"salsa20", new int[]{32, 8, CIPHER_SALSA20, PolarSSL.AES_CTX_SIZE}},
                 {"chacha20", new int[]{32, 8, CIPHER_CHACHA20, PolarSSL.AES_CTX_SIZE}},
-            }; ;
+        };
+
+        protected override Dictionary<string, int[]> getCiphers()
+        {
+            return _ciphers;
+        }
+
+        public static List<string> SupportedCiphers()
+        {
+            return new List<string>(_ciphers.Keys);
         }
 
         protected override void cipherUpdate(bool isCipher, int length, byte[] buf, byte[] outbuf)
