@@ -47,6 +47,10 @@ namespace Shadowsocks.Controller
                 {
                     // received rst
                 }
+                else if (se.SocketErrorCode == SocketError.NotConnected)
+                {
+                    // close when not connected
+                }
                 else
                 {
                     Console.WriteLine(e);
