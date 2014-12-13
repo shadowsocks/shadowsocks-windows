@@ -118,7 +118,7 @@ namespace Shadowsocks.Encrypt
                     }
                     break;
                 case CIPHER_RC4:
-                    PolarSSL.arc4_crypt(_encryptCtx, length, buf, outbuf);
+                    PolarSSL.arc4_crypt(ctx, length, buf, outbuf);
                     break;
             }
         }
