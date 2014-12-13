@@ -206,6 +206,8 @@
             this.EncryptionSelect.Items.AddRange(new object[] {
             "table",
             "rc4-md5",
+            "salsa20",
+            "chacha20",
             "aes-256-cfb",
             "aes-192-cfb",
             "aes-128-cfb",

@@ -8,7 +8,7 @@ namespace Shadowsocks.Encrypt
     public abstract class IVEncryptor
         : EncryptorBase
     {
-        protected static byte[] tempbuf = new byte[32768];
+        protected static byte[] tempbuf = new byte[MAX_INPUT_SIZE];
 
         protected Dictionary<string, int[]> ciphers;
 

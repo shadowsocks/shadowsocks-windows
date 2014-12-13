@@ -6,6 +6,8 @@ namespace Shadowsocks.Encrypt
     public abstract class EncryptorBase
         : IEncryptor
     {
+        public const int MAX_INPUT_SIZE = 32768;
+
         protected EncryptorBase(string method, string password)
         {
             Method = method;
