@@ -1,3 +1,6 @@
+2.1 2014-12-12
+- Add salsa20 and chacha20 support
+
 2.0.11 2014-11-23
 - Fix a crash
 - Only switch the system proxy off if we have switched it on
