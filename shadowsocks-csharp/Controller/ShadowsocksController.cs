@@ -31,6 +31,7 @@ namespace Shadowsocks.Controller
 
         public event EventHandler ConfigChanged;
         public event EventHandler EnableStatusChanged;
+        public event EventHandler EnableGlobalChanged;
         public event EventHandler ShareOverLANStatusChanged;
         
         // when user clicked Edit PAC, and PAC file has already created
@@ -90,6 +91,17 @@ namespace Shadowsocks.Controller
             if (EnableStatusChanged != null)
             {
                 EnableStatusChanged(this, new EventArgs());
+            }
+        }
+
+        public void ToggleGlobal(bool global)
+        {
+            _config.global = global;
+            UpdateSystemProxy();
+            SaveConfig(_config);
+            if (EnableGlobalChanged != null)
+            {
+                EnableGlobalChanged(this, new EventArgs());
             }
         }
 
@@ -175,7 +187,7 @@ namespace Shadowsocks.Controller
         {
             if (_config.enabled)
             {
-                SystemProxy.Enable();
+                SystemProxy.Enable(_config.global);
                 _systemProxyIsDirty = true;
             }
             else

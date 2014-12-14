@@ -24,16 +24,25 @@ namespace Shadowsocks.Controller
             _refreshReturn = InternetSetOption(IntPtr.Zero, INTERNET_OPTION_REFRESH, IntPtr.Zero, 0);
         }
 
-        public static void Enable()
+        public static void Enable(bool global)
         {
             try
             {
                 RegistryKey registry =
                     Registry.CurrentUser.OpenSubKey("Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings",
                         true);
-                registry.SetValue("ProxyEnable", 0);
-                registry.SetValue("ProxyServer", "");
-                registry.SetValue("AutoConfigURL", "http://127.0.0.1:8093/pac?t=" + GetTimestamp(DateTime.Now));
+                if (global)
+                {
+                    registry.SetValue("ProxyEnable", 1);
+                    registry.SetValue("ProxyServer", "127.0.0.1:8123");
+                    registry.SetValue("AutoConfigURL", "");
+                }
+                else
+                {
+                    registry.SetValue("ProxyEnable", 0);
+                    registry.SetValue("ProxyServer", "");
+                    registry.SetValue("AutoConfigURL", "http://127.0.0.1:8093/pac?t=" + GetTimestamp(DateTime.Now));
+                }
                 SystemProxy.NotifyIE();
                 //Must Notify IE first, or the connections do not chanage
                 CopyProxySettingFromLan();

@@ -37,6 +37,9 @@ namespace Shadowsocks.View
         private MenuItem menuItem3;
         private MenuItem quitItem;
         private MenuItem menuItem1;
+        private MenuItem modeItem;
+        private MenuItem globalModeItem;
+        private MenuItem PACModeItem;
         private ConfigForm configForm;
 
         public MenuViewController(ShadowsocksController controller)
@@ -49,6 +52,7 @@ namespace Shadowsocks.View
             controller.ConfigChanged += controller_ConfigChanged;
             controller.PACFileReadyToOpen += controller_PACFileReadyToOpen;
             controller.ShareOverLANStatusChanged += controller_ShareOverLANStatusChanged;
+            controller.EnableGlobalChanged += controller_EnableGlobalChanged;
 
             this.updateChecker = new UpdateChecker();
             updateChecker.NewVersionFound += updateChecker_NewVersionFound;
@@ -98,6 +102,9 @@ namespace Shadowsocks.View
         {
             this.contextMenu1 = new System.Windows.Forms.ContextMenu();
             this.enableItem = new System.Windows.Forms.MenuItem();
+            this.modeItem = new System.Windows.Forms.MenuItem();
+            this.PACModeItem = new System.Windows.Forms.MenuItem();
+            this.globalModeItem = new System.Windows.Forms.MenuItem();
             this.AutoStartupItem = new System.Windows.Forms.MenuItem();
             this.ShareOverLANItem = new System.Windows.Forms.MenuItem();
             this.ServersItem = new System.Windows.Forms.MenuItem();
@@ -117,6 +124,7 @@ namespace Shadowsocks.View
             // 
             this.contextMenu1.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
             this.enableItem,
+            this.modeItem,
             this.ServersItem,
             this.menuItem1,
             this.AutoStartupItem,
@@ -134,22 +142,30 @@ namespace Shadowsocks.View
             this.enableItem.Index = 0;
             this.enableItem.Text = "&Enable";
             this.enableItem.Click += new System.EventHandler(this.EnableItem_Click);
-            // 
-            // AutoStartupItem
-            // 
-            this.AutoStartupItem.Index = 3;
-            this.AutoStartupItem.Text = "Start on Boot";
-            this.AutoStartupItem.Click += new System.EventHandler(this.AutoStartupItem_Click);
-            // 
-            // ShareOverLANItem
-            // 
-            this.ShareOverLANItem.Index = 4;
-            this.ShareOverLANItem.Text = "Share over LAN";
-            this.ShareOverLANItem.Click += new System.EventHandler(this.ShareOverLANItem_Click);
+            //
+            // modeMenu
+            //
+            this.modeItem.Index = 1;
+            this.modeItem.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
+            this.PACModeItem,
+            this.globalModeItem});
+            this.modeItem.Text = "Mode";
+            //
+            // PACModeItem
+            //
+            this.PACModeItem.Index = 0;
+            this.PACModeItem.Text = "PAC";
+            this.PACModeItem.Click += new System.EventHandler(this.PACModeItem_Click);
+            //
+            // globalModeItem
+            //
+            this.globalModeItem.Index = 1;
+            this.globalModeItem.Text = "Global";
+            this.globalModeItem.Click += new System.EventHandler(this.GlobalModeItem_Click);
             // 
             // ServersItem
             // 
-            this.ServersItem.Index = 1;
+            this.ServersItem.Index = 2;
             this.ServersItem.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
             this.SeperatorItem,
             this.ConfigItem});
@@ -166,50 +182,62 @@ namespace Shadowsocks.View
             this.ConfigItem.Text = "Edit Servers...";
             this.ConfigItem.Click += new System.EventHandler(this.Config_Click);
             // 
-            // menuItem4
+            // menuItem1
             // 
-            this.menuItem4.Index = 6;
-            this.menuItem4.Text = "-";
+            this.menuItem1.Index = 3;
+            this.menuItem1.Text = "-";
+            // 
+            // AutoStartupItem
+            // 
+            this.AutoStartupItem.Index = 4;
+            this.AutoStartupItem.Text = "Start on Boot";
+            this.AutoStartupItem.Click += new System.EventHandler(this.AutoStartupItem_Click);
+            // 
+            // ShareOverLANItem
+            // 
+            this.ShareOverLANItem.Index = 5;
+            this.ShareOverLANItem.Text = "Share over LAN";
+            this.ShareOverLANItem.Click += new System.EventHandler(this.ShareOverLANItem_Click);
             // 
             // editPACFileItem
             // 
-            this.editPACFileItem.Index = 5;
+            this.editPACFileItem.Index = 6;
             this.editPACFileItem.Text = "Edit &PAC File...";
             this.editPACFileItem.Click += new System.EventHandler(this.EditPACFileItem_Click);
             // 
+            // menuItem4
+            // 
+            this.menuItem4.Index = 7;
+            this.menuItem4.Text = "-";
+            // 
             // QRCodeItem
             // 
-            this.QRCodeItem.Index = 7;
+            this.QRCodeItem.Index = 8;
             this.QRCodeItem.Text = "Show &QRCode...";
             this.QRCodeItem.Click += new System.EventHandler(this.QRCodeItem_Click);
             // 
             // ShowLogItem
             // 
-            this.ShowLogItem.Index = 8;
+            this.ShowLogItem.Index = 9;
             this.ShowLogItem.Text = "Show Logs...";
             this.ShowLogItem.Click += new System.EventHandler(this.ShowLogItem_Click);
             // 
             // aboutItem
             // 
-            this.aboutItem.Index = 9;
+            this.aboutItem.Index = 10;
             this.aboutItem.Text = "About...";
             this.aboutItem.Click += new System.EventHandler(this.AboutItem_Click);
             // 
             // menuItem3
             // 
-            this.menuItem3.Index = 10;
+            this.menuItem3.Index = 11;
             this.menuItem3.Text = "-";
             // 
             // quitItem
             // 
-            this.quitItem.Index = 11;
+            this.quitItem.Index = 12;
             this.quitItem.Text = "&Quit";
             this.quitItem.Click += new System.EventHandler(this.Quit_Click);
-            // 
-            // menuItem1
-            // 
-            this.menuItem1.Index = 2;
-            this.menuItem1.Text = "-";
         }
 
         private void controller_ConfigChanged(object sender, EventArgs e)
@@ -225,6 +253,12 @@ namespace Shadowsocks.View
         void controller_ShareOverLANStatusChanged(object sender, EventArgs e)
         {
             ShareOverLANItem.Checked = controller.GetConfiguration().shareOverLan;
+        }
+
+        void controller_EnableGlobalChanged(object sender, EventArgs e)
+        {
+            globalModeItem.Checked = controller.GetConfiguration().global;
+            PACModeItem.Checked = !globalModeItem.Checked;
         }
 
         void controller_PACFileReadyToOpen(object sender, ShadowsocksController.PathEventArgs e)
@@ -255,6 +289,8 @@ namespace Shadowsocks.View
             Configuration config = controller.GetConfiguration();
             UpdateServersMenu();
             enableItem.Checked = config.enabled;
+            globalModeItem.Checked = config.global;
+            PACModeItem.Checked = !config.global;
             ShareOverLANItem.Checked = config.shareOverLan;
             AutoStartupItem.Checked = AutoStartup.Check();
         }
@@ -338,11 +374,19 @@ namespace Shadowsocks.View
             ShowConfigForm();
         }
 
-
         private void EnableItem_Click(object sender, EventArgs e)
         {
-            enableItem.Checked = !enableItem.Checked;
-            controller.ToggleEnable(enableItem.Checked);
+            controller.ToggleEnable(!enableItem.Checked);
+        }
+
+        private void GlobalModeItem_Click(object sender, EventArgs e)
+        {
+            controller.ToggleGlobal(true);
+        }
+
+        private void PACModeItem_Click(object sender, EventArgs e)
+        {
+            controller.ToggleGlobal(false);
         }
 
         private void ShareOverLANItem_Click(object sender, EventArgs e)
