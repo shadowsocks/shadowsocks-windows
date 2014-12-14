@@ -14,7 +14,7 @@ namespace Shadowsocks.View
     {
         // yes this is just a menu view controller
         // when config form is closed, it moves away from RAM
-        // and it should just does anything related to the config form
+        // and it should just do anything related to the config form
         
         private ShadowsocksController controller;
         private UpdateChecker updateChecker;
