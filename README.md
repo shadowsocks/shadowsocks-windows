@@ -3,36 +3,34 @@ Shadowsocks for Windows
 
 [![Build Status]][Appveyor]
 
-### Features
+#### Features
 
-1. Native Windows UI
-2. Fast system proxy switching
-3. Compatible with IE
-4. Builtin PAC server with user editable PAC
-5. QRCode generation
-6. Only a single exe file of 200KB size
+1. System proxy configuration
+2. Fast profile switching
+3. PAC mode and global mode
+4. Compatible with IE
+5. Only a single exe file of 200KB size
 
-### Download
+#### Download
 
 Download [latest release].
 
-For Windows 7 and older, download Shadowsocks-win-x.x.x.zip.
+For <= Windows 7, download Shadowsocks-win-x.x.x.zip.
 
-For Windows 8 and newer, download Shadowsocks-win-dotnet4.0-x.x.x.zip.
+For >= Windows 8, download Shadowsocks-win-dotnet4.0-x.x.x.zip.
 
-### Usage
+#### Usage
 
 1. Find Shadowsocks icon in notification tray
 2. You can add multiple servers in servers menu
-3. After servers are added, click Enable menu item to enable system proxy
-4. After you saved PAC file with any editor, Shadowsocks will notify browsers
+3. Select Enable menu to enable system proxy
+4. Leave Enable menu unchecked, Shadowsocks will still provide an HTTP proxy at 127.0.0.1:8123
+5. After you saved PAC file with any editor, Shadowsocks will notify browsers
 about the change automatically
-5. Please disable other proxy addons in your browser, or set them to use
+6. Please disable other proxy addons in your browser, or set them to use
 system proxy
-6. You may need to install VC 2008 Runtime and .Net framework if Shadowsocks
-failed to start
 
-### License
+#### License
 
 GPLv3
 
