@@ -53,6 +53,7 @@ namespace Shadowsocks.View
             controller.PACFileReadyToOpen += controller_PACFileReadyToOpen;
             controller.ShareOverLANStatusChanged += controller_ShareOverLANStatusChanged;
             controller.EnableGlobalChanged += controller_EnableGlobalChanged;
+            controller.Errored += controller_Errored;
 
             this.updateChecker = new UpdateChecker();
             updateChecker.NewVersionFound += updateChecker_NewVersionFound;
@@ -66,6 +67,11 @@ namespace Shadowsocks.View
                 _isFirstRun = true;
                 ShowConfigForm();
             }
+        }
+
+        void controller_Errored(object sender, System.IO.ErrorEventArgs e)
+        {
+            MessageBox.Show(e.GetException().ToString(), "Error: " + e.GetException().Message);
         }
 
         private void LoadTrayIcon()

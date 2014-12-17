@@ -58,8 +58,11 @@ namespace Shadowsocks.Controller
 
         public void Stop()
         {
-            _listener.Close();
-            _listener = null;
+            if (_listener != null)
+            {
+                _listener.Close();
+                _listener = null;
+            }
         }
 
         public string TouchPACFile()
@@ -106,6 +109,10 @@ namespace Shadowsocks.Controller
                     listener.BeginAccept(
                         new AsyncCallback(AcceptCallback),
                         listener);
+                }
+                catch (ObjectDisposedException)
+                {
+                    // do nothing
                 }
                 catch (Exception e)
                 {
