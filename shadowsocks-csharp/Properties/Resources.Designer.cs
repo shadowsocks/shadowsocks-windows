@@ -61,6 +61,39 @@ namespace Shadowsocks.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Enable=启用
+        ///Mode=模式
+        ///PAC=PAC
+        ///Global=全局
+        ///Servers=服务器
+        ///Edit Servers...=编辑服务器...
+        ///Start on Boot=自动启动
+        ///Share over LAN=在局域网共享代理
+        ///Edit PAC File...=修改 PAC 文件...
+        ///Show QRCode...=显示二维码...
+        ///Show Logs...=显示日志...
+        ///About...=关于...
+        ///Quit=退出
+        ///Edit Servers=编辑服务器
+        ///Add=添加
+        ///Delete=删除
+        ///Server=服务器
+        ///Server IP=服务器 IP
+        ///Server Port=服务器端口
+        ///Password=密码
+        ///Encryption=加密
+        ///Proxy Port=代理端口
+        ///Remarks=备注
+        ///
+        ///.
+        /// </summary>
+        internal static string cn {
+            get {
+                return ResourceManager.GetString("cn", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
         internal static byte[] libsscrypto_dll {

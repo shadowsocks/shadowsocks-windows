@@ -61,7 +61,7 @@ namespace Shadowsocks.Controller
                     SocketException se = (SocketException)e;
                     if (se.SocketErrorCode == SocketError.AccessDenied)
                     {
-                        e = new Exception("Port is already used", e);
+                        e = new Exception(I18N.GetString("Port is already used"), e);
                     }
                 }
                 Errored(this, new ErrorEventArgs(e));

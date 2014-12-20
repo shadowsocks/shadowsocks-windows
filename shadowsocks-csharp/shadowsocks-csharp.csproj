@@ -73,6 +73,7 @@
     <Compile Include="3rd\SimpleJson.cs" />
     <Compile Include="Controller\AutoStartup.cs" />
     <Compile Include="Controller\FileManager.cs" />
+    <Compile Include="Controller\I18N.cs" />
     <Compile Include="Controller\Logging.cs" />
     <Compile Include="Controller\UpdateChecker.cs" />
     <Compile Include="Encrypt\EncryptorBase.cs" />
@@ -146,6 +147,7 @@
     <None Include="Resources\ss16.png" />
     <None Include="Resources\ss24.png" />
     <None Include="Resources\ssw128.png" />
+    <Content Include="Data\cn.txt" />
     <Content Include="shadowsocks.ico" />
     <None Include="Data\polipo_config.txt" />
   </ItemGroup>

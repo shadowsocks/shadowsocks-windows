@@ -23,12 +23,29 @@ namespace Shadowsocks.View
         public ConfigForm(ShadowsocksController controller)
         {
             InitializeComponent();
+            UpdateTexts();
             this.Icon = Icon.FromHandle(Resources.ssw128.GetHicon());
 
             this.controller = controller;
             controller.ConfigChanged += controller_ConfigChanged;
 
             LoadCurrentConfiguration();
+        }
+
+        private void UpdateTexts()
+        {
+            AddButton.Text = I18N.GetString("&Add");
+            DeleteButton.Text = I18N.GetString("&Delete");
+            IPLabel.Text = I18N.GetString("Server IP");
+            ServerPortLabel.Text = I18N.GetString("Server Port");
+            PasswordLabel.Text = I18N.GetString("Password");
+            EncryptionLabel.Text = I18N.GetString("Encryption");
+            ProxyPortLabel.Text = I18N.GetString("Proxy Port");
+            RemarksLabel.Text = I18N.GetString("Remarks");
+            ServerGroupBox.Text = I18N.GetString("Server");
+            OKButton.Text = I18N.GetString("OK");
+            MyCancelButton.Text = I18N.GetString("Cancel");
+            this.Text = I18N.GetString("Edit Servers");
         }
 
         private void controller_ConfigChanged(object sender, EventArgs e)
@@ -67,7 +84,7 @@ namespace Shadowsocks.View
             }
             catch (FormatException)
             {
-                MessageBox.Show("illegal port number format");
+                MessageBox.Show(I18N.GetString("Illegal port number format"));
             }
             catch (Exception ex)
             {
@@ -102,7 +119,7 @@ namespace Shadowsocks.View
             ServersListBox.Items.Clear();
             foreach (Server server in _modifiedConfiguration.configs)
             {
-                ServersListBox.Items.Add(string.IsNullOrEmpty(server.server) ? "New server" : string.IsNullOrEmpty(server.remarks)? server.server + ":" + server.server_port : server.server + ":" + server.server_port + " (" + server.remarks + ")");
+                ServersListBox.Items.Add(string.IsNullOrEmpty(server.server) ? I18N.GetString("New server") : string.IsNullOrEmpty(server.remarks)? server.server + ":" + server.server_port : server.server + ":" + server.server_port + " (" + server.remarks + ")");
             }
         }
 
@@ -176,7 +193,7 @@ namespace Shadowsocks.View
             }
             if (_modifiedConfiguration.configs.Count == 0)
             {
-                MessageBox.Show("Please add at least one server");
+                MessageBox.Show(I18N.GetString("Please add at least one server"));
                 return;
             }
             controller.SaveServers(_modifiedConfiguration.configs);
