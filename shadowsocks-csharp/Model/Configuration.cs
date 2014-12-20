@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Shadowsocks.Controller;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
@@ -109,7 +110,7 @@ namespace Shadowsocks.Model
         {
             if (!condition)
             {
-                throw new Exception("assertion failure");
+                throw new Exception(I18N.GetString("assertion failure"));
             }
         }
 
@@ -117,7 +118,7 @@ namespace Shadowsocks.Model
         {
             if (port <= 0 || port > 65535)
             {
-                throw new ArgumentException("port out of range");
+                throw new ArgumentException(I18N.GetString("Port out of range"));
             }
         }
 
@@ -125,7 +126,7 @@ namespace Shadowsocks.Model
         {
             if (string.IsNullOrEmpty(password))
             {
-                throw new ArgumentException("password can not be blank");
+                throw new ArgumentException(I18N.GetString("Password can not be blank"));
             }
         }
 
@@ -133,7 +134,7 @@ namespace Shadowsocks.Model
         {
             if (string.IsNullOrEmpty(server))
             {
-                throw new ArgumentException("server IP can not be blank");
+                throw new ArgumentException(I18N.GetString("Server IP can not be blank"));
             }
         }
 

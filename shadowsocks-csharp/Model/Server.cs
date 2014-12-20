@@ -4,6 +4,7 @@ using System.Text;
 using System.IO;
 using System.Diagnostics;
 using SimpleJson;
+using Shadowsocks.Controller;
 
 namespace Shadowsocks.Model
 {
@@ -21,6 +22,10 @@ namespace Shadowsocks.Model
         {
             get
             {
+                if (string.IsNullOrEmpty(server))
+                {
+                    return I18N.GetString("New server");
+                }
                 return string.IsNullOrEmpty(remarks) ? server + ":" + server_port : server + ":" + server_port + " (" + remarks + ")";
             }
         }
