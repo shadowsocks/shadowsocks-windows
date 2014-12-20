@@ -22,6 +22,7 @@ namespace Shadowsocks.View
 
         public ConfigForm(ShadowsocksController controller)
         {
+            this.Font = System.Drawing.SystemFonts.DialogFont;
             InitializeComponent();
             UpdateTexts();
             this.Icon = Icon.FromHandle(Resources.ssw128.GetHicon());
