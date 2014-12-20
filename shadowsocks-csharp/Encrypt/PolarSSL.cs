@@ -10,7 +10,7 @@ namespace Shadowsocks.Encrypt
 {
     public class PolarSSL
     {
-        const string DLLNAME = "polarssl";
+        const string DLLNAME = "libsscrypto";
 
         public const int AES_CTX_SIZE = 8 + 4 * 68;
         public const int AES_ENCRYPT = 1;
@@ -19,16 +19,19 @@ namespace Shadowsocks.Encrypt
         static PolarSSL()
         {
             string tempPath = Path.GetTempPath();
-            string dllPath = tempPath + "/polarssl.dll";
+            string dllPath = tempPath + "/libsscrypto.dll";
             try
             {
-                FileManager.UncompressFile(dllPath, Resources.polarssl_dll);
+                FileManager.UncompressFile(dllPath, Resources.libsscrypto_dll);
+                LoadLibrary(dllPath);
             }
-            catch (IOException e)
+            catch (IOException)
+            {
+            }
+            catch (Exception e)
             {
                 Console.WriteLine(e.ToString());
             }
-            LoadLibrary(dllPath);
         }
 
         [DllImport("Kernel32.dll")]

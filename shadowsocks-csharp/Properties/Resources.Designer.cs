@@ -63,19 +63,9 @@ namespace Shadowsocks.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
-        internal static byte[] libsodium_dll {
+        internal static byte[] libsscrypto_dll {
             get {
-                object obj = ResourceManager.GetObject("libsodium_dll", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Byte[].
-        /// </summary>
-        internal static byte[] polarssl_dll {
-            get {
-                object obj = ResourceManager.GetObject("polarssl_dll", resourceCulture);
+                object obj = ResourceManager.GetObject("libsscrypto_dll", resourceCulture);
                 return ((byte[])(obj));
             }
         }
