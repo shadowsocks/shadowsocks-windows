@@ -23,7 +23,6 @@ namespace Shadowsocks.Encrypt
             try
             {
                 FileManager.UncompressFile(dllPath, Resources.libsscrypto_dll);
-                LoadLibrary(dllPath);
             }
             catch (IOException)
             {
@@ -32,6 +31,7 @@ namespace Shadowsocks.Encrypt
             {
                 Console.WriteLine(e.ToString());
             }
+            LoadLibrary(dllPath);
         }
 
         [DllImport("Kernel32.dll")]

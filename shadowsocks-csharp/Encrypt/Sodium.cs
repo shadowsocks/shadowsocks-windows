@@ -28,6 +28,7 @@ namespace Shadowsocks.Encrypt
             {
                 Console.WriteLine(e.ToString());
             }
+            LoadLibrary(dllPath);
         }
 
         [DllImport("Kernel32.dll")]
