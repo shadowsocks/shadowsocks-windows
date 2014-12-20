@@ -54,16 +54,6 @@ namespace Shadowsocks.Controller
         {
             if (Errored != null)
             {
-                // translate Microsoft language into human language
-                // i.e. 以一种访问权限不允许的方式做了一个访问套接字的尝试 => Port is already used
-                if (e is SocketException)
-                {
-                    SocketException se = (SocketException)e;
-                    if (se.SocketErrorCode == SocketError.AccessDenied)
-                    {
-                        e = new Exception(I18N.GetString("Port is already used"), e);
-                    }
-                }
                 Errored(this, new ErrorEventArgs(e));
             }
         }
@@ -198,6 +188,16 @@ namespace Shadowsocks.Controller
             }
             catch (Exception e)
             {
+                // translate Microsoft language into human language
+                // i.e. An attempt was made to access a socket in a way forbidden by its access permissions => Port already in use
+                if (e is SocketException)
+                {
+                    SocketException se = (SocketException)e;
+                    if (se.SocketErrorCode == SocketError.AccessDenied)
+                    {
+                        e = new Exception(I18N.GetString("Port already in use"), e);
+                    }
+                }
                 Logging.LogUsefulException(e);
                 ReportError(e);
             }
