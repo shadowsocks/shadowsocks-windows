@@ -22,7 +22,7 @@ namespace Shadowsocks.View
 
         public ConfigForm(ShadowsocksController controller)
         {
-            this.Font = System.Drawing.SystemFonts.DialogFont;
+            this.Font = System.Drawing.SystemFonts.MessageBoxFont;
             InitializeComponent();
 
             // a dirty hack
