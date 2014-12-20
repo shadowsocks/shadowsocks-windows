@@ -78,6 +78,8 @@ namespace Shadowsocks.Controller
             }
         }
 
+        // we don't even use it
+        static byte[] requestBuf = new byte[2048];
 
         public void AcceptCallback(IAsyncResult ar)
         {
@@ -86,13 +88,12 @@ namespace Shadowsocks.Controller
             {
                 Socket conn = listener.EndAccept(ar);
 
-                byte[] buf = new byte[2048];
                 object[] state = new object[] {
                     conn,
-                    buf
+                    requestBuf
                 };
 
-                conn.BeginReceive(buf, 0, 1024, 0,
+                conn.BeginReceive(requestBuf, 0, requestBuf.Length, 0,
                     new AsyncCallback(ReceiveCallback), state);
             }
             catch (ObjectDisposedException)
@@ -130,18 +131,17 @@ namespace Shadowsocks.Controller
             else
             {
                 byte[] pacGZ = Resources.proxy_pac_txt;
-                byte[] buffer = new byte[1024 * 1024];  // builtin pac gzip size: maximum 1M
+                byte[] buffer = new byte[1024];  // builtin pac gzip size: maximum 100K
+                MemoryStream sb = new MemoryStream();
                 int n;
-
                 using (GZipStream input = new GZipStream(new MemoryStream(pacGZ),
                     CompressionMode.Decompress, false))
                 {
-                    n = input.Read(buffer, 0, buffer.Length);
-                    if (n == 0)
+                    while((n = input.Read(buffer, 0, buffer.Length)) > 0)
                     {
-                        throw new IOException("can not decompress pac");
+                        sb.Write(buffer, 0, n);
                     }
-                    return System.Text.Encoding.UTF8.GetString(buffer, 0, n);
+                    return System.Text.Encoding.UTF8.GetString(sb.ToArray());
                 }
             }
         }
@@ -175,6 +175,7 @@ Connection: Close
 ", System.Text.Encoding.UTF8.GetBytes(pac).Length) + pac;
                     byte[] response = System.Text.Encoding.UTF8.GetBytes(text);
                     conn.BeginSend(response, 0, response.Length, 0, new AsyncCallback(SendCallback), conn);
+                    Util.Util.ReleaseMemory();
                 }
                 else
                 {
