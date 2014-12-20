@@ -24,6 +24,11 @@ namespace Shadowsocks.View
         {
             this.Font = System.Drawing.SystemFonts.DialogFont;
             InitializeComponent();
+
+            // a dirty hack
+            this.ServersListBox.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.PerformLayout();
+
             UpdateTexts();
             this.Icon = Icon.FromHandle(Resources.ssw128.GetHicon());
 
