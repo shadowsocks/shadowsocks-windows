@@ -18,16 +18,13 @@ namespace Shadowsocks.Model
         public string method;
         public string remarks;
 
-        public string FriendlyName
+        public string FriendlyName()
         {
-            get
+            if (string.IsNullOrEmpty(server))
             {
-                if (string.IsNullOrEmpty(server))
-                {
-                    return I18N.GetString("New server");
-                }
-                return string.IsNullOrEmpty(remarks) ? server + ":" + server_port : server + ":" + server_port + " (" + remarks + ")";
+                return I18N.GetString("New server");
             }
+            return string.IsNullOrEmpty(remarks) ? server + ":" + server_port : server + ":" + server_port + " (" + remarks + ")";
         }
     }
 }

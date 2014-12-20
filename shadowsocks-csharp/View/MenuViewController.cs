@@ -117,7 +117,7 @@ namespace Shadowsocks.View
             }
             _notifyIcon.Icon = Icon.FromHandle(icon.GetHicon());
 
-            _notifyIcon.Text = I18N.GetString("Shadowsocks") + " " + UpdateChecker.Version + "\n" + (enabled ? I18N.GetString("Enabled") : I18N.GetString("Disabled")) + "\n" + controller.GetCurrentServer().FriendlyName;
+            _notifyIcon.Text = I18N.GetString("Shadowsocks") + " " + UpdateChecker.Version + "\n" + (enabled ? I18N.GetString("Enabled") : I18N.GetString("Disabled")) + "\n" + controller.GetCurrentServer().FriendlyName();
         }
 
         private void LoadMenu()
@@ -328,7 +328,7 @@ namespace Shadowsocks.View
             for (int i = 0; i < configuration.configs.Count; i++)
             {
                 Server server = configuration.configs[i];
-                MenuItem item = new MenuItem(server.FriendlyName);
+                MenuItem item = new MenuItem(server.FriendlyName());
                 item.Tag = i;
                 item.Click += AServerItem_Click;
                 items.Add(item);
