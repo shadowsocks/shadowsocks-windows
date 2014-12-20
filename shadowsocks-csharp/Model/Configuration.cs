@@ -37,7 +37,6 @@ namespace Shadowsocks.Model
             CheckPort(server.server_port);
             CheckPassword(server.password);
             CheckServer(server.server);
-            CheckRemark(server.remarks);
         }
 
         public static Configuration Load()
@@ -136,11 +135,6 @@ namespace Shadowsocks.Model
             {
                 throw new ArgumentException(I18N.GetString("Server IP can not be blank"));
             }
-        }
-
-        private static void CheckRemark(string remark)
-        {
-            //remark is optional
         }
 
         private class JsonSerializerStrategy : SimpleJson.PocoJsonSerializerStrategy
