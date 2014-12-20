@@ -119,7 +119,7 @@ namespace Shadowsocks.View
             ServersListBox.Items.Clear();
             foreach (Server server in _modifiedConfiguration.configs)
             {
-                ServersListBox.Items.Add(string.IsNullOrEmpty(server.server) ? I18N.GetString("New server") : string.IsNullOrEmpty(server.remarks)? server.server + ":" + server.server_port : server.server + ":" + server.server_port + " (" + server.remarks + ")");
+                ServersListBox.Items.Add(string.IsNullOrEmpty(server.server) ? I18N.GetString("New server") : server.FriendlyName);
             }
         }
 

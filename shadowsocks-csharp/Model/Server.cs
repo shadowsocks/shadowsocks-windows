@@ -16,5 +16,13 @@ namespace Shadowsocks.Model
         public string password;
         public string method;
         public string remarks;
+
+        public string FriendlyName
+        {
+            get
+            {
+                return string.IsNullOrEmpty(remarks) ? server + ":" + server_port : server + ":" + server_port + " (" + remarks + ")";
+            }
+        }
     }
 }

@@ -34,3 +34,5 @@ Shadowsocks {0} Update Found=Shadowsocks {0} 更新
 Click here to download=点击这里下载
 Shadowsocks is here=Shadowsocks 在这里
 You can turn on/off Shadowsocks in the context menu=可以在右键菜单中开关 Shadowsocks
+Enabled=已启用代理
+Disabled=已禁用代理

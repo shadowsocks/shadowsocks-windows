@@ -17,6 +17,8 @@ namespace Shadowsocks.Controller
         public string LatestVersionURL;
         public event EventHandler NewVersionFound;
 
+        public const string Version = "2.1.3";
+
         public void CheckUpdate()
         {
             // TODO test failures
@@ -100,7 +102,7 @@ namespace Shadowsocks.Controller
             {
                 return false;
             }
-            string currentVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString();
+            string currentVersion = Version;
 
             return CompareVersion(version, currentVersion) > 0;
         }

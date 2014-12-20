@@ -295,9 +295,9 @@
             // ServerGroupBox
             // 
             this.ServerGroupBox.Controls.Add(this.tableLayoutPanel1);
-            this.ServerGroupBox.Location = new System.Drawing.Point(223, 12);
+            this.ServerGroupBox.Location = new System.Drawing.Point(220, 12);
             this.ServerGroupBox.Name = "ServerGroupBox";
-            this.ServerGroupBox.Size = new System.Drawing.Size(255, 205);
+            this.ServerGroupBox.Size = new System.Drawing.Size(258, 199);
             this.ServerGroupBox.TabIndex = 6;
             this.ServerGroupBox.TabStop = false;
             this.ServerGroupBox.Text = "Server";
@@ -307,7 +307,7 @@
             this.ServersListBox.FormattingEnabled = true;
             this.ServersListBox.Location = new System.Drawing.Point(12, 12);
             this.ServersListBox.Name = "ServersListBox";
-            this.ServersListBox.Size = new System.Drawing.Size(192, 173);
+            this.ServersListBox.Size = new System.Drawing.Size(192, 199);
             this.ServersListBox.TabIndex = 5;
             this.ServersListBox.SelectedIndexChanged += new System.EventHandler(this.ServersListBox_SelectedIndexChanged);
             // 

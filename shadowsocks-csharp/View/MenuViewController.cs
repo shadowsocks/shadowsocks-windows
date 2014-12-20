@@ -56,9 +56,8 @@ namespace Shadowsocks.View
             controller.Errored += controller_Errored;
 
             _notifyIcon = new NotifyIcon();
-            LoadTrayIcon();
+            UpdateTrayIcon();
             _notifyIcon.Visible = true;
-            _notifyIcon.Text = I18N.GetString("Shadowsocks");
             _notifyIcon.ContextMenu = contextMenu1;
             _notifyIcon.DoubleClick += notifyIcon1_DoubleClick;
 
@@ -81,7 +80,7 @@ namespace Shadowsocks.View
             MessageBox.Show(e.GetException().ToString(), String.Format(I18N.GetString("Shadowsocks Error: {0}"), e.GetException().Message));
         }
 
-        private void LoadTrayIcon()
+        private void UpdateTrayIcon()
         {
             int dpi;
             Graphics graphics = Graphics.FromHwnd(IntPtr.Zero);
@@ -102,7 +101,8 @@ namespace Shadowsocks.View
             {
                 icon = Resources.ss24;
             }
-            if (!controller.GetConfiguration().enabled)
+            bool enabled = controller.GetConfiguration().enabled;
+            if (!enabled)
             {
                 Bitmap iconCopy = new Bitmap(icon);
                 for (int x = 0; x < iconCopy.Width; x++)
@@ -116,6 +116,8 @@ namespace Shadowsocks.View
                 icon = iconCopy;
             }
             _notifyIcon.Icon = Icon.FromHandle(icon.GetHicon());
+
+            _notifyIcon.Text = I18N.GetString("Shadowsocks") + " " + UpdateChecker.Version + "\n" + (enabled ? I18N.GetString("Enabled") : I18N.GetString("Disabled")) + "\n" + controller.GetCurrentServer().FriendlyName;
         }
 
         private void LoadMenu()
@@ -263,12 +265,12 @@ namespace Shadowsocks.View
         private void controller_ConfigChanged(object sender, EventArgs e)
         {
             LoadCurrentConfiguration();
+            UpdateTrayIcon();
         }
 
         private void controller_EnableStatusChanged(object sender, EventArgs e)
         {
             enableItem.Checked = controller.GetConfiguration().enabled;
-            LoadTrayIcon();
         }
 
         void controller_ShareOverLANStatusChanged(object sender, EventArgs e)
@@ -326,7 +328,7 @@ namespace Shadowsocks.View
             for (int i = 0; i < configuration.configs.Count; i++)
             {
                 Server server = configuration.configs[i];
-                MenuItem item = new MenuItem(string.IsNullOrEmpty(server.remarks) ? server.server + ":" + server.server_port : server.server + ":" + server.server_port + " (" + server.remarks + ")");
+                MenuItem item = new MenuItem(server.FriendlyName);
                 item.Tag = i;
                 item.Click += AServerItem_Click;
                 items.Add(item);
