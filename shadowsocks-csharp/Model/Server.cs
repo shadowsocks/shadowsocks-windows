@@ -24,7 +24,14 @@ namespace Shadowsocks.Model
             {
                 return I18N.GetString("New server");
             }
-            return string.IsNullOrEmpty(remarks) ? server + ":" + server_port : server + ":" + server_port + " (" + remarks + ")";
+            if (string.IsNullOrEmpty(remarks))
+            {
+                return server + ":" + server_port;
+            }
+            else
+            {
+                return remarks + " (" + server + ":" + server_port + ")";
+            }
         }
     }
 }
