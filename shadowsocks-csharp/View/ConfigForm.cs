@@ -51,6 +51,7 @@ namespace Shadowsocks.View
             ServerGroupBox.Text = I18N.GetString("Server");
             OKButton.Text = I18N.GetString("OK");
             MyCancelButton.Text = I18N.GetString("Cancel");
+            URIButton.Text = I18N.GetString("URI Parse");
             this.Text = I18N.GetString("Edit Servers");
         }
 
@@ -219,6 +220,25 @@ namespace Shadowsocks.View
         private void ConfigForm_FormClosed(object sender, FormClosedEventArgs e)
         {
             controller.ConfigChanged -= controller_ConfigChanged;
+        }
+
+        private void URIButton_Click(object sender, EventArgs e)
+        {
+            URIParseForm uriParseForm = new URIParseForm();
+            uriParseForm.ShowDialog(this);
+            if(uriParseForm.Parsed)
+            {
+                if (!SaveOldSelectedServer())
+                {
+                    return;
+                }
+
+                _modifiedConfiguration.configs.Add(uriParseForm.server);
+                LoadConfiguration(_modifiedConfiguration);
+                ServersListBox.SelectedIndex = _modifiedConfiguration.configs.Count - 1;
+                _oldSelectedIndex = ServersListBox.SelectedIndex;
+            }
+
         }
 
     }
