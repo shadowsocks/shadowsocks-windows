@@ -1,3 +1,22 @@
+2.1.4 2014-12-20
+- Fix crash when remarks are too long
+
+2.1.3 2014-12-20
+- Add Chinese Language
+- Fix some UI issues on Windows 8
+- Fix some UI issues on high DPI screens
+- Log bind error more friendly
+- Stability issues
+
+2.1.2 2014-12-14
+- Fix sometimes Shadowsocks doesn't respond to requests
+
+2.1.1 2014-12-14
+- Add global proxy option
+
+2.1 2014-12-12
+- Add salsa20 and chacha20 support
+
 2.0.11 2014-11-23
 - Fix a crash
 - Only switch the system proxy off if we have switched it on

@@ -66,15 +66,11 @@ namespace Shadowsocks.Controller
 
         public void AcceptCallback(IAsyncResult ar)
         {
+            Socket listener = (Socket)ar.AsyncState;
             try
             {
-                Socket listener = (Socket)ar.AsyncState;
                 Socket conn = listener.EndAccept(ar);
                 conn.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, true);
-
-                listener.BeginAccept(
-                    new AsyncCallback(AcceptCallback),
-                    listener);
 
                 Handler handler = new Handler();
                 handler.connection = conn;
@@ -86,6 +82,19 @@ namespace Shadowsocks.Controller
             catch
             {
                 //Console.WriteLine(e.Message);
+            }
+            finally
+            {
+                try
+                {
+                    listener.BeginAccept(
+                        new AsyncCallback(AcceptCallback),
+                        listener);
+                }
+                catch
+                {
+                    //Console.WriteLine(e.Message);
+                }
             }
         }
 

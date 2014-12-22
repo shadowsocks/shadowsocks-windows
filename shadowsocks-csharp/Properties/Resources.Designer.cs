@@ -61,11 +61,50 @@ namespace Shadowsocks.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Shadowsocks=Shadowsocks
+        ///Enable=启用代理
+        ///Mode=代理模式
+        ///PAC=PAC 模式
+        ///Global=全局模式
+        ///Servers=服务器选择
+        ///Edit Servers...=编辑服务器...
+        ///Start on Boot=自动启动
+        ///Share over LAN=在局域网共享代理
+        ///Edit PAC File...=编辑 PAC 文件...
+        ///Show QRCode...=显示二维码...
+        ///Show Logs...=显示日志...
+        ///About...=关于...
+        ///Quit=退出
+        ///Edit Servers=编辑服务器
+        ///&amp;Add=添加(&amp;A)
+        ///&amp;Delete=删除(&amp;D)
+        ///Server=服务器
+        ///Server IP=服务器 IP
+        ///Server Port=服务器端口
+        ///Password=密码
+        ///Encryption=加密
+        ///Proxy Port=代理端口
+        ///Remarks=备注
+        ///OK=确定
+        ///Cancel=取消
+        ///New server=未配置的服务器
+        ///QRCode=二维码
+        ///Shadowsocks Error: {0}=Shadowsocks 错误: {0}
+        ///Port already in use=端口已被占用
+        ///Il [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string cn {
+            get {
+                return ResourceManager.GetString("cn", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
-        internal static byte[] polarssl_dll {
+        internal static byte[] libsscrypto_dll {
             get {
-                object obj = ResourceManager.GetObject("polarssl_dll", resourceCulture);
+                object obj = ResourceManager.GetObject("libsscrypto_dll", resourceCulture);
                 return ((byte[])(obj));
             }
         }

@@ -41,7 +41,9 @@ namespace Shadowsocks
                 ShadowsocksController controller = new ShadowsocksController();
 
                 MenuViewController viewController = new MenuViewController(controller);
-                Util.Util.ReleaseMemory();
+
+                controller.Start();
+
                 Application.Run();
             }
         }

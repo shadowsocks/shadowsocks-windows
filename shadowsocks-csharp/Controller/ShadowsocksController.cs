@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
+using System.Net.Sockets;
 
 namespace Shadowsocks.Controller
 {
@@ -31,38 +32,30 @@ namespace Shadowsocks.Controller
 
         public event EventHandler ConfigChanged;
         public event EventHandler EnableStatusChanged;
+        public event EventHandler EnableGlobalChanged;
         public event EventHandler ShareOverLANStatusChanged;
         
         // when user clicked Edit PAC, and PAC file has already created
         public event EventHandler<PathEventArgs> PACFileReadyToOpen;
 
+        public event ErrorEventHandler Errored;
+
         public ShadowsocksController()
         {
             _config = Configuration.Load();
-            polipoRunner = new PolipoRunner();
-            polipoRunner.Start(_config);
-            local = new Local(_config);
-            try
-            {
-                local.Start();
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-            }
-            try
-            {
-                pacServer = new PACServer();
-                pacServer.PACFileChanged += pacServer_PACFileChanged;
-                pacServer.Start(_config);
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-            }
+        }
 
-            UpdateSystemProxy();
-            StartReleasingMemory();
+        public void Start()
+        {
+            Reload();
+        }
+
+        protected void ReportError(Exception e)
+        {
+            if (Errored != null)
+            {
+                Errored(this, new ErrorEventArgs(e));
+            }
         }
 
         public Server GetCurrentServer()
@@ -93,6 +86,17 @@ namespace Shadowsocks.Controller
             }
         }
 
+        public void ToggleGlobal(bool global)
+        {
+            _config.global = global;
+            UpdateSystemProxy();
+            SaveConfig(_config);
+            if (EnableGlobalChanged != null)
+            {
+                EnableGlobalChanged(this, new EventArgs());
+            }
+        }
+
         public void ToggleShareOverLAN(bool enabled)
         {
             _config.shareOverLan = enabled;
@@ -116,8 +120,14 @@ namespace Shadowsocks.Controller
                 return;
             }
             stopped = true;
-            local.Stop();
-            polipoRunner.Stop();
+            if (local != null)
+            {
+                local.Stop();
+            }
+            if (polipoRunner != null)
+            {
+                polipoRunner.Stop();
+            }
             if (_config.enabled)
             {
                 SystemProxy.Disable();
@@ -141,33 +151,71 @@ namespace Shadowsocks.Controller
             return "ss://" + base64;
         }
 
-
-        protected void SaveConfig(Configuration newConfig)
+        protected void Reload()
         {
-            Configuration.Save(newConfig);
             // some logic in configuration updated the config when saving, we need to read it again
             _config = Configuration.Load();
 
+            if (polipoRunner == null)
+            {
+                polipoRunner = new PolipoRunner();
+            }
+            if (pacServer == null)
+            {
+                pacServer = new PACServer();
+                pacServer.PACFileChanged += pacServer_PACFileChanged;
+            }
+
             pacServer.Stop();
-            local.Stop();
+
+            if (local != null)
+            {
+                local.Stop();
+            }
 
             // don't put polipoRunner.Start() before pacServer.Stop()
             // or bind will fail when switching bind address from 0.0.0.0 to 127.0.0.1
             // though UseShellExecute is set to true now
             // http://stackoverflow.com/questions/10235093/socket-doesnt-close-after-application-exits-if-a-launched-process-is-open
             polipoRunner.Stop();
-            polipoRunner.Start(_config);
+            try
+            {
+                polipoRunner.Start(_config);
 
-            local = new Local(_config);
-            local.Start();
-            pacServer.Start(_config);
+                local = new Local(_config);
+                local.Start();
+                pacServer.Start(_config);
+            }
+            catch (Exception e)
+            {
+                // translate Microsoft language into human language
+                // i.e. An attempt was made to access a socket in a way forbidden by its access permissions => Port already in use
+                if (e is SocketException)
+                {
+                    SocketException se = (SocketException)e;
+                    if (se.SocketErrorCode == SocketError.AccessDenied)
+                    {
+                        e = new Exception(I18N.GetString("Port already in use"), e);
+                    }
+                }
+                Logging.LogUsefulException(e);
+                ReportError(e);
+            }
 
             if (ConfigChanged != null)
             {
                 ConfigChanged(this, new EventArgs());
             }
 
+            UpdateSystemProxy();
             Util.Util.ReleaseMemory();
+        }
+
+
+        protected void SaveConfig(Configuration newConfig)
+        {
+            Configuration.Save(newConfig);
+            Reload();
         }
 
 
@@ -175,7 +223,7 @@ namespace Shadowsocks.Controller
         {
             if (_config.enabled)
             {
-                SystemProxy.Enable();
+                SystemProxy.Enable(_config.global);
                 _systemProxyIsDirty = true;
             }
             else

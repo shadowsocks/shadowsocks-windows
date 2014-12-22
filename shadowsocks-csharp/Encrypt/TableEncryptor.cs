@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Shadowsocks.Encrypt
 {
@@ -23,6 +24,11 @@ namespace Shadowsocks.Encrypt
             {
                 _decryptTable[_encryptTable[i]] = (byte)i;
             }
+        }
+
+        public static List<string> SupportedCiphers()
+        {
+            return new List<string>(new string[]{"table"});
         }
 
         public override void Encrypt(byte[] buf, int length, byte[] outbuf, out int outlength)

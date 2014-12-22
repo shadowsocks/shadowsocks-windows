@@ -1,4 +1,5 @@
 ﻿using QRCode4CS;
+using Shadowsocks.Controller;
 using Shadowsocks.Properties;
 using System;
 using System.Collections.Generic;
@@ -21,6 +22,7 @@ namespace Shadowsocks.View
             this.code = code;
             InitializeComponent();
             this.Icon = Icon.FromHandle(Resources.ssw128.GetHicon());
+            this.Text = I18N.GetString("QRCode");
         }
 
         private void GenQR(string ssconfig)

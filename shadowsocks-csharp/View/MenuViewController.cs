@@ -14,12 +14,12 @@ namespace Shadowsocks.View
     {
         // yes this is just a menu view controller
         // when config form is closed, it moves away from RAM
-        // and it should just does anything related to the config form
+        // and it should just do anything related to the config form
         
         private ShadowsocksController controller;
         private UpdateChecker updateChecker;
 
-        private NotifyIcon notifyIcon1;
+        private NotifyIcon _notifyIcon;
         private ContextMenu contextMenu1;
 
         private bool _isFirstRun;
@@ -37,18 +37,29 @@ namespace Shadowsocks.View
         private MenuItem menuItem3;
         private MenuItem quitItem;
         private MenuItem menuItem1;
+        private MenuItem modeItem;
+        private MenuItem globalModeItem;
+        private MenuItem PACModeItem;
         private ConfigForm configForm;
 
         public MenuViewController(ShadowsocksController controller)
         {
-            LoadMenu();
-            LoadTrayIcon();
-
             this.controller = controller;
+
+            LoadMenu();
+
             controller.EnableStatusChanged += controller_EnableStatusChanged;
             controller.ConfigChanged += controller_ConfigChanged;
             controller.PACFileReadyToOpen += controller_PACFileReadyToOpen;
             controller.ShareOverLANStatusChanged += controller_ShareOverLANStatusChanged;
+            controller.EnableGlobalChanged += controller_EnableGlobalChanged;
+            controller.Errored += controller_Errored;
+
+            _notifyIcon = new NotifyIcon();
+            UpdateTrayIcon();
+            _notifyIcon.Visible = true;
+            _notifyIcon.ContextMenu = contextMenu1;
+            _notifyIcon.DoubleClick += notifyIcon1_DoubleClick;
 
             this.updateChecker = new UpdateChecker();
             updateChecker.NewVersionFound += updateChecker_NewVersionFound;
@@ -64,7 +75,12 @@ namespace Shadowsocks.View
             }
         }
 
-        private void LoadTrayIcon()
+        void controller_Errored(object sender, System.IO.ErrorEventArgs e)
+        {
+            MessageBox.Show(e.GetException().ToString(), String.Format(I18N.GetString("Shadowsocks Error: {0}"), e.GetException().Message));
+        }
+
+        private void UpdateTrayIcon()
         {
             int dpi;
             Graphics graphics = Graphics.FromHwnd(IntPtr.Zero);
@@ -85,19 +101,33 @@ namespace Shadowsocks.View
             {
                 icon = Resources.ss24;
             }
-            notifyIcon1 = new NotifyIcon();
-            notifyIcon1.Text = "Shadowsocks";
-            notifyIcon1.Icon = Icon.FromHandle(icon.GetHicon());
-            notifyIcon1.Visible = true;
+            bool enabled = controller.GetConfiguration().enabled;
+            if (!enabled)
+            {
+                Bitmap iconCopy = new Bitmap(icon);
+                for (int x = 0; x < iconCopy.Width; x++)
+                {
+                    for (int y = 0; y < iconCopy.Height; y++)
+                    {
+                        Color color = icon.GetPixel(x, y);
+                        iconCopy.SetPixel(x, y , Color.FromArgb((byte)(color.A / 1.25), color.R, color.G, color.B));
+                    }
+                }
+                icon = iconCopy;
+            }
+            _notifyIcon.Icon = Icon.FromHandle(icon.GetHicon());
 
-            notifyIcon1.ContextMenu = contextMenu1;
-            notifyIcon1.DoubleClick +=notifyIcon1_DoubleClick;
+            string text = I18N.GetString("Shadowsocks") + " " + UpdateChecker.Version + "\n" + (enabled ? I18N.GetString("Enabled") : I18N.GetString("Disabled")) + "\n" + controller.GetCurrentServer().FriendlyName();
+            _notifyIcon.Text = text.Substring(0, Math.Min(63, text.Length));
         }
 
         private void LoadMenu()
         {
             this.contextMenu1 = new System.Windows.Forms.ContextMenu();
             this.enableItem = new System.Windows.Forms.MenuItem();
+            this.modeItem = new System.Windows.Forms.MenuItem();
+            this.PACModeItem = new System.Windows.Forms.MenuItem();
+            this.globalModeItem = new System.Windows.Forms.MenuItem();
             this.AutoStartupItem = new System.Windows.Forms.MenuItem();
             this.ShareOverLANItem = new System.Windows.Forms.MenuItem();
             this.ServersItem = new System.Windows.Forms.MenuItem();
@@ -117,6 +147,7 @@ namespace Shadowsocks.View
             // 
             this.contextMenu1.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
             this.enableItem,
+            this.modeItem,
             this.ServersItem,
             this.menuItem1,
             this.AutoStartupItem,
@@ -132,28 +163,36 @@ namespace Shadowsocks.View
             // enableItem
             // 
             this.enableItem.Index = 0;
-            this.enableItem.Text = "&Enable";
+            this.enableItem.Text = I18N.GetString("Enable");
             this.enableItem.Click += new System.EventHandler(this.EnableItem_Click);
-            // 
-            // AutoStartupItem
-            // 
-            this.AutoStartupItem.Index = 3;
-            this.AutoStartupItem.Text = "Start on Boot";
-            this.AutoStartupItem.Click += new System.EventHandler(this.AutoStartupItem_Click);
-            // 
-            // ShareOverLANItem
-            // 
-            this.ShareOverLANItem.Index = 4;
-            this.ShareOverLANItem.Text = "Share over LAN";
-            this.ShareOverLANItem.Click += new System.EventHandler(this.ShareOverLANItem_Click);
+            //
+            // modeMenu
+            //
+            this.modeItem.Index = 1;
+            this.modeItem.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
+            this.PACModeItem,
+            this.globalModeItem});
+            this.modeItem.Text = I18N.GetString("Mode");
+            //
+            // PACModeItem
+            //
+            this.PACModeItem.Index = 0;
+            this.PACModeItem.Text = I18N.GetString("PAC");
+            this.PACModeItem.Click += new System.EventHandler(this.PACModeItem_Click);
+            //
+            // globalModeItem
+            //
+            this.globalModeItem.Index = 1;
+            this.globalModeItem.Text = I18N.GetString("Global");
+            this.globalModeItem.Click += new System.EventHandler(this.GlobalModeItem_Click);
             // 
             // ServersItem
             // 
-            this.ServersItem.Index = 1;
+            this.ServersItem.Index = 2;
             this.ServersItem.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
             this.SeperatorItem,
             this.ConfigItem});
-            this.ServersItem.Text = "&Servers";
+            this.ServersItem.Text = I18N.GetString("Servers");
             // 
             // SeperatorItem
             // 
@@ -163,58 +202,71 @@ namespace Shadowsocks.View
             // ConfigItem
             // 
             this.ConfigItem.Index = 1;
-            this.ConfigItem.Text = "Edit Servers...";
+            this.ConfigItem.Text = I18N.GetString("Edit Servers...");
             this.ConfigItem.Click += new System.EventHandler(this.Config_Click);
             // 
-            // menuItem4
+            // menuItem1
             // 
-            this.menuItem4.Index = 6;
-            this.menuItem4.Text = "-";
+            this.menuItem1.Index = 3;
+            this.menuItem1.Text = "-";
+            // 
+            // AutoStartupItem
+            // 
+            this.AutoStartupItem.Index = 4;
+            this.AutoStartupItem.Text = I18N.GetString("Start on Boot");
+            this.AutoStartupItem.Click += new System.EventHandler(this.AutoStartupItem_Click);
+            // 
+            // ShareOverLANItem
+            // 
+            this.ShareOverLANItem.Index = 5;
+            this.ShareOverLANItem.Text = I18N.GetString("Share over LAN");
+            this.ShareOverLANItem.Click += new System.EventHandler(this.ShareOverLANItem_Click);
             // 
             // editPACFileItem
             // 
-            this.editPACFileItem.Index = 5;
-            this.editPACFileItem.Text = "Edit &PAC File...";
+            this.editPACFileItem.Index = 6;
+            this.editPACFileItem.Text = I18N.GetString("Edit PAC File...");
             this.editPACFileItem.Click += new System.EventHandler(this.EditPACFileItem_Click);
+            // 
+            // menuItem4
+            // 
+            this.menuItem4.Index = 7;
+            this.menuItem4.Text = "-";
             // 
             // QRCodeItem
             // 
-            this.QRCodeItem.Index = 7;
-            this.QRCodeItem.Text = "Show &QRCode...";
+            this.QRCodeItem.Index = 8;
+            this.QRCodeItem.Text = I18N.GetString("Show QRCode...");
             this.QRCodeItem.Click += new System.EventHandler(this.QRCodeItem_Click);
             // 
             // ShowLogItem
             // 
-            this.ShowLogItem.Index = 8;
-            this.ShowLogItem.Text = "Show Logs...";
+            this.ShowLogItem.Index = 9;
+            this.ShowLogItem.Text = I18N.GetString("Show Logs...");
             this.ShowLogItem.Click += new System.EventHandler(this.ShowLogItem_Click);
             // 
             // aboutItem
             // 
-            this.aboutItem.Index = 9;
-            this.aboutItem.Text = "About...";
+            this.aboutItem.Index = 10;
+            this.aboutItem.Text = I18N.GetString("About...");
             this.aboutItem.Click += new System.EventHandler(this.AboutItem_Click);
             // 
             // menuItem3
             // 
-            this.menuItem3.Index = 10;
+            this.menuItem3.Index = 11;
             this.menuItem3.Text = "-";
             // 
             // quitItem
             // 
-            this.quitItem.Index = 11;
-            this.quitItem.Text = "&Quit";
+            this.quitItem.Index = 12;
+            this.quitItem.Text = I18N.GetString("Quit");
             this.quitItem.Click += new System.EventHandler(this.Quit_Click);
-            // 
-            // menuItem1
-            // 
-            this.menuItem1.Index = 2;
-            this.menuItem1.Text = "-";
         }
 
         private void controller_ConfigChanged(object sender, EventArgs e)
         {
             LoadCurrentConfiguration();
+            UpdateTrayIcon();
         }
 
         private void controller_EnableStatusChanged(object sender, EventArgs e)
@@ -227,6 +279,12 @@ namespace Shadowsocks.View
             ShareOverLANItem.Checked = controller.GetConfiguration().shareOverLan;
         }
 
+        void controller_EnableGlobalChanged(object sender, EventArgs e)
+        {
+            globalModeItem.Checked = controller.GetConfiguration().global;
+            PACModeItem.Checked = !globalModeItem.Checked;
+        }
+
         void controller_PACFileReadyToOpen(object sender, ShadowsocksController.PathEventArgs e)
         {
             string argument = @"/select, " + e.Path;
@@ -236,11 +294,11 @@ namespace Shadowsocks.View
 
         void updateChecker_NewVersionFound(object sender, EventArgs e)
         {
-            notifyIcon1.BalloonTipTitle = "Shadowsocks " + updateChecker.LatestVersionNumber + " Update Found";
-            notifyIcon1.BalloonTipText = "Click here to download";
-            notifyIcon1.BalloonTipIcon = ToolTipIcon.Info;
-            notifyIcon1.BalloonTipClicked += notifyIcon1_BalloonTipClicked;
-            notifyIcon1.ShowBalloonTip(5000);
+            _notifyIcon.BalloonTipTitle = String.Format(I18N.GetString("Shadowsocks {0} Update Found"), updateChecker.LatestVersionNumber);
+            _notifyIcon.BalloonTipText = I18N.GetString("Click here to download");
+            _notifyIcon.BalloonTipIcon = ToolTipIcon.Info;
+            _notifyIcon.BalloonTipClicked += notifyIcon1_BalloonTipClicked;
+            _notifyIcon.ShowBalloonTip(5000);
             _isFirstRun = false;
         }
 
@@ -255,6 +313,8 @@ namespace Shadowsocks.View
             Configuration config = controller.GetConfiguration();
             UpdateServersMenu();
             enableItem.Checked = config.enabled;
+            globalModeItem.Checked = config.global;
+            PACModeItem.Checked = !config.global;
             ShareOverLANItem.Checked = config.shareOverLan;
             AutoStartupItem.Checked = AutoStartup.Check();
         }
@@ -269,7 +329,7 @@ namespace Shadowsocks.View
             for (int i = 0; i < configuration.configs.Count; i++)
             {
                 Server server = configuration.configs[i];
-                MenuItem item = new MenuItem(string.IsNullOrEmpty(server.remarks) ? server.server + ":" + server.server_port : server.server + ":" + server.server_port + " (" + server.remarks + ")");
+                MenuItem item = new MenuItem(server.FriendlyName());
                 item.Tag = i;
                 item.Click += AServerItem_Click;
                 items.Add(item);
@@ -312,7 +372,7 @@ namespace Shadowsocks.View
         private void Quit_Click(object sender, EventArgs e)
         {
             controller.Stop();
-            notifyIcon1.Visible = false;
+            _notifyIcon.Visible = false;
             Application.Exit();
         }
 
@@ -320,10 +380,10 @@ namespace Shadowsocks.View
         {
             if (_isFirstRun)
             {
-                notifyIcon1.BalloonTipTitle = "Shadowsocks is here";
-                notifyIcon1.BalloonTipText = "You can turn on/off Shadowsocks in the context menu";
-                notifyIcon1.BalloonTipIcon = ToolTipIcon.Info;
-                notifyIcon1.ShowBalloonTip(0);
+                _notifyIcon.BalloonTipTitle = I18N.GetString("Shadowsocks is here");
+                _notifyIcon.BalloonTipText =  I18N.GetString("You can turn on/off Shadowsocks in the context menu");
+                _notifyIcon.BalloonTipIcon = ToolTipIcon.Info;
+                _notifyIcon.ShowBalloonTip(0);
                 _isFirstRun = false;
             }
         }
@@ -338,11 +398,19 @@ namespace Shadowsocks.View
             ShowConfigForm();
         }
 
-
         private void EnableItem_Click(object sender, EventArgs e)
         {
-            enableItem.Checked = !enableItem.Checked;
-            controller.ToggleEnable(enableItem.Checked);
+            controller.ToggleEnable(!enableItem.Checked);
+        }
+
+        private void GlobalModeItem_Click(object sender, EventArgs e)
+        {
+            controller.ToggleGlobal(true);
+        }
+
+        private void PACModeItem_Click(object sender, EventArgs e)
+        {
+            controller.ToggleGlobal(false);
         }
 
         private void ShareOverLANItem_Click(object sender, EventArgs e)

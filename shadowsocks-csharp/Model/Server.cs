@@ -4,6 +4,7 @@ using System.Text;
 using System.IO;
 using System.Diagnostics;
 using SimpleJson;
+using Shadowsocks.Controller;
 
 namespace Shadowsocks.Model
 {
@@ -16,5 +17,21 @@ namespace Shadowsocks.Model
         public string password;
         public string method;
         public string remarks;
+
+        public string FriendlyName()
+        {
+            if (string.IsNullOrEmpty(server))
+            {
+                return I18N.GetString("New server");
+            }
+            if (string.IsNullOrEmpty(remarks))
+            {
+                return server + ":" + server_port;
+            }
+            else
+            {
+                return remarks + " (" + server + ":" + server_port + ")";
+            }
+        }
     }
 }
