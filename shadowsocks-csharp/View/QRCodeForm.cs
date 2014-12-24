@@ -1,4 +1,4 @@
-﻿using QRCode4CS;
+﻿using ZXing.QrCode.Internal;
 using Shadowsocks.Controller;
 using Shadowsocks.Properties;
 using System;
@@ -28,48 +28,20 @@ namespace Shadowsocks.View
         private void GenQR(string ssconfig)
         {
             string qrText = ssconfig;
-            QRCode4CS.Options options = new QRCode4CS.Options();
-            options.Text = qrText;
-            QRCode4CS.QRCode qrCoded = null;
-            bool success = false;
-            foreach (var level in new QRErrorCorrectLevel[]{QRErrorCorrectLevel.H, QRErrorCorrectLevel.Q, QRErrorCorrectLevel.M, QRErrorCorrectLevel.L})
-            {
-                for (int i = 3; i < 10; i++)
-                {
-                    try
-                    {
-                        options.TypeNumber = i;
-                        options.CorrectLevel = level;
-                        qrCoded = new QRCode4CS.QRCode(options);
-                        qrCoded.Make();
-                        success = true;
-                        break;
-                    }
-                    catch
-                    {
-                        qrCoded = null;
-                        continue;
-                    }
-                }
-                if (success)
-                    break;
-            }
-            if (qrCoded == null)
-            {
-                return;
-            }
-            int blockSize = Math.Max(200 / qrCoded.GetModuleCount(), 1);
-            Bitmap drawArea = new Bitmap((qrCoded.GetModuleCount() * blockSize), (qrCoded.GetModuleCount() * blockSize));
+            QRCode code = ZXing.QrCode.Internal.Encoder.encode(qrText, ErrorCorrectionLevel.M);
+            ByteMatrix m = code.Matrix;
+            int blockSize = Math.Max(200 / m.Height, 1);
+            Bitmap drawArea = new Bitmap((m.Height * blockSize), (m.Height * blockSize));
             using (Graphics g = Graphics.FromImage(drawArea))
             {
                 g.Clear(Color.White);
                 using (Brush b = new SolidBrush(Color.Black))
                 {
-                    for (int row = 0; row < qrCoded.GetModuleCount(); row++)
+                    for (int row = 0; row < m.Height; row++)
                     {
-                        for (int col = 0; col < qrCoded.GetModuleCount(); col++)
+                        for (int col = 0; col < m.Height; col++)
                         {
-                            if (qrCoded.IsDark(row, col))
+                            if (m[row, col] != 0)
                             {
                                 g.FillRectangle(b, blockSize * row, blockSize * col, blockSize, blockSize);
                             }

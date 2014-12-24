@@ -69,8 +69,23 @@
     <Reference Include="System.XML" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="3rd\QRCodeCS.cs" />
     <Compile Include="3rd\SimpleJson.cs" />
+    <Compile Include="3rd\zxing\BitArray.cs" />
+    <Compile Include="3rd\zxing\BitMatrix.cs" />
+    <Compile Include="3rd\zxing\BlockPair.cs" />
+    <Compile Include="3rd\zxing\ByteMatrix.cs" />
+    <Compile Include="3rd\zxing\EncodeHintType.cs" />
+    <Compile Include="3rd\zxing\Encoder.cs" />
+    <Compile Include="3rd\zxing\ErrorCorrectionLevel.cs" />
+    <Compile Include="3rd\zxing\FormatInformation.cs" />
+    <Compile Include="3rd\zxing\GenericGF.cs" />
+    <Compile Include="3rd\zxing\GenericGFPoly.cs" />
+    <Compile Include="3rd\zxing\MaskUtil.cs" />
+    <Compile Include="3rd\zxing\MatrixUtil.cs" />
+    <Compile Include="3rd\zxing\Mode.cs" />
+    <Compile Include="3rd\zxing\QRCode.cs" />
+    <Compile Include="3rd\zxing\ReedSolomonEncoder.cs" />
+    <Compile Include="3rd\zxing\Version.cs" />
     <Compile Include="Controller\AutoStartup.cs" />
     <Compile Include="Controller\FileManager.cs" />
     <Compile Include="Controller\I18N.cs" />
