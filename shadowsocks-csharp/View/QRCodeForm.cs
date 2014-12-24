@@ -31,13 +31,13 @@ namespace Shadowsocks.View
             QRCode code = ZXing.QrCode.Internal.Encoder.encode(qrText, ErrorCorrectionLevel.M);
             ByteMatrix m = code.Matrix;
             int blockSize = Math.Max(200 / m.Height, 1);
-            Bitmap drawArea = new Bitmap((m.Height * blockSize), (m.Height * blockSize));
+            Bitmap drawArea = new Bitmap((m.Width * blockSize), (m.Height * blockSize));
             using (Graphics g = Graphics.FromImage(drawArea))
             {
                 g.Clear(Color.White);
                 using (Brush b = new SolidBrush(Color.Black))
                 {
-                    for (int row = 0; row < m.Height; row++)
+                    for (int row = 0; row < m.Width; row++)
                     {
                         for (int col = 0; col < m.Height; col++)
                         {

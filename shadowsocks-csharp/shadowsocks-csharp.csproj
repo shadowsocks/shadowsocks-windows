@@ -57,6 +57,7 @@
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>ManagedMinimumRules.ruleset</CodeAnalysisRuleSet>
     <Prefer32Bit>false</Prefer32Bit>
+    <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationManifest>app.manifest</ApplicationManifest>
@@ -71,13 +72,10 @@
   <ItemGroup>
     <Compile Include="3rd\SimpleJson.cs" />
     <Compile Include="3rd\zxing\BitArray.cs" />
-    <Compile Include="3rd\zxing\BitMatrix.cs" />
     <Compile Include="3rd\zxing\BlockPair.cs" />
     <Compile Include="3rd\zxing\ByteMatrix.cs" />
-    <Compile Include="3rd\zxing\EncodeHintType.cs" />
     <Compile Include="3rd\zxing\Encoder.cs" />
     <Compile Include="3rd\zxing\ErrorCorrectionLevel.cs" />
-    <Compile Include="3rd\zxing\FormatInformation.cs" />
     <Compile Include="3rd\zxing\GenericGF.cs" />
     <Compile Include="3rd\zxing\GenericGFPoly.cs" />
     <Compile Include="3rd\zxing\MaskUtil.cs" />

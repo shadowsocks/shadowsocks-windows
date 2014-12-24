@@ -91,14 +91,6 @@ namespace ZXing.Common.ReedSolomon
          }
       }
 
-      internal GenericGFPoly One
-      {
-         get
-         {
-            return one;
-         }
-      }
-
       /// <summary>
       /// Builds the monomial.
       /// </summary>
@@ -138,19 +130,6 @@ namespace ZXing.Common.ReedSolomon
          return expTable[a];
       }
 
-      /// <summary>
-      /// Logs the specified a.
-      /// </summary>
-      /// <param name="a">A.</param>
-      /// <returns>base 2 log of a in GF(size)</returns>
-      internal int log(int a)
-      {
-         if (a == 0)
-         {
-            throw new ArgumentException();
-         }
-         return logTable[a];
-      }
 
       /// <summary>
       /// Inverses the specified a.
@@ -181,30 +160,11 @@ namespace ZXing.Common.ReedSolomon
       }
 
       /// <summary>
-      /// Gets the size.
-      /// </summary>
-      public int Size
-      {
-         get { return size; }
-      }
-
-      /// <summary>
       /// Gets the generator base.
       /// </summary>
       public int GeneratorBase
       {
          get { return generatorBase; }
-      }
-
-      /// <summary>
-      /// Returns a <see cref="System.String"/> that represents this instance.
-      /// </summary>
-      /// <returns>
-      /// A <see cref="System.String"/> that represents this instance.
-      /// </returns>
-      override public String ToString()
-      {
-         return "GF(0x" + primitive.ToString("X") + ',' + size + ')';
       }
    }
 }

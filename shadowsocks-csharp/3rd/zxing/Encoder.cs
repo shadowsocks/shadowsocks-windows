@@ -30,15 +30,6 @@ namespace ZXing.QrCode.Internal
    public static class Encoder
    {
 
-      // The original table is defined in the table 5 of JISX0510:2004 (p.19).
-      private static readonly int[] ALPHANUMERIC_TABLE = {
-         -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,  // 0x00-0x0f
-         -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,  // 0x10-0x1f
-         36, -1, -1, -1, 37, 38, -1, -1, -1, -1, 39, 40, -1, 41, 42, 43,  // 0x20-0x2f
-         0,   1,  2,  3,  4,  5,  6,  7,  8,  9, 44, -1, -1, -1, -1, -1,  // 0x30-0x3f
-         -1, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24,  // 0x40-0x4f
-         25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, -1, -1, -1, -1, -1,  // 0x50-0x5f
-      };
 
       internal static String DEFAULT_BYTE_MODE_ENCODING = "ISO-8859-1";
 
@@ -66,28 +57,10 @@ namespace ZXing.QrCode.Internal
       /// <returns><see cref="QRCode"/> representing the encoded QR code</returns>
       public static QRCode encode(String content, ErrorCorrectionLevel ecLevel)
       {
-         return encode(content, ecLevel, null);
-      }
-
-      /// <summary>
-      /// Encodes the specified content.
-      /// </summary>
-      /// <param name="content">The content.</param>
-      /// <param name="ecLevel">The ec level.</param>
-      /// <param name="hints">The hints.</param>
-      /// <returns></returns>
-      public static QRCode encode(String content,
-                                ErrorCorrectionLevel ecLevel,
-                                IDictionary<EncodeHintType, object> hints)
-      {
          // Determine what character encoding has been specified by the caller, if any
 #if !SILVERLIGHT || WINDOWS_PHONE
-         String encoding = hints == null || !hints.ContainsKey(EncodeHintType.CHARACTER_SET) ? null : (String)hints[EncodeHintType.CHARACTER_SET];
-         if (encoding == null)
-         {
-            encoding = DEFAULT_BYTE_MODE_ENCODING;
-         }
-         bool generateECI = !DEFAULT_BYTE_MODE_ENCODING.Equals(encoding);
+         String encoding = DEFAULT_BYTE_MODE_ENCODING;
+         //bool generateECI = !DEFAULT_BYTE_MODE_ENCODING.Equals(encoding);
 #else
          // Silverlight supports only UTF-8 and UTF-16 out-of-the-box
          const string encoding = "UTF-8";
@@ -98,7 +71,7 @@ namespace ZXing.QrCode.Internal
 
          // Pick an encoding mode appropriate for the content. Note that this will not attempt to use
          // multiple modes / segments even if that were more efficient. Twould be nice.
-         Mode mode = chooseMode(content, encoding);
+         Mode mode = Mode.BYTE;
 
          // This will store the header information, like mode and
          // length, as well as "header" segments like an ECI segment.
@@ -183,106 +156,6 @@ namespace ZXing.QrCode.Internal
          return qrCode;
       }
 
-      /// <summary>
-      /// Gets the alphanumeric code.
-      /// </summary>
-      /// <param name="code">The code.</param>
-      /// <returns>the code point of the table used in alphanumeric mode or
-      /// -1 if there is no corresponding code in the table.</returns>
-      internal static int getAlphanumericCode(int code)
-      {
-         if (code < ALPHANUMERIC_TABLE.Length)
-         {
-            return ALPHANUMERIC_TABLE[code];
-         }
-         return -1;
-      }
-
-      /// <summary>
-      /// Chooses the mode.
-      /// </summary>
-      /// <param name="content">The content.</param>
-      /// <returns></returns>
-      public static Mode chooseMode(String content)
-      {
-         return chooseMode(content, null);
-      }
-
-      /// <summary>
-      /// Choose the best mode by examining the content. Note that 'encoding' is used as a hint;
-      /// if it is Shift_JIS, and the input is only double-byte Kanji, then we return {@link Mode#KANJI}.
-      /// </summary>
-      /// <param name="content">The content.</param>
-      /// <param name="encoding">The encoding.</param>
-      /// <returns></returns>
-      private static Mode chooseMode(String content, String encoding)
-      {
-         if ("Shift_JIS".Equals(encoding))
-         {
-
-            // Choose Kanji mode if all input are double-byte characters
-            return isOnlyDoubleByteKanji(content) ? Mode.KANJI : Mode.BYTE;
-         }
-         bool hasNumeric = false;
-         bool hasAlphanumeric = false;
-         for (int i = 0; i < content.Length; ++i)
-         {
-            char c = content[i];
-            if (c >= '0' && c <= '9')
-            {
-               hasNumeric = true;
-            }
-            else if (getAlphanumericCode(c) != -1)
-            {
-               hasAlphanumeric = true;
-            }
-            else
-            {
-               return Mode.BYTE;
-            }
-         }
-         if (hasAlphanumeric)
-         {
-
-            return Mode.ALPHANUMERIC;
-         }
-         if (hasNumeric)
-         {
-
-            return Mode.NUMERIC;
-         }
-         return Mode.BYTE;
-      }
-
-      private static bool isOnlyDoubleByteKanji(String content)
-      {
-         byte[] bytes;
-         try
-         {
-            bytes = Encoding.GetEncoding("Shift_JIS").GetBytes(content);
-         }
-         catch (Exception )
-         {
-            return false;
-         }
-         int length = bytes.Length;
-         if (length % 2 != 0)
-         {
-            return false;
-         }
-         for (int i = 0; i < length; i += 2)
-         {
-
-
-            int byte1 = bytes[i] & 0xFF;
-            if ((byte1 < 0x81 || byte1 > 0x9F) && (byte1 < 0xE0 || byte1 > 0xEB))
-            {
-
-               return false;
-            }
-         }
-         return true;
-      }
 
       private static int chooseMaskPattern(BitArray bits,
                                            ErrorCorrectionLevel ecLevel,
@@ -594,83 +467,10 @@ namespace ZXing.QrCode.Internal
                               BitArray bits,
                               String encoding)
       {
-         if (mode.Equals(Mode.NUMERIC))
-            appendNumericBytes(content, bits);
-         else
-            if (mode.Equals(Mode.ALPHANUMERIC))
-               appendAlphanumericBytes(content, bits);
-            else
                if (mode.Equals(Mode.BYTE))
                   append8BitBytes(content, bits, encoding);
-               else
-                  if (mode.Equals(Mode.KANJI))
-                     appendKanjiBytes(content, bits);
                   else
                       throw new Exception("Invalid mode: " + mode);
-      }
-
-      internal static void appendNumericBytes(String content, BitArray bits)
-      {
-         int length = content.Length;
-
-         int i = 0;
-         while (i < length)
-         {
-            int num1 = content[i] - '0';
-            if (i + 2 < length)
-            {
-               // Encode three numeric letters in ten bits.
-               int num2 = content[i + 1] - '0';
-               int num3 = content[i + 2] - '0';
-               bits.appendBits(num1 * 100 + num2 * 10 + num3, 10);
-               i += 3;
-            }
-            else if (i + 1 < length)
-            {
-               // Encode two numeric letters in seven bits.
-               int num2 = content[i + 1] - '0';
-               bits.appendBits(num1 * 10 + num2, 7);
-               i += 2;
-            }
-            else
-            {
-               // Encode one numeric letter in four bits.
-               bits.appendBits(num1, 4);
-               i++;
-            }
-         }
-      }
-
-      internal static void appendAlphanumericBytes(String content, BitArray bits)
-      {
-         int length = content.Length;
-
-         int i = 0;
-         while (i < length)
-         {
-            int code1 = getAlphanumericCode(content[i]);
-            if (code1 == -1)
-            {
-                throw new Exception();
-            }
-            if (i + 1 < length)
-            {
-               int code2 = getAlphanumericCode(content[i + 1]);
-               if (code2 == -1)
-               {
-                   throw new Exception();
-               }
-               // Encode two alphanumeric letters in 11 bits.
-               bits.appendBits(code1 * 45 + code2, 11);
-               i += 2;
-            }
-            else
-            {
-               // Encode one alphanumeric letter in six bits.
-               bits.appendBits(code1, 6);
-               i++;
-            }
-         }
       }
 
       internal static void append8BitBytes(String content, BitArray bits, String encoding)
@@ -712,42 +512,6 @@ namespace ZXing.QrCode.Internal
          }
       }
 
-      internal static void appendKanjiBytes(String content, BitArray bits)
-      {
-         byte[] bytes;
-         try
-         {
-            bytes = Encoding.GetEncoding("Shift_JIS").GetBytes(content);
-         }
-         catch (Exception uee)
-         {
-             throw new Exception(uee.Message, uee);
-         }
-         int length = bytes.Length;
-         for (int i = 0; i < length; i += 2)
-         {
-            int byte1 = bytes[i] & 0xFF;
-            int byte2 = bytes[i + 1] & 0xFF;
-            int code = (byte1 << 8) | byte2;
-            int subtracted = -1;
-            if (code >= 0x8140 && code <= 0x9ffc)
-            {
-
-               subtracted = code - 0x8140;
-            }
-            else if (code >= 0xe040 && code <= 0xebbf)
-            {
-               subtracted = code - 0xc140;
-            }
-            if (subtracted == -1)
-            {
-
-                throw new Exception("Invalid byte sequence");
-            }
-            int encoded = ((subtracted >> 8) * 0xc0) + (subtracted & 0xff);
-            bits.appendBits(encoded, 13);
-         }
-      }
 
        /*
       private static void appendECI(CharacterSetECI eci, BitArray bits)
