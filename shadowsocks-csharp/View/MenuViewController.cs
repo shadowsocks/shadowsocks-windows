@@ -59,7 +59,7 @@ namespace Shadowsocks.View
             UpdateTrayIcon();
             _notifyIcon.Visible = true;
             _notifyIcon.ContextMenu = contextMenu1;
-            _notifyIcon.DoubleClick += notifyIcon1_DoubleClick;
+            _notifyIcon.MouseDoubleClick += notifyIcon1_DoubleClick;
 
             this.updateChecker = new UpdateChecker();
             updateChecker.NewVersionFound += updateChecker_NewVersionFound;
@@ -393,9 +393,12 @@ namespace Shadowsocks.View
             Process.Start("https://github.com/clowwindy/shadowsocks-csharp");
         }
 
-        private void notifyIcon1_DoubleClick(object sender, EventArgs e)
+        private void notifyIcon1_DoubleClick(object sender, MouseEventArgs e)
         {
-            ShowConfigForm();
+            if (e.Button == MouseButtons.Left)
+            {
+                ShowConfigForm();
+            }
         }
 
         private void EnableItem_Click(object sender, EventArgs e)
