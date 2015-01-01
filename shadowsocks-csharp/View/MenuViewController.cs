@@ -124,9 +124,7 @@ namespace Shadowsocks.View
 
         private void LoadMenu()
         {
-            this.contextMenu1 = new System.Windows.Forms.ContextMenu();
-
-            this.contextMenu1.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
+            this.contextMenu1 = new System.Windows.Forms.ContextMenu(new System.Windows.Forms.MenuItem[] {
                 this.enableItem = CreateMenuItem("Enable", new System.EventHandler(this.EnableItem_Click)),
                 CreateMenuGroup("Mode", new System.Windows.Forms.MenuItem[] {
                     this.PACModeItem = CreateMenuItem("PAC", new System.EventHandler(this.PACModeItem_Click)),
