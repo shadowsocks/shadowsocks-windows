@@ -114,24 +114,12 @@ namespace Shadowsocks.View
 
         private MenuItem CreateMenuItem(string text, EventHandler click)
         {
-            MenuItem result = new MenuItem(I18N.GetString(text), click);
-            return result;
-        }
-
-        private MenuItem CreateSeperatorItem()
-        {
-            MenuItem result = new MenuItem("-");
-            return result;
+            return new MenuItem(I18N.GetString(text), click);
         }
 
         private MenuItem CreateMenuGroup(string text, MenuItem[] items)
         {
-            for (int i = 0; i < items.Length; i++)
-            {
-                items[i].Index = i;
-            }
-            MenuItem result = new MenuItem(I18N.GetString(text), items);
-            return result;
+            return new MenuItem(I18N.GetString(text), items);
         }
 
         private void LoadMenu()
@@ -145,18 +133,18 @@ namespace Shadowsocks.View
                     this.globalModeItem = CreateMenuItem("Global", new System.EventHandler(this.GlobalModeItem_Click))
                 }),
                 this.ServersItem = CreateMenuGroup("Servers", new System.Windows.Forms.MenuItem[] {
-                    this.SeperatorItem = CreateSeperatorItem(),
+                    this.SeperatorItem = new MenuItem("-"),
                     this.ConfigItem = CreateMenuItem("Edit Servers...", new System.EventHandler(this.Config_Click))
                 }),
-                CreateSeperatorItem(),
+                new MenuItem("-"),
                 this.AutoStartupItem = CreateMenuItem("Start on Boot", new System.EventHandler(this.AutoStartupItem_Click)),
                 this.ShareOverLANItem = CreateMenuItem("Share over LAN", new System.EventHandler(this.ShareOverLANItem_Click)),
                 CreateMenuItem("Edit PAC File...", new System.EventHandler(this.EditPACFileItem_Click)),
-                CreateSeperatorItem(),
+                new MenuItem("-"),
                 CreateMenuItem("Show QRCode...", new System.EventHandler(this.QRCodeItem_Click)),
                 CreateMenuItem("Show Logs...", new System.EventHandler(this.ShowLogItem_Click)),
                 CreateMenuItem("About...", new System.EventHandler(this.Config_Click)),
-                CreateSeperatorItem(),
+                new MenuItem("-"),
                 CreateMenuItem("Quit", new System.EventHandler(this.Quit_Click))
             });
         }
