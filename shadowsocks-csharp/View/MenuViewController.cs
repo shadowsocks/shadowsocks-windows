@@ -28,16 +28,7 @@ namespace Shadowsocks.View
         private MenuItem ShareOverLANItem;
         private MenuItem SeperatorItem;
         private MenuItem ConfigItem;
-        private MenuItem SeperatorItem3;
-        private MenuItem editPACFileItem;
-        private MenuItem QRCodeItem;
-        private MenuItem ShowLogItem;
-        private MenuItem aboutItem;
         private MenuItem ServersItem;
-        private MenuItem SeperatorItem4;
-        private MenuItem quitItem;
-        private MenuItem SeperatorItem2;
-        private MenuItem modeItem;
         private MenuItem globalModeItem;
         private MenuItem PACModeItem;
         private ConfigForm configForm;
@@ -146,7 +137,6 @@ namespace Shadowsocks.View
         {
             this.contextMenu1 = new System.Windows.Forms.ContextMenu();
 
-
             this.PACModeItem = CreateMenuItem(0, "PAC", new System.EventHandler(this.PACModeItem_Click));
             this.globalModeItem = CreateMenuItem(1, "Global", new System.EventHandler(this.GlobalModeItem_Click));
 
@@ -154,40 +144,30 @@ namespace Shadowsocks.View
             this.ConfigItem = CreateMenuItem(1, "Edit Servers...", new System.EventHandler(this.Config_Click));
 
             this.enableItem = CreateMenuItem(0, "Enable", new System.EventHandler(this.EnableItem_Click));
-            this.modeItem = CreateMenuGroup(1, "Mode", new System.Windows.Forms.MenuItem[] {
-            this.PACModeItem,
-            this.globalModeItem});
             this.ServersItem = CreateMenuGroup(2, "Servers", new System.Windows.Forms.MenuItem[] {
-            this.SeperatorItem,
-            this.ConfigItem});
-            this.SeperatorItem2 = CreateSeperatorItem(3);
+                this.SeperatorItem,
+                this.ConfigItem
+            });
             this.AutoStartupItem = CreateMenuItem(4, "Start on Boot", new System.EventHandler(this.AutoStartupItem_Click));
             this.ShareOverLANItem = CreateMenuItem(5, "Share over LAN", new System.EventHandler(this.ShareOverLANItem_Click));
-            this.editPACFileItem = CreateMenuItem(6, "Edit PAC File...", new System.EventHandler(this.EditPACFileItem_Click));
-            this.SeperatorItem3 = CreateSeperatorItem(7);
-            this.QRCodeItem = CreateMenuItem(8, "Show QRCode...", new System.EventHandler(this.QRCodeItem_Click));
-            this.ShowLogItem = CreateMenuItem(9, "Show Logs...", new System.EventHandler(this.ShowLogItem_Click));
-            this.aboutItem = CreateMenuItem(10, "About...", new System.EventHandler(this.Config_Click));
-            this.SeperatorItem4 = CreateSeperatorItem(11);
-            this.quitItem = CreateMenuItem(12, "Quit", new System.EventHandler(this.Quit_Click));
 
-            // 
-            // contextMenu1
-            // 
             this.contextMenu1.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
             this.enableItem,
-            this.modeItem,
+            CreateMenuGroup(1, "Mode", new System.Windows.Forms.MenuItem[] {
+                this.PACModeItem,
+                this.globalModeItem
+            }),
             this.ServersItem,
-            this.SeperatorItem2,
+            CreateSeperatorItem(3),
             this.AutoStartupItem,
             this.ShareOverLANItem,
-            this.editPACFileItem,
-            this.SeperatorItem3,
-            this.QRCodeItem,
-            this.ShowLogItem,
-            this.aboutItem,
-            this.SeperatorItem4,
-            this.quitItem});
+            CreateMenuItem(6, "Edit PAC File...", new System.EventHandler(this.EditPACFileItem_Click)),
+            CreateSeperatorItem(7),
+            CreateMenuItem(8, "Show QRCode...", new System.EventHandler(this.QRCodeItem_Click)),
+            CreateMenuItem(9, "Show Logs...", new System.EventHandler(this.ShowLogItem_Click)),
+            CreateMenuItem(10, "About...", new System.EventHandler(this.Config_Click)),
+            CreateSeperatorItem(11),
+            CreateMenuItem(12, "Quit", new System.EventHandler(this.Quit_Click))});
         }
 
         private void controller_ConfigChanged(object sender, EventArgs e)
