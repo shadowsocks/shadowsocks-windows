@@ -1,3 +1,7 @@
+2.1.6 2015-01-02
+- Fix OPTIONS requests
+- Improve logs
+
 2.1.5 2014-12-25
 - Fix QR Code compatibility with iOS
 - Only left button will trigger double click on tray icon
