@@ -390,7 +390,7 @@ namespace Shadowsocks.View
 
         private void AboutItem_Click(object sender, EventArgs e)
         {
-            Process.Start("https://github.com/clowwindy/shadowsocks-csharp");
+            Process.Start("https://github.com/shadowsocks/shadowsocks-csharp");
         }
 
         private void notifyIcon1_DoubleClick(object sender, MouseEventArgs e)
