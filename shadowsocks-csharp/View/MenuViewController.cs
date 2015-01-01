@@ -124,26 +124,26 @@ namespace Shadowsocks.View
 
         private void LoadMenu()
         {
-            this.contextMenu1 = new System.Windows.Forms.ContextMenu(new System.Windows.Forms.MenuItem[] {
-                this.enableItem = CreateMenuItem("Enable", new System.EventHandler(this.EnableItem_Click)),
-                CreateMenuGroup("Mode", new System.Windows.Forms.MenuItem[] {
-                    this.PACModeItem = CreateMenuItem("PAC", new System.EventHandler(this.PACModeItem_Click)),
-                    this.globalModeItem = CreateMenuItem("Global", new System.EventHandler(this.GlobalModeItem_Click))
+            this.contextMenu1 = new ContextMenu(new MenuItem[] {
+                this.enableItem = CreateMenuItem("Enable", new EventHandler(this.EnableItem_Click)),
+                CreateMenuGroup("Mode", new MenuItem[] {
+                    this.PACModeItem = CreateMenuItem("PAC", new EventHandler(this.PACModeItem_Click)),
+                    this.globalModeItem = CreateMenuItem("Global", new EventHandler(this.GlobalModeItem_Click))
                 }),
-                this.ServersItem = CreateMenuGroup("Servers", new System.Windows.Forms.MenuItem[] {
+                this.ServersItem = CreateMenuGroup("Servers", new MenuItem[] {
                     this.SeperatorItem = new MenuItem("-"),
-                    this.ConfigItem = CreateMenuItem("Edit Servers...", new System.EventHandler(this.Config_Click))
+                    this.ConfigItem = CreateMenuItem("Edit Servers...", new EventHandler(this.Config_Click))
                 }),
                 new MenuItem("-"),
-                this.AutoStartupItem = CreateMenuItem("Start on Boot", new System.EventHandler(this.AutoStartupItem_Click)),
-                this.ShareOverLANItem = CreateMenuItem("Share over LAN", new System.EventHandler(this.ShareOverLANItem_Click)),
-                CreateMenuItem("Edit PAC File...", new System.EventHandler(this.EditPACFileItem_Click)),
+                this.AutoStartupItem = CreateMenuItem("Start on Boot", new EventHandler(this.AutoStartupItem_Click)),
+                this.ShareOverLANItem = CreateMenuItem("Share over LAN", new EventHandler(this.ShareOverLANItem_Click)),
+                CreateMenuItem("Edit PAC File...", new EventHandler(this.EditPACFileItem_Click)),
                 new MenuItem("-"),
-                CreateMenuItem("Show QRCode...", new System.EventHandler(this.QRCodeItem_Click)),
-                CreateMenuItem("Show Logs...", new System.EventHandler(this.ShowLogItem_Click)),
-                CreateMenuItem("About...", new System.EventHandler(this.Config_Click)),
+                CreateMenuItem("Show QRCode...", new EventHandler(this.QRCodeItem_Click)),
+                CreateMenuItem("Show Logs...", new EventHandler(this.ShowLogItem_Click)),
+                CreateMenuItem("About...", new EventHandler(this.Config_Click)),
                 new MenuItem("-"),
-                CreateMenuItem("Quit", new System.EventHandler(this.Quit_Click))
+                CreateMenuItem("Quit", new EventHandler(this.Quit_Click))
             });
         }
 
