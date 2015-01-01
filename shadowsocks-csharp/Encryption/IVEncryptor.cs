@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace Shadowsocks.Encrypt
+namespace Shadowsocks.Encryption
 {
     public abstract class IVEncryptor
         : EncryptorBase

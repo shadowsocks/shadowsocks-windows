@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Net.Sockets;
 using System.Net;
-using Shadowsocks.Encrypt;
+using Shadowsocks.Encryption;
 using Shadowsocks.Model;
 
 namespace Shadowsocks.Controller
