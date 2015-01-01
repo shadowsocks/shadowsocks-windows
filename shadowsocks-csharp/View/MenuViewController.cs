@@ -141,7 +141,7 @@ namespace Shadowsocks.View
                 new MenuItem("-"),
                 CreateMenuItem("Show QRCode...", new EventHandler(this.QRCodeItem_Click)),
                 CreateMenuItem("Show Logs...", new EventHandler(this.ShowLogItem_Click)),
-                CreateMenuItem("About...", new EventHandler(this.Config_Click)),
+                CreateMenuItem("About...", new EventHandler(this.AboutItem_Click)),
                 new MenuItem("-"),
                 CreateMenuItem("Quit", new EventHandler(this.Quit_Click))
             });
