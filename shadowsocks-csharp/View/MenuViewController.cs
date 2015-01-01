@@ -112,24 +112,25 @@ namespace Shadowsocks.View
             _notifyIcon.Text = text.Substring(0, Math.Min(63, text.Length));
         }
 
-        private MenuItem CreateMenuItem(int index, string text, EventHandler click)
+        private MenuItem CreateMenuItem(string text, EventHandler click)
         {
             MenuItem result = new MenuItem(I18N.GetString(text), click);
-            result.Index = index;
             return result;
         }
 
-        private MenuItem CreateSeperatorItem(int index)
+        private MenuItem CreateSeperatorItem()
         {
             MenuItem result = new MenuItem("-");
-            result.Index = index;
             return result;
         }
 
-        private MenuItem CreateMenuGroup(int index, string text, MenuItem[] items)
+        private MenuItem CreateMenuGroup(string text, MenuItem[] items)
         {
+            for (int i = 0; i < items.Length; i++)
+            {
+                items[i].Index = i;
+            }
             MenuItem result = new MenuItem(I18N.GetString(text), items);
-            result.Index = index;
             return result;
         }
 
@@ -137,37 +138,27 @@ namespace Shadowsocks.View
         {
             this.contextMenu1 = new System.Windows.Forms.ContextMenu();
 
-            this.PACModeItem = CreateMenuItem(0, "PAC", new System.EventHandler(this.PACModeItem_Click));
-            this.globalModeItem = CreateMenuItem(1, "Global", new System.EventHandler(this.GlobalModeItem_Click));
-
-            this.SeperatorItem = CreateSeperatorItem(0);
-            this.ConfigItem = CreateMenuItem(1, "Edit Servers...", new System.EventHandler(this.Config_Click));
-
-            this.enableItem = CreateMenuItem(0, "Enable", new System.EventHandler(this.EnableItem_Click));
-            this.ServersItem = CreateMenuGroup(2, "Servers", new System.Windows.Forms.MenuItem[] {
-                this.SeperatorItem,
-                this.ConfigItem
-            });
-            this.AutoStartupItem = CreateMenuItem(4, "Start on Boot", new System.EventHandler(this.AutoStartupItem_Click));
-            this.ShareOverLANItem = CreateMenuItem(5, "Share over LAN", new System.EventHandler(this.ShareOverLANItem_Click));
-
             this.contextMenu1.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
-            this.enableItem,
-            CreateMenuGroup(1, "Mode", new System.Windows.Forms.MenuItem[] {
-                this.PACModeItem,
-                this.globalModeItem
-            }),
-            this.ServersItem,
-            CreateSeperatorItem(3),
-            this.AutoStartupItem,
-            this.ShareOverLANItem,
-            CreateMenuItem(6, "Edit PAC File...", new System.EventHandler(this.EditPACFileItem_Click)),
-            CreateSeperatorItem(7),
-            CreateMenuItem(8, "Show QRCode...", new System.EventHandler(this.QRCodeItem_Click)),
-            CreateMenuItem(9, "Show Logs...", new System.EventHandler(this.ShowLogItem_Click)),
-            CreateMenuItem(10, "About...", new System.EventHandler(this.Config_Click)),
-            CreateSeperatorItem(11),
-            CreateMenuItem(12, "Quit", new System.EventHandler(this.Quit_Click))});
+                this.enableItem = CreateMenuItem("Enable", new System.EventHandler(this.EnableItem_Click)),
+                CreateMenuGroup("Mode", new System.Windows.Forms.MenuItem[] {
+                    this.PACModeItem = CreateMenuItem("PAC", new System.EventHandler(this.PACModeItem_Click)),
+                    this.globalModeItem = CreateMenuItem("Global", new System.EventHandler(this.GlobalModeItem_Click))
+                }),
+                this.ServersItem = CreateMenuGroup("Servers", new System.Windows.Forms.MenuItem[] {
+                    this.SeperatorItem = CreateSeperatorItem(),
+                    this.ConfigItem = CreateMenuItem("Edit Servers...", new System.EventHandler(this.Config_Click))
+                }),
+                CreateSeperatorItem(),
+                this.AutoStartupItem = CreateMenuItem("Start on Boot", new System.EventHandler(this.AutoStartupItem_Click)),
+                this.ShareOverLANItem = CreateMenuItem("Share over LAN", new System.EventHandler(this.ShareOverLANItem_Click)),
+                CreateMenuItem("Edit PAC File...", new System.EventHandler(this.EditPACFileItem_Click)),
+                CreateSeperatorItem(),
+                CreateMenuItem("Show QRCode...", new System.EventHandler(this.QRCodeItem_Click)),
+                CreateMenuItem("Show Logs...", new System.EventHandler(this.ShowLogItem_Click)),
+                CreateMenuItem("About...", new System.EventHandler(this.Config_Click)),
+                CreateSeperatorItem(),
+                CreateMenuItem("Quit", new System.EventHandler(this.Quit_Click))
+            });
         }
 
         private void controller_ConfigChanged(object sender, EventArgs e)
