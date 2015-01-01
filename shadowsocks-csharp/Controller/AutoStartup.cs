@@ -15,7 +15,8 @@ namespace Shadowsocks.Controller {
 				}
 				runKey.Close();
 				return true;
-			} catch (Exception) {
+			} catch (Exception e) {
+                Logging.LogUsefulException(e);
 				return false;
 			}
 		}
@@ -31,7 +32,10 @@ namespace Shadowsocks.Controller {
 						return true;
 				}
 				return false;
-			} catch (Exception) {
+            }
+            catch (Exception e)
+            {
+                Logging.LogUsefulException(e);
 				return false;
 			}
 		}
