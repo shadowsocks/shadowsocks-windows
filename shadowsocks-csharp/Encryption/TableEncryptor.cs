@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Shadowsocks.Encrypt
+namespace Shadowsocks.Encryption
 {
     public class TableEncryptor
         : EncryptorBase

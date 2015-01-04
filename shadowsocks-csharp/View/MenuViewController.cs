@@ -28,16 +28,7 @@ namespace Shadowsocks.View
         private MenuItem ShareOverLANItem;
         private MenuItem SeperatorItem;
         private MenuItem ConfigItem;
-        private MenuItem menuItem4;
-        private MenuItem editPACFileItem;
-        private MenuItem QRCodeItem;
-        private MenuItem ShowLogItem;
-        private MenuItem aboutItem;
         private MenuItem ServersItem;
-        private MenuItem menuItem3;
-        private MenuItem quitItem;
-        private MenuItem menuItem1;
-        private MenuItem modeItem;
         private MenuItem globalModeItem;
         private MenuItem PACModeItem;
         private ConfigForm configForm;
@@ -121,146 +112,39 @@ namespace Shadowsocks.View
             _notifyIcon.Text = text.Substring(0, Math.Min(63, text.Length));
         }
 
+        private MenuItem CreateMenuItem(string text, EventHandler click)
+        {
+            return new MenuItem(I18N.GetString(text), click);
+        }
+
+        private MenuItem CreateMenuGroup(string text, MenuItem[] items)
+        {
+            return new MenuItem(I18N.GetString(text), items);
+        }
+
         private void LoadMenu()
         {
-            this.contextMenu1 = new System.Windows.Forms.ContextMenu();
-            this.enableItem = new System.Windows.Forms.MenuItem();
-            this.modeItem = new System.Windows.Forms.MenuItem();
-            this.PACModeItem = new System.Windows.Forms.MenuItem();
-            this.globalModeItem = new System.Windows.Forms.MenuItem();
-            this.AutoStartupItem = new System.Windows.Forms.MenuItem();
-            this.ShareOverLANItem = new System.Windows.Forms.MenuItem();
-            this.ServersItem = new System.Windows.Forms.MenuItem();
-            this.SeperatorItem = new System.Windows.Forms.MenuItem();
-            this.ConfigItem = new System.Windows.Forms.MenuItem();
-            this.menuItem4 = new System.Windows.Forms.MenuItem();
-            this.editPACFileItem = new System.Windows.Forms.MenuItem();
-            this.QRCodeItem = new System.Windows.Forms.MenuItem();
-            this.ShowLogItem = new System.Windows.Forms.MenuItem();
-            this.aboutItem = new System.Windows.Forms.MenuItem();
-            this.menuItem3 = new System.Windows.Forms.MenuItem();
-            this.quitItem = new System.Windows.Forms.MenuItem();
-            this.menuItem1 = new System.Windows.Forms.MenuItem();
-
-            // 
-            // contextMenu1
-            // 
-            this.contextMenu1.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
-            this.enableItem,
-            this.modeItem,
-            this.ServersItem,
-            this.menuItem1,
-            this.AutoStartupItem,
-            this.ShareOverLANItem,
-            this.editPACFileItem,
-            this.menuItem4,
-            this.QRCodeItem,
-            this.ShowLogItem,
-            this.aboutItem,
-            this.menuItem3,
-            this.quitItem});
-            // 
-            // enableItem
-            // 
-            this.enableItem.Index = 0;
-            this.enableItem.Text = I18N.GetString("Enable");
-            this.enableItem.Click += new System.EventHandler(this.EnableItem_Click);
-            //
-            // modeMenu
-            //
-            this.modeItem.Index = 1;
-            this.modeItem.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
-            this.PACModeItem,
-            this.globalModeItem});
-            this.modeItem.Text = I18N.GetString("Mode");
-            //
-            // PACModeItem
-            //
-            this.PACModeItem.Index = 0;
-            this.PACModeItem.Text = I18N.GetString("PAC");
-            this.PACModeItem.Click += new System.EventHandler(this.PACModeItem_Click);
-            //
-            // globalModeItem
-            //
-            this.globalModeItem.Index = 1;
-            this.globalModeItem.Text = I18N.GetString("Global");
-            this.globalModeItem.Click += new System.EventHandler(this.GlobalModeItem_Click);
-            // 
-            // ServersItem
-            // 
-            this.ServersItem.Index = 2;
-            this.ServersItem.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
-            this.SeperatorItem,
-            this.ConfigItem});
-            this.ServersItem.Text = I18N.GetString("Servers");
-            // 
-            // SeperatorItem
-            // 
-            this.SeperatorItem.Index = 0;
-            this.SeperatorItem.Text = "-";
-            // 
-            // ConfigItem
-            // 
-            this.ConfigItem.Index = 1;
-            this.ConfigItem.Text = I18N.GetString("Edit Servers...");
-            this.ConfigItem.Click += new System.EventHandler(this.Config_Click);
-            // 
-            // menuItem1
-            // 
-            this.menuItem1.Index = 3;
-            this.menuItem1.Text = "-";
-            // 
-            // AutoStartupItem
-            // 
-            this.AutoStartupItem.Index = 4;
-            this.AutoStartupItem.Text = I18N.GetString("Start on Boot");
-            this.AutoStartupItem.Click += new System.EventHandler(this.AutoStartupItem_Click);
-            // 
-            // ShareOverLANItem
-            // 
-            this.ShareOverLANItem.Index = 5;
-            this.ShareOverLANItem.Text = I18N.GetString("Share over LAN");
-            this.ShareOverLANItem.Click += new System.EventHandler(this.ShareOverLANItem_Click);
-            // 
-            // editPACFileItem
-            // 
-            this.editPACFileItem.Index = 6;
-            this.editPACFileItem.Text = I18N.GetString("Edit PAC File...");
-            this.editPACFileItem.Click += new System.EventHandler(this.EditPACFileItem_Click);
-            // 
-            // menuItem4
-            // 
-            this.menuItem4.Index = 7;
-            this.menuItem4.Text = "-";
-            // 
-            // QRCodeItem
-            // 
-            this.QRCodeItem.Index = 8;
-            this.QRCodeItem.Text = I18N.GetString("Show QRCode...");
-            this.QRCodeItem.Click += new System.EventHandler(this.QRCodeItem_Click);
-            // 
-            // ShowLogItem
-            // 
-            this.ShowLogItem.Index = 9;
-            this.ShowLogItem.Text = I18N.GetString("Show Logs...");
-            this.ShowLogItem.Click += new System.EventHandler(this.ShowLogItem_Click);
-            // 
-            // aboutItem
-            // 
-            this.aboutItem.Index = 10;
-            this.aboutItem.Text = I18N.GetString("About...");
-            this.aboutItem.Click += new System.EventHandler(this.AboutItem_Click);
-            // 
-            // menuItem3
-            // 
-            this.menuItem3.Index = 11;
-            this.menuItem3.Text = "-";
-            // 
-            // quitItem
-            // 
-            this.quitItem.Index = 12;
-            this.quitItem.Text = I18N.GetString("Quit");
-            this.quitItem.Click += new System.EventHandler(this.Quit_Click);
+            this.contextMenu1 = new ContextMenu(new MenuItem[] {
+                this.enableItem = CreateMenuItem("Enable", new EventHandler(this.EnableItem_Click)),
+                CreateMenuGroup("Mode", new MenuItem[] {
+                    this.PACModeItem = CreateMenuItem("PAC", new EventHandler(this.PACModeItem_Click)),
+                    this.globalModeItem = CreateMenuItem("Global", new EventHandler(this.GlobalModeItem_Click))
+                }),
+                this.ServersItem = CreateMenuGroup("Servers", new MenuItem[] {
+                    this.SeperatorItem = new MenuItem("-"),
+                    this.ConfigItem = CreateMenuItem("Edit Servers...", new EventHandler(this.Config_Click))
+                }),
+                new MenuItem("-"),
+                this.AutoStartupItem = CreateMenuItem("Start on Boot", new EventHandler(this.AutoStartupItem_Click)),
+                this.ShareOverLANItem = CreateMenuItem("Share over LAN", new EventHandler(this.ShareOverLANItem_Click)),
+                CreateMenuItem("Edit PAC File...", new EventHandler(this.EditPACFileItem_Click)),
+                new MenuItem("-"),
+                CreateMenuItem("Show QRCode...", new EventHandler(this.QRCodeItem_Click)),
+                CreateMenuItem("Show Logs...", new EventHandler(this.ShowLogItem_Click)),
+                CreateMenuItem("About...", new EventHandler(this.AboutItem_Click)),
+                new MenuItem("-"),
+                CreateMenuItem("Quit", new EventHandler(this.Quit_Click))
+            });
         }
 
         private void controller_ConfigChanged(object sender, EventArgs e)
@@ -390,7 +274,7 @@ namespace Shadowsocks.View
 
         private void AboutItem_Click(object sender, EventArgs e)
         {
-            Process.Start("https://github.com/clowwindy/shadowsocks-csharp");
+            Process.Start("https://github.com/shadowsocks/shadowsocks-csharp");
         }
 
         private void notifyIcon1_DoubleClick(object sender, MouseEventArgs e)

@@ -1,7 +1,7 @@
 ﻿using System.Security.Cryptography;
 using System.Text;
 
-namespace Shadowsocks.Encrypt
+namespace Shadowsocks.Encryption
 {
     public abstract class EncryptorBase
         : IEncryptor

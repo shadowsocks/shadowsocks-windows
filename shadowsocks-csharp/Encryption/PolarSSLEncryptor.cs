@@ -5,7 +5,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 
-namespace Shadowsocks.Encrypt
+namespace Shadowsocks.Encryption
 {
     public class PolarSSLEncryptor
         : IVEncryptor, IDisposable

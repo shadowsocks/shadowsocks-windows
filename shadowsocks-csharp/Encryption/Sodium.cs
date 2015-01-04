@@ -6,7 +6,7 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace Shadowsocks.Encrypt
+namespace Shadowsocks.Encryption
 {
     public class Sodium
     {

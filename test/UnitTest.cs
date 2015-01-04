@@ -1,7 +1,7 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Shadowsocks.Controller;
-using Shadowsocks.Encrypt;
+using Shadowsocks.Encryption;
 using System.Threading;
 using System.Collections.Generic;
 
