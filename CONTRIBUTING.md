@@ -1,4 +1,4 @@
-How to contribute
+How to Contribute
 =================
 
 Pull Requests
