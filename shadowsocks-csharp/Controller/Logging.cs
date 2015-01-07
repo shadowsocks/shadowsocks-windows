@@ -18,7 +18,7 @@ namespace Shadowsocks.Controller
                 LogFile = Path.Combine(temppath, "shadowsocks.log");
                 FileStream fs = new FileStream(LogFile, FileMode.Append);
                 TextWriter tmp = Console.Out;
-                StreamWriter sw = new StreamWriter(fs);
+                StreamWriterWithTimestamp sw = new StreamWriterWithTimestamp(fs);
                 sw.AutoFlush = true;
                 Console.SetOut(sw);
                 Console.SetError(sw);
@@ -61,5 +61,30 @@ namespace Shadowsocks.Controller
                 Console.WriteLine(e);
             }
         }
+
     }
+
+    // Simply extened System.IO.StreamWriter for adding timestamp workaround
+    public class StreamWriterWithTimestamp : StreamWriter
+    {
+        public StreamWriterWithTimestamp(Stream stream) : base(stream)
+        {
+        }
+
+        private string GetTimestamp()
+        {
+            return "[" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "] ";
+        }
+
+        public override void WriteLine(string value)
+        {
+            base.WriteLine(GetTimestamp() + value);
+        }
+
+        public override void Write(string value)
+        {
+            base.Write(GetTimestamp() + value);
+        }
+    }
+
 }

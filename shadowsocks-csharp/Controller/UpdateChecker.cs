@@ -145,7 +145,7 @@ namespace Shadowsocks.Controller
             }
             catch (Exception ex)
             {
-                Console.Write(ex.ToString());
+                Console.WriteLine(ex.ToString());
                 return;
             }
         }
