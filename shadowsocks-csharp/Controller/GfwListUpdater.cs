@@ -6,6 +6,7 @@ using System.Net;
 using System.IO;
 using System.IO.Compression;
 using System.Security.Cryptography;
+using System.Text.RegularExpressions;
 using Shadowsocks.Model;
 using Shadowsocks.Properties;
 
@@ -194,9 +195,10 @@ namespace Shadowsocks.Controller
             /* refer https://github.com/clowwindy/gfwlist2pac/blob/master/gfwlist2pac/main.py */
             public string[] GetDomains()
             {
-                string[] lines = GetLines();
-                List<string> domains = new List<string>(lines.Length);
-                for(int i =0;i < lines.Length;i++)
+                List<string> lines = new List<string>(GetLines());
+                lines.AddRange(GetBuildIn());
+                List<string> domains = new List<string>(lines.Count);
+                for (int i = 0; i < lines.Count; i++)
                 {
                     string line = lines[i];
                     if (line.IndexOf(".*") >= 0)
@@ -225,7 +227,7 @@ namespace Shadowsocks.Controller
             {
                 string[] domains = GetDomains();
                 List<string> new_domains = new List<string>(domains.Length);
-                IDictionary<string, string> tld_dic = GetTldDictionary();
+                TldIndex tldIndex = GetTldIndex();
 
                 foreach(string domain in domains)
                 {
@@ -233,13 +235,13 @@ namespace Shadowsocks.Controller
                     int pos;
                     pos = domain.LastIndexOf('.');
                     last_root_domain = domain.Substring(pos + 1);
-                    if (!tld_dic.ContainsKey(last_root_domain))
+                    if (!tldIndex.Contains(last_root_domain))
                         continue;
                     while(pos > 0)
                     {
                         pos = domain.LastIndexOf('.', pos - 1);
                         last_root_domain = domain.Substring(pos + 1);
-                        if (tld_dic.ContainsKey(last_root_domain))
+                        if (tldIndex.Contains(last_root_domain))
                             continue;
                         else
                             break;
@@ -273,18 +275,73 @@ namespace Shadowsocks.Controller
                 return tlds;
             }
 
-            private IDictionary<string, string> GetTldDictionary()
+            private TldIndex GetTldIndex()
             {
                 string[] tlds = GetTlds();
-                IDictionary<string, string> dic = new Dictionary<string, string>(tlds.Length);
+                TldIndex index = new TldIndex();
                 foreach (string tld in tlds)
                 {
-                    if (!dic.ContainsKey(tld))
-                        dic.Add(tld, tld);
+                    index.Add(tld);
                 }
-                return dic;
+                return index;
             }
 
+            private string[] GetBuildIn()
+            {
+                string[] buildin = null;
+                byte[] builtinGZ = Resources.builtin_txt;
+                byte[] buffer = new byte[1024];
+                int n;
+                using (MemoryStream sb = new MemoryStream())
+                {
+                    using (GZipStream input = new GZipStream(new MemoryStream(builtinGZ),
+                        CompressionMode.Decompress, false))
+                    {
+                        while ((n = input.Read(buffer, 0, buffer.Length)) > 0)
+                        {
+                            sb.Write(buffer, 0, n);
+                        }
+                    }
+                    buildin = System.Text.Encoding.UTF8.GetString(sb.ToArray())
+                        .Split(new char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+                }
+                return buildin;
+            }
+
+            class TldIndex
+            {
+                List<string> patterns = new List<string>();
+                IDictionary<string, string> dic = new Dictionary<string, string>();
+
+                public void Add(string tld)
+                {
+                    if (string.IsNullOrEmpty(tld))
+                        return;
+                    if (tld.IndexOfAny(new char[] { '*', '?' }) >= 0)
+                    {
+                        patterns.Add("^" + Regex.Escape(tld).Replace("\\*", ".*").Replace("\\?", ".") + "$");
+                    }
+                    else if (!dic.ContainsKey(tld))
+                    {
+                        dic.Add(tld, tld);
+                    }
+                }
+
+                public bool Contains(string tld)
+                {
+                    if (dic.ContainsKey(tld))
+                        return true;
+                    foreach(string pattern in patterns)
+                    {
+                        if (Regex.IsMatch(tld, pattern))
+                            return true;
+                    }
+                    return false;
+                }
+
+            }
+
+           
         }
 
     }

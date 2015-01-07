@@ -61,6 +61,16 @@ namespace Shadowsocks.Properties {
         }
         
         /// <summary>
+        ///   查找 System.Byte[] 类型的本地化资源。
+        /// </summary>
+        internal static byte[] builtin_txt {
+            get {
+                object obj = ResourceManager.GetObject("builtin_txt", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Shadowsocks=Shadowsocks
         ///Enable=启用代理
         ///Mode=代理模式
