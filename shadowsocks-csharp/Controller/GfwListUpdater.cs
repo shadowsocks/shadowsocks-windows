@@ -203,23 +203,32 @@ namespace Shadowsocks.Controller
                     string line = lines[i];
                     if (line.IndexOf(".*") >= 0)
                         continue;
-                    else if (line.IndexOf("*") >= 0)
+                    if (line.StartsWith("http://"))
+                        line = line.Substring(7);
+                    else if (line.StartsWith("https://"))
+                        line = line.Substring(8);
+                    if (line.IndexOf("*") >= 0)
                         line = line.Replace("*", "/");
                     if (line.StartsWith("||"))
-                        line = line.Substring(2);
+                        while (line.StartsWith("||"))
+                            line = line.Substring(2);
                     else if (line.StartsWith("|"))
-                        line = line.Substring(1);
+                        line = line.TrimStart('|');
                     else if (line.StartsWith("."))
-                        line = line.Substring(1);
+                        line = line.TrimStart('.');
                     if (line.StartsWith("!"))
                         continue;
                     else if (line.StartsWith("["))
                         continue;
                     else if (line.StartsWith("@"))
                         continue; /*ignore white list*/
-                    domains.Add(line);
+                    int pos = line.IndexOfAny(new char[] { '/'});
+                    if (pos >= 0)
+                        line = line.Substring(0, pos);
+                    if (line.Length > 0)
+                        domains.Add(line);
                 }
-                return domains.ToArray();
+                return RemoveDuplicate(domains.ToArray());
             }
 
             /* refer https://github.com/clowwindy/gfwlist2pac/blob/master/gfwlist2pac/main.py */
@@ -250,7 +259,22 @@ namespace Shadowsocks.Controller
                         new_domains.Add(last_root_domain);
                 }
 
-                return new_domains.ToArray();
+                return RemoveDuplicate(new_domains.ToArray());
+            }
+
+            private string[] RemoveDuplicate(string[] src)
+            {
+                List<string> list = new List<string>(src.Length);
+                Dictionary<string, string> dic = new Dictionary<string, string>(src.Length);
+                foreach(string s in src)
+                {
+                    if (!dic.ContainsKey(s))
+                    {
+                        dic.Add(s, s);
+                        list.Add(s);
+                    }
+                }
+                return list.ToArray();
             }
 
             private string[] GetTlds()
