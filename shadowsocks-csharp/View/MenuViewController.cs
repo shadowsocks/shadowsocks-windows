@@ -231,7 +231,7 @@ namespace Shadowsocks.View
         {
             if (configForm != null)
             {
-                configForm.Focus();
+                configForm.Activate();
             }
             else
             {
