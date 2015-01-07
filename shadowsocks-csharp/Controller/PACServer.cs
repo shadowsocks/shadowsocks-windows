@@ -8,6 +8,7 @@ using System.IO.Compression;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace Shadowsocks.Controller
 {
@@ -19,6 +20,8 @@ namespace Shadowsocks.Controller
 
         Socket _listener;
         FileSystemWatcher watcher;
+
+        GfwListUpdater gfwlistUpdater;
 
         public event EventHandler PACFileChanged;
 
@@ -48,6 +51,7 @@ namespace Shadowsocks.Controller
                     _listener);
 
                 WatchPacFile();
+                StartGfwListUpdater();
             }
             catch (SocketException)
             {
@@ -58,6 +62,11 @@ namespace Shadowsocks.Controller
 
         public void Stop()
         {
+            if (gfwlistUpdater != null)
+            {
+                gfwlistUpdater.Stop();
+                gfwlistUpdater = null;
+            }
             if (_listener != null)
             {
                 _listener.Close();
@@ -242,5 +251,73 @@ Connection: Close
             //}
             return proxy;
         }
+
+        private void StartGfwListUpdater()
+        {
+            if (gfwlistUpdater != null)
+            {
+                gfwlistUpdater.Stop();
+                gfwlistUpdater = null;
+            }
+
+            gfwlistUpdater = new GfwListUpdater();
+            gfwlistUpdater.GfwListChanged += gfwlistUpdater_GfwListChanged;
+            IPEndPoint localEndPoint = (IPEndPoint)_listener.LocalEndPoint;
+            gfwlistUpdater.proxy = new WebProxy(localEndPoint.Address.ToString(), 8123);
+            gfwlistUpdater.useSystemProxy = false;
+            /* Delay 30 seconds, wait proxy start up. */
+            gfwlistUpdater.ScheduleUpdateTime(30);
+            gfwlistUpdater.Start();
+
+        }
+
+        private void gfwlistUpdater_GfwListChanged(object sender, GfwListUpdater.GfwListChangedArgs e)
+        {
+            if (e.GfwList == null || e.GfwList.Length == 0) return;
+            string pacfile = TouchPACFile();
+            string pacContent = File.ReadAllText(pacfile);
+            string oldDomains;
+            if (ClearPacContent(ref pacContent, out oldDomains))
+            {
+                StringBuilder sb = new StringBuilder();
+                sb.AppendLine("{");
+                for (int i = 0; i < e.GfwList.Length; i++)
+                {
+                    if (i == e.GfwList.Length - 1)
+                        sb.AppendFormat("\t\"{0}\": {1}\r\n", e.GfwList[i], 1);
+                    else
+                        sb.AppendFormat("\t\"{0}\": {1},\r\n", e.GfwList[i], 1);
+                }
+                sb.Append("}");
+                string newDomains = sb.ToString();
+                if (!string.Equals(oldDomains, newDomains))
+                {
+                    pacContent = pacContent.Replace("__LAST_MODIFIED__", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+                    pacContent = pacContent.Replace("__DOMAINS__", newDomains);
+                    File.WriteAllText(pacfile, pacContent);
+                    Console.WriteLine("gfwlist updated - " + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+                }
+            }
+            else
+            {
+                Console.WriteLine("Broken pac file.");
+            }
+        }
+
+        private bool ClearPacContent(ref string pacContent, out string oldDomains)
+        {
+            Regex regex = new Regex("(/\\*.*?\\*/\\s*)?var\\s+domains\\s*=\\s*(\\{(\\s*\"[^\"]*\"\\s*:\\s*\\d+\\s*,)*\\s*(\\s*\"[^\"]*\"\\s*:\\s*\\d+\\s*)\\})", RegexOptions.Singleline);
+            Match m = regex.Match(pacContent);
+            if (m.Success)
+            {
+                oldDomains = m.Result("$2");
+                pacContent = regex.Replace(pacContent, "/* Last Modified: __LAST_MODIFIED__ */\r\nvar domains = __DOMAINS__");
+                return true;
+            }
+            oldDomains = null;
+            return false;
+        }
+
+
     }
 }

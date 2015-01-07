@@ -86,6 +86,7 @@
     <Compile Include="3rd\zxing\Version.cs" />
     <Compile Include="Controller\AutoStartup.cs" />
     <Compile Include="Controller\FileManager.cs" />
+    <Compile Include="Controller\GfwListUpdater.cs" />
     <Compile Include="Controller\I18N.cs" />
     <Compile Include="Controller\Logging.cs" />
     <Compile Include="Controller\UpdateChecker.cs" />
@@ -147,6 +148,7 @@
     <None Include="Data\proxy.pac.txt.gz" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Data\tld.txt.gz" />
     <None Include="Resources\ss20.png" />
     <None Include="Resources\ss16.png" />
     <None Include="Resources\ss24.png" />
