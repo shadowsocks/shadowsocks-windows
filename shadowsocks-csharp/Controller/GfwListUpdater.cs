@@ -86,7 +86,7 @@ namespace Shadowsocks.Controller
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                Console.WriteLine(ex.ToString());
             }
             return null;
         }
@@ -132,11 +132,19 @@ namespace Shadowsocks.Controller
                 return;
             if (GfwListChanged != null)
             {
-                Parser parser = new Parser(response);
-                GfwListChangedArgs args = new GfwListChangedArgs {
-                    GfwList = parser.GetReducedDomains()
-                };
-                GfwListChanged(this, args);
+                try
+                {
+                    Parser parser = new Parser(response);
+                    GfwListChangedArgs args = new GfwListChangedArgs
+                    {
+                        GfwList = parser.GetReducedDomains()
+                    };
+                    GfwListChanged(this, args);
+                }
+                catch(Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                }
             }
         }
 
