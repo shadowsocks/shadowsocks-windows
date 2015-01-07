@@ -21,10 +21,18 @@ namespace Shadowsocks.Controller
 
         public void CheckUpdate()
         {
-            // TODO test failures
-            WebClient http = new WebClient();
-            http.DownloadStringCompleted += http_DownloadStringCompleted;
-            http.DownloadStringAsync(new Uri(UpdateURL));
+            new System.Threading.Thread(new System.Threading.ThreadStart(delegate() {
+                try
+                {
+                    WebClient http = new WebClient();
+                    string response = http.DownloadString(new Uri(UpdateURL));
+                    ParseResponse(response);
+                }
+                catch (Exception ex)
+                {
+                    Console.Write(ex.ToString());
+                }
+            })).Start();
         }
 
         public static int CompareVersion(string l, string r)
@@ -107,12 +115,10 @@ namespace Shadowsocks.Controller
             return CompareVersion(version, currentVersion) > 0;
         }
 
-        private void http_DownloadStringCompleted(object sender, DownloadStringCompletedEventArgs e)
+        private void ParseResponse(string response)
         {
             try
             {
-                string response = e.Result;
-
                 XmlDocument xmlDoc = new XmlDocument();
                 xmlDoc.LoadXml(response);
                 XmlNodeList elements = xmlDoc.GetElementsByTagName("media:content");
@@ -149,5 +155,6 @@ namespace Shadowsocks.Controller
                 return;
             }
         }
+
     }
 }
