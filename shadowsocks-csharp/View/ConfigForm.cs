@@ -20,6 +20,8 @@ namespace Shadowsocks.View
         private Configuration _modifiedConfiguration;
         private int _oldSelectedIndex = -1;
 
+        private ContextMenuStrip ServersListBoxContextMenu = null;
+
         public ConfigForm(ShadowsocksController controller)
         {
             this.Font = System.Drawing.SystemFonts.MessageBoxFont;
@@ -36,6 +38,38 @@ namespace Shadowsocks.View
             controller.ConfigChanged += controller_ConfigChanged;
 
             LoadCurrentConfiguration();
+        }
+
+        private void ServersListBoxContextMenu_Opening(object sender, CancelEventArgs e)
+        {
+            //clear the menu and add custom items
+            string contextItemText = I18N.GetString("Select");
+
+            ServersListBoxContextMenu.Items.Clear();
+            ToolStripItem item = new ToolStripMenuItem();
+            item.Name = string.Format("{0}", ServersListBox.SelectedIndex.ToString());
+            item.Text = string.Format("{0} - {1}", contextItemText, ServersListBox.SelectedItem.ToString());
+            ServersListBoxContextMenu.Items.Add(item);
+            ServersListBoxContextMenu.ItemClicked += new ToolStripItemClickedEventHandler(ServersListBoxContextMenu_ItemClicked);
+        }
+
+        void ServersListBoxContextMenu_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
+        {
+            ToolStripItem item = e.ClickedItem;
+            controller.SelectServerIndex(int.Parse(item.Name));
+        }
+
+        private void ServersListBox_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Right)
+            {
+                //select the item under the mouse pointer
+                ServersListBox.SelectedIndex = ServersListBox.IndexFromPoint(e.Location);
+                if (ServersListBox.SelectedIndex != -1)
+                {
+                    ServersListBoxContextMenu.Show();
+                }
+            }
         }
 
         private void UpdateTexts()
@@ -141,7 +175,9 @@ namespace Shadowsocks.View
 
         private void ConfigForm_Load(object sender, EventArgs e)
         {
-
+            ServersListBoxContextMenu = new ContextMenuStrip();
+            ServersListBoxContextMenu.Opening += new CancelEventHandler(ServersListBoxContextMenu_Opening);
+            ServersListBox.ContextMenuStrip = ServersListBoxContextMenu;
         }
 
         private void ServersListBox_SelectedIndexChanged(object sender, EventArgs e)
@@ -204,7 +240,7 @@ namespace Shadowsocks.View
                 return;
             }
             controller.SaveServers(_modifiedConfiguration.configs);
-            this.Close();
+            //this.Close();
         }
 
         private void CancelButton_Click(object sender, EventArgs e)

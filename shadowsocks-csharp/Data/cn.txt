@@ -43,3 +43,4 @@ Disabled=已禁用代理
 Shadowsocks URI=Shadowsocks URI
 Shadowsocks URI Parse=Shadowsocks URI解析
 URI Parse=URI解析
+Select=使用
