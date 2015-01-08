@@ -86,6 +86,7 @@
     <Compile Include="3rd\zxing\Version.cs" />
     <Compile Include="Controller\AutoStartup.cs" />
     <Compile Include="Controller\FileManager.cs" />
+    <Compile Include="Controller\GfwListUpdater.cs" />
     <Compile Include="Controller\I18N.cs" />
     <Compile Include="Controller\Logging.cs" />
     <Compile Include="Controller\UpdateChecker.cs" />
@@ -101,6 +102,11 @@
     <Compile Include="Controller\PACServer.cs" />
     <Compile Include="Model\Server.cs" />
     <Compile Include="Model\Configuration.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
     <Compile Include="Util\Util.cs" />
     <Compile Include="View\ConfigForm.cs">
       <SubType>Form</SubType>
@@ -127,14 +133,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Resources.resx</DependentUpon>
-      <DesignTime>True</DesignTime>
-    </Compile>
     <EmbeddedResource Include="View\QRCodeForm.resx">
       <DependentUpon>QRCodeForm.cs</DependentUpon>
     </EmbeddedResource>
@@ -142,6 +143,7 @@
     <None Include="app.manifest">
       <SubType>Designer</SubType>
     </None>
+    <None Include="Data\abp.js.gz" />
     <None Include="Data\libsscrypto.dll.gz" />
     <None Include="Data\polipo.exe.gz" />
     <None Include="Data\proxy.pac.txt.gz" />

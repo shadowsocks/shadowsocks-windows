@@ -38,6 +38,10 @@ namespace Shadowsocks.Controller
         // when user clicked Edit PAC, and PAC file has already created
         public event EventHandler<PathEventArgs> PACFileReadyToOpen;
 
+        public event EventHandler UpdatePACFromGFWListCompleted;
+
+        public event ErrorEventHandler UpdatePACFromGFWListError;
+
         public event ErrorEventHandler Errored;
 
         public ShadowsocksController()
@@ -128,6 +132,11 @@ namespace Shadowsocks.Controller
             {
                 polipoRunner.Stop();
             }
+            if (pacServer != null)
+            {
+                pacServer.Stop();
+                pacServer = null;
+            }
             if (_config.enabled)
             {
                 SystemProxy.Disable();
@@ -151,6 +160,18 @@ namespace Shadowsocks.Controller
             return "ss://" + base64;
         }
 
+        public void UpdatePACFromGFWList()
+        {
+            if (pacServer != null)
+            {
+                pacServer.UpdatePACFromGFWList();
+            }
+            else if (UpdatePACFromGFWListError != null)
+            {
+                UpdatePACFromGFWListError(this, new ErrorEventArgs(new Exception("The PACServer is not run.")));
+            }
+        }
+
         protected void Reload()
         {
             // some logic in configuration updated the config when saving, we need to read it again
@@ -164,6 +185,8 @@ namespace Shadowsocks.Controller
             {
                 pacServer = new PACServer();
                 pacServer.PACFileChanged += pacServer_PACFileChanged;
+                pacServer.UpdatePACFromGFWListCompleted += pacServer_UpdatePACFromGFWListCompleted;
+                pacServer.UpdatePACFromGFWListError += pacServer_UpdatePACFromGFWListError;
             }
 
             pacServer.Stop();
@@ -240,6 +263,18 @@ namespace Shadowsocks.Controller
         private void pacServer_PACFileChanged(object sender, EventArgs e)
         {
             UpdateSystemProxy();
+        }
+
+        private void pacServer_UpdatePACFromGFWListCompleted(object sender, EventArgs e)
+        {
+            if (UpdatePACFromGFWListCompleted != null)
+                UpdatePACFromGFWListCompleted(this, e);
+        }
+
+        private void pacServer_UpdatePACFromGFWListError(object sender, ErrorEventArgs e)
+        {
+            if (UpdatePACFromGFWListError != null)
+                UpdatePACFromGFWListError(this, e);
         }
 
         private void StartReleasingMemory()

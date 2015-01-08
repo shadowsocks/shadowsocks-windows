@@ -61,6 +61,16 @@ namespace Shadowsocks.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] abp_js {
+            get {
+                object obj = ResourceManager.GetObject("abp_js", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Shadowsocks=Shadowsocks
         ///Enable=启用代理
         ///Mode=代理模式
@@ -68,7 +78,7 @@ namespace Shadowsocks.Properties {
         ///Global=全局模式
         ///Servers=服务器选择
         ///Edit Servers...=编辑服务器...
-        ///Start on Boot=自动启动
+        ///Start on Boot=开机启动
         ///Share over LAN=在局域网共享代理
         ///Edit PAC File...=编辑 PAC 文件...
         ///Show QRCode...=显示二维码...
