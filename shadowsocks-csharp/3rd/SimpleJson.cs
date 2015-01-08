@@ -1035,13 +1035,13 @@ namespace SimpleJson
 
         protected static bool SerializeArray(IJsonSerializerStrategy jsonSerializerStrategy, IEnumerable anArray, StringBuilder builder)
         {
-            builder.Append("[");
+            builder.Append("[\r\n  ");
 
             bool first = true;
             foreach (object value in anArray)
             {
                 if (!first)
-                    builder.Append(",");
+                    builder.Append(",\r\n  ");
 
                 if (!SerializeValue(jsonSerializerStrategy, value, builder))
                     return false;
@@ -1049,7 +1049,7 @@ namespace SimpleJson
                 first = false;
             }
 
-            builder.Append("]");
+            builder.Append("\r\n]");
             return true;
         }
 

@@ -1,5 +1,6 @@
 ﻿using Shadowsocks.Model;
 using Shadowsocks.Properties;
+using Shadowsocks.Util;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -8,24 +9,19 @@ using System.IO.Compression;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
-using System.Text.RegularExpressions;
 
 namespace Shadowsocks.Controller
 {
     class PACServer
     {
         private static int PORT = 8093;
-        private static string PAC_FILE = "pac.txt";
+        public static string PAC_FILE = "pac.txt";
         private static Configuration config;
 
         Socket _listener;
         FileSystemWatcher watcher;
 
         public event EventHandler PACFileChanged;
-
-        public event EventHandler UpdatePACFromGFWListCompleted;
-
-        public event ErrorEventHandler UpdatePACFromGFWListError;
 
         public void Start(Configuration configuration)
         {
@@ -135,19 +131,7 @@ namespace Shadowsocks.Controller
             }
             else
             {
-                byte[] pacGZ = Resources.proxy_pac_txt;
-                byte[] buffer = new byte[1024];  // builtin pac gzip size: maximum 100K
-                MemoryStream sb = new MemoryStream();
-                int n;
-                using (GZipStream input = new GZipStream(new MemoryStream(pacGZ),
-                    CompressionMode.Decompress, false))
-                {
-                    while ((n = input.Read(buffer, 0, buffer.Length)) > 0)
-                    {
-                        sb.Write(buffer, 0, n);
-                    }
-                    return System.Text.Encoding.UTF8.GetString(sb.ToArray());
-                }
+                return Utils.UnGzip(Resources.proxy_pac_txt);
             }
         }
 
@@ -180,7 +164,7 @@ Connection: Close
 ", System.Text.Encoding.UTF8.GetBytes(pac).Length) + pac;
                     byte[] response = System.Text.Encoding.UTF8.GetBytes(text);
                     conn.BeginSend(response, 0, response.Length, 0, new AsyncCallback(SendCallback), conn);
-                    Util.Util.ReleaseMemory();
+                    Util.Utils.ReleaseMemory();
                 }
                 else
                 {
@@ -247,117 +231,5 @@ Connection: Close
             //}
             return proxy;
         }
-
-        public void UpdatePACFromGFWList()
-        {
-            GfwListUpdater gfwlist = new GfwListUpdater();
-            gfwlist.DownloadCompleted += gfwlist_DownloadCompleted;
-            gfwlist.Error += gfwlist_Error;
-            gfwlist.proxy = new WebProxy(IPAddress.Loopback.ToString(), 8123); /* use polipo proxy*/
-            gfwlist.Download();
-        }
-
-        private void gfwlist_DownloadCompleted(object sender, GfwListUpdater.GfwListDownloadCompletedArgs e)
-        {
-            GfwListUpdater.Parser parser = new GfwListUpdater.Parser(e.Content);
-            string[] lines = parser.GetValidLines();
-            StringBuilder rules = new StringBuilder(lines.Length * 16);
-            SerializeRules(lines, rules);
-            string abpContent = GetAbpContent();
-            abpContent = abpContent.Replace("__RULES__", rules.ToString());
-            File.WriteAllText(PAC_FILE, abpContent, Encoding.UTF8);
-            if (UpdatePACFromGFWListCompleted != null)
-            {
-                UpdatePACFromGFWListCompleted(this, new EventArgs());
-            }
-        }
-
-        private void gfwlist_Error(object sender, ErrorEventArgs e)
-        {
-            if (UpdatePACFromGFWListError != null)
-            {
-                UpdatePACFromGFWListError(this, e);
-            }
-        }
-
-        private string GetAbpContent()
-        {
-            string content;
-            if (File.Exists(PAC_FILE))
-            {
-                content = File.ReadAllText(PAC_FILE, Encoding.UTF8);
-                Regex regex = new Regex("var\\s+rules\\s*=\\s*(\\[(\\s*\"[^\"]*\"\\s*,)*(\\s*\"[^\"]*\")\\s*\\])", RegexOptions.Singleline);
-                Match m = regex.Match(content);
-                if (m.Success)
-                {
-                    content = regex.Replace(content, "var rules = __RULES__");
-                    return content;
-                }
-            }
-            byte[] abpGZ = Resources.abp_js;
-            byte[] buffer = new byte[1024];  // builtin pac gzip size: maximum 100K
-            int n;
-            using (MemoryStream sb = new MemoryStream())
-            {
-                using (GZipStream input = new GZipStream(new MemoryStream(abpGZ),
-                    CompressionMode.Decompress, false))
-                {
-                    while ((n = input.Read(buffer, 0, buffer.Length)) > 0)
-                    {
-                        sb.Write(buffer, 0, n);
-                    }
-                }
-                content = System.Text.Encoding.UTF8.GetString(sb.ToArray());
-            }
-            return content;
-        }
-
-        private static void SerializeRules(string[] rules, StringBuilder builder)
-        {
-            builder.Append("[\n");
-
-            bool first = true;
-            foreach (string rule in rules)
-            {
-                if (!first)
-                    builder.Append(",\n");
-
-                SerializeString(rule, builder);
-
-                first = false;
-            }
-
-            builder.Append("\n]");
-        }
-
-        private static void SerializeString(string aString, StringBuilder builder)
-        {
-            builder.Append("\t\"");
-
-            char[] charArray = aString.ToCharArray();
-            for (int i = 0; i < charArray.Length; i++)
-            {
-                char c = charArray[i];
-                if (c == '"')
-                    builder.Append("\\\"");
-                else if (c == '\\')
-                    builder.Append("\\\\");
-                else if (c == '\b')
-                    builder.Append("\\b");
-                else if (c == '\f')
-                    builder.Append("\\f");
-                else if (c == '\n')
-                    builder.Append("\\n");
-                else if (c == '\r')
-                    builder.Append("\\r");
-                else if (c == '\t')
-                    builder.Append("\\t");
-                else
-                    builder.Append(c);
-            }
-
-            builder.Append("\"");
-        }
-
     }
 }

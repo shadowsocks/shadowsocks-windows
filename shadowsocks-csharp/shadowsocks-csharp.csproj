@@ -86,7 +86,7 @@
     <Compile Include="3rd\zxing\Version.cs" />
     <Compile Include="Controller\AutoStartup.cs" />
     <Compile Include="Controller\FileManager.cs" />
-    <Compile Include="Controller\GfwListUpdater.cs" />
+    <Compile Include="Controller\GFWListUpdater.cs" />
     <Compile Include="Controller\I18N.cs" />
     <Compile Include="Controller\Logging.cs" />
     <Compile Include="Controller\UpdateChecker.cs" />

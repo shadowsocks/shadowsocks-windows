@@ -141,7 +141,7 @@ namespace Shadowsocks.View
                 this.AutoStartupItem = CreateMenuItem("Start on Boot", new EventHandler(this.AutoStartupItem_Click)),
                 this.ShareOverLANItem = CreateMenuItem("Share over LAN", new EventHandler(this.ShareOverLANItem_Click)),
                 CreateMenuItem("Edit PAC File...", new EventHandler(this.EditPACFileItem_Click)),
-                CreateMenuItem("Update PAC File via gfwlist...", new EventHandler(this.UpdatePACFromGFWListItem_Click)),
+                CreateMenuItem("Update PAC from GFWList", new EventHandler(this.UpdatePACFromGFWListItem_Click)),
                 new MenuItem("-"),
                 CreateMenuItem("Show QRCode...", new EventHandler(this.QRCodeItem_Click)),
                 CreateMenuItem("Show Logs...", new EventHandler(this.ShowLogItem_Click)),
@@ -265,7 +265,7 @@ namespace Shadowsocks.View
         void configForm_FormClosed(object sender, FormClosedEventArgs e)
         {
             configForm = null;
-            Util.Util.ReleaseMemory();
+            Util.Utils.ReleaseMemory();
             ShowFirstTimeBalloon();
         }
 

@@ -21,6 +21,7 @@ namespace Shadowsocks.Controller
         private PACServer pacServer;
         private Configuration _config;
         private PolipoRunner polipoRunner;
+        private GFWListUpdater gfwListUpdater;
         private bool stopped = false;
 
         private bool _systemProxyIsDirty = false;
@@ -157,13 +158,9 @@ namespace Shadowsocks.Controller
 
         public void UpdatePACFromGFWList()
         {
-            if (pacServer != null)
+            if (gfwListUpdater != null)
             {
-                pacServer.UpdatePACFromGFWList();
-            }
-            else if (UpdatePACFromGFWListError != null)
-            {
-                UpdatePACFromGFWListError(this, new ErrorEventArgs(new Exception("The PACServer is not run.")));
+                gfwListUpdater.UpdatePACFromGFWList();
             }
         }
 
@@ -180,8 +177,12 @@ namespace Shadowsocks.Controller
             {
                 pacServer = new PACServer();
                 pacServer.PACFileChanged += pacServer_PACFileChanged;
-                pacServer.UpdatePACFromGFWListCompleted += pacServer_UpdatePACFromGFWListCompleted;
-                pacServer.UpdatePACFromGFWListError += pacServer_UpdatePACFromGFWListError;
+            }
+            if (gfwListUpdater == null)
+            {
+                gfwListUpdater = new GFWListUpdater();
+                gfwListUpdater.UpdateCompleted += pacServer_PACUpdateCompleted;
+                gfwListUpdater.Error += pacServer_PACUpdateError;
             }
 
             pacServer.Stop();
@@ -226,7 +227,7 @@ namespace Shadowsocks.Controller
             }
 
             UpdateSystemProxy();
-            Util.Util.ReleaseMemory();
+            Util.Utils.ReleaseMemory();
         }
 
 
@@ -260,13 +261,13 @@ namespace Shadowsocks.Controller
             UpdateSystemProxy();
         }
 
-        private void pacServer_UpdatePACFromGFWListCompleted(object sender, EventArgs e)
+        private void pacServer_PACUpdateCompleted(object sender, EventArgs e)
         {
             if (UpdatePACFromGFWListCompleted != null)
                 UpdatePACFromGFWListCompleted(this, e);
         }
 
-        private void pacServer_UpdatePACFromGFWListError(object sender, ErrorEventArgs e)
+        private void pacServer_PACUpdateError(object sender, ErrorEventArgs e)
         {
             if (UpdatePACFromGFWListError != null)
                 UpdatePACFromGFWListError(this, e);
@@ -283,7 +284,7 @@ namespace Shadowsocks.Controller
         {
             while (true)
             {
-                Util.Util.ReleaseMemory();
+                Util.Utils.ReleaseMemory();
                 Thread.Sleep(30 * 1000);
             }
         }

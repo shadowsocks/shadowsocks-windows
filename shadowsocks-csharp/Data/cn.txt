@@ -39,6 +39,6 @@ Shadowsocks is here=Shadowsocks 在这里
 You can turn on/off Shadowsocks in the context menu=可以在右键菜单中开关 Shadowsocks
 Enabled=已启用代理
 Disabled=已禁用代理
-Update PAC File via GFWList...=从 GFWList 更新 PAC 文件...
+Update PAC from GFWList=从 GFWList 更新 PAC
 Failed to update PAC file =更新 PAC 文件失败
 PAC updated=更新 PAC 成功
