@@ -166,6 +166,10 @@ namespace Shadowsocks.Controller
             {
                 pacServer.UpdatePACFromGFWList();
             }
+            else if (UpdatePACFromGFWListError != null)
+            {
+                UpdatePACFromGFWListError(this, new ErrorEventArgs(new Exception("The PACServer is not run.")));
+            }
         }
 
         protected void Reload()
