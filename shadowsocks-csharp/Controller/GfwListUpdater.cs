@@ -4,8 +4,6 @@ using System.Text;
 using System.Net;
 using System.IO;
 using Shadowsocks.Properties;
-using System.IO.Compression;
-using System.Text.RegularExpressions;
 using SimpleJson;
 using Shadowsocks.Util;
 
@@ -25,12 +23,10 @@ namespace Shadowsocks.Controller
         {
             try
             {
-                string[] lines = ParseResult(e.Result);
+                List<string> lines = ParseResult(e.Result);
 
-                JsonArray rules = new JsonArray();
-                rules.AddRange(lines);
                 string abpContent = Utils.UnGzip(Resources.abp_js);
-                abpContent = abpContent.Replace("__RULES__", rules.ToString());
+                abpContent = abpContent.Replace("__RULES__", SimpleJson.SimpleJson.SerializeObject(lines));
                 File.WriteAllText(PAC_FILE, abpContent, Encoding.UTF8);
                 if (UpdateCompleted != null)
                 {
@@ -46,15 +42,15 @@ namespace Shadowsocks.Controller
             }
         }
 
-
         public void UpdatePACFromGFWList()
         {
             WebClient http = new WebClient();
+            http.Proxy = new WebProxy(IPAddress.Loopback.ToString(), 8123);
             http.DownloadStringCompleted += http_DownloadStringCompleted;
             http.DownloadStringAsync(new Uri(GFWLIST_URL));
         }
 
-        public string[] ParseResult(string response)
+        public List<string> ParseResult(string response)
         {
             byte[] bytes = Convert.FromBase64String(response);
             string content = Encoding.ASCII.GetString(bytes);
@@ -66,7 +62,7 @@ namespace Shadowsocks.Controller
                     continue;
                 valid_lines.Add(line);
             }
-            return valid_lines.ToArray();
+            return valid_lines;
         }
     }
 }
