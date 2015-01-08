@@ -1,14 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using System.Threading;
 using System.Net;
 using System.IO;
-using System.IO.Compression;
-using System.Security.Cryptography;
-using System.Text.RegularExpressions;
-using Shadowsocks.Model;
-using Shadowsocks.Properties;
 
 namespace Shadowsocks.Controller
 {

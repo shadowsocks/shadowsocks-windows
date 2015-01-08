@@ -1,7 +1,6 @@
 ﻿using Shadowsocks.Model;
 using Shadowsocks.Properties;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -9,7 +8,6 @@ using System.IO.Compression;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
-using System.Text.RegularExpressions;
 
 namespace Shadowsocks.Controller
 {
