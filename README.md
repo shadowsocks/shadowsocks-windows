@@ -30,6 +30,10 @@ about the change automatically
 6. Please disable other proxy addons in your browser, or set them to use
 system proxy
 
+### Develop
+
+Visual Studio Express 2012 is recommended.
+
 #### License
 
 GPLv3
