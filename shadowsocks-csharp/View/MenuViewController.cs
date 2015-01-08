@@ -340,7 +340,7 @@ namespace Shadowsocks.View
             if (isUpdatePACFromGFWListRunning)
             {
                 _notifyIcon.BalloonTipTitle = I18N.GetString("Update PAC File via gfwlist...");
-                _notifyIcon.BalloonTipText = I18N.GetString("Job running...");
+                _notifyIcon.BalloonTipText = I18N.GetString("Job already running...");
                 _notifyIcon.BalloonTipIcon = ToolTipIcon.Info;
                 _notifyIcon.ShowBalloonTip(5000);
             }
