@@ -71,16 +71,6 @@ namespace Shadowsocks.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized resource of type System.Byte[].
-        /// </summary>
-        internal static byte[] builtin_txt {
-            get {
-                object obj = ResourceManager.GetObject("builtin_txt", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Shadowsocks=Shadowsocks
         ///Enable=启用代理
         ///Mode=代理模式
@@ -203,16 +193,6 @@ namespace Shadowsocks.Properties {
             get {
                 object obj = ResourceManager.GetObject("ssw128", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Byte[].
-        /// </summary>
-        internal static byte[] tld_txt {
-            get {
-                object obj = ResourceManager.GetObject("tld_txt", resourceCulture);
-                return ((byte[])(obj));
             }
         }
     }
