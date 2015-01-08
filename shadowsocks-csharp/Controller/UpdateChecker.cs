@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.IO;
 using System.Net;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Xml;
 
 namespace Shadowsocks.Controller
@@ -21,10 +24,29 @@ namespace Shadowsocks.Controller
 
         public void CheckUpdate()
         {
+            // Waiting for proxy start
+            Thread.Sleep(5000);
+
             // TODO test failures
             WebClient http = new WebClient();
+            http.Proxy = new WebProxy("127.0.0.1", 8123);
             http.DownloadStringCompleted += http_DownloadStringCompleted;
             http.DownloadStringAsync(new Uri(UpdateURL));
+        }
+
+        public void CheckUpdateDelayed()
+        {
+            Thread updateCheckerThread = new Thread(new ThreadStart(this.CheckUpdate));
+            updateCheckerThread.IsBackground = true;
+            updateCheckerThread.Start();
+        }
+
+        public void DownloadNewVersion()
+        {
+            WebClient webClient = new WebClient();
+            webClient.Proxy = new WebProxy("127.0.0.1", 8123);
+            webClient.DownloadFileAsync(new Uri(LatestVersionURL), Path.GetTempPath() + "shadowsocks.zip");
+            webClient.DownloadFileCompleted += newVersionDownloadCompleted;
         }
 
         public static int CompareVersion(string l, string r)
@@ -105,6 +127,11 @@ namespace Shadowsocks.Controller
             string currentVersion = Version;
 
             return CompareVersion(version, currentVersion) > 0;
+        }
+
+        private void newVersionDownloadCompleted(object sender, AsyncCompletedEventArgs e)
+        {
+            System.Diagnostics.Process.Start(Path.GetTempPath() + "shadowsocks.zip");
         }
 
         private void http_DownloadStringCompleted(object sender, DownloadStringCompletedEventArgs e)
