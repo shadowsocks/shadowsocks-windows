@@ -33,6 +33,8 @@ namespace Shadowsocks.View
         private MenuItem PACModeItem;
         private ConfigForm configForm;
 
+        private bool isUpdatePACFromGFWListRunning = false;
+
         public MenuViewController(ShadowsocksController controller)
         {
             this.controller = controller;
@@ -181,6 +183,7 @@ namespace Shadowsocks.View
 
         void controller_UpdatePACFromGFWListError(object sender, System.IO.ErrorEventArgs e)
         {
+            isUpdatePACFromGFWListRunning = false;
             _notifyIcon.BalloonTipTitle = I18N.GetString("Update PAC File via gfwlist...");
             _notifyIcon.BalloonTipText = I18N.GetString("Update PAC file failed");
             _notifyIcon.BalloonTipIcon = ToolTipIcon.Info;
@@ -190,6 +193,7 @@ namespace Shadowsocks.View
 
         void controller_UpdatePACFromGFWListCompleted(object sender, EventArgs e)
         {
+            isUpdatePACFromGFWListRunning = false;
             _notifyIcon.BalloonTipTitle = I18N.GetString("Update PAC File via gfwlist...");
             _notifyIcon.BalloonTipText = I18N.GetString("Update PAC file succeed");
             _notifyIcon.BalloonTipIcon = ToolTipIcon.Info;
@@ -333,11 +337,22 @@ namespace Shadowsocks.View
 
         private void UpdatePACFromGFWListItem_Click(object sender, EventArgs e)
         {
-            _notifyIcon.BalloonTipTitle = I18N.GetString("Shadowsocks") + " " + UpdateChecker.Version;
-            _notifyIcon.BalloonTipText = I18N.GetString("Update PAC File via gfwlist...");
-            _notifyIcon.BalloonTipIcon = ToolTipIcon.Info;
-            _notifyIcon.ShowBalloonTip(5000);
-            controller.UpdatePACFromGFWList();
+            if (isUpdatePACFromGFWListRunning)
+            {
+                _notifyIcon.BalloonTipTitle = I18N.GetString("Update PAC File via gfwlist...");
+                _notifyIcon.BalloonTipText = I18N.GetString("Job running...");
+                _notifyIcon.BalloonTipIcon = ToolTipIcon.Info;
+                _notifyIcon.ShowBalloonTip(5000);
+            }
+            else
+            {
+                isUpdatePACFromGFWListRunning = true;
+                _notifyIcon.BalloonTipTitle = I18N.GetString("Shadowsocks") + " " + UpdateChecker.Version;
+                _notifyIcon.BalloonTipText = I18N.GetString("Update PAC File via gfwlist...");
+                _notifyIcon.BalloonTipIcon = ToolTipIcon.Info;
+                _notifyIcon.ShowBalloonTip(5000);
+                controller.UpdatePACFromGFWList();
+            }
         }
 
         private void AServerItem_Click(object sender, EventArgs e)
