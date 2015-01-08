@@ -1,6 +1,7 @@
 ﻿using Shadowsocks.Model;
 using Shadowsocks.Properties;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -21,9 +22,11 @@ namespace Shadowsocks.Controller
         Socket _listener;
         FileSystemWatcher watcher;
 
-        GfwListUpdater gfwlistUpdater;
-
         public event EventHandler PACFileChanged;
+
+        public event EventHandler UpdatePACFromGFWListCompleted;
+
+        public event ErrorEventHandler UpdatePACFromGFWListError;
 
         public void Start(Configuration configuration)
         {
@@ -51,7 +54,6 @@ namespace Shadowsocks.Controller
                     _listener);
 
                 WatchPacFile();
-                StartGfwListUpdater();
             }
             catch (SocketException)
             {
@@ -62,11 +64,6 @@ namespace Shadowsocks.Controller
 
         public void Stop()
         {
-            if (gfwlistUpdater != null)
-            {
-                gfwlistUpdater.Stop();
-                gfwlistUpdater = null;
-            }
             if (_listener != null)
             {
                 _listener.Close();
@@ -146,7 +143,7 @@ namespace Shadowsocks.Controller
                 using (GZipStream input = new GZipStream(new MemoryStream(pacGZ),
                     CompressionMode.Decompress, false))
                 {
-                    while((n = input.Read(buffer, 0, buffer.Length)) > 0)
+                    while ((n = input.Read(buffer, 0, buffer.Length)) > 0)
                     {
                         sb.Write(buffer, 0, n);
                     }
@@ -252,72 +249,103 @@ Connection: Close
             return proxy;
         }
 
-        private void StartGfwListUpdater()
+        public void UpdatePACFromGFWList()
         {
-            if (gfwlistUpdater != null)
-            {
-                gfwlistUpdater.Stop();
-                gfwlistUpdater = null;
-            }
-
-            gfwlistUpdater = new GfwListUpdater();
-            gfwlistUpdater.GfwListChanged += gfwlistUpdater_GfwListChanged;
-            IPEndPoint localEndPoint = (IPEndPoint)_listener.LocalEndPoint;
-            gfwlistUpdater.proxy = new WebProxy(localEndPoint.Address.ToString(), 8123);
-            gfwlistUpdater.useSystemProxy = false;
-            /* Delay 30 seconds, wait proxy start up. */
-            gfwlistUpdater.ScheduleUpdateTime(30);
-            gfwlistUpdater.Start();
-
+            GfwListUpdater gfwlist = new GfwListUpdater();
+            gfwlist.DownloadCompleted += gfwlist_DownloadCompleted;
+            gfwlist.Error += gfwlist_Error;
+            gfwlist.proxy = new WebProxy(IPAddress.Loopback.ToString(), 8123); /* use polipo proxy*/
+            gfwlist.Download();
         }
 
-        private void gfwlistUpdater_GfwListChanged(object sender, GfwListUpdater.GfwListChangedArgs e)
+        private void gfwlist_DownloadCompleted(object sender, GfwListUpdater.GfwListDownloadCompletedArgs e)
         {
-            if (e.GfwList == null || e.GfwList.Length == 0) return;
-            string pacfile = TouchPACFile();
-            string pacContent = File.ReadAllText(pacfile);
-            string oldDomains;
-            if (ClearPacContent(ref pacContent, out oldDomains))
+            GfwListUpdater.Parser parser = new GfwListUpdater.Parser(e.Content);
+            string[] lines = parser.GetValidLines();
+            StringBuilder rules = new StringBuilder(lines.Length * 16);
+            SerializeRules(lines, rules);
+            string abpContent = GetAbpContent();
+            abpContent = abpContent.Replace("__RULES__", rules.ToString());
+            File.WriteAllText(PAC_FILE, abpContent);
+            if (UpdatePACFromGFWListCompleted != null)
             {
-                StringBuilder sb = new StringBuilder();
-                sb.AppendLine("{");
-                for (int i = 0; i < e.GfwList.Length; i++)
+                UpdatePACFromGFWListCompleted(this, new EventArgs());
+            }
+        }
+
+        private void gfwlist_Error(object sender, ErrorEventArgs e)
+        {
+            if (UpdatePACFromGFWListError != null)
+            {
+                UpdatePACFromGFWListError(this, e);
+            }
+        }
+
+        private string GetAbpContent()
+        {
+            byte[] abpGZ = Resources.abp_js;
+            byte[] buffer = new byte[1024];  // builtin pac gzip size: maximum 100K
+            int n;
+            using (MemoryStream sb = new MemoryStream())
+            {
+                using (GZipStream input = new GZipStream(new MemoryStream(abpGZ),
+                    CompressionMode.Decompress, false))
                 {
-                    if (i == e.GfwList.Length - 1)
-                        sb.AppendFormat("\t\"{0}\": {1}\r\n", e.GfwList[i], 1);
-                    else
-                        sb.AppendFormat("\t\"{0}\": {1},\r\n", e.GfwList[i], 1);
+                    while ((n = input.Read(buffer, 0, buffer.Length)) > 0)
+                    {
+                        sb.Write(buffer, 0, n);
+                    }
                 }
-                sb.Append("}");
-                string newDomains = sb.ToString();
-                if (!string.Equals(oldDomains, newDomains))
-                {
-                    pacContent = pacContent.Replace("__LAST_MODIFIED__", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
-                    pacContent = pacContent.Replace("__DOMAINS__", newDomains);
-                    File.WriteAllText(pacfile, pacContent);
-                    Console.WriteLine("gfwlist updated - " + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
-                }
-            }
-            else
-            {
-                Console.WriteLine("Broken pac file.");
+                return System.Text.Encoding.UTF8.GetString(sb.ToArray());
             }
         }
 
-        private bool ClearPacContent(ref string pacContent, out string oldDomains)
+        private static void SerializeRules(string[] rules, StringBuilder builder)
         {
-            Regex regex = new Regex("(/\\*.*?\\*/\\s*)?var\\s+domains\\s*=\\s*(\\{(\\s*\"[^\"]*\"\\s*:\\s*\\d+\\s*,)*\\s*(\\s*\"[^\"]*\"\\s*:\\s*\\d+\\s*)\\})", RegexOptions.Singleline);
-            Match m = regex.Match(pacContent);
-            if (m.Success)
+            builder.Append("[\n");
+
+            bool first = true;
+            foreach (string rule in rules)
             {
-                oldDomains = m.Result("$2");
-                pacContent = regex.Replace(pacContent, "/* Last Modified: __LAST_MODIFIED__ */\r\nvar domains = __DOMAINS__");
-                return true;
+                if (!first)
+                    builder.Append(",\n");
+
+                SerializeString(rule, builder);
+
+                first = false;
             }
-            oldDomains = null;
-            return false;
+
+            builder.Append("\n]");
         }
 
+        private static void SerializeString(string aString, StringBuilder builder)
+        {
+            builder.Append("\t\"");
+
+            char[] charArray = aString.ToCharArray();
+            for (int i = 0; i < charArray.Length; i++)
+            {
+                char c = charArray[i];
+                if (c == '"')
+                    builder.Append("\\\"");
+                else if (c == '\\')
+                    builder.Append("\\\\");
+                else if (c == '\b')
+                    builder.Append("\\b");
+                else if (c == '\f')
+                    builder.Append("\\f");
+                else if (c == '\n')
+                    builder.Append("\\n");
+                else if (c == '\r')
+                    builder.Append("\\r");
+                else if (c == '\t')
+                    builder.Append("\\t");
+                else
+                    builder.Append(c);
+            }
+
+            builder.Append("\"");
+        }
 
     }
 }

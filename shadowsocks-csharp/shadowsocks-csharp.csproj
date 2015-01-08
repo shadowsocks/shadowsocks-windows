@@ -143,6 +143,7 @@
     <None Include="app.manifest">
       <SubType>Designer</SubType>
     </None>
+    <None Include="Data\abp.js.gz" />
     <None Include="Data\builtin.txt.gz" />
     <None Include="Data\libsscrypto.dll.gz" />
     <None Include="Data\polipo.exe.gz" />

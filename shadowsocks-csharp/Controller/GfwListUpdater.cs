@@ -16,186 +16,84 @@ namespace Shadowsocks.Controller
     {
         private const string GFWLIST_URL = "https://autoproxy-gfwlist.googlecode.com/svn/trunk/gfwlist.txt";
 
-        private const int EXPIRE_HOURS = 6;
-
         public IWebProxy proxy = null;
 
-        public bool useSystemProxy = true;
-
-        public class GfwListChangedArgs : EventArgs
+        public class GfwListDownloadCompletedArgs : EventArgs
         {
-            public string[] GfwList { get; set; }
+            public string Content;
         }
 
-        public event EventHandler<GfwListChangedArgs> GfwListChanged; 
+        public event EventHandler<GfwListDownloadCompletedArgs> DownloadCompleted;
 
-        private bool running = false;
-        private bool closed = false;
-        private int jobId = 0;
-        DateTime lastUpdateTimeUtc;
-        string lastUpdateMd5;
+        public event ErrorEventHandler Error;
 
-        private object locker = new object();
-
-        public GfwListUpdater()
+        public void Download()
         {
+            WebClient http = new WebClient();
+            http.Proxy = proxy;
+            http.DownloadStringCompleted += http_DownloadStringCompleted;
+            http.DownloadStringAsync(new Uri(GFWLIST_URL));
         }
 
-        ~GfwListUpdater()
+        protected void ReportError(Exception e)
         {
-            Stop();
-        }
-
-        public void Start()
-        {
-            lock (locker)
+            if (Error != null)
             {
-                if (running)
-                    return;
-                running = true;
-                closed = false;
-                jobId++;
-                new Thread(new ParameterizedThreadStart(UpdateJob)).Start(jobId);
+                Error(this, new ErrorEventArgs(e));
             }
         }
 
-        public void Stop()
-        {
-            lock(locker)
-            {
-                closed = true;
-                running = false;
-                jobId++;
-            }
-        }
-
-        public void ScheduleUpdateTime(int delaySeconds)
-        {
-            lock(locker)
-            {
-                lastUpdateTimeUtc = DateTime.UtcNow.AddHours(-1 * EXPIRE_HOURS).AddSeconds(delaySeconds);
-            }
-        }
-
-        private string DownloadGfwListFile()
+        private void http_DownloadStringCompleted(object sender, DownloadStringCompletedEventArgs e)
         {
             try
             {
-                WebClient http = new WebClient();
-                http.Proxy = useSystemProxy ? WebRequest.GetSystemWebProxy() : proxy;
-                return http.DownloadString(new Uri(GFWLIST_URL));
+                string response = e.Result;
+                if (DownloadCompleted != null)
+                {
+                    DownloadCompleted(this, new GfwListDownloadCompletedArgs
+                    {
+                        Content = response
+                    });
+                }
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.ToString());
+                ReportError(ex);
             }
-            return null;
         }
 
-        private bool IsExpire()
+        public class Parser
         {
-            lock (locker)
+            private string _Content;
+
+            public string Content
             {
-                TimeSpan ts = DateTime.UtcNow - lastUpdateTimeUtc;
-                bool expire = ((int)ts.TotalHours) >= EXPIRE_HOURS;
-                if (expire)
-                    lastUpdateTimeUtc = DateTime.UtcNow;
-                return expire;
+                get { return _Content; }
             }
-        }
-
-        private bool IsJobStop(int currentJobId)
-        {
-            lock (locker)
-            {
-                if (!running || closed || currentJobId != this.jobId)
-                    return true;
-            }
-            return false;
-        }
-
-        private bool IsGfwListChanged(string content)
-        {
-            byte[] inputBytes = Encoding.UTF8.GetBytes(content);
-            byte[] md5Bytes = MD5.Create().ComputeHash(inputBytes);
-            string md5 = "";
-            for (int i = 0; i < md5Bytes.Length; i++)
-                md5 += md5Bytes[i].ToString("x").PadLeft(2, '0');
-            if (md5 == lastUpdateMd5)
-                return false;
-            lastUpdateMd5 = md5;
-            return true;
-        }
-
-        private void ParseGfwList(string response)
-        {
-            if (!IsGfwListChanged(response))
-                return;
-            if (GfwListChanged != null)
-            {
-                try
-                {
-                    Parser parser = new Parser(response);
-                    GfwListChangedArgs args = new GfwListChangedArgs
-                    {
-                        GfwList = parser.GetReducedDomains()
-                    };
-                    GfwListChanged(this, args);
-                }
-                catch(Exception ex)
-                {
-                    Console.WriteLine(ex.ToString());
-                }
-            }
-        }
-
-        private void UpdateJob(object state)
-        {
-            int currentJobId = (int)state;
-            int retryTimes = 3;
-            while (!IsJobStop(currentJobId))
-            {
-                if (IsExpire())
-                {
-                    string response = DownloadGfwListFile();
-                    if (response != null)
-                    {
-                        ParseGfwList(response);
-                    }
-                    else if (retryTimes > 0)
-                    {
-                        ScheduleUpdateTime(30); /*Delay 30 seconds to retry*/
-                        retryTimes--;
-                    }
-                    else
-                    {
-                        retryTimes = 3; /* reset retry times, and wait next update time. */
-                    }
-                }
-
-                Thread.Sleep(1000);
-            }
-        }
-
-        class Parser
-        {
-            public string Content { get; private set; }
 
             public Parser(string response)
             {
                 byte[] bytes = Convert.FromBase64String(response);
-                this.Content = Encoding.ASCII.GetString(bytes);
+                this._Content = Encoding.ASCII.GetString(bytes);
             }
 
-            public string[] GetLines()
+            public string[] GetValidLines()
             {
-                return Content.Split(new char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries); 
+                string[] lines = Content.Split(new char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+                List<string> valid_lines = new List<string>(lines.Length);
+                foreach (string line in lines)
+                {
+                    if (line.StartsWith("!") || line.StartsWith("["))
+                        continue;
+                    valid_lines.Add(line);
+                }
+                return valid_lines.ToArray();
             }
-            
+
             /* refer https://github.com/clowwindy/gfwlist2pac/blob/master/gfwlist2pac/main.py */
             public string[] GetDomains()
             {
-                List<string> lines = new List<string>(GetLines());
+                List<string> lines = new List<string>(GetValidLines());
                 lines.AddRange(GetBuildIn());
                 List<string> domains = new List<string>(lines.Count);
                 for (int i = 0; i < lines.Count; i++)
@@ -222,7 +120,7 @@ namespace Shadowsocks.Controller
                         continue;
                     else if (line.StartsWith("@"))
                         continue; /*ignore white list*/
-                    int pos = line.IndexOfAny(new char[] { '/'});
+                    int pos = line.IndexOfAny(new char[] { '/' });
                     if (pos >= 0)
                         line = line.Substring(0, pos);
                     if (line.Length > 0)
@@ -238,7 +136,7 @@ namespace Shadowsocks.Controller
                 List<string> new_domains = new List<string>(domains.Length);
                 TldIndex tldIndex = GetTldIndex();
 
-                foreach(string domain in domains)
+                foreach (string domain in domains)
                 {
                     string last_root_domain = null;
                     int pos;
@@ -246,7 +144,7 @@ namespace Shadowsocks.Controller
                     last_root_domain = domain.Substring(pos + 1);
                     if (!tldIndex.Contains(last_root_domain))
                         continue;
-                    while(pos > 0)
+                    while (pos > 0)
                     {
                         pos = domain.LastIndexOf('.', pos - 1);
                         last_root_domain = domain.Substring(pos + 1);
@@ -266,7 +164,7 @@ namespace Shadowsocks.Controller
             {
                 List<string> list = new List<string>(src.Length);
                 Dictionary<string, string> dic = new Dictionary<string, string>(src.Length);
-                foreach(string s in src)
+                foreach (string s in src)
                 {
                     if (!dic.ContainsKey(s))
                     {
@@ -281,9 +179,9 @@ namespace Shadowsocks.Controller
             {
                 string[] tlds = null;
                 byte[] pacGZ = Resources.tld_txt;
-                byte[] buffer = new byte[1024]; 
+                byte[] buffer = new byte[1024];
                 int n;
-                using(MemoryStream sb = new MemoryStream())
+                using (MemoryStream sb = new MemoryStream())
                 {
                     using (GZipStream input = new GZipStream(new MemoryStream(pacGZ),
                         CompressionMode.Decompress, false))
@@ -332,7 +230,7 @@ namespace Shadowsocks.Controller
                 return buildin;
             }
 
-            class TldIndex
+            public class TldIndex
             {
                 List<string> patterns = new List<string>();
                 IDictionary<string, string> dic = new Dictionary<string, string>();
@@ -355,7 +253,7 @@ namespace Shadowsocks.Controller
                 {
                     if (dic.ContainsKey(tld))
                         return true;
-                    foreach(string pattern in patterns)
+                    foreach (string pattern in patterns)
                     {
                         if (Regex.IsMatch(tld, pattern))
                             return true;
@@ -365,7 +263,7 @@ namespace Shadowsocks.Controller
 
             }
 
-           
+
         }
 
     }
