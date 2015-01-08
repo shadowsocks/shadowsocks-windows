@@ -17,7 +17,6 @@ namespace Shadowsocks.Controller
                 string temppath = Path.GetTempPath();
                 LogFile = Path.Combine(temppath, "shadowsocks.log");
                 FileStream fs = new FileStream(LogFile, FileMode.Append);
-                TextWriter tmp = Console.Out;
                 StreamWriterWithTimestamp sw = new StreamWriterWithTimestamp(fs);
                 sw.AutoFlush = true;
                 Console.SetOut(sw);
@@ -64,7 +63,7 @@ namespace Shadowsocks.Controller
 
     }
 
-    // Simply extened System.IO.StreamWriter for adding timestamp workaround
+    // Simply extended System.IO.StreamWriter for adding timestamp workaround
     public class StreamWriterWithTimestamp : StreamWriter
     {
         public StreamWriterWithTimestamp(Stream stream) : base(stream)
