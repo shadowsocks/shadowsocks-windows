@@ -8,6 +8,7 @@ using System.IO.Compression;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace Shadowsocks.Controller
 {
@@ -264,7 +265,7 @@ Connection: Close
             SerializeRules(lines, rules);
             string abpContent = GetAbpContent();
             abpContent = abpContent.Replace("__RULES__", rules.ToString());
-            File.WriteAllText(PAC_FILE, abpContent);
+            File.WriteAllText(PAC_FILE, abpContent, Encoding.UTF8);
             if (UpdatePACFromGFWListCompleted != null)
             {
                 UpdatePACFromGFWListCompleted(this, new EventArgs());
@@ -281,6 +282,18 @@ Connection: Close
 
         private string GetAbpContent()
         {
+            string content;
+            if (File.Exists(PAC_FILE))
+            {
+                content = File.ReadAllText(PAC_FILE, Encoding.UTF8);
+                Regex regex = new Regex("var\\s+rules\\s*=\\s*(\\[(\\s*\"[^\"]*\"\\s*,)*(\\s*\"[^\"]*\")\\s*\\])", RegexOptions.Singleline);
+                Match m = regex.Match(content);
+                if (m.Success)
+                {
+                    content = regex.Replace(content, "var rules = __RULES__");
+                    return content;
+                }
+            }
             byte[] abpGZ = Resources.abp_js;
             byte[] buffer = new byte[1024];  // builtin pac gzip size: maximum 100K
             int n;
@@ -294,8 +307,9 @@ Connection: Close
                         sb.Write(buffer, 0, n);
                     }
                 }
-                return System.Text.Encoding.UTF8.GetString(sb.ToArray());
+                content = System.Text.Encoding.UTF8.GetString(sb.ToArray());
             }
+            return content;
         }
 
         private static void SerializeRules(string[] rules, StringBuilder builder)
