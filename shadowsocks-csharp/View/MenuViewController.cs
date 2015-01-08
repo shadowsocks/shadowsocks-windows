@@ -57,7 +57,7 @@ namespace Shadowsocks.View
 
             LoadCurrentConfiguration();
 
-            updateChecker.CheckUpdate();
+            updateChecker.CheckUpdateDelayed();
 
             if (controller.GetConfiguration().isDefault)
             {
@@ -188,7 +188,7 @@ namespace Shadowsocks.View
 
         void notifyIcon1_BalloonTipClicked(object sender, EventArgs e)
         {
-            System.Diagnostics.Process.Start(updateChecker.LatestVersionURL);
+            updateChecker.DownloadNewVersion();
         }
 
 
