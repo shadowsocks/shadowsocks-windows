@@ -45,8 +45,6 @@ namespace Shadowsocks
                 controller.Start();
 
                 Application.Run();
-
-                controller.Stop();
             }
         }
     }

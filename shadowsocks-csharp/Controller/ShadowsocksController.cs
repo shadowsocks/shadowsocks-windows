@@ -132,11 +132,6 @@ namespace Shadowsocks.Controller
             {
                 polipoRunner.Stop();
             }
-            if (pacServer != null)
-            {
-                pacServer.Stop();
-                pacServer = null;
-            }
             if (_config.enabled)
             {
                 SystemProxy.Disable();
