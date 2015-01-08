@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
+using System.IO;
 using System.Text;
 using System.Windows.Forms;
 
@@ -32,8 +33,6 @@ namespace Shadowsocks.View
         private MenuItem globalModeItem;
         private MenuItem PACModeItem;
         private ConfigForm configForm;
-
-        private bool isUpdatePACFromGFWListRunning = false;
 
         public MenuViewController(ShadowsocksController controller)
         {
@@ -181,38 +180,36 @@ namespace Shadowsocks.View
             System.Diagnostics.Process.Start("explorer.exe", argument);
         }
 
-        void controller_UpdatePACFromGFWListError(object sender, System.IO.ErrorEventArgs e)
+        void ShowBalloonTip(string title, string content, ToolTipIcon icon, int timeout)
         {
-            isUpdatePACFromGFWListRunning = false;
-            _notifyIcon.BalloonTipTitle = I18N.GetString("Update PAC File via gfwlist...");
-            _notifyIcon.BalloonTipText = I18N.GetString("Update PAC file failed");
-            _notifyIcon.BalloonTipIcon = ToolTipIcon.Info;
-            _notifyIcon.ShowBalloonTip(5000);
+            _notifyIcon.BalloonTipTitle = title;
+            _notifyIcon.BalloonTipText = content;
+            _notifyIcon.BalloonTipIcon = icon;
+            _notifyIcon.ShowBalloonTip(timeout);
+        }
+
+        void controller_UpdatePACFromGFWListError(object sender, ErrorEventArgs e)
+        {
+            ShowBalloonTip(I18N.GetString("Failed to update PAC file"), e.GetException().Message, ToolTipIcon.Error, 5000);
             Logging.LogUsefulException(e.GetException());
         }
 
         void controller_UpdatePACFromGFWListCompleted(object sender, EventArgs e)
         {
-            isUpdatePACFromGFWListRunning = false;
-            _notifyIcon.BalloonTipTitle = I18N.GetString("Update PAC File via gfwlist...");
-            _notifyIcon.BalloonTipText = I18N.GetString("Update PAC file succeed");
-            _notifyIcon.BalloonTipIcon = ToolTipIcon.Info;
-            _notifyIcon.ShowBalloonTip(5000);
+            ShowBalloonTip(I18N.GetString("Shadowsocks"), I18N.GetString("PAC updated"), ToolTipIcon.Info, 1000);
         }
 
         void updateChecker_NewVersionFound(object sender, EventArgs e)
         {
-            _notifyIcon.BalloonTipTitle = String.Format(I18N.GetString("Shadowsocks {0} Update Found"), updateChecker.LatestVersionNumber);
-            _notifyIcon.BalloonTipText = I18N.GetString("Click here to download");
-            _notifyIcon.BalloonTipIcon = ToolTipIcon.Info;
+            ShowBalloonTip(String.Format(I18N.GetString("Shadowsocks {0} Update Found"), updateChecker.LatestVersionNumber), I18N.GetString("Click here to download"), ToolTipIcon.Info, 5000);
             _notifyIcon.BalloonTipClicked += notifyIcon1_BalloonTipClicked;
-            _notifyIcon.ShowBalloonTip(5000);
             _isFirstRun = false;
         }
 
         void notifyIcon1_BalloonTipClicked(object sender, EventArgs e)
         {
             System.Diagnostics.Process.Start(updateChecker.LatestVersionURL);
+            _notifyIcon.BalloonTipClicked -= notifyIcon1_BalloonTipClicked;
         }
 
 
@@ -337,22 +334,7 @@ namespace Shadowsocks.View
 
         private void UpdatePACFromGFWListItem_Click(object sender, EventArgs e)
         {
-            if (isUpdatePACFromGFWListRunning)
-            {
-                _notifyIcon.BalloonTipTitle = I18N.GetString("Update PAC File via gfwlist...");
-                _notifyIcon.BalloonTipText = I18N.GetString("Job already running...");
-                _notifyIcon.BalloonTipIcon = ToolTipIcon.Info;
-                _notifyIcon.ShowBalloonTip(5000);
-            }
-            else
-            {
-                isUpdatePACFromGFWListRunning = true;
-                _notifyIcon.BalloonTipTitle = I18N.GetString("Shadowsocks") + " " + UpdateChecker.Version;
-                _notifyIcon.BalloonTipText = I18N.GetString("Update PAC File via gfwlist...");
-                _notifyIcon.BalloonTipIcon = ToolTipIcon.Info;
-                _notifyIcon.ShowBalloonTip(5000);
-                controller.UpdatePACFromGFWList();
-            }
+            controller.UpdatePACFromGFWList();
         }
 
         private void AServerItem_Click(object sender, EventArgs e)
