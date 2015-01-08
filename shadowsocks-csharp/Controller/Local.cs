@@ -61,7 +61,6 @@ namespace Shadowsocks.Controller
         public void Stop()
         {
             _listener.Close();
-            // Console.WriteLine("Shadowsocks stopped");
         }
 
 
