@@ -45,6 +45,8 @@ namespace Shadowsocks.View
             controller.ShareOverLANStatusChanged += controller_ShareOverLANStatusChanged;
             controller.EnableGlobalChanged += controller_EnableGlobalChanged;
             controller.Errored += controller_Errored;
+            controller.UpdatePACFromGFWListCompleted += controller_UpdatePACFromGFWListCompleted;
+            controller.UpdatePACFromGFWListError += controller_UpdatePACFromGFWListError;
 
             _notifyIcon = new NotifyIcon();
             UpdateTrayIcon();
@@ -138,6 +140,7 @@ namespace Shadowsocks.View
                 this.AutoStartupItem = CreateMenuItem("Start on Boot", new EventHandler(this.AutoStartupItem_Click)),
                 this.ShareOverLANItem = CreateMenuItem("Share over LAN", new EventHandler(this.ShareOverLANItem_Click)),
                 CreateMenuItem("Edit PAC File...", new EventHandler(this.EditPACFileItem_Click)),
+                CreateMenuItem("Update PAC from GFWList", new EventHandler(this.UpdatePACFromGFWListItem_Click)),
                 new MenuItem("-"),
                 CreateMenuItem("Show QRCode...", new EventHandler(this.QRCodeItem_Click)),
                 CreateMenuItem("Show Logs...", new EventHandler(this.ShowLogItem_Click)),
@@ -176,19 +179,36 @@ namespace Shadowsocks.View
             System.Diagnostics.Process.Start("explorer.exe", argument);
         }
 
+        void ShowBalloonTip(string title, string content, ToolTipIcon icon, int timeout)
+        {
+            _notifyIcon.BalloonTipTitle = title;
+            _notifyIcon.BalloonTipText = content;
+            _notifyIcon.BalloonTipIcon = icon;
+            _notifyIcon.ShowBalloonTip(timeout);
+        }
+
+        void controller_UpdatePACFromGFWListError(object sender, System.IO.ErrorEventArgs e)
+        {
+            ShowBalloonTip(I18N.GetString("Failed to update PAC file"), e.GetException().Message, ToolTipIcon.Error, 5000);
+            Logging.LogUsefulException(e.GetException());
+        }
+
+        void controller_UpdatePACFromGFWListCompleted(object sender, EventArgs e)
+        {
+            ShowBalloonTip(I18N.GetString("Shadowsocks"), I18N.GetString("PAC updated"), ToolTipIcon.Info, 1000);
+        }
+
         void updateChecker_NewVersionFound(object sender, EventArgs e)
         {
-            _notifyIcon.BalloonTipTitle = String.Format(I18N.GetString("Shadowsocks {0} Update Found"), updateChecker.LatestVersionNumber);
-            _notifyIcon.BalloonTipText = I18N.GetString("Click here to download");
-            _notifyIcon.BalloonTipIcon = ToolTipIcon.Info;
+            ShowBalloonTip(String.Format(I18N.GetString("Shadowsocks {0} Update Found"), updateChecker.LatestVersionNumber), I18N.GetString("Click here to download"), ToolTipIcon.Info, 5000);
             _notifyIcon.BalloonTipClicked += notifyIcon1_BalloonTipClicked;
-            _notifyIcon.ShowBalloonTip(5000);
             _isFirstRun = false;
         }
 
         void notifyIcon1_BalloonTipClicked(object sender, EventArgs e)
         {
             System.Diagnostics.Process.Start(updateChecker.LatestVersionURL);
+            _notifyIcon.BalloonTipClicked -= notifyIcon1_BalloonTipClicked;
         }
 
 
@@ -245,7 +265,7 @@ namespace Shadowsocks.View
         void configForm_FormClosed(object sender, FormClosedEventArgs e)
         {
             configForm = null;
-            Util.Util.ReleaseMemory();
+            Util.Utils.ReleaseMemory();
             ShowFirstTimeBalloon();
         }
 
@@ -310,6 +330,11 @@ namespace Shadowsocks.View
         private void EditPACFileItem_Click(object sender, EventArgs e)
         {
             controller.TouchPACFile();
+        }
+
+        private void UpdatePACFromGFWListItem_Click(object sender, EventArgs e)
+        {
+            controller.UpdatePACFromGFWList();
         }
 
         private void AServerItem_Click(object sender, EventArgs e)

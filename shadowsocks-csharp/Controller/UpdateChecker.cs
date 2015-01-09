@@ -23,6 +23,7 @@ namespace Shadowsocks.Controller
         {
             // TODO test failures
             WebClient http = new WebClient();
+            http.Proxy = new WebProxy(IPAddress.Loopback.ToString(), 8123);
             http.DownloadStringCompleted += http_DownloadStringCompleted;
             http.DownloadStringAsync(new Uri(UpdateURL));
         }
@@ -145,7 +146,7 @@ namespace Shadowsocks.Controller
             }
             catch (Exception ex)
             {
-                Console.Write(ex.ToString());
+                Console.WriteLine(ex.ToString());
                 return;
             }
         }

@@ -21,6 +21,7 @@ namespace Shadowsocks.Controller
         private PACServer pacServer;
         private Configuration _config;
         private PolipoRunner polipoRunner;
+        private GFWListUpdater gfwListUpdater;
         private bool stopped = false;
 
         private bool _systemProxyIsDirty = false;
@@ -37,6 +38,10 @@ namespace Shadowsocks.Controller
         
         // when user clicked Edit PAC, and PAC file has already created
         public event EventHandler<PathEventArgs> PACFileReadyToOpen;
+
+        public event EventHandler UpdatePACFromGFWListCompleted;
+
+        public event ErrorEventHandler UpdatePACFromGFWListError;
 
         public event ErrorEventHandler Errored;
 
@@ -151,6 +156,14 @@ namespace Shadowsocks.Controller
             return "ss://" + base64;
         }
 
+        public void UpdatePACFromGFWList()
+        {
+            if (gfwListUpdater != null)
+            {
+                gfwListUpdater.UpdatePACFromGFWList();
+            }
+        }
+
         protected void Reload()
         {
             // some logic in configuration updated the config when saving, we need to read it again
@@ -164,6 +177,12 @@ namespace Shadowsocks.Controller
             {
                 pacServer = new PACServer();
                 pacServer.PACFileChanged += pacServer_PACFileChanged;
+            }
+            if (gfwListUpdater == null)
+            {
+                gfwListUpdater = new GFWListUpdater();
+                gfwListUpdater.UpdateCompleted += pacServer_PACUpdateCompleted;
+                gfwListUpdater.Error += pacServer_PACUpdateError;
             }
 
             pacServer.Stop();
@@ -208,7 +227,7 @@ namespace Shadowsocks.Controller
             }
 
             UpdateSystemProxy();
-            Util.Util.ReleaseMemory();
+            Util.Utils.ReleaseMemory();
         }
 
 
@@ -242,6 +261,18 @@ namespace Shadowsocks.Controller
             UpdateSystemProxy();
         }
 
+        private void pacServer_PACUpdateCompleted(object sender, EventArgs e)
+        {
+            if (UpdatePACFromGFWListCompleted != null)
+                UpdatePACFromGFWListCompleted(this, e);
+        }
+
+        private void pacServer_PACUpdateError(object sender, ErrorEventArgs e)
+        {
+            if (UpdatePACFromGFWListError != null)
+                UpdatePACFromGFWListError(this, e);
+        }
+
         private void StartReleasingMemory()
         {
             _ramThread = new Thread(new ThreadStart(ReleaseMemory));
@@ -253,7 +284,7 @@ namespace Shadowsocks.Controller
         {
             while (true)
             {
-                Util.Util.ReleaseMemory();
+                Util.Utils.ReleaseMemory();
                 Thread.Sleep(30 * 1000);
             }
         }
