@@ -127,6 +127,12 @@
     <Compile Include="View\QRCodeForm.Designer.cs">
       <DependentUpon>QRCodeForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="View\URIParseForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="View\URIParseForm.Designer.cs">
+      <DependentUpon>URIParseForm.cs</DependentUpon>
+    </Compile>
     <EmbeddedResource Include="View\ConfigForm.resx">
       <DependentUpon>ConfigForm.cs</DependentUpon>
       <SubType>Designer</SubType>
@@ -138,6 +144,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="View\QRCodeForm.resx">
       <DependentUpon>QRCodeForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="View\URIParseForm.resx">
+      <DependentUpon>URIParseForm.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="app.config" />
     <None Include="app.manifest">

@@ -258,6 +258,7 @@ namespace Shadowsocks.View
                 configForm = new ConfigForm(controller);
                 configForm.Show();
                 configForm.FormClosed += configForm_FormClosed;
+                configForm.Activate();
             }
         }
 
