@@ -387,12 +387,36 @@ namespace Shadowsocks.View
                     var success = controller.AddServerBySSURL(result.Text);
                     if (success)
                     {
-                        ShowConfigForm();
+                        float minX = Int32.MaxValue, minY = Int32.MaxValue, maxX = 0, maxY = 0;
+                        foreach (ResultPoint point in result.ResultPoints)
+                        {
+                            minX = Math.Min(minX, point.X);
+                            minY = Math.Min(minY, point.Y);
+                            maxX = Math.Max(maxX, point.X);
+                            maxY = Math.Max(maxY, point.Y);
+                        }
+                        // make it 20% larger
+                        float margin = (maxX - minX) * 0.20f;
+                        minX -= margin;
+                        maxX += margin;
+                        minY -= margin;
+                        maxY += margin;
+
+                        QRCodeSplashForm splash = new QRCodeSplashForm();
+                        splash.FormClosed += splash_FormClosed;
+                        splash.Location = new Point((int)minX, (int)minY);
+                        splash.Size = new Size((int)maxX - (int)minX, (int)maxY - (int)minY);
+                        splash.Show();
                         return;
                     }
                 }
                 MessageBox.Show(I18N.GetString("Failed to scan QRCode"));
             }
+        }
+
+        void splash_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            ShowConfigForm();
         }
 
 		private void AutoStartupItem_Click(object sender, EventArgs e) {

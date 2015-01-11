@@ -183,6 +183,12 @@
     <Compile Include="View\QRCodeForm.Designer.cs">
       <DependentUpon>QRCodeForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="View\QRCodeSplashForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="View\QRCodeSplashForm.Designer.cs">
+      <DependentUpon>QRCodeSplashForm.cs</DependentUpon>
+    </Compile>
     <EmbeddedResource Include="View\ConfigForm.resx">
       <DependentUpon>ConfigForm.cs</DependentUpon>
       <SubType>Designer</SubType>
@@ -194,6 +200,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="View\QRCodeForm.resx">
       <DependentUpon>QRCodeForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="View\QRCodeSplashForm.resx">
+      <DependentUpon>QRCodeSplashForm.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="app.config" />
     <None Include="app.manifest">
