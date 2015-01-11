@@ -70,6 +70,11 @@
     <Reference Include="System.XML" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="3rd\zxing\BarcodeFormat.cs" />
+    <Compile Include="3rd\zxing\BaseLuminanceSource.cs" />
+    <Compile Include="3rd\zxing\Binarizer.cs" />
+    <Compile Include="3rd\zxing\BinaryBitmap.cs" />
+    <Compile Include="3rd\zxing\BitmapLuminanceSource.cs" />
     <Compile Include="3rd\zxing\common\BitArray.cs" />
     <Compile Include="3rd\zxing\common\BitMatrix.cs" />
     <Compile Include="3rd\zxing\common\BitSource.cs" />
@@ -88,6 +93,7 @@
     <Compile Include="3rd\zxing\common\reedsolomon\ReedSolomonEncoder.cs" />
     <Compile Include="3rd\zxing\DecodeHintType.cs" />
     <Compile Include="3rd\zxing\EncodeHintType.cs" />
+    <Compile Include="3rd\zxing\LuminanceSource.cs" />
     <Compile Include="3rd\zxing\qrcode\decoder\BitMatrixParser.cs" />
     <Compile Include="3rd\zxing\qrcode\decoder\DataBlock.cs" />
     <Compile Include="3rd\zxing\qrcode\decoder\DataMask.cs" />
@@ -112,6 +118,11 @@
     <Compile Include="3rd\zxing\qrcode\encoder\QRCode.cs" />
     <Compile Include="3rd\zxing\qrcode\encoder\QrCodeEncodingOptions.cs" />
     <Compile Include="3rd\SimpleJson.cs" />
+    <Compile Include="3rd\zxing\qrcode\QRCodeReader.cs" />
+    <Compile Include="3rd\zxing\Reader.cs" />
+    <Compile Include="3rd\zxing\ReaderException.cs" />
+    <Compile Include="3rd\zxing\Result.cs" />
+    <Compile Include="3rd\zxing\ResultMetadataType.cs" />
     <Compile Include="3rd\zxing\ResultPoint.cs" />
     <Compile Include="3rd\zxing\ResultPointCallback.cs" />
     <Compile Include="3rd\zxing\WriterException.cs" />

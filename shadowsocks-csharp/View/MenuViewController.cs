@@ -357,6 +357,45 @@ namespace Shadowsocks.View
             qrCodeForm.Show();
         }
 
+        private void ScanQRCodeItem_Click(object sender, EventArgs e)
+        {
+            /*
+            using (Bitmap image = new Bitmap(Screen.PrimaryScreen.Bounds.Width, 
+                                            Screen.PrimaryScreen.Bounds.Height))
+            {
+                using (Graphics g = Graphics.FromImage(bmpScreenCapture))
+                {
+                    g.CopyFromScreen(Screen.PrimaryScreen.Bounds.X,
+                                     Screen.PrimaryScreen.Bounds.Y,
+                                     0, 0,
+                                     bmpScreenCapture.Size,
+                                     CopyPixelOperation.SourceCopy);
+                }
+                resultPoints.Clear();
+             /*   var reader = new BarcodeReader
+                {
+                    PossibleFormats = new List<BarcodeFormat>
+                     {
+                        BarcodeFormat.QR_CODE
+                     }
+                };
+        
+                var result = reader.Decode(image);
+                var result = barcodeReader.Decode(image);
+                var timerStart = DateTime.Now.Ticks;
+                var timerStop = DateTime.Now.Ticks;
+
+                if (result == null)
+                {
+                    txtDecoderContent.Text = "No barcode recognized";
+                }
+                labDuration.Text = new TimeSpan(timerStop - timerStart).Milliseconds.ToString("0 ms");
+                
+            }
+         }
+             * */
+        }
+
 		private void AutoStartupItem_Click(object sender, EventArgs e) {
 			AutoStartupItem.Checked = !AutoStartupItem.Checked;
 			if (!AutoStartup.Set(AutoStartupItem.Checked)) {
