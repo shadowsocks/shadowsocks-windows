@@ -94,15 +94,7 @@ namespace Shadowsocks.Model
 
         public static Server GetDefaultServer()
         {
-            return new Server()
-            {
-                server = "",
-                server_port = 8388,
-                local_port = 1080,
-                method = "aes-256-cfb",
-                password = "",
-                remarks = ""
-            };
+            return new Server();
         }
 
         private static void Assert(bool condition)

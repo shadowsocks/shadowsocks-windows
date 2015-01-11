@@ -135,7 +135,9 @@ namespace Shadowsocks.View
                 }),
                 this.ServersItem = CreateMenuGroup("Servers", new MenuItem[] {
                     this.SeperatorItem = new MenuItem("-"),
-                    this.ConfigItem = CreateMenuItem("Edit Servers...", new EventHandler(this.Config_Click))
+                    this.ConfigItem = CreateMenuItem("Edit Servers...", new EventHandler(this.Config_Click)),
+                    CreateMenuItem("Show QRCode...", new EventHandler(this.QRCodeItem_Click)),
+                    CreateMenuItem("Scan QRCode from Screen...", new EventHandler(this.ScanQRCodeItem_Click))
                 }),
                 new MenuItem("-"),
                 this.AutoStartupItem = CreateMenuItem("Start on Boot", new EventHandler(this.AutoStartupItem_Click)),
@@ -143,8 +145,6 @@ namespace Shadowsocks.View
                 CreateMenuItem("Edit PAC File...", new EventHandler(this.EditPACFileItem_Click)),
                 CreateMenuItem("Update PAC from GFWList", new EventHandler(this.UpdatePACFromGFWListItem_Click)),
                 new MenuItem("-"),
-                CreateMenuItem("Show QRCode...", new EventHandler(this.QRCodeItem_Click)),
-                CreateMenuItem("Scan QRCode...", new EventHandler(this.ScanQRCodeItem_Click)),
                 CreateMenuItem("Show Logs...", new EventHandler(this.ShowLogItem_Click)),
                 CreateMenuItem("About...", new EventHandler(this.AboutItem_Click)),
                 new MenuItem("-"),
@@ -228,8 +228,10 @@ namespace Shadowsocks.View
         private void UpdateServersMenu()
         {
             var items = ServersItem.MenuItems;
-
-            items.Clear();
+            while (items[0] != SeperatorItem)
+            {
+                items.RemoveAt(0);
+            }
 
             Configuration configuration = controller.GetConfiguration();
             for (int i = 0; i < configuration.configs.Count; i++)
@@ -238,10 +240,8 @@ namespace Shadowsocks.View
                 MenuItem item = new MenuItem(server.FriendlyName());
                 item.Tag = i;
                 item.Click += AServerItem_Click;
-                items.Add(item);
+                items.Add(i, item);
             }
-            items.Add(SeperatorItem);
-            items.Add(ConfigItem);
 
             if (configuration.index >= 0 && configuration.index < configuration.configs.Count)
             {
@@ -384,8 +384,14 @@ namespace Shadowsocks.View
                 var result = reader.Decode(image);
                 if (result != null)
                 {
-                    Console.WriteLine(result.Text);
+                    var success = controller.AddServerBySSURL(result.Text);
+                    if (success)
+                    {
+                        ShowConfigForm();
+                        return;
+                    }
                 }
+                MessageBox.Show(I18N.GetString("Failed to scan QRCode"));
             }
         }
 

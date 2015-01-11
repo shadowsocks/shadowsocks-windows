@@ -80,6 +80,23 @@ namespace Shadowsocks.Controller
             SaveConfig(_config);
         }
 
+        public bool AddServerBySSURL(string ssURL)
+        {
+            try
+            {
+                var server = new Server(ssURL);
+                _config.configs.Add(server);
+                _config.index = _config.configs.Count - 1;
+                SaveConfig(_config);
+                return true;
+            }
+            catch (Exception e)
+            {
+                Logging.LogUsefulException(e);
+                return false;
+            }
+        }
+
         public void ToggleEnable(bool enabled)
         {
             _config.enabled = enabled;
