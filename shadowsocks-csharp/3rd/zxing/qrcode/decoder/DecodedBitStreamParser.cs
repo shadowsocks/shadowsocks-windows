@@ -54,7 +54,7 @@ namespace ZXing.QrCode.Internal
 
          try
          {
-            //CharacterSetECI currentCharacterSetECI = null;
+            CharacterSetECI currentCharacterSetECI = null;
             bool fc1InEffect = false;
             Mode mode;
             do
@@ -94,14 +94,29 @@ namespace ZXing.QrCode.Internal
                      symbolSequence = bits.readBits(8);
                      parityData = bits.readBits(8);
                   }
+                  else if (mode == Mode.ECI)
+                  {
+                     // Count doesn't apply to ECI
+                     int value = parseECIValue(bits);
+                     currentCharacterSetECI = CharacterSetECI.getCharacterSetECIByValue(value);
+                     if (currentCharacterSetECI == null)
+                     {
+                        return null;
+                     }
+                  }
                   else
                   {
                      // First handle Hanzi mode which does not start with character count
                      if (mode == Mode.HANZI)
                      {
                         //chinese mode contains a sub set indicator right after mode indicator
-                        //int subset = bits.readBits(4);
-                        //int countHanzi = bits.readBits(mode.getCharacterCountBits(version));
+                        int subset = bits.readBits(4);
+                        int countHanzi = bits.readBits(mode.getCharacterCountBits(version));
+                        if (subset == GB2312_SUBSET)
+                        {
+                           if (!decodeHanziSegment(bits, result, countHanzi))
+                              return null;
+                        }
                      }
                      else
                      {
@@ -116,6 +131,16 @@ namespace ZXing.QrCode.Internal
                         else if (mode == Mode.ALPHANUMERIC)
                         {
                            if (!decodeAlphanumericSegment(bits, result, count, fc1InEffect))
+                              return null;
+                        }
+                        else if (mode == Mode.BYTE)
+                        {
+                           if (!decodeByteSegment(bits, result, count, currentCharacterSetECI, byteSegments, hints))
+                              return null;
+                        }
+                        else if (mode == Mode.KANJI)
+                        {
+                           if (!decodeKanjiSegment(bits, result, count))
                               return null;
                         }
                         else
@@ -145,8 +170,214 @@ namespace ZXing.QrCode.Internal
                                   symbolSequence, parityData);
       }
 
+      /// <summary>
+      /// See specification GBT 18284-2000
+      /// </summary>
+      /// <param name="bits">The bits.</param>
+      /// <param name="result">The result.</param>
+      /// <param name="count">The count.</param>
+      /// <returns></returns>
+      private static bool decodeHanziSegment(BitSource bits,
+                                             StringBuilder result,
+                                             int count)
+      {
+         // Don't crash trying to read more bits than we have available.
+         if (count * 13 > bits.available())
+         {
+            return false;
+         }
 
+         // Each character will require 2 bytes. Read the characters as 2-byte pairs
+         // and decode as GB2312 afterwards
+         byte[] buffer = new byte[2 * count];
+         int offset = 0;
+         while (count > 0)
+         {
+            // Each 13 bits encodes a 2-byte character
+            int twoBytes = bits.readBits(13);
+            int assembledTwoBytes = ((twoBytes / 0x060) << 8) | (twoBytes % 0x060);
+            if (assembledTwoBytes < 0x003BF)
+            {
+               // In the 0xA1A1 to 0xAAFE range
+               assembledTwoBytes += 0x0A1A1;
+            }
+            else
+            {
+               // In the 0xB0A1 to 0xFAFE range
+               assembledTwoBytes += 0x0A6A1;
+            }
+            buffer[offset] = (byte)((assembledTwoBytes >> 8) & 0xFF);
+            buffer[offset + 1] = (byte)(assembledTwoBytes & 0xFF);
+            offset += 2;
+            count--;
+         }
 
+         try
+         {
+            result.Append(Encoding.GetEncoding(StringUtils.GB2312).GetString(buffer, 0, buffer.Length));
+         }
+#if (WINDOWS_PHONE70 || WINDOWS_PHONE71 || SILVERLIGHT4 || SILVERLIGHT5 || NETFX_CORE || MONOANDROID || MONOTOUCH)
+         catch (ArgumentException)
+         {
+            try
+            {
+               // Silverlight only supports a limited number of character sets, trying fallback to UTF-8
+               result.Append(Encoding.GetEncoding("UTF-8").GetString(buffer, 0, buffer.Length));
+            }
+            catch (Exception)
+            {
+               return false;
+            }
+         }
+#endif
+         catch (Exception)
+         {
+            return false;
+         }
+
+         return true;
+      }
+
+      private static bool decodeKanjiSegment(BitSource bits,
+                                             StringBuilder result,
+                                             int count)
+      {
+         // Don't crash trying to read more bits than we have available.
+         if (count * 13 > bits.available())
+         {
+            return false;
+         }
+
+         // Each character will require 2 bytes. Read the characters as 2-byte pairs
+         // and decode as Shift_JIS afterwards
+         byte[] buffer = new byte[2 * count];
+         int offset = 0;
+         while (count > 0)
+         {
+            // Each 13 bits encodes a 2-byte character
+            int twoBytes = bits.readBits(13);
+            int assembledTwoBytes = ((twoBytes / 0x0C0) << 8) | (twoBytes % 0x0C0);
+            if (assembledTwoBytes < 0x01F00)
+            {
+               // In the 0x8140 to 0x9FFC range
+               assembledTwoBytes += 0x08140;
+            }
+            else
+            {
+               // In the 0xE040 to 0xEBBF range
+               assembledTwoBytes += 0x0C140;
+            }
+            buffer[offset] = (byte)(assembledTwoBytes >> 8);
+            buffer[offset + 1] = (byte)assembledTwoBytes;
+            offset += 2;
+            count--;
+         }
+         // Shift_JIS may not be supported in some environments:
+         try
+         {
+            result.Append(Encoding.GetEncoding(StringUtils.SHIFT_JIS).GetString(buffer, 0, buffer.Length));
+         }
+#if (WINDOWS_PHONE70 || WINDOWS_PHONE71 || SILVERLIGHT4 || SILVERLIGHT5 || NETFX_CORE || MONOANDROID || MONOTOUCH)
+         catch (ArgumentException)
+         {
+            try
+            {
+               // Silverlight only supports a limited number of character sets, trying fallback to UTF-8
+               result.Append(Encoding.GetEncoding("UTF-8").GetString(buffer, 0, buffer.Length));
+            }
+            catch (Exception)
+            {
+               return false;
+            }
+         }
+#endif
+         catch (Exception)
+         {
+            return false;
+         }
+         return true;
+      }
+
+      private static bool decodeByteSegment(BitSource bits,
+                                            StringBuilder result,
+                                            int count,
+                                            CharacterSetECI currentCharacterSetECI,
+                                            IList<byte[]> byteSegments,
+                                            IDictionary<DecodeHintType, object> hints)
+      {
+         // Don't crash trying to read more bits than we have available.
+         if (count << 3 > bits.available())
+         {
+            return false;
+         }
+
+         byte[] readBytes = new byte[count];
+         for (int i = 0; i < count; i++)
+         {
+            readBytes[i] = (byte)bits.readBits(8);
+         }
+         String encoding;
+         if (currentCharacterSetECI == null)
+         {
+            // The spec isn't clear on this mode; see
+            // section 6.4.5: t does not say which encoding to assuming
+            // upon decoding. I have seen ISO-8859-1 used as well as
+            // Shift_JIS -- without anything like an ECI designator to
+            // give a hint.
+            encoding = StringUtils.guessEncoding(readBytes, hints);
+         }
+         else
+         {
+            encoding = currentCharacterSetECI.EncodingName;
+         }
+         try
+         {
+            result.Append(Encoding.GetEncoding(encoding).GetString(readBytes, 0, readBytes.Length));
+         }
+#if (WINDOWS_PHONE70 || WINDOWS_PHONE71 || SILVERLIGHT4 || SILVERLIGHT5 || NETFX_CORE || MONOANDROID || MONOTOUCH)
+         catch (ArgumentException)
+         {
+            try
+            {
+               // Silverlight only supports a limited number of character sets, trying fallback to UTF-8
+               result.Append(Encoding.GetEncoding("UTF-8").GetString(readBytes, 0, readBytes.Length));
+            }
+            catch (Exception)
+            {
+               return false;
+            }
+         }
+#endif
+#if WindowsCE
+         catch (PlatformNotSupportedException)
+         {
+            try
+            {
+               // WindowsCE doesn't support all encodings. But it is device depended.
+               // So we try here the some different ones
+               if (encoding == "ISO-8859-1")
+               {
+                  result.Append(Encoding.GetEncoding(1252).GetString(readBytes, 0, readBytes.Length));
+               }
+               else
+               {
+                  result.Append(Encoding.GetEncoding("UTF-8").GetString(readBytes, 0, readBytes.Length));
+               }
+            }
+            catch (Exception)
+            {
+               return false;
+            }
+         }
+#endif
+         catch (Exception)
+         {
+            return false;
+         }
+         byteSegments.Add(readBytes);
+
+         return true;
+      }
 
       private static char toAlphaNumericChar(int value)
       {

@@ -71,6 +71,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="3rd\zxing\BarcodeFormat.cs" />
+    <Compile Include="3rd\zxing\BarcodeReader.cs" />
+    <Compile Include="3rd\zxing\BarcodeReaderGeneric.cs" />
     <Compile Include="3rd\zxing\BaseLuminanceSource.cs" />
     <Compile Include="3rd\zxing\Binarizer.cs" />
     <Compile Include="3rd\zxing\BinaryBitmap.cs" />
@@ -78,22 +80,33 @@
     <Compile Include="3rd\zxing\common\BitArray.cs" />
     <Compile Include="3rd\zxing\common\BitMatrix.cs" />
     <Compile Include="3rd\zxing\common\BitSource.cs" />
+    <Compile Include="3rd\zxing\common\CharacterSetECI.cs" />
     <Compile Include="3rd\zxing\common\DecoderResult.cs" />
+    <Compile Include="3rd\zxing\common\DecodingOptions.cs" />
     <Compile Include="3rd\zxing\common\DefaultGridSampler.cs" />
     <Compile Include="3rd\zxing\common\DetectorResult.cs" />
     <Compile Include="3rd\zxing\common\detector\MathUtils.cs" />
     <Compile Include="3rd\zxing\common\detector\MonochromeRectangleDetector.cs" />
     <Compile Include="3rd\zxing\common\detector\WhiteRectangleDetector.cs" />
+    <Compile Include="3rd\zxing\common\ECI.cs" />
     <Compile Include="3rd\zxing\common\EncodingOptions.cs" />
+    <Compile Include="3rd\zxing\common\GlobalHistogramBinarizer.cs" />
     <Compile Include="3rd\zxing\common\GridSampler.cs" />
+    <Compile Include="3rd\zxing\common\HybridBinarizer.cs" />
     <Compile Include="3rd\zxing\common\PerspectiveTransform.cs" />
     <Compile Include="3rd\zxing\common\reedsolomon\GenericGF.cs" />
     <Compile Include="3rd\zxing\common\reedsolomon\GenericGFPoly.cs" />
     <Compile Include="3rd\zxing\common\reedsolomon\ReedSolomonDecoder.cs" />
     <Compile Include="3rd\zxing\common\reedsolomon\ReedSolomonEncoder.cs" />
+    <Compile Include="3rd\zxing\common\StringUtils.cs" />
     <Compile Include="3rd\zxing\DecodeHintType.cs" />
     <Compile Include="3rd\zxing\EncodeHintType.cs" />
+    <Compile Include="3rd\zxing\IBarcodeReader.cs" />
+    <Compile Include="3rd\zxing\IBarcodeReaderGeneric.cs" />
     <Compile Include="3rd\zxing\LuminanceSource.cs" />
+    <Compile Include="3rd\zxing\net2.0\Action.cs" />
+    <Compile Include="3rd\zxing\net2.0\Func.cs" />
+    <Compile Include="3rd\zxing\net2.0\TimeZoneInfo.cs" />
     <Compile Include="3rd\zxing\qrcode\decoder\BitMatrixParser.cs" />
     <Compile Include="3rd\zxing\qrcode\decoder\DataBlock.cs" />
     <Compile Include="3rd\zxing\qrcode\decoder\DataMask.cs" />
@@ -125,6 +138,7 @@
     <Compile Include="3rd\zxing\ResultMetadataType.cs" />
     <Compile Include="3rd\zxing\ResultPoint.cs" />
     <Compile Include="3rd\zxing\ResultPointCallback.cs" />
+    <Compile Include="3rd\zxing\RGBLuminanceSource.cs" />
     <Compile Include="3rd\zxing\WriterException.cs" />
     <Compile Include="Controller\AutoStartup.cs" />
     <Compile Include="Controller\FileManager.cs" />

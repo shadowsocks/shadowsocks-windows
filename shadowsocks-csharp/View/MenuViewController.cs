@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
+using ZXing;
 
 namespace Shadowsocks.View
 {
@@ -143,6 +144,7 @@ namespace Shadowsocks.View
                 CreateMenuItem("Update PAC from GFWList", new EventHandler(this.UpdatePACFromGFWListItem_Click)),
                 new MenuItem("-"),
                 CreateMenuItem("Show QRCode...", new EventHandler(this.QRCodeItem_Click)),
+                CreateMenuItem("Scan QRCode...", new EventHandler(this.ScanQRCodeItem_Click)),
                 CreateMenuItem("Show Logs...", new EventHandler(this.ShowLogItem_Click)),
                 CreateMenuItem("About...", new EventHandler(this.AboutItem_Click)),
                 new MenuItem("-"),
@@ -359,41 +361,32 @@ namespace Shadowsocks.View
 
         private void ScanQRCodeItem_Click(object sender, EventArgs e)
         {
-            /*
-            using (Bitmap image = new Bitmap(Screen.PrimaryScreen.Bounds.Width, 
+
+            using (Bitmap image = new Bitmap(Screen.PrimaryScreen.Bounds.Width,
                                             Screen.PrimaryScreen.Bounds.Height))
             {
-                using (Graphics g = Graphics.FromImage(bmpScreenCapture))
+                using (Graphics g = Graphics.FromImage(image))
                 {
                     g.CopyFromScreen(Screen.PrimaryScreen.Bounds.X,
                                      Screen.PrimaryScreen.Bounds.Y,
                                      0, 0,
-                                     bmpScreenCapture.Size,
+                                     image.Size,
                                      CopyPixelOperation.SourceCopy);
                 }
-                resultPoints.Clear();
-             /*   var reader = new BarcodeReader
+                var reader = new BarcodeReader
                 {
+                    TryHarder = true,
                     PossibleFormats = new List<BarcodeFormat>
-                     {
+                    {
                         BarcodeFormat.QR_CODE
-                     }
+                    }
                 };
-        
                 var result = reader.Decode(image);
-                var result = barcodeReader.Decode(image);
-                var timerStart = DateTime.Now.Ticks;
-                var timerStop = DateTime.Now.Ticks;
-
-                if (result == null)
+                if (result != null)
                 {
-                    txtDecoderContent.Text = "No barcode recognized";
+                    Console.WriteLine(result.Text);
                 }
-                labDuration.Text = new TimeSpan(timerStop - timerStart).Milliseconds.ToString("0 ms");
-                
             }
-         }
-             * */
         }
 
 		private void AutoStartupItem_Click(object sender, EventArgs e) {
