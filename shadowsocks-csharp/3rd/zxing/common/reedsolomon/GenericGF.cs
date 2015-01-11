@@ -28,7 +28,16 @@ namespace ZXing.Common.ReedSolomon
    /// <author>Sean Owen</author>
    public sealed class GenericGF
    {
+      public static GenericGF AZTEC_DATA_12 = new GenericGF(0x1069, 4096, 1); // x^12 + x^6 + x^5 + x^3 + 1
+      public static GenericGF AZTEC_DATA_10 = new GenericGF(0x409, 1024, 1); // x^10 + x^3 + 1
+      public static GenericGF AZTEC_DATA_6 = new GenericGF(0x43, 64, 1); // x^6 + x + 1
+      public static GenericGF AZTEC_PARAM = new GenericGF(0x13, 16, 1); // x^4 + x + 1
       public static GenericGF QR_CODE_FIELD_256 = new GenericGF(0x011D, 256, 0); // x^8 + x^4 + x^3 + x^2 + 1
+      public static GenericGF DATA_MATRIX_FIELD_256 = new GenericGF(0x012D, 256, 1); // x^8 + x^5 + x^3 + x^2 + 1
+      public static GenericGF AZTEC_DATA_8 = DATA_MATRIX_FIELD_256;
+      public static GenericGF MAXICODE_FIELD_64 = AZTEC_DATA_6;
+
+      private const int INITIALIZATION_THRESHOLD = 0;
 
       private int[] expTable;
       private int[] logTable;
@@ -37,6 +46,7 @@ namespace ZXing.Common.ReedSolomon
       private readonly int size;
       private readonly int primitive;
       private readonly int generatorBase;
+      private bool initialized = false;
 
       /// <summary>
       /// Create a representation of GF(size) using the given primitive polynomial.
@@ -54,6 +64,14 @@ namespace ZXing.Common.ReedSolomon
          this.size = size;
          this.generatorBase = genBase;
 
+         if (size <= INITIALIZATION_THRESHOLD)
+         {
+            initialize();
+         }
+      }
+
+      private void initialize()
+      {
          expTable = new int[size];
          logTable = new int[size];
          int x = 1;
@@ -74,13 +92,32 @@ namespace ZXing.Common.ReedSolomon
          // logTable[0] == 0 but this should never be used
          zero = new GenericGFPoly(this, new int[] { 0 });
          one = new GenericGFPoly(this, new int[] { 1 });
+         initialized = true;
+      }
+
+      private void checkInit()
+      {
+         if (!initialized)
+         {
+            initialize();
+         }
       }
 
       internal GenericGFPoly Zero
       {
          get
          {
+            checkInit();
             return zero;
+         }
+      }
+
+      internal GenericGFPoly One
+      {
+         get
+         {
+            checkInit();
+            return one;
          }
       }
 
@@ -92,6 +129,8 @@ namespace ZXing.Common.ReedSolomon
       /// <returns>the monomial representing coefficient * x^degree</returns>
       internal GenericGFPoly buildMonomial(int degree, int coefficient)
       {
+         checkInit();
+
          if (degree < 0)
          {
             throw new ArgumentException();
@@ -120,9 +159,26 @@ namespace ZXing.Common.ReedSolomon
       /// <returns>2 to the power of a in GF(size)</returns>
       internal int exp(int a)
       {
+         checkInit();
+
          return expTable[a];
       }
 
+      /// <summary>
+      /// Logs the specified a.
+      /// </summary>
+      /// <param name="a">A.</param>
+      /// <returns>base 2 log of a in GF(size)</returns>
+      internal int log(int a)
+      {
+         checkInit();
+
+         if (a == 0)
+         {
+            throw new ArgumentException();
+         }
+         return logTable[a];
+      }
 
       /// <summary>
       /// Inverses the specified a.
@@ -130,6 +186,8 @@ namespace ZXing.Common.ReedSolomon
       /// <returns>multiplicative inverse of a</returns>
       internal int inverse(int a)
       {
+         checkInit();
+
          if (a == 0)
          {
             throw new ArithmeticException();
@@ -145,6 +203,8 @@ namespace ZXing.Common.ReedSolomon
       /// <returns>product of a and b in GF(size)</returns>
       internal int multiply(int a, int b)
       {
+         checkInit();
+
          if (a == 0 || b == 0)
          {
             return 0;
@@ -153,11 +213,30 @@ namespace ZXing.Common.ReedSolomon
       }
 
       /// <summary>
+      /// Gets the size.
+      /// </summary>
+      public int Size
+      {
+         get { return size; }
+      }
+
+      /// <summary>
       /// Gets the generator base.
       /// </summary>
       public int GeneratorBase
       {
          get { return generatorBase; }
+      }
+
+      /// <summary>
+      /// Returns a <see cref="System.String"/> that represents this instance.
+      /// </summary>
+      /// <returns>
+      /// A <see cref="System.String"/> that represents this instance.
+      /// </returns>
+      override public String ToString()
+      {
+         return "GF(0x" + primitive.ToString("X") + ',' + size + ')';
       }
    }
 }
