@@ -8,6 +8,8 @@ using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
 using ZXing;
+using ZXing.Common;
+using ZXing.QrCode;
 
 namespace Shadowsocks.View
 {
@@ -387,15 +389,10 @@ namespace Shadowsocks.View
                                         cropRect,
                                         GraphicsUnit.Pixel);
                     }
-                    var reader = new BarcodeReader
-                    {
-                        TryHarder = true,
-                        PossibleFormats = new List<BarcodeFormat>
-                        {
-                            BarcodeFormat.QR_CODE
-                        }
-                    };
-                    var result = reader.Decode(target);
+                    var source = new BitmapLuminanceSource(target);
+                    var bitmap = new BinaryBitmap(new HybridBinarizer(source));
+                    QRCodeReader reader = new QRCodeReader();
+                    var result = reader.decode(bitmap);
                     if (result != null)
                     {
                         var success = controller.AddServerBySSURL(result.Text);
