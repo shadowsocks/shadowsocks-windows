@@ -201,71 +201,7 @@ namespace ZXing.QrCode.Internal
       /// <returns></returns>
       private static Mode chooseMode(String content, String encoding)
       {
-         if ("Shift_JIS".Equals(encoding))
-         {
-
-            // Choose Kanji mode if all input are double-byte characters
-            return isOnlyDoubleByteKanji(content) ? Mode.KANJI : Mode.BYTE;
-         }
-         bool hasNumeric = false;
-         bool hasAlphanumeric = false;
-         for (int i = 0; i < content.Length; ++i)
-         {
-            char c = content[i];
-            if (c >= '0' && c <= '9')
-            {
-               hasNumeric = true;
-            }
-            else if (getAlphanumericCode(c) != -1)
-            {
-               hasAlphanumeric = true;
-            }
-            else
-            {
-               return Mode.BYTE;
-            }
-         }
-         if (hasAlphanumeric)
-         {
-
-            return Mode.ALPHANUMERIC;
-         }
-         if (hasNumeric)
-         {
-
-            return Mode.NUMERIC;
-         }
          return Mode.BYTE;
-      }
-
-      private static bool isOnlyDoubleByteKanji(String content)
-      {
-         byte[] bytes;
-         try
-         {
-            bytes = Encoding.GetEncoding("Shift_JIS").GetBytes(content);
-         }
-         catch (Exception )
-         {
-            return false;
-         }
-         int length = bytes.Length;
-         if (length % 2 != 0)
-         {
-            return false;
-         }
-         for (int i = 0; i < length; i += 2)
-         {
-
-
-            int byte1 = bytes[i] & 0xFF;
-            if ((byte1 < 0x81 || byte1 > 0x9F) && (byte1 < 0xE0 || byte1 > 0xEB))
-            {
-
-               return false;
-            }
-         }
-         return true;
       }
 
       private static int chooseMaskPattern(BitArray bits,
@@ -578,19 +514,10 @@ namespace ZXing.QrCode.Internal
                               BitArray bits,
                               String encoding)
       {
-         if (mode.Equals(Mode.NUMERIC))
-            appendNumericBytes(content, bits);
-         else
-            if (mode.Equals(Mode.ALPHANUMERIC))
-               appendAlphanumericBytes(content, bits);
+        if (mode.Equals(Mode.BYTE))
+            append8BitBytes(content, bits, encoding);
             else
-               if (mode.Equals(Mode.BYTE))
-                  append8BitBytes(content, bits, encoding);
-               else
-                  if (mode.Equals(Mode.KANJI))
-                     appendKanjiBytes(content, bits);
-                  else
-                     throw new WriterException("Invalid mode: " + mode);
+                throw new WriterException("Invalid mode: " + mode);
       }
 
       internal static void appendNumericBytes(String content, BitArray bits)
@@ -625,37 +552,6 @@ namespace ZXing.QrCode.Internal
          }
       }
 
-      internal static void appendAlphanumericBytes(String content, BitArray bits)
-      {
-         int length = content.Length;
-
-         int i = 0;
-         while (i < length)
-         {
-            int code1 = getAlphanumericCode(content[i]);
-            if (code1 == -1)
-            {
-               throw new WriterException();
-            }
-            if (i + 1 < length)
-            {
-               int code2 = getAlphanumericCode(content[i + 1]);
-               if (code2 == -1)
-               {
-                  throw new WriterException();
-               }
-               // Encode two alphanumeric letters in 11 bits.
-               bits.appendBits(code1 * 45 + code2, 11);
-               i += 2;
-            }
-            else
-            {
-               // Encode one alphanumeric letter in six bits.
-               bits.appendBits(code1, 6);
-               i++;
-            }
-         }
-      }
 
       internal static void append8BitBytes(String content, BitArray bits, String encoding)
       {
@@ -696,51 +592,5 @@ namespace ZXing.QrCode.Internal
          }
       }
 
-      internal static void appendKanjiBytes(String content, BitArray bits)
-      {
-         byte[] bytes;
-         try
-         {
-            bytes = Encoding.GetEncoding("Shift_JIS").GetBytes(content);
-         }
-         catch (Exception uee)
-         {
-            throw new WriterException(uee.Message, uee);
-         }
-         int length = bytes.Length;
-         for (int i = 0; i < length; i += 2)
-         {
-            int byte1 = bytes[i] & 0xFF;
-            int byte2 = bytes[i + 1] & 0xFF;
-            int code = (byte1 << 8) | byte2;
-            int subtracted = -1;
-            if (code >= 0x8140 && code <= 0x9ffc)
-            {
-
-               subtracted = code - 0x8140;
-            }
-            else if (code >= 0xe040 && code <= 0xebbf)
-            {
-               subtracted = code - 0xc140;
-            }
-            if (subtracted == -1)
-            {
-
-               throw new WriterException("Invalid byte sequence");
-            }
-            int encoded = ((subtracted >> 8) * 0xc0) + (subtracted & 0xff);
-            bits.appendBits(encoded, 13);
-         }
-      }
-
-       /*
-      private static void appendECI(CharacterSetECI eci, BitArray bits)
-      {
-         bits.appendBits(Mode.ECI.Bits, 4);
-
-         // This is correct for values up to 127, which is all we need now.
-         bits.appendBits(eci.Value, 8);
-      }
-        * */
    }
 }

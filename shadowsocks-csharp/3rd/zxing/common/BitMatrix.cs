@@ -57,24 +57,6 @@ namespace ZXing.Common
          }
 
       }
-      /// <summary> This method is for compatibility with older code. It's only logical to call if the matrix
-      /// is square, so I'm throwing if that's not the case.
-      /// 
-      /// </summary>
-      /// <returns> row/column dimension of this matrix
-      /// </returns>
-      public int Dimension
-      {
-         get
-         {
-            if (width != height)
-            {
-               throw new System.ArgumentException("Can't call getDimension() on a non-square matrix");
-            }
-            return width;
-         }
-
-      }
 
       // A helper to construct a square matrix.
       public BitMatrix(int dimension)
@@ -141,15 +123,6 @@ namespace ZXing.Common
          bits[offset] ^= 1 << (x & 0x1f);
       }
 
-      /// <summary> Clears all bits (sets to false).</summary>
-      public void clear()
-      {
-         int max = bits.Length;
-         for (int i = 0; i < max; i++)
-         {
-            bits[i] = 0;
-         }
-      }
 
       /// <summary> <p>Sets a square region of the bit matrix to true.</p>
       /// 
@@ -226,90 +199,6 @@ namespace ZXing.Common
          Array.Copy(row.Array, 0, bits, y * rowSize, rowSize);
       }
 
-      /// <summary>
-      /// Modifies this {@code BitMatrix} to represent the same but rotated 180 degrees
-      /// </summary>
-      public void rotate180()
-      {
-         var width = Width;
-         var height = Height;
-         var topRow = new BitArray(width);
-         var bottomRow = new BitArray(width);
-         for (int i = 0; i < (height + 1)/2; i++)
-         {
-            topRow = getRow(i, topRow);
-            bottomRow = getRow(height - 1 - i, bottomRow);
-            topRow.reverse();
-            bottomRow.reverse();
-            setRow(i, bottomRow);
-            setRow(height - 1 - i, topRow);
-         }
-      }
-
-      /// <summary>
-      /// This is useful in detecting the enclosing rectangle of a 'pure' barcode.
-      /// </summary>
-      /// <returns>{left,top,width,height} enclosing rectangle of all 1 bits, or null if it is all white</returns>
-      public int[] getEnclosingRectangle()
-      {
-         int left = width;
-         int top = height;
-         int right = -1;
-         int bottom = -1;
-
-         for (int y = 0; y < height; y++)
-         {
-            for (int x32 = 0; x32 < rowSize; x32++)
-            {
-               int theBits = bits[y * rowSize + x32];
-               if (theBits != 0)
-               {
-                  if (y < top)
-                  {
-                     top = y;
-                  }
-                  if (y > bottom)
-                  {
-                     bottom = y;
-                  }
-                  if (x32 * 32 < left)
-                  {
-                     int bit = 0;
-                     while ((theBits << (31 - bit)) == 0)
-                     {
-                        bit++;
-                     }
-                     if ((x32 * 32 + bit) < left)
-                     {
-                        left = x32 * 32 + bit;
-                     }
-                  }
-                  if (x32 * 32 + 31 > right)
-                  {
-                     int bit = 31;
-                     while (((int)((uint)theBits >> bit)) == 0) // (theBits >>> bit)
-                     {
-                        bit--;
-                     }
-                     if ((x32 * 32 + bit) > right)
-                     {
-                        right = x32 * 32 + bit;
-                     }
-                  }
-               }
-            }
-         }
-
-         int widthTmp = right - left;
-         int heightTmp = bottom - top;
-
-         if (widthTmp < 0 || heightTmp < 0)
-         {
-            return null;
-         }
-
-         return new [] { left, top, widthTmp, heightTmp };
-      }
 
       /// <summary>
       /// This is useful in detecting a corner of a 'pure' barcode.
@@ -366,62 +255,5 @@ namespace ZXing.Common
          return new int[] { x, y };
       }
 
-      public override bool Equals(object obj)
-      {
-         if (!(obj is BitMatrix))
-         {
-            return false;
-         }
-         BitMatrix other = (BitMatrix)obj;
-         if (width != other.width || height != other.height ||
-             rowSize != other.rowSize || bits.Length != other.bits.Length)
-         {
-            return false;
-         }
-         for (int i = 0; i < bits.Length; i++)
-         {
-            if (bits[i] != other.bits[i])
-            {
-               return false;
-            }
-         }
-         return true;
-      }
-
-      public override int GetHashCode()
-      {
-         int hash = width;
-         hash = 31 * hash + width;
-         hash = 31 * hash + height;
-         hash = 31 * hash + rowSize;
-         foreach (var bit in bits)
-         {
-            hash = 31 * hash + bit.GetHashCode();
-         }
-         return hash;
-      }
-
-      public override String ToString()
-      {
-         var result = new System.Text.StringBuilder(height * (width + 1));
-         for (int y = 0; y < height; y++)
-         {
-            for (int x = 0; x < width; x++)
-            {
-               result.Append(this[x, y] ? "X " : "  ");
-            }
-#if WindowsCE
-            result.Append("\r\n");
-#else
-            result.AppendLine("");
-#endif
-         }
-         return result.ToString();
-      }
-
-      public object Clone()
-      {
-         return new BitMatrix(width, height, rowSize, (int[])bits.Clone());
-      }
    }
 }
