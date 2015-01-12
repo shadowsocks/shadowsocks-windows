@@ -71,8 +71,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="3rd\zxing\BarcodeFormat.cs" />
-    <Compile Include="3rd\zxing\BarcodeReader.cs" />
-    <Compile Include="3rd\zxing\BarcodeReaderGeneric.cs" />
     <Compile Include="3rd\zxing\BaseLuminanceSource.cs" />
     <Compile Include="3rd\zxing\Binarizer.cs" />
     <Compile Include="3rd\zxing\BinaryBitmap.cs" />
@@ -101,8 +99,6 @@
     <Compile Include="3rd\zxing\common\StringUtils.cs" />
     <Compile Include="3rd\zxing\DecodeHintType.cs" />
     <Compile Include="3rd\zxing\EncodeHintType.cs" />
-    <Compile Include="3rd\zxing\IBarcodeReader.cs" />
-    <Compile Include="3rd\zxing\IBarcodeReaderGeneric.cs" />
     <Compile Include="3rd\zxing\LuminanceSource.cs" />
     <Compile Include="3rd\zxing\net2.0\Action.cs" />
     <Compile Include="3rd\zxing\net2.0\Func.cs" />
@@ -138,7 +134,6 @@
     <Compile Include="3rd\zxing\ResultMetadataType.cs" />
     <Compile Include="3rd\zxing\ResultPoint.cs" />
     <Compile Include="3rd\zxing\ResultPointCallback.cs" />
-    <Compile Include="3rd\zxing\RGBLuminanceSource.cs" />
     <Compile Include="3rd\zxing\WriterException.cs" />
     <Compile Include="Controller\AutoStartup.cs" />
     <Compile Include="Controller\FileManager.cs" />
