@@ -54,7 +54,7 @@ namespace ZXing.QrCode.Internal
 
          try
          {
-            CharacterSetECI currentCharacterSetECI = null;
+            // CharacterSetECI currentCharacterSetECI = null;
             bool fc1InEffect = false;
             Mode mode;
             do
@@ -96,6 +96,7 @@ namespace ZXing.QrCode.Internal
                   }
                   else if (mode == Mode.ECI)
                   {
+                      /*
                      // Count doesn't apply to ECI
                      int value = parseECIValue(bits);
                      currentCharacterSetECI = CharacterSetECI.getCharacterSetECIByValue(value);
@@ -103,6 +104,7 @@ namespace ZXing.QrCode.Internal
                      {
                         return null;
                      }
+                       * */
                   }
                   else
                   {
@@ -135,7 +137,7 @@ namespace ZXing.QrCode.Internal
                         }
                         else if (mode == Mode.BYTE)
                         {
-                           if (!decodeByteSegment(bits, result, count, currentCharacterSetECI, byteSegments, hints))
+                           if (!decodeByteSegment(bits, result, count, byteSegments, hints))
                               return null;
                         }
                         else if (mode == Mode.KANJI)
@@ -301,7 +303,6 @@ namespace ZXing.QrCode.Internal
       private static bool decodeByteSegment(BitSource bits,
                                             StringBuilder result,
                                             int count,
-                                            CharacterSetECI currentCharacterSetECI,
                                             IList<byte[]> byteSegments,
                                             IDictionary<DecodeHintType, object> hints)
       {
@@ -317,19 +318,8 @@ namespace ZXing.QrCode.Internal
             readBytes[i] = (byte)bits.readBits(8);
          }
          String encoding;
-         if (currentCharacterSetECI == null)
-         {
-            // The spec isn't clear on this mode; see
-            // section 6.4.5: t does not say which encoding to assuming
-            // upon decoding. I have seen ISO-8859-1 used as well as
-            // Shift_JIS -- without anything like an ECI designator to
-            // give a hint.
-            encoding = StringUtils.guessEncoding(readBytes, hints);
-         }
-         else
-         {
-            encoding = currentCharacterSetECI.EncodingName;
-         }
+         encoding = StringUtils.guessEncoding(readBytes, hints);
+        
          try
          {
             result.Append(Encoding.GetEncoding(encoding).GetString(readBytes, 0, readBytes.Length));

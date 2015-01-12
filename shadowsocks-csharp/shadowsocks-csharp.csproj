@@ -78,12 +78,10 @@
     <Compile Include="3rd\zxing\common\BitArray.cs" />
     <Compile Include="3rd\zxing\common\BitMatrix.cs" />
     <Compile Include="3rd\zxing\common\BitSource.cs" />
-    <Compile Include="3rd\zxing\common\CharacterSetECI.cs" />
     <Compile Include="3rd\zxing\common\DecoderResult.cs" />
     <Compile Include="3rd\zxing\common\DefaultGridSampler.cs" />
     <Compile Include="3rd\zxing\common\DetectorResult.cs" />
     <Compile Include="3rd\zxing\common\detector\MathUtils.cs" />
-    <Compile Include="3rd\zxing\common\ECI.cs" />
     <Compile Include="3rd\zxing\common\GlobalHistogramBinarizer.cs" />
     <Compile Include="3rd\zxing\common\GridSampler.cs" />
     <Compile Include="3rd\zxing\common\HybridBinarizer.cs" />
