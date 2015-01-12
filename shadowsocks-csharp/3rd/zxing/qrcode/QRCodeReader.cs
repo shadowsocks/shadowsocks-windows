@@ -26,7 +26,7 @@ namespace ZXing.QrCode
    /// This implementation can detect and decode QR Codes in an image.
    /// <author>Sean Owen</author>
    /// </summary>
-   public class QRCodeReader : Reader
+   public class QRCodeReader
    {
       private static readonly ResultPoint[] NO_POINTS = new ResultPoint[0];
 

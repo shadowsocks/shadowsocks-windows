@@ -80,14 +80,10 @@
     <Compile Include="3rd\zxing\common\BitSource.cs" />
     <Compile Include="3rd\zxing\common\CharacterSetECI.cs" />
     <Compile Include="3rd\zxing\common\DecoderResult.cs" />
-    <Compile Include="3rd\zxing\common\DecodingOptions.cs" />
     <Compile Include="3rd\zxing\common\DefaultGridSampler.cs" />
     <Compile Include="3rd\zxing\common\DetectorResult.cs" />
     <Compile Include="3rd\zxing\common\detector\MathUtils.cs" />
-    <Compile Include="3rd\zxing\common\detector\MonochromeRectangleDetector.cs" />
-    <Compile Include="3rd\zxing\common\detector\WhiteRectangleDetector.cs" />
     <Compile Include="3rd\zxing\common\ECI.cs" />
-    <Compile Include="3rd\zxing\common\EncodingOptions.cs" />
     <Compile Include="3rd\zxing\common\GlobalHistogramBinarizer.cs" />
     <Compile Include="3rd\zxing\common\GridSampler.cs" />
     <Compile Include="3rd\zxing\common\HybridBinarizer.cs" />
@@ -100,9 +96,6 @@
     <Compile Include="3rd\zxing\DecodeHintType.cs" />
     <Compile Include="3rd\zxing\EncodeHintType.cs" />
     <Compile Include="3rd\zxing\LuminanceSource.cs" />
-    <Compile Include="3rd\zxing\net2.0\Action.cs" />
-    <Compile Include="3rd\zxing\net2.0\Func.cs" />
-    <Compile Include="3rd\zxing\net2.0\TimeZoneInfo.cs" />
     <Compile Include="3rd\zxing\qrcode\decoder\BitMatrixParser.cs" />
     <Compile Include="3rd\zxing\qrcode\decoder\DataBlock.cs" />
     <Compile Include="3rd\zxing\qrcode\decoder\DataMask.cs" />
@@ -125,11 +118,8 @@
     <Compile Include="3rd\zxing\qrcode\encoder\MaskUtil.cs" />
     <Compile Include="3rd\zxing\qrcode\encoder\MatrixUtil.cs" />
     <Compile Include="3rd\zxing\qrcode\encoder\QRCode.cs" />
-    <Compile Include="3rd\zxing\qrcode\encoder\QrCodeEncodingOptions.cs" />
     <Compile Include="3rd\SimpleJson.cs" />
     <Compile Include="3rd\zxing\qrcode\QRCodeReader.cs" />
-    <Compile Include="3rd\zxing\Reader.cs" />
-    <Compile Include="3rd\zxing\ReaderException.cs" />
     <Compile Include="3rd\zxing\Result.cs" />
     <Compile Include="3rd\zxing\ResultMetadataType.cs" />
     <Compile Include="3rd\zxing\ResultPoint.cs" />
