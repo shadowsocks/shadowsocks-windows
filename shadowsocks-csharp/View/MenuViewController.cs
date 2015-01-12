@@ -33,6 +33,7 @@ namespace Shadowsocks.View
         private MenuItem globalModeItem;
         private MenuItem PACModeItem;
         private ConfigForm configForm;
+        private string _urlToOpen;
 
         public MenuViewController(ShadowsocksController controller)
         {
@@ -362,31 +363,57 @@ namespace Shadowsocks.View
         private void ScanQRCodeItem_Click(object sender, EventArgs e)
         {
 
-            using (Bitmap image = new Bitmap(Screen.PrimaryScreen.Bounds.Width,
+            using (Bitmap fullImage = new Bitmap(Screen.PrimaryScreen.Bounds.Width,
                                             Screen.PrimaryScreen.Bounds.Height))
             {
-                using (Graphics g = Graphics.FromImage(image))
+                using (Graphics g = Graphics.FromImage(fullImage))
                 {
                     g.CopyFromScreen(Screen.PrimaryScreen.Bounds.X,
                                      Screen.PrimaryScreen.Bounds.Y,
                                      0, 0,
-                                     image.Size,
+                                     fullImage.Size,
                                      CopyPixelOperation.SourceCopy);
                 }
-                var reader = new BarcodeReader
+                for (int i = 0; i < 5; i++)
                 {
-                    TryHarder = true,
-                    PossibleFormats = new List<BarcodeFormat>
+                    int marginLeft = fullImage.Width * i / 3 / 5;
+                    int marginTop = fullImage.Height * i / 3 / 5;
+                    Rectangle cropRect = new Rectangle(marginLeft, marginTop, fullImage.Width - marginLeft * 2, fullImage.Height - marginTop * 2);
+                    Bitmap target = new Bitmap(cropRect.Width, cropRect.Height);
+
+                    using (Graphics g = Graphics.FromImage(target))
                     {
-                        BarcodeFormat.QR_CODE
+                        g.DrawImage(fullImage, new Rectangle(0, 0, target.Width, target.Height),
+                                        cropRect,
+                                        GraphicsUnit.Pixel);
                     }
-                };
-                var result = reader.Decode(image);
-                if (result != null)
-                {
-                    var success = controller.AddServerBySSURL(result.Text);
-                    if (success)
+                    var reader = new BarcodeReader
                     {
+                        TryHarder = true,
+                        PossibleFormats = new List<BarcodeFormat>
+                        {
+                            BarcodeFormat.QR_CODE
+                        }
+                    };
+                    var result = reader.Decode(target);
+                    if (result != null)
+                    {
+                        var success = controller.AddServerBySSURL(result.Text);
+                        QRCodeSplashForm splash = new QRCodeSplashForm();
+                        if (success)
+                        {
+                            splash.FormClosed += splash_FormClosed;
+                        }
+                        else if (result.Text.StartsWith("http://") || result.Text.StartsWith("https://"))
+                        {
+                            _urlToOpen = result.Text;
+                            splash.FormClosed += openURLFromQRCode;
+                        }
+                        else
+                        {
+                            MessageBox.Show(I18N.GetString("Failed to decode QRCode"));
+                            return;
+                        }
                         float minX = Int32.MaxValue, minY = Int32.MaxValue, maxX = 0, maxY = 0;
                         foreach (ResultPoint point in result.ResultPoints)
                         {
@@ -397,26 +424,30 @@ namespace Shadowsocks.View
                         }
                         // make it 20% larger
                         float margin = (maxX - minX) * 0.20f;
-                        minX -= margin;
-                        maxX += margin;
-                        minY -= margin;
-                        maxY += margin;
-
-                        QRCodeSplashForm splash = new QRCodeSplashForm();
-                        splash.FormClosed += splash_FormClosed;
+                        minX += -margin + marginLeft;
+                        maxX += margin + marginLeft;
+                        minY += -margin + marginTop;
+                        maxY += margin + marginTop;
                         splash.Location = new Point((int)minX, (int)minY);
-                        splash.Size = new Size((int)maxX - (int)minX, (int)maxY - (int)minY);
+                        // we need a panel because a window has a minimal size
+                        splash.Panel.Size = new Size((int)maxX - (int)minX, (int)maxY - (int)minY);
+                        splash.Size = splash.Panel.Size;
                         splash.Show();
                         return;
                     }
                 }
-                MessageBox.Show(I18N.GetString("Failed to scan QRCode"));
             }
+            MessageBox.Show(I18N.GetString("Failed to find QRCode"));
         }
 
         void splash_FormClosed(object sender, FormClosedEventArgs e)
         {
             ShowConfigForm();
+        }
+
+        void openURLFromQRCode(object sender, FormClosedEventArgs e)
+        {
+            Process.Start(_urlToOpen);
         }
 
 		private void AutoStartupItem_Click(object sender, EventArgs e) {
