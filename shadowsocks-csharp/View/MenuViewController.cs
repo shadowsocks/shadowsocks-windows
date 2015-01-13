@@ -427,6 +427,7 @@ namespace Shadowsocks.View
                         maxY += margin + marginTop;
                         splash.Location = new Point(0, 0);
                         // we need a panel because a window has a minimal size
+                        // TODO: test on high DPI
                         splash.TargetRect = new Rectangle((int)minX, (int)minY, (int)maxX - (int)minX, (int)maxY - (int)minY);
                         splash.Size = new Size(fullImage.Width, fullImage.Height);
                         splash.Show();
