@@ -435,7 +435,7 @@ namespace Shadowsocks.View
                     }
                 }
             }
-            MessageBox.Show(I18N.GetString("Failed to find QRCode"));
+            MessageBox.Show(I18N.GetString("No QRCode found. Try to zoom in or move it to the center of the screen."));
         }
 
         void splash_FormClosed(object sender, FormClosedEventArgs e)
@@ -451,7 +451,7 @@ namespace Shadowsocks.View
 		private void AutoStartupItem_Click(object sender, EventArgs e) {
 			AutoStartupItem.Checked = !AutoStartupItem.Checked;
 			if (!AutoStartup.Set(AutoStartupItem.Checked)) {
-				MessageBox.Show("Failed to edit registry");
+				MessageBox.Show(I18N.GetString("Failed to update registry"));
 			}
 		}
     }

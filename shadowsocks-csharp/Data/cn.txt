@@ -43,5 +43,6 @@ Disabled=已禁用代理
 Update PAC from GFWList=从 GFWList 更新 PAC
 Failed to update PAC file =更新 PAC 文件失败
 PAC updated=更新 PAC 成功
-"Failed to find QRCode=无法找到二维码
+No QRCode found. Try to zoom in or move it to the center of the screen.=找不到二维码，尝试把它放大或者移动到靠近屏幕中间的位置
 Failed to decode QRCode=无法解析二维码
+Failed to update registry=无法修改注册表

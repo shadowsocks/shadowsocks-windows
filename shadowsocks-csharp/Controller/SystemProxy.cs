@@ -48,10 +48,11 @@ namespace Shadowsocks.Controller
                 //Must Notify IE first, or the connections do not chanage
                 CopyProxySettingFromLan();
             }
-            catch (Exception)
+            catch (Exception e)
             {
-                MessageBox.Show("can not change registry!");
-                throw;
+                Logging.LogUsefulException(e);
+                // TODO this should be moved into views
+                MessageBox.Show(I18N.GetString("Failed to update registry"));
             }
         }
 
@@ -68,10 +69,11 @@ namespace Shadowsocks.Controller
                 SystemProxy.NotifyIE();
                 CopyProxySettingFromLan();
             }
-            catch (Exception)
+            catch (Exception e)
             {
-                MessageBox.Show("can not change registry!");
-                throw;
+                Logging.LogUsefulException(e);
+                // TODO this should be moved into views
+                MessageBox.Show(I18N.GetString("Failed to update registry"));
             }
         }
 
