@@ -425,10 +425,10 @@ namespace Shadowsocks.View
                         maxX += margin + marginLeft;
                         minY += -margin + marginTop;
                         maxY += margin + marginTop;
-                        splash.Location = new Point((int)minX, (int)minY);
+                        splash.Location = new Point(0, 0);
                         // we need a panel because a window has a minimal size
-                        splash.Panel.Size = new Size((int)maxX - (int)minX, (int)maxY - (int)minY);
-                        splash.Size = splash.Panel.Size;
+                        splash.TargetRect = new Rectangle((int)minX, (int)minY, (int)maxX - (int)minX, (int)maxY - (int)minY);
+                        splash.Size = new Size(fullImage.Width, fullImage.Height);
                         splash.Show();
                         return;
                     }
