@@ -13,28 +13,6 @@ namespace Shadowsocks.View
 {
     public class QRCodeSplashForm : PerPixelAlphaForm
     {
-        public class QRRectView : Control
-        {
-            private Pen pen;
-            private Brush brush;
-
-            public QRRectView()
-            {
-                pen = new Pen(Color.Red, 3);
-                brush = new SolidBrush(Color.FromArgb(100, Color.Red));
-                SetStyle(ControlStyles.ResizeRedraw, true);
-                SetStyle(ControlStyles.SupportsTransparentBackColor, true);
-                this.BackColor = Color.Transparent;
-                this.DoubleBuffered = true;
-            }
-
-            protected override void OnPaint(PaintEventArgs e)
-            {
-                Graphics g = e.Graphics;
-                g.FillRectangle(brush, 0, 0, Width, Height);
-                g.DrawRectangle(pen, 0, 0, Width, Height);
-            }
-        }
         public Rectangle TargetRect;
 
         public QRCodeSplashForm()
@@ -61,7 +39,6 @@ namespace Shadowsocks.View
         private int flashStep;
         private static int ANIMATION_STEPS = 30;
         private static double ANIMATION_TIME = 0.3;
-        private QRRectView codeRectView;
         int x;
         int y;
         int w;
@@ -77,12 +54,10 @@ namespace Shadowsocks.View
             this.BackColor = Color.Transparent;
             animationStep = 0;
             flashStep = 0;
-            //codeRectView = new QRRectView();
             x = 0;
             y = 0;
             w = Width;
             h = Height;
-            //this.Controls.Add(codeRectView);
             timer = new Timer();
             timer.Interval = (int)(ANIMATION_TIME * 1000 / ANIMATION_STEPS);
             timer.Tick += timer_Tick;
