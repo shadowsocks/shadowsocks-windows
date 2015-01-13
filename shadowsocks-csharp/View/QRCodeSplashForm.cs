@@ -247,7 +247,7 @@ namespace Shadowsocks.View
             if (bitmap.PixelFormat != PixelFormat.Format32bppArgb)
                 throw new ApplicationException("The bitmap must be 32ppp with alpha-channel.");
 
-            // The ideia of this is very simple,
+            // The idea of this is very simple,
             // 1. Create a compatible DC with screen;
             // 2. Select the bitmap with 32bpp with alpha-channel in the compatible DC;
             // 3. Call the UpdateLayeredWindow.
