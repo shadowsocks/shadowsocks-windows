@@ -17,7 +17,7 @@ Download [latest release].
 
 For <= Windows 7, download Shadowsocks-win-x.x.x.zip.
 
-For >= Windows 8, download Shadowsocks-win-dotnet4.0-x.x.x.zip.
+For >= Windows 8, download Shadowsocks-win-dotnet4.0-x.x.x.zip, unless you have .Net 2.0 installed.
 
 #### Usage
 
