@@ -7,6 +7,7 @@ using System.Text;
 using System.Windows.Forms;
 using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
+using System.Diagnostics;
 
 
 namespace Shadowsocks.View
@@ -20,7 +21,7 @@ namespace Shadowsocks.View
             this.Load += QRCodeSplashForm_Load;
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
             this.BackColor = System.Drawing.Color.White;
-            this.ClientSize = new System.Drawing.Size(284, 262);
+            this.ClientSize = new System.Drawing.Size(1, 1);
             this.ControlBox = false;
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.MaximizeBox = false;
@@ -31,14 +32,14 @@ namespace Shadowsocks.View
             this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
             this.StartPosition = System.Windows.Forms.FormStartPosition.Manual;
             this.TopMost = true;
-
         }
 
         private Timer timer;
-        private int animationStep;
         private int flashStep;
-        private static int ANIMATION_STEPS = 30;
-        private static double ANIMATION_TIME = 0.3;
+        private static double FPS = 1.0 / 15 * 1000; // System.Windows.Forms.Timer resolution is 15ms
+        private static double ANIMATION_TIME = 0.5;
+        private static int ANIMATION_STEPS = (int)(ANIMATION_TIME * FPS);
+        Stopwatch sw;
         int x;
         int y;
         int w;
@@ -52,12 +53,12 @@ namespace Shadowsocks.View
         {
             SetStyle(ControlStyles.SupportsTransparentBackColor, true);
             this.BackColor = Color.Transparent;
-            animationStep = 0;
             flashStep = 0;
             x = 0;
             y = 0;
             w = Width;
             h = Height;
+            sw = Stopwatch.StartNew();
             timer = new Timer();
             timer.Interval = (int)(ANIMATION_TIME * 1000 / ANIMATION_STEPS);
             timer.Tick += timer_Tick;
@@ -80,10 +81,9 @@ namespace Shadowsocks.View
 
         void timer_Tick(object sender, EventArgs e)
         {
-            if (animationStep < ANIMATION_STEPS)
+            double percent = (double)sw.ElapsedMilliseconds / 1000.0 / (double)ANIMATION_TIME;
+            if (percent < 1)
             {
-                animationStep++;
-                double percent = (double)animationStep / (double)ANIMATION_STEPS;
                 // ease out
                 percent = 1 - Math.Pow((1 - percent), 4);
                 x = (int)(TargetRect.X * percent);
@@ -101,14 +101,15 @@ namespace Shadowsocks.View
             }
             else
             {
-                timer.Interval = 50;
                 if (flashStep == 0)
                 {
+                    timer.Interval = 100;
                     g.Clear(Color.Transparent);
                     SetBitmap(bitmap);
                 }
                 else if (flashStep == 1)
                 {
+                    timer.Interval = 50;
                     g.FillRectangle(brush, x, y, w, h);
                     g.DrawRectangle(pen, x, y, w, h);
                     SetBitmap(bitmap);
@@ -137,6 +138,7 @@ namespace Shadowsocks.View
                 }
                 else
                 {
+                    sw.Stop();
                     timer.Stop();
                     pen.Dispose();
                     brush.Dispose();
