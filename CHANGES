@@ -1,3 +1,9 @@
+2.2 2015-01-14
+- Support updating PAC from GFWList
+- Support adding server by scanning QR Code
+- Output timestamp in logs
+- Minor fixes
+
 2.1.6 2015-01-02
 - Fix OPTIONS requests
 - Improve logs
