@@ -137,6 +137,7 @@ namespace Shadowsocks.Controller
 
         public void Stop()
         {
+            Console.WriteLine("Stop");
             if (stopped)
             {
                 return;
@@ -183,6 +184,7 @@ namespace Shadowsocks.Controller
 
         protected void Reload()
         {
+            Console.WriteLine("Reload");
             // some logic in configuration updated the config when saving, we need to read it again
             _config = Configuration.Load();
 
@@ -257,6 +259,7 @@ namespace Shadowsocks.Controller
 
         private void UpdateSystemProxy()
         {
+            Console.WriteLine("UpdateSystemProxy");
             if (_config.enabled)
             {
                 SystemProxy.Enable(_config.global);
