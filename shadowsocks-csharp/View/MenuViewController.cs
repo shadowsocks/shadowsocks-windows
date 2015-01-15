@@ -364,74 +364,77 @@ namespace Shadowsocks.View
 
         private void ScanQRCodeItem_Click(object sender, EventArgs e)
         {
-
-            using (Bitmap fullImage = new Bitmap(Screen.PrimaryScreen.Bounds.Width,
-                                            Screen.PrimaryScreen.Bounds.Height))
+            foreach (Screen screen in Screen.AllScreens)
             {
-                using (Graphics g = Graphics.FromImage(fullImage))
+                using (Bitmap fullImage = new Bitmap(screen.Bounds.Width,
+                                                screen.Bounds.Height))
                 {
-                    g.CopyFromScreen(Screen.PrimaryScreen.Bounds.X,
-                                     Screen.PrimaryScreen.Bounds.Y,
-                                     0, 0,
-                                     fullImage.Size,
-                                     CopyPixelOperation.SourceCopy);
-                }
-                for (int i = 0; i < 5; i++)
-                {
-                    int marginLeft = fullImage.Width * i / 3 / 5;
-                    int marginTop = fullImage.Height * i / 3 / 5;
-                    Rectangle cropRect = new Rectangle(marginLeft, marginTop, fullImage.Width - marginLeft * 2, fullImage.Height - marginTop * 2);
-                    Bitmap target = new Bitmap(cropRect.Width, cropRect.Height);
-
-                    using (Graphics g = Graphics.FromImage(target))
+                    using (Graphics g = Graphics.FromImage(fullImage))
                     {
-                        g.DrawImage(fullImage, new Rectangle(0, 0, target.Width, target.Height),
-                                        cropRect,
-                                        GraphicsUnit.Pixel);
+                        g.CopyFromScreen(screen.Bounds.X,
+                                         screen.Bounds.Y,
+                                         0, 0,
+                                         fullImage.Size,
+                                         CopyPixelOperation.SourceCopy);
                     }
-                    var source = new BitmapLuminanceSource(target);
-                    var bitmap = new BinaryBitmap(new HybridBinarizer(source));
-                    QRCodeReader reader = new QRCodeReader();
-                    var result = reader.decode(bitmap);
-                    if (result != null)
+                    int maxTry = 10;
+                    for (int i = 0; i < maxTry; i++)
                     {
-                        var success = controller.AddServerBySSURL(result.Text);
-                        QRCodeSplashForm splash = new QRCodeSplashForm();
-                        if (success)
+                        int marginLeft = fullImage.Width * i / 3 / maxTry;
+                        int marginTop = fullImage.Height * i / 3 / maxTry;
+                        Rectangle cropRect = new Rectangle(marginLeft, marginTop, fullImage.Width - marginLeft * 2, fullImage.Height - marginTop * 2);
+                        Bitmap target = new Bitmap(cropRect.Width, cropRect.Height);
+
+                        using (Graphics g = Graphics.FromImage(target))
                         {
-                            splash.FormClosed += splash_FormClosed;
+                            g.DrawImage(fullImage, new Rectangle(0, 0, target.Width, target.Height),
+                                            cropRect,
+                                            GraphicsUnit.Pixel);
                         }
-                        else if (result.Text.StartsWith("http://") || result.Text.StartsWith("https://"))
+                        var source = new BitmapLuminanceSource(target);
+                        var bitmap = new BinaryBitmap(new HybridBinarizer(source));
+                        QRCodeReader reader = new QRCodeReader();
+                        var result = reader.decode(bitmap);
+                        if (result != null)
                         {
-                            _urlToOpen = result.Text;
-                            splash.FormClosed += openURLFromQRCode;
-                        }
-                        else
-                        {
-                            MessageBox.Show(I18N.GetString("Failed to decode QRCode"));
+                            var success = controller.AddServerBySSURL(result.Text);
+                            QRCodeSplashForm splash = new QRCodeSplashForm();
+                            if (success)
+                            {
+                                splash.FormClosed += splash_FormClosed;
+                            }
+                            else if (result.Text.StartsWith("http://") || result.Text.StartsWith("https://"))
+                            {
+                                _urlToOpen = result.Text;
+                                splash.FormClosed += openURLFromQRCode;
+                            }
+                            else
+                            {
+                                MessageBox.Show(I18N.GetString("Failed to decode QRCode"));
+                                return;
+                            }
+                            float minX = Int32.MaxValue, minY = Int32.MaxValue, maxX = 0, maxY = 0;
+                            foreach (ResultPoint point in result.ResultPoints)
+                            {
+                                minX = Math.Min(minX, point.X);
+                                minY = Math.Min(minY, point.Y);
+                                maxX = Math.Max(maxX, point.X);
+                                maxY = Math.Max(maxY, point.Y);
+                            }
+                            // make it 20% larger
+                            float margin = (maxX - minX) * 0.20f;
+                            minX += -margin + marginLeft;
+                            maxX += margin + marginLeft;
+                            minY += -margin + marginTop;
+                            maxY += margin + marginTop;
+                            splash.Location = new Point(screen.Bounds.X, screen.Bounds.Y);
+                            // we need a panel because a window has a minimal size
+                            // TODO: test on high DPI
+                            splash.TargetRect = new Rectangle((int)minX + screen.Bounds.X, (int)minY + screen.Bounds.Y, (int)maxX - (int)minX, (int)maxY - (int)minY);
+                            splash.Size = new Size(fullImage.Width, fullImage.Height);
+                            splash.Show();
                             return;
                         }
-                        float minX = Int32.MaxValue, minY = Int32.MaxValue, maxX = 0, maxY = 0;
-                        foreach (ResultPoint point in result.ResultPoints)
-                        {
-                            minX = Math.Min(minX, point.X);
-                            minY = Math.Min(minY, point.Y);
-                            maxX = Math.Max(maxX, point.X);
-                            maxY = Math.Max(maxY, point.Y);
-                        }
-                        // make it 20% larger
-                        float margin = (maxX - minX) * 0.20f;
-                        minX += -margin + marginLeft;
-                        maxX += margin + marginLeft;
-                        minY += -margin + marginTop;
-                        maxY += margin + marginTop;
-                        splash.Location = new Point(0, 0);
-                        // we need a panel because a window has a minimal size
-                        // TODO: test on high DPI
-                        splash.TargetRect = new Rectangle((int)minX, (int)minY, (int)maxX - (int)minX, (int)maxY - (int)minY);
-                        splash.Size = new Size(fullImage.Width, fullImage.Height);
-                        splash.Show();
-                        return;
                     }
                 }
             }
