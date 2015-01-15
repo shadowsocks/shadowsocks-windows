@@ -49,6 +49,11 @@ namespace ZXing.Common
          {
             return (bits[i >> 5] & (1 << (i & 0x1F))) != 0;
          }
+         set
+         {
+            if (value)
+               bits[i >> 5] |= 1 << (i & 0x1F);
+         }
       }
 
       public BitArray()
@@ -57,6 +62,22 @@ namespace ZXing.Common
          this.bits = new int[1];
       }
 
+      public BitArray(int size)
+      {
+         if (size < 1)
+         {
+            throw new ArgumentException("size must be at least 1");
+         }
+         this.size = size;
+         this.bits = makeArray(size);
+      }
+
+      // For testing only
+      private BitArray(int[] bits, int size)
+      {
+         this.bits = bits;
+         this.size = size;
+      }
 
       private void ensureCapacity(int size)
       {
@@ -65,6 +86,46 @@ namespace ZXing.Common
             int[] newBits = makeArray(size);
             System.Array.Copy(bits, 0, newBits, 0, bits.Length);
             bits = newBits;
+         }
+      }
+
+
+      private static int numberOfTrailingZeros(int num)
+      {
+         var index = (-num & num)%37;
+         if (index < 0)
+            index *= -1;
+         return _lookup[index];
+      }
+
+      private static readonly int[] _lookup =
+         {
+            32, 0, 1, 26, 2, 23, 27, 0, 3, 16, 24, 30, 28, 11, 0, 13, 4, 7, 17,
+            0, 25, 22, 31, 15, 29, 10, 12, 6, 0, 21, 14, 9, 5, 20, 8, 19, 18
+         };
+
+
+      /// <summary> Sets a block of 32 bits, starting at bit i.
+      /// 
+      /// </summary>
+      /// <param name="i">first bit to set
+      /// </param>
+      /// <param name="newBits">the new value of the next 32 bits. Note again that the least-significant bit
+      /// corresponds to bit i, the next-least-significant to i+1, and so on.
+      /// </param>
+      public void setBulk(int i, int newBits)
+      {
+         bits[i >> 5] = newBits;
+      }
+
+
+      /// <summary> Clears all bits (sets to false).</summary>
+      public void clear()
+      {
+         int max = bits.Length;
+         for (int i = 0; i < max; i++)
+         {
+            bits[i] = 0;
          }
       }
 
@@ -82,13 +143,21 @@ namespace ZXing.Common
          size++;
       }
 
+      /// <returns> underlying array of ints. The first element holds the first 32 bits, and the least
+      /// significant bit is bit 0.
+      /// </returns>
+      public int[] Array
+      {
+         get { return bits; }
+      }
+
       /// <summary>
       /// Appends the least-significant bits, from value, in order from most-significant to
       /// least-significant. For example, appending 6 bits from 0x000001E will append the bits
       /// 0, 1, 1, 1, 1, 0 in that order.
       /// </summary>
-      /// <param name="value"><see cref="int"/> containing bits to append</param>
-      /// <param name="numBits">bits from value to append</param>
+      /// <param name="value">The value.</param>
+      /// <param name="numBits">The num bits.</param>
       public void appendBits(int value, int numBits)
       {
          if (numBits < 0 || numBits > 32)
@@ -156,5 +225,54 @@ namespace ZXing.Common
          return new int[(size + 31) >> 5];
       }
 
+      /// <summary>
+      /// Determines whether the specified <see cref="System.Object"/> is equal to this instance.
+      /// </summary>
+      /// <param name="o">The <see cref="System.Object"/> to compare with this instance.</param>
+      /// <returns>
+      ///   <c>true</c> if the specified <see cref="System.Object"/> is equal to this instance; otherwise, <c>false</c>.
+      /// </returns>
+      public override bool Equals(Object o)
+      {
+         var other = o as BitArray;
+         if (other == null)
+            return false;
+         if (size != other.size)
+            return false;
+         for (var index = 0; index < size; index++)
+         {
+            if (bits[index] != other.bits[index])
+               return false;
+         }
+         return true;
+      }
+
+      /// <summary>
+      /// Returns a hash code for this instance.
+      /// </summary>
+      /// <returns>
+      /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table. 
+      /// </returns>
+      public override int GetHashCode()
+      {
+         var hash = size;
+         foreach (var bit in bits)
+         {
+            hash = 31 * hash + bit.GetHashCode();
+         }
+         return hash;
+      }
+
+
+      /// <summary>
+      /// Erstellt ein neues Objekt, das eine Kopie der aktuellen Instanz darstellt.
+      /// </summary>
+      /// <returns>
+      /// Ein neues Objekt, das eine Kopie dieser Instanz darstellt.
+      /// </returns>
+      public object Clone()
+      {
+         return new BitArray((int[])bits.Clone(), size);
+      }
    }
 }

@@ -7,6 +7,9 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
+using ZXing;
+using ZXing.Common;
+using ZXing.QrCode;
 
 namespace Shadowsocks.View
 {
@@ -32,6 +35,7 @@ namespace Shadowsocks.View
         private MenuItem globalModeItem;
         private MenuItem PACModeItem;
         private ConfigForm configForm;
+        private string _urlToOpen;
 
         public MenuViewController(ShadowsocksController controller)
         {
@@ -45,6 +49,8 @@ namespace Shadowsocks.View
             controller.ShareOverLANStatusChanged += controller_ShareOverLANStatusChanged;
             controller.EnableGlobalChanged += controller_EnableGlobalChanged;
             controller.Errored += controller_Errored;
+            controller.UpdatePACFromGFWListCompleted += controller_UpdatePACFromGFWListCompleted;
+            controller.UpdatePACFromGFWListError += controller_UpdatePACFromGFWListError;
 
             _notifyIcon = new NotifyIcon();
             UpdateTrayIcon();
@@ -132,14 +138,16 @@ namespace Shadowsocks.View
                 }),
                 this.ServersItem = CreateMenuGroup("Servers", new MenuItem[] {
                     this.SeperatorItem = new MenuItem("-"),
-                    this.ConfigItem = CreateMenuItem("Edit Servers...", new EventHandler(this.Config_Click))
+                    this.ConfigItem = CreateMenuItem("Edit Servers...", new EventHandler(this.Config_Click)),
+                    CreateMenuItem("Show QRCode...", new EventHandler(this.QRCodeItem_Click)),
+                    CreateMenuItem("Scan QRCode from Screen...", new EventHandler(this.ScanQRCodeItem_Click))
                 }),
                 new MenuItem("-"),
                 this.AutoStartupItem = CreateMenuItem("Start on Boot", new EventHandler(this.AutoStartupItem_Click)),
                 this.ShareOverLANItem = CreateMenuItem("Share over LAN", new EventHandler(this.ShareOverLANItem_Click)),
                 CreateMenuItem("Edit PAC File...", new EventHandler(this.EditPACFileItem_Click)),
+                CreateMenuItem("Update PAC from GFWList", new EventHandler(this.UpdatePACFromGFWListItem_Click)),
                 new MenuItem("-"),
-                CreateMenuItem("Show QRCode...", new EventHandler(this.QRCodeItem_Click)),
                 CreateMenuItem("Show Logs...", new EventHandler(this.ShowLogItem_Click)),
                 CreateMenuItem("About...", new EventHandler(this.AboutItem_Click)),
                 new MenuItem("-"),
@@ -176,19 +184,36 @@ namespace Shadowsocks.View
             System.Diagnostics.Process.Start("explorer.exe", argument);
         }
 
+        void ShowBalloonTip(string title, string content, ToolTipIcon icon, int timeout)
+        {
+            _notifyIcon.BalloonTipTitle = title;
+            _notifyIcon.BalloonTipText = content;
+            _notifyIcon.BalloonTipIcon = icon;
+            _notifyIcon.ShowBalloonTip(timeout);
+        }
+
+        void controller_UpdatePACFromGFWListError(object sender, System.IO.ErrorEventArgs e)
+        {
+            ShowBalloonTip(I18N.GetString("Failed to update PAC file"), e.GetException().Message, ToolTipIcon.Error, 5000);
+            Logging.LogUsefulException(e.GetException());
+        }
+
+        void controller_UpdatePACFromGFWListCompleted(object sender, EventArgs e)
+        {
+            ShowBalloonTip(I18N.GetString("Shadowsocks"), I18N.GetString("PAC updated"), ToolTipIcon.Info, 1000);
+        }
+
         void updateChecker_NewVersionFound(object sender, EventArgs e)
         {
-            _notifyIcon.BalloonTipTitle = String.Format(I18N.GetString("Shadowsocks {0} Update Found"), updateChecker.LatestVersionNumber);
-            _notifyIcon.BalloonTipText = I18N.GetString("Click here to download");
-            _notifyIcon.BalloonTipIcon = ToolTipIcon.Info;
+            ShowBalloonTip(String.Format(I18N.GetString("Shadowsocks {0} Update Found"), updateChecker.LatestVersionNumber), I18N.GetString("Click here to download"), ToolTipIcon.Info, 5000);
             _notifyIcon.BalloonTipClicked += notifyIcon1_BalloonTipClicked;
-            _notifyIcon.ShowBalloonTip(5000);
             _isFirstRun = false;
         }
 
         void notifyIcon1_BalloonTipClicked(object sender, EventArgs e)
         {
             System.Diagnostics.Process.Start(updateChecker.LatestVersionURL);
+            _notifyIcon.BalloonTipClicked -= notifyIcon1_BalloonTipClicked;
         }
 
 
@@ -206,8 +231,10 @@ namespace Shadowsocks.View
         private void UpdateServersMenu()
         {
             var items = ServersItem.MenuItems;
-
-            items.Clear();
+            while (items[0] != SeperatorItem)
+            {
+                items.RemoveAt(0);
+            }
 
             Configuration configuration = controller.GetConfiguration();
             for (int i = 0; i < configuration.configs.Count; i++)
@@ -216,10 +243,8 @@ namespace Shadowsocks.View
                 MenuItem item = new MenuItem(server.FriendlyName());
                 item.Tag = i;
                 item.Click += AServerItem_Click;
-                items.Add(item);
+                items.Add(i, item);
             }
-            items.Add(SeperatorItem);
-            items.Add(ConfigItem);
 
             if (configuration.index >= 0 && configuration.index < configuration.configs.Count)
             {
@@ -244,7 +269,7 @@ namespace Shadowsocks.View
         void configForm_FormClosed(object sender, FormClosedEventArgs e)
         {
             configForm = null;
-            Util.Util.ReleaseMemory();
+            Util.Utils.ReleaseMemory();
             ShowFirstTimeBalloon();
         }
 
@@ -311,6 +336,11 @@ namespace Shadowsocks.View
             controller.TouchPACFile();
         }
 
+        private void UpdatePACFromGFWListItem_Click(object sender, EventArgs e)
+        {
+            controller.UpdatePACFromGFWList();
+        }
+
         private void AServerItem_Click(object sender, EventArgs e)
         {
             MenuItem item = (MenuItem)sender;
@@ -332,10 +362,104 @@ namespace Shadowsocks.View
             qrCodeForm.Show();
         }
 
+        private void ScanQRCodeItem_Click(object sender, EventArgs e)
+        {
+            foreach (Screen screen in Screen.AllScreens)
+            {
+                using (Bitmap fullImage = new Bitmap(screen.Bounds.Width,
+                                                screen.Bounds.Height))
+                {
+                    using (Graphics g = Graphics.FromImage(fullImage))
+                    {
+                        g.CopyFromScreen(screen.Bounds.X,
+                                         screen.Bounds.Y,
+                                         0, 0,
+                                         fullImage.Size,
+                                         CopyPixelOperation.SourceCopy);
+                    }
+                    int maxTry = 10;
+                    for (int i = 0; i < maxTry; i++)
+                    {
+                        int marginLeft = (int)((double)fullImage.Width * i / 2.5 / maxTry);
+                        int marginTop = (int)((double)fullImage.Height * i / 2.5 / maxTry);
+                        Rectangle cropRect = new Rectangle(marginLeft, marginTop, fullImage.Width - marginLeft * 2, fullImage.Height - marginTop * 2);
+                        Bitmap target = new Bitmap(screen.Bounds.Width, screen.Bounds.Height);
+
+                        double imageScale = (double)screen.Bounds.Width / (double)cropRect.Width;
+                        using (Graphics g = Graphics.FromImage(target))
+                        {
+                            g.DrawImage(fullImage, new Rectangle(0, 0, target.Width, target.Height),
+                                            cropRect,
+                                            GraphicsUnit.Pixel);
+                        }
+                        var source = new BitmapLuminanceSource(target);
+                        var bitmap = new BinaryBitmap(new HybridBinarizer(source));
+                        QRCodeReader reader = new QRCodeReader();
+                        var result = reader.decode(bitmap);
+                        if (result != null)
+                        {
+                            var success = controller.AddServerBySSURL(result.Text);
+                            QRCodeSplashForm splash = new QRCodeSplashForm();
+                            if (success)
+                            {
+                                splash.FormClosed += splash_FormClosed;
+                            }
+                            else if (result.Text.StartsWith("http://") || result.Text.StartsWith("https://"))
+                            {
+                                _urlToOpen = result.Text;
+                                splash.FormClosed += openURLFromQRCode;
+                            }
+                            else
+                            {
+                                MessageBox.Show(I18N.GetString("Failed to decode QRCode"));
+                                return;
+                            }
+                            double minX = Int32.MaxValue, minY = Int32.MaxValue, maxX = 0, maxY = 0;
+                            foreach (ResultPoint point in result.ResultPoints)
+                            {
+                                minX = Math.Min(minX, point.X);
+                                minY = Math.Min(minY, point.Y);
+                                maxX = Math.Max(maxX, point.X);
+                                maxY = Math.Max(maxY, point.Y);
+                            }
+                            minX /= imageScale;
+                            minY /= imageScale;
+                            maxX /= imageScale;
+                            maxY /= imageScale;
+                            // make it 20% larger
+                            double margin = (maxX - minX) * 0.20f;
+                            minX += -margin + marginLeft;
+                            maxX += margin + marginLeft;
+                            minY += -margin + marginTop;
+                            maxY += margin + marginTop;
+                            splash.Location = new Point(screen.Bounds.X, screen.Bounds.Y);
+                            // we need a panel because a window has a minimal size
+                            // TODO: test on high DPI
+                            splash.TargetRect = new Rectangle((int)minX + screen.Bounds.X, (int)minY + screen.Bounds.Y, (int)maxX - (int)minX, (int)maxY - (int)minY);
+                            splash.Size = new Size(fullImage.Width, fullImage.Height);
+                            splash.Show();
+                            return;
+                        }
+                    }
+                }
+            }
+            MessageBox.Show(I18N.GetString("No QRCode found. Try to zoom in or move it to the center of the screen."));
+        }
+
+        void splash_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            ShowConfigForm();
+        }
+
+        void openURLFromQRCode(object sender, FormClosedEventArgs e)
+        {
+            Process.Start(_urlToOpen);
+        }
+
 		private void AutoStartupItem_Click(object sender, EventArgs e) {
 			AutoStartupItem.Checked = !AutoStartupItem.Checked;
 			if (!AutoStartup.Set(AutoStartupItem.Checked)) {
-				MessageBox.Show("Failed to edit registry");
+				MessageBox.Show(I18N.GetString("Failed to update registry"));
 			}
 		}
     }

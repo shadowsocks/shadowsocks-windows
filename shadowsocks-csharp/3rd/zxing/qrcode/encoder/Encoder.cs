@@ -30,6 +30,15 @@ namespace ZXing.QrCode.Internal
    public static class Encoder
    {
 
+      // The original table is defined in the table 5 of JISX0510:2004 (p.19).
+      private static readonly int[] ALPHANUMERIC_TABLE = {
+         -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,  // 0x00-0x0f
+         -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,  // 0x10-0x1f
+         36, -1, -1, -1, 37, 38, -1, -1, -1, -1, 39, 40, -1, 41, 42, 43,  // 0x20-0x2f
+         0,   1,  2,  3,  4,  5,  6,  7,  8,  9, 44, -1, -1, -1, -1, -1,  // 0x30-0x3f
+         -1, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24,  // 0x40-0x4f
+         25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, -1, -1, -1, -1, -1,  // 0x50-0x5f
+      };
 
       internal static String DEFAULT_BYTE_MODE_ENCODING = "ISO-8859-1";
 
@@ -52,15 +61,32 @@ namespace ZXing.QrCode.Internal
       /// Note that there is no way to encode bytes in MODE_KANJI. We might want to add EncodeWithMode()
       /// with which clients can specify the encoding mode. For now, we don't need the functionality.
       /// </summary>
-      /// <param name="content">text to encode</param>
-      /// <param name="ecLevel">error correction level to use</param>
-      /// <returns><see cref="QRCode"/> representing the encoded QR code</returns>
+      /// <param name="content">The content.</param>
+      /// <param name="ecLevel">The ec level.</param>
       public static QRCode encode(String content, ErrorCorrectionLevel ecLevel)
+      {
+         return encode(content, ecLevel, null);
+      }
+
+      /// <summary>
+      /// Encodes the specified content.
+      /// </summary>
+      /// <param name="content">The content.</param>
+      /// <param name="ecLevel">The ec level.</param>
+      /// <param name="hints">The hints.</param>
+      /// <returns></returns>
+      public static QRCode encode(String content,
+                                ErrorCorrectionLevel ecLevel,
+                                IDictionary<EncodeHintType, object> hints)
       {
          // Determine what character encoding has been specified by the caller, if any
 #if !SILVERLIGHT || WINDOWS_PHONE
-         String encoding = DEFAULT_BYTE_MODE_ENCODING;
-         //bool generateECI = !DEFAULT_BYTE_MODE_ENCODING.Equals(encoding);
+         String encoding = hints == null || !hints.ContainsKey(EncodeHintType.CHARACTER_SET) ? null : (String)hints[EncodeHintType.CHARACTER_SET];
+         if (encoding == null)
+         {
+            encoding = DEFAULT_BYTE_MODE_ENCODING;
+         }
+         bool generateECI = !DEFAULT_BYTE_MODE_ENCODING.Equals(encoding);
 #else
          // Silverlight supports only UTF-8 and UTF-16 out-of-the-box
          const string encoding = "UTF-8";
@@ -71,27 +97,12 @@ namespace ZXing.QrCode.Internal
 
          // Pick an encoding mode appropriate for the content. Note that this will not attempt to use
          // multiple modes / segments even if that were more efficient. Twould be nice.
-         Mode mode = Mode.BYTE;
+         Mode mode = chooseMode(content, encoding);
 
          // This will store the header information, like mode and
          // length, as well as "header" segments like an ECI segment.
          BitArray headerBits = new BitArray();
 
-         /*
-          // Append ECI segment if applicable
-         if (mode == Mode.BYTE && generateECI)
-         {
-            CharacterSetECI eci = CharacterSetECI.getCharacterSetECIByName(encoding);
-            if (eci != null)
-            {
-               var eciIsExplicitDisabled = (hints != null && hints.ContainsKey(EncodeHintType.DISABLE_ECI) ? (bool)hints[EncodeHintType.DISABLE_ECI] : false);
-               if (!eciIsExplicitDisabled)
-               {
-                  appendECI(eci, headerBits);
-               }
-            }
-         }
-          * */
 
          // (With ECI in place,) Write the mode marker
          appendModeInfo(mode, headerBits);
@@ -156,6 +167,42 @@ namespace ZXing.QrCode.Internal
          return qrCode;
       }
 
+      /// <summary>
+      /// Gets the alphanumeric code.
+      /// </summary>
+      /// <param name="code">The code.</param>
+      /// <returns>the code point of the table used in alphanumeric mode or
+      /// -1 if there is no corresponding code in the table.</returns>
+      internal static int getAlphanumericCode(int code)
+      {
+         if (code < ALPHANUMERIC_TABLE.Length)
+         {
+            return ALPHANUMERIC_TABLE[code];
+         }
+         return -1;
+      }
+
+      /// <summary>
+      /// Chooses the mode.
+      /// </summary>
+      /// <param name="content">The content.</param>
+      /// <returns></returns>
+      public static Mode chooseMode(String content)
+      {
+         return chooseMode(content, null);
+      }
+
+      /// <summary>
+      /// Choose the best mode by examining the content. Note that 'encoding' is used as a hint;
+      /// if it is Shift_JIS, and the input is only double-byte Kanji, then we return {@link Mode#KANJI}.
+      /// </summary>
+      /// <param name="content">The content.</param>
+      /// <param name="encoding">The encoding.</param>
+      /// <returns></returns>
+      private static Mode chooseMode(String content, String encoding)
+      {
+         return Mode.BYTE;
+      }
 
       private static int chooseMaskPattern(BitArray bits,
                                            ErrorCorrectionLevel ecLevel,
@@ -199,7 +246,7 @@ namespace ZXing.QrCode.Internal
                return version;
             }
          }
-         throw new Exception("Data too big");
+         throw new WriterException("Data too big");
       }
 
       /// <summary>
@@ -212,7 +259,7 @@ namespace ZXing.QrCode.Internal
          int capacity = numDataBytes << 3;
          if (bits.Size > capacity)
          {
-             throw new Exception("data bits cannot fit in the QR Code" + bits.Size + " > " +
+            throw new WriterException("data bits cannot fit in the QR Code" + bits.Size + " > " +
                 capacity);
          }
          for (int i = 0; i < 4 && bits.Size < capacity; ++i)
@@ -237,7 +284,7 @@ namespace ZXing.QrCode.Internal
          }
          if (bits.Size != capacity)
          {
-             throw new Exception("Bits size does not equal capacity");
+            throw new WriterException("Bits size does not equal capacity");
          }
       }
 
@@ -261,7 +308,7 @@ namespace ZXing.QrCode.Internal
       {
          if (blockID >= numRSBlocks)
          {
-             throw new Exception("Block ID too large");
+            throw new WriterException("Block ID too large");
          }
          // numRsBlocksInGroup2 = 196 % 5 = 1
          int numRsBlocksInGroup2 = numTotalBytes % numRSBlocks;
@@ -284,13 +331,13 @@ namespace ZXing.QrCode.Internal
          if (numEcBytesInGroup1 != numEcBytesInGroup2)
          {
 
-             throw new Exception("EC bytes mismatch");
+            throw new WriterException("EC bytes mismatch");
          }
          // 5 = 4 + 1.
          if (numRSBlocks != numRsBlocksInGroup1 + numRsBlocksInGroup2)
          {
 
-             throw new Exception("RS blocks mismatch");
+            throw new WriterException("RS blocks mismatch");
          }
          // 196 = (13 + 26) * 4 + (14 + 26) * 1
          if (numTotalBytes !=
@@ -299,7 +346,7 @@ namespace ZXing.QrCode.Internal
                  ((numDataBytesInGroup2 + numEcBytesInGroup2) *
                      numRsBlocksInGroup2))
          {
-             throw new Exception("Total bytes mismatch");
+            throw new WriterException("Total bytes mismatch");
          }
 
          if (blockID < numRsBlocksInGroup1)
@@ -335,7 +382,7 @@ namespace ZXing.QrCode.Internal
          if (bits.SizeInBytes != numDataBytes)
          {
 
-             throw new Exception("Number of bits and data bytes does not match");
+            throw new WriterException("Number of bits and data bytes does not match");
          }
 
          // Step 1.  Divide data bytes into blocks and generate error correction bytes for them. We'll
@@ -369,7 +416,7 @@ namespace ZXing.QrCode.Internal
          if (numDataBytes != dataBytesOffset)
          {
 
-             throw new Exception("Data bytes does not match offset");
+            throw new WriterException("Data bytes does not match offset");
          }
 
          BitArray result = new BitArray();
@@ -400,7 +447,7 @@ namespace ZXing.QrCode.Internal
          }
          if (numTotalBytes != result.SizeInBytes)
          {  // Should be same.
-             throw new Exception("Interleaving error: " + numTotalBytes + " and " +
+            throw new WriterException("Interleaving error: " + numTotalBytes + " and " +
                 result.SizeInBytes + " differ.");
          }
 
@@ -450,7 +497,7 @@ namespace ZXing.QrCode.Internal
          int numBits = mode.getCharacterCountBits(version);
          if (numLetters >= (1 << numBits))
          {
-             throw new Exception(numLetters + " is bigger than " + ((1 << numBits) - 1));
+            throw new WriterException(numLetters + " is bigger than " + ((1 << numBits) - 1));
          }
          bits.appendBits(numLetters, numBits);
       }
@@ -467,11 +514,44 @@ namespace ZXing.QrCode.Internal
                               BitArray bits,
                               String encoding)
       {
-               if (mode.Equals(Mode.BYTE))
-                  append8BitBytes(content, bits, encoding);
-                  else
-                      throw new Exception("Invalid mode: " + mode);
+        if (mode.Equals(Mode.BYTE))
+            append8BitBytes(content, bits, encoding);
+            else
+                throw new WriterException("Invalid mode: " + mode);
       }
+
+      internal static void appendNumericBytes(String content, BitArray bits)
+      {
+         int length = content.Length;
+
+         int i = 0;
+         while (i < length)
+         {
+            int num1 = content[i] - '0';
+            if (i + 2 < length)
+            {
+               // Encode three numeric letters in ten bits.
+               int num2 = content[i + 1] - '0';
+               int num3 = content[i + 2] - '0';
+               bits.appendBits(num1 * 100 + num2 * 10 + num3, 10);
+               i += 3;
+            }
+            else if (i + 1 < length)
+            {
+               // Encode two numeric letters in seven bits.
+               int num2 = content[i + 1] - '0';
+               bits.appendBits(num1 * 10 + num2, 7);
+               i += 2;
+            }
+            else
+            {
+               // Encode one numeric letter in four bits.
+               bits.appendBits(num1, 4);
+               i++;
+            }
+         }
+      }
+
 
       internal static void append8BitBytes(String content, BitArray bits, String encoding)
       {
@@ -504,7 +584,7 @@ namespace ZXing.QrCode.Internal
 #endif
          catch (Exception uee)
          {
-             throw new Exception(uee.Message, uee);
+            throw new WriterException(uee.Message, uee);
          }
          foreach (byte b in bytes)
          {
@@ -512,15 +592,5 @@ namespace ZXing.QrCode.Internal
          }
       }
 
-
-       /*
-      private static void appendECI(CharacterSetECI eci, BitArray bits)
-      {
-         bits.appendBits(Mode.ECI.Bits, 4);
-
-         // This is correct for values up to 127, which is all we need now.
-         bits.appendBits(eci.Value, 8);
-      }
-        * */
    }
 }

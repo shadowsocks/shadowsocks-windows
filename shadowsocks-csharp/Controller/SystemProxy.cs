@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.IO;
 
 namespace Shadowsocks.Controller
 {
@@ -47,10 +48,11 @@ namespace Shadowsocks.Controller
                 //Must Notify IE first, or the connections do not chanage
                 CopyProxySettingFromLan();
             }
-            catch (Exception)
+            catch (Exception e)
             {
-                MessageBox.Show("can not change registry!");
-                throw;
+                Logging.LogUsefulException(e);
+                // TODO this should be moved into views
+                MessageBox.Show(I18N.GetString("Failed to update registry"));
             }
         }
 
@@ -67,10 +69,11 @@ namespace Shadowsocks.Controller
                 SystemProxy.NotifyIE();
                 CopyProxySettingFromLan();
             }
-            catch (Exception)
+            catch (Exception e)
             {
-                MessageBox.Show("can not change registry!");
-                throw;
+                Logging.LogUsefulException(e);
+                // TODO this should be moved into views
+                MessageBox.Show(I18N.GetString("Failed to update registry"));
             }
         }
 
@@ -79,18 +82,24 @@ namespace Shadowsocks.Controller
             RegistryKey registry =
                 Registry.CurrentUser.OpenSubKey("Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings\\Connections",
                     true);
-            var defulatValue = registry.GetValue("DefaultConnectionSettings");
-            var connections = registry.GetValueNames();
-            foreach (String each in connections){
-                if (!(each.Equals("DefaultConnectionSettings")
-                    || each.Equals("LAN Connection")
-                    || each.Equals("SavedLegacySettings")))
+            var defaultValue = registry.GetValue("DefaultConnectionSettings");
+            try
+            {
+                var connections = registry.GetValueNames();
+                foreach (String each in connections)
                 {
-                    //set all the connections's proxy as the lan
-                    registry.SetValue(each, defulatValue);
+                    if (!(each.Equals("DefaultConnectionSettings")
+                        || each.Equals("LAN Connection")
+                        || each.Equals("SavedLegacySettings")))
+                    {
+                        //set all the connections's proxy as the lan
+                        registry.SetValue(each, defaultValue);
+                    }
                 }
+                SystemProxy.NotifyIE();
+            } catch (IOException e) {
+                Logging.LogUsefulException(e);
             }
-            NotifyIE();
         }
 
         private static String GetTimestamp(DateTime value)

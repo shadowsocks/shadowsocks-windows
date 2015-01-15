@@ -61,17 +61,28 @@ namespace Shadowsocks.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] abp_js {
+            get {
+                object obj = ResourceManager.GetObject("abp_js", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Shadowsocks=Shadowsocks
         ///Enable=启用代理
         ///Mode=代理模式
         ///PAC=PAC 模式
         ///Global=全局模式
-        ///Servers=服务器选择
+        ///Servers=服务器
         ///Edit Servers...=编辑服务器...
-        ///Start on Boot=自动启动
+        ///Start on Boot=开机启动
         ///Share over LAN=在局域网共享代理
         ///Edit PAC File...=编辑 PAC 文件...
         ///Show QRCode...=显示二维码...
+        ///Scan QRCode from Screen...=扫描屏幕上的二维码...
         ///Show Logs...=显示日志...
         ///About...=关于...
         ///Quit=退出
@@ -89,9 +100,7 @@ namespace Shadowsocks.Properties {
         ///Cancel=取消
         ///New server=未配置的服务器
         ///QRCode=二维码
-        ///Shadowsocks Error: {0}=Shadowsocks 错误: {0}
-        ///Port already in use=端口已被占用
-        ///Il [rest of string was truncated]&quot;;.
+        ///Shadowsocks Error: {0}=Shadowsocks [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string cn {
             get {

@@ -59,7 +59,7 @@ namespace ZXing.Common.ReedSolomon
             }
             if (firstNonZero == coefficientsLength)
             {
-               this.coefficients = new int[]{0};
+               this.coefficients = field.Zero.coefficients;
             }
             else
             {
@@ -112,6 +112,36 @@ namespace ZXing.Common.ReedSolomon
          return coefficients[coefficients.Length - 1 - degree];
       }
 
+      /// <summary>
+      /// evaluation of this polynomial at a given point
+      /// </summary>
+      /// <param name="a">A.</param>
+      /// <returns>evaluation of this polynomial at a given point</returns>
+      internal int evaluateAt(int a)
+      {
+         int result = 0;
+         if (a == 0)
+         {
+            // Just return the x^0 coefficient
+            return getCoefficient(0);
+         }
+         int size = coefficients.Length;
+         if (a == 1)
+         {
+            // Just the sum of the coefficients
+            foreach (var coefficient in coefficients)
+            {
+               result = GenericGF.addOrSubtract(result, coefficient);
+            }
+            return result;
+         }
+         result = coefficients[0];
+         for (int i = 1; i < size; i++)
+         {
+            result = GenericGF.addOrSubtract(field.multiply(a, result), coefficients[i]);
+         }
+         return result;
+      }
 
       internal GenericGFPoly addOrSubtract(GenericGFPoly other)
       {
@@ -176,6 +206,24 @@ namespace ZXing.Common.ReedSolomon
          return new GenericGFPoly(field, product);
       }
 
+      internal GenericGFPoly multiply(int scalar)
+      {
+         if (scalar == 0)
+         {
+            return field.Zero;
+         }
+         if (scalar == 1)
+         {
+            return this;
+         }
+         int size = coefficients.Length;
+         int[] product = new int[size];
+         for (int i = 0; i < size; i++)
+         {
+            product[i] = field.multiply(coefficients[i], scalar);
+         }
+         return new GenericGFPoly(field, product);
+      }
 
       internal GenericGFPoly multiplyByMonomial(int degree, int coefficient)
       {
@@ -226,5 +274,58 @@ namespace ZXing.Common.ReedSolomon
          return new GenericGFPoly[] { quotient, remainder };
       }
 
+      public override String ToString()
+      {
+         StringBuilder result = new StringBuilder(8 * Degree);
+         for (int degree = Degree; degree >= 0; degree--)
+         {
+            int coefficient = getCoefficient(degree);
+            if (coefficient != 0)
+            {
+               if (coefficient < 0)
+               {
+                  result.Append(" - ");
+                  coefficient = -coefficient;
+               }
+               else
+               {
+                  if (result.Length > 0)
+                  {
+                     result.Append(" + ");
+                  }
+               }
+               if (degree == 0 || coefficient != 1)
+               {
+                  int alphaPower = field.log(coefficient);
+                  if (alphaPower == 0)
+                  {
+                     result.Append('1');
+                  }
+                  else if (alphaPower == 1)
+                  {
+                     result.Append('a');
+                  }
+                  else
+                  {
+                     result.Append("a^");
+                     result.Append(alphaPower);
+                  }
+               }
+               if (degree != 0)
+               {
+                  if (degree == 1)
+                  {
+                     result.Append('x');
+                  }
+                  else
+                  {
+                     result.Append("x^");
+                     result.Append(degree);
+                  }
+               }
+            }
+         }
+         return result.ToString();
+      }
    }
 }

@@ -1,5 +1,6 @@
 ﻿using Shadowsocks.Model;
 using Shadowsocks.Properties;
+using Shadowsocks.Util;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -14,7 +15,7 @@ namespace Shadowsocks.Controller
     class PACServer
     {
         private static int PORT = 8093;
-        private static string PAC_FILE = "pac.txt";
+        public static string PAC_FILE = "pac.txt";
         private static Configuration config;
 
         Socket _listener;
@@ -130,19 +131,7 @@ namespace Shadowsocks.Controller
             }
             else
             {
-                byte[] pacGZ = Resources.proxy_pac_txt;
-                byte[] buffer = new byte[1024];  // builtin pac gzip size: maximum 100K
-                MemoryStream sb = new MemoryStream();
-                int n;
-                using (GZipStream input = new GZipStream(new MemoryStream(pacGZ),
-                    CompressionMode.Decompress, false))
-                {
-                    while((n = input.Read(buffer, 0, buffer.Length)) > 0)
-                    {
-                        sb.Write(buffer, 0, n);
-                    }
-                    return System.Text.Encoding.UTF8.GetString(sb.ToArray());
-                }
+                return Utils.UnGzip(Resources.proxy_pac_txt);
             }
         }
 
@@ -175,7 +164,7 @@ Connection: Close
 ", System.Text.Encoding.UTF8.GetBytes(pac).Length) + pac;
                     byte[] response = System.Text.Encoding.UTF8.GetBytes(text);
                     conn.BeginSend(response, 0, response.Length, 0, new AsyncCallback(SendCallback), conn);
-                    Util.Util.ReleaseMemory();
+                    Util.Utils.ReleaseMemory();
                 }
                 else
                 {

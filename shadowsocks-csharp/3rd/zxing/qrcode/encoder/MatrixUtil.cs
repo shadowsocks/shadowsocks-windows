@@ -14,7 +14,6 @@
 * limitations under the License.
 */
 
-using System;
 using ZXing.Common;
 
 namespace ZXing.QrCode.Internal
@@ -310,7 +309,7 @@ namespace ZXing.QrCode.Internal
          // All bits should be consumed.
          if (bitIndex != dataBits.Size)
          {
-            throw new Exception("Not all bits consumed: " + bitIndex + '/' + dataBits.Size);
+            throw new WriterException("Not all bits consumed: " + bitIndex + '/' + dataBits.Size);
          }
       }
 
@@ -366,9 +365,6 @@ namespace ZXing.QrCode.Internal
       /// <returns></returns>
       public static int calculateBCHCode(int value, int poly)
       {
-         if (poly == 0)
-            throw new ArgumentException("0 polynominal", "poly");
-
          // If poly is "1 1111 0010 0101" (version info poly), msbSetInPoly is 13. We'll subtract 1
          // from 13 to make it 12.
          int msbSetInPoly = findMSBSet(poly);
@@ -394,7 +390,7 @@ namespace ZXing.QrCode.Internal
       {
          if (!QRCode.isValidMaskPattern(maskPattern))
          {
-             throw new Exception("Invalid mask pattern");
+            throw new WriterException("Invalid mask pattern");
          }
          int typeInfo = (ecLevel.Bits << 3) | maskPattern;
          bits.appendBits(typeInfo, 5);
@@ -409,7 +405,7 @@ namespace ZXing.QrCode.Internal
          if (bits.Size != 15)
          {
             // Just in case.
-             throw new Exception("should not happen but we got: " + bits.Size);
+            throw new WriterException("should not happen but we got: " + bits.Size);
          }
       }
 
@@ -428,7 +424,7 @@ namespace ZXing.QrCode.Internal
          if (bits.Size != 18)
          {
             // Just in case.
-             throw new Exception("should not happen but we got: " + bits.Size);
+            throw new WriterException("should not happen but we got: " + bits.Size);
          }
       }
 
@@ -472,7 +468,7 @@ namespace ZXing.QrCode.Internal
       {
          if (matrix[8, matrix.Height - 8] == 0)
          {
-             throw new Exception();
+            throw new WriterException();
          }
          matrix[8, matrix.Height - 8] = 1;
       }
@@ -483,7 +479,7 @@ namespace ZXing.QrCode.Internal
          {
             if (!isEmpty(matrix[xStart + x, yStart]))
             {
-                throw new Exception();
+               throw new WriterException();
             }
             matrix[xStart + x, yStart] = 0;
          }
@@ -495,7 +491,7 @@ namespace ZXing.QrCode.Internal
          {
             if (!isEmpty(matrix[xStart, yStart + y]))
             {
-                throw new Exception();
+               throw new WriterException();
             }
             matrix[xStart, yStart + y] = 0;
          }
