@@ -380,11 +380,12 @@ namespace Shadowsocks.View
                     int maxTry = 10;
                     for (int i = 0; i < maxTry; i++)
                     {
-                        int marginLeft = fullImage.Width * i / 3 / maxTry;
-                        int marginTop = fullImage.Height * i / 3 / maxTry;
+                        int marginLeft = (int)((double)fullImage.Width * i / 2.5 / maxTry);
+                        int marginTop = (int)((double)fullImage.Height * i / 2.5 / maxTry);
                         Rectangle cropRect = new Rectangle(marginLeft, marginTop, fullImage.Width - marginLeft * 2, fullImage.Height - marginTop * 2);
-                        Bitmap target = new Bitmap(cropRect.Width, cropRect.Height);
+                        Bitmap target = new Bitmap(screen.Bounds.Width, screen.Bounds.Height);
 
+                        double imageScale = (double)screen.Bounds.Width / (double)cropRect.Width;
                         using (Graphics g = Graphics.FromImage(target))
                         {
                             g.DrawImage(fullImage, new Rectangle(0, 0, target.Width, target.Height),
@@ -413,7 +414,7 @@ namespace Shadowsocks.View
                                 MessageBox.Show(I18N.GetString("Failed to decode QRCode"));
                                 return;
                             }
-                            float minX = Int32.MaxValue, minY = Int32.MaxValue, maxX = 0, maxY = 0;
+                            double minX = Int32.MaxValue, minY = Int32.MaxValue, maxX = 0, maxY = 0;
                             foreach (ResultPoint point in result.ResultPoints)
                             {
                                 minX = Math.Min(minX, point.X);
@@ -421,8 +422,12 @@ namespace Shadowsocks.View
                                 maxX = Math.Max(maxX, point.X);
                                 maxY = Math.Max(maxY, point.Y);
                             }
+                            minX /= imageScale;
+                            minY /= imageScale;
+                            maxX /= imageScale;
+                            maxY /= imageScale;
                             // make it 20% larger
-                            float margin = (maxX - minX) * 0.20f;
+                            double margin = (maxX - minX) * 0.20f;
                             minX += -margin + marginLeft;
                             maxX += margin + marginLeft;
                             minY += -margin + marginTop;
