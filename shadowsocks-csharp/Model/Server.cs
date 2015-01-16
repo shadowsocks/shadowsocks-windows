@@ -71,9 +71,9 @@ namespace Shadowsocks.Model
                 int indexLastAt = data.LastIndexOf('@');
 
                 string afterAt = data.Substring(indexLastAt + 1);
-                int indexLastComma = afterAt.LastIndexOf(':');
-                this.server_port = int.Parse(afterAt.Substring(indexLastComma + 1));
-                this.server = afterAt.Substring(0, indexLastComma);
+                int indexLastColon = afterAt.LastIndexOf(':');
+                this.server_port = int.Parse(afterAt.Substring(indexLastColon + 1));
+                this.server = afterAt.Substring(0, indexLastColon);
 
                 string beforeAt = data.Substring(0, indexLastAt);
                 string[] parts = beforeAt.Split(new[] { ':' });
