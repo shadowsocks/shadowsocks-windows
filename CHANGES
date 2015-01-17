@@ -1,3 +1,6 @@
+2.2.1 2015-01-18
+- Fix QR Code compatibility
+
 2.2 2015-01-14
 - Support updating PAC from GFWList
 - Support adding server by scanning QR Code

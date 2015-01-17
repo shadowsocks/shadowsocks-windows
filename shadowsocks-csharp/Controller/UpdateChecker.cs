@@ -17,7 +17,7 @@ namespace Shadowsocks.Controller
         public string LatestVersionURL;
         public event EventHandler NewVersionFound;
 
-        public const string Version = "2.2";
+        public const string Version = "2.2.1";
 
         public void CheckUpdate()
         {
