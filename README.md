@@ -23,11 +23,10 @@ For >= Windows 8, download Shadowsocks-win-dotnet4.0-x.x.x.zip, unless you have 
 
 1. Find Shadowsocks icon in notification tray
 2. You can add multiple servers in servers menu
-3. Select Enable menu to enable system proxy
-4. Leave Enable menu unchecked, Shadowsocks will still provide an HTTP proxy at 127.0.0.1:8123
-5. After you saved PAC file with any editor, Shadowsocks will notify browsers
+3. Select Enable System Proxy menu to enable system proxy
+4. After you saved PAC file with any editor, Shadowsocks will notify browsers
 about the change automatically
-6. Please disable other proxy addons in your browser, or set them to use
+5. Please disable other proxy addons in your browser, or set them to use
 system proxy
 
 ### Develop
