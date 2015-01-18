@@ -178,7 +178,7 @@ namespace Shadowsocks.Controller
         {
             if (gfwListUpdater != null)
             {
-                gfwListUpdater.UpdatePACFromGFWList();
+                gfwListUpdater.UpdatePACFromGFWList(_config);
             }
         }
 
