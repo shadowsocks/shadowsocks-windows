@@ -127,6 +127,7 @@
     <Compile Include="Controller\FileManager.cs" />
     <Compile Include="Controller\GFWListUpdater.cs" />
     <Compile Include="Controller\I18N.cs" />
+    <Compile Include="Controller\Listener.cs" />
     <Compile Include="Controller\Logging.cs" />
     <Compile Include="Controller\UpdateChecker.cs" />
     <Compile Include="Encryption\EncryptorBase.cs" />

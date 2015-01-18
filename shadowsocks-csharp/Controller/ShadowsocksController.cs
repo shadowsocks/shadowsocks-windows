@@ -17,7 +17,7 @@ namespace Shadowsocks.Controller
 
         private Thread _ramThread;
 
-        private Local local;
+        private Listener _listener;
         private PACServer pacServer;
         private Configuration _config;
         private PolipoRunner polipoRunner;
@@ -77,6 +77,7 @@ namespace Shadowsocks.Controller
         public void SaveServers(List<Server> servers, int localPort)
         {
             _config.configs = servers;
+            _config.localPort = localPort;
             SaveConfig(_config);
         }
 
@@ -142,9 +143,9 @@ namespace Shadowsocks.Controller
                 return;
             }
             stopped = true;
-            if (local != null)
+            if (_listener != null)
             {
-                local.Stop();
+                _listener.Stop();
             }
             if (polipoRunner != null)
             {
@@ -204,9 +205,9 @@ namespace Shadowsocks.Controller
 
             pacServer.Stop();
 
-            if (local != null)
+            if (_listener != null)
             {
-                local.Stop();
+                _listener.Stop();
             }
 
             // don't put polipoRunner.Start() before pacServer.Stop()
@@ -218,8 +219,11 @@ namespace Shadowsocks.Controller
             {
                 polipoRunner.Start(_config);
 
-                local = new Local(_config);
-                local.Start();
+                Local local = new Local(_config);
+                List<Listener.Service> services = new List<Listener.Service>();
+                services.Add(local);
+                _listener = new Listener(services);
+                _listener.Start(_config);
                 pacServer.Start(_config);
             }
             catch (Exception e)
