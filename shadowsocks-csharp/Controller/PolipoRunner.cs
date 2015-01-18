@@ -15,6 +15,7 @@ namespace Shadowsocks.Controller
     {
         private Process _process;
         private static string temppath;
+        private int _runningPort;
 
         static PolipoRunner()
         {
@@ -26,6 +27,14 @@ namespace Shadowsocks.Controller
             catch (IOException e)
             {
                 Logging.LogUsefulException(e);
+            }
+        }
+
+        public int RunningPort
+        {
+            get
+            {
+                return _runningPort;
             }
         }
 
@@ -48,8 +57,9 @@ namespace Shadowsocks.Controller
                     }
                 }
                 string polipoConfig = Resources.polipo_config;
+                _runningPort = this.GetFreePort();
                 polipoConfig = polipoConfig.Replace("__SOCKS_PORT__", configuration.localPort.ToString());
-                polipoConfig = polipoConfig.Replace("__POLIPO_BIND_PORT__", this.GetFreePort().ToString());
+                polipoConfig = polipoConfig.Replace("__POLIPO_BIND_PORT__", _runningPort.ToString());
                 polipoConfig = polipoConfig.Replace("__POLIPO_BIND_IP__", configuration.shareOverLan ? "0.0.0.0" : "127.0.0.1");
                 FileManager.ByteArrayToFile(temppath + "/polipo.conf", System.Text.Encoding.UTF8.GetBytes(polipoConfig));
 

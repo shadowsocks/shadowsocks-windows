@@ -222,7 +222,7 @@ namespace Shadowsocks.Controller
                 List<Listener.Service> services = new List<Listener.Service>();
                 services.Add(local);
                 services.Add(_pacServer);
-                services.Add(new PortForwarder(_config.localPort));
+                services.Add(new PortForwarder(polipoRunner.RunningPort));
                 _listener = new Listener(services);
                 _listener.Start(_config);
             }
