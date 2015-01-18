@@ -96,7 +96,7 @@ namespace Shadowsocks.Controller
                 {
                     usedPorts.Add(endPoint.Port);
                 }
-                for (int port = defaultPort; port < 65535; port++)
+                for (int port = defaultPort; port <= 65535; port++)
                 {
                     if (!usedPorts.Contains(port))
                     {
