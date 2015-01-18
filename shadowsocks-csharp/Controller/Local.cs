@@ -17,13 +17,12 @@ namespace Shadowsocks.Controller
             this._config = config;
         }
 
-        public bool GoodForMe(byte[] firstPacket, int length)
+        public bool Handle(byte[] firstPacket, int length, Socket socket)
         {
-            return true;
-        }
-        
-        public void Handle(byte[] firstPacket, int length, Socket socket)
-        {
+            if (length < 2 || firstPacket[0] != 5)
+            {
+                return false;
+            }
             socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, true);
             Handler handler = new Handler();
             handler.connection = socket;
@@ -32,6 +31,7 @@ namespace Shadowsocks.Controller
             handler.server = server;
 
             handler.Start(firstPacket, length);
+            return true;
         }
     }
 

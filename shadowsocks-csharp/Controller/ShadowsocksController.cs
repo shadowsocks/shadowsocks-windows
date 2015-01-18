@@ -18,7 +18,7 @@ namespace Shadowsocks.Controller
         private Thread _ramThread;
 
         private Listener _listener;
-        private PACServer pacServer;
+        private PACServer _pacServer;
         private Configuration _config;
         private PolipoRunner polipoRunner;
         private GFWListUpdater gfwListUpdater;
@@ -159,7 +159,7 @@ namespace Shadowsocks.Controller
 
         public void TouchPACFile()
         {
-            string pacFilename = pacServer.TouchPACFile();
+            string pacFilename = _pacServer.TouchPACFile();
             if (PACFileReadyToOpen != null)
             {
                 PACFileReadyToOpen(this, new PathEventArgs() { Path = pacFilename });
@@ -191,10 +191,10 @@ namespace Shadowsocks.Controller
             {
                 polipoRunner = new PolipoRunner();
             }
-            if (pacServer == null)
+            if (_pacServer == null)
             {
-                pacServer = new PACServer();
-                pacServer.PACFileChanged += pacServer_PACFileChanged;
+                _pacServer = new PACServer();
+                _pacServer.PACFileChanged += pacServer_PACFileChanged;
             }
             if (gfwListUpdater == null)
             {
@@ -202,8 +202,6 @@ namespace Shadowsocks.Controller
                 gfwListUpdater.UpdateCompleted += pacServer_PACUpdateCompleted;
                 gfwListUpdater.Error += pacServer_PACUpdateError;
             }
-
-            pacServer.Stop();
 
             if (_listener != null)
             {
@@ -222,9 +220,9 @@ namespace Shadowsocks.Controller
                 Local local = new Local(_config);
                 List<Listener.Service> services = new List<Listener.Service>();
                 services.Add(local);
+                services.Add(_pacServer);
                 _listener = new Listener(services);
                 _listener.Start(_config);
-                pacServer.Start(_config);
             }
             catch (Exception e)
             {

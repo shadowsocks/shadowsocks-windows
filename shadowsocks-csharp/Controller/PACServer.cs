@@ -12,59 +12,61 @@ using System.Text;
 
 namespace Shadowsocks.Controller
 {
-    class PACServer
+    class PACServer : Listener.Service
     {
         private static int PORT = 8093;
         public static string PAC_FILE = "pac.txt";
-        private static Configuration config;
 
-        Socket _listener;
         FileSystemWatcher watcher;
 
         public event EventHandler PACFileChanged;
 
-        public void Start(Configuration configuration)
+        public PACServer()
+        {
+            this.WatchPacFile();
+        }
+
+        public bool Handle(byte[] firstPacket, int length, Socket socket)
         {
             try
             {
-                config = configuration;
-                // Create a TCP/IP socket.
-                _listener = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-                _listener.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
-                IPEndPoint localEndPoint = null;
-                if (configuration.shareOverLan)
+                string request = Encoding.UTF8.GetString(firstPacket, 0, length);
+                string[] lines = request.Split('\r', '\n');
+                bool hostMatch = false, pathMatch = false;
+                foreach (string line in lines)
                 {
-                    localEndPoint = new IPEndPoint(IPAddress.Any, PORT);
+                    string[] kv = line.Split(new char[]{':'}, 2);
+                    if (kv.Length == 2)
+                    {
+                        if (kv[0] == "Host")
+                        {
+                            if (kv[1].Trim() == ((IPEndPoint)socket.LocalEndPoint).ToString())
+                            {
+                                hostMatch = true;
+                            }
+                        }
+                    }
+                    else if (kv.Length == 1)
+                    {
+                        if (line.IndexOf("pac") >= 0)
+                        {
+                            pathMatch = true;
+                        }
+                    }
                 }
-                else
+                if (hostMatch && pathMatch)
                 {
-                    localEndPoint = new IPEndPoint(IPAddress.Loopback, PORT);
+                    SendResponse(firstPacket, length, socket);
+                    return true;
                 }
-
-                // Bind the socket to the local endpoint and listen for incoming connections.
-                _listener.Bind(localEndPoint);
-                _listener.Listen(100);
-                _listener.BeginAccept(
-                    new AsyncCallback(AcceptCallback),
-                    _listener);
-
-                WatchPacFile();
+                return false;
             }
-            catch (SocketException)
+            catch (ArgumentException)
             {
-                _listener.Close();
-                throw;
+                return false;
             }
         }
 
-        public void Stop()
-        {
-            if (_listener != null)
-            {
-                _listener.Close();
-                _listener = null;
-            }
-        }
 
         public string TouchPACFile()
         {
@@ -76,50 +78,6 @@ namespace Shadowsocks.Controller
             {
                 FileManager.UncompressFile(PAC_FILE, Resources.proxy_pac_txt);
                 return PAC_FILE;
-            }
-        }
-
-        // we don't even use it
-        static byte[] requestBuf = new byte[2048];
-
-        public void AcceptCallback(IAsyncResult ar)
-        {
-            Socket listener = (Socket)ar.AsyncState;
-            try
-            {
-                Socket conn = listener.EndAccept(ar);
-
-                object[] state = new object[] {
-                    conn,
-                    requestBuf
-                };
-
-                conn.BeginReceive(requestBuf, 0, requestBuf.Length, 0,
-                    new AsyncCallback(ReceiveCallback), state);
-            }
-            catch (ObjectDisposedException)
-            {
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-            }
-            finally
-            {
-                try
-                {
-                    listener.BeginAccept(
-                        new AsyncCallback(AcceptCallback),
-                        listener);
-                }
-                catch (ObjectDisposedException)
-                {
-                    // do nothing
-                }
-                catch (Exception e)
-                {
-                    Logging.LogUsefulException(e);
-                }
             }
         }
 
@@ -135,46 +93,33 @@ namespace Shadowsocks.Controller
             }
         }
 
-        private void ReceiveCallback(IAsyncResult ar)
+        public void SendResponse(byte[] firstPacket, int length, Socket socket)
         {
-            object[] state = (object[])ar.AsyncState;
-
-            Socket conn = (Socket)state[0];
-            byte[] requestBuf = (byte[])state[1];
             try
             {
-                int bytesRead = conn.EndReceive(ar);
-
                 string pac = GetPACContent();
 
-                IPEndPoint localEndPoint = (IPEndPoint)conn.LocalEndPoint;
+                IPEndPoint localEndPoint = (IPEndPoint)socket.LocalEndPoint;
 
-                string proxy = GetPACAddress(requestBuf, localEndPoint);
+                string proxy = GetPACAddress(firstPacket, length, localEndPoint);
 
                 pac = pac.Replace("__PROXY__", proxy);
 
-                if (bytesRead > 0)
-                {
-                    string text = String.Format(@"HTTP/1.1 200 OK
+                string text = String.Format(@"HTTP/1.1 200 OK
 Server: Shadowsocks
 Content-Type: application/x-ns-proxy-autoconfig
 Content-Length: {0}
 Connection: Close
 
 ", System.Text.Encoding.UTF8.GetBytes(pac).Length) + pac;
-                    byte[] response = System.Text.Encoding.UTF8.GetBytes(text);
-                    conn.BeginSend(response, 0, response.Length, 0, new AsyncCallback(SendCallback), conn);
-                    Util.Utils.ReleaseMemory();
-                }
-                else
-                {
-                    conn.Close();
-                }
+                byte[] response = System.Text.Encoding.UTF8.GetBytes(text);
+                socket.BeginSend(response, 0, response.Length, 0, new AsyncCallback(SendCallback), socket);
+                Util.Utils.ReleaseMemory();
             }
             catch (Exception e)
             {
                 Console.WriteLine(e);
-                conn.Close();
+                socket.Close();
             }
         }
 
@@ -213,23 +158,9 @@ Connection: Close
             }
         }
 
-        private string GetPACAddress(byte[] requestBuf, IPEndPoint localEndPoint)
+        private string GetPACAddress(byte[] requestBuf, int length, IPEndPoint localEndPoint)
         {
-            string proxy = "PROXY " + localEndPoint.Address + ":8123;";
-            //try
-            //{
-            //    string requestString = Encoding.UTF8.GetString(requestBuf);
-            //    if (requestString.IndexOf("AppleWebKit") >= 0)
-            //    {
-            //        string address = "" + localEndPoint.Address + ":" + config.GetCurrentServer().local_port;
-            //        proxy = "SOCKS5 " + address + "; SOCKS " + address + ";";
-            //    }
-            //}
-            //catch (Exception e)
-            //{
-            //    Console.WriteLine(e);
-            //}
-            return proxy;
+            return "PROXY " + localEndPoint.Address + ":8123;";
         }
     }
 }
