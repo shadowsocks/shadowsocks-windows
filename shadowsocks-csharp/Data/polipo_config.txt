@@ -1,4 +1,5 @@
 proxyAddress = "__POLIPO_BIND_IP__"
+proxyPort = 8123
 
 socksParentProxy = "127.0.0.1:__SOCKS_PORT__"
 socksProxyType = socks5

@@ -6,6 +6,8 @@ using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Text;
+using System.Net.NetworkInformation;
+using System.Net;
 
 namespace Shadowsocks.Controller
 {
@@ -47,6 +49,7 @@ namespace Shadowsocks.Controller
                 }
                 string polipoConfig = Resources.polipo_config;
                 polipoConfig = polipoConfig.Replace("__SOCKS_PORT__", configuration.localPort.ToString());
+                polipoConfig = polipoConfig.Replace("__POLIPO_BIND_PORT__", this.GetFreePort().ToString());
                 polipoConfig = polipoConfig.Replace("__POLIPO_BIND_IP__", configuration.shareOverLan ? "0.0.0.0" : "127.0.0.1");
                 FileManager.ByteArrayToFile(temppath + "/polipo.conf", System.Text.Encoding.UTF8.GetBytes(polipoConfig));
 
@@ -78,6 +81,26 @@ namespace Shadowsocks.Controller
                 }
                 _process = null;
             }
+        }
+
+        private int GetFreePort()
+        {
+            IPGlobalProperties properties = IPGlobalProperties.GetIPGlobalProperties();
+            IPEndPoint[] tcpEndPoints = properties.GetActiveTcpListeners();
+
+            List<int> usedPorts = new List<int>();
+            foreach (IPEndPoint endPoint in IPGlobalProperties.GetIPGlobalProperties().GetActiveTcpListeners())
+            {
+                usedPorts.Add(endPoint.Port);
+            }
+            for (int port = 8123; port < 65535; port++)
+            {
+                if (!usedPorts.Contains(port))
+                {
+                    return port;
+                }
+            }
+            throw new Exception("No free port found.");
         }
     }
 }
