@@ -74,7 +74,7 @@ namespace Shadowsocks.Controller
             return Configuration.Load();
         }
 
-        public void SaveServers(List<Server> servers)
+        public void SaveServers(List<Server> servers, int localPort)
         {
             _config.configs = servers;
             SaveConfig(_config);

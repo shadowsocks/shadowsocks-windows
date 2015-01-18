@@ -45,8 +45,8 @@ namespace Shadowsocks.Controller
                         Console.WriteLine(e.ToString());
                     }
                 }
-                string polipoConfig = Resources.polipo_config; 
-                polipoConfig = polipoConfig.Replace("__SOCKS_PORT__", server.local_port.ToString());
+                string polipoConfig = Resources.polipo_config;
+                polipoConfig = polipoConfig.Replace("__SOCKS_PORT__", configuration.localPort.ToString());
                 polipoConfig = polipoConfig.Replace("__POLIPO_BIND_IP__", configuration.shareOverLan ? "0.0.0.0" : "127.0.0.1");
                 FileManager.ByteArrayToFile(temppath + "/polipo.conf", System.Text.Encoding.UTF8.GetBytes(polipoConfig));
 

@@ -79,12 +79,14 @@ namespace Shadowsocks.View
                     server = IPTextBox.Text,
                     server_port = int.Parse(ServerPortTextBox.Text),
                     password = PasswordTextBox.Text,
-                    local_port = int.Parse(ProxyPortTextBox.Text),
                     method = EncryptionSelect.Text,
                     remarks = RemarksTextBox.Text
                 };
+                int localPort = int.Parse(ProxyPortTextBox.Text);
                 Configuration.CheckServer(server);
+                Configuration.CheckPort(localPort);
                 _modifiedConfiguration.configs[_oldSelectedIndex] = server;
+                _modifiedConfiguration.localPort = localPort;
                 
                 return true;
             }
@@ -108,7 +110,7 @@ namespace Shadowsocks.View
                 IPTextBox.Text = server.server;
                 ServerPortTextBox.Text = server.server_port.ToString();
                 PasswordTextBox.Text = server.password;
-                ProxyPortTextBox.Text = server.local_port.ToString();
+                ProxyPortTextBox.Text = _modifiedConfiguration.localPort.ToString();
                 EncryptionSelect.Text = server.method ?? "aes-256-cfb";
                 RemarksTextBox.Text = server.remarks;
                 ServerGroupBox.Visible = true;
@@ -202,7 +204,7 @@ namespace Shadowsocks.View
                 MessageBox.Show(I18N.GetString("Please add at least one server"));
                 return;
             }
-            controller.SaveServers(_modifiedConfiguration.configs);
+            controller.SaveServers(_modifiedConfiguration.configs, _modifiedConfiguration.localPort);
             this.Close();
         }
 

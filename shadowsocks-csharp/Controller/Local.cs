@@ -11,13 +11,13 @@ namespace Shadowsocks.Controller
 
     class Local
     {
-        private Server _server;
+        private Configuration _config;
         private bool _shareOverLAN;
         //private Encryptor encryptor;
         Socket _listener;
         public Local(Configuration config)
         {
-            this._server = config.GetCurrentServer();
+            this._config = config;
             _shareOverLAN = config.shareOverLan;
             //this.encryptor = new Encryptor(config.method, config.password);
         }
@@ -32,11 +32,11 @@ namespace Shadowsocks.Controller
                 IPEndPoint localEndPoint = null;
                 if (_shareOverLAN)
                 {
-                    localEndPoint = new IPEndPoint(IPAddress.Any, _server.local_port);
+                    localEndPoint = new IPEndPoint(IPAddress.Any, _config.localPort);
                 }
                 else
                 {
-                    localEndPoint = new IPEndPoint(IPAddress.Loopback, _server.local_port);
+                    localEndPoint = new IPEndPoint(IPAddress.Loopback, _config.localPort);
                 }
 
                 // Bind the socket to the local endpoint and listen for incoming connections.
@@ -74,8 +74,9 @@ namespace Shadowsocks.Controller
 
                 Handler handler = new Handler();
                 handler.connection = conn;
-                handler.encryptor = EncryptorFactory.GetEncryptor(_server.method, _server.password);
-                handler.config = _server;
+                Server server = _config.GetCurrentServer();
+                handler.encryptor = EncryptorFactory.GetEncryptor(server.method, server.password);
+                handler.server = server;
 
                 handler.Start();
             }
@@ -104,7 +105,7 @@ namespace Shadowsocks.Controller
     {
         //public Encryptor encryptor;
         public IEncryptor encryptor;
-        public Server config;
+        public Server server;
         // Client  socket.
         public Socket remote;
         public Socket connection;
@@ -134,13 +135,13 @@ namespace Shadowsocks.Controller
             {
                 // TODO async resolving
                 IPAddress ipAddress;
-                bool parsed = IPAddress.TryParse(config.server, out ipAddress);
+                bool parsed = IPAddress.TryParse(server.server, out ipAddress);
                 if (!parsed)
                 {
-                    IPHostEntry ipHostInfo = Dns.GetHostEntry(config.server);
+                    IPHostEntry ipHostInfo = Dns.GetHostEntry(server.server);
                     ipAddress = ipHostInfo.AddressList[0];
                 }
-                IPEndPoint remoteEP = new IPEndPoint(ipAddress, config.server_port);
+                IPEndPoint remoteEP = new IPEndPoint(ipAddress, server.server_port);
 
 
                 remote = new Socket(ipAddress.AddressFamily,

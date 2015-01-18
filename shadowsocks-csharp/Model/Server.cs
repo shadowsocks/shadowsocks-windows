@@ -14,7 +14,6 @@ namespace Shadowsocks.Model
     {
         public string server;
         public int server_port;
-        public int local_port;
         public string password;
         public string method;
         public string remarks;
@@ -39,7 +38,6 @@ namespace Shadowsocks.Model
         {
             this.server = "";
             this.server_port = 8388;
-            this.local_port = 1080;
             this.method = "aes-256-cfb";
             this.password = "";
             this.remarks = "";
