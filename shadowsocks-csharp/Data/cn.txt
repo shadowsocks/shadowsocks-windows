@@ -1,5 +1,5 @@
 Shadowsocks=Shadowsocks
-Enable=启用代理
+Enable System Proxy=启用系统代理
 Mode=代理模式
 PAC=PAC 模式
 Global=全局模式
