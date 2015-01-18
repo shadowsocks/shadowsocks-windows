@@ -153,7 +153,7 @@ namespace Shadowsocks.Controller
             }
             if (_config.enabled)
             {
-                SystemProxy.Disable();
+                SystemProxy.Update(_config, true);
             }
         }
 
@@ -262,7 +262,7 @@ namespace Shadowsocks.Controller
         {
             if (_config.enabled)
             {
-                SystemProxy.Enable(_config.global);
+                SystemProxy.Update(_config, false);
                 _systemProxyIsDirty = true;
             }
             else
@@ -270,7 +270,7 @@ namespace Shadowsocks.Controller
                 // only switch it off if we have switched it on
                 if (_systemProxyIsDirty)
                 {
-                    SystemProxy.Disable();
+                    SystemProxy.Update(_config, false);
                     _systemProxyIsDirty = false;
                 }
             }

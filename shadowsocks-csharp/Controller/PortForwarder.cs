@@ -133,7 +133,6 @@ namespace Shadowsocks.Controller
 
                     if (bytesRead > 0)
                     {
-                        int bytesToSend;
                         _local.BeginSend(remoteRecvBuffer, 0, bytesRead, 0, new AsyncCallback(PipeConnectionSendCallback), null);
                     }
                     else
