@@ -63,7 +63,7 @@ namespace Shadowsocks.View
 
             LoadCurrentConfiguration();
 
-            updateChecker.CheckUpdate();
+            updateChecker.CheckUpdate(controller.GetConfiguration());
 
             if (controller.GetConfiguration().isDefault)
             {

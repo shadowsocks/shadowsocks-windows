@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Shadowsocks.Model;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Net;
@@ -19,11 +20,11 @@ namespace Shadowsocks.Controller
 
         public const string Version = "2.3";
 
-        public void CheckUpdate()
+        public void CheckUpdate(Configuration config)
         {
             // TODO test failures
             WebClient http = new WebClient();
-            http.Proxy = new WebProxy(IPAddress.Loopback.ToString(), 8123);
+            http.Proxy = new WebProxy(IPAddress.Loopback.ToString(), config.localPort);
             http.DownloadStringCompleted += http_DownloadStringCompleted;
             http.DownloadStringAsync(new Uri(UpdateURL));
         }
