@@ -14,7 +14,6 @@ namespace Shadowsocks.Controller
 {
     class PACServer : Listener.Service
     {
-        private static int PORT = 8093;
         public static string PAC_FILE = "pac.txt";
 
         FileSystemWatcher watcher;
