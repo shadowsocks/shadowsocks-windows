@@ -75,6 +75,10 @@ namespace Shadowsocks.Controller
 
         private bool IsNewVersion(string url)
         {
+            if (url.IndexOf("prerelease") >= 0)
+            {
+                return false;
+            }
             // check dotnet 4.0
             AssemblyName[] references = Assembly.GetExecutingAssembly().GetReferencedAssemblies();
             Version dotNetVersion = Environment.Version;
