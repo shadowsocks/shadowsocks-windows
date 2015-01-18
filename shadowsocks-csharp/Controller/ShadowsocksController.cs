@@ -196,6 +196,7 @@ namespace Shadowsocks.Controller
                 _pacServer = new PACServer();
                 _pacServer.PACFileChanged += pacServer_PACFileChanged;
             }
+            _pacServer.UpdateConfiguration(_config);
             if (gfwListUpdater == null)
             {
                 gfwListUpdater = new GFWListUpdater();

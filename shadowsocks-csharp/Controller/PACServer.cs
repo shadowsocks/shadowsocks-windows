@@ -17,12 +17,18 @@ namespace Shadowsocks.Controller
         public static string PAC_FILE = "pac.txt";
 
         FileSystemWatcher watcher;
+        private Configuration _config;
 
         public event EventHandler PACFileChanged;
 
         public PACServer()
         {
             this.WatchPacFile();
+        }
+
+        public void UpdateConfiguration(Configuration config)
+        {
+            this._config = config;
         }
 
         public bool Handle(byte[] firstPacket, int length, Socket socket)
@@ -159,7 +165,7 @@ Connection: Close
 
         private string GetPACAddress(byte[] requestBuf, int length, IPEndPoint localEndPoint)
         {
-            return "PROXY " + localEndPoint.Address + ":8123;";
+            return "PROXY " + localEndPoint.Address + ":" + this._config.localPort + ";";
         }
     }
 }
