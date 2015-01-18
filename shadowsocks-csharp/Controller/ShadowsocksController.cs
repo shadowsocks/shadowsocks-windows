@@ -221,6 +221,7 @@ namespace Shadowsocks.Controller
                 List<Listener.Service> services = new List<Listener.Service>();
                 services.Add(local);
                 services.Add(_pacServer);
+                services.Add(new PortForwarder(8123));
                 _listener = new Listener(services);
                 _listener.Start(_config);
             }

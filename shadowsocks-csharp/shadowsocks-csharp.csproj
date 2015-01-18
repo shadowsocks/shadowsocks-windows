@@ -129,6 +129,7 @@
     <Compile Include="Controller\I18N.cs" />
     <Compile Include="Controller\Listener.cs" />
     <Compile Include="Controller\Logging.cs" />
+    <Compile Include="Controller\PortForwarder.cs" />
     <Compile Include="Controller\UpdateChecker.cs" />
     <Compile Include="Encryption\EncryptorBase.cs" />
     <Compile Include="Encryption\EncryptorFactory.cs" />
