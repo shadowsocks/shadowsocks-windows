@@ -85,20 +85,30 @@ namespace Shadowsocks.Controller
 
         private int GetFreePort()
         {
-            IPGlobalProperties properties = IPGlobalProperties.GetIPGlobalProperties();
-            IPEndPoint[] tcpEndPoints = properties.GetActiveTcpListeners();
+            int defaultPort = 8123;
+            try
+            {
+                IPGlobalProperties properties = IPGlobalProperties.GetIPGlobalProperties();
+                IPEndPoint[] tcpEndPoints = properties.GetActiveTcpListeners();
 
-            List<int> usedPorts = new List<int>();
-            foreach (IPEndPoint endPoint in IPGlobalProperties.GetIPGlobalProperties().GetActiveTcpListeners())
-            {
-                usedPorts.Add(endPoint.Port);
-            }
-            for (int port = 8123; port < 65535; port++)
-            {
-                if (!usedPorts.Contains(port))
+                List<int> usedPorts = new List<int>();
+                foreach (IPEndPoint endPoint in IPGlobalProperties.GetIPGlobalProperties().GetActiveTcpListeners())
                 {
-                    return port;
+                    usedPorts.Add(endPoint.Port);
                 }
+                for (int port = defaultPort; port < 65535; port++)
+                {
+                    if (!usedPorts.Contains(port))
+                    {
+                        return port;
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                // in case access denied
+                Logging.LogUsefulException(e);
+                return defaultPort;
             }
             throw new Exception("No free port found.");
         }
