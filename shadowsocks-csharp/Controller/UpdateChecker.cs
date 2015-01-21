@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Shadowsocks.Model;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Net;
@@ -17,13 +18,13 @@ namespace Shadowsocks.Controller
         public string LatestVersionURL;
         public event EventHandler NewVersionFound;
 
-        public const string Version = "2.2";
+        public const string Version = "2.3";
 
-        public void CheckUpdate()
+        public void CheckUpdate(Configuration config)
         {
             // TODO test failures
             WebClient http = new WebClient();
-            http.Proxy = new WebProxy(IPAddress.Loopback.ToString(), 8123);
+            http.Proxy = new WebProxy(IPAddress.Loopback.ToString(), config.localPort);
             http.DownloadStringCompleted += http_DownloadStringCompleted;
             http.DownloadStringAsync(new Uri(UpdateURL));
         }
@@ -74,6 +75,10 @@ namespace Shadowsocks.Controller
 
         private bool IsNewVersion(string url)
         {
+            if (url.IndexOf("prerelease") >= 0)
+            {
+                return false;
+            }
             // check dotnet 4.0
             AssemblyName[] references = Assembly.GetExecutingAssembly().GetReferencedAssemblies();
             Version dotNetVersion = Environment.Version;

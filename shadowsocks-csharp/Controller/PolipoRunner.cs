@@ -6,6 +6,8 @@ using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Text;
+using System.Net.NetworkInformation;
+using System.Net;
 
 namespace Shadowsocks.Controller
 {
@@ -13,6 +15,7 @@ namespace Shadowsocks.Controller
     {
         private Process _process;
         private static string temppath;
+        private int _runningPort;
 
         static PolipoRunner()
         {
@@ -24,6 +27,14 @@ namespace Shadowsocks.Controller
             catch (IOException e)
             {
                 Logging.LogUsefulException(e);
+            }
+        }
+
+        public int RunningPort
+        {
+            get
+            {
+                return _runningPort;
             }
         }
 
@@ -45,8 +56,10 @@ namespace Shadowsocks.Controller
                         Console.WriteLine(e.ToString());
                     }
                 }
-                string polipoConfig = Resources.polipo_config; 
-                polipoConfig = polipoConfig.Replace("__SOCKS_PORT__", server.local_port.ToString());
+                string polipoConfig = Resources.polipo_config;
+                _runningPort = this.GetFreePort();
+                polipoConfig = polipoConfig.Replace("__SOCKS_PORT__", configuration.localPort.ToString());
+                polipoConfig = polipoConfig.Replace("__POLIPO_BIND_PORT__", _runningPort.ToString());
                 polipoConfig = polipoConfig.Replace("__POLIPO_BIND_IP__", configuration.shareOverLan ? "0.0.0.0" : "127.0.0.1");
                 FileManager.ByteArrayToFile(temppath + "/polipo.conf", System.Text.Encoding.UTF8.GetBytes(polipoConfig));
 
@@ -78,6 +91,36 @@ namespace Shadowsocks.Controller
                 }
                 _process = null;
             }
+        }
+
+        private int GetFreePort()
+        {
+            int defaultPort = 8123;
+            try
+            {
+                IPGlobalProperties properties = IPGlobalProperties.GetIPGlobalProperties();
+                IPEndPoint[] tcpEndPoints = properties.GetActiveTcpListeners();
+
+                List<int> usedPorts = new List<int>();
+                foreach (IPEndPoint endPoint in IPGlobalProperties.GetIPGlobalProperties().GetActiveTcpListeners())
+                {
+                    usedPorts.Add(endPoint.Port);
+                }
+                for (int port = defaultPort; port <= 65535; port++)
+                {
+                    if (!usedPorts.Contains(port))
+                    {
+                        return port;
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                // in case access denied
+                Logging.LogUsefulException(e);
+                return defaultPort;
+            }
+            throw new Exception("No free port found.");
         }
     }
 }

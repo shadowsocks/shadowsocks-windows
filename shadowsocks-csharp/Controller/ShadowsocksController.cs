@@ -17,8 +17,8 @@ namespace Shadowsocks.Controller
 
         private Thread _ramThread;
 
-        private Local local;
-        private PACServer pacServer;
+        private Listener _listener;
+        private PACServer _pacServer;
         private Configuration _config;
         private PolipoRunner polipoRunner;
         private GFWListUpdater gfwListUpdater;
@@ -74,9 +74,10 @@ namespace Shadowsocks.Controller
             return Configuration.Load();
         }
 
-        public void SaveServers(List<Server> servers)
+        public void SaveServers(List<Server> servers, int localPort)
         {
             _config.configs = servers;
+            _config.localPort = localPort;
             SaveConfig(_config);
         }
 
@@ -142,9 +143,9 @@ namespace Shadowsocks.Controller
                 return;
             }
             stopped = true;
-            if (local != null)
+            if (_listener != null)
             {
-                local.Stop();
+                _listener.Stop();
             }
             if (polipoRunner != null)
             {
@@ -152,13 +153,13 @@ namespace Shadowsocks.Controller
             }
             if (_config.enabled)
             {
-                SystemProxy.Disable();
+                SystemProxy.Update(_config, true);
             }
         }
 
         public void TouchPACFile()
         {
-            string pacFilename = pacServer.TouchPACFile();
+            string pacFilename = _pacServer.TouchPACFile();
             if (PACFileReadyToOpen != null)
             {
                 PACFileReadyToOpen(this, new PathEventArgs() { Path = pacFilename });
@@ -177,7 +178,7 @@ namespace Shadowsocks.Controller
         {
             if (gfwListUpdater != null)
             {
-                gfwListUpdater.UpdatePACFromGFWList();
+                gfwListUpdater.UpdatePACFromGFWList(_config);
             }
         }
 
@@ -190,11 +191,12 @@ namespace Shadowsocks.Controller
             {
                 polipoRunner = new PolipoRunner();
             }
-            if (pacServer == null)
+            if (_pacServer == null)
             {
-                pacServer = new PACServer();
-                pacServer.PACFileChanged += pacServer_PACFileChanged;
+                _pacServer = new PACServer();
+                _pacServer.PACFileChanged += pacServer_PACFileChanged;
             }
+            _pacServer.UpdateConfiguration(_config);
             if (gfwListUpdater == null)
             {
                 gfwListUpdater = new GFWListUpdater();
@@ -202,11 +204,9 @@ namespace Shadowsocks.Controller
                 gfwListUpdater.Error += pacServer_PACUpdateError;
             }
 
-            pacServer.Stop();
-
-            if (local != null)
+            if (_listener != null)
             {
-                local.Stop();
+                _listener.Stop();
             }
 
             // don't put polipoRunner.Start() before pacServer.Stop()
@@ -218,9 +218,13 @@ namespace Shadowsocks.Controller
             {
                 polipoRunner.Start(_config);
 
-                local = new Local(_config);
-                local.Start();
-                pacServer.Start(_config);
+                Local local = new Local(_config);
+                List<Listener.Service> services = new List<Listener.Service>();
+                services.Add(local);
+                services.Add(_pacServer);
+                services.Add(new PortForwarder(polipoRunner.RunningPort));
+                _listener = new Listener(services);
+                _listener.Start(_config);
             }
             catch (Exception e)
             {
@@ -259,7 +263,7 @@ namespace Shadowsocks.Controller
         {
             if (_config.enabled)
             {
-                SystemProxy.Enable(_config.global);
+                SystemProxy.Update(_config, false);
                 _systemProxyIsDirty = true;
             }
             else
@@ -267,7 +271,7 @@ namespace Shadowsocks.Controller
                 // only switch it off if we have switched it on
                 if (_systemProxyIsDirty)
                 {
-                    SystemProxy.Disable();
+                    SystemProxy.Update(_config, false);
                     _systemProxyIsDirty = false;
                 }
             }

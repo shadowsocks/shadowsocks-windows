@@ -16,6 +16,7 @@ namespace Shadowsocks.Model
         public bool enabled;
         public bool shareOverLan;
         public bool isDefault;
+        public int localPort;
 
         private static string CONFIG_FILE = "gui-config.json";
 
@@ -33,7 +34,6 @@ namespace Shadowsocks.Model
 
         public static void CheckServer(Server server)
         {
-            CheckPort(server.local_port);
             CheckPort(server.server_port);
             CheckPassword(server.password);
             CheckServer(server.server);
@@ -46,6 +46,10 @@ namespace Shadowsocks.Model
                 string configContent = File.ReadAllText(CONFIG_FILE);
                 Configuration config = SimpleJson.SimpleJson.DeserializeObject<Configuration>(configContent, new JsonSerializerStrategy());
                 config.isDefault = false;
+                if (config.localPort == 0)
+                {
+                    config.localPort = 1080;
+                }
                 return config;
             }
             catch (Exception e)
@@ -58,6 +62,7 @@ namespace Shadowsocks.Model
                 {
                     index = 0,
                     isDefault = true,
+                    localPort = 1080,
                     configs = new List<Server>()
                     {
                         GetDefaultServer()
@@ -105,7 +110,7 @@ namespace Shadowsocks.Model
             }
         }
 
-        private static void CheckPort(int port)
+        public static void CheckPort(int port)
         {
             if (port <= 0 || port > 65535)
             {

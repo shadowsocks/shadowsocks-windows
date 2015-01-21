@@ -9,105 +9,43 @@ using Shadowsocks.Model;
 namespace Shadowsocks.Controller
 {
 
-    class Local
+    class Local : Listener.Service
     {
-        private Server _server;
-        private bool _shareOverLAN;
-        //private Encryptor encryptor;
-        Socket _listener;
+        private Configuration _config;
         public Local(Configuration config)
         {
-            this._server = config.GetCurrentServer();
-            _shareOverLAN = config.shareOverLan;
-            //this.encryptor = new Encryptor(config.method, config.password);
+            this._config = config;
         }
 
-        public void Start()
+        public bool Handle(byte[] firstPacket, int length, Socket socket)
         {
-            try
+            if (length < 2 || firstPacket[0] != 5)
             {
-                // Create a TCP/IP socket.
-                _listener = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-                _listener.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
-                IPEndPoint localEndPoint = null;
-                if (_shareOverLAN)
-                {
-                    localEndPoint = new IPEndPoint(IPAddress.Any, _server.local_port);
-                }
-                else
-                {
-                    localEndPoint = new IPEndPoint(IPAddress.Loopback, _server.local_port);
-                }
-
-                // Bind the socket to the local endpoint and listen for incoming connections.
-                _listener.Bind(localEndPoint);
-                _listener.Listen(100);
-
-
-                // Start an asynchronous socket to listen for connections.
-                Console.WriteLine("Shadowsocks started");
-                _listener.BeginAccept(
-                    new AsyncCallback(AcceptCallback),
-                    _listener);
+                return false;
             }
-            catch(SocketException)
-            {
-                _listener.Close();
-                throw;
-            }
+            socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, true);
+            Handler handler = new Handler();
+            handler.connection = socket;
+            Server server = _config.GetCurrentServer();
+            handler.encryptor = EncryptorFactory.GetEncryptor(server.method, server.password);
+            handler.server = server;
 
+            handler.Start(firstPacket, length);
+            return true;
         }
-
-        public void Stop()
-        {
-            _listener.Close();
-        }
-
-
-        public void AcceptCallback(IAsyncResult ar)
-        {
-            Socket listener = (Socket)ar.AsyncState;
-            try
-            {
-                Socket conn = listener.EndAccept(ar);
-                conn.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, true);
-
-                Handler handler = new Handler();
-                handler.connection = conn;
-                handler.encryptor = EncryptorFactory.GetEncryptor(_server.method, _server.password);
-                handler.config = _server;
-
-                handler.Start();
-            }
-            catch
-            {
-                //Console.WriteLine(e.Message);
-            }
-            finally
-            {
-                try
-                {
-                    listener.BeginAccept(
-                        new AsyncCallback(AcceptCallback),
-                        listener);
-                }
-                catch
-                {
-                    //Console.WriteLine(e.Message);
-                }
-            }
-        }
-
     }
 
     class Handler
     {
         //public Encryptor encryptor;
         public IEncryptor encryptor;
-        public Server config;
+        public Server server;
         // Client  socket.
         public Socket remote;
         public Socket connection;
+
+        private byte[] _firstPacket;
+        private int _firstPacketLength;
         // Size of receive buffer.
         public const int RecvSize = 16384;
         public const int BufferSize = RecvSize + 32;
@@ -128,19 +66,21 @@ namespace Shadowsocks.Controller
         private object encryptionLock = new object();
         private object decryptionLock = new object();
 
-        public void Start()
+        public void Start(byte[] firstPacket, int length)
         {
+            this._firstPacket = firstPacket;
+            this._firstPacketLength = length;
             try
             {
                 // TODO async resolving
                 IPAddress ipAddress;
-                bool parsed = IPAddress.TryParse(config.server, out ipAddress);
+                bool parsed = IPAddress.TryParse(server.server, out ipAddress);
                 if (!parsed)
                 {
-                    IPHostEntry ipHostInfo = Dns.GetHostEntry(config.server);
+                    IPHostEntry ipHostInfo = Dns.GetHostEntry(server.server);
                     ipAddress = ipHostInfo.AddressList[0];
                 }
-                IPEndPoint remoteEP = new IPEndPoint(ipAddress, config.server_port);
+                IPEndPoint remoteEP = new IPEndPoint(ipAddress, server.server_port);
 
 
                 remote = new Socket(ipAddress.AddressFamily,
@@ -240,33 +180,15 @@ namespace Shadowsocks.Controller
             }
             try
             {
-                connection.BeginReceive(connetionRecvBuffer, 0, 256, 0,
-                    new AsyncCallback(HandshakeReceiveCallback), null);
-            }
-            catch (Exception e)
-            {
-                Logging.LogUsefulException(e);
-                this.Close();
-            }
-        }
-
-        private void HandshakeReceiveCallback(IAsyncResult ar)
-        {
-            if (closed)
-            {
-                return;
-            }
-            try
-            {
-                int bytesRead = connection.EndReceive(ar);
+                int bytesRead = _firstPacketLength;
 
                 if (bytesRead > 1)
                 {
                     byte[] response = { 5, 0 };
-                    if (connetionRecvBuffer[0] != 5)
+                    if (_firstPacket[0] != 5)
                     {
                         // reject socks 4
-                        response = new byte[]{ 0, 91 };
+                        response = new byte[] { 0, 91 };
                         Console.WriteLine("socks 5 protocol error");
                     }
                     connection.BeginSend(response, 0, response.Length, 0, new AsyncCallback(HandshakeSendCallback), null);
