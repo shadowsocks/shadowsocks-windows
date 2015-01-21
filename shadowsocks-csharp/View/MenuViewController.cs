@@ -98,7 +98,9 @@ namespace Shadowsocks.View
             {
                 icon = Resources.ss24;
             }
-            bool enabled = controller.GetConfiguration().enabled;
+            Configuration config = controller.GetConfiguration();
+            bool enabled = config.enabled;
+            bool global = config.global;
             if (!enabled)
             {
                 Bitmap iconCopy = new Bitmap(icon);
@@ -114,7 +116,7 @@ namespace Shadowsocks.View
             }
             _notifyIcon.Icon = Icon.FromHandle(icon.GetHicon());
 
-            string text = I18N.GetString("Shadowsocks") + " " + UpdateChecker.Version + "\n" + (enabled ? I18N.GetString("Enabled") : I18N.GetString("Disabled")) + " " + (controller.GetCurrentMode() ? I18N.GetString("Global") : I18N.GetString("PAC")) + "\n" + controller.GetCurrentServer().FriendlyName();
+            string text = I18N.GetString("Shadowsocks") + " " + UpdateChecker.Version + "\n" + (enabled ? I18N.GetString("Enabled") : I18N.GetString("Disabled")) + "\n" + global ? I18N.GetString("Global") : I18N.GetString("PAC")) + "\n" + config.GetCurrentServer().FriendlyName();
             _notifyIcon.Text = text.Substring(0, Math.Min(63, text.Length));
         }
 
