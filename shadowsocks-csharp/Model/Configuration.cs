@@ -32,6 +32,11 @@ namespace Shadowsocks.Model
             }
         }
 
+        public bool GetCurrentMode()
+        {
+            return global;
+        }
+
         public static void CheckServer(Server server)
         {
             CheckPort(server.server_port);

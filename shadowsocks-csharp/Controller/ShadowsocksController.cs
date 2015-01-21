@@ -68,6 +68,11 @@ namespace Shadowsocks.Controller
             return _config.GetCurrentServer();
         }
 
+        public bool GetCurrentMode()
+        {
+            return _config.global;
+        }
+
         // always return copy
         public Configuration GetConfiguration()
         {
