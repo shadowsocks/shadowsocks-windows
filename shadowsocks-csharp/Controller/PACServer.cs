@@ -52,10 +52,11 @@ namespace Shadowsocks.Controller
                         }
                         else if (kv[0] == "User-Agent")
                         {
-                            if (kv[1].IndexOf("Chrome") >= 0)
+                            // we need to drop connections when changing servers
+                            /* if (kv[1].IndexOf("Chrome") >= 0)
                             {
                                 useSocks = true;
-                            }
+                            } */
                         }
                     }
                     else if (kv.Length == 1)
