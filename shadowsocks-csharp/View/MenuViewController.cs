@@ -27,6 +27,7 @@ namespace Shadowsocks.View
 
         private bool _isFirstRun;
         private MenuItem enableItem;
+        private MenuItem modeItem;
         private MenuItem AutoStartupItem;
         private MenuItem ShareOverLANItem;
         private MenuItem SeperatorItem;
@@ -116,7 +117,10 @@ namespace Shadowsocks.View
             }
             _notifyIcon.Icon = Icon.FromHandle(icon.GetHicon());
 
-            string text = I18N.GetString("Shadowsocks") + " " + UpdateChecker.Version + "\n" + (enabled ? I18N.GetString("Enabled") : I18N.GetString("Disabled")) + "\n" + (global ? I18N.GetString("Global") : I18N.GetString("PAC")) + "\n" + config.GetCurrentServer().FriendlyName();
+            string text = I18N.GetString("Shadowsocks") + " " + UpdateChecker.Version + "\n" + 
+                (enabled ? I18N.GetString("System Proxy Enabled") : I18N.GetString("System Proxy Disabled")) +
+                (enabled ? "(" + (global ? I18N.GetString("Global") : I18N.GetString("PAC")) + ")" : "") + "\n" +
+                config.GetCurrentServer().FriendlyName();
             _notifyIcon.Text = text.Substring(0, Math.Min(63, text.Length));
         }
 
@@ -134,7 +138,7 @@ namespace Shadowsocks.View
         {
             this.contextMenu1 = new ContextMenu(new MenuItem[] {
                 this.enableItem = CreateMenuItem("Enable System Proxy", new EventHandler(this.EnableItem_Click)),
-                CreateMenuGroup("Mode", new MenuItem[] {
+                this.modeItem = CreateMenuGroup("Mode", new MenuItem[] {
                     this.PACModeItem = CreateMenuItem("PAC", new EventHandler(this.PACModeItem_Click)),
                     this.globalModeItem = CreateMenuItem("Global", new EventHandler(this.GlobalModeItem_Click))
                 }),
@@ -166,6 +170,7 @@ namespace Shadowsocks.View
         private void controller_EnableStatusChanged(object sender, EventArgs e)
         {
             enableItem.Checked = controller.GetConfiguration().enabled;
+            modeItem.Enabled = enableItem.Checked;
         }
 
         void controller_ShareOverLANStatusChanged(object sender, EventArgs e)
@@ -224,6 +229,7 @@ namespace Shadowsocks.View
             Configuration config = controller.GetConfiguration();
             UpdateServersMenu();
             enableItem.Checked = config.enabled;
+            modeItem.Enabled = config.enabled;
             globalModeItem.Checked = config.global;
             PACModeItem.Checked = !config.global;
             ShareOverLANItem.Checked = config.shareOverLan;
