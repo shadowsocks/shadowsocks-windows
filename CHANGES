@@ -1,4 +1,4 @@
-2.3 2015-01-14
+2.3 2015-01-25
 - Use the same port for every profile
 - Use the same port for HTTP/Socks5/PAC
 - Fix GFWList PAC compatibility issue with IE11
