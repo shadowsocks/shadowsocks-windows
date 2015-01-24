@@ -1,3 +1,9 @@
+2.3 2015-01-14
+- Use the same port for every profile
+- Use the same port for HTTP/Socks5/PAC
+- Fix GFWList PAC compatibility issue with IE11
+- Minor UI improvements
+
 2.2.1 2015-01-18
 - Fix QR Code compatibility
 
