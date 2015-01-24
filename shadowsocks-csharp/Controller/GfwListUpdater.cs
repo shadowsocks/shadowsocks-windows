@@ -16,9 +16,19 @@ namespace Shadowsocks.Controller
 
         private static string PAC_FILE = PACServer.PAC_FILE;
 
-        public event EventHandler UpdateCompleted;
+        public event EventHandler<ResultEventArgs> UpdateCompleted;
 
         public event ErrorEventHandler Error;
+
+        public class ResultEventArgs : EventArgs
+        {
+            public bool Success;
+
+            public ResultEventArgs(bool success)
+            {
+                this.Success = success;
+            }
+        }
 
         private void http_DownloadStringCompleted(object sender, DownloadStringCompletedEventArgs e)
         {
@@ -28,10 +38,19 @@ namespace Shadowsocks.Controller
 
                 string abpContent = Utils.UnGzip(Resources.abp_js);
                 abpContent = abpContent.Replace("__RULES__", SimpleJson.SimpleJson.SerializeObject(lines));
+                if (File.Exists(PAC_FILE))
+                {
+                    string original = File.ReadAllText(PAC_FILE, Encoding.UTF8);
+                    if (original == abpContent)
+                    {
+                        UpdateCompleted(this, new ResultEventArgs(false));
+                        return;
+                    }
+                }
                 File.WriteAllText(PAC_FILE, abpContent, Encoding.UTF8);
                 if (UpdateCompleted != null)
                 {
-                    UpdateCompleted(this, new EventArgs());
+                    UpdateCompleted(this, new ResultEventArgs(true));
                 }
             }
             catch (Exception ex)

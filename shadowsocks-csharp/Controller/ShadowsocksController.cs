@@ -39,7 +39,7 @@ namespace Shadowsocks.Controller
         // when user clicked Edit PAC, and PAC file has already created
         public event EventHandler<PathEventArgs> PACFileReadyToOpen;
 
-        public event EventHandler UpdatePACFromGFWListCompleted;
+        public event EventHandler<GFWListUpdater.ResultEventArgs> UpdatePACFromGFWListCompleted;
 
         public event ErrorEventHandler UpdatePACFromGFWListError;
 
@@ -282,7 +282,7 @@ namespace Shadowsocks.Controller
             UpdateSystemProxy();
         }
 
-        private void pacServer_PACUpdateCompleted(object sender, EventArgs e)
+        private void pacServer_PACUpdateCompleted(object sender, GFWListUpdater.ResultEventArgs e)
         {
             if (UpdatePACFromGFWListCompleted != null)
                 UpdatePACFromGFWListCompleted(this, e);

@@ -43,6 +43,7 @@ System Proxy Disabled=系统代理未启用
 Update PAC from GFWList=从 GFWList 更新 PAC
 Failed to update PAC file =更新 PAC 文件失败
 PAC updated=更新 PAC 成功
+No updates found. Please report to GFWList if you have problems with it.=未发现更新。如有问题请提交给 GFWList。
 No QRCode found. Try to zoom in or move it to the center of the screen.=找不到二维码，尝试把它放大或者移动到靠近屏幕中间的位置
 Failed to decode QRCode=无法解析二维码
 Failed to update registry=无法修改注册表
