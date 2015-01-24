@@ -23,11 +23,13 @@ For >= Windows 8, download Shadowsocks-win-dotnet4.0-x.x.x.zip, unless you have 
 
 1. Find Shadowsocks icon in notification tray
 2. You can add multiple servers in servers menu
-3. Select Enable System Proxy menu to enable system proxy
-4. After you saved PAC file with any editor, Shadowsocks will notify browsers
-about the change automatically
-5. Please disable other proxy addons in your browser, or set them to use
-system proxy
+3. Select Enable System Proxy menu to enable system proxy. Please disable other
+proxy addons in your browser, or set them to use system proxy
+4. You can also configure your browser proxy manually if you don't want to enable
+system proxy. Set Socks5 or HTTP proxy to 127.0.0.1:1080. You can change this
+port in Server -> Edit Servers
+5. You can change PAC rules by editing the PAC file. When you save the PAC file
+with any editor, Shadowsocks will notify browsers about the change automatically
 
 ### Develop
 
