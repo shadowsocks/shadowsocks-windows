@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Net;
+using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Text;
 
@@ -24,10 +25,29 @@ namespace Shadowsocks.Controller
             this._services = services;
         }
 
+        private bool CheckIfPortInUse(int port)
+        {
+            IPGlobalProperties ipProperties = IPGlobalProperties.GetIPGlobalProperties();
+            IPEndPoint[] ipEndPoints = ipProperties.GetActiveTcpListeners();
+
+            foreach (IPEndPoint endPoint in ipEndPoints)
+            {
+                if (endPoint.Port == port)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
         public void Start(Configuration config)
         {
             this._config = config;
             this._shareOverLAN = config.shareOverLan;
+
+            if (CheckIfPortInUse(_config.localPort))
+                throw new Exception(I18N.GetString("Port already in use"));
+
             try
             {
                 // Create a TCP/IP socket.
