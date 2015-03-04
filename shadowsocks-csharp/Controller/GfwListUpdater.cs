@@ -16,6 +16,8 @@ namespace Shadowsocks.Controller
 
         private static string PAC_FILE = PACServer.PAC_FILE;
 
+        private static string USER_RULE_FILE = PACServer.USER_RULE_FILE;
+
         public event EventHandler<ResultEventArgs> UpdateCompleted;
 
         public event ErrorEventHandler Error;
@@ -35,7 +37,17 @@ namespace Shadowsocks.Controller
             try
             {
                 List<string> lines = ParseResult(e.Result);
-
+                if (File.Exists(USER_RULE_FILE))
+                {
+                    string local = File.ReadAllText(USER_RULE_FILE, Encoding.UTF8);
+                    string[] rules = local.Split(new char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+                    foreach(string rule in rules)
+                    {
+                        if (rule.StartsWith("!") || rule.StartsWith("["))
+                            continue;
+                        lines.Add(rule);
+                    }
+                }
                 string abpContent = Utils.UnGzip(Resources.abp_js);
                 abpContent = abpContent.Replace("__RULES__", SimpleJson.SimpleJson.SerializeObject(lines));
                 if (File.Exists(PAC_FILE))
