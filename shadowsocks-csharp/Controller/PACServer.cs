@@ -16,6 +16,8 @@ namespace Shadowsocks.Controller
     {
         public static string PAC_FILE = "pac.txt";
 
+        public static string USER_RULE_FILE = "user-rule.txt";
+
         FileSystemWatcher watcher;
         private Configuration _config;
 
