@@ -198,6 +198,7 @@
     <None Include="Resources\ss24.png" />
     <None Include="Resources\ssw128.png" />
     <Content Include="Data\cn.txt" />
+    <Content Include="Data\user-rule.txt" />
     <Content Include="shadowsocks.ico" />
     <None Include="Data\polipo_config.txt" />
   </ItemGroup>

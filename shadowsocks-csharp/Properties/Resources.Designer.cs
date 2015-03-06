@@ -81,6 +81,7 @@ namespace Shadowsocks.Properties {
         ///Start on Boot=开机启动
         ///Allow Clients from LAN=允许来自局域网的连接
         ///Edit PAC File...=编辑 PAC 文件...
+        ///Edit User Rule for GFWList...=编辑 GFWList 的用户规则...
         ///Show QRCode...=显示二维码...
         ///Scan QRCode from Screen...=扫描屏幕上的二维码...
         ///Show Logs...=显示日志...
@@ -96,11 +97,7 @@ namespace Shadowsocks.Properties {
         ///Encryption=加密
         ///Proxy Port=代理端口
         ///Remarks=备注
-        ///OK=确定
-        ///Cancel=取消
-        ///New server=未配置的服务器
-        ///QRCode=二维码
-        ///Shadows [rest of string was truncated]&quot;;.
+        ///OK= [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string cn {
             get {
@@ -193,6 +190,17 @@ namespace Shadowsocks.Properties {
             get {
                 object obj = ResourceManager.GetObject("ssw128", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ! Put user rules line by line in this file.
+        ///! See https://adblockplus.org/en/filter-cheatsheet
+        ///.
+        /// </summary>
+        internal static string user_rule {
+            get {
+                return ResourceManager.GetString("user_rule", resourceCulture);
             }
         }
     }

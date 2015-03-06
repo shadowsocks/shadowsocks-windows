@@ -96,6 +96,19 @@ namespace Shadowsocks.Controller
             }
         }
 
+        internal string TouchUserRuleFile()
+        {
+            if (File.Exists(USER_RULE_FILE))
+            {
+                return USER_RULE_FILE;
+            }
+            else
+            {
+                File.WriteAllText(USER_RULE_FILE, Resources.user_rule);
+                return USER_RULE_FILE;
+            }
+        }
+
         private string GetPACContent()
         {
             if (File.Exists(PAC_FILE))

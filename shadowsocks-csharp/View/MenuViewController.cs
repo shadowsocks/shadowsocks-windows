@@ -46,7 +46,8 @@ namespace Shadowsocks.View
 
             controller.EnableStatusChanged += controller_EnableStatusChanged;
             controller.ConfigChanged += controller_ConfigChanged;
-            controller.PACFileReadyToOpen += controller_PACFileReadyToOpen;
+            controller.PACFileReadyToOpen += controller_FileReadyToOpen;
+            controller.UserRuleFileReadyToOpen += controller_FileReadyToOpen;
             controller.ShareOverLANStatusChanged += controller_ShareOverLANStatusChanged;
             controller.EnableGlobalChanged += controller_EnableGlobalChanged;
             controller.Errored += controller_Errored;
@@ -151,10 +152,12 @@ namespace Shadowsocks.View
                     CreateMenuItem("Scan QRCode from Screen...", new EventHandler(this.ScanQRCodeItem_Click))
                 }),
                 new MenuItem("-"),
-                this.AutoStartupItem = CreateMenuItem("Start on Boot", new EventHandler(this.AutoStartupItem_Click)),
-                this.ShareOverLANItem = CreateMenuItem("Allow Clients from LAN", new EventHandler(this.ShareOverLANItem_Click)),
                 CreateMenuItem("Edit PAC File...", new EventHandler(this.EditPACFileItem_Click)),
                 CreateMenuItem("Update PAC from GFWList", new EventHandler(this.UpdatePACFromGFWListItem_Click)),
+                CreateMenuItem("Edit User Rule for GFWList...", new EventHandler(this.EditUserRuleFileForGFWListItem_Click)),
+                new MenuItem("-"),
+                this.AutoStartupItem = CreateMenuItem("Start on Boot", new EventHandler(this.AutoStartupItem_Click)),
+                this.ShareOverLANItem = CreateMenuItem("Allow Clients from LAN", new EventHandler(this.ShareOverLANItem_Click)),
                 new MenuItem("-"),
                 CreateMenuItem("Show Logs...", new EventHandler(this.ShowLogItem_Click)),
                 CreateMenuItem("About...", new EventHandler(this.AboutItem_Click)),
@@ -186,7 +189,7 @@ namespace Shadowsocks.View
             PACModeItem.Checked = !globalModeItem.Checked;
         }
 
-        void controller_PACFileReadyToOpen(object sender, ShadowsocksController.PathEventArgs e)
+        void controller_FileReadyToOpen(object sender, ShadowsocksController.PathEventArgs e)
         {
             string argument = @"/select, " + e.Path;
 
@@ -350,6 +353,11 @@ namespace Shadowsocks.View
         private void UpdatePACFromGFWListItem_Click(object sender, EventArgs e)
         {
             controller.UpdatePACFromGFWList();
+        }
+
+        private void EditUserRuleFileForGFWListItem_Click(object sender, EventArgs e)
+        {
+            controller.TouchUserRuleFile();
         }
 
         private void AServerItem_Click(object sender, EventArgs e)
