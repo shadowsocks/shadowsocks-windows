@@ -1,4 +1,9 @@
+# translation for Simplified Chinese
+
 Shadowsocks=Shadowsocks
+
+# Menu items
+
 Enable System Proxy=启用系统代理
 Mode=系统代理模式
 PAC=PAC 模式
@@ -15,6 +20,9 @@ Show Logs...=显示日志...
 About...=关于...
 Quit=退出
 Edit Servers=编辑服务器
+
+# Config Form
+
 &Add=添加(&A)
 &Delete=删除(&D)
 Server=服务器
@@ -27,7 +35,13 @@ Remarks=备注
 OK=确定
 Cancel=取消
 New server=未配置的服务器
+
+# QRCode Form
+
 QRCode=二维码
+
+# Messages
+
 Shadowsocks Error: {0}=Shadowsocks 错误: {0}
 Port already in use=端口已被占用
 Illegal port number format=非法端口格式

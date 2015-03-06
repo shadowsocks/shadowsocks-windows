@@ -18,6 +18,10 @@ namespace Shadowsocks.Controller
                 string[] lines = Regex.Split(Resources.cn, "\r\n|\r|\n");
                 foreach (string line in lines)
                 {
+                    if (line.StartsWith("#"))
+                    {
+                        continue;
+                    }
                     string[] kv = Regex.Split(line, "=");
                     if (kv.Length == 2)
                     {
