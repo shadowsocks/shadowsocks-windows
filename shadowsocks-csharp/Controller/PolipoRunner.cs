@@ -19,7 +19,8 @@ namespace Shadowsocks.Controller
 
         static PolipoRunner()
         {
-            temppath = Path.GetTempPath();
+            // temppath = Path.GetTempPath();
+            temppath = Environment.CurrentDirectory;
             try
             {
                 FileManager.UncompressFile(temppath + "/ss_polipo.exe", Resources.polipo_exe);
