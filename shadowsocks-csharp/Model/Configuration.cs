@@ -18,7 +18,7 @@ namespace Shadowsocks.Model
         public bool isDefault;
         public int localPort;
 
-        private static string CONFIG_FILE = "gui-config.json";
+        private const string CONFIG_FILE = "gui-config.json";
 
         public Server GetCurrentServer()
         {
