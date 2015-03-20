@@ -42,6 +42,8 @@ QRCode=二维码
 
 # PAC Url Form
 
+Local PAC=使用本地 PAC
+Online PAC=使用在线 PAC
 Update Online PAC URL=更新在线 PAC 网址
 PAC Url=PAC 网址
 
