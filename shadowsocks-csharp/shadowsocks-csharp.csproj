@@ -162,6 +162,12 @@
     <Compile Include="Controller\ShadowsocksController.cs" />
     <Compile Include="Controller\SystemProxy.cs" />
     <Compile Include="View\MenuViewController.cs" />
+    <Compile Include="View\PACUrlForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="View\PACUrlForm.Designer.cs">
+      <DependentUpon>PACUrlForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="View\QRCodeForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -179,6 +185,9 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <SubType>Designer</SubType>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="View\PACUrlForm.resx">
+      <DependentUpon>PACUrlForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="View\QRCodeForm.resx">
       <DependentUpon>QRCodeForm.cs</DependentUpon>

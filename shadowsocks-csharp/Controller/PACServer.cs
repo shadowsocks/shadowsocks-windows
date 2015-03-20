@@ -71,7 +71,10 @@ namespace Shadowsocks.Controller
                 }
                 if (hostMatch && pathMatch)
                 {
-                    SendResponse(firstPacket, length, socket, useSocks);
+                    if (_config.useOnlinePac && !string.IsNullOrEmpty(_config.pacUrl))
+                        RedirectToOnlinePAC(firstPacket, length, socket, useSocks);
+                    else
+                        SendResponse(firstPacket, length, socket, useSocks);
                     return true;
                 }
                 return false;
@@ -118,6 +121,30 @@ namespace Shadowsocks.Controller
             else
             {
                 return Utils.UnGzip(Resources.proxy_pac_txt);
+            }
+        }
+
+        private void RedirectToOnlinePAC(byte[] firstPacket, int length, Socket socket, bool useSocks)
+        {
+            try
+            {
+                string friendlyMessage = "Redirect to online pac " + _config.pacUrl;
+                string text = String.Format(@"HTTP/1.1 302 Found
+Server: Shadowsocks
+Content-Type: text/html; charset=utf-8
+Location: {0}
+Content-Length: {1}
+Connection: Close
+
+", _config.pacUrl, System.Text.Encoding.UTF8.GetBytes(friendlyMessage).Length) + friendlyMessage;
+                byte[] response = System.Text.Encoding.UTF8.GetBytes(text);
+                socket.BeginSend(response, 0, response.Length, 0, new AsyncCallback(SendCallback), socket);
+                Util.Utils.ReleaseMemory();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                socket.Close();
             }
         }
 

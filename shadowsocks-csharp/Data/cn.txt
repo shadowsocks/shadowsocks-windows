@@ -40,6 +40,11 @@ New server=未配置的服务器
 
 QRCode=二维码
 
+# PAC Url Form
+
+Update Online PAC URL=更新在线 PAC 网址
+PAC Url=PAC 网址
+
 # Messages
 
 Shadowsocks Error: {0}=Shadowsocks 错误: {0}
@@ -64,3 +69,4 @@ Failed to decode QRCode=无法解析二维码
 Failed to update registry=无法修改注册表
 System Proxy On: =系统代理已启用：
 Running: Port {0}=正在运行：端口 {0}
+PAC Url can not be blank=PAC 网址不能为空
