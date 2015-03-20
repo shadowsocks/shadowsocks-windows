@@ -192,6 +192,28 @@ namespace Shadowsocks.Controller
             }
         }
 
+        public void SavePACUrl(string pacUrl)
+        {
+            _config.pacUrl = pacUrl;
+            UpdateSystemProxy();
+            SaveConfig(_config);
+            if (ConfigChanged != null)
+            {
+                ConfigChanged(this, new EventArgs());
+            }
+        }
+
+        public void UseOnlinePAC(bool useOnlinePac)
+        {
+            _config.useOnlinePac = useOnlinePac;
+            UpdateSystemProxy();
+            SaveConfig(_config);
+            if (ConfigChanged != null)
+            {
+                ConfigChanged(this, new EventArgs());
+            }
+        }
+
         protected void Reload()
         {
             // some logic in configuration updated the config when saving, we need to read it again
