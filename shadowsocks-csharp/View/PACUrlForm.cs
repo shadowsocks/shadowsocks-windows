@@ -31,7 +31,7 @@ namespace Shadowsocks.View
         private void UpdateTexts()
         {
             OkButton.Text = I18N.GetString("OK");
-            CancelButton.Text = I18N.GetString("Cancel");
+            MyCancelButton.Text = I18N.GetString("Cancel");
             PACUrlLabel.Text = I18N.GetString("PAC Url");
             this.Text = I18N.GetString("Update Online PAC URL");
         }
@@ -61,7 +61,7 @@ namespace Shadowsocks.View
             this.Close();
         }
 
-        private void CancelButton_Click(object sender, EventArgs e)
+        private void MyCancelButton_Click(object sender, EventArgs e)
         {
             this.Close();
         }

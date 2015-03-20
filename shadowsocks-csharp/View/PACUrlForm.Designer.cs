@@ -31,7 +31,7 @@
             this.PACUrlTextBox = new System.Windows.Forms.TextBox();
             this.PACUrlLabel = new System.Windows.Forms.Label();
             this.OkButton = new System.Windows.Forms.Button();
-            this.CancelButton = new System.Windows.Forms.Button();
+            this.MyCancelButton = new System.Windows.Forms.Button();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
             this.tableLayoutPanel1.SuspendLayout();
@@ -70,15 +70,15 @@
             this.OkButton.UseVisualStyleBackColor = true;
             this.OkButton.Click += new System.EventHandler(this.OkButton_Click);
             // 
-            // CancelButton
+            // MyCancelButton
             // 
-            this.CancelButton.Location = new System.Drawing.Point(84, 3);
-            this.CancelButton.Name = "CancelButton";
-            this.CancelButton.Size = new System.Drawing.Size(75, 23);
-            this.CancelButton.TabIndex = 6;
-            this.CancelButton.Text = "Cancel";
-            this.CancelButton.UseVisualStyleBackColor = true;
-            this.CancelButton.Click += new System.EventHandler(this.CancelButton_Click);
+            this.MyCancelButton.Location = new System.Drawing.Point(84, 3);
+            this.MyCancelButton.Name = "MyCancelButton";
+            this.MyCancelButton.Size = new System.Drawing.Size(75, 23);
+            this.MyCancelButton.TabIndex = 6;
+            this.MyCancelButton.Text = "Cancel";
+            this.MyCancelButton.UseVisualStyleBackColor = true;
+            this.MyCancelButton.Click += new System.EventHandler(this.MyCancelButton_Click);
             // 
             // tableLayoutPanel1
             // 
@@ -107,7 +107,7 @@
             this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tableLayoutPanel2.Controls.Add(this.OkButton, 0, 0);
-            this.tableLayoutPanel2.Controls.Add(this.CancelButton, 1, 0);
+            this.tableLayoutPanel2.Controls.Add(this.MyCancelButton, 1, 0);
             this.tableLayoutPanel2.Location = new System.Drawing.Point(136, 29);
             this.tableLayoutPanel2.Name = "tableLayoutPanel2";
             this.tableLayoutPanel2.RowCount = 1;
@@ -144,7 +144,7 @@
         private System.Windows.Forms.TextBox PACUrlTextBox;
         private System.Windows.Forms.Label PACUrlLabel;
         private System.Windows.Forms.Button OkButton;
-        private System.Windows.Forms.Button CancelButton;
+        private System.Windows.Forms.Button MyCancelButton;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel2;
     }
