@@ -17,6 +17,8 @@ namespace Shadowsocks.Model
         public bool shareOverLan;
         public bool isDefault;
         public int localPort;
+        public string pacUrl;
+        public bool useOnlinePac;
 
         private static string CONFIG_FILE = "gui-config.json";
 
