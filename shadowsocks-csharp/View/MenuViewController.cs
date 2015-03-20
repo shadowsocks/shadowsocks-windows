@@ -38,7 +38,6 @@ namespace Shadowsocks.View
         private MenuItem localPACItem;
         private MenuItem onlinePACItem;
         private ConfigForm configForm;
-        private PACUrlForm pacUrlForm;
         private string _urlToOpen;
 
         public MenuViewController(ShadowsocksController controller)
@@ -513,30 +512,17 @@ namespace Shadowsocks.View
             }
         }
 
-        private void showPACUrlForm()
-        {
-            if (pacUrlForm != null)
-            {
-                pacUrlForm.Activate();
-            }
-            else
-            {
-                pacUrlForm = new PACUrlForm(controller);
-                pacUrlForm.Show();
-                pacUrlForm.FormClosed += pacUrlForm_FormClosed;
-            }
-        }
-
-        private void pacUrlForm_FormClosed(object sender, FormClosedEventArgs e)
-        {
-            pacUrlForm = null;
-            Util.Utils.ReleaseMemory();
-            ShowFirstTimeBalloon();
-        }
-
         private void UpdateOnlinePACURLItem_Click(object sender, EventArgs e)
         {
-            showPACUrlForm();
+            string origPacUrl = controller.GetConfiguration().pacUrl;
+            string pacUrl = Microsoft.VisualBasic.Interaction.InputBox(
+                I18N.GetString("Please input PAC Url"),
+                I18N.GetString("Update Online PAC URL"),
+                origPacUrl, -1, -1);
+            if (!string.IsNullOrEmpty(pacUrl) && pacUrl != origPacUrl)
+            {
+                controller.SavePACUrl(pacUrl);
+            }
         }
     }
 }
