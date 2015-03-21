@@ -523,7 +523,7 @@ namespace Shadowsocks.View
                     I18N.GetString("Update Online PAC URL"),
                     pacUrl == null ? origPacUrl : pacUrl, -1, -1);
                 if (!string.IsNullOrEmpty(pacUrl) && !System.Text.RegularExpressions.Regex.IsMatch(pacUrl,
-                        @"^http(s)?://([a-zA-Z0-9_-]+)(\.[a-zA-Z0-9_-]+)/?", System.Text.RegularExpressions.RegexOptions.IgnoreCase))
+                        @"^http(s)?://([a-zA-Z0-9_-]+)+(\.[a-zA-Z0-9_-]+)+((/|\?)[\w \.\/\?%&= ]*)?$", System.Text.RegularExpressions.RegexOptions.IgnoreCase))
                     MessageBox.Show(I18N.GetString("Please input a valid url"));
                 else
                     break;
