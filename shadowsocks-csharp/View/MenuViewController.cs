@@ -35,6 +35,8 @@ namespace Shadowsocks.View
         private MenuItem ServersItem;
         private MenuItem globalModeItem;
         private MenuItem PACModeItem;
+        private MenuItem localPACItem;
+        private MenuItem onlinePACItem;
         private ConfigForm configForm;
         private string _urlToOpen;
 
@@ -151,10 +153,15 @@ namespace Shadowsocks.View
                     CreateMenuItem("Show QRCode...", new EventHandler(this.QRCodeItem_Click)),
                     CreateMenuItem("Scan QRCode from Screen...", new EventHandler(this.ScanQRCodeItem_Click))
                 }),
-                new MenuItem("-"),
-                CreateMenuItem("Edit PAC File...", new EventHandler(this.EditPACFileItem_Click)),
-                CreateMenuItem("Update PAC from GFWList", new EventHandler(this.UpdatePACFromGFWListItem_Click)),
-                CreateMenuItem("Edit User Rule for GFWList...", new EventHandler(this.EditUserRuleFileForGFWListItem_Click)),
+                CreateMenuGroup("PAC", new MenuItem[] {
+                    this.localPACItem = CreateMenuItem("Local PAC", new EventHandler(this.LocalPACItem_Click)),
+                    this.onlinePACItem = CreateMenuItem("Online PAC", new EventHandler(this.OnlinePACItem_Click)),
+                    new MenuItem("-"),
+                    CreateMenuItem("Edit PAC File...", new EventHandler(this.EditPACFileItem_Click)),
+                    CreateMenuItem("Update PAC from GFWList", new EventHandler(this.UpdatePACFromGFWListItem_Click)),
+                    CreateMenuItem("Edit User Rule for GFWList...", new EventHandler(this.EditUserRuleFileForGFWListItem_Click)),
+                    CreateMenuItem("Update Online PAC URL", new EventHandler(this.UpdateOnlinePACURLItem_Click)),
+                }),
                 new MenuItem("-"),
                 this.AutoStartupItem = CreateMenuItem("Start on Boot", new EventHandler(this.AutoStartupItem_Click)),
                 this.ShareOverLANItem = CreateMenuItem("Allow Clients from LAN", new EventHandler(this.ShareOverLANItem_Click)),
@@ -240,6 +247,9 @@ namespace Shadowsocks.View
             PACModeItem.Checked = !config.global;
             ShareOverLANItem.Checked = config.shareOverLan;
             AutoStartupItem.Checked = AutoStartup.Check();
+            onlinePACItem.Enabled = !string.IsNullOrEmpty(config.pacUrl);
+            onlinePACItem.Checked = onlinePACItem.Enabled && config.useOnlinePac;
+            localPACItem.Checked = !onlinePACItem.Checked;
         }
 
         private void UpdateServersMenu()
@@ -481,5 +491,38 @@ namespace Shadowsocks.View
 				MessageBox.Show(I18N.GetString("Failed to update registry"));
 			}
 		}
+
+        private void LocalPACItem_Click(object sender, EventArgs e)
+        {
+            if (!localPACItem.Checked)
+            {
+                localPACItem.Checked = true;
+                onlinePACItem.Checked = false;
+                controller.UseOnlinePAC(false);
+            }
+        }
+
+        private void OnlinePACItem_Click(object sender, EventArgs e)
+        {
+            if (!onlinePACItem.Checked)
+            {
+                localPACItem.Checked = false;
+                onlinePACItem.Checked = true;
+                controller.UseOnlinePAC(true);
+            }
+        }
+
+        private void UpdateOnlinePACURLItem_Click(object sender, EventArgs e)
+        {
+            string origPacUrl = controller.GetConfiguration().pacUrl;
+            string pacUrl = Microsoft.VisualBasic.Interaction.InputBox(
+                I18N.GetString("Please input PAC Url"),
+                I18N.GetString("Update Online PAC URL"),
+                origPacUrl, -1, -1);
+            if (!string.IsNullOrEmpty(pacUrl) && pacUrl != origPacUrl)
+            {
+                controller.SavePACUrl(pacUrl);
+            }
+        }
     }
 }
