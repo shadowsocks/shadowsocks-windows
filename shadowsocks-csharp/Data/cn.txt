@@ -45,7 +45,7 @@ QRCode=二维码
 Local PAC=使用本地 PAC
 Online PAC=使用在线 PAC
 Update Online PAC URL=更新在线 PAC 网址
-Please input PAC Url=请输入 PAC 网址
+Please input PAC Url, e.g. http://autoproxy2pac.appspot.com/pac/proxy/127.0.0.1/1080=请输入 PAC 网址，例如：http://autoproxy2pac.appspot.com/pac/proxy/127.0.0.1/1080
 
 # Messages
 
@@ -71,3 +71,4 @@ Failed to decode QRCode=无法解析二维码
 Failed to update registry=无法修改注册表
 System Proxy On: =系统代理已启用：
 Running: Port {0}=正在运行：端口 {0}
+Please input a valid url=请输入一个有效的网址

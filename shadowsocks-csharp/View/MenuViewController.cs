@@ -515,10 +515,20 @@ namespace Shadowsocks.View
         private void UpdateOnlinePACURLItem_Click(object sender, EventArgs e)
         {
             string origPacUrl = controller.GetConfiguration().pacUrl;
-            string pacUrl = Microsoft.VisualBasic.Interaction.InputBox(
-                I18N.GetString("Please input PAC Url"),
-                I18N.GetString("Update Online PAC URL"),
-                origPacUrl, -1, -1);
+            string pacUrl = null;
+            while (true)
+            {
+                pacUrl = Microsoft.VisualBasic.Interaction.InputBox(
+                    I18N.GetString("Please input PAC Url, e.g. http://autoproxy2pac.appspot.com/pac/proxy/127.0.0.1/1080"),
+                    I18N.GetString("Update Online PAC URL"),
+                    pacUrl == null ? origPacUrl : pacUrl, -1, -1);
+                if (!string.IsNullOrEmpty(pacUrl) && !System.Text.RegularExpressions.Regex.IsMatch(pacUrl,
+                        @"^http(s)?://([a-zA-Z0-9_-]+)(\.[a-zA-Z0-9_-]+)/?", System.Text.RegularExpressions.RegexOptions.IgnoreCase))
+                    MessageBox.Show(I18N.GetString("Please input a valid url"));
+                else
+                    break;
+            }
+
             if (!string.IsNullOrEmpty(pacUrl) && pacUrl != origPacUrl)
             {
                 controller.SavePACUrl(pacUrl);
