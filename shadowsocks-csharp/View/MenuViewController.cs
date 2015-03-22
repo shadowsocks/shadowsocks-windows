@@ -37,6 +37,10 @@ namespace Shadowsocks.View
         private MenuItem PACModeItem;
         private MenuItem localPACItem;
         private MenuItem onlinePACItem;
+        private MenuItem editLocalPACItem;
+        private MenuItem updateFromGFWListItem;
+        private MenuItem editGFWUserRuleItem;
+        private MenuItem editOnlinePACItem;
         private ConfigForm configForm;
         private string _urlToOpen;
 
@@ -153,14 +157,14 @@ namespace Shadowsocks.View
                     CreateMenuItem("Show QRCode...", new EventHandler(this.QRCodeItem_Click)),
                     CreateMenuItem("Scan QRCode from Screen...", new EventHandler(this.ScanQRCodeItem_Click))
                 }),
-                CreateMenuGroup("PAC", new MenuItem[] {
+                CreateMenuGroup("PAC ", new MenuItem[] {
                     this.localPACItem = CreateMenuItem("Local PAC", new EventHandler(this.LocalPACItem_Click)),
                     this.onlinePACItem = CreateMenuItem("Online PAC", new EventHandler(this.OnlinePACItem_Click)),
                     new MenuItem("-"),
-                    CreateMenuItem("Edit PAC File...", new EventHandler(this.EditPACFileItem_Click)),
-                    CreateMenuItem("Update PAC from GFWList", new EventHandler(this.UpdatePACFromGFWListItem_Click)),
-                    CreateMenuItem("Edit User Rule for GFWList...", new EventHandler(this.EditUserRuleFileForGFWListItem_Click)),
-                    CreateMenuItem("Update Online PAC URL", new EventHandler(this.UpdateOnlinePACURLItem_Click)),
+                    this.editLocalPACItem = CreateMenuItem("Edit Local PAC File...", new EventHandler(this.EditPACFileItem_Click)),
+                    this.updateFromGFWListItem = CreateMenuItem("Update Local PAC from GFWList", new EventHandler(this.UpdatePACFromGFWListItem_Click)),
+                    this.editGFWUserRuleItem = CreateMenuItem("Edit User Rule for GFWList...", new EventHandler(this.EditUserRuleFileForGFWListItem_Click)),
+                    this.editOnlinePACItem = CreateMenuItem("Edit Online PAC URL...", new EventHandler(this.UpdateOnlinePACURLItem_Click)),
                 }),
                 new MenuItem("-"),
                 this.AutoStartupItem = CreateMenuItem("Start on Boot", new EventHandler(this.AutoStartupItem_Click)),
@@ -247,9 +251,9 @@ namespace Shadowsocks.View
             PACModeItem.Checked = !config.global;
             ShareOverLANItem.Checked = config.shareOverLan;
             AutoStartupItem.Checked = AutoStartup.Check();
-            onlinePACItem.Enabled = !string.IsNullOrEmpty(config.pacUrl);
             onlinePACItem.Checked = onlinePACItem.Enabled && config.useOnlinePac;
             localPACItem.Checked = !onlinePACItem.Checked;
+            UpdatePACItemsEnabledStatus();
         }
 
         private void UpdateServersMenu()
@@ -499,6 +503,7 @@ namespace Shadowsocks.View
                 localPACItem.Checked = true;
                 onlinePACItem.Checked = false;
                 controller.UseOnlinePAC(false);
+                UpdatePACItemsEnabledStatus();
             }
         }
 
@@ -506,9 +511,17 @@ namespace Shadowsocks.View
         {
             if (!onlinePACItem.Checked)
             {
-                localPACItem.Checked = false;
-                onlinePACItem.Checked = true;
-                controller.UseOnlinePAC(true);
+                if (String.IsNullOrEmpty(controller.GetConfiguration().pacUrl))
+                {
+                    UpdateOnlinePACURLItem_Click(sender, e);
+                }
+                if (!String.IsNullOrEmpty(controller.GetConfiguration().pacUrl))
+                {
+                    localPACItem.Checked = false;
+                    onlinePACItem.Checked = true;
+                    controller.UseOnlinePAC(true);
+                }
+                UpdatePACItemsEnabledStatus();
             }
         }
 
@@ -517,11 +530,29 @@ namespace Shadowsocks.View
             string origPacUrl = controller.GetConfiguration().pacUrl;
             string pacUrl = Microsoft.VisualBasic.Interaction.InputBox(
                 I18N.GetString("Please input PAC Url"),
-                I18N.GetString("Update Online PAC URL"),
+                I18N.GetString("Edit Online PAC URL"),
                 origPacUrl, -1, -1);
             if (!string.IsNullOrEmpty(pacUrl) && pacUrl != origPacUrl)
             {
                 controller.SavePACUrl(pacUrl);
+            }
+        }
+
+        private void UpdatePACItemsEnabledStatus()
+        {
+            if (this.localPACItem.Checked)
+            {
+                this.editLocalPACItem.Enabled = true;
+                this.updateFromGFWListItem.Enabled = true;
+                this.editGFWUserRuleItem.Enabled = true;
+                this.editOnlinePACItem.Enabled = false;
+            }
+            else
+            {
+                this.editLocalPACItem.Enabled = false;
+                this.updateFromGFWListItem.Enabled = false;
+                this.editGFWUserRuleItem.Enabled = false;
+                this.editOnlinePACItem.Enabled = true;
             }
         }
     }

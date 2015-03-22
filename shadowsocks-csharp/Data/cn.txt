@@ -12,7 +12,10 @@ Servers=服务器
 Edit Servers...=编辑服务器...
 Start on Boot=开机启动
 Allow Clients from LAN=允许来自局域网的连接
-Edit PAC File...=编辑 PAC 文件...
+Local PAC=使用本地 PAC
+Online PAC=使用在线 PAC
+Edit Local PAC File...=编辑本地 PAC 文件...
+Update Local PAC from GFWList=从 GFWList 更新本地 PAC
 Edit User Rule for GFWList...=编辑 GFWList 的用户规则...
 Show QRCode...=显示二维码...
 Scan QRCode from Screen...=扫描屏幕上的二维码...
@@ -42,9 +45,8 @@ QRCode=二维码
 
 # PAC Url Form
 
-Local PAC=使用本地 PAC
-Online PAC=使用在线 PAC
-Update Online PAC URL=更新在线 PAC 网址
+Edit Online PAC URL=编辑在线 PAC 网址
+Edit Online PAC URL...=编辑在线 PAC 网址...
 Please input PAC Url=请输入 PAC 网址
 
 # Messages
@@ -62,7 +64,6 @@ Shadowsocks is here=Shadowsocks 在这里
 You can turn on/off Shadowsocks in the context menu=可以在右键菜单中开关 Shadowsocks
 System Proxy Enabled=系统代理已启用
 System Proxy Disabled=系统代理未启用
-Update PAC from GFWList=从 GFWList 更新 PAC
 Failed to update PAC file =更新 PAC 文件失败
 PAC updated=更新 PAC 成功
 No updates found. Please report to GFWList if you have problems with it.=未发现更新。如有问题请提交给 GFWList。
