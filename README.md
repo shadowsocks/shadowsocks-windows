@@ -30,6 +30,9 @@ system proxy. Set Socks5 or HTTP proxy to 127.0.0.1:1080. You can change this
 port in Server -> Edit Servers
 5. You can change PAC rules by editing the PAC file. When you save the PAC file
 with any editor, Shadowsocks will notify browsers about the change automatically
+6. You can also update the PAC file from GFWList. Note your modifications to the PAC
+file will be lost. However you can put your rules in the user rule file for GFWList.
+Don't forget to update from GFWList again after you've edited the user rule
 
 ### Develop
 
