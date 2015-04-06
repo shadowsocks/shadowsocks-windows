@@ -20,6 +20,32 @@ namespace Shadowsocks.Controller
         static PolipoRunner()
         {
             temppath = Path.GetTempPath();
+            string[] commandLineArgs = Environment.GetCommandLineArgs();
+            for (int i = 0; i < commandLineArgs.Length; i++)
+            {
+                string commandLineArg = commandLineArgs[i];
+                if (commandLineArg.ToLower() == "/SameFolderForPolipo".ToLower())
+                {
+                    temppath = Environment.CurrentDirectory;
+                }
+                if (commandLineArg.ToLower() == "/PolipoFolder".ToLower())
+                {
+                    if (i == commandLineArgs.Length - 1)
+                    {
+                        System.Windows.Forms.MessageBox.Show("Polipo folder not specified.", "Error", System.Windows.Forms.MessageBoxButtons.OK, System.Windows.Forms.MessageBoxIcon.Error);
+                        throw new Exception("Polipo folder not specified");
+                    }
+                    else if (!IsDirectoryValid(commandLineArgs[i + 1]))
+                    {
+                        System.Windows.Forms.MessageBox.Show("Polipo folder not valid.", "Error", System.Windows.Forms.MessageBoxButtons.OK, System.Windows.Forms.MessageBoxIcon.Error);
+                        throw new Exception("Polipo folder not valid");
+                    }
+                    else
+                    {
+                        temppath = commandLineArgs[i + 1];
+                    }
+                }
+            }
             try
             {
                 FileManager.UncompressFile(temppath + "/ss_polipo.exe", Resources.polipo_exe);
@@ -121,6 +147,25 @@ namespace Shadowsocks.Controller
                 return defaultPort;
             }
             throw new Exception("No free port found.");
+        }
+
+        public static bool IsDirectoryValid(string path)
+        {
+            try
+            {
+                if (new DirectoryInfo(path).Exists == true)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            catch (Exception e)
+            {
+                return false;
+            }
         }
     }
 }
