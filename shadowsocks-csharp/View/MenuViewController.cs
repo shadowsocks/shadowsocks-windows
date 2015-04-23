@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
+using Microsoft.Win32;
 using ZXing;
 using ZXing.Common;
 using ZXing.QrCode;
@@ -325,9 +326,44 @@ namespace Shadowsocks.View
             }
         }
 
+        private static string GetDefaultBrowserPath()
+        {
+            string userChoice = @"Software\Microsoft\Windows\Shell\Associations\UrlAssociations\https\UserChoice";
+            string commandPath = @"$BROWSER$\shell\open\command";
+            string browserPath = "";
+            try
+            {
+                // Read default browser path from userChoice Key
+                RegistryKey userChoiceKey = Registry.CurrentUser.OpenSubKey(userChoice, false);
+                string progId = (userChoiceKey.GetValue("ProgId").ToString());
+                userChoiceKey.Close();
+
+                // Look up the path of the executable
+                commandPath = commandPath.Replace("$BROWSER$", progId);
+                RegistryKey pathKey = Registry.ClassesRoot.OpenSubKey(commandPath, false);
+
+                browserPath = pathKey.GetValue(null).ToString().ToLower().Replace("\"", "");
+                pathKey.Close();
+
+                // Trim parameters.
+                string exeSuffix = "exe";
+                if (!browserPath.EndsWith(exeSuffix))
+                {
+                    browserPath = browserPath.Substring(0, browserPath.LastIndexOf(exeSuffix, StringComparison.Ordinal) + exeSuffix.Length);
+                }
+            }
+            catch (Exception e)
+            {
+                Logging.LogUsefulException(e);
+            }
+
+            return browserPath;
+        }
+
         private void AboutItem_Click(object sender, EventArgs e)
         {
-            Process.Start("https://github.com/shadowsocks/shadowsocks-csharp");
+            string aboutLink = "https://github.com/shadowsocks/shadowsocks-csharp";
+            Process.Start(GetDefaultBrowserPath(), aboutLink);
         }
 
         private void notifyIcon1_DoubleClick(object sender, MouseEventArgs e)
