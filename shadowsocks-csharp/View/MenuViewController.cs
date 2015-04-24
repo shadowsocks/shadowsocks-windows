@@ -237,7 +237,7 @@ namespace Shadowsocks.View
 
         void notifyIcon1_BalloonTipClicked(object sender, EventArgs e)
         {
-            System.Diagnostics.Process.Start(updateChecker.LatestVersionURL);
+            Process.Start(GetDefaultBrowserPath(), updateChecker.LatestVersionURL);
             _notifyIcon.BalloonTipClicked -= notifyIcon1_BalloonTipClicked;
         }
 
@@ -330,7 +330,7 @@ namespace Shadowsocks.View
         {
             string userChoice = @"Software\Microsoft\Windows\Shell\Associations\UrlAssociations\https\UserChoice";
             string commandPath = @"$BROWSER$\shell\open\command";
-            string browserPath = "";
+            string browserPath = null;
             try
             {
                 // Read default browser path from userChoice Key
@@ -357,6 +357,10 @@ namespace Shadowsocks.View
                 Logging.LogUsefulException(e);
             }
 
+            if (browserPath == null)
+            {
+                browserPath = "iexplore.exe";
+            }
             return browserPath;
         }
 
