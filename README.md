@@ -36,6 +36,8 @@ Don't forget to update from GFWList again after you've edited the user rule
 
 ### Develop
 
+Check out the [contributing](https://github.com/shadowsocks/shadowsocks-csharp/blob/master/CONTRIBUTING.md) page first.
+
 Visual Studio Express 2012 is recommended.
 
 #### License
