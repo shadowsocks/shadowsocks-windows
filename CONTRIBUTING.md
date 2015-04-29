@@ -13,8 +13,7 @@ needed.
 Issues
 ------
 
-1. Only bugs and feature requests are accepted here.
-2. Nobody has reported any bugs but posted a lot of questions in the last
+1. Nobody has reported any bugs but posted a lot of questions in the last
 few months. So we're closing the issue tracker.
 
 
