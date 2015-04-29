@@ -4,9 +4,7 @@ How to Contribute
 Pull Requests
 -------------
 
-1. Pull requests are welcome. If you would like to add a large feature
-or make a significant change, make sure to open an issue to discuss with
-people first.
+1. Pull requests are welcome.
 2. Make sure to pass the unit tests. Write unit tests for new modules if
 needed.
 
