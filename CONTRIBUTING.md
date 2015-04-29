@@ -14,14 +14,8 @@ Issues
 ------
 
 1. Only bugs and feature requests are accepted here.
-2. We'll only work on important features. If the feature you're asking only
-benefits a few people, you'd better implement the feature yourself and send us
-a pull request, or ask some of your friends to do so.
-3. We don't answer questions of any other types here. Since very few people
-are watching the issue tracker here, you'll probably get no help from here.
-Read [Troubleshooting] and get help from forums or [mailing lists].
-4. Issues in languages other than English will be Google translated into English
-later.
+2. Nobody has reported any bugs but posted a lot of questions in the last
+few months. So we're closing the issue tracker.
 
 
 [Troubleshooting]: https://github.com/clowwindy/shadowsocks/wiki/Troubleshooting
