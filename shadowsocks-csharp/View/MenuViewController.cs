@@ -37,6 +37,8 @@ namespace Shadowsocks.View
         private MenuItem PACModeItem;
         private MenuItem localPACItem;
         private MenuItem onlinePACItem;
+        private MenuItem fastModeItem;
+        private MenuItem preciseModeItem;
         private MenuItem editLocalPACItem;
         private MenuItem updateFromGFWListItem;
         private MenuItem editGFWUserRuleItem;
@@ -161,6 +163,9 @@ namespace Shadowsocks.View
                     this.localPACItem = CreateMenuItem("Local PAC", new EventHandler(this.LocalPACItem_Click)),
                     this.onlinePACItem = CreateMenuItem("Online PAC", new EventHandler(this.OnlinePACItem_Click)),
                     new MenuItem("-"),
+                    this.fastModeItem = CreateMenuItem("Fast Mode", new EventHandler(this.fastModeItem_Click)),
+                    this.preciseModeItem = CreateMenuItem("Precise Mode", new EventHandler(this.preciseModeItem_Click)),
+                    new MenuItem("-"),
                     this.editLocalPACItem = CreateMenuItem("Edit Local PAC File...", new EventHandler(this.EditPACFileItem_Click)),
                     this.updateFromGFWListItem = CreateMenuItem("Update Local PAC from GFWList", new EventHandler(this.UpdatePACFromGFWListItem_Click)),
                     this.editGFWUserRuleItem = CreateMenuItem("Edit User Rule for GFWList...", new EventHandler(this.EditUserRuleFileForGFWListItem_Click)),
@@ -253,6 +258,8 @@ namespace Shadowsocks.View
             AutoStartupItem.Checked = AutoStartup.Check();
             onlinePACItem.Checked = onlinePACItem.Enabled && config.useOnlinePac;
             localPACItem.Checked = !onlinePACItem.Checked;
+            fastModeItem.Checked = !config.usePreciseMode;
+            preciseModeItem.Checked = config.usePreciseMode;
             UpdatePACItemsEnabledStatus();
         }
 
@@ -525,6 +532,26 @@ namespace Shadowsocks.View
             }
         }
 
+        private void fastModeItem_Click(object sender, EventArgs e)
+        {
+            if (!fastModeItem.Checked)
+            {
+                fastModeItem.Checked = true;
+                preciseModeItem.Checked = false;
+                controller.UsePreciseMode(false);
+            }
+        }
+
+        private void preciseModeItem_Click(object sender, EventArgs e)
+        {
+            if (!preciseModeItem.Checked)
+            {
+                fastModeItem.Checked = false;
+                preciseModeItem.Checked = true;
+                controller.UsePreciseMode(true);
+            }
+        }
+
         private void UpdateOnlinePACURLItem_Click(object sender, EventArgs e)
         {
             string origPacUrl = controller.GetConfiguration().pacUrl;
@@ -544,6 +571,8 @@ namespace Shadowsocks.View
             {
                 this.editLocalPACItem.Enabled = true;
                 this.updateFromGFWListItem.Enabled = true;
+                this.fastModeItem.Enabled = true;
+                this.preciseModeItem.Enabled = true;
                 this.editGFWUserRuleItem.Enabled = true;
                 this.editOnlinePACItem.Enabled = false;
             }
@@ -551,6 +580,8 @@ namespace Shadowsocks.View
             {
                 this.editLocalPACItem.Enabled = false;
                 this.updateFromGFWListItem.Enabled = false;
+                this.fastModeItem.Enabled = false;
+                this.preciseModeItem.Enabled = false;
                 this.editGFWUserRuleItem.Enabled = false;
                 this.editOnlinePACItem.Enabled = true;
             }
