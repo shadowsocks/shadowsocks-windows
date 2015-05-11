@@ -10,7 +10,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Shadowsocks</RootNamespace>
     <AssemblyName>Shadowsocks</AssemblyName>
-    <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <StartupObject>
     </StartupObject>
@@ -189,11 +189,15 @@
       <SubType>Designer</SubType>
     </None>
     <None Include="Data\abp.js.gz" />
+    <None Include="Data\builtin.txt.gz" />
     <None Include="Data\libsscrypto.dll.gz" />
     <None Include="Data\polipo.exe.gz" />
+    <None Include="Data\proxy.pac.gz" />
     <None Include="Data\proxy.pac.txt.gz" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Data\tld.txt.gz" />
+    <None Include="Resources\proxy.pac.gz" />
     <None Include="Resources\ss20.png" />
     <None Include="Resources\ss16.png" />
     <None Include="Resources\ss24.png" />

@@ -214,6 +214,16 @@ namespace Shadowsocks.Controller
             }
         }
 
+        public void UsePreciseMode(bool usePreciseMode)
+        {
+            _config.usePreciseMode = usePreciseMode;
+            SaveConfig(_config);
+            if (ConfigChanged != null)
+            {
+                ConfigChanged(this, new EventArgs());
+            }
+        }
+
         protected void Reload()
         {
             // some logic in configuration updated the config when saving, we need to read it again

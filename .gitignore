@@ -4,4 +4,4 @@ obj/
 shadowsocks-csharp/shadowsocks-csharp.csproj.user
 TestResults
 *.suo
-
+*Thumbs.db
