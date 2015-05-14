@@ -5,6 +5,7 @@ using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 
 namespace Shadowsocks.Controller
 {
@@ -20,9 +21,29 @@ namespace Shadowsocks.Controller
         Socket _socket;
         IList<Service> _services;
 
+        private const int m_numConnections = 8000; 
+        private const int m_receiveBufferSize = 4096; 
+        private Semaphore m_maxNumberAcceptedClients;
+
+        private AsyncSocketUserTokenPool m_asyncSocketUserTokenPool;
+        private AsyncSocketUserTokenList m_asyncSocketUserTokenList;
+        public AsyncSocketUserTokenList AsyncSocketUserTokenList { get { return m_asyncSocketUserTokenList; } }
+
         public Listener(IList<Service> services)
         {
             this._services = services;
+
+            m_asyncSocketUserTokenPool = new AsyncSocketUserTokenPool(m_numConnections);
+            m_asyncSocketUserTokenList = new AsyncSocketUserTokenList();
+            m_maxNumberAcceptedClients = new Semaphore(m_numConnections, m_numConnections);
+
+            AsyncSocketUserToken userToken;
+            for (int i = 0; i < m_numConnections; i++)
+            {
+                userToken = new AsyncSocketUserToken(m_receiveBufferSize);
+                userToken.ReceiveEventArgs.Completed += new EventHandler<SocketAsyncEventArgs>(IO_Completed);
+                m_asyncSocketUserTokenPool.Push(userToken);
+            }
         }
 
         private bool CheckIfPortInUse(int port)
@@ -70,9 +91,8 @@ namespace Shadowsocks.Controller
 
                 // Start an asynchronous socket to listen for connections.
                 Console.WriteLine("Shadowsocks started");
-                _socket.BeginAccept(
-                    new AsyncCallback(AcceptCallback),
-                    _socket);
+
+                StartAccept(null);
             }
             catch (SocketException)
             {
@@ -87,77 +107,130 @@ namespace Shadowsocks.Controller
             {
                 _socket.Close();
                 _socket = null;
+            }         
+        }
+
+        public void StartAccept(SocketAsyncEventArgs acceptEventArgs)
+        {
+            if (acceptEventArgs == null)
+            {
+                acceptEventArgs = new SocketAsyncEventArgs();
+                acceptEventArgs.Completed += new EventHandler<SocketAsyncEventArgs>(AcceptEventArg_Completed);
+            }
+            else
+            {
+                acceptEventArgs.AcceptSocket = null; 
+            }
+
+            m_maxNumberAcceptedClients.WaitOne(); 
+            bool willRaiseEvent = _socket.AcceptAsync(acceptEventArgs);
+            if (!willRaiseEvent)
+            {
+                ProcessAccept(acceptEventArgs);
             }
         }
 
-        public void AcceptCallback(IAsyncResult ar)
+
+        void AcceptEventArg_Completed(object sender, SocketAsyncEventArgs acceptEventArgs)
         {
-            Socket listener = (Socket)ar.AsyncState;
             try
             {
-                Socket conn = listener.EndAccept(ar);
-
-                byte[] buf = new byte[4096];
-                object[] state = new object[] {
-                    conn,
-                    buf
-                };
-
-                conn.BeginReceive(buf, 0, buf.Length, 0,
-                    new AsyncCallback(ReceiveCallback), state);
+                ProcessAccept(acceptEventArgs);
             }
-            catch (ObjectDisposedException)
+            catch (Exception e)
             {
+                Logging.LogUsefulException(e);
+            }
+        }
+
+        private void ProcessAccept(SocketAsyncEventArgs acceptEventArgs)
+        {          
+            AsyncSocketUserToken userToken = m_asyncSocketUserTokenPool.Pop();
+            m_asyncSocketUserTokenList.Add(userToken);
+            userToken.ConnectSocket = acceptEventArgs.AcceptSocket;
+
+            try
+            {
+                bool willRaiseEvent = userToken.ConnectSocket.ReceiveAsync(userToken.ReceiveEventArgs);  
+                if (!willRaiseEvent)
+                {
+                    lock (userToken)
+                    {
+                        ProcessReceive(userToken.ReceiveEventArgs);
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Logging.LogUsefulException(e);
+            }
+
+            StartAccept(acceptEventArgs);
+        }
+
+
+        void IO_Completed(object sender, SocketAsyncEventArgs asyncEventArgs)
+        {
+            AsyncSocketUserToken userToken = asyncEventArgs.UserToken as AsyncSocketUserToken;
+            try
+            {
+                lock (userToken)
+                {
+                    if (asyncEventArgs.LastOperation == SocketAsyncOperation.Receive)
+                        ProcessReceive(asyncEventArgs);
+                }
             }
             catch (Exception e)
             {
                 Console.WriteLine(e);
             }
-            finally
-            {
-                try
-                {
-                    listener.BeginAccept(
-                        new AsyncCallback(AcceptCallback),
-                        listener);
-                }
-                catch (ObjectDisposedException)
-                {
-                    // do nothing
-                }
-                catch (Exception e)
-                {
-                    Logging.LogUsefulException(e);
-                }
-            }
         }
 
-
-        private void ReceiveCallback(IAsyncResult ar)
+        private void ProcessReceive(SocketAsyncEventArgs receiveEventArgs)
         {
-            object[] state = (object[])ar.AsyncState;
+            AsyncSocketUserToken userToken = receiveEventArgs.UserToken as AsyncSocketUserToken;
+            if (userToken.ConnectSocket == null)
+                return;
 
-            Socket conn = (Socket)state[0];
-            byte[] buf = (byte[])state[1];
-            try
+            if (userToken.ReceiveEventArgs.BytesTransferred > 0 && userToken.ReceiveEventArgs.SocketError == SocketError.Success)
             {
-                int bytesRead = conn.EndReceive(ar);
                 foreach (Service service in _services)
                 {
-                    if (service.Handle(buf, bytesRead, conn))
+                    if (service.Handle(userToken.ReceiveEventArgs.Buffer, userToken.ReceiveEventArgs.BytesTransferred, userToken.ConnectSocket))
                     {
                         return;
                     }
                 }
-                // no service found for this
-                // shouldn't happen
-                conn.Close();
+
+                bool willRaiseEvent = userToken.ConnectSocket.ReceiveAsync(userToken.ReceiveEventArgs);
+                if (!willRaiseEvent)
+                    ProcessReceive(userToken.ReceiveEventArgs);
+            }
+            else
+            {
+                CloseClientSocket(userToken);
+            }
+        }
+
+        public void CloseClientSocket(AsyncSocketUserToken userToken)
+        {
+            if (userToken.ConnectSocket == null)
+                return;
+            try
+            {
+                userToken.ConnectSocket.Shutdown(SocketShutdown.Both);
             }
             catch (Exception e)
             {
                 Console.WriteLine(e);
-                conn.Close();
             }
+            userToken.ConnectSocket.Close();
+            userToken.ConnectSocket = null;
+
+            m_maxNumberAcceptedClients.Release();
+            m_asyncSocketUserTokenPool.Push(userToken);
+            m_asyncSocketUserTokenList.Remove(userToken);
         }
     }
+
 }
