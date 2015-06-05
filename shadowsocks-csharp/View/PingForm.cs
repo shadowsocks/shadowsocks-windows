@@ -260,14 +260,14 @@ namespace Shadowsocks.View
             {
                 foreach (var row in dgvMain.Rows)
                 {
-                    var t = new Thread(Ping);
+                    var t = new Thread(Ping) { IsBackground = true };
                     t.Start(row);
                 }
             }
             else
             {
                 ChangeStatus(I18N.GetString("DoSomething"));
-                var t = new Thread(Go);
+                var t = new Thread(Go) { IsBackground = true };
                 t.Start(dgvMain.Rows);
             }
 
