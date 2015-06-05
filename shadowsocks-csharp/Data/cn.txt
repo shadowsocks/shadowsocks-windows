@@ -72,3 +72,25 @@ Failed to decode QRCode=无法解析二维码
 Failed to update registry=无法修改注册表
 System Proxy On: =系统代理已启用：
 Running: Port {0}=正在运行：端口 {0}
+
+
+# Pingform
+UsableTest...=可用性测试...
+UsableTest=服务器可用性测试
+SvcAddr=地址
+Location=物理地址
+Max=最大
+Min=最小
+Average=平均
+IP=IP地址
+Speed=下载速度
+TestSpeed=测速
+Pinging=正在获取
+PingFail=获取失败
+FailTime=失败次数
+CurrentStatus:=当前状态：
+Ready=准备就绪
+DoSomething=我们正在处理一些事情
+Wrong=遇到一些问题
+Unknow=未知
+Seems your server is down, r u sure apply this server?=看起来你的服务器不可用，确定要使用这个服务器吗？

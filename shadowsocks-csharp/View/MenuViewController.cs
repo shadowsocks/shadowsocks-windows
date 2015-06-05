@@ -42,6 +42,9 @@ namespace Shadowsocks.View
         private MenuItem editGFWUserRuleItem;
         private MenuItem editOnlinePACItem;
         private ConfigForm configForm;
+
+        private PingForm pingForm;
+
         private string _urlToOpen;
 
         public MenuViewController(ShadowsocksController controller)
@@ -132,11 +135,11 @@ namespace Shadowsocks.View
                 + "\n" + config.GetCurrentServer().FriendlyName();
             _notifyIcon.Text = text.Substring(0, Math.Min(63, text.Length));
         }
-
         private MenuItem CreateMenuItem(string text, EventHandler click)
         {
             return new MenuItem(I18N.GetString(text), click);
         }
+
 
         private MenuItem CreateMenuGroup(string text, MenuItem[] items)
         {
@@ -169,6 +172,8 @@ namespace Shadowsocks.View
                 new MenuItem("-"),
                 this.AutoStartupItem = CreateMenuItem("Start on Boot", new EventHandler(this.AutoStartupItem_Click)),
                 this.ShareOverLANItem = CreateMenuItem("Allow Clients from LAN", new EventHandler(this.ShareOverLANItem_Click)),
+                new MenuItem("-"),
+                CreateMenuItem("UsableTest...", new EventHandler(this.PingForm_Click)),
                 new MenuItem("-"),
                 CreateMenuItem("Show Logs...", new EventHandler(this.ShowLogItem_Click)),
                 CreateMenuItem("About...", new EventHandler(this.AboutItem_Click)),
@@ -278,6 +283,29 @@ namespace Shadowsocks.View
             {
                 items[configuration.index].Checked = true;
             }
+        }
+
+        private void ShowPingForm()
+        {
+            if (pingForm != null)
+            {
+                pingForm.Activate();
+            }
+            else
+            {
+                pingForm = new PingForm(controller);
+                pingForm.Show();
+                pingForm.FormClosed += pingForm_FormClosed;
+            }
+        }
+        private void PingForm_Click(object sender, EventArgs e)
+        {
+            ShowPingForm();
+        }
+        void pingForm_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            pingForm = null;
+            Util.Utils.ReleaseMemory();
         }
 
         private void ShowConfigForm()
