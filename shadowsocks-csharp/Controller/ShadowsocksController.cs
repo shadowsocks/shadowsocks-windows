@@ -35,7 +35,7 @@ namespace Shadowsocks.Controller
         public event EventHandler EnableStatusChanged;
         public event EventHandler EnableGlobalChanged;
         public event EventHandler ShareOverLANStatusChanged;
-        
+
         // when user clicked Edit PAC, and PAC file has already created
         public event EventHandler<PathEventArgs> PACFileReadyToOpen;
         public event EventHandler<PathEventArgs> UserRuleFileReadyToOpen;
@@ -135,6 +135,35 @@ namespace Shadowsocks.Controller
         {
             _config.index = index;
             SaveConfig(_config);
+        }
+
+        public void SelectServerIndexTemp(int index)
+        {
+            _config.index = index;
+
+            if (polipoRunner == null)
+                polipoRunner = new PolipoRunner();
+
+            if (_listener != null)
+                _listener.Stop();
+
+            try
+            {
+                Local local = new Local(_config);
+                List<Listener.Service> services = new List<Listener.Service>();
+                services.Add(local);
+                _listener = new Listener(services);
+                _listener.Start(_config);
+            }
+            catch (Exception e)
+            {
+                var se = e as SocketException;
+                if (se?.SocketErrorCode == SocketError.AccessDenied)
+                    e = new Exception(I18N.GetString("Port already in use"), e);
+                Logging.LogUsefulException(e);
+                ReportError(e);
+            }
+            Util.Utils.ReleaseMemory();
         }
 
         public void Stop()

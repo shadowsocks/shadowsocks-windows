@@ -1,15 +1,26 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Drawing;
 using System.IO;
 using System.IO.Compression;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Windows.Forms;
+using Shadowsocks._3rd.ProxySocket;
 
 namespace Shadowsocks.Util
 {
     public class Utils
     {
+        public static Shadowsocks._3rd.QQWry qqwry;
+        public static Font GetFont()
+        {
+            var fs = FontFamily.Families;
+            var ret = fs.FirstOrDefault(f => f.Name == "Microsoft YaHei UI Light") ?? fs.FirstOrDefault(f => f.Name == "Microsoft YaHei UI");
+            return ret == null ? SystemFonts.MessageBoxFont : new Font(ret,9f,FontStyle.Regular);
+        }
         public static void ReleaseMemory()
         {
             // release any unused pages
