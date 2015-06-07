@@ -22,7 +22,7 @@ namespace Shadowsocks.View
             this.code = code;
             InitializeComponent();
             this.Icon = Icon.FromHandle(Resources.ssw128.GetHicon());
-            this.Text = I18N.GetString("QRCode");
+            this.Text = I18N.GetString("QRCode.QRCode");
         }
 
         private void GenQR(string ssconfig)

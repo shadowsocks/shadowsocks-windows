@@ -73,7 +73,7 @@ namespace Shadowsocks.Controller
             {
                 Logging.LogUsefulException(e);
                 // TODO this should be moved into views
-                MessageBox.Show(I18N.GetString("Failed to update registry"));
+                MessageBox.Show(I18N.GetString("Message.FailedToUpdateRegistry"));
             }
         }
 

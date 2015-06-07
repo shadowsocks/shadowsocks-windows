@@ -82,7 +82,7 @@ namespace Shadowsocks.View
 
         void controller_Errored(object sender, System.IO.ErrorEventArgs e)
         {
-            MessageBox.Show(e.GetException().ToString(), String.Format(I18N.GetString("Shadowsocks Error: {0}"), e.GetException().Message));
+            MessageBox.Show(e.GetException().ToString(), String.Format(I18N.GetString("Message.ShadowsocksError"), e.GetException().Message));
         }
 
         private void UpdateTrayIcon()
@@ -125,10 +125,10 @@ namespace Shadowsocks.View
             _notifyIcon.Icon = Icon.FromHandle(icon.GetHicon());
 
             // we want to show more details but notify icon title is limited to 63 characters
-            string text = I18N.GetString("Shadowsocks") + " " + UpdateChecker.Version + "\n" +
+            string text = I18N.GetString("Main.Shadowsocks") + " " + UpdateChecker.Version + "\n" +
                 (enabled ?
-                    I18N.GetString("System Proxy On: ") + (global ? I18N.GetString("Global") : I18N.GetString("PAC")) :
-                    String.Format(I18N.GetString("Running: Port {0}"), config.localPort))  // this feedback is very important because they need to know Shadowsocks is running
+                    I18N.GetString("Message.SystemProxyOn") + (global ? I18N.GetString("Menu.Global") : I18N.GetString("Menu.PAC")) :
+                    String.Format(I18N.GetString("Message.RunningPort"), config.localPort))  // this feedback is very important because they need to know Shadowsocks is running
                 + "\n" + config.GetCurrentServer().FriendlyName();
             _notifyIcon.Text = text.Substring(0, Math.Min(63, text.Length));
         }
@@ -146,34 +146,34 @@ namespace Shadowsocks.View
         private void LoadMenu()
         {
             this.contextMenu1 = new ContextMenu(new MenuItem[] {
-                this.enableItem = CreateMenuItem("Enable System Proxy", new EventHandler(this.EnableItem_Click)),
-                this.modeItem = CreateMenuGroup("Mode", new MenuItem[] {
-                    this.PACModeItem = CreateMenuItem("PAC", new EventHandler(this.PACModeItem_Click)),
-                    this.globalModeItem = CreateMenuItem("Global", new EventHandler(this.GlobalModeItem_Click))
+                this.enableItem = CreateMenuItem("Menu.EnableSystemProxy", new EventHandler(this.EnableItem_Click)),
+                this.modeItem = CreateMenuGroup("Menu.Mode", new MenuItem[] {
+                    this.PACModeItem = CreateMenuItem("Menu.PAC", new EventHandler(this.PACModeItem_Click)),
+                    this.globalModeItem = CreateMenuItem("Menu.Global", new EventHandler(this.GlobalModeItem_Click))
                 }),
-                this.ServersItem = CreateMenuGroup("Servers", new MenuItem[] {
+                this.ServersItem = CreateMenuGroup("Menu.Servers", new MenuItem[] {
                     this.SeperatorItem = new MenuItem("-"),
-                    this.ConfigItem = CreateMenuItem("Edit Servers...", new EventHandler(this.Config_Click)),
-                    CreateMenuItem("Show QRCode...", new EventHandler(this.QRCodeItem_Click)),
-                    CreateMenuItem("Scan QRCode from Screen...", new EventHandler(this.ScanQRCodeItem_Click))
+                    this.ConfigItem = CreateMenuItem("Menu.EditServers2", new EventHandler(this.Config_Click)),
+                    CreateMenuItem("Menu.ShowQRCode", new EventHandler(this.QRCodeItem_Click)),
+                    CreateMenuItem("Menu.ScanQRCodeFromScreen", new EventHandler(this.ScanQRCodeItem_Click))
                 }),
                 CreateMenuGroup("PAC ", new MenuItem[] {
-                    this.localPACItem = CreateMenuItem("Local PAC", new EventHandler(this.LocalPACItem_Click)),
-                    this.onlinePACItem = CreateMenuItem("Online PAC", new EventHandler(this.OnlinePACItem_Click)),
+                    this.localPACItem = CreateMenuItem("Menu.LocalPAC", new EventHandler(this.LocalPACItem_Click)),
+                    this.onlinePACItem = CreateMenuItem("Menu.OnlinePAC", new EventHandler(this.OnlinePACItem_Click)),
                     new MenuItem("-"),
-                    this.editLocalPACItem = CreateMenuItem("Edit Local PAC File...", new EventHandler(this.EditPACFileItem_Click)),
-                    this.updateFromGFWListItem = CreateMenuItem("Update Local PAC from GFWList", new EventHandler(this.UpdatePACFromGFWListItem_Click)),
-                    this.editGFWUserRuleItem = CreateMenuItem("Edit User Rule for GFWList...", new EventHandler(this.EditUserRuleFileForGFWListItem_Click)),
-                    this.editOnlinePACItem = CreateMenuItem("Edit Online PAC URL...", new EventHandler(this.UpdateOnlinePACURLItem_Click)),
+                    this.editLocalPACItem = CreateMenuItem("Menu.EditLocalPACFile", new EventHandler(this.EditPACFileItem_Click)),
+                    this.updateFromGFWListItem = CreateMenuItem("Menu.UpdatePACFromGFWList", new EventHandler(this.UpdatePACFromGFWListItem_Click)),
+                    this.editGFWUserRuleItem = CreateMenuItem("Menu.EditUserRuleForGFWList", new EventHandler(this.EditUserRuleFileForGFWListItem_Click)),
+                    this.editOnlinePACItem = CreateMenuItem("PAC.EditOnlinePACURL2", new EventHandler(this.UpdateOnlinePACURLItem_Click)),
                 }),
                 new MenuItem("-"),
-                this.AutoStartupItem = CreateMenuItem("Start on Boot", new EventHandler(this.AutoStartupItem_Click)),
-                this.ShareOverLANItem = CreateMenuItem("Allow Clients from LAN", new EventHandler(this.ShareOverLANItem_Click)),
+                this.AutoStartupItem = CreateMenuItem("Menu.StartOnBoot", new EventHandler(this.AutoStartupItem_Click)),
+                this.ShareOverLANItem = CreateMenuItem("Menu.AllowClientsFromLAN", new EventHandler(this.ShareOverLANItem_Click)),
                 new MenuItem("-"),
-                CreateMenuItem("Show Logs...", new EventHandler(this.ShowLogItem_Click)),
-                CreateMenuItem("About...", new EventHandler(this.AboutItem_Click)),
+                CreateMenuItem("Menu.ShowLogs", new EventHandler(this.ShowLogItem_Click)),
+                CreateMenuItem("Menu.About", new EventHandler(this.AboutItem_Click)),
                 new MenuItem("-"),
-                CreateMenuItem("Quit", new EventHandler(this.Quit_Click))
+                CreateMenuItem("Menu.Quit", new EventHandler(this.Quit_Click))
             });
         }
 
@@ -217,19 +217,19 @@ namespace Shadowsocks.View
 
         void controller_UpdatePACFromGFWListError(object sender, System.IO.ErrorEventArgs e)
         {
-            ShowBalloonTip(I18N.GetString("Failed to update PAC file"), e.GetException().Message, ToolTipIcon.Error, 5000);
+            ShowBalloonTip(I18N.GetString("Message.FailedToUpdatePACFile"), e.GetException().Message, ToolTipIcon.Error, 5000);
             Logging.LogUsefulException(e.GetException());
         }
 
         void controller_UpdatePACFromGFWListCompleted(object sender, GFWListUpdater.ResultEventArgs e)
         {
-            string result = e.Success ? I18N.GetString("PAC updated") : I18N.GetString("No updates found. Please report to GFWList if you have problems with it.");
-            ShowBalloonTip(I18N.GetString("Shadowsocks"), result, ToolTipIcon.Info, 1000);
+            string result = e.Success ? I18N.GetString("Message.PACUpdated") : I18N.GetString("Message.NoUpdatesFound");
+            ShowBalloonTip(I18N.GetString("Main.Shadowsocks"), result, ToolTipIcon.Info, 1000);
         }
 
         void updateChecker_NewVersionFound(object sender, EventArgs e)
         {
-            ShowBalloonTip(String.Format(I18N.GetString("Shadowsocks {0} Update Found"), updateChecker.LatestVersionNumber), I18N.GetString("Click here to download"), ToolTipIcon.Info, 5000);
+            ShowBalloonTip(String.Format(I18N.GetString("Message.ShadowsocksUpdateFound"), updateChecker.LatestVersionNumber), I18N.GetString("Message.ClickHereToDownload"), ToolTipIcon.Info, 5000);
             _notifyIcon.BalloonTipClicked += notifyIcon1_BalloonTipClicked;
             _isFirstRun = false;
         }
@@ -317,8 +317,8 @@ namespace Shadowsocks.View
         {
             if (_isFirstRun)
             {
-                _notifyIcon.BalloonTipTitle = I18N.GetString("Shadowsocks is here");
-                _notifyIcon.BalloonTipText =  I18N.GetString("You can turn on/off Shadowsocks in the context menu");
+                _notifyIcon.BalloonTipTitle = I18N.GetString("Message.ShadowsocksIsHere");
+                _notifyIcon.BalloonTipText = I18N.GetString("Message.TurnOnOffShadowsocksInContextMenu");
                 _notifyIcon.BalloonTipIcon = ToolTipIcon.Info;
                 _notifyIcon.ShowBalloonTip(0);
                 _isFirstRun = false;
@@ -444,7 +444,7 @@ namespace Shadowsocks.View
                             }
                             else
                             {
-                                MessageBox.Show(I18N.GetString("Failed to decode QRCode"));
+                                MessageBox.Show(I18N.GetString("Message.FailedToDecodeQRCode"));
                                 return;
                             }
                             double minX = Int32.MaxValue, minY = Int32.MaxValue, maxX = 0, maxY = 0;
@@ -476,7 +476,7 @@ namespace Shadowsocks.View
                     }
                 }
             }
-            MessageBox.Show(I18N.GetString("No QRCode found. Try to zoom in or move it to the center of the screen."));
+            MessageBox.Show(I18N.GetString("Message.NoQRCodeFound"));
         }
 
         void splash_FormClosed(object sender, FormClosedEventArgs e)
@@ -492,7 +492,7 @@ namespace Shadowsocks.View
 		private void AutoStartupItem_Click(object sender, EventArgs e) {
 			AutoStartupItem.Checked = !AutoStartupItem.Checked;
 			if (!AutoStartup.Set(AutoStartupItem.Checked)) {
-				MessageBox.Show(I18N.GetString("Failed to update registry"));
+                MessageBox.Show(I18N.GetString("Message.FailedToUpdateRegistry"));
 			}
 		}
 
@@ -529,8 +529,8 @@ namespace Shadowsocks.View
         {
             string origPacUrl = controller.GetConfiguration().pacUrl;
             string pacUrl = Microsoft.VisualBasic.Interaction.InputBox(
-                I18N.GetString("Please input PAC Url"),
-                I18N.GetString("Edit Online PAC URL"),
+                I18N.GetString("PAC.InputPACUrl"),
+                I18N.GetString("PAC.EditOnlinePACURL"),
                 origPacUrl, -1, -1);
             if (!string.IsNullOrEmpty(pacUrl) && pacUrl != origPacUrl)
             {

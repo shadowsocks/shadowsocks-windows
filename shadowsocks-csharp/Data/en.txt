@@ -1,0 +1,74 @@
+# translation for English	
+
+Main.Shadowsocks=Shadowsocks	
+	
+# Menu items	
+	
+Menu.EnableSystemProxy=Enable System Proxy
+Menu.Mode=Mode
+Menu.PAC=PAC
+Menu.Global=Global
+Menu.Servers=Servers
+Menu.EditServers2=Edit Servers...
+Menu.StartOnBoot=Start on Boot
+Menu.AllowClientsFromLAN=Allow Clients from LAN
+Menu.LocalPAC=Local PAC
+Menu.OnlinePAC=Online PAC
+Menu.EditLocalPACFile=Edit Local PAC File...
+Menu.UpdatePACFromGFWList=Update Local PAC from GFWList
+Menu.EditUserRuleForGFWList=Edit User Rule for GFWList...
+Menu.ShowQRCode=Show QRCode...
+Menu.ScanQRCodeFromScreen=Scan QRCode from Screen...
+Menu.ShowLogs=Show Logs...
+Menu.About=About...
+Menu.Quit=Quit
+Menu.EditServers=Edit Servers
+	
+# Config Form	
+	
+Config.Add=&Add
+Config.Delete=&Delete
+Config.Server=Server
+Config.ServerIP=Server IP
+Config.ServerPort=Server Port
+Config.Password=Password
+Config.Encryption=Encryption
+Config.ProxyPort=Proxy Port
+Config.Remarks=Remarks
+Config.OK=OK
+Config.Cancel=Cancel
+Config.NewServer=New server
+	
+# QRCode Form	
+	
+QRCode.QRCode=QRCode
+	
+# PAC Url Form	
+	
+PAC.EditOnlinePACURL=Edit Online PAC URL
+PAC.EditOnlinePACURL2=Edit Online PAC URL...
+PAC.InputPACUrl=Please input PAC Url
+	
+# Messages	
+	
+Message.ShadowsocksError=Shadowsocks Error: {0}
+Message.PortAlreadyInUse=Port already in use
+Message.IllegalPortNumberFormat=Illegal port number format
+Message.AddAtLeastOneServer=Please add at least one server
+Message.ServerIPCanNotBlank=Server IP can not be blank
+Message.PasswordCanNotBlank=Password can not be blank
+Message.PortOutOfRange=Port out of range
+Message.ShadowsocksUpdateFound=Shadowsocks {0} Update Found
+Message.ClickHereToDownload=Click here to download
+Message.ShadowsocksIsHere=Shadowsocks is here
+Message.TurnOnOffShadowsocksInContextMenu=You can turn on/off Shadowsocks in the context menu
+Message.SystemProxyEnabled=System Proxy Enabled
+Message.SystemProxyDisabled=System Proxy Disabled
+Message.FailedToUpdatePACFile=Failed to update PAC file 
+Message.PACUpdated=PAC updated
+Message.NoUpdatesFound=No updates found. Please report to GFWList if you have problems with it.
+Message.NoQRCodeFound=No QRCode found. Try to zoom in or move it to the center of the screen.
+Message.FailedToDecodeQRCode=Failed to decode QRCode
+Message.FailedToUpdateRegistry=Failed to update registry
+Message.SystemProxyOn=System Proxy On: 
+Message.RunningPort=Running: Port {0}

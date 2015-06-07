@@ -46,7 +46,7 @@ namespace Shadowsocks.Controller
             this._shareOverLAN = config.shareOverLan;
 
             if (CheckIfPortInUse(_config.localPort))
-                throw new Exception(I18N.GetString("Port already in use"));
+                throw new Exception(I18N.GetString("Message.PortAlreadyInUse"));
 
             try
             {

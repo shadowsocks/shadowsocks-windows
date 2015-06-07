@@ -40,18 +40,18 @@ namespace Shadowsocks.View
 
         private void UpdateTexts()
         {
-            AddButton.Text = I18N.GetString("&Add");
-            DeleteButton.Text = I18N.GetString("&Delete");
-            IPLabel.Text = I18N.GetString("Server IP");
-            ServerPortLabel.Text = I18N.GetString("Server Port");
-            PasswordLabel.Text = I18N.GetString("Password");
-            EncryptionLabel.Text = I18N.GetString("Encryption");
-            ProxyPortLabel.Text = I18N.GetString("Proxy Port");
-            RemarksLabel.Text = I18N.GetString("Remarks");
-            ServerGroupBox.Text = I18N.GetString("Server");
-            OKButton.Text = I18N.GetString("OK");
-            MyCancelButton.Text = I18N.GetString("Cancel");
-            this.Text = I18N.GetString("Edit Servers");
+            AddButton.Text = I18N.GetString("Config.Add");
+            DeleteButton.Text = I18N.GetString("Config.Delete");
+            IPLabel.Text = I18N.GetString("Config.ServerIP");
+            ServerPortLabel.Text = I18N.GetString("Config.ServerPort");
+            PasswordLabel.Text = I18N.GetString("Config.Password");
+            EncryptionLabel.Text = I18N.GetString("Config.Encryption");
+            ProxyPortLabel.Text = I18N.GetString("Config.ProxyPort");
+            RemarksLabel.Text = I18N.GetString("Config.Remarks");
+            ServerGroupBox.Text = I18N.GetString("Config.Server");
+            OKButton.Text = I18N.GetString("Config.OK");
+            MyCancelButton.Text = I18N.GetString("Config.Cancel");
+            this.Text = I18N.GetString("Menu.EditServers");
         }
 
         private void controller_ConfigChanged(object sender, EventArgs e)
@@ -92,7 +92,7 @@ namespace Shadowsocks.View
             }
             catch (FormatException)
             {
-                MessageBox.Show(I18N.GetString("Illegal port number format"));
+                MessageBox.Show(I18N.GetString("Message.IllegalPortNumberFormat"));
             }
             catch (Exception ex)
             {
@@ -201,7 +201,7 @@ namespace Shadowsocks.View
             }
             if (_modifiedConfiguration.configs.Count == 0)
             {
-                MessageBox.Show(I18N.GetString("Please add at least one server"));
+                MessageBox.Show(I18N.GetString("Message.AddAtLeastOneServer"));
                 return;
             }
             controller.SaveServers(_modifiedConfiguration.configs, _modifiedConfiguration.localPort);
