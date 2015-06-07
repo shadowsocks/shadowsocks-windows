@@ -12,21 +12,28 @@ namespace Shadowsocks.Controller
         static I18N()
         {
             Strings = new Dictionary<string, string>();
-            
+            string languageString = null;
+
             if (System.Globalization.CultureInfo.CurrentCulture.IetfLanguageTag.ToLowerInvariant().StartsWith("zh"))
             {
-                string[] lines = Regex.Split(Resources.cn, "\r\n|\r|\n");
-                foreach (string line in lines)
+                languageString = Resources.zh_cn;
+            }
+            else
+            {
+                languageString = Resources.en;
+            }
+
+            string[] lines = Regex.Split(languageString, "\r\n|\r|\n");
+            foreach (string line in lines)
+            {
+                if (line.StartsWith("#"))
                 {
-                    if (line.StartsWith("#"))
-                    {
-                        continue;
-                    }
-                    string[] kv = Regex.Split(line, "=");
-                    if (kv.Length == 2)
-                    {
-                        Strings[kv[0]] = kv[1];
-                    }
+                    continue;
+                }
+                string[] kv = Regex.Split(line, "=");
+                if (kv.Length == 2)
+                {
+                    Strings[kv[0]] = kv[1];
                 }
             }
         }

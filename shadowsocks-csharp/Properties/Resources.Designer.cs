@@ -71,37 +71,29 @@ namespace Shadowsocks.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Shadowsocks=Shadowsocks
-        ///Enable System Proxy=启用系统代理
-        ///Mode=系统代理模式
-        ///PAC=PAC 模式
-        ///Global=全局模式
-        ///Servers=服务器
-        ///Edit Servers...=编辑服务器...
-        ///Start on Boot=开机启动
-        ///Allow Clients from LAN=允许来自局域网的连接
-        ///Edit PAC File...=编辑 PAC 文件...
-        ///Edit User Rule for GFWList...=编辑 GFWList 的用户规则...
-        ///Show QRCode...=显示二维码...
-        ///Scan QRCode from Screen...=扫描屏幕上的二维码...
-        ///Show Logs...=显示日志...
-        ///About...=关于...
-        ///Quit=退出
-        ///Edit Servers=编辑服务器
-        ///&amp;Add=添加(&amp;A)
-        ///&amp;Delete=删除(&amp;D)
-        ///Server=服务器
-        ///Server IP=服务器 IP
-        ///Server Port=服务器端口
-        ///Password=密码
-        ///Encryption=加密
-        ///Proxy Port=代理端口
-        ///Remarks=备注
-        ///OK= [rest of string was truncated]&quot;;.
+        ///   Looks up a localized string similar to # translation for English	
+        ///
+        ///Main.Shadowsocks=Shadowsocks	
+        ///	
+        ///# Menu items	
+        ///	
+        ///Menu.EnableSystemProxy=Enable System Proxy
+        ///Menu.Mode=Mode
+        ///Menu.PAC=PAC
+        ///Menu.Global=Global
+        ///Menu.Servers=Servers
+        ///Menu.EditServers2=Edit Servers...
+        ///Menu.StartOnBoot=Start on Boot
+        ///Menu.AllowClientsFromLAN=Allow Clients from LAN
+        ///Menu.LocalPAC=Local PAC
+        ///Menu.OnlinePAC=Online PAC
+        ///Menu.EditLocalPACFile=Edit Local PAC File...
+        ///Menu.UpdatePACFromGFWList=Update Local PAC from GFWList
+        ///Menu.EditUserRuleForGFWList=Edit User Rule  [rest of string was truncated]&quot;;.
         /// </summary>
-        internal static string cn {
+        internal static string en {
             get {
-                return ResourceManager.GetString("cn", resourceCulture);
+                return ResourceManager.GetString("en", resourceCulture);
             }
         }
         
@@ -201,6 +193,35 @@ namespace Shadowsocks.Properties {
         internal static string user_rule {
             get {
                 return ResourceManager.GetString("user_rule", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to # translation for Simplified Chinese
+        ///
+        ///Main.Shadowsocks=Shadowsocks
+        ///
+        ///# Menu items
+        ///
+        ///Menu.EnableSystemProxy=启用系统代理
+        ///Menu.Mode=系统代理模式
+        ///Menu.PAC=PAC 模式
+        ///Menu.Global=全局模式
+        ///Menu.Servers=服务器
+        ///Menu.EditServers2=编辑服务器...
+        ///Menu.StartOnBoot=开机启动
+        ///Menu.AllowClientsFromLAN=允许来自局域网的连接
+        ///Menu.LocalPAC=使用本地 PAC
+        ///Menu.OnlinePAC=使用在线 PAC
+        ///Menu.EditLocalPACFile=编辑本地 PAC 文件...
+        ///Menu.UpdatePACFromGFWList=从 GFWList 更新本地 PAC
+        ///Menu.EditUserRuleForGFWList=编辑 GFWList 的用户规则...
+        ///Menu.ShowQRCode=显示二维码...
+        ///Menu.ScanQRCodeFromScreen= [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string zh_cn {
+            get {
+                return ResourceManager.GetString("zh_cn", resourceCulture);
             }
         }
     }

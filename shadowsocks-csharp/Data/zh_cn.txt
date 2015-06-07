@@ -1,0 +1,74 @@
+# translation for Simplified Chinese
+
+Main.Shadowsocks=Shadowsocks
+
+# Menu items
+
+Menu.EnableSystemProxy=启用系统代理
+Menu.Mode=系统代理模式
+Menu.PAC=PAC 模式
+Menu.Global=全局模式
+Menu.Servers=服务器
+Menu.EditServers2=编辑服务器...
+Menu.StartOnBoot=开机启动
+Menu.AllowClientsFromLAN=允许来自局域网的连接
+Menu.LocalPAC=使用本地 PAC
+Menu.OnlinePAC=使用在线 PAC
+Menu.EditLocalPACFile=编辑本地 PAC 文件...
+Menu.UpdatePACFromGFWList=从 GFWList 更新本地 PAC
+Menu.EditUserRuleForGFWList=编辑 GFWList 的用户规则...
+Menu.ShowQRCode=显示二维码...
+Menu.ScanQRCodeFromScreen=扫描屏幕上的二维码...
+Menu.ShowLogs=显示日志...
+Menu.About=关于...
+Menu.Quit=退出
+Menu.EditServers=编辑服务器
+
+# Config Form
+
+Config.Add=添加(&A)
+Config.Delete=删除(&D)
+Config.Server=服务器
+Config.ServerIP=服务器 IP
+Config.ServerPort=服务器端口
+Config.Password=密码
+Config.Encryption=加密
+Config.ProxyPort=代理端口
+Config.Remarks=备注
+Config.OK=确定
+Config.Cancel=取消
+Config.NewServer=未配置的服务器
+
+# QRCode Form
+
+QRCode.QRCode=二维码
+
+# PAC Url Form
+
+PAC.EditOnlinePACURL=编辑在线 PAC 网址
+PAC.EditOnlinePACURL2=编辑在线 PAC 网址...
+PAC.InputPACUrl=请输入 PAC 网址
+
+# Messages
+
+Message.ShadowsocksError=Shadowsocks 错误: {0}
+Message.PortAlreadyInUse=端口已被占用
+Message.IllegalPortNumberFormat=非法端口格式
+Message.AddAtLeastOneServer=请添加至少一个服务器
+Message.ServerIPCanNotBlank=服务器 IP 不能为空
+Message.PasswordCanNotBlank=密码不能为空
+Message.PortOutOfRange=端口超出范围
+Message.ShadowsocksUpdateFound=Shadowsocks {0} 更新
+Message.ClickHereToDownload=点击这里下载
+Message.ShadowsocksIsHere=Shadowsocks 在这里
+Message.TurnOnOffShadowsocksInContextMenu=可以在右键菜单中开关 Shadowsocks
+Message.SystemProxyEnabled=系统代理已启用
+Message.SystemProxyDisabled=系统代理未启用
+Message.FailedToUpdatePACFile=更新 PAC 文件失败
+Message.PACUpdated=更新 PAC 成功
+Message.NoUpdatesFound=未发现更新。如有问题请提交给 GFWList。
+Message.NoQRCodeFound=未发现二维码，尝试把它放大或移动到靠近屏幕中间的位置
+Message.FailedToDecodeQRCode=无法解析二维码
+Message.FailedToUpdateRegistry=无法修改注册表
+Message.SystemProxyOn=系统代理已启用：
+Message.RunningPort=正在运行：端口 {0}

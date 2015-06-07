@@ -22,7 +22,7 @@ namespace Shadowsocks.Model
         {
             if (string.IsNullOrEmpty(server))
             {
-                return I18N.GetString("New server");
+                return I18N.GetString("Config.NewServer");
             }
             if (string.IsNullOrEmpty(remarks))
             {

@@ -108,7 +108,7 @@ namespace Shadowsocks.Model
         {
             if (!condition)
             {
-                throw new Exception(I18N.GetString("assertion failure"));
+                throw new Exception("assertion failure");
             }
         }
 
@@ -116,7 +116,7 @@ namespace Shadowsocks.Model
         {
             if (port <= 0 || port > 65535)
             {
-                throw new ArgumentException(I18N.GetString("Port out of range"));
+                throw new ArgumentException(I18N.GetString("Message.PortOutOfRange"));
             }
         }
 
@@ -124,7 +124,7 @@ namespace Shadowsocks.Model
         {
             if (string.IsNullOrEmpty(password))
             {
-                throw new ArgumentException(I18N.GetString("Password can not be blank"));
+                throw new ArgumentException(I18N.GetString("Message.PasswordCanNotBlank"));
             }
         }
 
@@ -132,7 +132,7 @@ namespace Shadowsocks.Model
         {
             if (string.IsNullOrEmpty(server))
             {
-                throw new ArgumentException(I18N.GetString("Server IP can not be blank"));
+                throw new ArgumentException(I18N.GetString("Message.ServerIPCanNotBlank"));
             }
         }
 
