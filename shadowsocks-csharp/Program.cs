@@ -1,12 +1,12 @@
-﻿using Shadowsocks.Controller;
-using Shadowsocks.Properties;
-using Shadowsocks.View;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using System.Windows.Forms;
+using Shadowsocks.Controller;
+using Shadowsocks.Properties;
+using Shadowsocks.Util;
+using Shadowsocks.View;
 
 namespace Shadowsocks
 {
@@ -18,8 +18,8 @@ namespace Shadowsocks
         [STAThread]
         static void Main()
         {
-            Util.Utils.ReleaseMemory();
-            using (Mutex mutex = new Mutex(false, "Global\\" + "71981632-A427-497F-AB91-241CD227EC1F"))
+            Utils.ReleaseMemory();
+            using (var mutex = new Mutex(false, "Global\\" + "71981632-A427-497F-AB91-241CD227EC1F"))
             {
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
@@ -29,18 +29,17 @@ namespace Shadowsocks
                     Process[] oldProcesses = Process.GetProcessesByName("Shadowsocks");
                     if (oldProcesses.Length > 0)
                     {
-                        Process oldProcess = oldProcesses[0];
                     }
-                    MessageBox.Show("Shadowsocks is already running.\n\nFind Shadowsocks icon in your notify tray.");
+                    MessageBox.Show(Resources.MultiProcess);
                     return;
                 }
                 Directory.SetCurrentDirectory(Application.StartupPath);
 #if !DEBUG
-                Logging.OpenLogFile();
+                Logging.AttatchToConsole();
 #endif
                 ShadowsocksController controller = new ShadowsocksController();
 
-                MenuViewController viewController = new MenuViewController(controller);
+                MenuViewController.AttachMenu(controller);
 
                 controller.Start();
 

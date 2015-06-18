@@ -1,12 +1,13 @@
-﻿using Shadowsocks.Controller;
-using Shadowsocks.Model;
-using Shadowsocks.Properties;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Diagnostics;
 using System.Drawing;
-using System.Text;
+using System.IO;
 using System.Windows.Forms;
+using Microsoft.VisualBasic;
+using Shadowsocks.Controller;
+using Shadowsocks.Model;
+using Shadowsocks.Properties;
+using Shadowsocks.Util;
 using ZXing;
 using ZXing.Common;
 using ZXing.QrCode;
@@ -18,7 +19,7 @@ namespace Shadowsocks.View
         // yes this is just a menu view controller
         // when config form is closed, it moves away from RAM
         // and it should just do anything related to the config form
-        
+
         private ShadowsocksController controller;
         private UpdateChecker updateChecker;
 
@@ -44,7 +45,12 @@ namespace Shadowsocks.View
         private ConfigForm configForm;
         private string _urlToOpen;
 
-        public MenuViewController(ShadowsocksController controller)
+        public static MenuViewController AttachMenu(ShadowsocksController controller)
+        {
+            return new MenuViewController(controller);
+        }
+
+        private MenuViewController(ShadowsocksController controller)
         {
             this.controller = controller;
 
@@ -80,7 +86,7 @@ namespace Shadowsocks.View
             }
         }
 
-        void controller_Errored(object sender, System.IO.ErrorEventArgs e)
+        void controller_Errored(object sender, ErrorEventArgs e)
         {
             MessageBox.Show(e.GetException().ToString(), String.Format(I18N.GetString("Shadowsocks Error: {0}"), e.GetException().Message));
         }
@@ -171,6 +177,7 @@ namespace Shadowsocks.View
                 this.ShareOverLANItem = CreateMenuItem("Allow Clients from LAN", new EventHandler(this.ShareOverLANItem_Click)),
                 new MenuItem("-"),
                 CreateMenuItem("Show Logs...", new EventHandler(this.ShowLogItem_Click)),
+                CreateMenuItem("Clear Logs...",ClearLogItem_Click),
                 CreateMenuItem("About...", new EventHandler(this.AboutItem_Click)),
                 new MenuItem("-"),
                 CreateMenuItem("Quit", new EventHandler(this.Quit_Click))
@@ -204,7 +211,7 @@ namespace Shadowsocks.View
         {
             string argument = @"/select, " + e.Path;
 
-            System.Diagnostics.Process.Start("explorer.exe", argument);
+            Process.Start("explorer.exe", argument);
         }
 
         void ShowBalloonTip(string title, string content, ToolTipIcon icon, int timeout)
@@ -215,7 +222,7 @@ namespace Shadowsocks.View
             _notifyIcon.ShowBalloonTip(timeout);
         }
 
-        void controller_UpdatePACFromGFWListError(object sender, System.IO.ErrorEventArgs e)
+        void controller_UpdatePACFromGFWListError(object sender, ErrorEventArgs e)
         {
             ShowBalloonTip(I18N.GetString("Failed to update PAC file"), e.GetException().Message, ToolTipIcon.Error, 5000);
             Logging.LogUsefulException(e.GetException());
@@ -236,7 +243,7 @@ namespace Shadowsocks.View
 
         void notifyIcon1_BalloonTipClicked(object sender, EventArgs e)
         {
-            System.Diagnostics.Process.Start(updateChecker.LatestVersionURL);
+            Process.Start(updateChecker.LatestVersionURL);
             _notifyIcon.BalloonTipClicked -= notifyIcon1_BalloonTipClicked;
         }
 
@@ -297,7 +304,7 @@ namespace Shadowsocks.View
         void configForm_FormClosed(object sender, FormClosedEventArgs e)
         {
             configForm = null;
-            Util.Utils.ReleaseMemory();
+            Utils.ReleaseMemory();
             ShowFirstTimeBalloon();
         }
 
@@ -318,7 +325,7 @@ namespace Shadowsocks.View
             if (_isFirstRun)
             {
                 _notifyIcon.BalloonTipTitle = I18N.GetString("Shadowsocks is here");
-                _notifyIcon.BalloonTipText =  I18N.GetString("You can turn on/off Shadowsocks in the context menu");
+                _notifyIcon.BalloonTipText = I18N.GetString("You can turn on/off Shadowsocks in the context menu");
                 _notifyIcon.BalloonTipIcon = ToolTipIcon.Info;
                 _notifyIcon.ShowBalloonTip(0);
                 _isFirstRun = false;
@@ -384,7 +391,12 @@ namespace Shadowsocks.View
         {
             string argument = Logging.LogFile;
 
-            System.Diagnostics.Process.Start("notepad.exe", argument);
+            Process.Start("notepad.exe", argument);
+        }
+
+        private void ClearLogItem_Click(object sender, EventArgs e)
+        {
+            Logging.Clear();
         }
 
         private void QRCodeItem_Click(object sender, EventArgs e)
@@ -489,12 +501,14 @@ namespace Shadowsocks.View
             Process.Start(_urlToOpen);
         }
 
-		private void AutoStartupItem_Click(object sender, EventArgs e) {
-			AutoStartupItem.Checked = !AutoStartupItem.Checked;
-			if (!AutoStartup.Set(AutoStartupItem.Checked)) {
-				MessageBox.Show(I18N.GetString("Failed to update registry"));
-			}
-		}
+        private void AutoStartupItem_Click(object sender, EventArgs e)
+        {
+            AutoStartupItem.Checked = !AutoStartupItem.Checked;
+            if (!AutoStartup.Set(AutoStartupItem.Checked))
+            {
+                MessageBox.Show(I18N.GetString("Failed to update registry"));
+            }
+        }
 
         private void LocalPACItem_Click(object sender, EventArgs e)
         {
@@ -528,7 +542,7 @@ namespace Shadowsocks.View
         private void UpdateOnlinePACURLItem_Click(object sender, EventArgs e)
         {
             string origPacUrl = controller.GetConfiguration().pacUrl;
-            string pacUrl = Microsoft.VisualBasic.Interaction.InputBox(
+            string pacUrl = Interaction.InputBox(
                 I18N.GetString("Please input PAC Url"),
                 I18N.GetString("Edit Online PAC URL"),
                 origPacUrl, -1, -1);
