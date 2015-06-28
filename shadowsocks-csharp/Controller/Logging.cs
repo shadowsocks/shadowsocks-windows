@@ -1,27 +1,28 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Net.Sockets;
-using System.Text;
 
 namespace Shadowsocks.Controller
 {
     public class Logging
     {
         public static string LogFile;
-
-        public static bool OpenLogFile()
+        private static FileStream _logFileStream;
+        private static StreamWriter _streamWriter;
+        public static bool AttatchToConsole()
         {
             try
             {
                 string temppath = Path.GetTempPath();
                 LogFile = Path.Combine(temppath, "shadowsocks.log");
-                FileStream fs = new FileStream(LogFile, FileMode.Append);
-                StreamWriterWithTimestamp sw = new StreamWriterWithTimestamp(fs);
-                sw.AutoFlush = true;
-                Console.SetOut(sw);
-                Console.SetError(sw);
-                
+                if (_logFileStream == null)
+                {
+                    _logFileStream = new FileStream(LogFile, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite);
+                    _logFileStream.Seek(_logFileStream.Length, SeekOrigin.Begin);
+                    _streamWriter = new StreamWriterWithTimestamp(_logFileStream) { AutoFlush = true };
+                    Console.SetOut(_streamWriter);
+                    Console.SetError(_streamWriter);
+                }
                 return true;
             }
             catch (IOException e)
@@ -61,12 +62,33 @@ namespace Shadowsocks.Controller
             }
         }
 
+        /// <summary>
+        /// Clear the log file
+        /// </summary>
+        /// <returns></returns>
+        public static bool Clear()
+        {
+            if (_logFileStream != null)
+            {
+                try
+                {
+                    _logFileStream.SetLength(0);
+                    return true;
+                }
+                catch (IOException ioException)
+                {
+                    Console.WriteLine(ioException);
+                }
+            }
+            return false;
+        }
     }
 
     // Simply extended System.IO.StreamWriter for adding timestamp workaround
     public class StreamWriterWithTimestamp : StreamWriter
     {
-        public StreamWriterWithTimestamp(Stream stream) : base(stream)
+        public StreamWriterWithTimestamp(Stream stream)
+            : base(stream)
         {
         }
 
