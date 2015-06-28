@@ -45,4 +45,4 @@ GPLv3
 
 [Appveyor]:       https://ci.appveyor.com/project/clowwindy/shadowsocks-csharp
 [Build Status]:   https://ci.appveyor.com/api/projects/status/gknc8l1lxy423ehv/branch/master
-[latest release]: https://sourceforge.net/projects/shadowsocksgui/files/dist/
+[latest release]: https://github.com/shadowsocks/shadowsocks-csharp/releases
