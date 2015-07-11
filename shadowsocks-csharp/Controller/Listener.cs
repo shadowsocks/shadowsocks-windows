@@ -18,7 +18,7 @@ namespace Shadowsocks.Controller
         public class UDPState
         {
             public byte[] buffer = new byte[4096];
-            public EndPoint remoteEndPoint = new IPEndPoint(IPAddress.Any, 1);
+            public EndPoint remoteEndPoint = new IPEndPoint(IPAddress.Any, 0);
         }
 
         Configuration _config;
