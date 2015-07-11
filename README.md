@@ -10,6 +10,7 @@ Shadowsocks for Windows
 3. PAC mode and global mode
 4. GFWList and user rules
 5. Supports HTTP proxy
+6. Supports UDP relay (see Usage)
 
 #### Download
 
@@ -33,6 +34,8 @@ with any editor, Shadowsocks will notify browsers about the change automatically
 6. You can also update the PAC file from GFWList. Note your modifications to the PAC
 file will be lost. However you can put your rules in the user rule file for GFWList.
 Don't forget to update from GFWList again after you've edited the user rule
+7. For UDP, you need to use SocksCap or ProxyCap to force programs you want
+to proxy to tunnel over Shadowsocks
 
 ### Develop
 
