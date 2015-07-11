@@ -12,12 +12,19 @@ namespace Shadowsocks.Controller
     {
         public interface Service
         {
-            bool Handle(byte[] firstPacket, int length, Socket socket);
+            bool Handle(byte[] firstPacket, int length, Socket socket, object state);
+        }
+
+        public class UDPState
+        {
+            public byte[] buffer = new byte[4096];
+            public EndPoint remoteEndPoint = new IPEndPoint(IPAddress.Any, 1);
         }
 
         Configuration _config;
         bool _shareOverLAN;
-        Socket _socket;
+        Socket _tcpSocket;
+        Socket _udpSocket;
         IList<Service> _services;
 
         public Listener(IList<Service> services)
@@ -51,8 +58,10 @@ namespace Shadowsocks.Controller
             try
             {
                 // Create a TCP/IP socket.
-                _socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-                _socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
+                _tcpSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                _udpSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+                _tcpSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
+                _udpSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
                 IPEndPoint localEndPoint = null;
                 if (_shareOverLAN)
                 {
@@ -64,29 +73,73 @@ namespace Shadowsocks.Controller
                 }
 
                 // Bind the socket to the local endpoint and listen for incoming connections.
-                _socket.Bind(localEndPoint);
-                _socket.Listen(1024);
+                _tcpSocket.Bind(localEndPoint);
+                _udpSocket.Bind(localEndPoint);
+                _tcpSocket.Listen(1024);
 
 
                 // Start an asynchronous socket to listen for connections.
                 Console.WriteLine("Shadowsocks started");
-                _socket.BeginAccept(
+                _tcpSocket.BeginAccept(
                     new AsyncCallback(AcceptCallback),
-                    _socket);
+                    _tcpSocket);
+                UDPState udpState = new UDPState();
+                _udpSocket.BeginReceiveFrom(udpState.buffer, 0, udpState.buffer.Length, 0, ref udpState.remoteEndPoint, new AsyncCallback(RecvFromCallback), udpState);
             }
             catch (SocketException)
             {
-                _socket.Close();
+                _tcpSocket.Close();
                 throw;
             }
         }
 
         public void Stop()
         {
-            if (_socket != null)
+            if (_tcpSocket != null)
             {
-                _socket.Close();
-                _socket = null;
+                _tcpSocket.Close();
+                _tcpSocket = null;
+            }
+            if (_udpSocket != null)
+            {
+                _udpSocket.Close();
+                _udpSocket = null;
+            }
+        }
+
+        public void RecvFromCallback(IAsyncResult ar)
+        {
+            UDPState state = (UDPState)ar.AsyncState;
+            try
+            {
+                int bytesRead = _udpSocket.EndReceiveFrom(ar, ref state.remoteEndPoint);
+                foreach (Service service in _services)
+                {
+                    if (service.Handle(state.buffer, bytesRead, _udpSocket, state))
+                    {
+                        break;
+                    }
+                }
+            }
+            catch (ObjectDisposedException)
+            {
+            }
+            catch (Exception)
+            {
+            }
+            finally
+            {
+                try
+                {
+                    _udpSocket.BeginReceiveFrom(state.buffer, 0, state.buffer.Length, 0, ref state.remoteEndPoint, new AsyncCallback(RecvFromCallback), state);
+                }
+                catch (ObjectDisposedException)
+                {
+                    // do nothing
+                }
+                catch (Exception)
+                {
+                }
             }
         }
 
@@ -144,14 +197,16 @@ namespace Shadowsocks.Controller
                 int bytesRead = conn.EndReceive(ar);
                 foreach (Service service in _services)
                 {
-                    if (service.Handle(buf, bytesRead, conn))
+                    if (service.Handle(buf, bytesRead, conn, null))
                     {
                         return;
                     }
                 }
                 // no service found for this
-                // shouldn't happen
-                conn.Close();
+                if (conn.ProtocolType == ProtocolType.Tcp)
+                {
+                    conn.Close();
+                }
             }
             catch (Exception e)
             {

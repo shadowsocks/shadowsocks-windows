@@ -6,24 +6,25 @@ using System.Net;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Xml;
+using SimpleJson;
 
 namespace Shadowsocks.Controller
 {
     public class UpdateChecker
     {
-        private const string UpdateURL = "https://sourceforge.net/api/file/index/project-id/1817190/path/dist/mtime/desc/limit/10/rss";
+        private const string UpdateURL = "https://api.github.com/repos/shadowsocks/shadowsocks-csharp/releases";
 
         public string LatestVersionNumber;
         public string LatestVersionURL;
         public event EventHandler NewVersionFound;
 
-        public const string Version = "2.3.1";
+        public const string Version = "2.4";
 
         public void CheckUpdate(Configuration config)
         {
             // TODO test failures
             WebClient http = new WebClient();
+            http.Headers.Add("User-Agent", "Mozilla/5.0 (Windows NT 5.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.3319.102 Safari/537.36");
             http.Proxy = new WebProxy(IPAddress.Loopback.ToString(), config.localPort);
             http.DownloadStringCompleted += http_DownloadStringCompleted;
             http.DownloadStringAsync(new Uri(UpdateURL));
@@ -119,23 +120,25 @@ namespace Shadowsocks.Controller
             {
                 string response = e.Result;
 
-                XmlDocument xmlDoc = new XmlDocument();
-                xmlDoc.LoadXml(response);
-                XmlNodeList elements = xmlDoc.GetElementsByTagName("media:content");
+                JsonArray result = (JsonArray)SimpleJson.SimpleJson.DeserializeObject(e.Result);
+
                 List<string> versions = new List<string>();
-                foreach (XmlNode el in elements)
+                foreach (JsonObject release in result)
                 {
-                    foreach (XmlAttribute attr in el.Attributes)
+                    if ((bool)release["prerelease"])
                     {
-                        if (attr.Name == "url")
+                        continue;
+                    }
+                    foreach (JsonObject asset in (JsonArray)release["assets"])
+                    {
+                        string url = (string)asset["browser_download_url"];
+                        if (IsNewVersion(url))
                         {
-                            if (IsNewVersion(attr.Value))
-                            {
-                                versions.Add(attr.Value);
-                            }
+                            versions.Add(url);
                         }
                     }
                 }
+
                 if (versions.Count == 0)
                 {
                     return;

@@ -9,16 +9,20 @@ using Shadowsocks.Model;
 namespace Shadowsocks.Controller
 {
 
-    class Local : Listener.Service
+    class TCPRelay : Listener.Service
     {
         private Configuration _config;
-        public Local(Configuration config)
+        public TCPRelay(Configuration config)
         {
             this._config = config;
         }
 
-        public bool Handle(byte[] firstPacket, int length, Socket socket)
+        public bool Handle(byte[] firstPacket, int length, Socket socket, object state)
         {
+            if (socket.ProtocolType != ProtocolType.Tcp)
+            {
+                return false;
+            }
             if (length < 2 || firstPacket[0] != 5)
             {
                 return false;
@@ -44,6 +48,7 @@ namespace Shadowsocks.Controller
         public Socket remote;
         public Socket connection;
 
+        private byte command;
         private byte[] _firstPacket;
         private int _firstPacketLength;
         // Size of receive buffer.
@@ -70,32 +75,7 @@ namespace Shadowsocks.Controller
         {
             this._firstPacket = firstPacket;
             this._firstPacketLength = length;
-            try
-            {
-                // TODO async resolving
-                IPAddress ipAddress;
-                bool parsed = IPAddress.TryParse(server.server, out ipAddress);
-                if (!parsed)
-                {
-                    IPHostEntry ipHostInfo = Dns.GetHostEntry(server.server);
-                    ipAddress = ipHostInfo.AddressList[0];
-                }
-                IPEndPoint remoteEP = new IPEndPoint(ipAddress, server.server_port);
-
-
-                remote = new Socket(ipAddress.AddressFamily,
-                    SocketType.Stream, ProtocolType.Tcp);
-                remote.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, true);
-
-                // Connect to the remote endpoint.
-                remote.BeginConnect(remoteEP,
-                    new AsyncCallback(ConnectCallback), null);
-            }
-            catch (Exception e)
-            {
-                Logging.LogUsefulException(e);
-                this.Close();
-            }
+            this.HandshakeReceive();
         }
 
         private void CheckClose()
@@ -149,28 +129,6 @@ namespace Shadowsocks.Controller
             }
         }
 
-        private void ConnectCallback(IAsyncResult ar)
-        {
-            if (closed)
-            {
-                return;
-            }
-            try
-            {
-                // Complete the connection.
-                remote.EndConnect(ar);
-
-                //Console.WriteLine("Socket connected to {0}",
-                //    remote.RemoteEndPoint.ToString());
-
-                HandshakeReceive();
-            }
-            catch (Exception e)
-            {
-                Logging.LogUsefulException(e);
-                this.Close();
-            }
-        }
 
         private void HandshakeReceive()
         {
@@ -241,11 +199,19 @@ namespace Shadowsocks.Controller
             try
             {
                 int bytesRead = connection.EndReceive(ar);
-
-                if (bytesRead > 0)
+                
+                if (bytesRead >= 3)
                 {
-                    byte[] response = { 5, 0, 0, 1, 0, 0, 0, 0, 0, 0 };
-                    connection.BeginSend(response, 0, response.Length, 0, new AsyncCallback(StartPipe), null);
+                    command = connetionRecvBuffer[1];
+                    if (command == 1)
+                    {
+                        byte[] response = { 5, 0, 0, 1, 0, 0, 0, 0, 0, 0 };
+                        connection.BeginSend(response, 0, response.Length, 0, new AsyncCallback(StartConnect), null);
+                    }
+                    else if (command == 3)
+                    {
+                        HandleUDPAssociate();
+                    }
                 }
                 else
                 {
@@ -260,8 +226,96 @@ namespace Shadowsocks.Controller
             }
         }
 
+        private void HandleUDPAssociate()
+        {
+            IPEndPoint endPoint = (IPEndPoint)connection.LocalEndPoint;
+            byte[] address = endPoint.Address.GetAddressBytes();
+            int port = endPoint.Port;
+            byte[] response = new byte[4 + address.Length + 2];
+            response[0] = 5;
+            if (endPoint.AddressFamily == AddressFamily.InterNetwork)
+            {
+                response[3] = 1;
+            }
+            else if (endPoint.AddressFamily == AddressFamily.InterNetworkV6)
+            {
+                response[3] = 4;
+            }
+            address.CopyTo(response, 4);
+            response[response.Length - 1] = (byte)(port & 0xFF);
+            response[response.Length - 2] = (byte)((port >> 8) & 0xFF);
+            connection.BeginSend(response, 0, response.Length, 0, new AsyncCallback(ReadAll), true);
+        }
 
-        private void StartPipe(IAsyncResult ar)
+        private void ReadAll(IAsyncResult ar)
+        {
+
+            if (closed)
+            {
+                return;
+            }
+            try
+            {
+                if (ar.AsyncState != null)
+                {
+                    connection.EndSend(ar);
+                    connection.BeginReceive(connetionRecvBuffer, 0, RecvSize, 0,
+                        new AsyncCallback(ReadAll), null);
+                }
+                else
+                {
+                    int bytesRead = connection.EndReceive(ar);
+                    if (bytesRead > 0)
+                    {
+                        connection.BeginReceive(connetionRecvBuffer, 0, RecvSize, 0,
+                            new AsyncCallback(ReadAll), null);
+                    }
+                    else
+                    {
+                        this.Close();
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Logging.LogUsefulException(e);
+                this.Close();
+            }
+        }
+
+        private void StartConnect(IAsyncResult ar)
+        {
+            try
+            {
+                connection.EndSend(ar);
+
+                // TODO async resolving
+                IPAddress ipAddress;
+                bool parsed = IPAddress.TryParse(server.server, out ipAddress);
+                if (!parsed)
+                {
+                    IPHostEntry ipHostInfo = Dns.GetHostEntry(server.server);
+                    ipAddress = ipHostInfo.AddressList[0];
+                }
+                IPEndPoint remoteEP = new IPEndPoint(ipAddress, server.server_port);
+
+
+                remote = new Socket(ipAddress.AddressFamily,
+                    SocketType.Stream, ProtocolType.Tcp);
+                remote.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, true);
+
+                // Connect to the remote endpoint.
+                remote.BeginConnect(remoteEP,
+                    new AsyncCallback(ConnectCallback), null);
+            }
+            catch (Exception e)
+            {
+                Logging.LogUsefulException(e);
+                this.Close();
+            }
+        }
+
+        private void ConnectCallback(IAsyncResult ar)
         {
             if (closed)
             {
@@ -269,7 +323,29 @@ namespace Shadowsocks.Controller
             }
             try
             {
-                connection.EndReceive(ar);
+                // Complete the connection.
+                remote.EndConnect(ar);
+
+                //Console.WriteLine("Socket connected to {0}",
+                //    remote.RemoteEndPoint.ToString());
+
+                StartPipe();
+            }
+            catch (Exception e)
+            {
+                Logging.LogUsefulException(e);
+                this.Close();
+            }
+        }
+
+        private void StartPipe()
+        {
+            if (closed)
+            {
+                return;
+            }
+            try
+            {
                 remote.BeginReceive(remoteRecvBuffer, 0, RecvSize, 0,
                     new AsyncCallback(PipeRemoteReceiveCallback), null);
                 connection.BeginReceive(connetionRecvBuffer, 0, RecvSize, 0,
