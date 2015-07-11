@@ -124,7 +124,7 @@ namespace Shadowsocks.Controller
             catch (ObjectDisposedException)
             {
             }
-            catch (Exception e)
+            catch (Exception)
             {
             }
             finally
@@ -137,7 +137,7 @@ namespace Shadowsocks.Controller
                 {
                     // do nothing
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
                 }
             }
