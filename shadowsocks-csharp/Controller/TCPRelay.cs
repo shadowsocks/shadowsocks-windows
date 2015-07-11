@@ -9,16 +9,20 @@ using Shadowsocks.Model;
 namespace Shadowsocks.Controller
 {
 
-    class Local : Listener.Service
+    class TCPRelay : Listener.Service
     {
         private Configuration _config;
-        public Local(Configuration config)
+        public TCPRelay(Configuration config)
         {
             this._config = config;
         }
 
-        public bool Handle(byte[] firstPacket, int length, Socket socket)
+        public bool Handle(byte[] firstPacket, int length, Socket socket, object state)
         {
+            if (socket.ProtocolType != ProtocolType.Tcp)
+            {
+                return false;
+            }
             if (length < 2 || firstPacket[0] != 5)
             {
                 return false;
@@ -238,8 +242,8 @@ namespace Shadowsocks.Controller
                 response[3] = 4;
             }
             address.CopyTo(response, 4);
-            response[response.Length - 2] = (byte)(port & 0xFF);
-            response[response.Length - 1] = (byte)((port >> 8) & 0xFF);
+            response[response.Length - 1] = (byte)(port & 0xFF);
+            response[response.Length - 2] = (byte)((port >> 8) & 0xFF);
             connection.BeginSend(response, 0, response.Length, 0, new AsyncCallback(ReadAll), true);
         }
 

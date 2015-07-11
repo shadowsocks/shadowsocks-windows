@@ -131,6 +131,7 @@
     <Compile Include="Controller\Listener.cs" />
     <Compile Include="Controller\Logging.cs" />
     <Compile Include="Controller\PortForwarder.cs" />
+    <Compile Include="Controller\UDPRelay.cs" />
     <Compile Include="Controller\UpdateChecker.cs" />
     <Compile Include="Encryption\EncryptorBase.cs" />
     <Compile Include="Encryption\EncryptorFactory.cs" />
@@ -156,7 +157,7 @@
     <Compile Include="View\ConfigForm.Designer.cs">
       <DependentUpon>ConfigForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Controller\Local.cs" />
+    <Compile Include="Controller\TCPRelay.cs" />
     <Compile Include="Controller\PolipoRunner.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
