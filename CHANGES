@@ -1,3 +1,12 @@
+2.4 2015-07-11
+- Support UDP relay
+- Support online PAC
+- Migrate update checker to GitHub releases
+- Other fixes
+
+2.3.1 2015-03-06
+- Support user rule
+
 2.3 2015-01-25
 - Use the same port for every profile
 - Use the same port for HTTP/Socks5/PAC
