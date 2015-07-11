@@ -199,13 +199,77 @@ namespace Shadowsocks.Controller
                 if (bytesRead >= 3)
                 {
                     command = connetionRecvBuffer[1];
-                    byte[] response = { 5, 0, 0, 1, 0, 0, 0, 0, 0, 0 };
-                    connection.BeginSend(response, 0, response.Length, 0, new AsyncCallback(StartConnect), null);
+                    if (command == 1)
+                    {
+                        byte[] response = { 5, 0, 0, 1, 0, 0, 0, 0, 0, 0 };
+                        connection.BeginSend(response, 0, response.Length, 0, new AsyncCallback(StartConnect), null);
+                    }
+                    else if (command == 3)
+                    {
+                        HandleUDPAssociate();
+                    }
                 }
                 else
                 {
                     Console.WriteLine("failed to recv data in handshakeReceive2Callback");
                     this.Close();
+                }
+            }
+            catch (Exception e)
+            {
+                Logging.LogUsefulException(e);
+                this.Close();
+            }
+        }
+
+        private void HandleUDPAssociate()
+        {
+            IPEndPoint endPoint = (IPEndPoint)connection.LocalEndPoint;
+            byte[] address = endPoint.Address.GetAddressBytes();
+            int port = endPoint.Port;
+            byte[] response = new byte[4 + address.Length + 2];
+            response[0] = 5;
+            if (endPoint.AddressFamily == AddressFamily.InterNetwork)
+            {
+                response[3] = 1;
+            }
+            else if (endPoint.AddressFamily == AddressFamily.InterNetworkV6)
+            {
+                response[3] = 4;
+            }
+            address.CopyTo(response, 4);
+            response[response.Length - 2] = (byte)(port & 0xFF);
+            response[response.Length - 1] = (byte)((port >> 8) & 0xFF);
+            connection.BeginSend(response, 0, response.Length, 0, new AsyncCallback(ReadAll), true);
+        }
+
+        private void ReadAll(IAsyncResult ar)
+        {
+
+            if (closed)
+            {
+                return;
+            }
+            try
+            {
+                if (ar.AsyncState != null)
+                {
+                    connection.EndSend(ar);
+                    connection.BeginReceive(connetionRecvBuffer, 0, RecvSize, 0,
+                        new AsyncCallback(ReadAll), null);
+                }
+                else
+                {
+                    int bytesRead = connection.EndReceive(ar);
+                    if (bytesRead > 0)
+                    {
+                        connection.BeginReceive(connetionRecvBuffer, 0, RecvSize, 0,
+                            new AsyncCallback(ReadAll), null);
+                    }
+                    else
+                    {
+                        this.Close();
+                    }
                 }
             }
             catch (Exception e)
