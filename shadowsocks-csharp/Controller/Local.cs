@@ -44,6 +44,7 @@ namespace Shadowsocks.Controller
         public Socket remote;
         public Socket connection;
 
+        private byte command;
         private byte[] _firstPacket;
         private int _firstPacketLength;
         // Size of receive buffer.
@@ -70,32 +71,7 @@ namespace Shadowsocks.Controller
         {
             this._firstPacket = firstPacket;
             this._firstPacketLength = length;
-            try
-            {
-                // TODO async resolving
-                IPAddress ipAddress;
-                bool parsed = IPAddress.TryParse(server.server, out ipAddress);
-                if (!parsed)
-                {
-                    IPHostEntry ipHostInfo = Dns.GetHostEntry(server.server);
-                    ipAddress = ipHostInfo.AddressList[0];
-                }
-                IPEndPoint remoteEP = new IPEndPoint(ipAddress, server.server_port);
-
-
-                remote = new Socket(ipAddress.AddressFamily,
-                    SocketType.Stream, ProtocolType.Tcp);
-                remote.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, true);
-
-                // Connect to the remote endpoint.
-                remote.BeginConnect(remoteEP,
-                    new AsyncCallback(ConnectCallback), null);
-            }
-            catch (Exception e)
-            {
-                Logging.LogUsefulException(e);
-                this.Close();
-            }
+            this.HandshakeReceive();
         }
 
         private void CheckClose()
@@ -149,28 +125,6 @@ namespace Shadowsocks.Controller
             }
         }
 
-        private void ConnectCallback(IAsyncResult ar)
-        {
-            if (closed)
-            {
-                return;
-            }
-            try
-            {
-                // Complete the connection.
-                remote.EndConnect(ar);
-
-                //Console.WriteLine("Socket connected to {0}",
-                //    remote.RemoteEndPoint.ToString());
-
-                HandshakeReceive();
-            }
-            catch (Exception e)
-            {
-                Logging.LogUsefulException(e);
-                this.Close();
-            }
-        }
 
         private void HandshakeReceive()
         {
@@ -241,11 +195,12 @@ namespace Shadowsocks.Controller
             try
             {
                 int bytesRead = connection.EndReceive(ar);
-
-                if (bytesRead > 0)
+                
+                if (bytesRead >= 3)
                 {
+                    command = connetionRecvBuffer[1];
                     byte[] response = { 5, 0, 0, 1, 0, 0, 0, 0, 0, 0 };
-                    connection.BeginSend(response, 0, response.Length, 0, new AsyncCallback(StartPipe), null);
+                    connection.BeginSend(response, 0, response.Length, 0, new AsyncCallback(StartConnect), null);
                 }
                 else
                 {
@@ -260,8 +215,39 @@ namespace Shadowsocks.Controller
             }
         }
 
+        private void StartConnect(IAsyncResult ar)
+        {
+            try
+            {
+                connection.EndSend(ar);
 
-        private void StartPipe(IAsyncResult ar)
+                // TODO async resolving
+                IPAddress ipAddress;
+                bool parsed = IPAddress.TryParse(server.server, out ipAddress);
+                if (!parsed)
+                {
+                    IPHostEntry ipHostInfo = Dns.GetHostEntry(server.server);
+                    ipAddress = ipHostInfo.AddressList[0];
+                }
+                IPEndPoint remoteEP = new IPEndPoint(ipAddress, server.server_port);
+
+
+                remote = new Socket(ipAddress.AddressFamily,
+                    SocketType.Stream, ProtocolType.Tcp);
+                remote.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, true);
+
+                // Connect to the remote endpoint.
+                remote.BeginConnect(remoteEP,
+                    new AsyncCallback(ConnectCallback), null);
+            }
+            catch (Exception e)
+            {
+                Logging.LogUsefulException(e);
+                this.Close();
+            }
+        }
+
+        private void ConnectCallback(IAsyncResult ar)
         {
             if (closed)
             {
@@ -269,7 +255,29 @@ namespace Shadowsocks.Controller
             }
             try
             {
-                connection.EndReceive(ar);
+                // Complete the connection.
+                remote.EndConnect(ar);
+
+                //Console.WriteLine("Socket connected to {0}",
+                //    remote.RemoteEndPoint.ToString());
+
+                StartPipe();
+            }
+            catch (Exception e)
+            {
+                Logging.LogUsefulException(e);
+                this.Close();
+            }
+        }
+
+        private void StartPipe()
+        {
+            if (closed)
+            {
+                return;
+            }
+            try
+            {
                 remote.BeginReceive(remoteRecvBuffer, 0, RecvSize, 0,
                     new AsyncCallback(PipeRemoteReceiveCallback), null);
                 connection.BeginReceive(connetionRecvBuffer, 0, RecvSize, 0,
