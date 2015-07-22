@@ -11,6 +11,9 @@ namespace Shadowsocks.Model
     public class Configuration
     {
         public List<Server> configs;
+
+        // when strategy is set, index is ignored
+        public string strategy;
         public int index;
         public bool global;
         public bool enabled;
@@ -79,9 +82,9 @@ namespace Shadowsocks.Model
             {
                 config.index = config.configs.Count - 1;
             }
-            if (config.index < 0)
+            if (config.index < -1)
             {
-                config.index = 0;
+                config.index = -1;
             }
             config.isDefault = false;
             try

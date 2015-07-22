@@ -133,7 +133,7 @@ namespace Shadowsocks.View
 
         private void LoadCurrentConfiguration()
         {
-            _modifiedConfiguration = controller.GetConfiguration();
+            _modifiedConfiguration = controller.GetConfigurationCopy();
             LoadConfiguration(_modifiedConfiguration);
             _oldSelectedIndex = _modifiedConfiguration.index;
             ServersListBox.SelectedIndex = _modifiedConfiguration.index;

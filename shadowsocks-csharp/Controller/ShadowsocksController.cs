@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading;
 using System.Net.Sockets;
+using Shadowsocks.Controller.Strategy;
 
 namespace Shadowsocks.Controller
 {
@@ -20,6 +21,7 @@ namespace Shadowsocks.Controller
         private Listener _listener;
         private PACServer _pacServer;
         private Configuration _config;
+        private StrategyManager _strategyManager;
         private PolipoRunner polipoRunner;
         private GFWListUpdater gfwListUpdater;
         private bool stopped = false;
@@ -49,6 +51,7 @@ namespace Shadowsocks.Controller
         public ShadowsocksController()
         {
             _config = Configuration.Load();
+            _strategyManager = new StrategyManager(this);
         }
 
         public void Start()
@@ -70,9 +73,32 @@ namespace Shadowsocks.Controller
         }
 
         // always return copy
-        public Configuration GetConfiguration()
+        public Configuration GetConfigurationCopy()
         {
             return Configuration.Load();
+        }
+
+        // always return current instance
+        public Configuration GetCurrentConfiguration()
+        {
+            return _config;
+        }
+
+        public IList<IStrategy> GetStrategies()
+        {
+            return _strategyManager.GetStrategies();
+        }
+
+        public IStrategy GetCurrentStrategy()
+        {
+            foreach (var strategy in _strategyManager.GetStrategies())
+            {
+                if (strategy.ID == this._config.strategy)
+                {
+                    return strategy;
+                }
+            }
+            return null;
         }
 
         public void SaveServers(List<Server> servers, int localPort)
@@ -134,6 +160,14 @@ namespace Shadowsocks.Controller
         public void SelectServerIndex(int index)
         {
             _config.index = index;
+            _config.strategy = null;
+            SaveConfig(_config);
+        }
+
+        public void SelectStrategy(string strategyID)
+        {
+            _config.index = -1;
+            _config.strategy = strategyID;
             SaveConfig(_config);
         }
 
@@ -250,8 +284,8 @@ namespace Shadowsocks.Controller
             {
                 polipoRunner.Start(_config);
 
-                TCPRelay tcpRelay = new TCPRelay(_config);
-                UDPRelay udpRelay = new UDPRelay(_config);
+                TCPRelay tcpRelay = new TCPRelay(this);
+                UDPRelay udpRelay = new UDPRelay(this);
                 List<Listener.Service> services = new List<Listener.Service>();
                 services.Add(tcpRelay);
                 services.Add(udpRelay);

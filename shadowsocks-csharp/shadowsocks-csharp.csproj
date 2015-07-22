@@ -124,15 +124,15 @@
     <Compile Include="3rd\zxing\ResultPoint.cs" />
     <Compile Include="3rd\zxing\ResultPointCallback.cs" />
     <Compile Include="3rd\zxing\WriterException.cs" />
-    <Compile Include="Controller\AutoStartup.cs" />
+    <Compile Include="Controller\System\AutoStartup.cs" />
     <Compile Include="Controller\FileManager.cs" />
-    <Compile Include="Controller\GFWListUpdater.cs" />
+    <Compile Include="Controller\Service\GFWListUpdater.cs" />
     <Compile Include="Controller\I18N.cs" />
-    <Compile Include="Controller\Listener.cs" />
+    <Compile Include="Controller\Service\Listener.cs" />
     <Compile Include="Controller\Logging.cs" />
-    <Compile Include="Controller\PortForwarder.cs" />
-    <Compile Include="Controller\UDPRelay.cs" />
-    <Compile Include="Controller\UpdateChecker.cs" />
+    <Compile Include="Controller\Service\PortForwarder.cs" />
+    <Compile Include="Controller\Service\UDPRelay.cs" />
+    <Compile Include="Controller\Service\UpdateChecker.cs" />
     <Compile Include="Encryption\EncryptorBase.cs" />
     <Compile Include="Encryption\EncryptorFactory.cs" />
     <Compile Include="Encryption\IVEncryptor.cs" />
@@ -142,7 +142,7 @@
     <Compile Include="Encryption\SodiumEncryptor.cs" />
     <Compile Include="Encryption\TableEncryptor.cs" />
     <Compile Include="Encryption\IEncryptor.cs" />
-    <Compile Include="Controller\PACServer.cs" />
+    <Compile Include="Controller\Service\PACServer.cs" />
     <Compile Include="Model\Server.cs" />
     <Compile Include="Model\Configuration.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
@@ -150,6 +150,9 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="Controller\Strategy\BalancingStrategy.cs" />
+    <Compile Include="Controller\Strategy\StrategyManager.cs" />
+    <Compile Include="Controller\Strategy\IStrategy.cs" />
     <Compile Include="Util\Util.cs" />
     <Compile Include="View\ConfigForm.cs">
       <SubType>Form</SubType>
@@ -157,12 +160,12 @@
     <Compile Include="View\ConfigForm.Designer.cs">
       <DependentUpon>ConfigForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Controller\TCPRelay.cs" />
-    <Compile Include="Controller\PolipoRunner.cs" />
+    <Compile Include="Controller\Service\TCPRelay.cs" />
+    <Compile Include="Controller\Service\PolipoRunner.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Controller\ShadowsocksController.cs" />
-    <Compile Include="Controller\SystemProxy.cs" />
+    <Compile Include="Controller\System\SystemProxy.cs" />
     <Compile Include="View\MenuViewController.cs" />
     <Compile Include="View\QRCodeForm.cs">
       <SubType>Form</SubType>

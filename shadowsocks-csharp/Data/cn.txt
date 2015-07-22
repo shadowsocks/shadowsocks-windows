@@ -23,6 +23,7 @@ Show Logs...=显示日志...
 About...=关于...
 Quit=退出
 Edit Servers=编辑服务器
+Load Balance=负载均衡
 
 # Config Form
 

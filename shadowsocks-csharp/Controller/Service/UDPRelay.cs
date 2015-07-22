@@ -6,16 +6,17 @@ using Shadowsocks.Model;
 using System.Net.Sockets;
 using System.Net;
 using System.Runtime.CompilerServices;
+using Shadowsocks.Controller.Strategy;
 
 namespace Shadowsocks.Controller
 {
     class UDPRelay : Listener.Service
     {
-        private Configuration _config;
+        private ShadowsocksController _controller;
         private LRUCache<IPEndPoint, UDPHandler> _cache;
-        public UDPRelay(Configuration config)
+        public UDPRelay(ShadowsocksController controller)
         {
-            this._config = config;
+            this._controller = controller;
             this._cache = new LRUCache<IPEndPoint, UDPHandler>(512);  // todo: choose a smart number
         }
 
@@ -34,7 +35,7 @@ namespace Shadowsocks.Controller
             UDPHandler handler = _cache.get(remoteEndPoint);
             if (handler == null)
             {
-                handler = new UDPHandler(socket, _config.GetCurrentServer(), remoteEndPoint);
+                handler = new UDPHandler(socket, _controller.GetCurrentStrategy().GetAServer(IStrategyCallerType.UDP, remoteEndPoint), remoteEndPoint);
                 _cache.add(remoteEndPoint, handler);
             }
             handler.Send(firstPacket, length);

@@ -5,16 +5,17 @@ using System.Net.Sockets;
 using System.Net;
 using Shadowsocks.Encryption;
 using Shadowsocks.Model;
+using Shadowsocks.Controller.Strategy;
 
 namespace Shadowsocks.Controller
 {
 
     class TCPRelay : Listener.Service
     {
-        private Configuration _config;
-        public TCPRelay(Configuration config)
+        private ShadowsocksController _controller;
+        public TCPRelay(ShadowsocksController controller)
         {
-            this._config = config;
+            this._controller = controller;
         }
 
         public bool Handle(byte[] firstPacket, int length, Socket socket, object state)
@@ -30,7 +31,7 @@ namespace Shadowsocks.Controller
             socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, true);
             Handler handler = new Handler();
             handler.connection = socket;
-            Server server = _config.GetCurrentServer();
+            Server server = _controller.GetCurrentStrategy().GetAServer(IStrategyCallerType.TCP, (IPEndPoint)socket.RemoteEndPoint);
             handler.encryptor = EncryptorFactory.GetEncryptor(server.method, server.password);
             handler.server = server;
 
