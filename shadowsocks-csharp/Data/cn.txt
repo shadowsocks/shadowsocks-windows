@@ -24,6 +24,7 @@ About...=关于...
 Quit=退出
 Edit Servers=编辑服务器
 Load Balance=负载均衡
+High Availability=高可用
 
 # Config Form
 

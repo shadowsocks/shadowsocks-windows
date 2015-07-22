@@ -282,6 +282,11 @@ namespace Shadowsocks.Controller
             polipoRunner.Stop();
             try
             {
+                foreach (var strategy in GetStrategies())
+                {
+                    strategy.ReloadServers();
+                }
+
                 polipoRunner.Start(_config);
 
                 TCPRelay tcpRelay = new TCPRelay(this);

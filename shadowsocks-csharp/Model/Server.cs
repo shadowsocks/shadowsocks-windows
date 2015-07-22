@@ -18,6 +18,17 @@ namespace Shadowsocks.Model
         public string method;
         public string remarks;
 
+        public override int GetHashCode()
+        {
+            return server.GetHashCode() ^ server_port;
+        }
+
+        public override bool Equals(object obj)
+        {
+            Server o2 = (Server)obj;
+            return this.server == o2.server && this.server_port == o2.server_port;
+        }
+
         public string FriendlyName()
         {
             if (string.IsNullOrEmpty(server))

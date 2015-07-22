@@ -20,20 +20,19 @@ namespace Shadowsocks.Controller.Strategy
 
         public string Name
         {
-            get
-            {
-                return "Load Balance";
-            }
+            get { return I18N.GetString("Load Balance"); }
         }
 
         public string ID
         {
-            get
-            {
-                return "com.shadowsocks.strategy.balancing";
-            }
+            get { return "com.shadowsocks.strategy.balancing"; }
         }
-        
+
+        public void ReloadServers()
+        {
+            // do nothing
+        }
+
         public Server GetAServer(IStrategyCallerType type, IPEndPoint localIPEndPoint)
         {
             var configs = _controller.GetCurrentConfiguration().configs;
@@ -49,7 +48,7 @@ namespace Shadowsocks.Controller.Strategy
             return configs[index % configs.Count];
         }
 
-        public void UpdateLatency(Model.Server server)
+        public void UpdateLatency(Model.Server server, TimeSpan latency)
         {
             // do nothing
         }

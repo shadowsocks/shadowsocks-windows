@@ -31,6 +31,14 @@ namespace Shadowsocks.Controller
             }
         }
 
+        public static void Debug(object o)
+        {
+
+#if DEBUG
+            Console.WriteLine(o);
+#endif
+        }
+
         public static void LogUsefulException(Exception e)
         {
             // just log useful exceptions, not all of them

@@ -127,7 +127,7 @@ namespace Shadowsocks.View
             string serverInfo = null;
             if (config.strategy != null)
             {
-                serverInfo = I18N.GetString(controller.GetCurrentStrategy().Name);
+                serverInfo = controller.GetCurrentStrategy().Name;
             }
             else
             {
@@ -275,17 +275,18 @@ namespace Shadowsocks.View
             int i = 0;
             foreach (var strategy in controller.GetStrategies())
             {
-                MenuItem item = new MenuItem(I18N.GetString(strategy.Name));
+                MenuItem item = new MenuItem(strategy.Name);
                 item.Tag = strategy.ID;
                 item.Click += AStrategyItem_Click;
                 items.Add(i, item);
                 i++;
             }
+            int strategyCount = i;
             Configuration configuration = controller.GetConfigurationCopy();
             foreach (var server in configuration.configs)
             {
                 MenuItem item = new MenuItem(server.FriendlyName());
-                item.Tag = i;
+                item.Tag = i - strategyCount;
                 item.Click += AServerItem_Click;
                 items.Add(i, item);
                 i++;

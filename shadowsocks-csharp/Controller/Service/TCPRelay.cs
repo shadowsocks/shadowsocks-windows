@@ -34,6 +34,7 @@ namespace Shadowsocks.Controller
             Server server = _controller.GetCurrentStrategy().GetAServer(IStrategyCallerType.TCP, (IPEndPoint)socket.RemoteEndPoint);
             handler.encryptor = EncryptorFactory.GetEncryptor(server.method, server.password);
             handler.server = server;
+            handler.controller = _controller;
 
             handler.Start(firstPacket, length);
             return true;
@@ -48,6 +49,7 @@ namespace Shadowsocks.Controller
         // Client  socket.
         public Socket remote;
         public Socket connection;
+        public ShadowsocksController controller;
 
         private byte command;
         private byte[] _firstPacket;
@@ -55,6 +57,10 @@ namespace Shadowsocks.Controller
         // Size of receive buffer.
         public const int RecvSize = 16384;
         public const int BufferSize = RecvSize + 32;
+
+        private int totalRead = 0;
+        private int totalWrite = 0;
+
         // remote receive buffer
         private byte[] remoteRecvBuffer = new byte[RecvSize];
         // remote send buffer
@@ -71,6 +77,8 @@ namespace Shadowsocks.Controller
         
         private object encryptionLock = new object();
         private object decryptionLock = new object();
+
+        private DateTime _startConnectTime;
 
         public void Start(byte[] firstPacket, int length)
         {
@@ -305,6 +313,8 @@ namespace Shadowsocks.Controller
                     SocketType.Stream, ProtocolType.Tcp);
                 remote.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, true);
 
+                _startConnectTime = DateTime.Now;
+
                 // Connect to the remote endpoint.
                 remote.BeginConnect(remoteEP,
                     new AsyncCallback(ConnectCallback), null);
@@ -330,10 +340,14 @@ namespace Shadowsocks.Controller
                 //Console.WriteLine("Socket connected to {0}",
                 //    remote.RemoteEndPoint.ToString());
 
+                var latency = DateTime.Now - _startConnectTime;
+                controller.GetCurrentStrategy().UpdateLatency(this.server, latency);
+
                 StartPipe();
             }
             catch (Exception e)
             {
+                controller.GetCurrentStrategy().SetFailure(this.server);
                 Logging.LogUsefulException(e);
                 this.Close();
             }
@@ -368,6 +382,7 @@ namespace Shadowsocks.Controller
             try
             {
                 int bytesRead = remote.EndReceive(ar);
+                totalRead += bytesRead;
 
                 if (bytesRead > 0)
                 {
@@ -381,6 +396,8 @@ namespace Shadowsocks.Controller
                         encryptor.Decrypt(remoteRecvBuffer, bytesRead, remoteSendBuffer, out bytesToSend);
                     }
                     connection.BeginSend(remoteSendBuffer, 0, bytesToSend, 0, new AsyncCallback(PipeConnectionSendCallback), null);
+
+                    controller.GetCurrentStrategy().UpdateLastRead(this.server);
                 }
                 else
                 {
@@ -388,6 +405,12 @@ namespace Shadowsocks.Controller
                     connection.Shutdown(SocketShutdown.Send);
                     connectionShutdown = true;
                     CheckClose();
+
+                    if (totalRead == 0)
+                    {
+                        // closed before anything received, reports as failure
+                        controller.GetCurrentStrategy().SetFailure(this.server);
+                    }
                 }
             }
             catch (Exception e)
@@ -406,6 +429,7 @@ namespace Shadowsocks.Controller
             try
             {
                 int bytesRead = connection.EndReceive(ar);
+                totalWrite += bytesRead;
 
                 if (bytesRead > 0)
                 {
@@ -419,6 +443,8 @@ namespace Shadowsocks.Controller
                         encryptor.Encrypt(connetionRecvBuffer, bytesRead, connetionSendBuffer, out bytesToSend);
                     }
                     remote.BeginSend(connetionSendBuffer, 0, bytesToSend, 0, new AsyncCallback(PipeRemoteSendCallback), null);
+
+                    controller.GetCurrentStrategy().UpdateLastWrite(this.server);
                 }
                 else
                 {
