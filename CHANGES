@@ -1,3 +1,7 @@
+2.5 2015-07-11
+- Support load balance
+- Support high availability
+
 2.4 2015-07-11
 - Support UDP relay
 - Support online PAC
