@@ -125,7 +125,7 @@ namespace Shadowsocks.View
             _notifyIcon.Icon = Icon.FromHandle(icon.GetHicon());
 
             string serverInfo = null;
-            if (config.strategy != null)
+            if (controller.GetCurrentStrategy() != null)
             {
                 serverInfo = controller.GetCurrentStrategy().Name;
             }

@@ -35,7 +35,7 @@ namespace Shadowsocks.Controller
             UDPHandler handler = _cache.get(remoteEndPoint);
             if (handler == null)
             {
-                handler = new UDPHandler(socket, _controller.GetCurrentStrategy().GetAServer(IStrategyCallerType.UDP, remoteEndPoint), remoteEndPoint);
+                handler = new UDPHandler(socket, _controller.GetAServer(IStrategyCallerType.UDP, remoteEndPoint), remoteEndPoint);
                 _cache.add(remoteEndPoint, handler);
             }
             handler.Send(firstPacket, length);

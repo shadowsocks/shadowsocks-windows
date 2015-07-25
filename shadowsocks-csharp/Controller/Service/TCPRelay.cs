@@ -82,7 +82,7 @@ namespace Shadowsocks.Controller
 
         public void CreateRemote()
         {
-            Server server = controller.GetCurrentStrategy().GetAServer(IStrategyCallerType.TCP, (IPEndPoint)connection.RemoteEndPoint);
+            Server server = controller.GetAServer(IStrategyCallerType.TCP, (IPEndPoint)connection.RemoteEndPoint);
             this.encryptor = EncryptorFactory.GetEncryptor(server.method, server.password);
             this.server = server;
         }
@@ -373,7 +373,11 @@ namespace Shadowsocks.Controller
                 return;
             }
             Server server = ((ServerTimer)sender).Server;
-            controller.GetCurrentStrategy().SetFailure(server);
+            IStrategy strategy = controller.GetCurrentStrategy();
+            if (strategy != null)
+            {
+                strategy.SetFailure(server);
+            }
             Console.WriteLine(String.Format("{0} timed out", server.FriendlyName()));
             remote.Close();
             RetryConnect();
@@ -417,7 +421,11 @@ namespace Shadowsocks.Controller
                 //    remote.RemoteEndPoint.ToString());
 
                 var latency = DateTime.Now - _startConnectTime;
-                controller.GetCurrentStrategy().UpdateLatency(server, latency);
+                IStrategy strategy = controller.GetCurrentStrategy();
+                if (strategy != null)
+                {
+                    strategy.UpdateLatency(server, latency);
+                }
 
                 StartPipe();
             }
@@ -428,7 +436,11 @@ namespace Shadowsocks.Controller
             {
                 if (server != null)
                 {
-                    controller.GetCurrentStrategy().SetFailure(server);
+                    IStrategy strategy = controller.GetCurrentStrategy();
+                    if (strategy != null)
+                    {
+                        strategy.SetFailure(server);
+                    }
                 }
                 Logging.LogUsefulException(e);
                 RetryConnect();
@@ -479,7 +491,11 @@ namespace Shadowsocks.Controller
                     }
                     connection.BeginSend(remoteSendBuffer, 0, bytesToSend, 0, new AsyncCallback(PipeConnectionSendCallback), null);
 
-                    controller.GetCurrentStrategy().UpdateLastRead(this.server);
+                    IStrategy strategy = controller.GetCurrentStrategy();
+                    if (strategy != null)
+                    {
+                        strategy.UpdateLastRead(this.server);
+                    }
                 }
                 else
                 {
@@ -527,7 +543,12 @@ namespace Shadowsocks.Controller
                     }
                     remote.BeginSend(connetionSendBuffer, 0, bytesToSend, 0, new AsyncCallback(PipeRemoteSendCallback), null);
 
-                    controller.GetCurrentStrategy().UpdateLastWrite(this.server);
+
+                    IStrategy strategy = controller.GetCurrentStrategy();
+                    if (strategy != null)
+                    {
+                        strategy.UpdateLastWrite(this.server);
+                    }
                 }
                 else
                 {

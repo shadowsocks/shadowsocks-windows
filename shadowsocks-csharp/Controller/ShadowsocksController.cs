@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading;
 using System.Net.Sockets;
 using Shadowsocks.Controller.Strategy;
+using System.Net;
 
 namespace Shadowsocks.Controller
 {
@@ -99,6 +100,16 @@ namespace Shadowsocks.Controller
                 }
             }
             return null;
+        }
+
+        public Server GetAServer(IStrategyCallerType type, IPEndPoint localIPEndPoint)
+        {
+            IStrategy strategy = GetCurrentStrategy();
+            if (strategy != null)
+            {
+                return strategy.GetAServer(type, localIPEndPoint);
+            }
+            return GetCurrentServer();
         }
 
         public void SaveServers(List<Server> servers, int localPort)
