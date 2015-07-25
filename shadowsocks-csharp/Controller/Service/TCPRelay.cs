@@ -31,9 +31,6 @@ namespace Shadowsocks.Controller
             socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, true);
             Handler handler = new Handler();
             handler.connection = socket;
-            Server server = _controller.GetCurrentStrategy().GetAServer(IStrategyCallerType.TCP, (IPEndPoint)socket.RemoteEndPoint);
-            handler.encryptor = EncryptorFactory.GetEncryptor(server.method, server.password);
-            handler.server = server;
             handler.controller = _controller;
 
             handler.Start(firstPacket, length);
@@ -50,6 +47,7 @@ namespace Shadowsocks.Controller
         public Socket remote;
         public Socket connection;
         public ShadowsocksController controller;
+        private int retryCount = 0;
 
         private byte command;
         private byte[] _firstPacket;
@@ -79,6 +77,13 @@ namespace Shadowsocks.Controller
         private object decryptionLock = new object();
 
         private DateTime _startConnectTime;
+
+        public void CreateRemote()
+        {
+            Server server = controller.GetCurrentStrategy().GetAServer(IStrategyCallerType.TCP, (IPEndPoint)connection.RemoteEndPoint);
+            this.encryptor = EncryptorFactory.GetEncryptor(server.method, server.password);
+            this.server = server;
+        }
 
         public void Start(byte[] firstPacket, int length)
         {
@@ -133,7 +138,10 @@ namespace Shadowsocks.Controller
             {
                 lock (decryptionLock)
                 {
-                    ((IDisposable)encryptor).Dispose();
+                    if (encryptor != null)
+                    {
+                        ((IDisposable)encryptor).Dispose();
+                    }
                 }
             }
         }
@@ -215,7 +223,7 @@ namespace Shadowsocks.Controller
                     if (command == 1)
                     {
                         byte[] response = { 5, 0, 0, 1, 0, 0, 0, 0, 0, 0 };
-                        connection.BeginSend(response, 0, response.Length, 0, new AsyncCallback(StartConnect), null);
+                        connection.BeginSend(response, 0, response.Length, 0, new AsyncCallback(ResponseCallback), null);
                     }
                     else if (command == 3)
                     {
@@ -292,11 +300,26 @@ namespace Shadowsocks.Controller
             }
         }
 
-        private void StartConnect(IAsyncResult ar)
+        private void ResponseCallback(IAsyncResult ar)
         {
             try
             {
                 connection.EndSend(ar);
+
+                StartConnect();
+            }
+            catch (Exception e)
+            {
+                Logging.LogUsefulException(e);
+                this.Close();
+            }
+        }
+
+        private void StartConnect()
+        {
+            try
+            {
+                CreateRemote();
 
                 // TODO async resolving
                 IPAddress ipAddress;
@@ -349,7 +372,16 @@ namespace Shadowsocks.Controller
             {
                 controller.GetCurrentStrategy().SetFailure(this.server);
                 Logging.LogUsefulException(e);
-                this.Close();
+                if (retryCount < 3)
+                {
+                    Console.WriteLine("Connection failed, retrying");
+                    StartConnect();
+                    retryCount++;
+                }
+                else
+                {
+                    this.Close();
+                }
             }
         }
 
