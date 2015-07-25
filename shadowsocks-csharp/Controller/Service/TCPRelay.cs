@@ -6,6 +6,7 @@ using System.Net;
 using Shadowsocks.Encryption;
 using Shadowsocks.Model;
 using Shadowsocks.Controller.Strategy;
+using System.Timers;
 
 namespace Shadowsocks.Controller
 {
@@ -48,6 +49,7 @@ namespace Shadowsocks.Controller
         public Socket connection;
         public ShadowsocksController controller;
         private int retryCount = 0;
+        private bool connected;
 
         private byte command;
         private byte[] _firstPacket;
@@ -129,7 +131,7 @@ namespace Shadowsocks.Controller
                     remote.Shutdown(SocketShutdown.Both);
                     remote.Close();
                 }
-                catch (SocketException e)
+                catch (Exception e)
                 {
                     Logging.LogUsefulException(e);
                 }
@@ -315,6 +317,15 @@ namespace Shadowsocks.Controller
             }
         }
 
+        private class ServerTimer : Timer
+        {
+            public Server Server;
+
+            public ServerTimer(int p) :base(p)
+            {
+            }
+        }
+
         private void StartConnect()
         {
             try
@@ -337,10 +348,16 @@ namespace Shadowsocks.Controller
                 remote.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, true);
 
                 _startConnectTime = DateTime.Now;
+                ServerTimer connectTimer = new ServerTimer(3000);
+                connectTimer.AutoReset = false;
+                connectTimer.Elapsed += connectTimer_Elapsed;
+                connectTimer.Enabled = true;
+                connectTimer.Server = server;
 
+                connected = false;
                 // Connect to the remote endpoint.
                 remote.BeginConnect(remoteEP,
-                    new AsyncCallback(ConnectCallback), null);
+                    new AsyncCallback(ConnectCallback), connectTimer);
             }
             catch (Exception e)
             {
@@ -349,39 +366,72 @@ namespace Shadowsocks.Controller
             }
         }
 
+        private void connectTimer_Elapsed(object sender, ElapsedEventArgs e)
+        {
+            if (connected)
+            {
+                return;
+            }
+            Server server = ((ServerTimer)sender).Server;
+            controller.GetCurrentStrategy().SetFailure(server);
+            Console.WriteLine(String.Format("{0} timed out", server.FriendlyName()));
+            remote.Close();
+            RetryConnect();
+        }
+
+        private void RetryConnect()
+        {
+            if (retryCount < 4)
+            {
+                Console.WriteLine("Connection failed, retrying");
+                StartConnect();
+                retryCount++;
+            }
+            else
+            {
+                this.Close();
+            }
+        }
+
         private void ConnectCallback(IAsyncResult ar)
         {
+            Server server = null;
             if (closed)
             {
                 return;
             }
             try
             {
+                ServerTimer timer = (ServerTimer)ar.AsyncState;
+                server = timer.Server;
+                timer.Elapsed -= connectTimer_Elapsed;
+                timer.Enabled = false;
+                timer.Dispose();
+
                 // Complete the connection.
                 remote.EndConnect(ar);
+
+                connected = true;
 
                 //Console.WriteLine("Socket connected to {0}",
                 //    remote.RemoteEndPoint.ToString());
 
                 var latency = DateTime.Now - _startConnectTime;
-                controller.GetCurrentStrategy().UpdateLatency(this.server, latency);
+                controller.GetCurrentStrategy().UpdateLatency(server, latency);
 
                 StartPipe();
             }
+            catch (ArgumentException e)
+            {
+            }
             catch (Exception e)
             {
-                controller.GetCurrentStrategy().SetFailure(this.server);
+                if (server != null)
+                {
+                    controller.GetCurrentStrategy().SetFailure(server);
+                }
                 Logging.LogUsefulException(e);
-                if (retryCount < 3)
-                {
-                    Console.WriteLine("Connection failed, retrying");
-                    StartConnect();
-                    retryCount++;
-                }
-                else
-                {
-                    this.Close();
-                }
+                RetryConnect();
             }
         }
 

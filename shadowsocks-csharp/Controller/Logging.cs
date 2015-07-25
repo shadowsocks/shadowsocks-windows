@@ -63,6 +63,9 @@ namespace Shadowsocks.Controller
                     Console.WriteLine(e);
                 }
             }
+            else if (e is ObjectDisposedException)
+            {
+            }
             else
             {
                 Console.WriteLine(e);
