@@ -441,7 +441,8 @@ namespace Shadowsocks.Controller
                     if (totalRead == 0)
                     {
                         // closed before anything received, reports as failure
-                        controller.GetCurrentStrategy().SetFailure(this.server);
+                        // disable this feature
+                        // controller.GetCurrentStrategy().SetFailure(this.server);
                     }
                 }
             }

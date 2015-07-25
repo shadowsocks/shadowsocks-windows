@@ -16,6 +16,7 @@ namespace Shadowsocks.Controller.Strategy
         {
             // time interval between SYN and SYN+ACK
             public TimeSpan latency;
+            public DateTime lastTimeDetectLatency;
 
             // last time anything received
             public DateTime lastRead;
@@ -27,13 +28,9 @@ namespace Shadowsocks.Controller.Strategy
             public DateTime lastFailure;
 
             public Server server;
-        }
 
-        /**
-         * if last failure is > 10 min
-         * and (last write > last read) and (now - last read <  5s)  // means not stuck
-         * choose the lowest latency
-         */
+            public double score;
+        }
 
         public HighAvailabilityStrategy(ShadowsocksController controller)
         {
@@ -63,20 +60,66 @@ namespace Shadowsocks.Controller.Strategy
                 {
                     var status = new ServerStatus();
                     status.server = server;
+                    status.lastFailure = DateTime.MinValue;
+                    status.lastRead = DateTime.Now;
+                    status.lastWrite = DateTime.Now;
+                    status.latency = new TimeSpan(0, 0, 0, 0, 10);
+                    status.lastTimeDetectLatency = DateTime.Now;
                     newServerStatus[server] = status;
                 }
             }
             _serverStatus = newServerStatus;
 
-            // just leave removed servers there
-            
-            // TODO
-            _currentServer = _controller.GetCurrentConfiguration().configs[0];
+            ChooseNewServer();
         }
 
         public Server GetAServer(IStrategyCallerType type, System.Net.IPEndPoint localIPEndPoint)
         {
+            // TODO don't choose new server too frequently
+            ChooseNewServer();
             return _currentServer;
+        }
+
+        /**
+         * once failed, try after 5 min
+         * and (last write - last read) < 5s
+         * and (now - last read) <  5s  // means not stuck
+         * and latency < 200ms, try after 30s
+         */
+        public void ChooseNewServer()
+        {
+            List<ServerStatus> servers = new List<ServerStatus>(_serverStatus.Values);
+            DateTime now = DateTime.Now;
+            foreach (var status in servers)
+            {
+                // all of failure, latency, (lastread - lastwrite) normalized to 1000, then
+                // 100 * failure - 2 * latency - 0.5 * (lastread - lastwrite)
+                status.score =
+                    100 * 1000 * Math.Min(5 * 60, (now - status.lastFailure).TotalSeconds)
+                    -2 * 5 * (Math.Min(2000, status.latency.TotalMilliseconds) / (1 + (now - status.lastTimeDetectLatency).TotalSeconds / 30 / 2) +
+                    -0.5 * 200 * Math.Min(5, (status.lastRead - status.lastWrite).TotalSeconds));
+                Logging.Debug(String.Format("server: {0} latency:{1} score: {2}", status.server.FriendlyName(), status.latency, status.score));
+            }
+            ServerStatus max = null;
+            foreach (var status in servers)
+            {
+                if (max == null)
+                {
+                    max = status;
+                }
+                else
+                {
+                    if (status.score >= max.score)
+                    {
+                        max = status;
+                    }
+                }
+            }
+            if (max != null)
+            {
+                _currentServer = max.server;
+                Logging.Debug(String.Format("choosing server: {0}", _currentServer.FriendlyName()));
+            }
         }
 
         public void UpdateLatency(Model.Server server, TimeSpan latency)
@@ -87,6 +130,7 @@ namespace Shadowsocks.Controller.Strategy
             if (_serverStatus.TryGetValue(server, out status))
             {
                 status.latency = latency;
+                status.lastTimeDetectLatency = DateTime.Now;
             }
         }
 
