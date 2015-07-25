@@ -90,6 +90,7 @@ namespace Shadowsocks.Controller.Strategy
          */
         public void ChooseNewServer()
         {
+            Server oldServer = _currentServer;
             List<ServerStatus> servers = new List<ServerStatus>(_serverStatus.Values);
             DateTime now = DateTime.Now;
             foreach (var status in servers)
@@ -98,7 +99,7 @@ namespace Shadowsocks.Controller.Strategy
                 // 100 * failure - 2 * latency - 0.5 * (lastread - lastwrite)
                 status.score =
                     100 * 1000 * Math.Min(5 * 60, (now - status.lastFailure).TotalSeconds)
-                    -2 * 5 * (Math.Min(2000, status.latency.TotalMilliseconds) / (1 + (now - status.lastTimeDetectLatency).TotalSeconds / 30 / 2) +
+                    -2 * 5 * (Math.Min(2000, status.latency.TotalMilliseconds) / (1 + (now - status.lastTimeDetectLatency).TotalSeconds / 30 / 10) +
                     -0.5 * 200 * Math.Min(5, (status.lastRead - status.lastWrite).TotalSeconds));
                 Logging.Debug(String.Format("server: {0} latency:{1} score: {2}", status.server.FriendlyName(), status.latency, status.score));
             }
@@ -120,6 +121,10 @@ namespace Shadowsocks.Controller.Strategy
             if (max != null)
             {
                 _currentServer = max.server;
+                if (_currentServer != oldServer)
+                {
+                    Console.WriteLine("HA switching to server: {0}", _currentServer.FriendlyName());
+                }
                 Logging.Debug(String.Format("choosing server: {0}", _currentServer.FriendlyName()));
             }
         }

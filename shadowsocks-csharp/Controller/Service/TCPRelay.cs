@@ -383,7 +383,7 @@ namespace Shadowsocks.Controller
         {
             if (retryCount < 4)
             {
-                Console.WriteLine("Connection failed, retrying");
+                Logging.Debug("Connection failed, retrying");
                 StartConnect();
                 retryCount++;
             }
