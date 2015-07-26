@@ -60,19 +60,14 @@ namespace Shadowsocks.Controller
         {
             try
             {
-                Console.WriteLine("Disable");
                 RegistryKey registry =
                     Registry.CurrentUser.OpenSubKey("Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings",
                         true);
-                Console.WriteLine("Disable1");
                 registry.SetValue("ProxyEnable", 0);
                 registry.SetValue("ProxyServer", "");
                 registry.SetValue("AutoConfigURL", "");
-                Console.WriteLine("Disable2");
                 SystemProxy.NotifyIE();
-                Console.WriteLine("Disable3");
                 CopyProxySettingFromLan();
-                Console.WriteLine("Disable4");
             }
             catch (Exception e)
             {
