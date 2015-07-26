@@ -434,7 +434,7 @@ namespace Shadowsocks.Controller
 
                 StartPipe();
             }
-            catch (ArgumentException e)
+            catch (ArgumentException)
             {
             }
             catch (Exception e)
