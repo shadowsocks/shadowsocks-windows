@@ -109,6 +109,10 @@ namespace Shadowsocks.Controller
             {
                 return strategy.GetAServer(type, localIPEndPoint);
             }
+            if (_config.index < 0)
+            {
+                _config.index = 0;
+            }
             return GetCurrentServer();
         }
 
@@ -293,7 +297,8 @@ namespace Shadowsocks.Controller
             polipoRunner.Stop();
             try
             {
-                foreach (var strategy in GetStrategies())
+                var strategy = GetCurrentStrategy();
+                if (strategy != null)
                 {
                     strategy.ReloadServers();
                 }

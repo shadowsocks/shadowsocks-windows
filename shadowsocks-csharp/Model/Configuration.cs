@@ -55,6 +55,13 @@ namespace Shadowsocks.Model
                 {
                     config.localPort = 1080;
                 }
+                if (config.index == -1)
+                {
+                    if (config.strategy == null)
+                    {
+                        config.index = 0;
+                    }
+                }
                 return config;
             }
             catch (Exception e)
@@ -85,6 +92,13 @@ namespace Shadowsocks.Model
             if (config.index < -1)
             {
                 config.index = -1;
+            }
+            if (config.index == -1)
+            {
+                if (config.strategy == null)
+                {
+                    config.index = 0;
+                }
             }
             config.isDefault = false;
             try
