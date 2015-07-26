@@ -7,7 +7,7 @@ namespace Shadowsocks.Controller.Strategy
 {
     class HighAvailabilityStrategy : IStrategy
     {
-        protected Server _currentServer;
+        protected ServerStatus _currentServer;
         protected Dictionary<Server, ServerStatus> _serverStatus;
         ShadowsocksController _controller;
         Random _random;
@@ -67,6 +67,11 @@ namespace Shadowsocks.Controller.Strategy
                     status.lastTimeDetectLatency = DateTime.Now;
                     newServerStatus[server] = status;
                 }
+                else
+                {
+                    // update settings for existing server
+                    newServerStatus[server].server = server;
+                }
             }
             _serverStatus = newServerStatus;
 
@@ -79,7 +84,11 @@ namespace Shadowsocks.Controller.Strategy
             {
                 ChooseNewServer();
             }
-            return _currentServer;
+            if (_currentServer == null)
+            {
+                return null;
+            }
+            return _currentServer.server;
         }
 
         /**
@@ -90,7 +99,7 @@ namespace Shadowsocks.Controller.Strategy
          */
         public void ChooseNewServer()
         {
-            Server oldServer = _currentServer;
+            ServerStatus oldServer = _currentServer;
             List<ServerStatus> servers = new List<ServerStatus>(_serverStatus.Values);
             DateTime now = DateTime.Now;
             foreach (var status in servers)
@@ -120,12 +129,11 @@ namespace Shadowsocks.Controller.Strategy
             }
             if (max != null)
             {
-                _currentServer = max.server;
-                if (_currentServer != oldServer)
+                if (_currentServer == null || max.score - _currentServer.score > 200)
                 {
-                    Console.WriteLine("HA switching to server: {0}", _currentServer.FriendlyName());
+                    _currentServer = max;
+                    Console.WriteLine("HA switching to server: {0}", _currentServer.server.FriendlyName());
                 }
-                Logging.Debug(String.Format("choosing server: {0}", _currentServer.FriendlyName()));
             }
         }
 
