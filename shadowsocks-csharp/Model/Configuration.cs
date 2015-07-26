@@ -121,6 +121,11 @@ namespace Shadowsocks.Model
             {
                 throw new ArgumentException(I18N.GetString("Port out of range"));
             }
+        }
+
+        public static void CheckLocalPort(int port)
+        {
+            CheckPort(port);
             if (port == 8123)
             {
                 throw new ArgumentException(I18N.GetString("Port can't be 8123"));

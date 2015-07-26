@@ -84,7 +84,7 @@ namespace Shadowsocks.View
                 };
                 int localPort = int.Parse(ProxyPortTextBox.Text);
                 Configuration.CheckServer(server);
-                Configuration.CheckPort(localPort);
+                Configuration.CheckLocalPort(localPort);
                 _modifiedConfiguration.configs[_oldSelectedIndex] = server;
                 _modifiedConfiguration.localPort = localPort;
                 
