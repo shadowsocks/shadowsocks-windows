@@ -83,6 +83,10 @@ namespace Shadowsocks.Controller
         public void CreateRemote()
         {
             Server server = controller.GetAServer(IStrategyCallerType.TCP, (IPEndPoint)connection.RemoteEndPoint);
+            if (server == null || server.server == "")
+            {
+                throw new ArgumentException("No server configured");
+            }
             this.encryptor = EncryptorFactory.GetEncryptor(server.method, server.password);
             this.server = server;
         }
@@ -310,6 +314,7 @@ namespace Shadowsocks.Controller
 
                 StartConnect();
             }
+
             catch (Exception e)
             {
                 Logging.LogUsefulException(e);
