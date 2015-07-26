@@ -1,4 +1,10 @@
-2.5 2015-07-11
+2.5.1 2015-07-26
+- Prevent HA from switching servers too frequently
+- Fix a problem that server settings can not be updated when using HA
+- Fix server port can't be 8123
+- Other minor fixes
+
+2.5 2015-07-25
 - Support load balance
 - Support high availability
 
