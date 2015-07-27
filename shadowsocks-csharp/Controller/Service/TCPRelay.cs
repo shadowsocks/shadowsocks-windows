@@ -74,7 +74,7 @@ namespace Shadowsocks.Controller
         private bool connectionShutdown = false;
         private bool remoteShutdown = false;
         private bool closed = false;
-        
+
         private object encryptionLock = new object();
         private object decryptionLock = new object();
 
@@ -222,14 +222,13 @@ namespace Shadowsocks.Controller
             try
             {
                 int bytesRead = connection.EndReceive(ar);
-                
+
                 if (bytesRead >= 3)
                 {
                     command = connetionRecvBuffer[1];
                     if (command == 1)
                     {
-                        byte[] response = { 5, 0, 0, 1, 0, 0, 0, 0, 0, 0 };
-                        connection.BeginSend(response, 0, response.Length, 0, new AsyncCallback(ResponseCallback), null);
+                        StartConnect();
                     }
                     else if (command == 3)
                     {
@@ -312,7 +311,7 @@ namespace Shadowsocks.Controller
             {
                 connection.EndSend(ar);
 
-                StartConnect();
+                StartPipe();
             }
 
             catch (Exception e)
@@ -326,7 +325,7 @@ namespace Shadowsocks.Controller
         {
             public Server Server;
 
-            public ServerTimer(int p) :base(p)
+            public ServerTimer(int p) : base(p)
             {
             }
         }
@@ -432,7 +431,8 @@ namespace Shadowsocks.Controller
                     strategy.UpdateLatency(server, latency);
                 }
 
-                StartPipe();
+                byte[] response = { 5, 0, 0, 1, 0, 0, 0, 0, 0, 0 };
+                connection.BeginSend(response, 0, response.Length, 0, new AsyncCallback(ResponseCallback), null);
             }
             catch (ArgumentException)
             {
