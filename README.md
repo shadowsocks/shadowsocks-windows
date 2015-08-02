@@ -3,6 +3,9 @@ Shadowsocks for Windows
 
 [![Build Status]][Appveyor]
 
+Announcement: We'll drop .Net 2.0 support in our next release. The minimal installation
+requirement will be .Net 4.0. If you have any questions, please post in the issue tracker.
+
 #### Features
 
 1. System proxy configuration
