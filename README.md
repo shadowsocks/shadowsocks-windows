@@ -3,9 +3,6 @@ Shadowsocks for Windows
 
 [![Build Status]][Appveyor]
 
-Announcement: We'll drop .Net 2.0 support in our next release. The minimal installation
-requirement will be .Net 4.0. If you have any questions, please post in the issue tracker.
-
 #### Features
 
 1. System proxy configuration
@@ -19,9 +16,7 @@ requirement will be .Net 4.0. If you have any questions, please post in the issu
 
 Download a [latest release].
 
-For >= Windows 8 or with .Net 4.0, download Shadowsocks-win-dotnet4.0-x.x.x.zip.
-
-For <= Windows 7 or with .Net 2.0, download Shadowsocks-win-x.x.x.zip.
+Notice: .Net 2.0 doesn't work well on Windows 10. We no longer support .Net 2.0. Both Shadowsocks-win-xxx.zip and Shadowsocks-win-dotnet4.0-xxx.zip are exactly the same file now. If you use Windows XP or 7, please install .Net 4.0 or higher.
 
 #### Basic
 
