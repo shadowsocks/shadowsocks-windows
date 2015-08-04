@@ -13,7 +13,6 @@ namespace Shadowsocks.View
 {
     public partial class LogForm : Form
     {
-        FileSystemWatcher watcher;
         long lastOffset;
         string filename;
         Timer timer;
