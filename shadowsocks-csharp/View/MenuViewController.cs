@@ -349,7 +349,7 @@ namespace Shadowsocks.View
 
         private void AboutItem_Click(object sender, EventArgs e)
         {
-            Process.Start("https://github.com/shadowsocks/shadowsocks-csharp");
+            Process.Start("https://github.com/shadowsocks/shadowsocks-windows");
         }
 
         private void notifyIcon1_DoubleClick(object sender, MouseEventArgs e)
