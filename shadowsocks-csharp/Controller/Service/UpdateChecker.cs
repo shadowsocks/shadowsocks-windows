@@ -80,30 +80,6 @@ namespace Shadowsocks.Controller
             {
                 return false;
             }
-            // check dotnet 4.0
-            AssemblyName[] references = Assembly.GetExecutingAssembly().GetReferencedAssemblies();
-            Version dotNetVersion = Environment.Version;
-            foreach (AssemblyName reference in references)
-            {
-                if (reference.Name == "mscorlib")
-                {
-                    dotNetVersion = reference.Version;
-                }
-            }
-            if (dotNetVersion.Major >= 4)
-            {
-                if (url.IndexOf("dotnet4.0") < 0)
-                {
-                    return false;
-                }
-            }
-            else
-            {
-                if (url.IndexOf("dotnet4.0") >= 0)
-                {
-                    return false;
-                }
-            }
             string version = ParseVersionFromURL(url);
             if (version == null)
             {
