@@ -412,7 +412,7 @@ namespace Shadowsocks.View
         {
             string argument = Logging.LogFile;
 
-            System.Diagnostics.Process.Start("notepad.exe", argument);
+            new LogForm(argument).Show();
         }
 
         private void QRCodeItem_Click(object sender, EventArgs e)
