@@ -105,5 +105,10 @@ namespace Shadowsocks.View
         {
             this.Close();
         }
+
+        private void LogForm_Shown(object sender, EventArgs e)
+        {
+            textBox1.ScrollToCaret();
+        }
     }
 }
