@@ -8,8 +8,10 @@ using System.Data;
 using System.Drawing;
 using System.IO;
 using System.IO.Compression;
+using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+using Shadowsocks.Model;
 
 namespace Shadowsocks.View
 {
@@ -30,8 +32,8 @@ namespace Shadowsocks.View
             string qrText = ssconfig;
             QRCode code = ZXing.QrCode.Internal.Encoder.encode(qrText, ErrorCorrectionLevel.M);
             ByteMatrix m = code.Matrix;
-            int blockSize = Math.Max(pictureBox1.Height / m.Height, 1);
-            Bitmap drawArea = new Bitmap((m.Width * blockSize), (m.Height * blockSize));
+            int blockSize = Math.Max(pictureBox1.Height/m.Height, 1);
+            Bitmap drawArea = new Bitmap((m.Width*blockSize), (m.Height*blockSize));
             using (Graphics g = Graphics.FromImage(drawArea))
             {
                 g.Clear(Color.White);
@@ -43,7 +45,7 @@ namespace Shadowsocks.View
                         {
                             if (m[row, col] != 0)
                             {
-                                g.FillRectangle(b, blockSize * row, blockSize * col, blockSize, blockSize);
+                                g.FillRectangle(b, blockSize*row, blockSize*col, blockSize, blockSize);
                             }
                         }
                     }
@@ -54,7 +56,20 @@ namespace Shadowsocks.View
 
         private void QRCodeForm_Load(object sender, EventArgs e)
         {
-            GenQR(code);
+            var servers = Configuration.Load();
+            var serverDatas = servers.configs.Select(
+                server =>
+                    new KeyValuePair<string, string>(ShadowsocksController.GetQRCode(server), server.FriendlyName())
+                ).ToList();
+            listBox1.DataSource = serverDatas;
+
+            var selectIndex = serverDatas.FindIndex(serverData => serverData.Key.StartsWith(code));
+            if (selectIndex >= 0) listBox1.SetSelected(selectIndex, true);
+        }
+
+        private void listBox1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            GenQR((sender as ListBox)?.SelectedValue.ToString());
         }
     }
 }

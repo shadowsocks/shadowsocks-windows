@@ -228,6 +228,11 @@ namespace Shadowsocks.Controller
         public string GetQRCodeForCurrentServer()
         {
             Server server = GetCurrentServer();
+            return GetQRCode(server);
+        }
+
+        public static string GetQRCode(Server server)
+        {
             string parts = server.method + ":" + server.password + "@" + server.server + ":" + server.server_port;
             string base64 = System.Convert.ToBase64String(Encoding.UTF8.GetBytes(parts));
             return "ss://" + base64;
