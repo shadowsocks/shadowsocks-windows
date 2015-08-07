@@ -55,7 +55,9 @@ namespace Shadowsocks.Controller
                         else
                             pacUrl = "http://127.0.0.1:" + config.localPort.ToString() + "/pac?t=" + GetTimestamp(DateTime.Now);
                         registry.SetValue("ProxyEnable", 0);
-                        //registry.SetValue("ProxyServer", "");         //Unnecessary
+                        var readProxyServer = registry.GetValue("ProxyServer");
+                        if (readProxyServer != null && readProxyServer.Equals("127.0.0.1:" + config.localPort.ToString()))
+                            registry.SetValue("ProxyServer", "");
                         registry.SetValue("AutoConfigURL", pacUrl);
                     }
                 }
