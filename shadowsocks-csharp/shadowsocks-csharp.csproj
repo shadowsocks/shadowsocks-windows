@@ -123,7 +123,9 @@
     <Compile Include="3rd\zxing\ResultPoint.cs" />
     <Compile Include="3rd\zxing\ResultPointCallback.cs" />
     <Compile Include="3rd\zxing\WriterException.cs" />
+    <Compile Include="Controller\Service\AvailabilityStatistics.cs" />
     <Compile Include="Controller\Strategy\HighAvailabilityStrategy.cs" />
+    <Compile Include="Controller\Strategy\SimplyChooseByStatisticsStrategy.cs" />
     <Compile Include="Controller\System\AutoStartup.cs" />
     <Compile Include="Controller\FileManager.cs" />
     <Compile Include="Controller\Service\GFWListUpdater.cs" />

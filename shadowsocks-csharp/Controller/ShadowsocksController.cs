@@ -25,6 +25,7 @@ namespace Shadowsocks.Controller
         private StrategyManager _strategyManager;
         private PolipoRunner polipoRunner;
         private GFWListUpdater gfwListUpdater;
+        private AvailabilityStatistics _availabilityStatics;
         private bool stopped = false;
 
         private bool _systemProxyIsDirty = false;
@@ -246,6 +247,16 @@ namespace Shadowsocks.Controller
             }
         }
 
+        public void ToggleAvailabilityStatistics(bool enabled)
+        {
+            if (_availabilityStatics != null)
+            {
+                _availabilityStatics.Set(enabled);
+                _config.availabilityStatistics = enabled;
+                SaveConfig(_config);
+            }
+        }
+
         public void SavePACUrl(string pacUrl)
         {
             _config.pacUrl = pacUrl;
@@ -293,6 +304,12 @@ namespace Shadowsocks.Controller
             if (_listener != null)
             {
                 _listener.Stop();
+            }
+
+            if (_availabilityStatics == null)
+            {
+                _availabilityStatics = new AvailabilityStatistics();
+                _availabilityStatics.UpdateConfiguration(_config);
             }
 
             // don't put polipoRunner.Start() before pacServer.Stop()
