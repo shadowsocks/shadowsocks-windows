@@ -25,7 +25,7 @@ Quit=退出
 Edit Servers=编辑服务器
 Load Balance=负载均衡
 High Availability=高可用
-Simply Choose By Statistics=根据统计
+Choose By Total Package Loss=累计丢包率
 
 # Config Form
 

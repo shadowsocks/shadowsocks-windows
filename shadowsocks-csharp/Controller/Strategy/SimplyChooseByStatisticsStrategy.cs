@@ -125,7 +125,7 @@ namespace Shadowsocks.Controller.Strategy
 
         string IStrategy.Name
         {
-            get { return I18N.GetString("Simply Choose By Statics"); }
+            get { return I18N.GetString("Choose By Total Package Loss"); }
         }
 
         Server IStrategy.GetAServer(IStrategyCallerType type, IPEndPoint localIPEndPoint)
