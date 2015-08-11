@@ -16,12 +16,14 @@ namespace Shadowsocks.Controller.Strategy
         private Server _currentServer;
         private Timer timer;
         private Dictionary<string, StatisticsData> statistics;
-        private static readonly int CachedInterval = 60 * 60 * 1000; //choose a new server every 60 minutes
+        private static readonly int CachedInterval = 30 * 60 * 1000; //choose a new server every 30 minutes
 
         public SimplyChooseByStatisticsStrategy(ShadowsocksController controller)
         {
             _controller = controller;
-            _currentServer = null;  //we can also choose a server randomly at first
+            var servers = controller.GetCurrentConfiguration().configs;
+            int randomIndex = new Random().Next() % servers.Count();
+            _currentServer = servers[randomIndex];  //choose a server randomly at first
             timer = new Timer(ReloadStatisticsAndChooseAServer);
         }
 
@@ -109,7 +111,10 @@ namespace Shadowsocks.Controller.Strategy
                                   }
                                   ).Aggregate((result1, result2) => result1.score > result2.score ? result1 : result2);
 
-                Logging.Debug(string.Format("best server {0}: {1}", bestResult.server.FriendlyName(), bestResult.score));
+                if (_controller.GetCurrentStrategy().ID == ID && _currentServer != bestResult.server) //output when enabled
+                {  
+                    Console.WriteLine("Switch to server: {0} by package loss:{1}", bestResult.server.FriendlyName(), 1 - bestResult.score);
+                }
                 _currentServer = bestResult.server;
             }
             catch (Exception e)
@@ -118,44 +123,51 @@ namespace Shadowsocks.Controller.Strategy
             }
         }
 
-        string IStrategy.ID
+        public string ID
         {
             get { return "com.shadowsocks.strategy.scbs"; }
         }
 
-        string IStrategy.Name
+        public string Name
         {
             get { return I18N.GetString("Choose By Total Package Loss"); }
         }
 
-        Server IStrategy.GetAServer(IStrategyCallerType type, IPEndPoint localIPEndPoint)
+        public Server GetAServer(IStrategyCallerType type, IPEndPoint localIPEndPoint)
         {
-            Console.WriteLine("Switch to server by statistics: {0}", _currentServer.FriendlyName());
+            var oldServer = _currentServer;
+            if (oldServer == null)
+            {
+                ChooseNewServer(_controller.GetCurrentConfiguration().configs);
+            }
+            if (oldServer != _currentServer)
+            {
+            }
             return _currentServer;  //current server cached for CachedInterval
         }
 
-        void IStrategy.ReloadServers()
+        public void ReloadServers()
         {
             ChooseNewServer(_controller.GetCurrentConfiguration().configs);
             timer?.Change(0, CachedInterval);
         }
 
-        void IStrategy.SetFailure(Server server)
+        public void SetFailure(Server server)
         {
             Logging.Debug(String.Format("failure: {0}", server.FriendlyName()));
         }
 
-        void IStrategy.UpdateLastRead(Server server)
+        public void UpdateLastRead(Server server)
         {
             //TODO: combine this part of data with ICMP statics
         }
 
-        void IStrategy.UpdateLastWrite(Server server)
+        public void UpdateLastWrite(Server server)
         {
             //TODO: combine this part of data with ICMP statics
         }
 
-        void IStrategy.UpdateLatency(Server server, TimeSpan latency)
+        public void UpdateLatency(Server server, TimeSpan latency)
         {
             //TODO: combine this part of data with ICMP statics
         }
