@@ -106,7 +106,6 @@ namespace Shadowsocks.Controller.Strategy
                                   ).Aggregate((result1, result2) => result1.score > result2.score ? result1 : result2);
 
                 Logging.Debug(string.Format("best server {0}: {1}", bestResult.server.FriendlyName(), bestResult.score));
-                Console.WriteLine("Switch to server by statistics: {0}", bestResult.server.FriendlyName());
                 _currentServer = bestResult.server;
             }
             catch (Exception e)
@@ -127,6 +126,7 @@ namespace Shadowsocks.Controller.Strategy
 
         Server IStrategy.GetAServer(IStrategyCallerType type, IPEndPoint localIPEndPoint)
         {
+            Console.WriteLine("Switch to server by statistics: {0}", _currentServer.FriendlyName());
             return _currentServer;  //current server cached for CachedInterval
         }
 
