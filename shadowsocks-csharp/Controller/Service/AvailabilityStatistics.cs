@@ -15,7 +15,7 @@ namespace Shadowsocks.Controller
         private static readonly string Delimiter = ",";
         private static readonly int Timeout = 500;
         private static readonly int Repeat = 4; //repeat times every evaluation
-        private static readonly int Interval = 60 * 60 * 1000;  //evaluate proxies every 60 minutes
+        private static readonly int Interval = 10 * 60 * 1000;  //evaluate proxies every 15 minutes
         private Timer timer = null;
         private State state = null;
         private List<Server> servers;
