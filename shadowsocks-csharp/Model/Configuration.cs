@@ -22,6 +22,7 @@ namespace Shadowsocks.Model
         public int localPort;
         public string pacUrl;
         public bool useOnlinePac;
+        public bool availabilityStatistics;
 
         private static string CONFIG_FILE = "gui-config.json";
 
