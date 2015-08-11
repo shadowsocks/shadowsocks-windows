@@ -93,6 +93,10 @@ namespace Shadowsocks.Controller.Strategy
 
         private void ChooseNewServer(List<Server> servers)
         {
+            if (statistics == null)
+            {
+                return;
+            }
             try
             {
                 var bestResult = (from server in servers
