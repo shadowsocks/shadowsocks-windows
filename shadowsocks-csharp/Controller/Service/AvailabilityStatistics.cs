@@ -2,12 +2,20 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
+using SimpleJson;
+using System.Net.Http;
 using System.Net.NetworkInformation;
-using System.Threading;
+using System.Threading.Tasks;
+using System.Windows.Forms;
 using Shadowsocks.Model;
+using SimpleJson = SimpleJson.SimpleJson;
+using Timer = System.Threading.Timer;
 
 namespace Shadowsocks.Controller
 {
+    using DataUnit = KeyValuePair<string, string>;
+    using DataList = List<KeyValuePair<string, string>>;
     class AvailabilityStatistics
     {
         private const string StatisticsFilesName = "shadowsocks.availability.csv";
@@ -51,35 +59,67 @@ namespace Shadowsocks.Controller
             }
         }
 
-        private void Evaluate(object obj)
+        //hardcode
+        //TODO: backup reliable isp&geolocation provider or a local database is required
+        private static async Task<DataList> getGeolocationAndISP()
         {
-            var ping = new Ping();
-            var state = (State) obj;
-            foreach (var server in _servers)
+            Logging.Debug("Retrive information of geolocation and isp");
+            const string api = "http://ip-api.com/json";
+            var jsonString = await new HttpClient().GetStringAsync(api);
+            var ret = new DataList
             {
-                Logging.Debug("eveluating " + server.FriendlyName());
-                foreach (var _ in Enumerable.Range(0, Repeat))
+                new DataUnit(State.Geolocation, State.Unknown),
+                new DataUnit(State.ISP, State.Unknown),
+            };
+            dynamic obj;
+            if (!global::SimpleJson.SimpleJson.TryDeserializeObject(jsonString, out obj)) return ret;
+            string country = obj["country"];
+            string city = obj["city"];
+            string isp = obj["isp"];
+            string regionName= obj["regionName"];
+            if (country == null || city == null || isp == null || regionName == null) return ret;
+            ret[0] = new DataUnit(State.Geolocation, $"{country} {regionName} {city}");
+            ret[1] = new DataUnit(State.ISP, isp);
+            return ret;
+        }
+
+        private static async Task<List<DataList>> ICMPTest(Server server)
+        {
+            Logging.Debug("eveluating " + server.FriendlyName());
+            var ping = new Ping();
+            var ret = new List<DataList>();
+            foreach (var timestamp in Enumerable.Range(0, Repeat).Select(_ => DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")))
+            {
+                //ICMP echo. we can also set options and special bytes
+                var reply = await ping.SendTaskAsync(server.server, Timeout);
+                ret.Add(new List<KeyValuePair<string, string>>
                 {
-                    //TODO: do simple analyze of data to provide friendly message, like package loss.
-                    var timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
-                    //ICMP echo. we can also set options and special bytes
-                    //seems no need to use SendPingAsync：
-                    var reply = ping.Send(server.server, Timeout);
-                    state.Data = new List<KeyValuePair<string, string>>
-                    {
-                        new KeyValuePair<string, string>("Timestamp", timestamp),
-                        new KeyValuePair<string, string>("Server", server.FriendlyName()),
-                        new KeyValuePair<string, string>("Status", reply?.Status.ToString()),
-                        new KeyValuePair<string, string>("RoundtripTime", reply?.RoundtripTime.ToString())
-                    };
-                    //state.data.Add(new KeyValuePair<string, string>("data", reply.Buffer.ToString())); // The data of reply
-                    Append(state.Data);
+                    new KeyValuePair<string, string>("Timestamp", timestamp),
+                    new KeyValuePair<string, string>("Server", server.FriendlyName()),
+                    new KeyValuePair<string, string>("Status", reply?.Status.ToString()),
+                    new KeyValuePair<string, string>("RoundtripTime", reply?.RoundtripTime.ToString())
+                    //new KeyValuePair<string, string>("data", reply.Buffer.ToString()); // The data of reply
+                });
+            }
+            return ret;
+        }
+
+        private async void Evaluate(object obj)
+        {
+            var geolocationAndIsp = getGeolocationAndISP();
+            foreach (var dataLists in await TaskEx.WhenAll(_servers.Select(ICMPTest)))
+            {
+                await geolocationAndIsp;
+                foreach (var dataList in dataLists)
+                {
+                    Append(dataList, geolocationAndIsp.Result);
                 }
             }
         }
 
-        private static void Append(List<KeyValuePair<string, string>> data)
+        private static void Append(DataList dataList, IEnumerable<DataUnit> extra)
         {
+            var data = dataList.Concat(extra);
             var dataLine = string.Join(Delimiter, data.Select(kv => kv.Value).ToArray());
             string[] lines;
             if (!File.Exists(AvailabilityStatisticsFile))
@@ -102,7 +142,10 @@ namespace Shadowsocks.Controller
 
         private class State
         {
-            public List<KeyValuePair<string, string>> Data = new List<KeyValuePair<string, string>>();
+            public DataList dataList = new DataList();
+            public const string Geolocation = "Geolocation";
+            public const string ISP = "ISP";
+            public const string Unknown = "Unknown";
         }
     }
 }
