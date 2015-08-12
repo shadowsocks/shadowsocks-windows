@@ -1,36 +1,36 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
-using System.Text;
-using Shadowsocks.Model;
-using System.IO;
 using System.Net.NetworkInformation;
 using System.Threading;
+using Shadowsocks.Model;
 
 namespace Shadowsocks.Controller.Strategy
 {
     class SimplyChooseByStatisticsStrategy : IStrategy
     {
-        private ShadowsocksController _controller;
+        private readonly ShadowsocksController _controller;
         private Server _currentServer;
-        private Timer timer;
-        private Dictionary<string, StatisticsData> statistics;
-        private static readonly int CachedInterval = 30 * 60 * 1000; //choose a new server every 30 minutes
+        private readonly Timer _timer;
+        private Dictionary<string, StatisticsData> _statistics;
+        private const int CachedInterval = 30*60*1000; //choose a new server every 30 minutes
+        private const int RetryInterval = 2*60*1000; //choose a new server every 30 minutes
 
         public SimplyChooseByStatisticsStrategy(ShadowsocksController controller)
         {
             _controller = controller;
             var servers = controller.GetCurrentConfiguration().configs;
-            int randomIndex = new Random().Next() % servers.Count();
+            var randomIndex = new Random().Next() % servers.Count();
             _currentServer = servers[randomIndex];  //choose a server randomly at first
-            timer = new Timer(ReloadStatisticsAndChooseAServer);
+            _timer = new Timer(ReloadStatisticsAndChooseAServer);
         }
 
         private void ReloadStatisticsAndChooseAServer(object obj)
         {
             Logging.Debug("Reloading statistics and choose a new server....");
-            List<Server> servers = _controller.GetCurrentConfiguration().configs;
+            var servers = _controller.GetCurrentConfiguration().configs;
             LoadStatistics();
             ChooseNewServer(servers);
         }
@@ -47,8 +47,14 @@ namespace Shadowsocks.Controller.Strategy
             try
             {
                 var path = AvailabilityStatistics.AvailabilityStatisticsFile;
-                Logging.Debug(string.Format("loading statistics from{0}", path));
-                statistics = (from l in File.ReadAllLines(path)
+                Logging.Debug($"loading statistics from {path}");
+                if (!File.Exists(path))
+                {
+                    LogWhenEnabled($"statistics file does not exist, try to reload {RetryInterval} minutes later");
+                    _timer.Change(RetryInterval, CachedInterval);
+                    return;
+                }
+                _statistics = (from l in File.ReadAllLines(path)
                                   .Skip(1)
                                   let strings = l.Split(new[] { "," }, StringSplitOptions.RemoveEmptyEntries)
                                   let rawData = new
@@ -95,7 +101,7 @@ namespace Shadowsocks.Controller.Strategy
 
         private void ChooseNewServer(List<Server> servers)
         {
-            if (statistics == null)
+            if (_statistics == null)
             {
                 return;
             }
@@ -103,17 +109,17 @@ namespace Shadowsocks.Controller.Strategy
             {
                 var bestResult = (from server in servers
                                   let name = server.FriendlyName()
-                                  where statistics.ContainsKey(name)
+                                  where _statistics.ContainsKey(name)
                                   select new
                                   {
                                       server,
-                                      score = GetScore(statistics[name])
+                                      score = GetScore(_statistics[name])
                                   }
                                   ).Aggregate((result1, result2) => result1.score > result2.score ? result1 : result2);
 
-                if (_controller.GetCurrentStrategy().ID == ID && _currentServer != bestResult.server) //output when enabled
+                if (!_currentServer.Equals(bestResult.server)) //output when enabled
                 {  
-                    Console.WriteLine("Switch to server: {0} by package loss:{1}", bestResult.server.FriendlyName(), 1 - bestResult.score);
+                   LogWhenEnabled($"Switch to server: {bestResult.server.FriendlyName()} by package loss:{1 - bestResult.score}");
                 }
                 _currentServer = bestResult.server;
             }
@@ -123,15 +129,17 @@ namespace Shadowsocks.Controller.Strategy
             }
         }
 
-        public string ID
+        private void LogWhenEnabled(string log)
         {
-            get { return "com.shadowsocks.strategy.scbs"; }
+            if (_controller.GetCurrentStrategy()?.ID == ID) //output when enabled
+            {
+                Console.WriteLine(log);
+            }
         }
 
-        public string Name
-        {
-            get { return I18N.GetString("Choose By Total Package Loss"); }
-        }
+        public string ID => "com.shadowsocks.strategy.scbs";
+
+        public string Name => I18N.GetString("Choose By Total Package Loss");
 
         public Server GetAServer(IStrategyCallerType type, IPEndPoint localIPEndPoint)
         {
@@ -140,21 +148,18 @@ namespace Shadowsocks.Controller.Strategy
             {
                 ChooseNewServer(_controller.GetCurrentConfiguration().configs);
             }
-            if (oldServer != _currentServer)
-            {
-            }
             return _currentServer;  //current server cached for CachedInterval
         }
 
         public void ReloadServers()
         {
             ChooseNewServer(_controller.GetCurrentConfiguration().configs);
-            timer?.Change(0, CachedInterval);
+            _timer?.Change(0, CachedInterval);
         }
 
         public void SetFailure(Server server)
         {
-            Logging.Debug(String.Format("failure: {0}", server.FriendlyName()));
+            Logging.Debug($"failure: {server.FriendlyName()}");
         }
 
         public void UpdateLastRead(Server server)
