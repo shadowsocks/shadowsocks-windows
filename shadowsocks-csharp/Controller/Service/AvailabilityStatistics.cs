@@ -5,27 +5,26 @@ using System.Linq;
 using System.Net.NetworkInformation;
 using System.Threading;
 using Shadowsocks.Model;
-using System.Reflection;
 
 namespace Shadowsocks.Controller
 {
     class AvailabilityStatistics
     {
-        private static readonly string StatisticsFilesName = "shadowsocks.availability.csv";
-        private static readonly string Delimiter = ",";
-        private static readonly int Timeout = 500;
-        private static readonly int Repeat = 4; //repeat times every evaluation
-        private static readonly int Interval = 10 * 60 * 1000;  //evaluate proxies every 15 minutes
-        private Timer timer = null;
-        private State state = null;
-        private List<Server> servers;
+        private const string StatisticsFilesName = "shadowsocks.availability.csv";
+        private const string Delimiter = ",";
+        private const int Timeout = 500;
+        private const int Repeat = 4; //repeat times every evaluation
+        private const int Interval = 10*60*1000; //evaluate proxies every 15 minutes
+        private Timer _timer;
+        private State _state;
+        private List<Server> _servers;
 
         public static string AvailabilityStatisticsFile;
 
         //static constructor to initialize every public static fields before refereced
         static AvailabilityStatistics()
         {
-            string temppath = Path.GetTempPath();
+            var temppath = Path.GetTempPath();
             AvailabilityStatisticsFile = Path.Combine(temppath, StatisticsFilesName);
         }
 
@@ -35,15 +34,13 @@ namespace Shadowsocks.Controller
             {
                 if (enabled)
                 {
-                    if (timer?.Change(0, Interval) == null)
-                    {
-                        state = new State();
-                        timer = new Timer(Evaluate, state, 0, Interval);
-                    }
+                    if (_timer?.Change(0, Interval) != null) return true;
+                    _state = new State();
+                    _timer = new Timer(Evaluate, _state, 0, Interval);
                 }
                 else
                 {
-                    timer?.Dispose();
+                    _timer?.Dispose();
                 }
                 return true;
             }
@@ -56,54 +53,56 @@ namespace Shadowsocks.Controller
 
         private void Evaluate(object obj)
         {
-            Ping ping = new Ping();
-            State state = (State) obj;
-            foreach (var server in servers)
+            var ping = new Ping();
+            var state = (State) obj;
+            foreach (var server in _servers)
             {
                 Logging.Debug("eveluating " + server.FriendlyName());
                 foreach (var _ in Enumerable.Range(0, Repeat))
                 {
                     //TODO: do simple analyze of data to provide friendly message, like package loss.
-                    string timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+                    var timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
                     //ICMP echo. we can also set options and special bytes
-                    //seems no need to use SendPingAsync
-                    PingReply reply = ping.Send(server.server, Timeout);
-                    state.data = new List<KeyValuePair<string, string>>();
-                    state.data.Add(new KeyValuePair<string, string>("Timestamp", timestamp));
-                    state.data.Add(new KeyValuePair<string, string>("Server", server.FriendlyName()));
-                    state.data.Add(new KeyValuePair<string, string>("Status", reply.Status.ToString()));
-                    state.data.Add(new KeyValuePair<string, string>("RoundtripTime", reply.RoundtripTime.ToString()));
+                    //seems no need to use SendPingAsync：
+                    var reply = ping.Send(server.server, Timeout);
+                    state.Data = new List<KeyValuePair<string, string>>
+                    {
+                        new KeyValuePair<string, string>("Timestamp", timestamp),
+                        new KeyValuePair<string, string>("Server", server.FriendlyName()),
+                        new KeyValuePair<string, string>("Status", reply?.Status.ToString()),
+                        new KeyValuePair<string, string>("RoundtripTime", reply?.RoundtripTime.ToString())
+                    };
                     //state.data.Add(new KeyValuePair<string, string>("data", reply.Buffer.ToString())); // The data of reply
-                    Append(state.data);
+                    Append(state.Data);
                 }
             }
         }
 
         private static void Append(List<KeyValuePair<string, string>> data)
         {
-            string dataLine = string.Join(Delimiter, data.Select(kv => kv.Value).ToArray());
+            var dataLine = string.Join(Delimiter, data.Select(kv => kv.Value).ToArray());
             string[] lines;
             if (!File.Exists(AvailabilityStatisticsFile))
             {
-                string headerLine = string.Join(Delimiter, data.Select(kv => kv.Key).ToArray());
-                lines = new string[] { headerLine, dataLine };
+                var headerLine = string.Join(Delimiter, data.Select(kv => kv.Key).ToArray());
+                lines = new[] { headerLine, dataLine };
             }
             else
             {
-                lines = new string[] { dataLine };
+                lines = new[] { dataLine };
             }
             File.AppendAllLines(AvailabilityStatisticsFile, lines);
         }
 
-        internal void UpdateConfiguration(Configuration _config)
+        internal void UpdateConfiguration(Configuration config)
         {
-            Set(_config.availabilityStatistics);
-            servers = _config.configs;
+            Set(config.availabilityStatistics);
+            _servers = config.configs;
         }
 
         private class State
         {
-            public List<KeyValuePair<string, string>> data = new List<KeyValuePair<string, string>>();
+            public List<KeyValuePair<string, string>> Data = new List<KeyValuePair<string, string>>();
         }
     }
 }
