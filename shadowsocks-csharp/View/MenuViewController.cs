@@ -165,6 +165,7 @@ namespace Shadowsocks.View
                     this.SeperatorItem = new MenuItem("-"),
                     this.ConfigItem = CreateMenuItem("Edit Servers...", new EventHandler(this.Config_Click)),
                     CreateMenuItem("Show QRCode...", new EventHandler(this.QRCodeItem_Click)),
+                    CreateMenuItem("Statistics Stategy Options", new EventHandler(StatisticsStrategyOptionsItem_Click)),
                     CreateMenuItem("Scan QRCode from Screen...", new EventHandler(this.ScanQRCodeItem_Click))
                 }),
                 CreateMenuGroup("PAC ", new MenuItem[] {
@@ -424,6 +425,14 @@ namespace Shadowsocks.View
             //qrCodeForm.Icon = this.Icon;
             // TODO
             qrCodeForm.Show();
+        }
+
+        private static void StatisticsStrategyOptionsItem_Click(object sender, EventArgs e)
+        {
+            //TODO: Load options
+            var statisticsStrategyOptionsForm = new StatisticsStrategyOptionsForm();
+            statisticsStrategyOptionsForm.Show();
+            //TODO: Save options
         }
 
         private void ScanQRCodeItem_Click(object sender, EventArgs e)
