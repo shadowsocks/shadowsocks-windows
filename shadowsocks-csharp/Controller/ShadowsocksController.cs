@@ -301,17 +301,16 @@ namespace Shadowsocks.Controller
                 gfwListUpdater.Error += pacServer_PACUpdateError;
             }
 
+            if (_availabilityStatics == null)
+            {
+                _availabilityStatics = new AvailabilityStatistics();
+            }
+            _availabilityStatics.UpdateConfiguration(_config);
+
             if (_listener != null)
             {
                 _listener.Stop();
             }
-
-            if (_availabilityStatics == null)
-            {
-                _availabilityStatics = new AvailabilityStatistics();
-                _availabilityStatics.UpdateConfiguration(_config);
-            }
-
             // don't put polipoRunner.Start() before pacServer.Stop()
             // or bind will fail when switching bind address from 0.0.0.0 to 127.0.0.1
             // though UseShellExecute is set to true now

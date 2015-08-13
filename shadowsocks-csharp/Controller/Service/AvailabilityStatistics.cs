@@ -23,6 +23,7 @@ namespace Shadowsocks.Controller
         private const int Timeout = 500;
         private const int Repeat = 4; //repeat times every evaluation
         private const int Interval = 10*60*1000; //evaluate proxies every 15 minutes
+        private const int delayBeforeStart = 1*1000; //delay 1 second before start
         private Timer _timer;
         private State _state;
         private List<Server> _servers;
@@ -40,16 +41,10 @@ namespace Shadowsocks.Controller
         {
             try
             {
-                if (enabled)
-                {
-                    if (_timer?.Change(0, Interval) != null) return true;
-                    _state = new State();
-                    _timer = new Timer(Evaluate, _state, 0, Interval);
-                }
-                else
-                {
-                    _timer?.Dispose();
-                }
+                _timer?.Dispose();
+                if (!enabled) return true;
+                _state = new State();
+                _timer = new Timer(Evaluate, _state, delayBeforeStart, Interval);
                 return true;
             }
             catch (Exception e)
@@ -65,12 +60,21 @@ namespace Shadowsocks.Controller
         {
             Logging.Debug("Retrive information of geolocation and isp");
             const string api = "http://ip-api.com/json";
-            var jsonString = await new HttpClient().GetStringAsync(api);
             var ret = new DataList
             {
                 new DataUnit(State.Geolocation, State.Unknown),
                 new DataUnit(State.ISP, State.Unknown),
             };
+            string jsonString;
+            try
+            {
+                jsonString = await new HttpClient().GetStringAsync(api);
+            }
+            catch (HttpRequestException e)
+            {
+                Logging.LogUsefulException(e);
+                return ret;
+            }
             dynamic obj;
             if (!global::SimpleJson.SimpleJson.TryDeserializeObject(jsonString, out obj)) return ret;
             string country = obj["country"];
@@ -86,6 +90,7 @@ namespace Shadowsocks.Controller
         private static async Task<List<DataList>> ICMPTest(Server server)
         {
             Logging.Debug("eveluating " + server.FriendlyName());
+            if (server.server == "") return null;
             var ping = new Ping();
             var ret = new List<DataList>();
             foreach (var timestamp in Enumerable.Range(0, Repeat).Select(_ => DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")))
@@ -109,9 +114,10 @@ namespace Shadowsocks.Controller
             var geolocationAndIsp = getGeolocationAndISP();
             foreach (var dataLists in await TaskEx.WhenAll(_servers.Select(ICMPTest)))
             {
-                await geolocationAndIsp;
-                foreach (var dataList in dataLists)
+                if (dataLists == null) continue;
+                foreach (var dataList in dataLists.Where(dataList => dataList != null))
                 {
+                    await geolocationAndIsp;
                     Append(dataList, geolocationAndIsp.Result);
                 }
             }

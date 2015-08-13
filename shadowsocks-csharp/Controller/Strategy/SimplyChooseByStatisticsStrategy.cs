@@ -101,7 +101,7 @@ namespace Shadowsocks.Controller.Strategy
 
         private void ChooseNewServer(List<Server> servers)
         {
-            if (_statistics == null)
+            if (_statistics == null || servers.Count == 0)
             {
                 return;
             }
