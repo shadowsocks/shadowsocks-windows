@@ -10,3 +10,4 @@ shadowsocks-csharp/3rd/*
 !shadowsocks-csharp/3rd/SimpleJson.cs
 packages/*
 
+shadowsocks-csharp.sln.DotSettings.user
