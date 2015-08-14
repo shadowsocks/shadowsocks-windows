@@ -46,6 +46,10 @@ with any editor, Shadowsocks will notify browsers about the change automatically
 For UDP, you need to use SocksCap or ProxyCap to force programs you want
 to proxy to tunnel over Shadowsocks
 
+#### Develop
+
+Visual Studio 2015 is required.
+
 #### License
 
 GPLv3
