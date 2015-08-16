@@ -1,3 +1,7 @@
+2.5.3 2015-08-16
+- Replace Polipo with Privoxy
+- Add Choose by Total Packet Loss
+
 2.5.2 2015-08-04
 - Add log viewer
 
