@@ -39,7 +39,9 @@ with any editor, Shadowsocks will notify browsers about the change automatically
 
 1. Load balance: choosing server randomly
 2. High availability: choosing the best server (low latency and packet loss)
-3. Write your own strategy by implement IStrategy interface and send us a pull request!
+3. Choose By Total Package Loss: ping and choose. Please also enable
+   `Availability Statistics` in the menu if you want to use this
+4. Write your own strategy by implement IStrategy interface and send us a pull request!
 
 #### UDP
 
