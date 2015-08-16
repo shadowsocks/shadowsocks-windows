@@ -9,7 +9,7 @@ using Shadowsocks.Model;
 
 namespace Shadowsocks.Controller.Strategy
 {
-    class SimplyChooseByStatisticsStrategy : IStrategy
+    class StatisticsStrategy : IStrategy
     {
         private readonly ShadowsocksController _controller;
         private Server _currentServer;
@@ -18,7 +18,16 @@ namespace Shadowsocks.Controller.Strategy
         private const int CachedInterval = 30*60*1000; //choose a new server every 30 minutes
         private const int RetryInterval = 2*60*1000; //choose a new server every 30 minutes
 
-        public SimplyChooseByStatisticsStrategy(ShadowsocksController controller)
+        public class StatisticsData
+        {
+            public int SuccessTimes;
+            public int TimedOutTimes;
+            public int AverageResponse;
+            public int MinResponse;
+            public int MaxResponse;
+        }
+
+        public StatisticsStrategy(ShadowsocksController controller)
         {
             _controller = controller;
             var servers = controller.GetCurrentConfiguration().configs;
@@ -90,15 +99,6 @@ namespace Shadowsocks.Controller.Strategy
             return (double)data.SuccessTimes / (data.SuccessTimes + data.TimedOutTimes); //simply choose min package loss
         }
 
-        private class StatisticsData
-        {
-            public int SuccessTimes;
-            public int TimedOutTimes;
-            public int AverageResponse;
-            public int MinResponse;
-            public int MaxResponse;
-        }
-
         private void ChooseNewServer(List<Server> servers)
         {
             if (_statistics == null || servers.Count == 0)
@@ -137,7 +137,7 @@ namespace Shadowsocks.Controller.Strategy
             }
         }
 
-        public string ID => "com.shadowsocks.strategy.scbs";
+        public string ID => "com.shadowsocks.strategy.statistics";
 
         public string Name => I18N.GetString("Choose By Total Package Loss");
 
@@ -176,6 +176,5 @@ namespace Shadowsocks.Controller.Strategy
         {
             //TODO: combine this part of data with ICMP statics
         }
-
     }
 }

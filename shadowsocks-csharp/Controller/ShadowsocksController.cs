@@ -124,6 +124,12 @@ namespace Shadowsocks.Controller
             SaveConfig(_config);
         }
 
+        public void SaveStrategyConfigurations(StatisticsStrategyConfiguration configuration)
+        {
+            _config.statisticsStrategyConfiguration = configuration;
+            SaveConfig(_config);
+        }
+
         public bool AddServerBySSURL(string ssURL)
         {
             try

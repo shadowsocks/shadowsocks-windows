@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Windows.Forms;
+using SimpleJson;
 
 namespace Shadowsocks.Model
 {
@@ -23,6 +24,8 @@ namespace Shadowsocks.Model
         public string pacUrl;
         public bool useOnlinePac;
         public bool availabilityStatistics;
+
+        public StatisticsStrategyConfiguration statisticsStrategyConfiguration;
 
         private static string CONFIG_FILE = "gui-config.json";
 
