@@ -67,14 +67,21 @@ namespace Shadowsocks.Controller
                     string timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
                     //ICMP echo. we can also set options and special bytes
                     //seems no need to use SendPingAsync
-                    PingReply reply = ping.Send(server.server, Timeout);
-                    state.data = new List<KeyValuePair<string, string>>();
-                    state.data.Add(new KeyValuePair<string, string>("Timestamp", timestamp));
-                    state.data.Add(new KeyValuePair<string, string>("Server", server.FriendlyName()));
-                    state.data.Add(new KeyValuePair<string, string>("Status", reply.Status.ToString()));
-                    state.data.Add(new KeyValuePair<string, string>("RoundtripTime", reply.RoundtripTime.ToString()));
-                    //state.data.Add(new KeyValuePair<string, string>("data", reply.Buffer.ToString())); // The data of reply
-                    Append(state.data);
+                    try
+                    {
+                        PingReply reply = ping.Send(server.server, Timeout);
+                        state.data = new List<KeyValuePair<string, string>>();
+                        state.data.Add(new KeyValuePair<string, string>("Timestamp", timestamp));
+                        state.data.Add(new KeyValuePair<string, string>("Server", server.FriendlyName()));
+                        state.data.Add(new KeyValuePair<string, string>("Status", reply.Status.ToString()));
+                        state.data.Add(new KeyValuePair<string, string>("RoundtripTime", reply.RoundtripTime.ToString()));
+                        //state.data.Add(new KeyValuePair<string, string>("data", reply.Buffer.ToString())); // The data of reply
+                        Append(state.data);
+                    }
+                    catch (Exception e)
+                    {
+                        Logging.LogUsefulException(e);
+                    }
                 }
             }
         }
