@@ -48,6 +48,15 @@ with any editor, Shadowsocks will notify browsers about the change automatically
 For UDP, you need to use SocksCap or ProxyCap to force programs you want
 to be proxied to tunnel over Shadowsocks
 
+#### Multiple Instances
+
+If you want to manage multiple servers using other tools like SwitchyOmega,
+you can start multiple Shadowsocks instances. To avoid configuration conflicts,
+copy Shadowsocks to a new directory and choose a different local port.
+
+Also, make sure to use `SOCKS5` proxy in SwitchyOmega, since we have only
+one HTTP proxy instance.
+
 #### Develop
 
 Visual Studio 2015 is required.
