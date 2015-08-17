@@ -96,15 +96,22 @@ namespace Shadowsocks.Controller
             foreach (var timestamp in Enumerable.Range(0, Repeat).Select(_ => DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")))
             {
                 //ICMP echo. we can also set options and special bytes
-                var reply = await ping.SendTaskAsync(server.server, Timeout);
-                ret.Add(new List<KeyValuePair<string, string>>
+                try
                 {
-                    new KeyValuePair<string, string>("Timestamp", timestamp),
-                    new KeyValuePair<string, string>("Server", server.FriendlyName()),
-                    new KeyValuePair<string, string>("Status", reply?.Status.ToString()),
-                    new KeyValuePair<string, string>("RoundtripTime", reply?.RoundtripTime.ToString())
-                    //new KeyValuePair<string, string>("data", reply.Buffer.ToString()); // The data of reply
-                });
+                    var reply = await ping.SendTaskAsync(server.server, Timeout);
+                    ret.Add(new List<KeyValuePair<string, string>>
+                    {
+                        new KeyValuePair<string, string>("Timestamp", timestamp),
+                        new KeyValuePair<string, string>("Server", server.FriendlyName()),
+                        new KeyValuePair<string, string>("Status", reply?.Status.ToString()),
+                        new KeyValuePair<string, string>("RoundtripTime", reply?.RoundtripTime.ToString())
+                        //new KeyValuePair<string, string>("data", reply.Buffer.ToString()); // The data of reply
+                    });
+                }
+                catch (PingException e)
+                {
+                    Logging.LogUsefulException(e);
+                }
             }
             return ret;
         }
