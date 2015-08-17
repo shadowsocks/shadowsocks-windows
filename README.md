@@ -57,6 +57,10 @@ copy Shadowsocks to a new directory and choose a different local port.
 Also, make sure to use `SOCKS5` proxy in SwitchyOmega, since we have only
 one HTTP proxy instance.
 
+#### Server Configuration
+
+Please visit [Servers] for more information.
+
 #### Develop
 
 Visual Studio 2015 is required.
@@ -70,4 +74,5 @@ GPLv3
 [Build Status]:   https://ci.appveyor.com/api/projects/status/gknc8l1lxy423ehv/branch/master
 [latest release]: https://github.com/shadowsocks/shadowsocks-csharp/releases
 [GFWList]:        https://github.com/gfwlist/gfwlist
+[Servers]:        https://github.com/shadowsocks/shadowsocks/wiki/Ports-and-Clients#linux--server-side
 [中文说明]:       https://github.com/shadowsocks/shadowsocks-windows/wiki/Shadowsocks-Windows-%E4%BD%BF%E7%94%A8%E8%AF%B4%E6%98%8E
