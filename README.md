@@ -7,7 +7,7 @@ Shadowsocks for Windows
 
 1. System proxy configuration
 2. PAC mode and global mode
-3. [GFWList](https://github.com/gfwlist/gfwlist) and user rules
+3. [GFWList] and user rules
 4. Supports HTTP proxy
 5. Supports server auto switching
 6. Supports UDP relay (see Usage)
@@ -30,7 +30,7 @@ port in `Servers -> Edit Servers`
 
 1. You can change PAC rules by editing the PAC file. When you save the PAC file
 with any editor, Shadowsocks will notify browsers about the change automatically
-2. You can also update PAC file from [GFWList](https://github.com/gfwlist/gfwlist) (maintained by 3rd party)
+2. You can also update PAC file from [GFWList] (maintained by 3rd party)
 3. You can also use online PAC URL
 
 #### Server Auto Switching
@@ -58,3 +58,4 @@ GPLv3
 [Appveyor]:       https://ci.appveyor.com/project/clowwindy/shadowsocks-csharp
 [Build Status]:   https://ci.appveyor.com/api/projects/status/gknc8l1lxy423ehv/branch/master
 [latest release]: https://github.com/shadowsocks/shadowsocks-csharp/releases
+[GFWList]:        https://github.com/gfwlist/gfwlist
