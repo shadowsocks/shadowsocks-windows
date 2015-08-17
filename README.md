@@ -16,8 +16,6 @@ Shadowsocks for Windows
 
 Download a [latest release].
 
-Notice: .Net 2.0 doesn't work well on Windows 10. We no longer support .Net 2.0. Both Shadowsocks-win-xxx.zip and Shadowsocks-win-dotnet4.0-xxx.zip are exactly the same file now. If you use Windows XP or 7, please install .Net 4.0 or higher.
-
 #### Basic
 
 1. Find Shadowsocks icon in the notification tray
