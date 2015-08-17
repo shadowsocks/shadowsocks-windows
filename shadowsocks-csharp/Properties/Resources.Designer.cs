@@ -113,29 +113,34 @@ namespace Shadowsocks.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to proxyAddress = &quot;__POLIPO_BIND_IP__&quot;
-        ///proxyPort = 8123
-        ///
-        ///socksParentProxy = &quot;127.0.0.1:__SOCKS_PORT__&quot;
-        ///socksProxyType = socks5
-        ///diskCacheRoot = &quot;&quot;
-        ///localDocumentRoot = &quot;&quot;
-        ///
-        ///allowedPorts = 1-65535
-        ///tunnelAllowedPorts = 1-65535.
+        ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
-        internal static string polipo_config {
+        internal static byte[] mgwz_dll {
             get {
-                return ResourceManager.GetString("polipo_config", resourceCulture);
+                object obj = ResourceManager.GetObject("mgwz_dll", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to listen-address __POLIPO_BIND_IP__:8123
+        ///show-on-task-bar 0
+        ///activity-animation 0
+        ///forward-socks5 / 127.0.0.1:__SOCKS_PORT__ .
+        ///hide-console.
+        /// </summary>
+        internal static string privoxy_conf {
+            get {
+                return ResourceManager.GetString("privoxy_conf", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
-        internal static byte[] polipo_exe {
+        internal static byte[] privoxy_exe {
             get {
-                object obj = ResourceManager.GetObject("polipo_exe", resourceCulture);
+                object obj = ResourceManager.GetObject("privoxy_exe", resourceCulture);
                 return ((byte[])(obj));
             }
         }

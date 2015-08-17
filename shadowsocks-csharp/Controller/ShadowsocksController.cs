@@ -54,6 +54,7 @@ namespace Shadowsocks.Controller
         {
             _config = Configuration.Load();
             _strategyManager = new StrategyManager(this);
+            StartReleasingMemory();
         }
 
         public void Start()

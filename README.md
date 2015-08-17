@@ -16,8 +16,6 @@ Shadowsocks for Windows
 
 Download a [latest release].
 
-Notice: .Net 2.0 doesn't work well on Windows 10. We no longer support .Net 2.0. Both Shadowsocks-win-xxx.zip and Shadowsocks-win-dotnet4.0-xxx.zip are exactly the same file now. If you use Windows XP or 7, please install .Net 4.0 or higher.
-
 #### Basic
 
 1. Find Shadowsocks icon in the notification tray
@@ -39,12 +37,18 @@ with any editor, Shadowsocks will notify browsers about the change automatically
 
 1. Load balance: choosing server randomly
 2. High availability: choosing the best server (low latency and packet loss)
-3. Write your own strategy by implement IStrategy interface and send us a pull request!
+3. Choose By Total Package Loss: ping and choose. Please also enable
+   `Availability Statistics` in the menu if you want to use this
+4. Write your own strategy by implement IStrategy interface and send us a pull request!
 
 #### UDP
 
 For UDP, you need to use SocksCap or ProxyCap to force programs you want
 to proxy to tunnel over Shadowsocks
+
+#### Develop
+
+Visual Studio 2015 is required.
 
 #### License
 
