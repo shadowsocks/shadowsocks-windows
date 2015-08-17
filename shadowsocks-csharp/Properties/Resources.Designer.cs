@@ -113,6 +113,16 @@ namespace Shadowsocks.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] mgwz_dll {
+            get {
+                object obj = ResourceManager.GetObject("mgwz_dll", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to proxyAddress = &quot;__POLIPO_BIND_IP__&quot;
         ///proxyPort = 8123
         ///
@@ -136,6 +146,26 @@ namespace Shadowsocks.Properties {
         internal static byte[] polipo_exe {
             get {
                 object obj = ResourceManager.GetObject("polipo_exe", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to listen-address __POLIPO_BIND_IP__:8123
+        ///.
+        /// </summary>
+        internal static string privoxy_conf {
+            get {
+                return ResourceManager.GetString("privoxy_conf", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] privoxy_exe {
+            get {
+                object obj = ResourceManager.GetObject("privoxy_exe", resourceCulture);
                 return ((byte[])(obj));
             }
         }

@@ -205,7 +205,9 @@
     </None>
     <None Include="Data\abp.js.gz" />
     <None Include="Data\libsscrypto.dll.gz" />
+    <None Include="Data\mgwz.dll.gz" />
     <None Include="Data\polipo.exe.gz" />
+    <None Include="Data\privoxy.exe.gz" />
     <None Include="Data\proxy.pac.txt.gz" />
   </ItemGroup>
   <ItemGroup>
@@ -214,6 +216,7 @@
     <None Include="Resources\ss24.png" />
     <None Include="Resources\ssw128.png" />
     <Content Include="Data\cn.txt" />
+    <Content Include="Data\privoxy_conf.txt" />
     <Content Include="Data\user-rule.txt" />
     <Content Include="shadowsocks.ico" />
     <None Include="Data\polipo_config.txt" />
