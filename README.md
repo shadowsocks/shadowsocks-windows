@@ -3,6 +3,8 @@ Shadowsocks for Windows
 
 [![Build Status]][Appveyor]
 
+[中文说明]
+
 #### Features
 
 1. System proxy configuration
@@ -59,3 +61,4 @@ GPLv3
 [Build Status]:   https://ci.appveyor.com/api/projects/status/gknc8l1lxy423ehv/branch/master
 [latest release]: https://github.com/shadowsocks/shadowsocks-csharp/releases
 [GFWList]:        https://github.com/gfwlist/gfwlist
+[中文说明]:       https://github.com/shadowsocks/shadowsocks-windows/wiki/Shadowsocks-Windows-%E4%BD%BF%E7%94%A8%E8%AF%B4%E6%98%8E
