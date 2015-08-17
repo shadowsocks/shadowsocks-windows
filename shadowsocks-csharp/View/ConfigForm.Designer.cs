@@ -52,6 +52,7 @@
             this.ProxyPortLabel = new System.Windows.Forms.Label();
             this.tableLayoutPanel3 = new System.Windows.Forms.TableLayoutPanel();
             this.tableLayoutPanel4 = new System.Windows.Forms.TableLayoutPanel();
+						this.updateServerButton = new System.Windows.Forms.Button();
             this.tableLayoutPanel1.SuspendLayout();
             this.ServerGroupBox.SuspendLayout();
             this.tableLayoutPanel2.SuspendLayout();
@@ -300,6 +301,7 @@
             this.tableLayoutPanel2.Controls.Add(this.ServersListBox, 0, 0);
             this.tableLayoutPanel2.Controls.Add(this.ServerGroupBox, 1, 0);
             this.tableLayoutPanel2.Controls.Add(this.tableLayoutPanel4, 0, 1);
+            this.tableLayoutPanel2.Controls.Add(this.updateServerButton, 0, 2);
             this.tableLayoutPanel2.Location = new System.Drawing.Point(12, 12);
             this.tableLayoutPanel2.Margin = new System.Windows.Forms.Padding(0);
             this.tableLayoutPanel2.Name = "tableLayoutPanel2";
@@ -391,6 +393,16 @@
             this.tableLayoutPanel4.Size = new System.Drawing.Size(166, 32);
             this.tableLayoutPanel4.TabIndex = 8;
             // 
+            // updateServer
+            // 
+            this.updateServerButton.Location = new System.Drawing.Point(3, 214);
+            this.updateServerButton.Name = "updateServer";
+            this.updateServerButton.Size = new System.Drawing.Size(108, 23);
+            this.updateServerButton.TabIndex = 10;
+            this.updateServerButton.Text = "Update Server";
+            this.updateServerButton.UseVisualStyleBackColor = true;
+            this.updateServerButton.Click += new System.EventHandler(this.updateServer_Click);
+            // 
             // ConfigForm
             // 
             this.AcceptButton = this.OKButton;
@@ -453,6 +465,7 @@
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel5;
         private System.Windows.Forms.TextBox ProxyPortTextBox;
         private System.Windows.Forms.Label ProxyPortLabel;
+        private System.Windows.Forms.Button updateServerButton;
     }
 }
 

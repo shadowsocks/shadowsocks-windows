@@ -1,0 +1,262 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>9.0.21022</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{8C02D2F7-7CDB-4D55-9F25-CD03EF4AA062}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Shadowsocks</RootNamespace>
+    <AssemblyName>Shadowsocks</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <StartupObject>
+    </StartupObject>
+    <ApplicationIcon>shadowsocks.ico</ApplicationIcon>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <UpgradeBackupLocation>
+    </UpgradeBackupLocation>
+    <OldToolsVersion>3.5</OldToolsVersion>
+    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>1</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x86\Debug\</OutputPath>
+    <DefineConstants>TRACE;DEBUG</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>ManagedMinimumRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
+    <OutputPath>bin\x86\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>ManagedMinimumRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>false</Prefer32Bit>
+    <DebugSymbols>true</DebugSymbols>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.VisualBasic" />
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.XML" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="3rd\zxing\BarcodeFormat.cs" />
+    <Compile Include="3rd\zxing\BaseLuminanceSource.cs" />
+    <Compile Include="3rd\zxing\Binarizer.cs" />
+    <Compile Include="3rd\zxing\BinaryBitmap.cs" />
+    <Compile Include="3rd\zxing\BitmapLuminanceSource.cs" />
+    <Compile Include="3rd\zxing\common\BitArray.cs" />
+    <Compile Include="3rd\zxing\common\BitMatrix.cs" />
+    <Compile Include="3rd\zxing\common\BitSource.cs" />
+    <Compile Include="3rd\zxing\common\DecoderResult.cs" />
+    <Compile Include="3rd\zxing\common\DefaultGridSampler.cs" />
+    <Compile Include="3rd\zxing\common\DetectorResult.cs" />
+    <Compile Include="3rd\zxing\common\detector\MathUtils.cs" />
+    <Compile Include="3rd\zxing\common\GlobalHistogramBinarizer.cs" />
+    <Compile Include="3rd\zxing\common\GridSampler.cs" />
+    <Compile Include="3rd\zxing\common\HybridBinarizer.cs" />
+    <Compile Include="3rd\zxing\common\PerspectiveTransform.cs" />
+    <Compile Include="3rd\zxing\common\reedsolomon\GenericGF.cs" />
+    <Compile Include="3rd\zxing\common\reedsolomon\GenericGFPoly.cs" />
+    <Compile Include="3rd\zxing\common\reedsolomon\ReedSolomonDecoder.cs" />
+    <Compile Include="3rd\zxing\common\reedsolomon\ReedSolomonEncoder.cs" />
+    <Compile Include="3rd\zxing\common\StringUtils.cs" />
+    <Compile Include="3rd\zxing\DecodeHintType.cs" />
+    <Compile Include="3rd\zxing\EncodeHintType.cs" />
+    <Compile Include="3rd\zxing\LuminanceSource.cs" />
+    <Compile Include="3rd\zxing\qrcode\decoder\BitMatrixParser.cs" />
+    <Compile Include="3rd\zxing\qrcode\decoder\DataBlock.cs" />
+    <Compile Include="3rd\zxing\qrcode\decoder\DataMask.cs" />
+    <Compile Include="3rd\zxing\qrcode\decoder\DecodedBitStreamParser.cs" />
+    <Compile Include="3rd\zxing\qrcode\decoder\Decoder.cs" />
+    <Compile Include="3rd\zxing\qrcode\decoder\ErrorCorrectionLevel.cs" />
+    <Compile Include="3rd\zxing\qrcode\decoder\FormatInformation.cs" />
+    <Compile Include="3rd\zxing\qrcode\decoder\Mode.cs" />
+    <Compile Include="3rd\zxing\qrcode\decoder\QRCodeDecoderMetaData.cs" />
+    <Compile Include="3rd\zxing\qrcode\decoder\Version.cs" />
+    <Compile Include="3rd\zxing\qrcode\detector\AlignmentPattern.cs" />
+    <Compile Include="3rd\zxing\qrcode\detector\AlignmentPatternFinder.cs" />
+    <Compile Include="3rd\zxing\qrcode\detector\Detector.cs" />
+    <Compile Include="3rd\zxing\qrcode\detector\FinderPattern.cs" />
+    <Compile Include="3rd\zxing\qrcode\detector\FinderPatternFinder.cs" />
+    <Compile Include="3rd\zxing\qrcode\detector\FinderPatternInfo.cs" />
+    <Compile Include="3rd\zxing\qrcode\encoder\BlockPair.cs" />
+    <Compile Include="3rd\zxing\qrcode\encoder\ByteMatrix.cs" />
+    <Compile Include="3rd\zxing\qrcode\encoder\Encoder.cs" />
+    <Compile Include="3rd\zxing\qrcode\encoder\MaskUtil.cs" />
+    <Compile Include="3rd\zxing\qrcode\encoder\MatrixUtil.cs" />
+    <Compile Include="3rd\zxing\qrcode\encoder\QRCode.cs" />
+    <Compile Include="3rd\SimpleJson.cs" />
+    <Compile Include="3rd\zxing\qrcode\QRCodeReader.cs" />
+    <Compile Include="3rd\zxing\Result.cs" />
+    <Compile Include="3rd\zxing\ResultMetadataType.cs" />
+    <Compile Include="3rd\zxing\ResultPoint.cs" />
+    <Compile Include="3rd\zxing\ResultPointCallback.cs" />
+    <Compile Include="3rd\zxing\WriterException.cs" />
+    <Compile Include="Controller\Service\AvailabilityStatistics.cs" />
+    <Compile Include="Controller\Strategy\HighAvailabilityStrategy.cs" />
+    <Compile Include="Controller\Strategy\SimplyChooseByStatisticsStrategy.cs" />
+    <Compile Include="Controller\System\AutoStartup.cs" />
+    <Compile Include="Controller\FileManager.cs" />
+    <Compile Include="Controller\Service\GFWListUpdater.cs" />
+    <Compile Include="Controller\I18N.cs" />
+    <Compile Include="Controller\Service\Listener.cs" />
+    <Compile Include="Controller\Logging.cs" />
+    <Compile Include="Controller\Service\PortForwarder.cs" />
+    <Compile Include="Controller\Service\UDPRelay.cs" />
+    <Compile Include="Controller\Service\UpdateChecker.cs" />
+    <Compile Include="Encryption\EncryptorBase.cs" />
+    <Compile Include="Encryption\EncryptorFactory.cs" />
+    <Compile Include="Encryption\IVEncryptor.cs" />
+    <Compile Include="Encryption\PolarSSL.cs" />
+    <Compile Include="Encryption\PolarSSLEncryptor.cs" />
+    <Compile Include="Encryption\Sodium.cs" />
+    <Compile Include="Encryption\SodiumEncryptor.cs" />
+    <Compile Include="Encryption\TableEncryptor.cs" />
+    <Compile Include="Encryption\IEncryptor.cs" />
+    <Compile Include="Controller\Service\PACServer.cs" />
+    <Compile Include="Model\Server.cs" />
+    <Compile Include="Model\Configuration.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Controller\Strategy\BalancingStrategy.cs" />
+    <Compile Include="Controller\Strategy\StrategyManager.cs" />
+    <Compile Include="Controller\Strategy\IStrategy.cs" />
+    <Compile Include="Util\Util.cs" />
+    <Compile Include="View\ConfigForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="View\ConfigForm.Designer.cs">
+      <DependentUpon>ConfigForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controller\Service\TCPRelay.cs" />
+    <Compile Include="Controller\Service\PolipoRunner.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Controller\ShadowsocksController.cs" />
+    <Compile Include="Controller\System\SystemProxy.cs" />
+    <Compile Include="View\LogForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="View\LogForm.Designer.cs">
+      <DependentUpon>LogForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="View\MenuViewController.cs" />
+    <Compile Include="View\QRCodeForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="View\QRCodeForm.Designer.cs">
+      <DependentUpon>QRCodeForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="View\QRCodeSplashForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <EmbeddedResource Include="View\ConfigForm.resx">
+      <DependentUpon>ConfigForm.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <SubType>Designer</SubType>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="View\LogForm.resx">
+      <DependentUpon>LogForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="View\QRCodeForm.resx">
+      <DependentUpon>QRCodeForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <None Include="app.config" />
+    <None Include="app.manifest">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Data\abp.js.gz" />
+    <None Include="Data\libsscrypto.dll.gz" />
+    <None Include="Data\mgwz.dll.gz" />
+    <None Include="Data\privoxy.exe.gz" />
+    <None Include="Data\proxy.pac.txt.gz" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\ss20.png" />
+    <None Include="Resources\ss16.png" />
+    <None Include="Resources\ss24.png" />
+    <None Include="Resources\ssw128.png" />
+    <Content Include="Data\cn.txt" />
+    <Content Include="Data\privoxy_conf.txt" />
+    <Content Include="Data\user-rule.txt" />
+    <Content Include="shadowsocks.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1 Client Profile</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.2.0">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 2.0 %28x86%29</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.0">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.0 %28x86%29</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Windows.Installer.3.1">
+      <Visible>False</Visible>
+      <ProductName>Windows Installer 3.1</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
