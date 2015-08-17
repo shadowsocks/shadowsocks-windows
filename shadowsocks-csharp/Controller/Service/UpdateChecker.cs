@@ -12,7 +12,7 @@ namespace Shadowsocks.Controller
 {
     public class UpdateChecker
     {
-        private const string UpdateURL = "https://api.github.com/repos/shadowsocks/shadowsocks-csharp/releases";
+        private const string UpdateURL = "https://api.github.com/repos/shadowsocks/shadowsocks-windows/releases";
 
         public string LatestVersionNumber;
         public string LatestVersionURL;
