@@ -52,6 +52,7 @@ namespace Shadowsocks.View
             OKButton.Text = I18N.GetString("OK");
             MyCancelButton.Text = I18N.GetString("Cancel");
             this.Text = I18N.GetString("Edit Servers");
+						updateServerButton.Text = I18N.GetString("Update Server");
         }
 
         private void controller_ConfigChanged(object sender, EventArgs e)
@@ -226,6 +227,14 @@ namespace Shadowsocks.View
         {
             controller.ConfigChanged -= controller_ConfigChanged;
         }
-
+				
+        private void updateServer_Click(object sender, EventArgs e)
+        {
+            UpdateServer updateServer = new UpdateServer(controller.GetConfigurationCopy());
+            _modifiedConfiguration.configs = updateServer.updateServerData();
+            controller.SaveServers(_modifiedConfiguration.configs, _modifiedConfiguration.localPort);
+            MessageBox.Show(I18N.GetString("update server sucess"));
+            Close();
+        }
     }
 }
