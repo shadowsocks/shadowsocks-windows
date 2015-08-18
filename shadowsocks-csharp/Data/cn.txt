@@ -42,6 +42,8 @@ Remarks=备注
 OK=确定
 Cancel=取消
 New server=未配置的服务器
+Move &Up=上移
+Move D&own=下移
 
 # QRCode Form
 
