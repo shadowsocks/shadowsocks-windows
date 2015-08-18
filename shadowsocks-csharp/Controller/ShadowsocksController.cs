@@ -360,7 +360,7 @@ namespace Shadowsocks.Controller
             }
 
             UpdateSystemProxy();
-            Util.Utils.ReleaseMemory();
+            Util.Utils.ReleaseMemory(true);
         }
 
 
@@ -417,7 +417,7 @@ namespace Shadowsocks.Controller
         {
             while (true)
             {
-                Util.Utils.ReleaseMemory();
+                Util.Utils.ReleaseMemory(false);
                 Thread.Sleep(30 * 1000);
             }
         }

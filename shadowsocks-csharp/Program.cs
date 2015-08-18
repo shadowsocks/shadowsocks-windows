@@ -18,7 +18,7 @@ namespace Shadowsocks
         [STAThread]
         static void Main()
         {
-            Util.Utils.ReleaseMemory();
+            Util.Utils.ReleaseMemory(true);
             using (Mutex mutex = new Mutex(false, "Global\\Shadowsocks_" + Application.StartupPath.GetHashCode()))
             {
                 Application.EnableVisualStyles();
