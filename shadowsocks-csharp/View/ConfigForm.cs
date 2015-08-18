@@ -148,6 +148,10 @@ namespace Shadowsocks.View
 
         private void ServersListBox_SelectedIndexChanged(object sender, EventArgs e)
         {
+            if (!ServersListBox.CanSelect)
+            {
+                return;
+            }
             if (_lastSelectedIndex == ServersListBox.SelectedIndex)
             {
                 // we are moving back to oldSelectedIndex or doing a force move
@@ -159,6 +163,7 @@ namespace Shadowsocks.View
                 ServersListBox.SelectedIndex = _lastSelectedIndex;
                 return;
             }
+            ServersListBox.Items[_lastSelectedIndex] = _modifiedConfiguration.configs[_lastSelectedIndex].FriendlyName();
             UpdateMoveUpAndDownButton();
             LoadSelectedServer();
             _lastSelectedIndex = ServersListBox.SelectedIndex;
@@ -197,6 +202,7 @@ namespace Shadowsocks.View
 
         private void OKButton_Click(object sender, EventArgs e)
         {
+            Server server = controller.GetCurrentServer();
             if (!SaveOldSelectedServer())
             {
                 return;
@@ -206,9 +212,8 @@ namespace Shadowsocks.View
                 MessageBox.Show(I18N.GetString("Please add at least one server"));
                 return;
             }
-            int index = _modifiedConfiguration.index;
             controller.SaveServers(_modifiedConfiguration.configs, _modifiedConfiguration.localPort);
-            controller.SelectServerIndex(index);
+            controller.SelectServerIndex(_modifiedConfiguration.configs.IndexOf(server));
             this.Close();
         }
 
@@ -238,9 +243,11 @@ namespace Shadowsocks.View
             _modifiedConfiguration.index += step;
 
             ServersListBox.BeginUpdate();
+            ServersListBox.Enabled = false;
             _lastSelectedIndex = index + step;
             ServersListBox.Items.Remove(item);
             ServersListBox.Items.Insert(index + step, item);
+            ServersListBox.Enabled = true;
             ServersListBox.SelectedIndex = index + step;
             ServersListBox.EndUpdate();
 
