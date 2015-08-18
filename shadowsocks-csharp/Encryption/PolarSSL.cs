@@ -49,7 +49,6 @@ namespace Shadowsocks.Encryption
         [DllImport(DLLNAME, CallingConvention = CallingConvention.Cdecl)]
         public extern static int aes_crypt_cfb128(IntPtr ctx, int mode, int length, ref int iv_off, byte[] iv, byte[] input, byte[] output);
 
-
         public const int ARC4_CTX_SIZE = 264;
 
         [DllImport(DLLNAME, CallingConvention = CallingConvention.Cdecl)]

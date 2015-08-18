@@ -112,7 +112,7 @@ namespace Shadowsocks.Controller.Strategy
                                   ).Aggregate((result1, result2) => result1.score > result2.score ? result1 : result2);
 
                 if (_controller.GetCurrentStrategy().ID == ID && _currentServer != bestResult.server) //output when enabled
-                {  
+                {
                     Console.WriteLine("Switch to server: {0} by package loss:{1}", bestResult.server.FriendlyName(), 1 - bestResult.score);
                 }
                 _currentServer = bestResult.server;

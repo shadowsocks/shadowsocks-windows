@@ -21,7 +21,7 @@ namespace Shadowsocks.Controller
                 sw.AutoFlush = true;
                 Console.SetOut(sw);
                 Console.SetError(sw);
-                
+
                 return true;
             }
             catch (IOException e)
@@ -71,7 +71,6 @@ namespace Shadowsocks.Controller
                 Console.WriteLine(e);
             }
         }
-
     }
 
     // Simply extended System.IO.StreamWriter for adding timestamp workaround

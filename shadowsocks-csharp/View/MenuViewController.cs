@@ -18,7 +18,7 @@ namespace Shadowsocks.View
         // yes this is just a menu view controller
         // when config form is closed, it moves away from RAM
         // and it should just do anything related to the config form
-        
+
         private ShadowsocksController controller;
         private UpdateChecker updateChecker;
 
@@ -520,17 +520,17 @@ namespace Shadowsocks.View
             Process.Start(_urlToOpen);
         }
 
-		private void AutoStartupItem_Click(object sender, EventArgs e) {
-			AutoStartupItem.Checked = !AutoStartupItem.Checked;
-			if (!AutoStartup.Set(AutoStartupItem.Checked)) {
-				MessageBox.Show(I18N.GetString("Failed to update registry"));
-			}
-		}
+        private void AutoStartupItem_Click(object sender, EventArgs e) {
+            AutoStartupItem.Checked = !AutoStartupItem.Checked;
+            if (!AutoStartup.Set(AutoStartupItem.Checked)) {
+                MessageBox.Show(I18N.GetString("Failed to update registry"));
+            }
+        }
 
-		private void AvailabilityStatisticsItem_Click(object sender, EventArgs e) {
-			AvailabilityStatistics.Checked = !AvailabilityStatistics.Checked;
+        private void AvailabilityStatisticsItem_Click(object sender, EventArgs e) {
+            AvailabilityStatistics.Checked = !AvailabilityStatistics.Checked;
             controller.ToggleAvailabilityStatistics(AvailabilityStatistics.Checked);
-		}
+        }
 
         private void LocalPACItem_Click(object sender, EventArgs e)
         {

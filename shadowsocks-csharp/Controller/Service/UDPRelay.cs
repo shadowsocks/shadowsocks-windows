@@ -108,9 +108,11 @@ namespace Shadowsocks.Controller
                 }
                 catch (ObjectDisposedException)
                 {
+                    // TODO: handle the ObjectDisposedException
                 }
                 catch (Exception)
                 {
+                    // TODO: need more think about handle other Exceptions, or should remove this catch().
                 }
                 finally
                 {
@@ -124,9 +126,11 @@ namespace Shadowsocks.Controller
                 }
                 catch (ObjectDisposedException)
                 {
+                    // TODO: handle the ObjectDisposedException
                 }
                 catch (Exception)
                 {
+                    // TODO: need more think about handle other Exceptions, or should remove this catch().
                 }
                 finally
                 {
@@ -134,6 +138,8 @@ namespace Shadowsocks.Controller
             }
         }
     }
+
+
     // cc by-sa 3.0 http://stackoverflow.com/a/3719378/1124054
     class LRUCache<K, V> where V : UDPRelay.UDPHandler
     {
@@ -196,5 +202,4 @@ namespace Shadowsocks.Controller
         public K key;
         public V value;
     }
-
 }
