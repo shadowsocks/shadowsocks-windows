@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading;
 
 namespace Shadowsocks.Encryption
 {
@@ -12,19 +13,17 @@ namespace Shadowsocks.Encryption
 
         const int SODIUM_BLOCK_SIZE = 64;
 
+        static byte[] sodiumBuf = new byte[MAX_INPUT_SIZE + SODIUM_BLOCK_SIZE];
+
         protected int _encryptBytesRemaining;
         protected int _decryptBytesRemaining;
         protected ulong _encryptIC;
         protected ulong _decryptIC;
-        protected byte[] _encryptBuf;
-        protected byte[] _decryptBuf;
 
         public SodiumEncryptor(string method, string password)
             : base(method, password)
         {
             InitKey(method, password);
-            _encryptBuf = new byte[MAX_INPUT_SIZE + SODIUM_BLOCK_SIZE];
-            _decryptBuf = new byte[MAX_INPUT_SIZE + SODIUM_BLOCK_SIZE];
         }
 
         private static Dictionary<string, int[]> _ciphers = new Dictionary<string, int[]> {
@@ -47,48 +46,51 @@ namespace Shadowsocks.Encryption
             // TODO write a unidirection cipher so we don't have to if if if
             int bytesRemaining;
             ulong ic;
-            byte[] sodiumBuf;
             byte[] iv;
-            if (isCipher)
-            {
-                bytesRemaining = _encryptBytesRemaining;
-                ic = _encryptIC;
-                sodiumBuf = _encryptBuf;
-                iv = _encryptIV;
-            }
-            else
-            {
-                bytesRemaining = _decryptBytesRemaining;
-                ic = _decryptIC;
-                sodiumBuf = _decryptBuf;
-                iv = _decryptIV;
-            }
-            int padding = bytesRemaining;
-            Buffer.BlockCopy(buf, 0, sodiumBuf, padding, length);
 
-            switch (_cipher)
+            // I'm tired. just add a big lock
+            // let's optimize for RAM instead of CPU
+            lock(sodiumBuf)
             {
-                case CIPHER_SALSA20:
-                    Sodium.crypto_stream_salsa20_xor_ic(sodiumBuf, sodiumBuf, (ulong)(padding + length), iv, ic, _key);
-                    break;
-                case CIPHER_CHACHA20:
-                    Sodium.crypto_stream_chacha20_xor_ic(sodiumBuf, sodiumBuf, (ulong)(padding + length), iv, ic, _key);
-                    break;
-            }
-            Buffer.BlockCopy(sodiumBuf, padding, outbuf, 0, length);
-            padding += length;
-            ic += (ulong)padding / SODIUM_BLOCK_SIZE;
-            bytesRemaining = padding % SODIUM_BLOCK_SIZE;
+                if (isCipher)
+                {
+                    bytesRemaining = _encryptBytesRemaining;
+                    ic = _encryptIC;
+                    iv = _encryptIV;
+                }
+                else
+                {
+                    bytesRemaining = _decryptBytesRemaining;
+                    ic = _decryptIC;
+                    iv = _decryptIV;
+                }
+                int padding = bytesRemaining;
+                Buffer.BlockCopy(buf, 0, sodiumBuf, padding, length);
 
-            if (isCipher)
-            {
-                _encryptBytesRemaining = bytesRemaining;
-                _encryptIC = ic;
-            }
-            else
-            {
-                _decryptBytesRemaining = bytesRemaining;
-                _decryptIC = ic;
+                switch (_cipher)
+                {
+                    case CIPHER_SALSA20:
+                        Sodium.crypto_stream_salsa20_xor_ic(sodiumBuf, sodiumBuf, (ulong)(padding + length), iv, ic, _key);
+                        break;
+                    case CIPHER_CHACHA20:
+                        Sodium.crypto_stream_chacha20_xor_ic(sodiumBuf, sodiumBuf, (ulong)(padding + length), iv, ic, _key);
+                        break;
+                }
+                Buffer.BlockCopy(sodiumBuf, padding, outbuf, 0, length);
+                padding += length;
+                ic += (ulong)padding / SODIUM_BLOCK_SIZE;
+                bytesRemaining = padding % SODIUM_BLOCK_SIZE;
+
+                if (isCipher)
+                {
+                    _encryptBytesRemaining = bytesRemaining;
+                    _encryptIC = ic;
+                }
+                else
+                {
+                    _decryptBytesRemaining = bytesRemaining;
+                    _decryptIC = ic;
+                }
             }
         }
 
