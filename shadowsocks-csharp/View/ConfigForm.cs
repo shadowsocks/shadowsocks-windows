@@ -276,6 +276,10 @@ namespace Shadowsocks.View
 
         private void MoveUpButton_Click(object sender, EventArgs e)
         {
+            if (!SaveOldSelectedServer())
+            {
+                return;
+            }
             if (ServersListBox.SelectedIndex > 0)
             {
                 MoveConfigItem(-1);  // -1 means move backward
@@ -284,6 +288,10 @@ namespace Shadowsocks.View
 
         private void MoveDownButton_Click(object sender, EventArgs e)
         {
+            if (!SaveOldSelectedServer())
+            {
+                return;
+            }
             if (ServersListBox.SelectedIndex < ServersListBox.Items.Count - 1)
             {
                 MoveConfigItem(+1);  // +1 means move forward
