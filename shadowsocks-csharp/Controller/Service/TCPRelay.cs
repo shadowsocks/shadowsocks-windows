@@ -14,9 +14,16 @@ namespace Shadowsocks.Controller
     class TCPRelay : Listener.Service
     {
         private ShadowsocksController _controller;
+
+        public ISet<Handler> Handlers
+        {
+            get; set;
+        }
+
         public TCPRelay(ShadowsocksController controller)
         {
             this._controller = controller;
+            this.Handlers = new HashSet<Handler>();
         }
 
         public bool Handle(byte[] firstPacket, int length, Socket socket, object state)
@@ -33,8 +40,14 @@ namespace Shadowsocks.Controller
             Handler handler = new Handler();
             handler.connection = socket;
             handler.controller = _controller;
+            handler.relay = this;
 
             handler.Start(firstPacket, length);
+            lock (this.Handlers)
+            {
+                this.Handlers.Add(handler);
+                Logging.Debug($"connections: {Handlers.Count}");
+            }
             return true;
         }
     }
@@ -48,6 +61,8 @@ namespace Shadowsocks.Controller
         public Socket remote;
         public Socket connection;
         public ShadowsocksController controller;
+        public TCPRelay relay;
+
         private int retryCount = 0;
         private bool connected;
 
@@ -55,7 +70,7 @@ namespace Shadowsocks.Controller
         private byte[] _firstPacket;
         private int _firstPacketLength;
         // Size of receive buffer.
-        public const int RecvSize = 16384;
+        public const int RecvSize = 8192;
         public const int BufferSize = RecvSize + 32;
 
         private int totalRead = 0;
@@ -108,6 +123,11 @@ namespace Shadowsocks.Controller
 
         public void Close()
         {
+            lock (relay.Handlers)
+            {
+                Logging.Debug($"connections: {relay.Handlers.Count}");
+                relay.Handlers.Remove(this);
+            }
             lock (this)
             {
                 if (closed)
