@@ -1,4 +1,5 @@
-﻿using Shadowsocks.Properties;
+﻿using Shadowsocks.Controller;
+using Shadowsocks.Properties;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -23,6 +24,20 @@ namespace Shadowsocks.View
             this.filename = filename;
             InitializeComponent();
             this.Icon = Icon.FromHandle(Resources.ssw128.GetHicon());
+
+            UpdateTexts();
+        }
+
+        private void UpdateTexts()
+        {
+            FileMenuItem.Text = I18N.GetString("&File");
+            OpenLocationMenuItem.Text = I18N.GetString("&Open Location");
+            ExitMenuItem.Text = I18N.GetString("E&xit");
+            CleanLogsButton.Text = I18N.GetString("&Clean logs");
+            ChangeFontButton.Text = I18N.GetString("&Font");
+            WrapTextCheckBox.Text = I18N.GetString("&Wrap text");
+            TopMostCheckBox.Text = I18N.GetString("&Top most");
+            this.Text = I18N.GetString("Log Viewer");
         }
 
         private void Timer_Tick(object sender, EventArgs e)
@@ -43,9 +58,9 @@ namespace Shadowsocks.View
 
                 string line = "";
                 while ((line = reader.ReadLine()) != null)
-                    textBox1.AppendText(line + "\r\n");
+                    LogMessageTextBox.AppendText(line + "\r\n");
 
-                textBox1.ScrollToCaret();
+                LogMessageTextBox.ScrollToCaret();
 
                 lastOffset = reader.BaseStream.Position;
             }
@@ -63,12 +78,12 @@ namespace Shadowsocks.View
                 while ((line = reader.ReadLine()) != null)
                 {
                     changed = true;
-                    textBox1.AppendText(line + "\r\n");
+                    LogMessageTextBox.AppendText(line + "\r\n");
                 }
 
                 if (changed)
                 {
-                    textBox1.ScrollToCaret();
+                    LogMessageTextBox.ScrollToCaret();
                 }
 
                 lastOffset = reader.BaseStream.Position;
@@ -89,25 +104,46 @@ namespace Shadowsocks.View
             timer.Stop();
         }
 
-        private void menuItem2_Click(object sender, EventArgs e)
+        private void OpenLocationMenuItem_Click(object sender, EventArgs e)
         {
             string argument = @"/select, " + filename;
             System.Diagnostics.Process.Start("explorer.exe", argument);
         }
 
-        private void menuItem3_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void menuItem4_Click(object sender, EventArgs e)
+        private void ExitMenuItem_Click(object sender, EventArgs e)
         {
             this.Close();
         }
 
         private void LogForm_Shown(object sender, EventArgs e)
         {
-            textBox1.ScrollToCaret();
+            LogMessageTextBox.ScrollToCaret();
+        }
+
+        private void WrapTextCheckBox_CheckedChanged(object sender, EventArgs e)
+        {
+            LogMessageTextBox.WordWrap = WrapTextCheckBox.Checked;
+            LogMessageTextBox.ScrollToCaret();
+        }
+
+        private void CleanLogsButton_Click(object sender, EventArgs e)
+        {
+            LogMessageTextBox.Clear();
+        }
+
+        private void ChangeFontButton_Click(object sender, EventArgs e)
+        {
+            FontDialog fd = new FontDialog();
+            fd.Font = LogMessageTextBox.Font;
+            if (fd.ShowDialog() == DialogResult.OK)
+            {
+                LogMessageTextBox.Font = fd.Font;
+            }
+        }
+
+        private void TopMostCheckBox_CheckedChanged(object sender, EventArgs e)
+        {
+            this.TopMost = TopMostCheckBox.Checked;
         }
     }
 }
