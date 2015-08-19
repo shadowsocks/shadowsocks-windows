@@ -51,6 +51,8 @@ namespace Shadowsocks.View
             ServerGroupBox.Text = I18N.GetString("Server");
             OKButton.Text = I18N.GetString("OK");
             MyCancelButton.Text = I18N.GetString("Cancel");
+            MoveUpButton.Text = I18N.GetString("Move &Up");
+            MoveDownButton.Text = I18N.GetString("Move D&own");
             this.Text = I18N.GetString("Edit Servers");
 						updateServerButton.Text = I18N.GetString("Update Server");
         }
@@ -59,7 +61,7 @@ namespace Shadowsocks.View
         {
             LoadCurrentConfiguration();
         }
-        
+
         private void ShowWindow()
         {
             this.Opacity = 1;
@@ -88,7 +90,7 @@ namespace Shadowsocks.View
                 Configuration.CheckLocalPort(localPort);
                 _modifiedConfiguration.configs[_oldSelectedIndex] = server;
                 _modifiedConfiguration.localPort = localPort;
-                
+
                 return true;
             }
             catch (FormatException)
@@ -114,12 +116,6 @@ namespace Shadowsocks.View
                 ProxyPortTextBox.Text = _modifiedConfiguration.localPort.ToString();
                 EncryptionSelect.Text = server.method ?? "aes-256-cfb";
                 RemarksTextBox.Text = server.remarks;
-                ServerGroupBox.Visible = true;
-                //IPTextBox.Focus();
-            }
-            else
-            {
-                ServerGroupBox.Visible = false;
             }
         }
 
@@ -142,6 +138,7 @@ namespace Shadowsocks.View
                 _oldSelectedIndex = 0;
             }
             ServersListBox.SelectedIndex = _oldSelectedIndex;
+            UpdateMoveUpAndDownButton();
             LoadSelectedServer();
         }
 
@@ -163,6 +160,7 @@ namespace Shadowsocks.View
                 ServersListBox.SelectedIndex = _oldSelectedIndex;
                 return;
             }
+            UpdateMoveUpAndDownButton();
             LoadSelectedServer();
             _oldSelectedIndex = ServersListBox.SelectedIndex;
         }
@@ -209,7 +207,9 @@ namespace Shadowsocks.View
                 MessageBox.Show(I18N.GetString("Please add at least one server"));
                 return;
             }
+            int index = _modifiedConfiguration.index;
             controller.SaveServers(_modifiedConfiguration.configs, _modifiedConfiguration.localPort);
+            controller.SelectServerIndex(index);
             this.Close();
         }
 
@@ -236,5 +236,61 @@ namespace Shadowsocks.View
             MessageBox.Show(I18N.GetString("update server sucess"));
             Close();
         }
+        private void MoveConfigItem(int step)
+        {
+            int index = ServersListBox.SelectedIndex;
+            Server server = _modifiedConfiguration.configs[index];
+            object item = ServersListBox.SelectedItem;
+
+            _modifiedConfiguration.configs.Remove(server);
+            _modifiedConfiguration.configs.Insert(index + step, server);
+            _modifiedConfiguration.index += step;
+
+            ServersListBox.BeginUpdate();
+            _oldSelectedIndex = index + step;
+            ServersListBox.Items.Remove(item);
+            ServersListBox.Items.Insert(index + step, item);
+            ServersListBox.SelectedIndex = index + step;
+            ServersListBox.EndUpdate();
+
+            UpdateMoveUpAndDownButton();
+        }
+
+        private void UpdateMoveUpAndDownButton()
+        {
+            if (ServersListBox.SelectedIndex == 0)
+            {
+                MoveUpButton.Enabled = false;
+            }
+            else
+            {
+                MoveUpButton.Enabled = true;
+            }
+            if (ServersListBox.SelectedIndex == ServersListBox.Items.Count - 1)
+            {
+                MoveDownButton.Enabled = false;
+            }
+            else
+            {
+                MoveDownButton.Enabled = true;
+            }
+        }
+
+        private void MoveUpButton_Click(object sender, EventArgs e)
+        {
+            if (ServersListBox.SelectedIndex > 0)
+            {
+                MoveConfigItem(-1);  // -1 means move backward
+            }
+        }
+
+        private void MoveDownButton_Click(object sender, EventArgs e)
+        {
+            if (ServersListBox.SelectedIndex < ServersListBox.Items.Count - 1)
+            {
+                MoveConfigItem(+1);  // +1 means move forward
+            }
+        }
+
     }
 }

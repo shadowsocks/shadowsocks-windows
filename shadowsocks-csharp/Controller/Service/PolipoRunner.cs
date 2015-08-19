@@ -65,10 +65,13 @@ namespace Shadowsocks.Controller
                 polipoConfig = polipoConfig.Replace("__POLIPO_BIND_IP__", configuration.shareOverLan ? "0.0.0.0" : "127.0.0.1");
                 FileManager.ByteArrayToFile(temppath + "/privoxy.conf", System.Text.Encoding.UTF8.GetBytes(polipoConfig));
 
+                if (!(temppath.EndsWith("\\") || temppath.EndsWith("/"))) {
+                    temppath = temppath + "\\";
+                }
                 _process = new Process();
                 // Configure the process using the StartInfo properties.
-                _process.StartInfo.FileName = temppath + "/ss_privoxy.exe";
-                _process.StartInfo.Arguments = " \"" + temppath + "/privoxy.conf\"";
+                _process.StartInfo.FileName = temppath + "ss_privoxy.exe";
+                _process.StartInfo.Arguments = " \"" + temppath + "privoxy.conf\"";
                 _process.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
                 _process.StartInfo.UseShellExecute = true;
                 _process.StartInfo.CreateNoWindow = true;
