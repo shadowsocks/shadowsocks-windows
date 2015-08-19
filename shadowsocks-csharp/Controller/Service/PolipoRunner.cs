@@ -147,7 +147,6 @@ namespace Shadowsocks.Controller
         [DllImport("user32.dll")]
         public static extern IntPtr SendMessage(IntPtr hWnd, uint msg, int wParam, int lParam);
 
-
         public void RefreshTrayArea()
         {
             IntPtr systemTrayContainerHandle = FindWindow("Shell_TrayWnd", null);
@@ -163,7 +162,6 @@ namespace Shadowsocks.Controller
             }
             RefreshTrayArea(notificationAreaHandle);
         }
-
 
         private static void RefreshTrayArea(IntPtr windowHandle)
         {

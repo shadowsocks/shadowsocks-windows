@@ -53,7 +53,6 @@ namespace Shadowsocks.Controller
             {
                 return CompareVersion(ParseVersionFromURL(x), ParseVersionFromURL(y));
             }
-
         }
 
         private static string ParseVersionFromURL(string url)

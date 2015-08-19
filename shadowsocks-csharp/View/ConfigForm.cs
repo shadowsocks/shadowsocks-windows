@@ -18,7 +18,7 @@ namespace Shadowsocks.View
 
         // this is a copy of configuration that we are working on
         private Configuration _modifiedConfiguration;
-        private int _oldSelectedIndex = -1;
+        private int _lastSelectedIndex = -1;
 
         public ConfigForm(ShadowsocksController controller)
         {
@@ -72,7 +72,7 @@ namespace Shadowsocks.View
         {
             try
             {
-                if (_oldSelectedIndex == -1 || _oldSelectedIndex >= _modifiedConfiguration.configs.Count)
+                if (_lastSelectedIndex == -1 || _lastSelectedIndex >= _modifiedConfiguration.configs.Count)
                 {
                     return true;
                 }
@@ -87,7 +87,7 @@ namespace Shadowsocks.View
                 int localPort = int.Parse(ProxyPortTextBox.Text);
                 Configuration.CheckServer(server);
                 Configuration.CheckLocalPort(localPort);
-                _modifiedConfiguration.configs[_oldSelectedIndex] = server;
+                _modifiedConfiguration.configs[_lastSelectedIndex] = server;
                 _modifiedConfiguration.localPort = localPort;
 
                 return true;
@@ -131,12 +131,12 @@ namespace Shadowsocks.View
         {
             _modifiedConfiguration = controller.GetConfigurationCopy();
             LoadConfiguration(_modifiedConfiguration);
-            _oldSelectedIndex = _modifiedConfiguration.index;
-            if (_oldSelectedIndex < 0)
+            _lastSelectedIndex = _modifiedConfiguration.index;
+            if (_lastSelectedIndex < 0)
             {
-                _oldSelectedIndex = 0;
+                _lastSelectedIndex = 0;
             }
-            ServersListBox.SelectedIndex = _oldSelectedIndex;
+            ServersListBox.SelectedIndex = _lastSelectedIndex;
             UpdateMoveUpAndDownButton();
             LoadSelectedServer();
         }
@@ -148,7 +148,11 @@ namespace Shadowsocks.View
 
         private void ServersListBox_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (_oldSelectedIndex == ServersListBox.SelectedIndex)
+            if (!ServersListBox.CanSelect)
+            {
+                return;
+            }
+            if (_lastSelectedIndex == ServersListBox.SelectedIndex)
             {
                 // we are moving back to oldSelectedIndex or doing a force move
                 return;
@@ -156,12 +160,13 @@ namespace Shadowsocks.View
             if (!SaveOldSelectedServer())
             {
                 // why this won't cause stack overflow?
-                ServersListBox.SelectedIndex = _oldSelectedIndex;
+                ServersListBox.SelectedIndex = _lastSelectedIndex;
                 return;
             }
+            ServersListBox.Items[_lastSelectedIndex] = _modifiedConfiguration.configs[_lastSelectedIndex].FriendlyName();
             UpdateMoveUpAndDownButton();
             LoadSelectedServer();
-            _oldSelectedIndex = ServersListBox.SelectedIndex;
+            _lastSelectedIndex = ServersListBox.SelectedIndex;
         }
 
         private void AddButton_Click(object sender, EventArgs e)
@@ -174,29 +179,30 @@ namespace Shadowsocks.View
             _modifiedConfiguration.configs.Add(server);
             LoadConfiguration(_modifiedConfiguration);
             ServersListBox.SelectedIndex = _modifiedConfiguration.configs.Count - 1;
-            _oldSelectedIndex = ServersListBox.SelectedIndex;
+            _lastSelectedIndex = ServersListBox.SelectedIndex;
         }
 
         private void DeleteButton_Click(object sender, EventArgs e)
         {
-            _oldSelectedIndex = ServersListBox.SelectedIndex;
-            if (_oldSelectedIndex >= 0 && _oldSelectedIndex < _modifiedConfiguration.configs.Count)
+            _lastSelectedIndex = ServersListBox.SelectedIndex;
+            if (_lastSelectedIndex >= 0 && _lastSelectedIndex < _modifiedConfiguration.configs.Count)
             {
-                _modifiedConfiguration.configs.RemoveAt(_oldSelectedIndex);
+                _modifiedConfiguration.configs.RemoveAt(_lastSelectedIndex);
             }
-            if (_oldSelectedIndex >= _modifiedConfiguration.configs.Count)
+            if (_lastSelectedIndex >= _modifiedConfiguration.configs.Count)
             {
                 // can be -1
-                _oldSelectedIndex = _modifiedConfiguration.configs.Count - 1;
+                _lastSelectedIndex = _modifiedConfiguration.configs.Count - 1;
             }
-            ServersListBox.SelectedIndex = _oldSelectedIndex;
+            ServersListBox.SelectedIndex = _lastSelectedIndex;
             LoadConfiguration(_modifiedConfiguration);
-            ServersListBox.SelectedIndex = _oldSelectedIndex;
+            ServersListBox.SelectedIndex = _lastSelectedIndex;
             LoadSelectedServer();
         }
 
         private void OKButton_Click(object sender, EventArgs e)
         {
+            Server server = controller.GetCurrentServer();
             if (!SaveOldSelectedServer())
             {
                 return;
@@ -206,9 +212,8 @@ namespace Shadowsocks.View
                 MessageBox.Show(I18N.GetString("Please add at least one server"));
                 return;
             }
-            int index = _modifiedConfiguration.index;
             controller.SaveServers(_modifiedConfiguration.configs, _modifiedConfiguration.localPort);
-            controller.SelectServerIndex(index);
+            controller.SelectServerIndex(_modifiedConfiguration.configs.IndexOf(server));
             this.Close();
         }
 
@@ -238,9 +243,11 @@ namespace Shadowsocks.View
             _modifiedConfiguration.index += step;
 
             ServersListBox.BeginUpdate();
-            _oldSelectedIndex = index + step;
+            ServersListBox.Enabled = false;
+            _lastSelectedIndex = index + step;
             ServersListBox.Items.Remove(item);
             ServersListBox.Items.Insert(index + step, item);
+            ServersListBox.Enabled = true;
             ServersListBox.SelectedIndex = index + step;
             ServersListBox.EndUpdate();
 
@@ -290,6 +297,5 @@ namespace Shadowsocks.View
                 MoveConfigItem(+1);  // +1 means move forward
             }
         }
-
     }
 }

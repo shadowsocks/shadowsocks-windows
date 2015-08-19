@@ -103,7 +103,6 @@ namespace Shadowsocks.Controller
                 }
             }
 
-
             private void StartPipe(IAsyncResult ar)
             {
                 if (_closed)

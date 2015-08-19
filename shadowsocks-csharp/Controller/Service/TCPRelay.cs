@@ -111,7 +111,7 @@ namespace Shadowsocks.Controller
         private bool connectionShutdown = false;
         private bool remoteShutdown = false;
         private bool closed = false;
-        
+
         private object encryptionLock = new object();
         private object decryptionLock = new object();
 
@@ -195,7 +195,6 @@ namespace Shadowsocks.Controller
             }
         }
 
-
         private void HandshakeReceive()
         {
             if (closed)
@@ -265,7 +264,7 @@ namespace Shadowsocks.Controller
             try
             {
                 int bytesRead = connection.EndReceive(ar);
-                
+
                 if (bytesRead >= 3)
                 {
                     command = connetionRecvBuffer[1];
@@ -315,7 +314,6 @@ namespace Shadowsocks.Controller
 
         private void ReadAll(IAsyncResult ar)
         {
-
             if (closed)
             {
                 return;
@@ -389,7 +387,6 @@ namespace Shadowsocks.Controller
                     ipAddress = ipHostInfo.AddressList[0];
                 }
                 IPEndPoint remoteEP = new IPEndPoint(ipAddress, server.server_port);
-
 
                 remote = new Socket(ipAddress.AddressFamily,
                     SocketType.Stream, ProtocolType.Tcp);
@@ -592,7 +589,6 @@ namespace Shadowsocks.Controller
                     }
                     remote.BeginSend(connetionSendBuffer, 0, bytesToSend, 0, new AsyncCallback(PipeRemoteSendCallback), null);
 
-
                     IStrategy strategy = controller.GetCurrentStrategy();
                     if (strategy != null)
                     {
@@ -651,5 +647,4 @@ namespace Shadowsocks.Controller
             }
         }
     }
-
 }
