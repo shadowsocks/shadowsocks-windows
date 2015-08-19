@@ -14,6 +14,7 @@ namespace Shadowsocks.Controller
     class TCPRelay : Listener.Service
     {
         private ShadowsocksController _controller;
+        private DateTime _lastSweepTime;
 
         public ISet<Handler> Handlers
         {
@@ -24,6 +25,7 @@ namespace Shadowsocks.Controller
         {
             this._controller = controller;
             this.Handlers = new HashSet<Handler>();
+            this._lastSweepTime = DateTime.Now;
         }
 
         public bool Handle(byte[] firstPacket, int length, Socket socket, object state)
@@ -43,12 +45,30 @@ namespace Shadowsocks.Controller
             handler.relay = this;
 
             handler.Start(firstPacket, length);
+            IList<Handler> handlersToClose = new List<Handler>();
             lock (this.Handlers)
             {
                 this.Handlers.Add(handler);
                 Logging.Debug($"connections: {Handlers.Count}");
+                DateTime now = DateTime.Now;
+                if (now - _lastSweepTime > TimeSpan.FromSeconds(1))
+                {
+                    _lastSweepTime = now;
+                    foreach (Handler handler1 in this.Handlers)
+                    {
+                        if (now - handler1.lastActivity > TimeSpan.FromSeconds(1800))
+                        {
+                            handlersToClose.Add(handler1);
+                        }
+                    }
+                }
             }
-            return true;
+            foreach (Handler handler1 in handlersToClose)
+            {
+                Logging.Debug("Closing timed out connection");
+                handler1.Close();
+            }
+        return true;
         }
     }
 
@@ -62,6 +82,8 @@ namespace Shadowsocks.Controller
         public Socket connection;
         public ShadowsocksController controller;
         public TCPRelay relay;
+
+        public DateTime lastActivity;
 
         private int retryCount = 0;
         private bool connected;
@@ -111,6 +133,7 @@ namespace Shadowsocks.Controller
             this._firstPacket = firstPacket;
             this._firstPacketLength = length;
             this.HandshakeReceive();
+            this.lastActivity = DateTime.Now;
         }
 
         private void CheckClose()
@@ -505,6 +528,7 @@ namespace Shadowsocks.Controller
 
                 if (bytesRead > 0)
                 {
+                    this.lastActivity = DateTime.Now;
                     int bytesToSend;
                     lock (decryptionLock)
                     {
