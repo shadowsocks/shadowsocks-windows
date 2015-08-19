@@ -154,5 +154,14 @@ namespace Shadowsocks.Encryption
                 cipherUpdate(false, length, buf, outbuf);
             }
         }
+
+        public override void Reset()
+        {
+            _encryptIVSent = false;
+            _decryptIVReceived = false;
+            _encryptIVOffset = 0; // SSL
+            _decryptIVOffset = 0; // SSL
+        }
+
     }
 }

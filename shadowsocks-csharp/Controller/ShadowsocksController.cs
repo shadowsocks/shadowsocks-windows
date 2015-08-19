@@ -35,7 +35,9 @@ namespace Shadowsocks.Controller
         public event EventHandler EnableStatusChanged;
         public event EventHandler EnableGlobalChanged;
         public event EventHandler ShareOverLANStatusChanged;
-        
+        public event EventHandler SelectRandomStatusChanged;
+        public event EventHandler ShowConfigFormEvent;
+
         // when user clicked Edit PAC, and PAC file has already created
         public event EventHandler<PathEventArgs> PACFileReadyToOpen;
         public event EventHandler<PathEventArgs> UserRuleFileReadyToOpen;
@@ -75,10 +77,68 @@ namespace Shadowsocks.Controller
             return Configuration.Load();
         }
 
+        public Configuration GetCurrentConfiguration()
+        {
+            return _config;
+        }
+
+        public List<Server> MergeConfiguration(Configuration mergeConfig, List<Server> servers)
+        {
+            if (servers != null)
+            {
+                for (int j = 0; j < servers.Count; ++j)
+                {
+                    for (int i = 0; i < mergeConfig.configs.Count; ++i)
+                    {
+                        if (mergeConfig.configs[i].server == servers[j].server
+                            && mergeConfig.configs[i].server_port == servers[j].server_port
+                            && mergeConfig.configs[i].method == servers[j].method
+                            && mergeConfig.configs[i].password == servers[j].password
+                            && mergeConfig.configs[i].tcp_over_udp == servers[j].tcp_over_udp
+                            && mergeConfig.configs[i].udp_over_tcp == servers[j].udp_over_tcp
+                            && mergeConfig.configs[i].obfs_tcp == servers[j].obfs_tcp
+                            //&& mergeConfig.configs[i].remarks == servers[j].remarks
+                            )
+                        {
+                            servers[j].CopyServer(mergeConfig.configs[i]);
+                            break;
+                        }
+                    }
+                }
+            }
+            return servers;
+        }
+
+        public Configuration MergeGetConfiguration(Configuration mergeConfig)
+        {
+            Configuration ret = Configuration.Load();
+            if (mergeConfig != null)
+            {
+                MergeConfiguration(mergeConfig, ret.configs);
+            }
+            return ret;
+        }
+
         public void SaveServers(List<Server> servers, int localPort)
         {
-            _config.configs = servers;
+            _config.configs = MergeConfiguration(_config, servers);
             _config.localPort = localPort;
+            SaveConfig(_config);
+        }
+
+        public void SaveServersConfig(Configuration config)
+        {
+            _config.configs = MergeConfiguration(_config, config.configs);
+            _config.localPort = config.localPort;
+            _config.reconnectTimes = config.reconnectTimes;
+            _config.randomAlgorithm = config.randomAlgorithm;
+            _config.TTL = config.TTL;
+            _config.socks5enable = config.socks5enable;
+            _config.socks5Host = config.socks5Host;
+            _config.socks5Port = config.socks5Port;
+            _config.socks5User = config.socks5User;
+            _config.socks5Pass = config.socks5Pass;
+            _config.autoban = config.autoban;
             SaveConfig(_config);
         }
 
@@ -131,6 +191,16 @@ namespace Shadowsocks.Controller
             }
         }
 
+        public void ToggleSelectRandom(bool enabled)
+        {
+            _config.random = enabled;
+            SaveConfig(_config);
+            if (SelectRandomStatusChanged != null)
+            {
+                SelectRandomStatusChanged(this, new EventArgs());
+            }
+        }
+
         public void SelectServerIndex(int index)
         {
             _config.index = index;
@@ -176,10 +246,24 @@ namespace Shadowsocks.Controller
             }
         }
 
-        public string GetQRCodeForCurrentServer()
+        public string GetSSLinkForCurrentServer()
         {
             Server server = GetCurrentServer();
             string parts = server.method + ":" + server.password + "@" + server.server + ":" + server.server_port;
+            string base64 = System.Convert.ToBase64String(Encoding.UTF8.GetBytes(parts));
+            return "ss://" + base64;
+        }
+
+        public string GetSSLinkForServer(Server server)
+        {
+            string parts = server.method + ":" + server.password + "@" + server.server + ":" + server.server_port;
+            string base64 = System.Convert.ToBase64String(Encoding.UTF8.GetBytes(parts));
+            return "ss://" + base64;
+        }
+
+        public string GetSSRemarksLinkForServer(Server server)
+        {
+            string parts = server.method + ":" + server.password + "@" + server.server + ":" + server.server_port + "#" + server.remarks;
             string base64 = System.Convert.ToBase64String(Encoding.UTF8.GetBytes(parts));
             return "ss://" + base64;
         }
@@ -189,6 +273,14 @@ namespace Shadowsocks.Controller
             if (gfwListUpdater != null)
             {
                 gfwListUpdater.UpdatePACFromGFWList(_config);
+            }
+        }
+
+        public void UpdatePACFromOnlinePac(string url)
+        {
+            if (gfwListUpdater != null)
+            {
+                gfwListUpdater.UpdatePACFromGFWList(_config, url);
             }
         }
 
@@ -217,7 +309,7 @@ namespace Shadowsocks.Controller
         protected void Reload()
         {
             // some logic in configuration updated the config when saving, we need to read it again
-            _config = Configuration.Load();
+            _config = MergeGetConfiguration(_config);
 
             if (polipoRunner == null)
             {
@@ -250,11 +342,9 @@ namespace Shadowsocks.Controller
             {
                 polipoRunner.Start(_config);
 
-                TCPRelay tcpRelay = new TCPRelay(_config);
-                UDPRelay udpRelay = new UDPRelay(_config);
+                Local local = new Local(_config);
                 List<Listener.Service> services = new List<Listener.Service>();
-                services.Add(tcpRelay);
-                services.Add(udpRelay);
+                services.Add(local);
                 services.Add(_pacServer);
                 services.Add(new PortForwarder(polipoRunner.RunningPort));
                 _listener = new Listener(services);
@@ -341,6 +431,14 @@ namespace Shadowsocks.Controller
             {
                 Util.Utils.ReleaseMemory();
                 Thread.Sleep(30 * 1000);
+            }
+        }
+
+        public void ShowConfigForm()
+        {
+            if (ShowConfigFormEvent != null)
+            {
+                ShowConfigFormEvent(this, new EventArgs());
             }
         }
     }

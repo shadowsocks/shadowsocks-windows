@@ -15,12 +15,8 @@ namespace Shadowsocks.Controller
             this._targetPort = targetPort;
         }
 
-        public bool Handle(byte[] firstPacket, int length, Socket socket, object state)
+        public bool Handle(byte[] firstPacket, int length, Socket socket)
         {
-            if (socket.ProtocolType != ProtocolType.Tcp)
-            {
-                return false;
-            }
             new Handler().Start(firstPacket, length, socket, this._targetPort);
             return true;
         }

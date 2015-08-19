@@ -966,7 +966,17 @@ namespace SimpleJson
             return TOKEN_NONE;
         }
 
-        protected static bool SerializeValue(IJsonSerializerStrategy jsonSerializerStrategy, object value, StringBuilder builder)
+        protected static string GetIndentString(int indent)
+        {
+            string ret = "";
+            for (int i = 0; i < indent; ++i)
+            {
+                ret += "\t";
+            }
+            return ret;
+        }
+
+        protected static bool SerializeValue(IJsonSerializerStrategy jsonSerializerStrategy, object value, StringBuilder builder, int indent = 1)
         {
             bool success = true;
 
@@ -975,15 +985,15 @@ namespace SimpleJson
             else if (value is IDictionary<string, object>)
             {
                 IDictionary<string, object> dict = (IDictionary<string, object>)value;
-                success = SerializeObject(jsonSerializerStrategy, dict.Keys, dict.Values, builder);
+                success = SerializeObject(jsonSerializerStrategy, dict.Keys, dict.Values, builder, indent);
             }
             else if (value is IDictionary<string, string>)
             {
                 IDictionary<string, string> dict = (IDictionary<string, string>)value;
-                success = SerializeObject(jsonSerializerStrategy, dict.Keys, dict.Values, builder);
+                success = SerializeObject(jsonSerializerStrategy, dict.Keys, dict.Values, builder, indent);
             }
             else if (value is IEnumerable)
-                success = SerializeArray(jsonSerializerStrategy, (IEnumerable)value, builder);
+                success = SerializeArray(jsonSerializerStrategy, (IEnumerable)value, builder, indent);
             else if (IsNumeric(value))
                 success = SerializeNumber(value, builder);
             else if (value is Boolean)
@@ -995,13 +1005,13 @@ namespace SimpleJson
                 object serializedObject;
                 success = jsonSerializerStrategy.SerializeNonPrimitiveObject(value, out serializedObject);
                 if (success)
-                    SerializeValue(jsonSerializerStrategy, serializedObject, builder);
+                    SerializeValue(jsonSerializerStrategy, serializedObject, builder, indent);
             }
 
             return success;
         }
 
-        protected static bool SerializeObject(IJsonSerializerStrategy jsonSerializerStrategy, IEnumerable keys, IEnumerable values, StringBuilder builder)
+        protected static bool SerializeObject(IJsonSerializerStrategy jsonSerializerStrategy, IEnumerable keys, IEnumerable values, StringBuilder builder, int indent)
         {
             builder.Append("{\r\n");
 
@@ -1015,41 +1025,53 @@ namespace SimpleJson
                 object value = ve.Current;
 
                 if (!first)
+                {
                     builder.Append(",\r\n");
+                }
 
                 if (key is string)
+                {
+                    builder.Append(GetIndentString(indent));
                     SerializeString((string)key, builder);
+                }
                 else
-                    if (!SerializeValue(jsonSerializerStrategy, value, builder)) return false;
+                    if (!SerializeValue(jsonSerializerStrategy, value, builder, indent + 1)) return false;
 
                 builder.Append(" : ");
-                if (!SerializeValue(jsonSerializerStrategy, value, builder))
+                if (!SerializeValue(jsonSerializerStrategy, value, builder, indent + 1))
                     return false;
 
                 first = false;
             }
 
-            builder.Append("}\r\n");
+            builder.Append("\r\n");
+            builder.Append(GetIndentString(indent - 1));
+            builder.Append("}");
             return true;
         }
 
-        protected static bool SerializeArray(IJsonSerializerStrategy jsonSerializerStrategy, IEnumerable anArray, StringBuilder builder)
+        protected static bool SerializeArray(IJsonSerializerStrategy jsonSerializerStrategy, IEnumerable anArray, StringBuilder builder, int indent)
         {
-            builder.Append("[\r\n  ");
+            builder.Append("[\r\n");
 
             bool first = true;
             foreach (object value in anArray)
             {
                 if (!first)
-                    builder.Append(",\r\n  ");
+                {
+                    builder.Append(",\r\n");
+                }
 
-                if (!SerializeValue(jsonSerializerStrategy, value, builder))
+                builder.Append(GetIndentString(indent));
+                if (!SerializeValue(jsonSerializerStrategy, value, builder, indent + 1))
                     return false;
 
                 first = false;
             }
 
-            builder.Append("\r\n]");
+            builder.Append("\r\n");
+            builder.Append(GetIndentString(indent - 1));
+            builder.Append("]");
             return true;
         }
 

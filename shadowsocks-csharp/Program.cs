@@ -19,7 +19,7 @@ namespace Shadowsocks
         static void Main()
         {
             Util.Utils.ReleaseMemory();
-            using (Mutex mutex = new Mutex(false, "Global\\" + "71981632-A427-497F-AB91-241CD227EC1F"))
+            using (Mutex mutex = new Mutex(false, "Global\\Shadowsocks_" + Application.StartupPath.GetHashCode()))
             {
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
@@ -31,7 +31,9 @@ namespace Shadowsocks
                     {
                         Process oldProcess = oldProcesses[0];
                     }
-                    MessageBox.Show("Shadowsocks is already running.\n\nFind Shadowsocks icon in your notify tray.");
+                    MessageBox.Show(I18N.GetString("Find Shadowsocks icon in your notify tray.") + "\n" +
+                        I18N.GetString("If you want to start multiple Shadowsocks, make a copy in another directory."),
+                        I18N.GetString("Shadowsocks is already running."));
                     return;
                 }
                 Directory.SetCurrentDirectory(Application.StartupPath);

@@ -45,14 +45,29 @@ namespace Shadowsocks.Encryption
             base.initCipher(iv, isCipher);
 
             IntPtr ctx;
-            ctx = Marshal.AllocHGlobal(_cipherInfo[3]);
             if (isCipher)
             {
-                _encryptCtx = ctx;
+                if (_encryptCtx == IntPtr.Zero)
+                {
+                    ctx = Marshal.AllocHGlobal(_cipherInfo[3]);
+                    _encryptCtx = ctx;
+                }
+                else
+                {
+                    ctx = _encryptCtx;
+                }
             }
             else
             {
-                _decryptCtx = ctx;
+                if (_decryptCtx == IntPtr.Zero)
+                {
+                    ctx = Marshal.AllocHGlobal(_cipherInfo[3]);
+                    _decryptCtx = ctx;
+                }
+                else
+                {
+                    ctx = _decryptCtx;
+                }
             }
             byte[] realkey;
             if (_method == "rc4-md5")

@@ -52,6 +52,10 @@ namespace Shadowsocks.Encryption
             outlength = length;
         }
 
+        public override void Reset()
+        {
+        }
+
         private readonly byte[] _encryptTable = new byte[256];
         private readonly byte[] _decryptTable = new byte[256];
 

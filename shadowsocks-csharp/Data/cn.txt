@@ -12,13 +12,20 @@ Servers=服务器
 Edit Servers...=编辑服务器...
 Start on Boot=开机启动
 Allow Clients from LAN=允许来自局域网的连接
+Random Proxy=服务器负载均衡
 Local PAC=使用本地 PAC
 Online PAC=使用在线 PAC
 Edit Local PAC File...=编辑本地 PAC 文件...
+Update Local PAC from ChnIPList=从 ChnIPList 更新本地 PAC
 Update Local PAC from GFWList=从 GFWList 更新本地 PAC
 Edit User Rule for GFWList...=编辑 GFWList 的用户规则...
 Show QRCode...=显示二维码...
 Scan QRCode from Screen...=扫描屏幕上的二维码...
+Copy Address from clipboard...=从剪贴板复制地址...
+Server Statistic...=服务器连接统计...
+Disconnect Current=断开当前所有连接
+Help=帮助
+Check Update=检查更新
 Show Logs...=显示日志...
 About...=关于...
 Quit=退出
@@ -28,16 +35,65 @@ Edit Servers=编辑服务器
 
 &Add=添加(&A)
 &Delete=删除(&D)
-Server=服务器
+Up=上移
+Down=下移
+
+New server=未配置的服务器
+
+Server=服务器(截图注意对服务器地址打码)
 Server IP=服务器 IP
 Server Port=服务器端口
 Password=密码
 Encryption=加密
-Proxy Port=代理端口
 Remarks=备注
+
+Adv. Setting=高级选项
+UDPoverTCP=UDP over TCP
+UDPoverUDP=UDP over UDP
+Obfs TCP=混淆TCP协议头
+Obfs UDP=混淆UDP协议
+NOT all server support belows=以下选项不是所有服务端都支持
+UDP over UDP if not checked=不打钩使用 UDP over UDP
+UDP over TCP if not checked=不打钩使用 UDP over TCP
+Recommend checked=保留功能
+Checked if server support=服务端支持的话打钩
+Link=链接
+
+Balance=负载均衡
+Order=按次序
+Random=随机
+LowLatency=低延迟优先
+LowException=低错误优先
+SelectedFirst=选中优先
+AutoBan=自动禁用出错服务器
+
+Socks5 Proxy=Socks5代理（连接服务器用）
+Socks5 Proxy On=开启Socks5
+Username=用户名
+
+Proxy Port=本地端口
+Reconnect Times=重连次数
+TTL=超时秒数
+
 OK=确定
 Cancel=取消
-New server=未配置的服务器
+
+# ServerLog Form
+ServerLog=服务器记录
+&Clear=清空(&C)
+Total Connect=总连接
+Enable=开关
+Connecting=连接
+Latency=延迟
+Avg Speed=下载\n速度
+Max Speed=历史\n最高
+Upload=上传\n流量
+Download=下载\n流量
+Error=错误
+Timeout=超时
+NoData=空连
+Error Percent=出错\n比例
+Continuous=连错
 
 # QRCode Form
 
@@ -58,8 +114,7 @@ Please add at least one server=请添加至少一个服务器
 Server IP can not be blank=服务器 IP 不能为空
 Password can not be blank=密码不能为空
 Port out of range=端口超出范围
-Port can't be 8123=端口不能为 8123
-Shadowsocks {0} Update Found=Shadowsocks {0} 更新
+{0} {1} Update Found={0} {1} 更新
 Click here to download=点击这里下载
 Shadowsocks is here=Shadowsocks 在这里
 You can turn on/off Shadowsocks in the context menu=可以在右键菜单中开关 Shadowsocks
@@ -69,6 +124,9 @@ Failed to update PAC file =更新 PAC 文件失败
 PAC updated=更新 PAC 成功
 No updates found. Please report to GFWList if you have problems with it.=未发现更新。如有问题请提交给 GFWList。
 No QRCode found. Try to zoom in or move it to the center of the screen.=未发现二维码，尝试把它放大或移动到靠近屏幕中间的位置
+Shadowsocks is already running.=Shadowsocks 已经在运行。
+Find Shadowsocks icon in your notify tray.=请在任务栏里寻找 Shadowsocks 图标。
+If you want to start multiple Shadowsocks, make a copy in another directory.=如果想启动多份，可以另外复制一份到别的目录。
 Failed to decode QRCode=无法解析二维码
 Failed to update registry=无法修改注册表
 System Proxy On: =系统代理已启用：

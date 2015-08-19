@@ -18,8 +18,12 @@ namespace Shadowsocks.Encryption
 
         static PolarSSL()
         {
-            string tempPath = Path.GetTempPath();
-            string dllPath = tempPath + "/libsscrypto.dll";
+            string runningPath = Path.Combine(System.Windows.Forms.Application.StartupPath, @"temp"); // Path.GetTempPath();
+            if (!Directory.Exists(runningPath))
+            {
+                Directory.CreateDirectory(runningPath);
+            }
+            string dllPath = runningPath + "/libsscrypto.dll";
             try
             {
                 FileManager.UncompressFile(dllPath, Resources.libsscrypto_dll);

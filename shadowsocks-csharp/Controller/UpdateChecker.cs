@@ -6,28 +6,48 @@ using System.Net;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
-using SimpleJson;
+using System.Xml;
 
 namespace Shadowsocks.Controller
 {
     public class UpdateChecker
     {
-        private const string UpdateURL = "https://api.github.com/repos/shadowsocks/shadowsocks-csharp/releases";
+        //private const string UpdateURL = "https://sourceforge.net/api/file/index/project-id/1817190/path/dist/mtime/desc/limit/10/rss";
+        private const string UpdateURL = "https://github.com/breakwa11/shadowsocks-rss/raw/master/shadowsocks-win.xml";
 
         public string LatestVersionNumber;
         public string LatestVersionURL;
         public event EventHandler NewVersionFound;
 
-        public const string Version = "2.4";
+        public const string Name = "ShadowsocksR";
+        public const string Copyright = "Copyright © BreakWall 2015";
+        public const string Version = "3.3.6";
+        public const string FullVersion = Version + " Final";
+
+        private static bool UseProxy = true;
 
         public void CheckUpdate(Configuration config)
         {
-            // TODO test failures
-            WebClient http = new WebClient();
-            http.Headers.Add("User-Agent", "Mozilla/5.0 (Windows NT 5.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.3319.102 Safari/537.36");
-            http.Proxy = new WebProxy(IPAddress.Loopback.ToString(), config.localPort);
-            http.DownloadStringCompleted += http_DownloadStringCompleted;
-            http.DownloadStringAsync(new Uri(UpdateURL));
+            try
+            {
+                WebClient http = new WebClient();
+                http.Headers.Add("User-Agent", "Mozilla/5.0 (Windows NT 5.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.3319.102 Safari/537.36");
+                if (UseProxy)
+                {
+                    http.Proxy = new WebProxy(IPAddress.Loopback.ToString(), config.localPort);
+                }
+                else
+                {
+                    http.Proxy = null;
+                }
+                //UseProxy = !UseProxy;
+                http.DownloadStringCompleted += http_DownloadStringCompleted;
+                http.DownloadStringAsync(new Uri(UpdateURL));
+            }
+            catch (Exception e)
+            {
+                Logging.LogUsefulException(e);
+            }
         }
 
         public static int CompareVersion(string l, string r)
@@ -58,7 +78,7 @@ namespace Shadowsocks.Controller
 
         private static string ParseVersionFromURL(string url)
         {
-            Match match = Regex.Match(url, @".*Shadowsocks-win.*?-([\d\.]+)\.\w+", RegexOptions.IgnoreCase);
+            Match match = Regex.Match(url, @".*" + Name + @"-win.*?-([\d\.]+)\.\w+", RegexOptions.IgnoreCase);
             if (match.Success)
             {
                 if (match.Groups.Count == 2)
@@ -120,25 +140,23 @@ namespace Shadowsocks.Controller
             {
                 string response = e.Result;
 
-                JsonArray result = (JsonArray)SimpleJson.SimpleJson.DeserializeObject(e.Result);
-
+                XmlDocument xmlDoc = new XmlDocument();
+                xmlDoc.LoadXml(response);
+                XmlNodeList elements = xmlDoc.GetElementsByTagName("media:content");
                 List<string> versions = new List<string>();
-                foreach (JsonObject release in result)
+                foreach (XmlNode el in elements)
                 {
-                    if ((bool)release["prerelease"])
+                    foreach (XmlAttribute attr in el.Attributes)
                     {
-                        continue;
-                    }
-                    foreach (JsonObject asset in (JsonArray)release["assets"])
-                    {
-                        string url = (string)asset["browser_download_url"];
-                        if (IsNewVersion(url))
+                        if (attr.Name == "url")
                         {
-                            versions.Add(url);
+                            if (IsNewVersion(attr.Value))
+                            {
+                                versions.Add(attr.Value);
+                            }
                         }
                     }
                 }
-
                 if (versions.Count == 0)
                 {
                     return;
@@ -154,7 +172,11 @@ namespace Shadowsocks.Controller
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.ToString());
+                Logging.Debug(ex.ToString());
+                if (NewVersionFound != null)
+                {
+                    NewVersionFound(this, new EventArgs());
+                }
                 return;
             }
         }

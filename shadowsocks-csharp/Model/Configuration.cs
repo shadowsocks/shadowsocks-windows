@@ -4,14 +4,170 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Windows.Forms;
+using System.Threading;
 
 namespace Shadowsocks.Model
 {
+    public class ServerSelectStrategy
+    {
+        private Random randomGennarator;
+        private int lastSelectIndex;
+        private struct ServerIndex
+        {
+            public int index;
+            public Server server;
+            public ServerIndex(int i, Server s)
+            {
+                index = i;
+                this.server = s;
+            }
+        };
+        private int lowerBound(List<double> data, double target)
+        {
+            int left = 0;
+            int right = data.Count - 1;
+            while (left < right)
+            {
+                int mid = (left + right) / 2;
+                if (data[mid] >= target)
+                    right = mid;
+                else if (data[mid] < target)
+                    left = mid + 1;
+            }
+            return left;
+        }
+
+        private double Algorithm2(ServerSpeedLog serverSpeedLog)
+        {
+            if (serverSpeedLog.ErrorContinurousTimes > 30)
+                return 1;
+            else if (serverSpeedLog.TotalConnectTimes < 3)
+                return 500;
+            else if (serverSpeedLog.AvgConnectTime < 0)
+                return 1;
+            else if (serverSpeedLog.AvgConnectTime <= 20)
+                return 500;
+            else
+            {
+                double chance = 10000.0 / serverSpeedLog.AvgConnectTime;
+                if (chance > 500) chance = 500;
+                chance -= serverSpeedLog.ErrorContinurousTimes * 10;
+                if (chance < 1) chance = 1;
+                return chance;
+            }
+        }
+
+        private double Algorithm3(ServerSpeedLog serverSpeedLog)
+        {
+            if (serverSpeedLog.ErrorContinurousTimes > 30)
+                return 1;
+            else if (serverSpeedLog.TotalConnectTimes < 3)
+                return 500;
+            else if (serverSpeedLog.AvgConnectTime < 0)
+                return 1;
+            else
+            {
+                double chance = 20.0 / (serverSpeedLog.AvgConnectTime / 500 + 1);
+                if (chance > 500) chance = 500;
+                chance -= serverSpeedLog.ErrorContinurousTimes * 2;
+                if (chance < 1) chance = 1;
+                return chance;
+            }
+        }
+
+        public int Select(List<Server> configs, int curIndex, int algorithm)
+        {
+            if (randomGennarator == null)
+            {
+                randomGennarator = new Random();
+                lastSelectIndex = -1;
+            }
+            if (configs.Count > 0)
+            {
+                List<ServerIndex> serverList = new List<ServerIndex>();
+                for (int i = 0; i < configs.Count; ++i)
+                {
+                    if (configs[i].isEnable())
+                        serverList.Add(new ServerIndex(i, configs[i]));
+                }
+                int serverListIndex = -1;
+                if (serverList.Count > 0)
+                {
+                    if (algorithm == 0)
+                    {
+                        lastSelectIndex = (lastSelectIndex + 1) % configs.Count;
+                        for (int i = 0; i < configs.Count; ++i)
+                        {
+                            if (configs[lastSelectIndex].isEnable())
+                            {
+                                serverListIndex = lastSelectIndex;
+                                break;
+                            }
+                            else
+                            {
+                                lastSelectIndex = (lastSelectIndex + 1) % configs.Count;
+                            }
+                        }
+                    }
+                    else if (algorithm == 1)
+                    {
+                        serverListIndex = randomGennarator.Next(serverList.Count);
+                        serverListIndex = serverList[serverListIndex].index;
+                    }
+                    else if (algorithm == 3)
+                    {
+                        List<double> chances = new List<double>();
+                        double lastBeginVal = 0;
+                        foreach (ServerIndex s in serverList)
+                        {
+                            double chance = Algorithm3(s.server.ServerSpeedLog());
+                            chances.Add(lastBeginVal + chance);
+                            lastBeginVal += chance;
+                        }
+                        {
+                            double target = randomGennarator.NextDouble() * lastBeginVal;
+                            serverListIndex = lowerBound(chances, target);
+                            serverListIndex = serverList[serverListIndex].index;
+                            return serverListIndex;
+                        }
+                    }
+                    else //if (algorithm == 2 || algorithm == 4)
+                    {
+                        List<double> chances = new List<double>();
+                        double lastBeginVal = 0;
+                        foreach (ServerIndex s in serverList)
+                        {
+                            double chance = Algorithm2(s.server.ServerSpeedLog());
+                            chances.Add(lastBeginVal + chance);
+                            lastBeginVal += chance;
+                        }
+                        if (algorithm == 4 && randomGennarator.Next(3) == 0)
+                        {
+                            return curIndex;
+                        }
+                        {
+                            double target = randomGennarator.NextDouble() * lastBeginVal;
+                            serverListIndex = lowerBound(chances, target);
+                            serverListIndex = serverList[serverListIndex].index;
+                            return serverListIndex;
+                        }
+                    }
+                }
+                return serverListIndex;
+            }
+            else
+            {
+                return -1;
+            }
+        }
+    }
+
     [Serializable]
     public class Configuration
     {
         public List<Server> configs;
         public int index;
+        public bool random;
         public bool global;
         public bool enabled;
         public bool shareOverLan;
@@ -19,18 +175,62 @@ namespace Shadowsocks.Model
         public int localPort;
         public string pacUrl;
         public bool useOnlinePac;
+        public int reconnectTimes;
+        public int randomAlgorithm;
+        public int TTL;
+        public bool socks5enable;
+        public string socks5Host;
+        public int socks5Port;
+        public string socks5User;
+        public string socks5Pass;
+        public bool autoban;
+        private ServerSelectStrategy serverStrategy = new ServerSelectStrategy();
 
         private static string CONFIG_FILE = "gui-config.json";
 
-        public Server GetCurrentServer()
+        public Server GetCurrentServer(bool usingRandom = false, bool forceRandom = false)
         {
-            if (index >= 0 && index < configs.Count)
+            lock (serverStrategy)
             {
-                return configs[index];
-            }
-            else
-            {
-                return GetDefaultServer();
+                if (forceRandom)
+                {
+                    int index = serverStrategy.Select(configs, this.index, randomAlgorithm);
+                    if (index == -1) return GetDefaultServer();
+                    return configs[index];
+                }
+                else if (usingRandom && random)
+                {
+                    int index = serverStrategy.Select(configs, this.index, randomAlgorithm);
+                    if (index == -1) return GetDefaultServer();
+                    return configs[index];
+                }
+                else
+                {
+                    if (index >= 0 && index < configs.Count)
+                    {
+                        int selIndex = index;
+                        if (usingRandom)
+                        {
+                            for (int i = 0; i < configs.Count; ++i)
+                            {
+                                if (configs[selIndex].isEnable())
+                                {
+                                    break;
+                                }
+                                else
+                                {
+                                    selIndex = (selIndex + 1) % configs.Count;
+                                }
+                            }
+                        }
+
+                        return configs[selIndex];
+                    }
+                    else
+                    {
+                        return GetDefaultServer();
+                    }
+                }
             }
         }
 
@@ -65,6 +265,7 @@ namespace Shadowsocks.Model
                     index = 0,
                     isDefault = true,
                     localPort = 1080,
+                    reconnectTimes = 3,
                     configs = new List<Server>()
                     {
                         GetDefaultServer()
@@ -117,10 +318,6 @@ namespace Shadowsocks.Model
             if (port <= 0 || port > 65535)
             {
                 throw new ArgumentException(I18N.GetString("Port out of range"));
-            }
-            if (port == 8123)
-            {
-                throw new ArgumentException(I18N.GetString("Port can't be 8123"));
             }
         }
 

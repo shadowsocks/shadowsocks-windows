@@ -92,6 +92,16 @@ namespace Shadowsocks.Encryption
             }
         }
 
+        public override void Reset()
+        {
+            _encryptIVSent = false;
+            _decryptIVReceived = false;
+            _encryptIC = 0;
+            _decryptIC = 0;
+            _encryptBytesRemaining = 0;
+            _decryptBytesRemaining = 0;
+        }
+
         public override void Dispose()
         {
         }

@@ -25,7 +25,8 @@ namespace Shadowsocks.Controller
                     string[] kv = Regex.Split(line, "=");
                     if (kv.Length == 2)
                     {
-                        Strings[kv[0]] = kv[1];
+                        string val = Regex.Replace(kv[1], "\\\\n", "\r\n");
+                        Strings[kv[0]] = val;
                     }
                 }
             }

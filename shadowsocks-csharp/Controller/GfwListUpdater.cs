@@ -74,12 +74,50 @@ namespace Shadowsocks.Controller
             }
         }
 
+        private void http_DownloadPACCompleted(object sender, DownloadStringCompletedEventArgs e)
+        {
+            try
+            {
+                string content = e.Result;
+                if (File.Exists(PAC_FILE))
+                {
+                    string original = File.ReadAllText(PAC_FILE, Encoding.UTF8);
+                    if (original == content)
+                    {
+                        UpdateCompleted(this, new ResultEventArgs(false));
+                        return;
+                    }
+                }
+                File.WriteAllText(PAC_FILE, content, Encoding.UTF8);
+                if (UpdateCompleted != null)
+                {
+                    UpdateCompleted(this, new ResultEventArgs(true));
+                }
+            }
+            catch (Exception ex)
+            {
+                if (Error != null)
+                {
+                    Error(this, new ErrorEventArgs(ex));
+                }
+            }
+
+        }
+
         public void UpdatePACFromGFWList(Configuration config)
         {
             WebClient http = new WebClient();
             http.Proxy = new WebProxy(IPAddress.Loopback.ToString(), config.localPort);
             http.DownloadStringCompleted += http_DownloadStringCompleted;
             http.DownloadStringAsync(new Uri(GFWLIST_URL));
+        }
+
+        public void UpdatePACFromGFWList(Configuration config, string url)
+        {
+            WebClient http = new WebClient();
+            http.Proxy = new WebProxy(IPAddress.Loopback.ToString(), config.localPort);
+            http.DownloadStringCompleted += http_DownloadPACCompleted;
+            http.DownloadStringAsync(new Uri(url));
         }
 
         public List<string> ParseResult(string response)

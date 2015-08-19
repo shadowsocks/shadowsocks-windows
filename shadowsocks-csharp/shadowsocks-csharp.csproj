@@ -9,7 +9,7 @@
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Shadowsocks</RootNamespace>
-    <AssemblyName>Shadowsocks</AssemblyName>
+    <AssemblyName>ShadowsocksR</AssemblyName>
     <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <StartupObject>
@@ -131,7 +131,6 @@
     <Compile Include="Controller\Listener.cs" />
     <Compile Include="Controller\Logging.cs" />
     <Compile Include="Controller\PortForwarder.cs" />
-    <Compile Include="Controller\UDPRelay.cs" />
     <Compile Include="Controller\UpdateChecker.cs" />
     <Compile Include="Encryption\EncryptorBase.cs" />
     <Compile Include="Encryption\EncryptorFactory.cs" />
@@ -157,7 +156,7 @@
     <Compile Include="View\ConfigForm.Designer.cs">
       <DependentUpon>ConfigForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Controller\TCPRelay.cs" />
+    <Compile Include="Controller\Local.cs" />
     <Compile Include="Controller\PolipoRunner.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -173,6 +172,12 @@
     <Compile Include="View\QRCodeSplashForm.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="View\ServerLogForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="View\ServerLogForm.Designer.cs">
+      <DependentUpon>ServerLogForm.cs</DependentUpon>
+    </Compile>
     <EmbeddedResource Include="View\ConfigForm.resx">
       <DependentUpon>ConfigForm.cs</DependentUpon>
       <SubType>Designer</SubType>
@@ -185,24 +190,29 @@
     <EmbeddedResource Include="View\QRCodeForm.resx">
       <DependentUpon>QRCodeForm.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="View\ServerLogForm.resx">
+      <DependentUpon>ServerLogForm.cs</DependentUpon>
+    </EmbeddedResource>
     <None Include="app.config" />
     <None Include="app.manifest">
       <SubType>Designer</SubType>
     </None>
     <None Include="Data\abp.js.gz" />
     <None Include="Data\libsscrypto.dll.gz" />
-    <None Include="Data\polipo.exe.gz" />
+    <None Include="Data\mgwz.dll.gz" />
+    <None Include="Data\privoxy.exe.gz" />
     <None Include="Data\proxy.pac.txt.gz" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Properties\DataSources\Shadowsocks.View.ConfigForm.datasource" />
     <None Include="Resources\ss20.png" />
     <None Include="Resources\ss16.png" />
     <None Include="Resources\ss24.png" />
     <None Include="Resources\ssw128.png" />
     <Content Include="Data\cn.txt" />
+    <None Include="Data\privoxy_conf.txt" />
     <Content Include="Data\user-rule.txt" />
     <Content Include="shadowsocks.ico" />
-    <None Include="Data\polipo_config.txt" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">

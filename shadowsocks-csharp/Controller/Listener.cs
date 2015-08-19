@@ -12,19 +12,13 @@ namespace Shadowsocks.Controller
     {
         public interface Service
         {
-            bool Handle(byte[] firstPacket, int length, Socket socket, object state);
-        }
-
-        public class UDPState
-        {
-            public byte[] buffer = new byte[4096];
-            public EndPoint remoteEndPoint = new IPEndPoint(IPAddress.Any, 1);
+            bool Handle(byte[] firstPacket, int length, Socket socket);
         }
 
         Configuration _config;
         bool _shareOverLAN;
-        Socket _tcpSocket;
-        Socket _udpSocket;
+        Socket _socket;
+        Socket _socket_v6;
         IList<Service> _services;
 
         public Listener(IList<Service> services)
@@ -58,88 +52,75 @@ namespace Shadowsocks.Controller
             try
             {
                 // Create a TCP/IP socket.
-                _tcpSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-                _udpSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-                _tcpSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
-                _udpSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
+                bool ipv6 = true;
+                //bool ipv6 = false;
+                _socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                _socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
+                if (ipv6)
+                {
+                    try
+                    {
+                        _socket_v6 = new Socket(AddressFamily.InterNetworkV6, SocketType.Stream, ProtocolType.Tcp);
+                        _socket_v6.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
+                    }
+                    catch
+                    {
+                        _socket_v6 = null;
+                    }
+                }
                 IPEndPoint localEndPoint = null;
+                IPEndPoint localEndPointV6 = null;
                 if (_shareOverLAN)
                 {
                     localEndPoint = new IPEndPoint(IPAddress.Any, _config.localPort);
+                    localEndPointV6 = new IPEndPoint(IPAddress.IPv6Any, _config.localPort);
                 }
                 else
                 {
                     localEndPoint = new IPEndPoint(IPAddress.Loopback, _config.localPort);
+                    localEndPointV6 = new IPEndPoint(IPAddress.IPv6Loopback, _config.localPort);
                 }
 
                 // Bind the socket to the local endpoint and listen for incoming connections.
-                _tcpSocket.Bind(localEndPoint);
-                _udpSocket.Bind(localEndPoint);
-                _tcpSocket.Listen(1024);
+                _socket.Bind(localEndPoint);
+                _socket.Listen(1024);
+                if (_socket_v6 != null)
+                {
+                    _socket_v6.Bind(localEndPointV6);
+                    _socket_v6.Listen(1024);
+                }
 
 
                 // Start an asynchronous socket to listen for connections.
                 Console.WriteLine("Shadowsocks started");
-                _tcpSocket.BeginAccept(
+                _socket.BeginAccept(
                     new AsyncCallback(AcceptCallback),
-                    _tcpSocket);
-                UDPState udpState = new UDPState();
-                _udpSocket.BeginReceiveFrom(udpState.buffer, 0, udpState.buffer.Length, 0, ref udpState.remoteEndPoint, new AsyncCallback(RecvFromCallback), udpState);
+                    _socket);
+                if (_socket_v6 != null)
+                    _socket_v6.BeginAccept(
+                        new AsyncCallback(AcceptCallback),
+                        _socket_v6);
             }
             catch (SocketException)
             {
-                _tcpSocket.Close();
+                _socket.Close();
+                if (_socket_v6 != null)
+                    _socket_v6.Close();
                 throw;
             }
         }
 
         public void Stop()
         {
-            if (_tcpSocket != null)
+            if (_socket != null)
             {
-                _tcpSocket.Close();
-                _tcpSocket = null;
+                _socket.Close();
+                _socket = null;
             }
-            if (_udpSocket != null)
+            if (_socket_v6 != null)
             {
-                _udpSocket.Close();
-                _udpSocket = null;
-            }
-        }
-
-        public void RecvFromCallback(IAsyncResult ar)
-        {
-            UDPState state = (UDPState)ar.AsyncState;
-            try
-            {
-                int bytesRead = _udpSocket.EndReceiveFrom(ar, ref state.remoteEndPoint);
-                foreach (Service service in _services)
-                {
-                    if (service.Handle(state.buffer, bytesRead, _udpSocket, state))
-                    {
-                        break;
-                    }
-                }
-            }
-            catch (ObjectDisposedException)
-            {
-            }
-            catch (Exception)
-            {
-            }
-            finally
-            {
-                try
-                {
-                    _udpSocket.BeginReceiveFrom(state.buffer, 0, state.buffer.Length, 0, ref state.remoteEndPoint, new AsyncCallback(RecvFromCallback), state);
-                }
-                catch (ObjectDisposedException)
-                {
-                    // do nothing
-                }
-                catch (Exception)
-                {
-                }
+                _socket_v6.Close();
+                _socket_v6 = null;
             }
         }
 
@@ -197,16 +178,14 @@ namespace Shadowsocks.Controller
                 int bytesRead = conn.EndReceive(ar);
                 foreach (Service service in _services)
                 {
-                    if (service.Handle(buf, bytesRead, conn, null))
+                    if (service.Handle(buf, bytesRead, conn))
                     {
                         return;
                     }
                 }
                 // no service found for this
-                if (conn.ProtocolType == ProtocolType.Tcp)
-                {
-                    conn.Close();
-                }
+                // shouldn't happen
+                conn.Close();
             }
             catch (Exception e)
             {
