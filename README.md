@@ -61,6 +61,11 @@ one HTTP proxy instance.
 
 Please visit [Servers] for more information.
 
+#### Portable Mode
+
+If you want to put all temporary files into shadowsocks/temp folder instead of
+system temp folder, create a `shadowsocks_portable_mode.txt` into shadowsocks folder.
+
 #### Develop
 
 Visual Studio 2015 is required.
