@@ -56,7 +56,7 @@ namespace Shadowsocks.Controller
                     _lastSweepTime = now;
                     foreach (Handler handler1 in this.Handlers)
                     {
-                        if (now - handler1.lastActivity > TimeSpan.FromSeconds(1800))
+                        if (now - handler1.lastActivity > TimeSpan.FromSeconds(900))
                         {
                             handlersToClose.Add(handler1);
                         }
