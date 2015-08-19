@@ -45,6 +45,17 @@ New server=未配置的服务器
 Move &Up=上移(&U)
 Move D&own=下移(&O)
 
+# Log Form
+
+&File=文件(&F)
+&Open Location=在资源管理器中打开(&O)
+E&xit=退出(&X)
+&Clean logs=清空(&C)
+&Font=字体(&F)
+&Wrap text=自动换行(&W)
+&Top most=置顶(&T)
+Log Viewer=日志查看器
+
 # QRCode Form
 
 QRCode=二维码
