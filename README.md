@@ -1,83 +1,32 @@
 Shadowsocks for Windows
 =======================
 
-[![Build Status]][Appveyor]
+#### Features compare with official version
 
-[中文说明]
+1. Add a plugins interface
+2. Add a PingPlugin for Demo
 
-#### Features
+#### 和官方版本相比有什么不同
 
-1. System proxy configuration
-2. PAC mode and global mode
-3. [GFWList] and user rules
-4. Supports HTTP proxy
-5. Supports server auto switching
-6. Supports UDP relay (see Usage)
+1. 新增插件功能
+2. 增加了Ping测试的Demo插件，如果需要在ping过程中获取获取服务器IP归属地，请下载[纯真IP库]并把qqwry.dat文件放置在当前目录
 
 #### Download
 
-Download the [latest release].
+Download [latest release].
 
-#### Basic
+#### Usage
 
-1. Find Shadowsocks icon in the notification tray
-2. You can add multiple servers in servers menu
-3. Select `Enable System Proxy` menu to enable system proxy. Please disable other
-proxy addons in your browser, or set them to use system proxy
-4. You can also configure your browser proxy manually if you don't want to enable
-system proxy. Set Socks5 or HTTP proxy to 127.0.0.1:1080. You can change this
-port in `Servers -> Edit Servers`
+See [official]
 
-#### PAC
+### Develop
 
-1. You can change PAC rules by editing the PAC file. When you save the PAC file
-with any editor, Shadowsocks will notify browsers about the change automatically
-2. You can also update PAC file from [GFWList] (maintained by 3rd party)
-3. You can also use online PAC URL
-
-#### Server Auto Switching
-
-1. Load balance: choosing server randomly
-2. High availability: choosing the best server (low latency and packet loss)
-3. Choose By Total Package Loss: ping and choose. Please also enable
-   `Availability Statistics` in the menu if you want to use this
-4. Write your own strategy by implement IStrategy interface and send us a pull request!
-
-#### UDP
-
-For UDP, you need to use SocksCap or ProxyCap to force programs you want
-to be proxied to tunnel over Shadowsocks
-
-#### Multiple Instances
-
-If you want to manage multiple servers using other tools like SwitchyOmega,
-you can start multiple Shadowsocks instances. To avoid configuration conflicts,
-copy Shadowsocks to a new directory and choose a different local port.
-
-Also, make sure to use `SOCKS5` proxy in SwitchyOmega, since we have only
-one HTTP proxy instance.
-
-#### Server Configuration
-
-Please visit [Servers] for more information.
-
-#### Portable Mode
-
-If you want to put all temporary files into shadowsocks/temp folder instead of
-system temp folder, create a `shadowsocks_portable_mode.txt` into shadowsocks folder.
-
-#### Develop
-
-Visual Studio 2015 is required.
+Visual Studio 2015 is recommended.
 
 #### License
 
 GPLv3
 
-
-[Appveyor]:       https://ci.appveyor.com/project/clowwindy/shadowsocks-csharp
-[Build Status]:   https://ci.appveyor.com/api/projects/status/gknc8l1lxy423ehv/branch/master
-[latest release]: https://github.com/shadowsocks/shadowsocks-csharp/releases
-[GFWList]:        https://github.com/gfwlist/gfwlist
-[Servers]:        https://github.com/shadowsocks/shadowsocks/wiki/Ports-and-Clients#linux--server-side
-[中文说明]:       https://github.com/shadowsocks/shadowsocks-windows/wiki/Shadowsocks-Windows-%E4%BD%BF%E7%94%A8%E8%AF%B4%E6%98%8E
+[latest release]: https://github.com/TkYu/shadowsocks-csharp-withping/releases
+[official]: https://github.com/shadowsocks/shadowsocks-csharp
+[纯真IP库]: http://update.cz88.net/soft/setup.zip
