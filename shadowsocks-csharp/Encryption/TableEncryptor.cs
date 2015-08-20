@@ -41,7 +41,6 @@ namespace Shadowsocks.Encryption
             outlength = length;
         }
 
-
         public override void Decrypt(byte[] buf, int length, byte[] outbuf, out int outlength)
         {
             byte[] result = new byte[length];
@@ -99,7 +98,6 @@ namespace Shadowsocks.Encryption
             }
             return sorted;
         }
-
 
         public override void Dispose()
         {

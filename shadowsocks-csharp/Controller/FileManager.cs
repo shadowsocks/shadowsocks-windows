@@ -29,9 +29,6 @@ namespace Shadowsocks.Controller
 
         public static void UncompressFile(string fileName, byte[] content)
         {
-            //some people use RamDisk, their Temp dir maybe disappeared, so we need check it first
-            if (!Directory.Exists(Path.GetDirectoryName(fileName)))Directory.CreateDirectory(Path.GetDirectoryName(fileName));
-
             FileStream destinationFile = File.Create(fileName);
 
             // Because the uncompressed size of the file is unknown, 
