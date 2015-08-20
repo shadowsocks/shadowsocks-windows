@@ -5,6 +5,9 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
+using System.IO;
+using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Windows.Forms;
 using ZXing;
@@ -153,6 +156,40 @@ namespace Shadowsocks.View
             return new MenuItem(I18N.GetString(text), items);
         }
 
+        private MenuItem GetPlugins()
+        {
+            List<string> plugins = new List<string>();
+            plugins.AddRange(Directory.GetFiles(Application.StartupPath, "*.ss.dll", SearchOption.TopDirectoryOnly));
+            if (Directory.Exists($"{Application.StartupPath}\\Plugins"))plugins.AddRange(Directory.GetFiles($"{Application.StartupPath}\\Plugins", "*.ss.dll", SearchOption.TopDirectoryOnly));
+            if (plugins.Count == 0)
+            {
+                return new MenuItem("-");
+            }
+            else
+            {
+                var lm = new List<MenuItem>();
+                foreach (var pluginPath in plugins)
+                {
+                    try
+                    {
+                        var dll = Assembly.LoadFile(pluginPath);
+                        var t = dll.GetTypes().First(c => c.IsClass & c.Name.StartsWith("ss"));
+                        var mi = new MenuItem($"{t.GetProperty("PluginName", BindingFlags.Public | BindingFlags.Static).GetValue(null, null)}(作者:{t.GetProperty("Author", BindingFlags.Public | BindingFlags.Static).GetValue(null, null)})");
+                        mi.Click += (sender, e) =>
+                        {
+                            var methodInfo = t.GetMethod("Invoke", BindingFlags.Public | BindingFlags.Static);
+                            methodInfo.Invoke(null, new object[] { controller });
+                        };
+                        lm.Add(mi);
+                    }
+                    catch (Exception)
+                    { }//OOPS
+                }
+                if (lm.Count == 0) return new MenuItem("-");
+                return new MenuItem(I18N.GetString("Plugins"), lm.ToArray());
+            }
+        }
+
         private void LoadMenu()
         {
             this.contextMenu1 = new ContextMenu(new MenuItem[] {
@@ -180,7 +217,9 @@ namespace Shadowsocks.View
                 this.AutoStartupItem = CreateMenuItem("Start on Boot", new EventHandler(this.AutoStartupItem_Click)),
                 this.AvailabilityStatistics = CreateMenuItem("Availability Statistics", new EventHandler(this.AvailabilityStatisticsItem_Click)),
                 this.ShareOverLANItem = CreateMenuItem("Allow Clients from LAN", new EventHandler(this.ShareOverLANItem_Click)),
-                new MenuItem("-"),
+
+                GetPlugins(),
+
                 CreateMenuItem("Show Logs...", new EventHandler(this.ShowLogItem_Click)),
                 CreateMenuItem("About...", new EventHandler(this.AboutItem_Click)),
                 new MenuItem("-"),
