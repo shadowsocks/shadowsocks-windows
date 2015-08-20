@@ -1,5 +1,6 @@
 ﻿using Shadowsocks.Controller;
 using Shadowsocks.Properties;
+using Shadowsocks.Util;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -14,7 +15,7 @@ namespace Shadowsocks.Encryption
 
         static Sodium()
         {
-            string tempPath = Path.GetTempPath();
+            string tempPath = Utils.GetTempPath();
             string dllPath = tempPath + "/libsscrypto.dll";
             try
             {

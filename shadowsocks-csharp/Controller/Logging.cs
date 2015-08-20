@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Shadowsocks.Util;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net.Sockets;
@@ -14,7 +15,7 @@ namespace Shadowsocks.Controller
         {
             try
             {
-                string temppath = Path.GetTempPath();
+                string temppath = Utils.GetTempPath();
                 LogFile = Path.Combine(temppath, "shadowsocks.log");
                 FileStream fs = new FileStream(LogFile, FileMode.Append);
                 StreamWriterWithTimestamp sw = new StreamWriterWithTimestamp(fs);

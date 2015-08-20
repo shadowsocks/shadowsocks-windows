@@ -9,6 +9,7 @@ using System.Text;
 using System.Net.NetworkInformation;
 using System.Net;
 using System.Runtime.InteropServices;
+using Shadowsocks.Util;
 
 namespace Shadowsocks.Controller
 {
@@ -20,7 +21,7 @@ namespace Shadowsocks.Controller
 
         static PolipoRunner()
         {
-            temppath = Path.GetTempPath();
+            temppath = Utils.GetTempPath();
             try
             {
                 FileManager.UncompressFile(temppath + "/ss_privoxy.exe", Resources.privoxy_exe);

@@ -5,11 +5,29 @@ using System.IO;
 using System.IO.Compression;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Windows.Forms;
 
 namespace Shadowsocks.Util
 {
     public class Utils
     {
+        // return path to store temporary files
+        public static string GetTempPath()
+        {
+            if (File.Exists(Application.StartupPath + "/shadowsocks_portable_mode.txt"))
+            {
+                try
+                {
+                    Directory.CreateDirectory(Application.StartupPath + "/temp");
+                } catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                }
+                return Application.StartupPath + "/temp";
+            }
+            return Path.GetTempPath();
+        }
+
         public static void ReleaseMemory(bool removePages)
         {
             // release any unused pages

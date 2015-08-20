@@ -6,6 +6,7 @@ using System.Net.NetworkInformation;
 using System.Threading;
 using Shadowsocks.Model;
 using System.Reflection;
+using Shadowsocks.Util;
 
 namespace Shadowsocks.Controller
 {
@@ -25,7 +26,7 @@ namespace Shadowsocks.Controller
         //static constructor to initialize every public static fields before refereced
         static AvailabilityStatistics()
         {
-            string temppath = Path.GetTempPath();
+            string temppath = Utils.GetTempPath();
             AvailabilityStatisticsFile = Path.Combine(temppath, StatisticsFilesName);
         }
 
