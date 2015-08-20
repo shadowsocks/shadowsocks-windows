@@ -24,6 +24,7 @@ namespace Shadowsocks.Model
         public bool useOnlinePac;
         public bool availabilityStatistics;
         public bool autoCheckUpdate;
+        public LogViewerConfig logViewer;
 
         private static string CONFIG_FILE = "gui-config.json";
 
