@@ -14,16 +14,17 @@ namespace Shadowsocks.Util
         // return path to store temporary files
         public static string GetTempPath()
         {
-            if (File.Exists(Application.StartupPath + "/shadowsocks_portable_mode.txt"))
+            if (File.Exists(Application.StartupPath + "\\shadowsocks_portable_mode.txt"))
             {
                 try
                 {
-                    Directory.CreateDirectory(Application.StartupPath + "/temp");
+                    Directory.CreateDirectory(Application.StartupPath + "\\temp");
                 } catch (Exception e)
                 {
                     Console.WriteLine(e);
                 }
-                return Application.StartupPath + "/temp";
+                // don't use "/", it will fail when we call explorer /select xxx/temp\xxx.log
+                return Application.StartupPath + "\\temp";
             }
             return Path.GetTempPath();
         }
