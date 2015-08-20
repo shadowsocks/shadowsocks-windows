@@ -18,12 +18,28 @@ namespace Shadowsocks.View
         string filename;
         Timer timer;
         const int BACK_OFFSET = 65536;
+        Model.Configuration config;
 
         public LogForm(string filename)
         {
             this.filename = filename;
             InitializeComponent();
             this.Icon = Icon.FromHandle(Resources.ssw128.GetHicon());
+
+            config = Model.Configuration.Load();
+            if (config.logViewer == null)
+            {
+                config.logViewer = new Model.LogViewerConfig();
+            }
+            else
+            {
+                topMostTrigger = config.logViewer.topMost;
+                wrapTextTrigger = config.logViewer.wrapText;
+                toolbarTrigger = config.logViewer.toolbarShown;
+                LogMessageTextBox.Font = new Font(config.logViewer.fontName, config.logViewer.fontSize);
+                LogMessageTextBox.BackColor = config.logViewer.GetBackgroundColor();
+                LogMessageTextBox.ForeColor = config.logViewer.GetTextColor();
+            }
 
             UpdateTexts();
         }
@@ -103,14 +119,29 @@ namespace Shadowsocks.View
             timer.Interval = 300;
             timer.Tick += Timer_Tick;
             timer.Start();
+
+            topMostTriggerLock = true;
             this.TopMost = TopMostMenuItem.Checked = TopMostCheckBox.Checked = topMostTrigger;
-            LogMessageTextBox.WordWrap = WrapTextCheckBox.Checked = WrapTextMenuItem.Checked = wrapTextTrigger;
-            ToolbarFlowLayoutPanel.Visible = toolbarTrigger;
+            topMostTriggerLock = false;
+
+            wrapTextTriggerLock = true;
+            LogMessageTextBox.WordWrap = WrapTextMenuItem.Checked = WrapTextCheckBox.Checked = wrapTextTrigger;
+            wrapTextTriggerLock = false;
+
+            ToolbarFlowLayoutPanel.Visible = ShowToolbarMenuItem.Checked = toolbarTrigger;
         }
 
         private void LogForm_FormClosing(object sender, FormClosingEventArgs e)
         {
             timer.Stop();
+            config.logViewer.topMost = topMostTrigger;
+            config.logViewer.wrapText = wrapTextTrigger;
+            config.logViewer.toolbarShown = toolbarTrigger;
+            config.logViewer.fontName = LogMessageTextBox.Font.Name;
+            config.logViewer.fontSize = LogMessageTextBox.Font.Size;
+            config.logViewer.SetBackgroundColor(LogMessageTextBox.BackColor);
+            config.logViewer.SetTextColor(LogMessageTextBox.ForeColor);
+            Model.Configuration.Save(config);
         }
 
         private void OpenLocationMenuItem_Click(object sender, EventArgs e)
@@ -235,6 +266,7 @@ namespace Shadowsocks.View
         #endregion
 
         private bool toolbarTrigger = false;
+
         private void ShowToolbarMenuItem_Click(object sender, EventArgs e)
         {
             toolbarTrigger = !toolbarTrigger;
