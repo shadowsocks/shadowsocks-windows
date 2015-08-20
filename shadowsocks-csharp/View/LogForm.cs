@@ -103,9 +103,9 @@ namespace Shadowsocks.View
             timer.Interval = 300;
             timer.Tick += Timer_Tick;
             timer.Start();
-            this.TopMost = TopMostMenuItem.Checked = TopMostCheckBox.Checked = TopMostTrigger;
-            LogMessageTextBox.WordWrap = WrapTextCheckBox.Checked = WrapTextMenuItem.Checked = WrapTextTrigger;
-            ToolbarFlowLayoutPanel.Visible = ShowToolbarTrigger;
+            this.TopMost = TopMostMenuItem.Checked = TopMostCheckBox.Checked = topMostTrigger;
+            LogMessageTextBox.WordWrap = WrapTextCheckBox.Checked = WrapTextMenuItem.Checked = wrapTextTrigger;
+            ToolbarFlowLayoutPanel.Visible = toolbarTrigger;
         }
 
         private void LogForm_FormClosing(object sender, FormClosingEventArgs e)
@@ -170,24 +170,24 @@ namespace Shadowsocks.View
         #endregion
 
         #region Trigger the log messages wrapable, or not.
-        bool WrapTextTrigger = false;
-        bool WrapTextTriggerLock = false;
+        bool wrapTextTrigger = false;
+        bool wrapTextTriggerLock = false;
 
         private void TriggerWrapText()
         {
-            WrapTextTriggerLock = true;
+            wrapTextTriggerLock = true;
 
-            WrapTextTrigger = !WrapTextTrigger;
-            LogMessageTextBox.WordWrap = WrapTextTrigger;
+            wrapTextTrigger = !wrapTextTrigger;
+            LogMessageTextBox.WordWrap = wrapTextTrigger;
             LogMessageTextBox.ScrollToCaret();
-            WrapTextMenuItem.Checked = WrapTextCheckBox.Checked = WrapTextTrigger;
+            WrapTextMenuItem.Checked = WrapTextCheckBox.Checked = wrapTextTrigger;
 
-            WrapTextTriggerLock = false;
+            wrapTextTriggerLock = false;
         }
 
         private void WrapTextMenuItem_Click(object sender, EventArgs e)
         {
-            if (!WrapTextTriggerLock)
+            if (!wrapTextTriggerLock)
             {
                 TriggerWrapText();
             }
@@ -195,7 +195,7 @@ namespace Shadowsocks.View
 
         private void WrapTextCheckBox_CheckedChanged(object sender, EventArgs e)
         {
-            if (!WrapTextTriggerLock)
+            if (!wrapTextTriggerLock)
             {
                 TriggerWrapText();
             }
@@ -203,23 +203,23 @@ namespace Shadowsocks.View
         #endregion
 
         #region Trigger this window top most, or not.
-        bool TopMostTrigger = false;
-        bool TopMostTriggerLock = false;
+        bool topMostTrigger = false;
+        bool topMostTriggerLock = false;
 
         private void TriggerTopMost()
         {
-            TopMostTriggerLock = true;
+            topMostTriggerLock = true;
 
-            TopMostTrigger = !TopMostTrigger;
-            this.TopMost = TopMostTrigger;
-            TopMostMenuItem.Checked = TopMostCheckBox.Checked = TopMostTrigger;
+            topMostTrigger = !topMostTrigger;
+            this.TopMost = topMostTrigger;
+            TopMostMenuItem.Checked = TopMostCheckBox.Checked = topMostTrigger;
 
-            TopMostTriggerLock = false;
+            topMostTriggerLock = false;
         }
 
         private void TopMostCheckBox_CheckedChanged(object sender, EventArgs e)
         {
-            if (!TopMostTriggerLock)
+            if (!topMostTriggerLock)
             {
                 TriggerTopMost();
             }
@@ -227,19 +227,19 @@ namespace Shadowsocks.View
 
         private void TopMostMenuItem_Click(object sender, EventArgs e)
         {
-            if (!TopMostTriggerLock)
+            if (!topMostTriggerLock)
             {
                 TriggerTopMost();
             }
         }
         #endregion
 
-        private bool ShowToolbarTrigger = false;
+        private bool toolbarTrigger = false;
         private void ShowToolbarMenuItem_Click(object sender, EventArgs e)
         {
-            ShowToolbarTrigger = !ShowToolbarTrigger;
-            ToolbarFlowLayoutPanel.Visible = ShowToolbarTrigger;
-            ShowToolbarMenuItem.Checked = ShowToolbarTrigger;
+            toolbarTrigger = !toolbarTrigger;
+            ToolbarFlowLayoutPanel.Visible = toolbarTrigger;
+            ShowToolbarMenuItem.Checked = toolbarTrigger;
         }
     }
 }
