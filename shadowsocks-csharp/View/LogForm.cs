@@ -80,7 +80,7 @@ namespace Shadowsocks.View
 
                 string line = "";
                 while ((line = reader.ReadLine()) != null)
-                    LogMessageTextBox.AppendText(line + "\r\n");
+                    LogMessageTextBox.AppendText(line + Environment.NewLine);
 
                 LogMessageTextBox.ScrollToCaret();
 
@@ -100,7 +100,7 @@ namespace Shadowsocks.View
                 while ((line = reader.ReadLine()) != null)
                 {
                     changed = true;
-                    LogMessageTextBox.AppendText(line + "\r\n");
+                    LogMessageTextBox.AppendText(line + Environment.NewLine);
                 }
 
                 if (changed)
