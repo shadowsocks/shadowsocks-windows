@@ -18,14 +18,17 @@ namespace Shadowsocks.Controller
 
         public static string USER_RULE_FILE = "user-rule.txt";
 
-        FileSystemWatcher watcher;
+        FileSystemWatcher PACFileWatcher;
+        FileSystemWatcher UserRuleFileWatcher;
         private Configuration _config;
 
         public event EventHandler PACFileChanged;
+        public event EventHandler UserRuleFileChanged;
 
         public PACServer()
         {
             this.WatchPacFile();
+            this.WatchUserRuleFile();
         }
 
         public void UpdateConfiguration(Configuration config)
@@ -167,25 +170,51 @@ Connection: Close
 
         private void WatchPacFile()
         {
-            if (watcher != null)
+            if (PACFileWatcher != null)
             {
-                watcher.Dispose();
+                PACFileWatcher.Dispose();
             }
-            watcher = new FileSystemWatcher(Directory.GetCurrentDirectory());
-            watcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.DirectoryName;
-            watcher.Filter = PAC_FILE;
-            watcher.Changed += Watcher_Changed;
-            watcher.Created += Watcher_Changed;
-            watcher.Deleted += Watcher_Changed;
-            watcher.Renamed += Watcher_Changed;
-            watcher.EnableRaisingEvents = true;
+            PACFileWatcher = new FileSystemWatcher(Directory.GetCurrentDirectory());
+            PACFileWatcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.DirectoryName;
+            PACFileWatcher.Filter = PAC_FILE;
+            PACFileWatcher.Changed += PACFileWatcher_Changed;
+            PACFileWatcher.Created += PACFileWatcher_Changed;
+            PACFileWatcher.Deleted += PACFileWatcher_Changed;
+            PACFileWatcher.Renamed += PACFileWatcher_Changed;
+            PACFileWatcher.EnableRaisingEvents = true;
         }
 
-        private void Watcher_Changed(object sender, FileSystemEventArgs e)
+        private void WatchUserRuleFile()
+        {
+            if (UserRuleFileWatcher != null)
+            {
+                UserRuleFileWatcher.Dispose();
+            }
+            UserRuleFileWatcher = new FileSystemWatcher(Directory.GetCurrentDirectory());
+            UserRuleFileWatcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.DirectoryName;
+            UserRuleFileWatcher.Filter = USER_RULE_FILE;
+            UserRuleFileWatcher.Changed += UserRuleFileWatcher_Changed;
+            UserRuleFileWatcher.Created += UserRuleFileWatcher_Changed;
+            UserRuleFileWatcher.Deleted += UserRuleFileWatcher_Changed;
+            UserRuleFileWatcher.Renamed += UserRuleFileWatcher_Changed;
+            UserRuleFileWatcher.EnableRaisingEvents = true;
+        }
+
+        private void PACFileWatcher_Changed(object sender, FileSystemEventArgs e)
         {
             if (PACFileChanged != null)
             {
+                Console.WriteLine("Detected: PAC file '{0}' was {1}.", e.Name, e.ChangeType.ToString().ToLower());
                 PACFileChanged(this, new EventArgs());
+            }
+        }
+
+        private void UserRuleFileWatcher_Changed(object sender, FileSystemEventArgs e)
+        {
+            if (UserRuleFileChanged != null)
+            {
+                Console.WriteLine("Detected: User Rule file '{0}' was {1}.", e.Name, e.ChangeType.ToString().ToLower());
+                UserRuleFileChanged(this, new EventArgs());
             }
         }
 

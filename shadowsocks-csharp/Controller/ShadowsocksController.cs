@@ -7,6 +7,8 @@ using System.Threading;
 using System.Net.Sockets;
 using Shadowsocks.Controller.Strategy;
 using System.Net;
+using Shadowsocks.Util;
+using Shadowsocks.Properties;
 
 namespace Shadowsocks.Controller
 {
@@ -293,6 +295,7 @@ namespace Shadowsocks.Controller
             {
                 _pacServer = new PACServer();
                 _pacServer.PACFileChanged += pacServer_PACFileChanged;
+                _pacServer.UserRuleFileChanged += pacServer_UserRuleFileChanged;
             }
             _pacServer.UpdateConfiguration(_config);
             if (gfwListUpdater == null)
@@ -402,6 +405,46 @@ namespace Shadowsocks.Controller
         {
             if (UpdatePACFromGFWListError != null)
                 UpdatePACFromGFWListError(this, e);
+        }
+
+        private void pacServer_UserRuleFileChanged(object sender, EventArgs e)
+        {
+            // TODO: this is a dirty hack. (from code GListUpdater.http_DownloadStringCompleted())
+
+            //UpdatePACFromGFWList();  // TODO: code like this temporary
+            //try
+            //{
+            List<string> lines = GFWListUpdater.ParseResult(File.ReadAllText(Utils.GetTempPath() + "\\gfwlist.txt"));
+                if (File.Exists(PACServer.USER_RULE_FILE))
+                {
+                    string local = File.ReadAllText(PACServer.USER_RULE_FILE, Encoding.UTF8);
+                    string[] rules = local.Split(new char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+                    foreach (string rule in rules)
+                    {
+                        if (rule.StartsWith("!") || rule.StartsWith("["))
+                            continue;
+                        lines.Add(rule);
+                    }
+                }
+                string abpContent = Utils.UnGzip(Resources.abp_js);
+                abpContent = abpContent.Replace("__RULES__", SimpleJson.SimpleJson.SerializeObject(lines));
+                if (File.Exists(PACServer.PAC_FILE))
+                {
+                    string original = File.ReadAllText(PACServer.PAC_FILE, Encoding.UTF8);
+                    if (original == abpContent)
+                    {
+                        return;
+                    }
+                }
+                File.WriteAllText(PACServer.PAC_FILE, abpContent, Encoding.UTF8);
+            //}
+            //catch (Exception ex)
+            //{
+            //    if (Error != null)
+            //    {
+            //        Error(this, new ErrorEventArgs(ex));
+            //    }
+            //}
         }
 
         private void StartReleasingMemory()
