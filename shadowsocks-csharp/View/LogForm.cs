@@ -120,6 +120,11 @@ namespace Shadowsocks.View
             timer.Tick += Timer_Tick;
             timer.Start();
 
+            this.Top = config.logViewer.top;
+            this.Left = config.logViewer.left;
+            this.Height = config.logViewer.height;
+            this.Width = config.logViewer.width;
+
             topMostTriggerLock = true;
             this.TopMost = TopMostMenuItem.Checked = TopMostCheckBox.Checked = topMostTrigger;
             topMostTriggerLock = false;
@@ -141,6 +146,10 @@ namespace Shadowsocks.View
             config.logViewer.fontSize = LogMessageTextBox.Font.Size;
             config.logViewer.SetBackgroundColor(LogMessageTextBox.BackColor);
             config.logViewer.SetTextColor(LogMessageTextBox.ForeColor);
+            config.logViewer.top = this.Top;
+            config.logViewer.left = this.Left;
+            config.logViewer.height = this.Height;
+            config.logViewer.width = this.Width;
             Model.Configuration.Save(config);
         }
 

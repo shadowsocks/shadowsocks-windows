@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Drawing;
+using System.Windows.Forms;
 
 namespace Shadowsocks.Model
 {
@@ -13,6 +14,10 @@ namespace Shadowsocks.Model
         public bool topMost;
         public bool wrapText;
         public bool toolbarShown;
+        public int width;
+        public int height;
+        public int top;
+        public int left;
 
         public LogViewerConfig()
         {
@@ -23,6 +28,10 @@ namespace Shadowsocks.Model
             this.topMost = false;
             this.wrapText = false;
             this.toolbarShown = false;
+            this.width = 600;
+            this.height = 400;
+            this.top = (Screen.PrimaryScreen.WorkingArea.Height - height) / 2;
+            this.left = (Screen.PrimaryScreen.WorkingArea.Width - width) / 2;
         }
 
         public Color GetBackgroundColor()

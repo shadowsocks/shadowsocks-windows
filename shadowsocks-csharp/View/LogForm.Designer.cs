@@ -63,7 +63,7 @@
             this.LogMessageTextBox.Name = "LogMessageTextBox";
             this.LogMessageTextBox.ReadOnly = true;
             this.LogMessageTextBox.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.LogMessageTextBox.Size = new System.Drawing.Size(584, 377);
+            this.LogMessageTextBox.Size = new System.Drawing.Size(378, 99);
             this.LogMessageTextBox.TabIndex = 0;
             // 
             // MainMenu
@@ -199,7 +199,7 @@
             this.tableLayoutPanel1.RowCount = 2;
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(590, 418);
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(384, 140);
             this.tableLayoutPanel1.TabIndex = 2;
             // 
             // ToolbarFlowLayoutPanel
@@ -212,16 +212,17 @@
             this.ToolbarFlowLayoutPanel.Dock = System.Windows.Forms.DockStyle.Fill;
             this.ToolbarFlowLayoutPanel.Location = new System.Drawing.Point(3, 3);
             this.ToolbarFlowLayoutPanel.Name = "ToolbarFlowLayoutPanel";
-            this.ToolbarFlowLayoutPanel.Size = new System.Drawing.Size(584, 29);
+            this.ToolbarFlowLayoutPanel.Size = new System.Drawing.Size(378, 29);
             this.ToolbarFlowLayoutPanel.TabIndex = 2;
             // 
             // LogForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(590, 418);
+            this.ClientSize = new System.Drawing.Size(384, 140);
             this.Controls.Add(this.tableLayoutPanel1);
             this.Menu = this.MainMenu;
+            this.MinimumSize = new System.Drawing.Size(400, 200);
             this.Name = "LogForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Log Viewer";
