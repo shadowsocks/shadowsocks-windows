@@ -12,13 +12,13 @@ namespace Shadowsocks.Controller
 {
     public class UpdateChecker
     {
-        private const string UpdateURL = "https://api.github.com/repos/shadowsocks/shadowsocks-csharp/releases";
+        private const string UpdateURL = "https://api.github.com/repos/shadowsocks/shadowsocks-windows/releases";
 
         public string LatestVersionNumber;
         public string LatestVersionURL;
         public event EventHandler NewVersionFound;
 
-        public const string Version = "2.4";
+        public const string Version = "2.5.6";
 
         public void CheckUpdate(Configuration config)
         {
@@ -53,7 +53,6 @@ namespace Shadowsocks.Controller
             {
                 return CompareVersion(ParseVersionFromURL(x), ParseVersionFromURL(y));
             }
-
         }
 
         private static string ParseVersionFromURL(string url)
@@ -79,30 +78,6 @@ namespace Shadowsocks.Controller
             if (url.IndexOf("prerelease") >= 0)
             {
                 return false;
-            }
-            // check dotnet 4.0
-            AssemblyName[] references = Assembly.GetExecutingAssembly().GetReferencedAssemblies();
-            Version dotNetVersion = Environment.Version;
-            foreach (AssemblyName reference in references)
-            {
-                if (reference.Name == "mscorlib")
-                {
-                    dotNetVersion = reference.Version;
-                }
-            }
-            if (dotNetVersion.Major >= 4)
-            {
-                if (url.IndexOf("dotnet4.0") < 0)
-                {
-                    return false;
-                }
-            }
-            else
-            {
-                if (url.IndexOf("dotnet4.0") >= 0)
-                {
-                    return false;
-                }
             }
             string version = ParseVersionFromURL(url);
             if (version == null)
@@ -154,7 +129,7 @@ namespace Shadowsocks.Controller
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.ToString());
+                Logging.Debug(ex.ToString());
                 return;
             }
         }

@@ -18,7 +18,7 @@ namespace Shadowsocks.Controller
         public class UDPState
         {
             public byte[] buffer = new byte[4096];
-            public EndPoint remoteEndPoint = new IPEndPoint(IPAddress.Any, 1);
+            public EndPoint remoteEndPoint = new IPEndPoint(IPAddress.Any, 0);
         }
 
         Configuration _config;
@@ -76,7 +76,6 @@ namespace Shadowsocks.Controller
                 _tcpSocket.Bind(localEndPoint);
                 _udpSocket.Bind(localEndPoint);
                 _tcpSocket.Listen(1024);
-
 
                 // Start an asynchronous socket to listen for connections.
                 Console.WriteLine("Shadowsocks started");
@@ -184,7 +183,6 @@ namespace Shadowsocks.Controller
                 }
             }
         }
-
 
         private void ReceiveCallback(IAsyncResult ar)
         {

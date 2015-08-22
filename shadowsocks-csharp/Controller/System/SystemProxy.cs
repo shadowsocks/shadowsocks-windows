@@ -55,6 +55,7 @@ namespace Shadowsocks.Controller
                         else
                             pacUrl = "http://127.0.0.1:" + config.localPort.ToString() + "/pac?t=" + GetTimestamp(DateTime.Now);
                         registry.SetValue("ProxyEnable", 0);
+                        var readProxyServer = registry.GetValue("ProxyServer");
                         registry.SetValue("ProxyServer", "");
                         registry.SetValue("AutoConfigURL", pacUrl);
                     }
@@ -65,6 +66,8 @@ namespace Shadowsocks.Controller
                     registry.SetValue("ProxyServer", "");
                     registry.SetValue("AutoConfigURL", "");
                 }
+                //Set AutoDetectProxy Off
+                IEAutoDetectProxy(false);
                 SystemProxy.NotifyIE();
                 //Must Notify IE first, or the connections do not chanage
                 CopyProxySettingFromLan();
@@ -105,6 +108,31 @@ namespace Shadowsocks.Controller
         private static String GetTimestamp(DateTime value)
         {
             return value.ToString("yyyyMMddHHmmssffff");
+        }
+
+        /// <summary>
+        /// Checks or unchecks the IE Options Connection setting of "Automatically detect Proxy"
+        /// </summary>
+        /// <param name="set">Provide 'true' if you want to check the 'Automatically detect Proxy' check box. To uncheck, pass 'false'</param>
+        private static void IEAutoDetectProxy(bool set)
+        {
+            RegistryKey registry =
+                Registry.CurrentUser.OpenSubKey("Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings\\Connections",
+                    true);
+            byte[] defConnection = (byte[])registry.GetValue("DefaultConnectionSettings");
+            byte[] savedLegacySetting = (byte[])registry.GetValue("SavedLegacySettings");
+            if (set)
+            {
+                defConnection[8] = Convert.ToByte(defConnection[8] & 8);
+                savedLegacySetting[8] = Convert.ToByte(savedLegacySetting[8] & 8);
+            }
+            else
+            {
+                defConnection[8] = Convert.ToByte(defConnection[8] & ~8);
+                savedLegacySetting[8] = Convert.ToByte(savedLegacySetting[8] & ~8);
+            }
+            registry.SetValue("DefaultConnectionSettings", defConnection);
+            registry.SetValue("SavedLegacySettings", savedLegacySetting);
         }
     }
 }

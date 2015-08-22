@@ -242,7 +242,6 @@ namespace Shadowsocks.View
             SetBitmap(bitmap, 255);
         }
 
-
         /// <para>Changes the current bitmap with a custom opacity level.  Here is where all happens!</para>
         public void SetBitmap(Bitmap bitmap, byte opacity)
         {
@@ -287,7 +286,6 @@ namespace Shadowsocks.View
                 Win32.DeleteDC(memDc);
             }
         }
-
 
         protected override CreateParams CreateParams
         {

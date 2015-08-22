@@ -6,16 +6,17 @@ using Shadowsocks.Model;
 using System.Net.Sockets;
 using System.Net;
 using System.Runtime.CompilerServices;
+using Shadowsocks.Controller.Strategy;
 
 namespace Shadowsocks.Controller
 {
     class UDPRelay : Listener.Service
     {
-        private Configuration _config;
+        private ShadowsocksController _controller;
         private LRUCache<IPEndPoint, UDPHandler> _cache;
-        public UDPRelay(Configuration config)
+        public UDPRelay(ShadowsocksController controller)
         {
-            this._config = config;
+            this._controller = controller;
             this._cache = new LRUCache<IPEndPoint, UDPHandler>(512);  // todo: choose a smart number
         }
 
@@ -34,7 +35,7 @@ namespace Shadowsocks.Controller
             UDPHandler handler = _cache.get(remoteEndPoint);
             if (handler == null)
             {
-                handler = new UDPHandler(socket, _config.GetCurrentServer(), remoteEndPoint);
+                handler = new UDPHandler(socket, _controller.GetAServer(IStrategyCallerType.UDP, remoteEndPoint), remoteEndPoint);
                 _cache.add(remoteEndPoint, handler);
             }
             handler.Send(firstPacket, length);
@@ -107,9 +108,11 @@ namespace Shadowsocks.Controller
                 }
                 catch (ObjectDisposedException)
                 {
+                    // TODO: handle the ObjectDisposedException
                 }
                 catch (Exception)
                 {
+                    // TODO: need more think about handle other Exceptions, or should remove this catch().
                 }
                 finally
                 {
@@ -123,9 +126,11 @@ namespace Shadowsocks.Controller
                 }
                 catch (ObjectDisposedException)
                 {
+                    // TODO: handle the ObjectDisposedException
                 }
                 catch (Exception)
                 {
+                    // TODO: need more think about handle other Exceptions, or should remove this catch().
                 }
                 finally
                 {
@@ -133,6 +138,8 @@ namespace Shadowsocks.Controller
             }
         }
     }
+
+
     // cc by-sa 3.0 http://stackoverflow.com/a/3719378/1124054
     class LRUCache<K, V> where V : UDPRelay.UDPHandler
     {
@@ -195,5 +202,4 @@ namespace Shadowsocks.Controller
         public K key;
         public V value;
     }
-
 }
