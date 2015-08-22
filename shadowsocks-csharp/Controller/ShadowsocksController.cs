@@ -414,7 +414,12 @@ namespace Shadowsocks.Controller
             //UpdatePACFromGFWList();  // TODO: code like this temporary
             //try
             //{
-            List<string> lines = GFWListUpdater.ParseResult(File.ReadAllText(Utils.GetTempPath() + "\\gfwlist.txt"));
+                if (!File.Exists(Utils.GetTempPath() + "\\gfwlist.txt"))
+                {
+                    UpdatePACFromGFWList();
+                    return;
+                }
+                List<string> lines = GFWListUpdater.ParseResult(File.ReadAllText(Utils.GetTempPath() + "\\gfwlist.txt"));
                 if (File.Exists(PACServer.USER_RULE_FILE))
                 {
                     string local = File.ReadAllText(PACServer.USER_RULE_FILE, Encoding.UTF8);
