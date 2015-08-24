@@ -131,6 +131,7 @@
     <Compile Include="Controller\Listener.cs" />
     <Compile Include="Controller\Logging.cs" />
     <Compile Include="Controller\PortForwarder.cs" />
+    <Compile Include="Controller\TDP.cs" />
     <Compile Include="Controller\UpdateChecker.cs" />
     <Compile Include="Encryption\EncryptorBase.cs" />
     <Compile Include="Encryption\EncryptorFactory.cs" />
@@ -149,6 +150,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="Util\CRC.cs" />
     <Compile Include="Util\Util.cs" />
     <Compile Include="View\ConfigForm.cs">
       <SubType>Form</SubType>

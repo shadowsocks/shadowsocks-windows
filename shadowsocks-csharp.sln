@@ -4,6 +4,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 14.0.23107.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "shadowsocks-csharp", "shadowsocks-csharp\shadowsocks-csharp.csproj", "{8C02D2F7-7CDB-4D55-9F25-CD03EF4AA062}"
+	ProjectSection(ProjectDependencies) = postProject
+		{0F2A0C8A-6C06-485B-AA13-AEEC19CA9637} = {0F2A0C8A-6C06-485B-AA13-AEEC19CA9637}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "test", "test\test.csproj", "{45913187-0685-4903-B250-DCEF0479CD86}"
 	ProjectSection(ProjectDependencies) = postProject

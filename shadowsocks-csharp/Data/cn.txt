@@ -48,13 +48,13 @@ Encryption=加密
 Remarks=备注
 
 Adv. Setting=高级选项
+TCPoverUDP=TCP over UDP
 UDPoverTCP=UDP over TCP
-UDPoverUDP=UDP over UDP
 Obfs TCP=混淆TCP协议头
 Obfs UDP=混淆UDP协议
 NOT all server support belows=以下选项不是所有服务端都支持
+TCP over TCP if not checked=不打钩使用 TCP over TCP
 UDP over UDP if not checked=不打钩使用 UDP over UDP
-UDP over TCP if not checked=不打钩使用 UDP over TCP
 Recommend checked=保留功能
 Checked if server support=服务端支持的话打钩
 Link=链接
@@ -67,7 +67,7 @@ LowException=低错误优先
 SelectedFirst=选中优先
 AutoBan=自动禁用出错服务器
 
-Socks5 Proxy=Socks5代理（连接服务器用）
+Socks5 Proxy=Socks5代理（前置代理）
 Socks5 Proxy On=开启Socks5
 Username=用户名
 

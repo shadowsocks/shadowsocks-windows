@@ -84,9 +84,9 @@ namespace Shadowsocks.View
                 ShowConfigForm();
             }
 
-            //timerDelayCheckUpdate = new System.Timers.Timer(1000 * 10.0);
-            //timerDelayCheckUpdate.Elapsed += timer_Elapsed;
-            //timerDelayCheckUpdate.Start();
+            timerDelayCheckUpdate = new System.Timers.Timer(1000 * 10.0);
+            timerDelayCheckUpdate.Elapsed += timer_Elapsed;
+            timerDelayCheckUpdate.Start();
         }
 
         private void timer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)

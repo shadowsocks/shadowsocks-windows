@@ -63,10 +63,12 @@ namespace Shadowsocks.View
             RemarksLabel.Text = I18N.GetString("Remarks");
 
             LabelExpertSetting.Text = I18N.GetString(LabelExpertSetting.Text);
+            TCPoverUDPLabel.Text = I18N.GetString(TCPoverUDPLabel.Text);
             UDPoverTCPLabel.Text = I18N.GetString(UDPoverTCPLabel.Text);
             ObfsTCPLabel.Text = I18N.GetString(ObfsTCPLabel.Text);
             ObfsUDPLabel.Text = I18N.GetString(ObfsUDPLabel.Text);
             LabelNote.Text = I18N.GetString(LabelNote.Text);
+            CheckTCPoverUDP.Text = I18N.GetString(CheckTCPoverUDP.Text);
             CheckUDPoverUDP.Text = I18N.GetString(CheckUDPoverUDP.Text);
             CheckObfsTCP.Text = I18N.GetString(CheckObfsTCP.Text);
             CheckObfsUDP.Text = I18N.GetString(CheckObfsUDP.Text);
@@ -124,6 +126,7 @@ namespace Shadowsocks.View
                     password = PasswordTextBox.Text,
                     method = EncryptionSelect.Text,
                     remarks = RemarksTextBox.Text,
+                    tcp_over_udp = CheckTCPoverUDP.Checked,
                     udp_over_tcp = CheckUDPoverUDP.Checked,
                     obfs_tcp = CheckObfsTCP.Checked,
                     obfs_udp = CheckObfsUDP.Checked
@@ -204,6 +207,7 @@ namespace Shadowsocks.View
                 ProxyPortTextBox.Text = _modifiedConfiguration.localPort.ToString();
                 EncryptionSelect.Text = server.method ?? "aes-256-cfb";
                 RemarksTextBox.Text = server.remarks;
+                CheckTCPoverUDP.Checked = server.tcp_over_udp;
                 CheckUDPoverUDP.Checked = server.udp_over_tcp;
                 CheckObfsTCP.Checked = server.obfs_tcp;
                 CheckObfsUDP.Checked = server.obfs_udp;
