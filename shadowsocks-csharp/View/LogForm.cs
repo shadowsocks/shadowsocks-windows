@@ -120,8 +120,8 @@ namespace Shadowsocks.View
             timer.Tick += Timer_Tick;
             timer.Start();
 
-            this.Top = config.logViewer.top;
-            this.Left = config.logViewer.left;
+            this.Top = (config.logViewer.top >=0) ? config.logViewer.top : 0;
+            this.Left = (config.logViewer.left >=0) ? config.logViewer.left : 0;
             this.Height = config.logViewer.height;
             this.Width = config.logViewer.width;
 
