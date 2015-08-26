@@ -2,6 +2,7 @@
 using Shadowsocks.Properties;
 using Shadowsocks.Util;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -200,23 +201,50 @@ Connection: Close
             UserRuleFileWatcher.EnableRaisingEvents = true;
         }
 
+        #region FileSystemWatcher.OnChanged()
+
+        // FileSystemWatcher Changed event is raised twice
+        // http://stackoverflow.com/questions/1764809/filesystemwatcher-changed-event-is-raised-twice
+        private static Hashtable fileChangedTime = new Hashtable();
+
         private void PACFileWatcher_Changed(object sender, FileSystemEventArgs e)
         {
-            if (PACFileChanged != null)
+            string path = e.FullPath.ToString();
+            string currentLastWriteTime = File.GetLastWriteTime(e.FullPath).ToString();
+
+            // if there is no path info stored yet or stored path has different time of write then the one now is inspected
+            if (!fileChangedTime.ContainsKey(path) || fileChangedTime[path].ToString() != currentLastWriteTime)
             {
-                Console.WriteLine("Detected: PAC file '{0}' was {1}.", e.Name, e.ChangeType.ToString().ToLower());
-                PACFileChanged(this, new EventArgs());
+                if (PACFileChanged != null)
+                {
+                    Console.WriteLine("Detected: PAC file '{0}' was {1}.", e.Name, e.ChangeType.ToString().ToLower());
+                    PACFileChanged(this, new EventArgs());
+                }
+
+                //lastly we update the last write time in the hashtable
+                fileChangedTime[path] = currentLastWriteTime;
             }
         }
 
         private void UserRuleFileWatcher_Changed(object sender, FileSystemEventArgs e)
         {
-            if (UserRuleFileChanged != null)
+            string path = e.FullPath.ToString();
+            string currentLastWriteTime = File.GetLastWriteTime(e.FullPath).ToString();
+
+            // if there is no path info stored yet or stored path has different time of write then the one now is inspected
+            if (!fileChangedTime.ContainsKey(path) || fileChangedTime[path].ToString() != currentLastWriteTime)
             {
-                Console.WriteLine("Detected: User Rule file '{0}' was {1}.", e.Name, e.ChangeType.ToString().ToLower());
-                UserRuleFileChanged(this, new EventArgs());
+                if (UserRuleFileChanged != null)
+                {
+                    Console.WriteLine("Detected: User Rule file '{0}' was {1}.", e.Name, e.ChangeType.ToString().ToLower());
+                    UserRuleFileChanged(this, new EventArgs());
+                }
+                //lastly we update the last write time in the hashtable
+                fileChangedTime[path] = currentLastWriteTime;
             }
         }
+
+        #endregion
 
         private string GetPACAddress(byte[] requestBuf, int length, IPEndPoint localEndPoint, bool useSocks)
         {
