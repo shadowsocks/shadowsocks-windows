@@ -47,7 +47,7 @@ namespace Shadowsocks.View
         {
             this.Text = I18N.GetString("Edit Servers") + "("
                 + (controller.GetCurrentConfiguration().shareOverLan ? "any" : "local") + ":" + controller.GetCurrentConfiguration().localPort.ToString()
-                + I18N.GetString(" Version") + UpdateChecker.Version
+                + I18N.GetString(" Version") + UpdateChecker.FullVersion
                 + ")";
 
             AddButton.Text = I18N.GetString("&Add");

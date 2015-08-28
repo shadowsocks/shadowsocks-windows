@@ -309,7 +309,6 @@
             this.ObfsTCPLabel.Size = new System.Drawing.Size(58, 14);
             this.ObfsTCPLabel.TabIndex = 24;
             this.ObfsTCPLabel.Text = "Obfs TCP";
-            this.ObfsTCPLabel.Visible = false;
             // 
             // UDPoverTCPLabel
             // 
@@ -327,11 +326,10 @@
             this.CheckObfsTCP.AutoSize = true;
             this.CheckObfsTCP.Location = new System.Drawing.Point(92, 218);
             this.CheckObfsTCP.Name = "CheckObfsTCP";
-            this.CheckObfsTCP.Size = new System.Drawing.Size(144, 18);
+            this.CheckObfsTCP.Size = new System.Drawing.Size(166, 18);
             this.CheckObfsTCP.TabIndex = 27;
-            this.CheckObfsTCP.Text = "Recommend checked";
+            this.CheckObfsTCP.Text = "Checked if server support";
             this.CheckObfsTCP.UseVisualStyleBackColor = true;
-            this.CheckObfsTCP.Visible = false;
             // 
             // CheckUDPoverUDP
             // 
@@ -464,7 +462,7 @@
             this.ServersListBox.Location = new System.Drawing.Point(0, 0);
             this.ServersListBox.Margin = new System.Windows.Forms.Padding(0);
             this.ServersListBox.Name = "ServersListBox";
-            this.ServersListBox.Size = new System.Drawing.Size(200, 350);
+            this.ServersListBox.Size = new System.Drawing.Size(200, 390);
             this.ServersListBox.TabIndex = 5;
             this.ServersListBox.SelectedIndexChanged += new System.EventHandler(this.ServersListBox_SelectedIndexChanged);
             // 
@@ -624,10 +622,10 @@
             this.tableLayoutPanel7.Name = "tableLayoutPanel7";
             this.tableLayoutPanel7.RowCount = 4;
             this.tableLayoutPanel2.SetRowSpan(this.tableLayoutPanel7, 3);
-            this.tableLayoutPanel7.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 350F));
+            this.tableLayoutPanel7.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 390F));
             this.tableLayoutPanel7.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel7.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel7.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
+            this.tableLayoutPanel7.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 8F));
             this.tableLayoutPanel7.Size = new System.Drawing.Size(200, 505);
             this.tableLayoutPanel7.TabIndex = 16;
             // 
@@ -636,7 +634,7 @@
             this.CheckAutoBan.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.CheckAutoBan.AutoSize = true;
             this.tableLayoutPanel7.SetColumnSpan(this.CheckAutoBan, 2);
-            this.CheckAutoBan.Location = new System.Drawing.Point(63, 461);
+            this.CheckAutoBan.Location = new System.Drawing.Point(63, 481);
             this.CheckAutoBan.Name = "CheckAutoBan";
             this.CheckAutoBan.Size = new System.Drawing.Size(73, 18);
             this.CheckAutoBan.TabIndex = 17;
@@ -651,7 +649,7 @@
             this.tableLayoutPanel6.Controls.Add(this.RandomComboBox, 1, 0);
             this.tableLayoutPanel6.Controls.Add(this.LabelRandom, 0, 0);
             this.tableLayoutPanel6.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.tableLayoutPanel6.Location = new System.Drawing.Point(0, 401);
+            this.tableLayoutPanel6.Location = new System.Drawing.Point(0, 441);
             this.tableLayoutPanel6.Margin = new System.Windows.Forms.Padding(0);
             this.tableLayoutPanel6.Name = "tableLayoutPanel6";
             this.tableLayoutPanel6.RowCount = 1;
@@ -698,7 +696,7 @@
             this.tableLayoutPanel4.Controls.Add(this.DeleteButton, 1, 0);
             this.tableLayoutPanel4.Controls.Add(this.AddButton, 0, 0);
             this.tableLayoutPanel4.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.tableLayoutPanel4.Location = new System.Drawing.Point(0, 355);
+            this.tableLayoutPanel4.Location = new System.Drawing.Point(0, 395);
             this.tableLayoutPanel4.Margin = new System.Windows.Forms.Padding(0, 5, 0, 0);
             this.tableLayoutPanel4.Name = "tableLayoutPanel4";
             this.tableLayoutPanel4.RowCount = 2;

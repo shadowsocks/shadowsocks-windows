@@ -62,7 +62,7 @@ namespace Shadowsocks.View
         {
             this.Text = I18N.GetString("ServerLog") + "("
                 + (controller.GetCurrentConfiguration().shareOverLan ? "any" : "local") + ":" + controller.GetCurrentConfiguration().localPort.ToString()
-                + I18N.GetString(" Version") + UpdateChecker.Version
+                + I18N.GetString(" Version") + UpdateChecker.FullVersion
                 + ")";
         }
         private void UpdateTexts()

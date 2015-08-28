@@ -448,25 +448,6 @@ namespace Shadowsocks.Controller
         {
             return (DateTime.Now - updateTime).TotalSeconds > TTL;
         }
-
-        private static void SetCRC32(byte[] buffer)
-        {
-            ulong crc = ~Shadowsocks.Util.CRC32.CalcCRC32(buffer, buffer.Length - 4);
-            buffer[buffer.Length - 1] = (byte)(crc >> 24);
-            buffer[buffer.Length - 2] = (byte)(crc >> 16);
-            buffer[buffer.Length - 3] = (byte)(crc >> 8);
-            buffer[buffer.Length - 4] = (byte)(crc);
-        }
-
-        private byte[] CheckCRC32(byte[] buffer)
-        {
-            ulong crc = ~Shadowsocks.Util.CRC32.CalcCRC32(buffer, buffer.Length);
-            if (crc != 0xffffffff00000000u)
-                return null;
-            byte[] ret = new byte[buffer.Length - 4];
-            Array.Copy(buffer, ret, buffer.Length - 4);
-            return ret;
-        }
         private byte[] CheckRecvData(byte[] buffer)
         {
             if (buffer[buffer.Length - 2] != buffer[2] || buffer[buffer.Length - 1] != buffer[3])
@@ -1036,7 +1017,7 @@ namespace Shadowsocks.Controller
             buffer[0] = 0x8;
             buffer[1] = (byte)Command.CMD_CONNECT;
             localid.CopyTo(buffer, 4);
-            SetCRC32(buffer);
+            Util.CRC32.SetCRC32(buffer);
             return buffer;
         }
 
@@ -1050,7 +1031,7 @@ namespace Shadowsocks.Controller
             buffer[3] = (byte)(requestid % 256);
             localid.CopyTo(buffer, 4);
             Array.Copy(connectInfo, 0, buffer, 8, connectInfo.Length);
-            SetCRC32(buffer);
+            Util.CRC32.SetCRC32(buffer);
             return buffer;
         }
 
@@ -1063,7 +1044,7 @@ namespace Shadowsocks.Controller
             buffer[2] = (byte)(requestid / 256);
             buffer[3] = (byte)(requestid % 256);
             localid.CopyTo(buffer, 4);
-            SetCRC32(buffer);
+            Util.CRC32.SetCRC32(buffer);
             return buffer;
         }
 
@@ -1110,7 +1091,7 @@ namespace Shadowsocks.Controller
             }
             localid.CopyTo(buffer, 4);
             Array.Copy(data, 0, buffer, beginIndex, data.Length);
-            SetCRC32(buffer);
+            Util.CRC32.SetCRC32(buffer);
             return buffer;
         }
 
@@ -1190,7 +1171,7 @@ namespace Shadowsocks.Controller
                 //        );
             }
             localid.CopyTo(buffer, 4);
-            SetCRC32(buffer);
+            Util.CRC32.SetCRC32(buffer);
             return buffer;
         }
 

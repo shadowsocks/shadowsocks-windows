@@ -1912,28 +1912,24 @@ namespace Shadowsocks.Controller
             }
         }
 
-        private void RemoteSend(byte[] bytes, int length, bool obfs = false, int obfs_max = 255)
+        private void RemoteSend(byte[] bytes, int length, bool obfs = false, int obfs_max = 32)
         {
             int bytesToSend;
             if (obfs)
             {
                 byte[] bytesToEncrypt = null;
-                int obfs_len = random.Next(obfs_max) + 1;
-                if (obfs_len == 1)
+                int obfs_len = random.Next(obfs_max - 1) + 1;
                 {
-                    bytesToEncrypt = new byte[length + 1];
-                    Array.Copy(bytes, 0, bytesToEncrypt, 1, length);
-                    bytesToEncrypt[0] = 0x81;
-                    length += 1;
-                }
-                else
-                {
-                    int len = obfs_len - 2;
-                    bytesToEncrypt = new byte[length + len + 2];
-                    Array.Copy(bytes, 0, bytesToEncrypt, len + 2, length);
-                    bytesToEncrypt[0] = 0x80;
-                    bytesToEncrypt[1] = (byte)len;
-                    length += len + 2;
+                    int len = obfs_len;
+                    int total_len = length + len + 3 + 4;
+                    bytesToEncrypt = new byte[total_len];
+                    Array.Copy(bytes, 0, bytesToEncrypt, 3 + len, length);
+                    bytesToEncrypt[0] = 0x88;
+                    bytesToEncrypt[1] = (byte)(total_len >> 8);
+                    bytesToEncrypt[2] = (byte)(total_len);
+                    bytesToEncrypt[3] = (byte)(obfs_len);
+                    Util.CRC32.SetCRC32(bytesToEncrypt);
+                    length = total_len;
                 }
                 Logging.LogBin(LogLevel.Debug, "remote send", bytesToEncrypt, length);
                 lock (encryptionLock)
@@ -2112,7 +2108,15 @@ namespace Shadowsocks.Controller
                     else
                     {
                         {
-                            RemoteSend(connetionRecvBuffer, bytesRead);
+                            int packet = ++connectionPacketNumber;
+                            if (packet == 1)
+                            {
+                                RemoteSend(connetionRecvBuffer, bytesRead, server.obfs_tcp);
+                            }
+                            else
+                            {
+                                RemoteSend(connetionRecvBuffer, bytesRead);
+                            }
                         }
                     }
                 }
