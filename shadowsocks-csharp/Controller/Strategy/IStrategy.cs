@@ -14,17 +14,17 @@ namespace Shadowsocks.Controller.Strategy
 
     /*
      * IStrategy
-     * 
+     *
      * Subclasses must be thread-safe
      */
     public interface IStrategy
     {
         string Name { get; }
-        
+
         string ID { get; }
 
         /*
-         * Called when servers need to be reloaded, i.e. new configuration saved 
+         * Called when servers need to be reloaded, i.e. new configuration saved
          */
         void ReloadServers();
 

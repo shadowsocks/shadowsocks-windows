@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Text;
+using Shadowsocks.Model;
+using System.IO;
 using System.Net.NetworkInformation;
 using System.Threading;
 using Shadowsocks.Model;
@@ -17,15 +20,6 @@ namespace Shadowsocks.Controller.Strategy
         private Dictionary<string, StatisticsData> _statistics;
         private const int CachedInterval = 30*60*1000; //choose a new server every 30 minutes
         private const int RetryInterval = 2*60*1000; //choose a new server every 30 minutes
-
-        public class StatisticsData
-        {
-            public int SuccessTimes;
-            public int TimedOutTimes;
-            public int AverageResponse;
-            public int MinResponse;
-            public int MaxResponse;
-        }
 
         public StatisticsStrategy(ShadowsocksController controller)
         {
@@ -99,6 +93,15 @@ namespace Shadowsocks.Controller.Strategy
             return (double)data.SuccessTimes / (data.SuccessTimes + data.TimedOutTimes); //simply choose min package loss
         }
 
+        private class StatisticsData
+        {
+            public int SuccessTimes;
+            public int TimedOutTimes;
+            public int AverageResponse;
+            public int MinResponse;
+            public int MaxResponse;
+        }
+
         private void ChooseNewServer(List<Server> servers)
         {
             if (_statistics == null || servers.Count == 0)
@@ -118,7 +121,7 @@ namespace Shadowsocks.Controller.Strategy
                                   ).Aggregate((result1, result2) => result1.score > result2.score ? result1 : result2);
 
                 if (!_currentServer.Equals(bestResult.server)) //output when enabled
-                {  
+                {
                    LogWhenEnabled($"Switch to server: {bestResult.server.FriendlyName()} by package loss:{1 - bestResult.score}");
                 }
                 _currentServer = bestResult.server;
@@ -137,7 +140,7 @@ namespace Shadowsocks.Controller.Strategy
             }
         }
 
-        public string ID => "com.shadowsocks.strategy.statistics";
+        public string ID => "com.shadowsocks.strategy.scbs";
 
         public string Name => I18N.GetString("Choose By Total Package Loss");
 
@@ -147,6 +150,9 @@ namespace Shadowsocks.Controller.Strategy
             if (oldServer == null)
             {
                 ChooseNewServer(_controller.GetCurrentConfiguration().configs);
+            }
+            if (oldServer != _currentServer)
+            {
             }
             return _currentServer;  //current server cached for CachedInterval
         }
@@ -176,5 +182,6 @@ namespace Shadowsocks.Controller.Strategy
         {
             //TODO: combine this part of data with ICMP statics
         }
+
     }
 }

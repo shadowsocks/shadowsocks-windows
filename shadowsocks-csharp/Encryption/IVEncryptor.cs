@@ -26,7 +26,6 @@ namespace Shadowsocks.Encryption
         protected int keyLen;
         protected int ivLen;
 
-
         public IVEncryptor(string method, string password)
             : base(method, password)
         {

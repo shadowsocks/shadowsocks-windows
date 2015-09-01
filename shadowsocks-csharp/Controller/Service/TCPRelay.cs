@@ -14,9 +14,18 @@ namespace Shadowsocks.Controller
     class TCPRelay : Listener.Service
     {
         private ShadowsocksController _controller;
+        private DateTime _lastSweepTime;
+
+        public ISet<Handler> Handlers
+        {
+            get; set;
+        }
+
         public TCPRelay(ShadowsocksController controller)
         {
             this._controller = controller;
+            this.Handlers = new HashSet<Handler>();
+            this._lastSweepTime = DateTime.Now;
         }
 
         public bool Handle(byte[] firstPacket, int length, Socket socket, object state)
@@ -33,9 +42,33 @@ namespace Shadowsocks.Controller
             Handler handler = new Handler();
             handler.connection = socket;
             handler.controller = _controller;
+            handler.relay = this;
 
             handler.Start(firstPacket, length);
-            return true;
+            IList<Handler> handlersToClose = new List<Handler>();
+            lock (this.Handlers)
+            {
+                this.Handlers.Add(handler);
+                Logging.Debug($"connections: {Handlers.Count}");
+                DateTime now = DateTime.Now;
+                if (now - _lastSweepTime > TimeSpan.FromSeconds(1))
+                {
+                    _lastSweepTime = now;
+                    foreach (Handler handler1 in this.Handlers)
+                    {
+                        if (now - handler1.lastActivity > TimeSpan.FromSeconds(900))
+                        {
+                            handlersToClose.Add(handler1);
+                        }
+                    }
+                }
+            }
+            foreach (Handler handler1 in handlersToClose)
+            {
+                Logging.Debug("Closing timed out connection");
+                handler1.Close();
+            }
+        return true;
         }
     }
 
@@ -48,6 +81,10 @@ namespace Shadowsocks.Controller
         public Socket remote;
         public Socket connection;
         public ShadowsocksController controller;
+        public TCPRelay relay;
+
+        public DateTime lastActivity;
+
         private int retryCount = 0;
         private bool connected;
 
@@ -55,7 +92,7 @@ namespace Shadowsocks.Controller
         private byte[] _firstPacket;
         private int _firstPacketLength;
         // Size of receive buffer.
-        public const int RecvSize = 16384;
+        public const int RecvSize = 8192;
         public const int BufferSize = RecvSize + 32;
 
         private int totalRead = 0;
@@ -74,7 +111,7 @@ namespace Shadowsocks.Controller
         private bool connectionShutdown = false;
         private bool remoteShutdown = false;
         private bool closed = false;
-        
+
         private object encryptionLock = new object();
         private object decryptionLock = new object();
 
@@ -96,6 +133,7 @@ namespace Shadowsocks.Controller
             this._firstPacket = firstPacket;
             this._firstPacketLength = length;
             this.HandshakeReceive();
+            this.lastActivity = DateTime.Now;
         }
 
         private void CheckClose()
@@ -108,6 +146,11 @@ namespace Shadowsocks.Controller
 
         public void Close()
         {
+            lock (relay.Handlers)
+            {
+                Logging.Debug($"connections: {relay.Handlers.Count}");
+                relay.Handlers.Remove(this);
+            }
             lock (this)
             {
                 if (closed)
@@ -151,7 +194,6 @@ namespace Shadowsocks.Controller
                 }
             }
         }
-
 
         private void HandshakeReceive()
         {
@@ -222,7 +264,7 @@ namespace Shadowsocks.Controller
             try
             {
                 int bytesRead = connection.EndReceive(ar);
-                
+
                 if (bytesRead >= 3)
                 {
                     command = connetionRecvBuffer[1];
@@ -272,7 +314,6 @@ namespace Shadowsocks.Controller
 
         private void ReadAll(IAsyncResult ar)
         {
-
             if (closed)
             {
                 return;
@@ -346,7 +387,6 @@ namespace Shadowsocks.Controller
                     ipAddress = ipHostInfo.AddressList[0];
                 }
                 IPEndPoint remoteEP = new IPEndPoint(ipAddress, server.server_port);
-
 
                 remote = new Socket(ipAddress.AddressFamily,
                     SocketType.Stream, ProtocolType.Tcp);
@@ -485,6 +525,7 @@ namespace Shadowsocks.Controller
 
                 if (bytesRead > 0)
                 {
+                    this.lastActivity = DateTime.Now;
                     int bytesToSend;
                     lock (decryptionLock)
                     {
@@ -548,7 +589,6 @@ namespace Shadowsocks.Controller
                     }
                     remote.BeginSend(connetionSendBuffer, 0, bytesToSend, 0, new AsyncCallback(PipeRemoteSendCallback), null);
 
-
                     IStrategy strategy = controller.GetCurrentStrategy();
                     if (strategy != null)
                     {
@@ -607,5 +647,4 @@ namespace Shadowsocks.Controller
             }
         }
     }
-
 }

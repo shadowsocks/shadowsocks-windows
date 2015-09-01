@@ -9,6 +9,7 @@ using System.Text;
 using System.Net.NetworkInformation;
 using System.Net;
 using System.Runtime.InteropServices;
+using Shadowsocks.Util;
 
 namespace Shadowsocks.Controller
 {
@@ -20,7 +21,7 @@ namespace Shadowsocks.Controller
 
         static PolipoRunner()
         {
-            temppath = Path.GetTempPath();
+            temppath = Utils.GetTempPath();
             try
             {
                 FileManager.UncompressFile(temppath + "/ss_privoxy.exe", Resources.privoxy_exe);
@@ -65,10 +66,13 @@ namespace Shadowsocks.Controller
                 polipoConfig = polipoConfig.Replace("__POLIPO_BIND_IP__", configuration.shareOverLan ? "0.0.0.0" : "127.0.0.1");
                 FileManager.ByteArrayToFile(temppath + "/privoxy.conf", System.Text.Encoding.UTF8.GetBytes(polipoConfig));
 
+                if (!(temppath.EndsWith("\\") || temppath.EndsWith("/"))) {
+                    temppath = temppath + "\\";
+                }
                 _process = new Process();
                 // Configure the process using the StartInfo properties.
-                _process.StartInfo.FileName = temppath + "/ss_privoxy.exe";
-                _process.StartInfo.Arguments = " \"" + temppath + "/privoxy.conf\"";
+                _process.StartInfo.FileName = temppath + "ss_privoxy.exe";
+                _process.StartInfo.Arguments = " \"" + temppath + "privoxy.conf\"";
                 _process.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
                 _process.StartInfo.UseShellExecute = true;
                 _process.StartInfo.CreateNoWindow = true;
@@ -144,7 +148,6 @@ namespace Shadowsocks.Controller
         [DllImport("user32.dll")]
         public static extern IntPtr SendMessage(IntPtr hWnd, uint msg, int wParam, int lParam);
 
-
         public void RefreshTrayArea()
         {
             IntPtr systemTrayContainerHandle = FindWindow("Shell_TrayWnd", null);
@@ -160,7 +163,6 @@ namespace Shadowsocks.Controller
             }
             RefreshTrayArea(notificationAreaHandle);
         }
-
 
         private static void RefreshTrayArea(IntPtr windowHandle)
         {

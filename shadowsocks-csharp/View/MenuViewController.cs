@@ -18,7 +18,7 @@ namespace Shadowsocks.View
         // yes this is just a menu view controller
         // when config form is closed, it moves away from RAM
         // and it should just do anything related to the config form
-        
+
         private ShadowsocksController controller;
         private UpdateChecker updateChecker;
 
@@ -29,6 +29,7 @@ namespace Shadowsocks.View
         private MenuItem enableItem;
         private MenuItem modeItem;
         private MenuItem AutoStartupItem;
+        private MenuItem AvailabilityStatistics;
         private MenuItem ShareOverLANItem;
         private MenuItem SeperatorItem;
         private MenuItem ConfigItem;
@@ -164,7 +165,6 @@ namespace Shadowsocks.View
                     this.SeperatorItem = new MenuItem("-"),
                     this.ConfigItem = CreateMenuItem("Edit Servers...", new EventHandler(this.Config_Click)),
                     CreateMenuItem("Show QRCode...", new EventHandler(this.QRCodeItem_Click)),
-                    CreateMenuItem("Statistics Stategy Options", new EventHandler(StatisticsStrategyOptionsItem_Click)),
                     CreateMenuItem("Scan QRCode from Screen...", new EventHandler(this.ScanQRCodeItem_Click))
                 }),
                 CreateMenuGroup("PAC ", new MenuItem[] {
@@ -178,6 +178,7 @@ namespace Shadowsocks.View
                 }),
                 new MenuItem("-"),
                 this.AutoStartupItem = CreateMenuItem("Start on Boot", new EventHandler(this.AutoStartupItem_Click)),
+                this.AvailabilityStatistics = CreateMenuItem("Availability Statistics", new EventHandler(this.AvailabilityStatisticsItem_Click)),
                 this.ShareOverLANItem = CreateMenuItem("Allow Clients from LAN", new EventHandler(this.ShareOverLANItem_Click)),
                 new MenuItem("-"),
                 CreateMenuItem("Show Logs...", new EventHandler(this.ShowLogItem_Click)),
@@ -261,6 +262,7 @@ namespace Shadowsocks.View
             PACModeItem.Checked = !config.global;
             ShareOverLANItem.Checked = config.shareOverLan;
             AutoStartupItem.Checked = AutoStartup.Check();
+            AvailabilityStatistics.Checked = config.availabilityStatistics;
             onlinePACItem.Checked = onlinePACItem.Enabled && config.useOnlinePac;
             localPACItem.Checked = !onlinePACItem.Checked;
             UpdatePACItemsEnabledStatus();
@@ -320,7 +322,7 @@ namespace Shadowsocks.View
         void configForm_FormClosed(object sender, FormClosedEventArgs e)
         {
             configForm = null;
-            Util.Utils.ReleaseMemory();
+            Util.Utils.ReleaseMemory(true);
             ShowFirstTimeBalloon();
         }
 
@@ -424,14 +426,6 @@ namespace Shadowsocks.View
             qrCodeForm.Show();
         }
 
-        private void StatisticsStrategyOptionsItem_Click(object sender, EventArgs e)
-        {
-            //TODO: Load options
-            var statisticsStrategyOptionsForm = new StatisticsStrategyConfigurationForm(controller);
-            statisticsStrategyOptionsForm.Show();
-            //TODO: Save options
-        }
-
         private void ScanQRCodeItem_Click(object sender, EventArgs e)
         {
             foreach (Screen screen in Screen.AllScreens)
@@ -526,12 +520,17 @@ namespace Shadowsocks.View
             Process.Start(_urlToOpen);
         }
 
-		private void AutoStartupItem_Click(object sender, EventArgs e) {
-			AutoStartupItem.Checked = !AutoStartupItem.Checked;
-			if (!AutoStartup.Set(AutoStartupItem.Checked)) {
-				MessageBox.Show(I18N.GetString("Failed to update registry"));
-			}
-		}
+        private void AutoStartupItem_Click(object sender, EventArgs e) {
+            AutoStartupItem.Checked = !AutoStartupItem.Checked;
+            if (!AutoStartup.Set(AutoStartupItem.Checked)) {
+                MessageBox.Show(I18N.GetString("Failed to update registry"));
+            }
+        }
+
+        private void AvailabilityStatisticsItem_Click(object sender, EventArgs e) {
+            AvailabilityStatistics.Checked = !AvailabilityStatistics.Checked;
+            controller.ToggleAvailabilityStatistics(AvailabilityStatistics.Checked);
+        }
 
         private void LocalPACItem_Click(object sender, EventArgs e)
         {

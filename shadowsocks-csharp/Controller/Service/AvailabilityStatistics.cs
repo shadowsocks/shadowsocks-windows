@@ -10,13 +10,15 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using Shadowsocks.Model;
 using SimpleJson = SimpleJson.SimpleJson;
+using Shadowsocks.Util;
 using Timer = System.Threading.Timer;
 
 namespace Shadowsocks.Controller
 {
     using DataUnit = KeyValuePair<string, string>;
     using DataList = List<KeyValuePair<string, string>>;
-    class AvailabilityStatistics
+
+    internal class AvailabilityStatistics
     {
         private const string StatisticsFilesName = "shadowsocks.availability.csv";
         private const string Delimiter = ",";
@@ -33,7 +35,7 @@ namespace Shadowsocks.Controller
         //static constructor to initialize every public static fields before refereced
         static AvailabilityStatistics()
         {
-            var temppath = Path.GetTempPath();
+            string temppath = Utils.GetTempPath();
             AvailabilityStatisticsFile = Path.Combine(temppath, StatisticsFilesName);
         }
 
@@ -41,10 +43,18 @@ namespace Shadowsocks.Controller
         {
             try
             {
-                _timer?.Dispose();
-                if (!enabled) return true;
-                _state = new State();
-                _timer = new Timer(Evaluate, _state, delayBeforeStart, Interval);
+                if (enabled)
+                {
+                    if (_timer?.Change(0, Interval) == null)
+                    {
+                        _state = new State();
+                        _timer = new Timer(Evaluate, _state, 0, Interval);
+                    }
+                }
+                else
+                {
+                    _timer?.Dispose();
+                }
                 return true;
             }
             catch (Exception e)
@@ -80,7 +90,7 @@ namespace Shadowsocks.Controller
             string country = obj["country"];
             string city = obj["city"];
             string isp = obj["isp"];
-            string regionName= obj["regionName"];
+            string regionName = obj["regionName"];
             if (country == null || city == null || isp == null || regionName == null) return ret;
             ret[0] = new DataUnit(State.Geolocation, $"{country} {regionName} {city}");
             ret[1] = new DataUnit(State.ISP, isp);
@@ -93,7 +103,8 @@ namespace Shadowsocks.Controller
             if (server.server == "") return null;
             var ping = new Ping();
             var ret = new List<DataList>();
-            foreach (var timestamp in Enumerable.Range(0, Repeat).Select(_ => DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")))
+            foreach (
+                var timestamp in Enumerable.Range(0, Repeat).Select(_ => DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")))
             {
                 //ICMP echo. we can also set options and special bytes
                 try
@@ -108,7 +119,7 @@ namespace Shadowsocks.Controller
                         //new KeyValuePair<string, string>("data", reply.Buffer.ToString()); // The data of reply
                     });
                 }
-                catch (PingException e)
+                catch (Exception e)
                 {
                     Logging.LogUsefulException(e);
                 }
@@ -138,11 +149,11 @@ namespace Shadowsocks.Controller
             if (!File.Exists(AvailabilityStatisticsFile))
             {
                 var headerLine = string.Join(Delimiter, data.Select(kv => kv.Key).ToArray());
-                lines = new[] { headerLine, dataLine };
+                lines = new[] {headerLine, dataLine};
             }
             else
             {
-                lines = new[] { dataLine };
+                lines = new[] {dataLine};
             }
             File.AppendAllLines(AvailabilityStatisticsFile, lines);
         }
