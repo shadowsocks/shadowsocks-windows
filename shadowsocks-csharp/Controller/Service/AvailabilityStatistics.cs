@@ -121,6 +121,7 @@ namespace Shadowsocks.Controller
                 }
                 catch (Exception e)
                 {
+                    Console.WriteLine($"An exception occured when eveluating {server.FriendlyName()}");
                     Logging.LogUsefulException(e);
                 }
             }
