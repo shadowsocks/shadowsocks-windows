@@ -6,10 +6,11 @@ using System.Net;
 using SimpleJson;
 using System.Net.Http;
 using System.Net.NetworkInformation;
+using System.Net.Sockets;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Shadowsocks.Model;
-using SimpleJson = SimpleJson.SimpleJson;
 using Shadowsocks.Util;
 using Timer = System.Threading.Timer;
 
@@ -20,35 +21,43 @@ namespace Shadowsocks.Controller
 
     internal class AvailabilityStatistics
     {
+        public static readonly string DateTimePattern = "yyyy-MM-dd HH:mm:ss";
         private const string StatisticsFilesName = "shadowsocks.availability.csv";
         private const string Delimiter = ",";
         private const int Timeout = 500;
-        private const int Repeat = 4; //repeat times every evaluation
-        private const int Interval = 10*60*1000; //evaluate proxies every 15 minutes
-        private const int delayBeforeStart = 1*1000; //delay 1 second before start
+        private const int DelayBeforeStart = 1000;
+        private int _repeat => _config.RepeatTimesNum;
+        private int _interval => (int) TimeSpan.FromMinutes(_config.DataCollectionMinutes).TotalMilliseconds; 
         private Timer _timer;
         private State _state;
         private List<Server> _servers;
+        private StatisticsStrategyConfiguration _config;
 
         public static string AvailabilityStatisticsFile;
 
         //static constructor to initialize every public static fields before refereced
         static AvailabilityStatistics()
         {
-            string temppath = Utils.GetTempPath();
+            var temppath = Utils.GetTempPath();
             AvailabilityStatisticsFile = Path.Combine(temppath, StatisticsFilesName);
         }
 
-        public bool Set(bool enabled)
+        public AvailabilityStatistics(Configuration config, StatisticsStrategyConfiguration statisticsConfig)
         {
+            UpdateConfiguration(config, statisticsConfig);
+        }
+
+        public bool Set(StatisticsStrategyConfiguration config)
+        {
+            _config = config;
             try
             {
-                if (enabled)
+                if (config.StatisticsEnabled)
                 {
-                    if (_timer?.Change(0, Interval) == null)
+                    if (_timer?.Change(DelayBeforeStart, _interval) == null)
                     {
                         _state = new State();
-                        _timer = new Timer(Evaluate, _state, 0, Interval);
+                        _timer = new Timer(Evaluate, _state, DelayBeforeStart, _interval);
                     }
                 }
                 else
@@ -66,7 +75,7 @@ namespace Shadowsocks.Controller
 
         //hardcode
         //TODO: backup reliable isp&geolocation provider or a local database is required
-        private static async Task<DataList> getGeolocationAndISP()
+        public static async Task<DataList> GetGeolocationAndIsp()
         {
             Logging.Debug("Retrive information of geolocation and isp");
             const string api = "http://ip-api.com/json";
@@ -92,24 +101,25 @@ namespace Shadowsocks.Controller
             string isp = obj["isp"];
             string regionName = obj["regionName"];
             if (country == null || city == null || isp == null || regionName == null) return ret;
-            ret[0] = new DataUnit(State.Geolocation, $"{country} {regionName} {city}");
+            ret[0] = new DataUnit(State.Geolocation, $"{country} | {regionName} | {city}");
             ret[1] = new DataUnit(State.ISP, isp);
             return ret;
         }
 
-        private static async Task<List<DataList>> ICMPTest(Server server)
+        private async Task<List<DataList>> ICMPTest(Server server)
         {
-            Logging.Debug("eveluating " + server.FriendlyName());
+            Logging.Debug("Ping " + server.FriendlyName());
             if (server.server == "") return null;
+            var IP = Dns.GetHostAddresses(server.server).First(ip => ip.AddressFamily == AddressFamily.InterNetwork);
             var ping = new Ping();
             var ret = new List<DataList>();
             foreach (
-                var timestamp in Enumerable.Range(0, Repeat).Select(_ => DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")))
+                var timestamp in Enumerable.Range(0, _repeat).Select(_ => DateTime.Now.ToString(DateTimePattern)))
             {
                 //ICMP echo. we can also set options and special bytes
                 try
                 {
-                    var reply = await ping.SendTaskAsync(server.server, Timeout);
+                    var reply = ping.Send(IP, Timeout);
                     ret.Add(new List<KeyValuePair<string, string>>
                     {
                         new KeyValuePair<string, string>("Timestamp", timestamp),
@@ -118,6 +128,8 @@ namespace Shadowsocks.Controller
                         new KeyValuePair<string, string>("RoundtripTime", reply?.RoundtripTime.ToString())
                         //new KeyValuePair<string, string>("data", reply.Buffer.ToString()); // The data of reply
                     });
+                    Thread.Sleep(new Random().Next() % Timeout);
+                    //Do ICMPTest in a random frequency
                 }
                 catch (Exception e)
                 {
@@ -130,7 +142,7 @@ namespace Shadowsocks.Controller
 
         private async void Evaluate(object obj)
         {
-            var geolocationAndIsp = getGeolocationAndISP();
+            var geolocationAndIsp = GetGeolocationAndIsp();
             foreach (var dataLists in await TaskEx.WhenAll(_servers.Select(ICMPTest)))
             {
                 if (dataLists == null) continue;
@@ -156,16 +168,23 @@ namespace Shadowsocks.Controller
             {
                 lines = new[] {dataLine};
             }
-            File.AppendAllLines(AvailabilityStatisticsFile, lines);
+            try
+            {
+                File.AppendAllLines(AvailabilityStatisticsFile, lines);
+            }
+            catch (IOException e)
+            {
+                Logging.LogUsefulException(e);
+            }
         }
 
-        internal void UpdateConfiguration(Configuration config)
+        internal void UpdateConfiguration(Configuration config, StatisticsStrategyConfiguration statisticsConfig)
         {
-            Set(config.availabilityStatistics);
+            Set(statisticsConfig);
             _servers = config.configs;
         }
 
-        private class State
+        public class State
         {
             public DataList dataList = new DataList();
             public const string Geolocation = "Geolocation";

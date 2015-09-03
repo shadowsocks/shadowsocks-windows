@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -7,19 +8,25 @@ using System.Text;
 using Shadowsocks.Model;
 using System.IO;
 using System.Net.NetworkInformation;
-using System.Threading;
+using System.Windows.Forms;
+using Newtonsoft.Json;
 using Shadowsocks.Model;
+using Timer = System.Threading.Timer;
 
 namespace Shadowsocks.Controller.Strategy
 {
+    using DataUnit = KeyValuePair<string, string>;
+    using DataList = List<KeyValuePair<string, string>>;
+
     class StatisticsStrategy : IStrategy
     {
         private readonly ShadowsocksController _controller;
         private Server _currentServer;
         private readonly Timer _timer;
-        private Dictionary<string, StatisticsData> _statistics;
-        private const int CachedInterval = 30*60*1000; //choose a new server every 30 minutes
-        private const int RetryInterval = 2*60*1000; //choose a new server every 30 minutes
+        private Dictionary<string, List<StatisticsRawData>> _rawStatistics;
+        private int ChoiceKeptMilliseconds
+            => (int) TimeSpan.FromMinutes(_controller.StatisticsConfiguration.ChoiceKeptMinutes).TotalMilliseconds;
+        private const int RetryInterval = 2*60*1000; //retry 2 minutes after failed
 
         public StatisticsStrategy(ShadowsocksController controller)
         {
@@ -38,13 +45,6 @@ namespace Shadowsocks.Controller.Strategy
             ChooseNewServer(servers);
         }
 
-        /*
-        return a dict:
-        {
-            'ServerFriendlyName1':StatisticsData,
-            'ServerFriendlyName2':...
-        }
-        */
         private void LoadStatistics()
         {
             try
@@ -53,32 +53,30 @@ namespace Shadowsocks.Controller.Strategy
                 Logging.Debug($"loading statistics from {path}");
                 if (!File.Exists(path))
                 {
-                    LogWhenEnabled($"statistics file does not exist, try to reload {RetryInterval} minutes later");
-                    _timer.Change(RetryInterval, CachedInterval);
+                    LogWhenEnabled($"statistics file does not exist, try to reload {RetryInterval/60/1000} minutes later");
+                    _timer.Change(RetryInterval, ChoiceKeptMilliseconds);
                     return;
                 }
-                _statistics = (from l in File.ReadAllLines(path)
-                                  .Skip(1)
-                                  let strings = l.Split(new[] { "," }, StringSplitOptions.RemoveEmptyEntries)
-                                  let rawData = new
-                                  {
-                                      ServerName = strings[1],
-                                      IPStatus = strings[2],
-                                      RoundtripTime = int.Parse(strings[3])
-                                  }
-                                  group rawData by rawData.ServerName into server
-                                  select new
-                                  {
-                                      ServerName = server.Key,
-                                      data = new StatisticsData
-                                      {
-                                          SuccessTimes = server.Count(data => IPStatus.Success.ToString().Equals(data.IPStatus)),
-                                          TimedOutTimes = server.Count(data => IPStatus.TimedOut.ToString().Equals(data.IPStatus)),
-                                          AverageResponse = Convert.ToInt32(server.Average(data => data.RoundtripTime)),
-                                          MinResponse = server.Min(data => data.RoundtripTime),
-                                          MaxResponse = server.Max(data => data.RoundtripTime)
-                                      }
-                                  }).ToDictionary(server => server.ServerName, server => server.data);
+                _rawStatistics = (from l in File.ReadAllLines(path)
+                    .Skip(1)
+                    let strings = l.Split(new[] {","}, StringSplitOptions.RemoveEmptyEntries)
+                    let rawData = new StatisticsRawData
+                    {
+                        Timestamp = strings[0],
+                        ServerName = strings[1],
+                        ICMPStatus = strings[2],
+                        RoundtripTime = int.Parse(strings[3]),
+                        Geolocation = 5 > strings.Length ?
+                        null 
+                        : strings[4],
+                        ISP = 6 > strings.Length ? null : strings[5]
+                    }
+                    group rawData by rawData.ServerName into server
+                    select new
+                    {
+                        ServerName = server.Key,
+                        data = server.ToList()
+                    }).ToDictionary(server => server.ServerName, server=> server.data);
             }
             catch (Exception e)
             {
@@ -88,15 +86,67 @@ namespace Shadowsocks.Controller.Strategy
 
         //return the score by data
         //server with highest score will be choosen
-        private static double GetScore(StatisticsData data)
+        private float GetScore(IEnumerable<StatisticsRawData> rawDataList)
         {
-            return (double)data.SuccessTimes / (data.SuccessTimes + data.TimedOutTimes); //simply choose min package loss
+            var config = _controller.StatisticsConfiguration;
+            if (config.ByIsp)
+            {
+                var current = AvailabilityStatistics.GetGeolocationAndIsp().Result;
+                rawDataList = rawDataList.Where(data => data.Geolocation == current[0].Value || data.Geolocation == AvailabilityStatistics.State.Unknown);
+                rawDataList = rawDataList.Where(data => data.ISP == current[1].Value || data.ISP == AvailabilityStatistics.State.Unknown);
+                if (rawDataList.LongCount() == 0) return 0; 
+            }
+            if (config.ByHourOfDay)
+            {
+                var currentHour = DateTime.Now.Hour;
+                rawDataList = rawDataList.Where(data =>
+                {
+                    DateTime dateTime;
+                    DateTime.TryParseExact(data.Timestamp, AvailabilityStatistics.DateTimePattern, null,
+                        DateTimeStyles.None, out dateTime);
+                    var result = dateTime.Hour.Equals(currentHour);
+                    return result;
+                });
+                if (rawDataList.LongCount() == 0) return 0; 
+            }
+            var dataList = rawDataList as IList<StatisticsRawData> ?? rawDataList.ToList();
+            var serverName = dataList[0]?.ServerName;
+            var SuccessTimes = (float) dataList.Count(data => data.ICMPStatus.Equals(IPStatus.Success.ToString()));
+            var TimedOutTimes = (float) dataList.Count(data => data.ICMPStatus.Equals(IPStatus.TimedOut.ToString()));
+            var statisticsData = new StatisticsData()
+            {
+                PackageLoss = TimedOutTimes / (SuccessTimes + TimedOutTimes) * 100,
+                AverageResponse = Convert.ToInt32(dataList.Average(data => data.RoundtripTime)),
+                MinResponse = dataList.Min(data => data.RoundtripTime),
+                MaxResponse = dataList.Max(data => data.RoundtripTime)
+            };
+            float factor;
+            float score = 0;
+            if (!config.Calculations.TryGetValue("PackageLoss", out factor)) factor = 0;
+            score += statisticsData.PackageLoss*factor;
+            if (!config.Calculations.TryGetValue("AverageResponse", out factor)) factor = 0;
+            score += statisticsData.AverageResponse*factor;
+            if (!config.Calculations.TryGetValue("MinResponse", out factor)) factor = 0;
+            score += statisticsData.MinResponse*factor;
+            if (!config.Calculations.TryGetValue("MaxResponse", out factor)) factor = 0;
+            score += statisticsData.MaxResponse*factor;
+            Logging.Debug($"{serverName}  {JsonConvert.SerializeObject(statisticsData)}");
+            return score;
+        }
+
+        class StatisticsRawData
+        {
+            public string Timestamp;
+            public string ServerName;
+            public string ICMPStatus;
+            public int RoundtripTime;
+            public string Geolocation;
+            public string ISP ;
         }
 
         public class StatisticsData
         {
-            public int SuccessTimes;
-            public int TimedOutTimes;
+            public float PackageLoss;
             public int AverageResponse;
             public int MinResponse;
             public int MaxResponse;
@@ -104,7 +154,7 @@ namespace Shadowsocks.Controller.Strategy
 
         private void ChooseNewServer(List<Server> servers)
         {
-            if (_statistics == null || servers.Count == 0)
+            if (_rawStatistics == null || servers.Count == 0)
             {
                 return;
             }
@@ -112,17 +162,17 @@ namespace Shadowsocks.Controller.Strategy
             {
                 var bestResult = (from server in servers
                                   let name = server.FriendlyName()
-                                  where _statistics.ContainsKey(name)
+                                  where _rawStatistics.ContainsKey(name)
                                   select new
                                   {
                                       server,
-                                      score = GetScore(_statistics[name])
+                                      score = GetScore(_rawStatistics[name])
                                   }
                                   ).Aggregate((result1, result2) => result1.score > result2.score ? result1 : result2);
 
                 if (!_currentServer.Equals(bestResult.server)) //output when enabled
                 {
-                   LogWhenEnabled($"Switch to server: {bestResult.server.FriendlyName()} by package loss:{1 - bestResult.score}");
+                   LogWhenEnabled($"Switch to server: {bestResult.server.FriendlyName()} by statistics: score {bestResult.score}");
                 }
                 _currentServer = bestResult.server;
             }
@@ -160,7 +210,7 @@ namespace Shadowsocks.Controller.Strategy
         public void ReloadServers()
         {
             ChooseNewServer(_controller.GetCurrentConfiguration().configs);
-            _timer?.Change(0, CachedInterval);
+            _timer?.Change(0, ChoiceKeptMilliseconds);
         }
 
         public void SetFailure(Server server)

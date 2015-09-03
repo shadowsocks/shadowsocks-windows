@@ -37,7 +37,7 @@ namespace Shadowsocks.View
             bindingConfiguration.Add(_configuration);
             foreach (var kv in _configuration.Calculations)
             {
-                var calculation = new CalculationControl(kv.Key);
+                var calculation = new CalculationControl(kv.Key, kv.Value);
                 calculationContainer.Controls.Add(calculation);
             }
         }
@@ -54,6 +54,7 @@ namespace Shadowsocks.View
                 _configuration.Calculations[calculation.Value] = calculation.Factor;
             }
             _controller?.SaveStrategyConfigurations(_configuration);
+            _controller?.UpdateStatisticsConfiguration(StatisticsEnabledCheckBox.Checked);
             Close();
         }
     }

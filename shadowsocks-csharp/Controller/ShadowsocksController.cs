@@ -258,14 +258,12 @@ namespace Shadowsocks.Controller
             }
         }
 
-        public void ToggleAvailabilityStatistics(bool enabled)
+        public void UpdateStatisticsConfiguration(bool enabled)
         {
-            if (_availabilityStatics != null)
-            {
-                _availabilityStatics.Set(enabled);
-                _config.availabilityStatistics = enabled;
-                SaveConfig(_config);
-            }
+            if (_availabilityStatics == null) return;
+            _availabilityStatics.UpdateConfiguration(_config, StatisticsConfiguration);
+            _config.availabilityStatistics = enabled;
+            SaveConfig(_config);
         }
 
         public void SavePACUrl(string pacUrl)
@@ -315,9 +313,9 @@ namespace Shadowsocks.Controller
 
             if (_availabilityStatics == null)
             {
-                _availabilityStatics = new AvailabilityStatistics();
+                _availabilityStatics = new AvailabilityStatistics(_config, StatisticsConfiguration);
             }
-            _availabilityStatics.UpdateConfiguration(_config);
+            _availabilityStatics.UpdateConfiguration(_config, StatisticsConfiguration);
 
             if (_listener != null)
             {

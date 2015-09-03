@@ -37,6 +37,7 @@
             // 
             // factorNum
             // 
+            this.factorNum.DecimalPlaces = 2;
             this.factorNum.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.factorNum.Increment = new decimal(new int[] {
             1,

@@ -14,12 +14,12 @@ namespace Shadowsocks.Model
     public class StatisticsStrategyConfiguration
     {
         public static readonly string ID = "com.shadowsocks.strategy.statistics"; 
-        private bool _statisticsEnabled;
-        private bool _byIsp;
-        private bool _byHourOfDay;
-        private int _choiceKeptMinutes;
-        private int _dataCollectionMinutes;
-        private int _repeatTimesNum;
+        private bool _statisticsEnabled = true;
+        private bool _byIsp = false;
+        private bool _byHourOfDay = false;
+        private int _choiceKeptMinutes = 10;
+        private int _dataCollectionMinutes = 10;
+        private int _repeatTimesNum = 4;
 
 
         private const string ConfigFile = "statistics-config.json";
@@ -34,7 +34,9 @@ namespace Shadowsocks.Model
             }
             catch (FileNotFoundException e)
             {
-                return new StatisticsStrategyConfiguration();
+                var configuration = new StatisticsStrategyConfiguration();
+                Save(configuration);
+                return configuration;
             }
             catch (Exception e)
             {

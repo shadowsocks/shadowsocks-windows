@@ -33,9 +33,9 @@
             System.Windows.Forms.DataVisualization.Charting.Legend legend1 = new System.Windows.Forms.DataVisualization.Charting.Legend();
             System.Windows.Forms.DataVisualization.Charting.Series series1 = new System.Windows.Forms.DataVisualization.Charting.Series();
             System.Windows.Forms.DataVisualization.Charting.Series series2 = new System.Windows.Forms.DataVisualization.Charting.Series();
-            System.Windows.Forms.DataVisualization.Charting.Series series3 = new System.Windows.Forms.DataVisualization.Charting.Series();
             this.StatisticsChart = new System.Windows.Forms.DataVisualization.Charting.Chart();
             this.byISPCheckBox = new System.Windows.Forms.CheckBox();
+            this.bindingConfiguration = new System.Windows.Forms.BindingSource(this.components);
             this.label2 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
@@ -57,8 +57,8 @@
             this.calculationContainer = new System.Windows.Forms.FlowLayoutPanel();
             this.CancelButton = new System.Windows.Forms.Button();
             this.OKButton = new System.Windows.Forms.Button();
-            this.bindingConfiguration = new System.Windows.Forms.BindingSource(this.components);
             ((System.ComponentModel.ISupportInitialize)(this.StatisticsChart)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.bindingConfiguration)).BeginInit();
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
@@ -75,7 +75,6 @@
             this.splitContainer3.Panel1.SuspendLayout();
             this.splitContainer3.Panel2.SuspendLayout();
             this.splitContainer3.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.bindingConfiguration)).BeginInit();
             this.SuspendLayout();
             // 
             // StatisticsChart
@@ -96,26 +95,20 @@
             this.StatisticsChart.Name = "StatisticsChart";
             this.StatisticsChart.Palette = System.Windows.Forms.DataVisualization.Charting.ChartColorPalette.Pastel;
             series1.ChartArea = "ChartArea";
-            series1.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Area;
-            series1.Color = System.Drawing.Color.FromArgb(((int)(((byte)(204)))), ((int)(((byte)(204)))), ((int)(((byte)(204)))));
+            series1.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Bubble;
+            series1.Color = System.Drawing.Color.FromArgb(((int)(((byte)(221)))), ((int)(((byte)(88)))), ((int)(((byte)(0)))));
             series1.Legend = "ChartLegend";
-            series1.Name = "Data Transferred";
+            series1.Name = "Package Loss";
+            series1.YValuesPerPoint = 4;
+            series2.BorderWidth = 4;
             series2.ChartArea = "ChartArea";
-            series2.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Bubble;
-            series2.Color = System.Drawing.Color.FromArgb(((int)(((byte)(221)))), ((int)(((byte)(88)))), ((int)(((byte)(0)))));
+            series2.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
+            series2.Color = System.Drawing.Color.FromArgb(((int)(((byte)(155)))), ((int)(((byte)(77)))), ((int)(((byte)(150)))));
             series2.Legend = "ChartLegend";
-            series2.Name = "Package Loss";
-            series2.YValuesPerPoint = 4;
-            series3.BorderWidth = 4;
-            series3.ChartArea = "ChartArea";
-            series3.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
-            series3.Color = System.Drawing.Color.FromArgb(((int)(((byte)(155)))), ((int)(((byte)(77)))), ((int)(((byte)(150)))));
-            series3.Legend = "ChartLegend";
-            series3.Name = "Ping";
+            series2.Name = "Ping";
             this.StatisticsChart.Series.Add(series1);
             this.StatisticsChart.Series.Add(series2);
-            this.StatisticsChart.Series.Add(series3);
-            this.StatisticsChart.Size = new System.Drawing.Size(951, 222);
+            this.StatisticsChart.Size = new System.Drawing.Size(1061, 314);
             this.StatisticsChart.TabIndex = 2;
             // 
             // byISPCheckBox
@@ -129,6 +122,10 @@
             this.byISPCheckBox.TabIndex = 5;
             this.byISPCheckBox.Text = "By ISP/geolocation";
             this.byISPCheckBox.UseVisualStyleBackColor = true;
+            // 
+            // bindingConfiguration
+            // 
+            this.bindingConfiguration.DataSource = typeof(Shadowsocks.Model.StatisticsStrategyConfiguration);
             // 
             // label2
             // 
@@ -153,7 +150,7 @@
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(12, 226);
+            this.label4.Location = new System.Drawing.Point(7, 226);
             this.label4.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(51, 28);
@@ -165,7 +162,7 @@
             this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.groupBox1.Controls.Add(this.radioButton2);
             this.groupBox1.Controls.Add(this.radioButton1);
-            this.groupBox1.Location = new System.Drawing.Point(698, 7);
+            this.groupBox1.Location = new System.Drawing.Point(808, 81);
             this.groupBox1.Margin = new System.Windows.Forms.Padding(5, 10, 5, 10);
             this.groupBox1.Name = "groupBox1";
             this.groupBox1.Padding = new System.Windows.Forms.Padding(5, 10, 5, 10);
@@ -177,6 +174,7 @@
             // radioButton2
             // 
             this.radioButton2.AutoSize = true;
+            this.radioButton2.Checked = true;
             this.radioButton2.Location = new System.Drawing.Point(10, 63);
             this.radioButton2.Margin = new System.Windows.Forms.Padding(5, 10, 5, 10);
             this.radioButton2.Name = "radioButton2";
@@ -194,7 +192,6 @@
             this.radioButton1.Name = "radioButton1";
             this.radioButton1.Size = new System.Drawing.Size(70, 32);
             this.radioButton1.TabIndex = 0;
-            this.radioButton1.TabStop = true;
             this.radioButton1.Text = "24h";
             this.radioButton1.UseVisualStyleBackColor = true;
             // 
@@ -217,8 +214,8 @@
             this.splitContainer1.Panel2.Controls.Add(this.OKButton);
             this.splitContainer1.Panel2.Controls.Add(this.groupBox1);
             this.splitContainer1.Panel2.Controls.Add(this.StatisticsChart);
-            this.splitContainer1.Size = new System.Drawing.Size(951, 458);
-            this.splitContainer1.SplitterDistance = 226;
+            this.splitContainer1.Size = new System.Drawing.Size(1061, 637);
+            this.splitContainer1.SplitterDistance = 313;
             this.splitContainer1.SplitterWidth = 10;
             this.splitContainer1.TabIndex = 12;
             // 
@@ -249,7 +246,7 @@
             // splitContainer2.Panel2
             // 
             this.splitContainer2.Panel2.Controls.Add(this.splitContainer3);
-            this.splitContainer2.Size = new System.Drawing.Size(951, 226);
+            this.splitContainer2.Size = new System.Drawing.Size(1061, 313);
             this.splitContainer2.SplitterDistance = 365;
             this.splitContainer2.SplitterWidth = 5;
             this.splitContainer2.TabIndex = 7;
@@ -282,7 +279,7 @@
             0,
             0,
             0});
-            this.dataCollectionMinutesNum.Location = new System.Drawing.Point(161, 188);
+            this.dataCollectionMinutesNum.Location = new System.Drawing.Point(161, 179);
             this.dataCollectionMinutesNum.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.dataCollectionMinutesNum.Maximum = new decimal(new int[] {
             120,
@@ -298,7 +295,7 @@
             this.dataCollectionMinutesNum.Size = new System.Drawing.Size(92, 34);
             this.dataCollectionMinutesNum.TabIndex = 18;
             this.dataCollectionMinutesNum.Value = new decimal(new int[] {
-            5,
+            10,
             0,
             0,
             0});
@@ -339,7 +336,7 @@
             this.choiceKeptMinutesNum.Size = new System.Drawing.Size(92, 34);
             this.choiceKeptMinutesNum.TabIndex = 16;
             this.choiceKeptMinutesNum.Value = new decimal(new int[] {
-            5,
+            10,
             0,
             0,
             0});
@@ -359,7 +356,7 @@
             // repeatTimesNum
             // 
             this.repeatTimesNum.DataBindings.Add(new System.Windows.Forms.Binding("Value", this.bindingConfiguration, "RepeatTimesNum", true));
-            this.repeatTimesNum.Location = new System.Drawing.Point(72, 223);
+            this.repeatTimesNum.Location = new System.Drawing.Point(66, 224);
             this.repeatTimesNum.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.repeatTimesNum.Maximum = new decimal(new int[] {
             10,
@@ -378,7 +375,7 @@
             // label6
             // 
             this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(171, 226);
+            this.label6.Location = new System.Drawing.Point(163, 226);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(184, 28);
             this.label6.TabIndex = 13;
@@ -401,7 +398,7 @@
             // splitContainer3.Panel2
             // 
             this.splitContainer3.Panel2.Controls.Add(this.calculationContainer);
-            this.splitContainer3.Size = new System.Drawing.Size(581, 226);
+            this.splitContainer3.Size = new System.Drawing.Size(691, 313);
             this.splitContainer3.SplitterDistance = 46;
             this.splitContainer3.SplitterWidth = 10;
             this.splitContainer3.TabIndex = 6;
@@ -423,13 +420,13 @@
             this.calculationContainer.Location = new System.Drawing.Point(0, 0);
             this.calculationContainer.Margin = new System.Windows.Forms.Padding(5, 10, 5, 10);
             this.calculationContainer.Name = "calculationContainer";
-            this.calculationContainer.Size = new System.Drawing.Size(581, 170);
+            this.calculationContainer.Size = new System.Drawing.Size(691, 257);
             this.calculationContainer.TabIndex = 1;
             // 
             // CancelButton
             // 
             this.CancelButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.CancelButton.Location = new System.Drawing.Point(844, 166);
+            this.CancelButton.Location = new System.Drawing.Point(954, 240);
             this.CancelButton.Name = "CancelButton";
             this.CancelButton.Size = new System.Drawing.Size(93, 43);
             this.CancelButton.TabIndex = 5;
@@ -440,7 +437,7 @@
             // OKButton
             // 
             this.OKButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.OKButton.Location = new System.Drawing.Point(745, 166);
+            this.OKButton.Location = new System.Drawing.Point(855, 240);
             this.OKButton.Name = "OKButton";
             this.OKButton.Size = new System.Drawing.Size(93, 43);
             this.OKButton.TabIndex = 4;
@@ -448,16 +445,12 @@
             this.OKButton.UseVisualStyleBackColor = true;
             this.OKButton.Click += new System.EventHandler(this.OKButton_Click);
             // 
-            // bindingConfiguration
-            // 
-            this.bindingConfiguration.DataSource = typeof(Shadowsocks.Model.StatisticsStrategyConfiguration);
-            // 
             // StatisticsStrategyConfigurationForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 28F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSize = true;
-            this.ClientSize = new System.Drawing.Size(951, 458);
+            this.ClientSize = new System.Drawing.Size(1061, 637);
             this.Controls.Add(this.splitContainer1);
             this.Font = new System.Drawing.Font("Segoe UI", 10F);
             this.Margin = new System.Windows.Forms.Padding(5, 10, 5, 10);
@@ -465,6 +458,7 @@
             this.Name = "StatisticsStrategyConfigurationForm";
             this.Text = "StatisticsStrategyConfigurationForm";
             ((System.ComponentModel.ISupportInitialize)(this.StatisticsChart)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.bindingConfiguration)).EndInit();
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
             this.splitContainer1.Panel1.ResumeLayout(false);
@@ -484,7 +478,6 @@
             this.splitContainer3.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer3)).EndInit();
             this.splitContainer3.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.bindingConfiguration)).EndInit();
             this.ResumeLayout(false);
 
         }
