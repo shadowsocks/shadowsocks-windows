@@ -93,7 +93,7 @@ namespace Shadowsocks.Controller.Strategy
             return (double)data.SuccessTimes / (data.SuccessTimes + data.TimedOutTimes); //simply choose min package loss
         }
 
-        private class StatisticsData
+        public class StatisticsData
         {
             public int SuccessTimes;
             public int TimedOutTimes;

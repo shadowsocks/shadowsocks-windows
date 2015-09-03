@@ -26,6 +26,8 @@ namespace Shadowsocks.Controller
         private PolipoRunner polipoRunner;
         private GFWListUpdater gfwListUpdater;
         private AvailabilityStatistics _availabilityStatics;
+        public StatisticsStrategyConfiguration StatisticsConfiguration { get; private set; }
+
         private bool stopped = false;
 
         private bool _systemProxyIsDirty = false;
@@ -53,9 +55,11 @@ namespace Shadowsocks.Controller
         public ShadowsocksController()
         {
             _config = Configuration.Load();
+            StatisticsConfiguration = StatisticsStrategyConfiguration.Load();
             _strategyManager = new StrategyManager(this);
             StartReleasingMemory();
         }
+
 
         public void Start()
         {
@@ -127,8 +131,8 @@ namespace Shadowsocks.Controller
 
         public void SaveStrategyConfigurations(StatisticsStrategyConfiguration configuration)
         {
-            _config.statisticsStrategyConfiguration = configuration;
-            SaveConfig(_config);
+            StatisticsConfiguration = configuration;
+            StatisticsStrategyConfiguration.Save(configuration);
         }
 
         public bool AddServerBySSURL(string ssURL)
@@ -290,6 +294,7 @@ namespace Shadowsocks.Controller
         {
             // some logic in configuration updated the config when saving, we need to read it again
             _config = Configuration.Load();
+            StatisticsConfiguration = StatisticsStrategyConfiguration.Load();
 
             if (polipoRunner == null)
             {

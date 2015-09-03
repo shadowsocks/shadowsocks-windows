@@ -25,8 +25,6 @@ namespace Shadowsocks.Model
         public bool useOnlinePac;
         public bool availabilityStatistics;
 
-        public StatisticsStrategyConfiguration statisticsStrategyConfiguration;
-
         private static string CONFIG_FILE = "gui-config.json";
 
         public Server GetCurrentServer()

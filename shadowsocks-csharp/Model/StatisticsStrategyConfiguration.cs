@@ -1,8 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
+using Shadowsocks.Controller;
 using Shadowsocks.Controller.Strategy;
+using SimpleJson;
+using Newtonsoft.Json;
 
 namespace Shadowsocks.Model
 {
@@ -16,6 +20,41 @@ namespace Shadowsocks.Model
         private int _choiceKeptMinutes;
         private int _dataCollectionMinutes;
         private int _repeatTimesNum;
+
+
+        private const string ConfigFile = "statistics-config.json";
+
+        public static StatisticsStrategyConfiguration Load()
+        {
+            try
+            {
+                var content = File.ReadAllText(ConfigFile);
+                var configuration = JsonConvert.DeserializeObject<StatisticsStrategyConfiguration>(content);
+                return configuration;
+            }
+            catch (FileNotFoundException e)
+            {
+                return new StatisticsStrategyConfiguration();
+            }
+            catch (Exception e)
+            {
+                Logging.LogUsefulException(e);
+                return new StatisticsStrategyConfiguration();
+            }
+        }
+
+        public static void Save(StatisticsStrategyConfiguration configuration)
+        {
+            try
+            {
+                var content = JsonConvert.SerializeObject(configuration, Formatting.Indented);
+                File.WriteAllText(ConfigFile, content);
+            }
+            catch (Exception e)
+            {
+                Logging.LogUsefulException(e);
+            }
+        }
 
         public Dictionary<string, float> Calculations;
 

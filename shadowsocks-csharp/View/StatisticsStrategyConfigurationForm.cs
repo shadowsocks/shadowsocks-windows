@@ -9,7 +9,7 @@ namespace Shadowsocks.View
 {
     public partial class StatisticsStrategyConfigurationForm: Form
     {
-        private ShadowsocksController _controller;
+        private readonly ShadowsocksController _controller;
         private StatisticsStrategyConfiguration _configuration;
 
         public StatisticsStrategyConfigurationForm(ShadowsocksController controller)
@@ -24,8 +24,12 @@ namespace Shadowsocks.View
 
         private void LoadConfiguration()
         {
-            _configuration = _controller.GetConfigurationCopy()?.statisticsStrategyConfiguration
+            _configuration = _controller.StatisticsConfiguration
                              ?? new StatisticsStrategyConfiguration();
+            if (_configuration.Calculations == null)
+            {
+                _configuration = new StatisticsStrategyConfiguration();
+            }
         }
 
         private void InitData()
