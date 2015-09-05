@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Net.NetworkInformation;
 using System.Text;
 using System.Windows.Forms;
 
@@ -42,7 +43,8 @@ namespace Shadowsocks.Model
         {
             CheckPort(server.server_port);
             CheckPassword(server.password);
-            CheckServer(server.server);
+          //  CheckServer(server.server);       
+            CheckServerAvailability(server.server);
         }
 
         public static Configuration Load()
@@ -163,6 +165,26 @@ namespace Shadowsocks.Model
             }
         }
 
+        public static void CheckServerAvailability(string server)
+        {
+            bool pingable = false;
+            Ping pinger = new Ping();
+            try
+            {
+                PingReply reply = pinger.Send(server);
+                pingable = reply.Status == IPStatus.Success;
+            }
+            catch (PingException)
+            {
+                throw new ArgumentException(I18N.GetString("Server not available"));
+            }
+            
+            if(pingable == false)
+            {
+                throw new ArgumentException(I18N.GetString("Server not available"));
+            }
+        }
+
         private class JsonSerializerStrategy : SimpleJson.PocoJsonSerializerStrategy
         {
             // convert string to int
@@ -175,5 +197,6 @@ namespace Shadowsocks.Model
                 return base.DeserializeObject(value, type);
             }
         }
+
     }
 }

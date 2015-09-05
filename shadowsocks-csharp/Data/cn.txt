@@ -73,6 +73,7 @@ Port already in use=端口已被占用
 Illegal port number format=非法端口格式
 Please add at least one server=请添加至少一个服务器
 Server IP can not be blank=服务器 IP 不能为空
+Server not available=服务器不可用，请检查网络或目标服务器
 Password can not be blank=密码不能为空
 Port out of range=端口超出范围
 Port can't be 8123=端口不能为 8123
