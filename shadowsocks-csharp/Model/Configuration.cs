@@ -42,7 +42,6 @@ namespace Shadowsocks.Model
         {
             CheckPort(server.server_port);
             CheckPassword(server.password);
-            CheckServer(server.server);
         }
 
         public static Configuration Load()
