@@ -84,6 +84,7 @@ namespace Shadowsocks.Controller
 
         public List<Server> MergeConfiguration(Configuration mergeConfig, List<Server> servers)
         {
+            List<Server> missingServers = new List<Server>();
             if (servers != null)
             {
                 for (int j = 0; j < servers.Count; ++j)
@@ -106,7 +107,30 @@ namespace Shadowsocks.Controller
                     }
                 }
             }
-            return servers;
+            for (int i = 0; i < mergeConfig.configs.Count; ++i)
+            {
+                int j = 0;
+                for (; j < servers.Count; ++j)
+                {
+                    if (mergeConfig.configs[i].server == servers[j].server
+                        && mergeConfig.configs[i].server_port == servers[j].server_port
+                        && mergeConfig.configs[i].method == servers[j].method
+                        && mergeConfig.configs[i].password == servers[j].password
+                        && mergeConfig.configs[i].tcp_over_udp == servers[j].tcp_over_udp
+                        && mergeConfig.configs[i].udp_over_tcp == servers[j].udp_over_tcp
+                        && mergeConfig.configs[i].obfs_tcp == servers[j].obfs_tcp
+                        //&& mergeConfig.configs[i].remarks == servers[j].remarks
+                        )
+                    {
+                        break;
+                    }
+                }
+                if (j == servers.Count)
+                {
+                    missingServers.Add(mergeConfig.configs[i]);
+                }
+            }
+            return missingServers;
         }
 
         public Configuration MergeGetConfiguration(Configuration mergeConfig)
@@ -121,14 +145,20 @@ namespace Shadowsocks.Controller
 
         public void SaveServers(List<Server> servers, int localPort)
         {
-            _config.configs = MergeConfiguration(_config, servers);
+            List<Server> missingServers = MergeConfiguration(_config, servers);
+            _config.configs = servers;
             _config.localPort = localPort;
             SaveConfig(_config);
+            foreach(Server s in missingServers)
+            {
+                s.GetConnections().CloseAll();
+            }
         }
 
         public void SaveServersConfig(Configuration config)
         {
-            _config.configs = MergeConfiguration(_config, config.configs);
+            List<Server> missingServers = MergeConfiguration(_config, config.configs);
+            _config.configs = config.configs;
             _config.localPort = config.localPort;
             _config.reconnectTimes = config.reconnectTimes;
             _config.randomAlgorithm = config.randomAlgorithm;
@@ -140,6 +170,10 @@ namespace Shadowsocks.Controller
             _config.socks5Pass = config.socks5Pass;
             _config.autoban = config.autoban;
             SaveConfig(_config);
+            foreach (Server s in missingServers)
+            {
+                s.GetConnections().CloseAll();
+            }
         }
 
         public bool AddServerBySSURL(string ssURL)

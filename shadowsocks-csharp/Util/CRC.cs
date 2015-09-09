@@ -50,6 +50,15 @@ namespace Shadowsocks.Util
             buffer[buffer.Length - 4] = (byte)(crc);
         }
 
+        public static void SetCRC32(byte[] buffer, int length)
+        {
+            ulong crc = ~CalcCRC32(buffer, length - 4);
+            buffer[length - 1] = (byte)(crc >> 24);
+            buffer[length - 2] = (byte)(crc >> 16);
+            buffer[length - 3] = (byte)(crc >> 8);
+            buffer[length - 4] = (byte)(crc);
+        }
+
         public byte[] CheckCRC32(byte[] buffer)
         {
             ulong crc = ~CalcCRC32(buffer, buffer.Length);

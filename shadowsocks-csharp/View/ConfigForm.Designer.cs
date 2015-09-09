@@ -288,6 +288,7 @@
             this.ObfsUDPLabel.Size = new System.Drawing.Size(59, 14);
             this.ObfsUDPLabel.TabIndex = 25;
             this.ObfsUDPLabel.Text = "Obfs UDP";
+            this.ObfsUDPLabel.Visible = false;
             // 
             // CheckObfsUDP
             // 
@@ -298,6 +299,7 @@
             this.CheckObfsUDP.TabIndex = 28;
             this.CheckObfsUDP.Text = "Recommend checked";
             this.CheckObfsUDP.UseVisualStyleBackColor = true;
+            this.CheckObfsUDP.Visible = false;
             // 
             // ObfsTCPLabel
             // 
@@ -668,7 +670,7 @@
             "LowLatency",
             "LowException",
             "SelectedFirst"});
-            this.RandomComboBox.Location = new System.Drawing.Point(63, 6);
+            this.RandomComboBox.Location = new System.Drawing.Point(63, 7);
             this.RandomComboBox.Name = "RandomComboBox";
             this.RandomComboBox.Size = new System.Drawing.Size(127, 22);
             this.RandomComboBox.TabIndex = 10;

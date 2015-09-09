@@ -21,8 +21,8 @@ namespace Shadowsocks.Controller
 
         public const string Name = "ShadowsocksR";
         public const string Copyright = "Copyright © BreakWall 2015";
-        public const string Version = "3.4.1";
-        public const string FullVersion = Version + " Beta";
+        public const string Version = "3.4.2";
+        public const string FullVersion = Version + "";
 
         private static bool UseProxy = true;
 
@@ -40,7 +40,7 @@ namespace Shadowsocks.Controller
                 {
                     http.Proxy = null;
                 }
-                //UseProxy = !UseProxy;
+                UseProxy = !UseProxy;
                 http.DownloadStringCompleted += http_DownloadStringCompleted;
                 http.DownloadStringAsync(new Uri(UpdateURL));
             }

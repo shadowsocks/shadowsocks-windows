@@ -1921,15 +1921,21 @@ namespace Shadowsocks.Controller
                 int obfs_len = random.Next(obfs_max - 1) + 1;
                 {
                     int len = obfs_len;
+                    int data_length = length;
+                    if (length >= 128)
+                    {
+                        length = random.Next(32, 128);
+                    }
                     int total_len = length + len + 3 + 4;
-                    bytesToEncrypt = new byte[total_len];
+                    bytesToEncrypt = new byte[total_len + data_length - length];
                     Array.Copy(bytes, 0, bytesToEncrypt, 3 + len, length);
                     bytesToEncrypt[0] = 0x88;
                     bytesToEncrypt[1] = (byte)(total_len >> 8);
                     bytesToEncrypt[2] = (byte)(total_len);
                     bytesToEncrypt[3] = (byte)(obfs_len);
-                    Util.CRC32.SetCRC32(bytesToEncrypt);
-                    length = total_len;
+                    Util.CRC32.SetCRC32(bytesToEncrypt, total_len);
+                    Array.Copy(bytes, length, bytesToEncrypt, total_len, data_length - length);
+                    length = bytesToEncrypt.Length;
                 }
                 Logging.LogBin(LogLevel.Debug, "remote send", bytesToEncrypt, length);
                 lock (encryptionLock)
