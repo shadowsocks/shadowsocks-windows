@@ -145,6 +145,7 @@
     <Compile Include="Encryption\TableEncryptor.cs" />
     <Compile Include="Encryption\IEncryptor.cs" />
     <Compile Include="Controller\Service\PACServer.cs" />
+    <Compile Include="Model\LogViewerConfig.cs" />
     <Compile Include="Model\Server.cs" />
     <Compile Include="Model\Configuration.cs" />
     <Compile Include="Properties\Resources.Designer.cs">

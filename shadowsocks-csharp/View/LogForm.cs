@@ -18,12 +18,28 @@ namespace Shadowsocks.View
         string filename;
         Timer timer;
         const int BACK_OFFSET = 65536;
+        Model.Configuration config;
 
         public LogForm(string filename)
         {
             this.filename = filename;
             InitializeComponent();
             this.Icon = Icon.FromHandle(Resources.ssw128.GetHicon());
+
+            config = Model.Configuration.Load();
+            if (config.logViewer == null)
+            {
+                config.logViewer = new Model.LogViewerConfig();
+            }
+            else
+            {
+                topMostTrigger = config.logViewer.topMost;
+                wrapTextTrigger = config.logViewer.wrapText;
+                toolbarTrigger = config.logViewer.toolbarShown;
+                LogMessageTextBox.Font = new Font(config.logViewer.fontName, config.logViewer.fontSize);
+                LogMessageTextBox.BackColor = config.logViewer.GetBackgroundColor();
+                LogMessageTextBox.ForeColor = config.logViewer.GetTextColor();
+            }
 
             UpdateTexts();
         }
@@ -34,9 +50,15 @@ namespace Shadowsocks.View
             OpenLocationMenuItem.Text = I18N.GetString("&Open Location");
             ExitMenuItem.Text = I18N.GetString("E&xit");
             CleanLogsButton.Text = I18N.GetString("&Clean logs");
-            ChangeFontButton.Text = I18N.GetString("&Font");
+            ChangeFontButton.Text = I18N.GetString("Change &font");
             WrapTextCheckBox.Text = I18N.GetString("&Wrap text");
             TopMostCheckBox.Text = I18N.GetString("&Top most");
+            ViewMenuItem.Text = I18N.GetString("&View");
+            CleanLogsMenuItem.Text = I18N.GetString("&Clean logs");
+            ChangeFontMenuItem.Text = I18N.GetString("Change &font");
+            WrapTextMenuItem.Text = I18N.GetString("&Wrap text");
+            TopMostMenuItem.Text = I18N.GetString("&Top most");
+            ShowToolbarMenuItem.Text = I18N.GetString("&Show toolbar");
             this.Text = I18N.GetString("Log Viewer");
         }
 
@@ -58,7 +80,7 @@ namespace Shadowsocks.View
 
                 string line = "";
                 while ((line = reader.ReadLine()) != null)
-                    LogMessageTextBox.AppendText(line + "\r\n");
+                    LogMessageTextBox.AppendText(line + Environment.NewLine);
 
                 LogMessageTextBox.ScrollToCaret();
 
@@ -78,7 +100,7 @@ namespace Shadowsocks.View
                 while ((line = reader.ReadLine()) != null)
                 {
                     changed = true;
-                    LogMessageTextBox.AppendText(line + "\r\n");
+                    LogMessageTextBox.AppendText(line + Environment.NewLine);
                 }
 
                 if (changed)
@@ -97,11 +119,38 @@ namespace Shadowsocks.View
             timer.Interval = 300;
             timer.Tick += Timer_Tick;
             timer.Start();
+
+            this.Top = (config.logViewer.top >=0) ? config.logViewer.top : 0;
+            this.Left = (config.logViewer.left >=0) ? config.logViewer.left : 0;
+            this.Height = config.logViewer.height;
+            this.Width = config.logViewer.width;
+
+            topMostTriggerLock = true;
+            this.TopMost = TopMostMenuItem.Checked = TopMostCheckBox.Checked = topMostTrigger;
+            topMostTriggerLock = false;
+
+            wrapTextTriggerLock = true;
+            LogMessageTextBox.WordWrap = WrapTextMenuItem.Checked = WrapTextCheckBox.Checked = wrapTextTrigger;
+            wrapTextTriggerLock = false;
+
+            ToolbarFlowLayoutPanel.Visible = ShowToolbarMenuItem.Checked = toolbarTrigger;
         }
 
         private void LogForm_FormClosing(object sender, FormClosingEventArgs e)
         {
             timer.Stop();
+            config.logViewer.topMost = topMostTrigger;
+            config.logViewer.wrapText = wrapTextTrigger;
+            config.logViewer.toolbarShown = toolbarTrigger;
+            config.logViewer.fontName = LogMessageTextBox.Font.Name;
+            config.logViewer.fontSize = LogMessageTextBox.Font.Size;
+            config.logViewer.SetBackgroundColor(LogMessageTextBox.BackColor);
+            config.logViewer.SetTextColor(LogMessageTextBox.ForeColor);
+            config.logViewer.top = this.Top;
+            config.logViewer.left = this.Left;
+            config.logViewer.height = this.Height;
+            config.logViewer.width = this.Width;
+            Model.Configuration.Save(config);
         }
 
         private void OpenLocationMenuItem_Click(object sender, EventArgs e)
@@ -121,18 +170,25 @@ namespace Shadowsocks.View
             LogMessageTextBox.ScrollToCaret();
         }
 
-        private void WrapTextCheckBox_CheckedChanged(object sender, EventArgs e)
-        {
-            LogMessageTextBox.WordWrap = WrapTextCheckBox.Checked;
-            LogMessageTextBox.ScrollToCaret();
-        }
-
-        private void CleanLogsButton_Click(object sender, EventArgs e)
+        #region Clean up the content in LogMessageTextBox.
+        private void DoCleanLogs()
         {
             LogMessageTextBox.Clear();
         }
 
-        private void ChangeFontButton_Click(object sender, EventArgs e)
+        private void CleanLogsMenuItem_Click(object sender, EventArgs e)
+        {
+            DoCleanLogs();
+        }
+
+        private void CleanLogsButton_Click(object sender, EventArgs e)
+        {
+            DoCleanLogs();
+        }
+        #endregion
+
+        #region Change the font settings applied in LogMessageTextBox.
+        private void DoChangeFont()
         {
             FontDialog fd = new FontDialog();
             fd.Font = LogMessageTextBox.Font;
@@ -142,9 +198,89 @@ namespace Shadowsocks.View
             }
         }
 
+        private void ChangeFontMenuItem_Click(object sender, EventArgs e)
+        {
+            DoChangeFont();
+        }
+
+        private void ChangeFontButton_Click(object sender, EventArgs e)
+        {
+            DoChangeFont();
+        }
+        #endregion
+
+        #region Trigger the log messages wrapable, or not.
+        bool wrapTextTrigger = false;
+        bool wrapTextTriggerLock = false;
+
+        private void TriggerWrapText()
+        {
+            wrapTextTriggerLock = true;
+
+            wrapTextTrigger = !wrapTextTrigger;
+            LogMessageTextBox.WordWrap = wrapTextTrigger;
+            LogMessageTextBox.ScrollToCaret();
+            WrapTextMenuItem.Checked = WrapTextCheckBox.Checked = wrapTextTrigger;
+
+            wrapTextTriggerLock = false;
+        }
+
+        private void WrapTextMenuItem_Click(object sender, EventArgs e)
+        {
+            if (!wrapTextTriggerLock)
+            {
+                TriggerWrapText();
+            }
+        }
+
+        private void WrapTextCheckBox_CheckedChanged(object sender, EventArgs e)
+        {
+            if (!wrapTextTriggerLock)
+            {
+                TriggerWrapText();
+            }
+        }
+        #endregion
+
+        #region Trigger this window top most, or not.
+        bool topMostTrigger = false;
+        bool topMostTriggerLock = false;
+
+        private void TriggerTopMost()
+        {
+            topMostTriggerLock = true;
+
+            topMostTrigger = !topMostTrigger;
+            this.TopMost = topMostTrigger;
+            TopMostMenuItem.Checked = TopMostCheckBox.Checked = topMostTrigger;
+
+            topMostTriggerLock = false;
+        }
+
         private void TopMostCheckBox_CheckedChanged(object sender, EventArgs e)
         {
-            this.TopMost = TopMostCheckBox.Checked;
+            if (!topMostTriggerLock)
+            {
+                TriggerTopMost();
+            }
+        }
+
+        private void TopMostMenuItem_Click(object sender, EventArgs e)
+        {
+            if (!topMostTriggerLock)
+            {
+                TriggerTopMost();
+            }
+        }
+        #endregion
+
+        private bool toolbarTrigger = false;
+
+        private void ShowToolbarMenuItem_Click(object sender, EventArgs e)
+        {
+            toolbarTrigger = !toolbarTrigger;
+            ToolbarFlowLayoutPanel.Visible = toolbarTrigger;
+            ShowToolbarMenuItem.Checked = toolbarTrigger;
         }
     }
 }

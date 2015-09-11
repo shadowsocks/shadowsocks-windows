@@ -50,10 +50,12 @@ Move D&own=下移(&O)
 &File=文件(&F)
 &Open Location=在资源管理器中打开(&O)
 E&xit=退出(&X)
-&Clean logs=清空(&C)
-&Font=字体(&F)
+&View=视图(&V)
+&Clean logs=清空日志(&C)
+Change &font=设置字体(&F)
 &Wrap text=自动换行(&W)
 &Top most=置顶(&T)
+&Show toolbar=显示工具栏(&S)
 Log Viewer=日志查看器
 
 # QRCode Form
