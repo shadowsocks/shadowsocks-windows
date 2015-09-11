@@ -75,9 +75,9 @@ Visual Studio 2015 is required.
 GPLv3
 
 
-[Appveyor]:       https://ci.appveyor.com/project/clowwindy/shadowsocks-csharp
-[Build Status]:   https://ci.appveyor.com/api/projects/status/gknc8l1lxy423ehv/branch/master
-[latest release]: https://github.com/shadowsocks/shadowsocks-csharp/releases
+[Appveyor]:       https://ci.appveyor.com/project/kimw/shadowsocks-windows
+[Build Status]:   https://ci.appveyor.com/api/projects/status/q0h3wsyisbic5fpt/branch/master
+[latest release]: https://github.com/kimw/shadowsocks-windows/releases
 [GFWList]:        https://github.com/gfwlist/gfwlist
-[Servers]:        https://github.com/shadowsocks/shadowsocks/wiki/Ports-and-Clients#linux--server-side
-[中文说明]:       https://github.com/shadowsocks/shadowsocks-windows/wiki/Shadowsocks-Windows-%E4%BD%BF%E7%94%A8%E8%AF%B4%E6%98%8E
+[Servers]:        https://github.com/kimw/shadowsocks/wiki/Ports-and-Clients#linux--server-side
+[中文说明]:       https://github.com/kimw/shadowsocks-windows/wiki/Shadowsocks-Windows-%E4%BD%BF%E7%94%A8%E8%AF%B4%E6%98%8E
