@@ -49,7 +49,7 @@ namespace Shadowsocks.Controller
             lock (this.Handlers)
             {
                 this.Handlers.Add(handler);
-                Logging.Debug($"connections: {Handlers.Count}");
+                Logging.Debug($"TCP connections: {Handlers.Count}");
                 DateTime now = DateTime.Now;
                 if (now - _lastSweepTime > TimeSpan.FromSeconds(1))
                 {
@@ -65,10 +65,10 @@ namespace Shadowsocks.Controller
             }
             foreach (Handler handler1 in handlersToClose)
             {
-                Logging.Debug("Closing timed out connection");
+                Logging.Debug("Closing timed out TCP connection.");
                 handler1.Close();
             }
-        return true;
+            return true;
         }
     }
 
@@ -148,7 +148,7 @@ namespace Shadowsocks.Controller
         {
             lock (relay.Handlers)
             {
-                Logging.Debug($"connections: {relay.Handlers.Count}");
+                Logging.Debug($"TCP connections: {relay.Handlers.Count}");
                 relay.Handlers.Remove(this);
             }
             lock (this)
@@ -212,7 +212,7 @@ namespace Shadowsocks.Controller
                     {
                         // reject socks 4
                         response = new byte[] { 0, 91 };
-                        Console.WriteLine("socks 5 protocol error");
+                        Logging.Info("socks 5 protocol error");
                     }
                     connection.BeginSend(response, 0, response.Length, 0, new AsyncCallback(HandshakeSendCallback), null);
                 }
@@ -280,7 +280,7 @@ namespace Shadowsocks.Controller
                 }
                 else
                 {
-                    Console.WriteLine("failed to recv data in handshakeReceive2Callback");
+                    Logging.Info("failed to recv data in handshakeReceive2Callback");
                     this.Close();
                 }
             }
@@ -423,7 +423,7 @@ namespace Shadowsocks.Controller
             {
                 strategy.SetFailure(server);
             }
-            Console.WriteLine(String.Format("{0} timed out", server.FriendlyName()));
+            Logging.Info($"{server.FriendlyName()} timed out");
             remote.Close();
             RetryConnect();
         }
@@ -462,8 +462,7 @@ namespace Shadowsocks.Controller
 
                 connected = true;
 
-                //Console.WriteLine("Socket connected to {0}",
-                //    remote.RemoteEndPoint.ToString());
+                Logging.Debug($"Socket connected to {remote.RemoteEndPoint}");
 
                 var latency = DateTime.Now - _startConnectTime;
                 IStrategy strategy = controller.GetCurrentStrategy();
@@ -545,7 +544,7 @@ namespace Shadowsocks.Controller
                 }
                 else
                 {
-                    //Console.WriteLine("bytesRead: " + bytesRead.ToString());
+                    Logging.Debug($"bytes read: {bytesRead}");
                     connection.Shutdown(SocketShutdown.Send);
                     connectionShutdown = true;
                     CheckClose();

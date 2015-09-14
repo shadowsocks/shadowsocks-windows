@@ -70,7 +70,7 @@ namespace Shadowsocks.Model
             {
                 if (!(e is FileNotFoundException))
                 {
-                    Console.WriteLine(e);
+                    Logging.LogUsefulException(e);
                 }
                 return new Configuration
                 {

@@ -32,11 +32,15 @@ namespace Shadowsocks.Controller
             }
         }
 
+        public static void Info(object o)
+        {
+            Console.WriteLine(o);
+        }
+
         public static void Debug(object o)
         {
-
 #if DEBUG
-            Console.WriteLine(o);
+            Console.WriteLine("[D] " + o);
 #endif
         }
 

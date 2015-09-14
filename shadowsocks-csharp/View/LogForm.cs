@@ -156,7 +156,7 @@ namespace Shadowsocks.View
         private void OpenLocationMenuItem_Click(object sender, EventArgs e)
         {
             string argument = "/select, \"" + filename + "\"";
-            Console.WriteLine(argument);
+            Logging.Debug(argument);
             System.Diagnostics.Process.Start("explorer.exe", argument);
         }
 

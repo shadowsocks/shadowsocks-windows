@@ -21,7 +21,7 @@ namespace Shadowsocks.Util
                     Directory.CreateDirectory(Application.StartupPath + "\\temp");
                 } catch (Exception e)
                 {
-                    Console.WriteLine(e);
+                    Logging.LogUsefulException(e);
                 }
                 // don't use "/", it will fail when we call explorer /select xxx/temp\xxx.log
                 return Application.StartupPath + "\\temp";

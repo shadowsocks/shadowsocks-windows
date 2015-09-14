@@ -47,7 +47,7 @@ namespace Shadowsocks.Controller.Strategy
             try
             {
                 var path = AvailabilityStatistics.AvailabilityStatisticsFile;
-                Logging.Debug(string.Format("loading statistics from{0}", path));
+                Logging.Debug($"loading statistics from {path}");
                 statistics = (from l in File.ReadAllLines(path)
                                   .Skip(1)
                                   let strings = l.Split(new[] { "," }, StringSplitOptions.RemoveEmptyEntries)
@@ -113,7 +113,7 @@ namespace Shadowsocks.Controller.Strategy
 
                 if (_controller.GetCurrentStrategy().ID == ID && _currentServer != bestResult.server) //output when enabled
                 {
-                    Console.WriteLine("Switch to server: {0} by package loss:{1}", bestResult.server.FriendlyName(), 1 - bestResult.score);
+                    Logging.Info($"Switch to server: {bestResult.server.FriendlyName()} by package loss:{1 - bestResult.score}");
                 }
                 _currentServer = bestResult.server;
             }
@@ -154,7 +154,7 @@ namespace Shadowsocks.Controller.Strategy
 
         public void SetFailure(Server server)
         {
-            Logging.Debug(String.Format("failure: {0}", server.FriendlyName()));
+            Logging.Debug($"failure: {server.FriendlyName()}");
         }
 
         public void UpdateLastRead(Server server)
@@ -171,6 +171,5 @@ namespace Shadowsocks.Controller.Strategy
         {
             //TODO: combine this part of data with ICMP statics
         }
-
     }
 }

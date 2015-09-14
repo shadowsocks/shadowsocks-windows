@@ -153,7 +153,7 @@ Connection: Close
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
+                Logging.LogUsefulException(e);
                 socket.Close();
             }
         }
@@ -217,7 +217,7 @@ Connection: Close
             {
                 if (PACFileChanged != null)
                 {
-                    Console.WriteLine("Detected: PAC file '{0}' was {1}.", e.Name, e.ChangeType.ToString().ToLower());
+                    Logging.Info($"Detected: PAC file '{e.Name}' was {e.ChangeType.ToString().ToLower()}.");
                     PACFileChanged(this, new EventArgs());
                 }
 
@@ -236,7 +236,7 @@ Connection: Close
             {
                 if (UserRuleFileChanged != null)
                 {
-                    Console.WriteLine("Detected: User Rule file '{0}' was {1}.", e.Name, e.ChangeType.ToString().ToLower());
+                    Logging.Info($"Detected: User Rule file '{e.Name}' was {e.ChangeType.ToString().ToLower()}.");
                     UserRuleFileChanged(this, new EventArgs());
                 }
                 //lastly we update the last write time in the hashtable
@@ -259,7 +259,7 @@ Connection: Close
             //}
             //catch (Exception e)
             //{
-            //    Console.WriteLine(e);
+            //    Logging.LogUsefulException(e);
             //}
             return (useSocks ? "SOCKS5 " : "PROXY ") + localEndPoint.Address + ":" + this._config.localPort + ";";
         }

@@ -78,7 +78,7 @@ namespace Shadowsocks.Controller
                 _tcpSocket.Listen(1024);
 
                 // Start an asynchronous socket to listen for connections.
-                Console.WriteLine("Shadowsocks started");
+                Logging.Info("Shadowsocks started");
                 _tcpSocket.BeginAccept(
                     new AsyncCallback(AcceptCallback),
                     _tcpSocket);
@@ -163,7 +163,7 @@ namespace Shadowsocks.Controller
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
+                Logging.LogUsefulException(e);
             }
             finally
             {
@@ -208,7 +208,7 @@ namespace Shadowsocks.Controller
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
+                Logging.LogUsefulException(e);
                 conn.Close();
             }
         }

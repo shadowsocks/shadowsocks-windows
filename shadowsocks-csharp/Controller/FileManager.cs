@@ -19,10 +19,9 @@ namespace Shadowsocks.Controller
                 _FileStream.Close();
                 return true;
             }
-            catch (Exception _Exception)
+            catch (Exception e)
             {
-                Console.WriteLine("Exception caught in process: {0}",
-                                  _Exception.ToString());
+                Logging.LogUsefulException(e);
             }
             return false;
         }

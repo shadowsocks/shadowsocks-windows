@@ -231,7 +231,7 @@ namespace Shadowsocks.View
         void controller_UpdatePACFromGFWListError(object sender, System.IO.ErrorEventArgs e)
         {
             ShowBalloonTip(I18N.GetString("Failed to update PAC file"), e.GetException().Message, ToolTipIcon.Error, 5000);
-            Logging.LogUsefulException(e.GetException());
+            Logging.LogUsefulException(e);
         }
 
         void controller_UpdatePACFromGFWListCompleted(object sender, GFWListUpdater.ResultEventArgs e)
