@@ -209,7 +209,7 @@ namespace Shadowsocks.View
         }
         #endregion
 
-        #region Trigger the log messages wrapable, or not.
+        #region Trigger the log messages to wrapable, or not.
         bool wrapTextTrigger = false;
         bool wrapTextTriggerLock = false;
 
@@ -242,7 +242,7 @@ namespace Shadowsocks.View
         }
         #endregion
 
-        #region Trigger this window top most, or not.
+        #region Trigger the window to top most, or not.
         bool topMostTrigger = false;
         bool topMostTriggerLock = false;
 
