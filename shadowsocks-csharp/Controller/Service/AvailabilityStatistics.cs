@@ -17,8 +17,7 @@ namespace Shadowsocks.Controller
     using DataUnit = KeyValuePair<string, string>;
     using DataList = List<KeyValuePair<string, string>>;
 
-    using RawStatistics = Dictionary<string, List<AvailabilityStatistics.RawStatisticsData>>;
-    using Statistics = Dictionary<string, List<AvailabilityStatistics.StatisticsData>>;
+    using Statistics = Dictionary<string, List<AvailabilityStatistics.RawStatisticsData>>;
 
     public class AvailabilityStatistics
     {
@@ -27,11 +26,11 @@ namespace Shadowsocks.Controller
         private const string Delimiter = ",";
         private const int Timeout = 500;
         private const int DelayBeforeStart = 1000;
-        public RawStatistics rawStatistics { get; private set; }
-        public RawStatistics filteredStatistics { get; private set; }
-        private int _repeat => _config.RepeatTimesNum;
+        public Statistics RawStatistics { get; private set; }
+        public Statistics FilteredStatistics { get; private set; }
+        private int Repeat => _config.RepeatTimesNum;
         private const int RetryInterval = 2*60*1000; //retry 2 minutes after failed
-        private int _interval => (int) TimeSpan.FromMinutes(_config.DataCollectionMinutes).TotalMilliseconds; 
+        private int Interval => (int) TimeSpan.FromMinutes(_config.DataCollectionMinutes).TotalMilliseconds; 
         private Timer _timer;
         private State _state;
         private List<Server> _servers;
@@ -58,10 +57,10 @@ namespace Shadowsocks.Controller
             {
                 if (config.StatisticsEnabled)
                 {
-                    if (_timer?.Change(DelayBeforeStart, _interval) == null)
+                    if (_timer?.Change(DelayBeforeStart, Interval) == null)
                     {
                         _state = new State();
-                        _timer = new Timer(run, _state, DelayBeforeStart, _interval);
+                        _timer = new Timer(Run, _state, DelayBeforeStart, Interval);
                     }
                 }
                 else
@@ -118,12 +117,12 @@ namespace Shadowsocks.Controller
             var ping = new Ping();
             var ret = new List<DataList>();
             foreach (
-                var timestamp in Enumerable.Range(0, _repeat).Select(_ => DateTime.Now.ToString(DateTimePattern)))
+                var timestamp in Enumerable.Range(0, Repeat).Select(_ => DateTime.Now.ToString(DateTimePattern)))
             {
                 //ICMP echo. we can also set options and special bytes
                 try
                 {
-                    var reply = ping.Send(IP, Timeout);
+                    var reply = await ping.SendTaskAsync(IP, Timeout);
                     ret.Add(new List<KeyValuePair<string, string>>
                     {
                         new KeyValuePair<string, string>("Timestamp", timestamp),
@@ -132,7 +131,7 @@ namespace Shadowsocks.Controller
                         new KeyValuePair<string, string>("RoundtripTime", reply?.RoundtripTime.ToString())
                         //new KeyValuePair<string, string>("data", reply.Buffer.ToString()); // The data of reply
                     });
-                    Thread.Sleep(new Random().Next() % Timeout);
+                    Thread.Sleep(Timeout + new Random().Next() % Timeout);
                     //Do ICMPTest in a random frequency
                 }
                 catch (Exception e)
@@ -144,7 +143,7 @@ namespace Shadowsocks.Controller
             return ret;
         }
 
-        private void run(object obj)
+        private void Run(object obj)
         {
             LoadRawStatistics();
             FilterRawStatistics();
@@ -197,11 +196,11 @@ namespace Shadowsocks.Controller
 
         private void FilterRawStatistics()
         {
-            if (filteredStatistics == null)
+            if (FilteredStatistics == null)
             {
-                filteredStatistics = new RawStatistics();
+                FilteredStatistics = new Statistics();
             }
-            foreach (IEnumerable<RawStatisticsData> rawData in rawStatistics.Values)
+            foreach (IEnumerable<RawStatisticsData> rawData in RawStatistics.Values)
             {
                 var filteredData = rawData;
                 if (_config.ByIsp)
@@ -232,7 +231,7 @@ namespace Shadowsocks.Controller
                 }
                 var dataList = filteredData as List<RawStatisticsData> ?? filteredData.ToList();
                 var serverName = dataList[0].ServerName;
-                filteredStatistics[serverName] = dataList;
+                FilteredStatistics[serverName] = dataList;
             }
         }
         
@@ -245,10 +244,10 @@ namespace Shadowsocks.Controller
                 if (!File.Exists(path))
                 {
                     Console.WriteLine($"statistics file does not exist, try to reload {RetryInterval/60/1000} minutes later");
-                    _timer.Change(RetryInterval, _interval);
+                    _timer.Change(RetryInterval, Interval);
                     return;
                 }
-                rawStatistics = (from l in File.ReadAllLines(path)
+                RawStatistics = (from l in File.ReadAllLines(path)
                     .Skip(1)
                     let strings = l.Split(new[] {","}, StringSplitOptions.RemoveEmptyEntries)
                     let rawData = new RawStatisticsData
