@@ -60,7 +60,6 @@ namespace Shadowsocks.Model
             catch (Exception)
             {
                 return ColorTranslator.FromHtml("white");
-                throw;
             }
         }
 
