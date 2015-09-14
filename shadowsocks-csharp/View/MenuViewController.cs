@@ -324,7 +324,7 @@ namespace Shadowsocks.View
         {
             if (logForms.Count == 0)
             {
-                LogForm f = new LogForm(Logging.LogFile);
+                LogForm f = new LogForm(Logging.LogFilePath);
                 f.Show();
                 f.FormClosed += logForm_FormClosed;
 
@@ -440,7 +440,7 @@ namespace Shadowsocks.View
 
         private void ShowLogItem_Click(object sender, EventArgs e)
         {
-            LogForm f = new LogForm(Logging.LogFile);
+            LogForm f = new LogForm(Logging.LogFilePath);
             f.Show();
             f.FormClosed += logForm_FormClosed;
 
