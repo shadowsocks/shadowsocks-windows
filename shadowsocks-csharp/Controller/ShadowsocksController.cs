@@ -25,7 +25,7 @@ namespace Shadowsocks.Controller
         private StrategyManager _strategyManager;
         private PolipoRunner polipoRunner;
         private GFWListUpdater gfwListUpdater;
-        private AvailabilityStatistics _availabilityStatics;
+        public AvailabilityStatistics availabilityStatistics { get; private set; }
         public StatisticsStrategyConfiguration StatisticsConfiguration { get; private set; }
 
         private bool stopped = false;
@@ -260,8 +260,8 @@ namespace Shadowsocks.Controller
 
         public void UpdateStatisticsConfiguration(bool enabled)
         {
-            if (_availabilityStatics == null) return;
-            _availabilityStatics.UpdateConfiguration(_config, StatisticsConfiguration);
+            if (availabilityStatistics == null) return;
+            availabilityStatistics.UpdateConfiguration(_config, StatisticsConfiguration);
             _config.availabilityStatistics = enabled;
             SaveConfig(_config);
         }
@@ -311,11 +311,11 @@ namespace Shadowsocks.Controller
                 gfwListUpdater.Error += pacServer_PACUpdateError;
             }
 
-            if (_availabilityStatics == null)
+            if (availabilityStatistics == null)
             {
-                _availabilityStatics = new AvailabilityStatistics(_config, StatisticsConfiguration);
+                availabilityStatistics = new AvailabilityStatistics(_config, StatisticsConfiguration);
             }
-            _availabilityStatics.UpdateConfiguration(_config, StatisticsConfiguration);
+            availabilityStatistics.UpdateConfiguration(_config, StatisticsConfiguration);
 
             if (_listener != null)
             {

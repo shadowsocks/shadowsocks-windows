@@ -62,8 +62,8 @@ namespace Shadowsocks.Model
 
         public StatisticsStrategyConfiguration()
         {
-            var statisticsStrategy = typeof (StatisticsStrategy);
-            var statisticsData = statisticsStrategy.GetNestedType("StatisticsData");
+            var availabilityStatisticsType = typeof (AvailabilityStatistics);
+            var statisticsData = availabilityStatisticsType.GetNestedType("StatisticsData");
             var properties = statisticsData.GetFields(BindingFlags.Instance | BindingFlags.Public);
             Calculations = properties.ToDictionary(p => p.Name, _ => (float) 0);
         }
