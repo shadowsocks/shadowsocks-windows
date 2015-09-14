@@ -43,6 +43,8 @@ namespace Shadowsocks.View
         private MenuItem editGFWUserRuleItem;
         private MenuItem editOnlinePACItem;
         private ConfigForm configForm;
+        private List<LogForm> logForms = new List<LogForm>();
+        private bool logFormsVisible = false;
         private string _urlToOpen;
 
         public MenuViewController(ShadowsocksController controller)
@@ -251,7 +253,6 @@ namespace Shadowsocks.View
             _notifyIcon.BalloonTipClicked -= notifyIcon1_BalloonTipClicked;
         }
 
-
         private void LoadCurrentConfiguration()
         {
             Configuration config = controller.GetConfigurationCopy();
@@ -319,6 +320,32 @@ namespace Shadowsocks.View
             }
         }
 
+        private void ShowLogForms()
+        {
+            if (logForms.Count == 0)
+            {
+                LogForm f = new LogForm(Logging.LogFile);
+                f.Show();
+                f.FormClosed += logForm_FormClosed;
+
+                logForms.Add(f);
+                logFormsVisible = true;
+            }
+            else
+            {
+                logFormsVisible = !logFormsVisible;
+                foreach (LogForm f in logForms)
+                {
+                    f.Visible = logFormsVisible;
+                }
+            }
+        }
+
+        void logForm_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            logForms.Remove((LogForm)sender);
+        }
+
         void configForm_FormClosed(object sender, FormClosedEventArgs e)
         {
             configForm = null;
@@ -359,7 +386,7 @@ namespace Shadowsocks.View
         {
             if (e.Button == MouseButtons.Left)
             {
-                ShowConfigForm();
+                ShowLogForms();
             }
         }
 
@@ -413,9 +440,11 @@ namespace Shadowsocks.View
 
         private void ShowLogItem_Click(object sender, EventArgs e)
         {
-            string argument = Logging.LogFile;
+            LogForm f = new LogForm(Logging.LogFile);
+            f.Show();
+            f.FormClosed += logForm_FormClosed;
 
-            new LogForm(argument).Show();
+            logForms.Add(f);
         }
 
         private void QRCodeItem_Click(object sender, EventArgs e)
