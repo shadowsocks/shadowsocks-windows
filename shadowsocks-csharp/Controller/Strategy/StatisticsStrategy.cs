@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
-using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
@@ -39,7 +37,7 @@ namespace Shadowsocks.Controller.Strategy
 
         private void LoadStatistics()
         {
-            _filteredStatistics = _controller.availabilityStatistics.rawStatistics ?? _filteredStatistics ?? new Dictionary<string, List<AvailabilityStatistics.RawStatisticsData>>();
+            _filteredStatistics = _controller.availabilityStatistics.RawStatistics ?? _filteredStatistics ?? new Dictionary<string, List<AvailabilityStatistics.RawStatisticsData>>();
         }
 
         //return the score by data
@@ -49,11 +47,11 @@ namespace Shadowsocks.Controller.Strategy
             var config = _controller.StatisticsConfiguration;
             List<AvailabilityStatistics.RawStatisticsData> dataList;
             if (_filteredStatistics == null || !_filteredStatistics.TryGetValue(serverName, out dataList)) return 0;
-            var SuccessTimes = (float) dataList.Count(data => data.ICMPStatus.Equals(IPStatus.Success.ToString()));
-            var TimedOutTimes = (float) dataList.Count(data => data.ICMPStatus.Equals(IPStatus.TimedOut.ToString()));
-            var statisticsData = new AvailabilityStatistics.StatisticsData()
+            var successTimes = (float) dataList.Count(data => data.ICMPStatus.Equals(IPStatus.Success.ToString()));
+            var timedOutTimes = (float) dataList.Count(data => data.ICMPStatus.Equals(IPStatus.TimedOut.ToString()));
+            var statisticsData = new AvailabilityStatistics.StatisticsData
             {
-                PackageLoss = TimedOutTimes/(SuccessTimes + TimedOutTimes)*100,
+                PackageLoss = timedOutTimes/(successTimes + timedOutTimes)*100,
                 AverageResponse = Convert.ToInt32(dataList.Average(data => data.RoundtripTime)),
                 MinResponse = dataList.Min(data => data.RoundtripTime),
                 MaxResponse = dataList.Max(data => data.RoundtripTime)
