@@ -119,6 +119,16 @@ namespace Shadowsocks.View
             }
             return false;
         }
+        public bool SetCellToolTipText(DataGridViewCell cell, string newString)
+        {
+            if (cell.ToolTipText != newString)
+            {
+                cell.ToolTipText = newString;
+                rowChange = true;
+                return true;
+            }
+            return false;
+        }
         public bool SetCellText(DataGridViewCell cell, string newString)
         {
             if ((string)cell.Value != newString)
@@ -321,9 +331,10 @@ namespace Shadowsocks.View
                         else if (columnName == "Upload")
                         {
                             string valStr = FormatBytes(serverSpeedLog.totalUploadBytes);
-                            if ((string)cell.Value != valStr)
+                            string fullVal = serverSpeedLog.totalUploadBytes.ToString();
+                            if (cell.ToolTipText != fullVal)
                             {
-                                if (valStr == "0")
+                                if (fullVal == "0")
                                     SetBackColor(cell, Color.White);
                                 else
                                 {
@@ -338,15 +349,17 @@ namespace Shadowsocks.View
                                 //Color col = cell.Style.BackColor;
                                 //SetBackColor(cell, Color.FromArgb(Math.Min(255, col.R + colAdd), Math.Min(255, col.G + colAdd), Math.Min(255, col.B + colAdd)));
                             }
+                            SetCellToolTipText(cell, fullVal);
                             SetCellText(cell, valStr);
                         }
                         // TotalDownloadBytes
                         else if (columnName == "Download")
                         {
                             string valStr = FormatBytes(serverSpeedLog.totalDownloadBytes);
-                            if ((string)cell.Value != valStr)
+                            string fullVal = serverSpeedLog.totalDownloadBytes.ToString();
+                            if (cell.ToolTipText != fullVal)
                             {
-                                if (valStr == "0")
+                                if (fullVal == "0")
                                     SetBackColor(cell, Color.White);
                                 else
                                 {
@@ -361,6 +374,7 @@ namespace Shadowsocks.View
                                 //Color col = cell.Style.BackColor;
                                 //SetBackColor(cell, Color.FromArgb(Math.Min(255, col.R + colAdd), Math.Min(255, col.G + colAdd), Math.Min(255, col.B + colAdd)));
                             }
+                            SetCellToolTipText(cell, fullVal);
                             SetCellText(cell, valStr);
                         }
                         // ErrorConnectTimes

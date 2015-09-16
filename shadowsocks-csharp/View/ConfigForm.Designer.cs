@@ -669,8 +669,9 @@
             "Random",
             "LowLatency",
             "LowException",
-            "SelectedFirst"});
-            this.RandomComboBox.Location = new System.Drawing.Point(63, 7);
+            "SelectedFirst",
+            "Timer"});
+            this.RandomComboBox.Location = new System.Drawing.Point(63, 6);
             this.RandomComboBox.Name = "RandomComboBox";
             this.RandomComboBox.Size = new System.Drawing.Size(127, 22);
             this.RandomComboBox.TabIndex = 10;

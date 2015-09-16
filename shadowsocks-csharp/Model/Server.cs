@@ -512,7 +512,7 @@ namespace Shadowsocks.Model
         public bool udp_over_tcp;
         public bool obfs_tcp;
         public bool obfs_udp;
-        private bool enable;
+        public bool enable;
 
         private ServerSpeedLog serverSpeedLog = new ServerSpeedLog();
         private DnsBuffer dnsBuffer = new DnsBuffer();

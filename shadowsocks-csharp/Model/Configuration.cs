@@ -12,6 +12,9 @@ namespace Shadowsocks.Model
     {
         private Random randomGennarator;
         private int lastSelectIndex;
+        private DateTime lastSelectTime;
+        private int lastUserSelectIndex;
+
         private struct ServerIndex
         {
             public int index;
@@ -75,18 +78,36 @@ namespace Shadowsocks.Model
             }
         }
 
-        public int Select(List<Server> configs, int curIndex, int algorithm)
+        public int Select(List<Server> configs, int curIndex, int algorithm, bool forceChange = false)
         {
             if (randomGennarator == null)
             {
                 randomGennarator = new Random();
                 lastSelectIndex = -1;
+                lastSelectTime = DateTime.Now;
+                lastUserSelectIndex = curIndex;
+            }
+            if (lastUserSelectIndex != curIndex)
+            {
+                if (configs.Count > curIndex && curIndex >= 0 && configs[curIndex].isEnable())
+                {
+                    lastSelectIndex = curIndex;
+                }
+                lastUserSelectIndex = curIndex;
             }
             if (configs.Count > 0)
             {
                 List<ServerIndex> serverList = new List<ServerIndex>();
                 for (int i = 0; i < configs.Count; ++i)
                 {
+                    if (forceChange && lastSelectIndex == i)
+                        continue;
+                    if (configs[i].isEnable())
+                        serverList.Add(new ServerIndex(i, configs[i]));
+                }
+                if (serverList.Count == 0)
+                {
+                    int i = lastSelectIndex;
                     if (configs[i].isEnable())
                         serverList.Add(new ServerIndex(i, configs[i]));
                 }
@@ -114,8 +135,22 @@ namespace Shadowsocks.Model
                         serverListIndex = randomGennarator.Next(serverList.Count);
                         serverListIndex = serverList[serverListIndex].index;
                     }
-                    else if (algorithm == 3)
+                    else if (algorithm == 3 || algorithm == 5)
                     {
+                        if (algorithm == 5)
+                        {
+                            if ((DateTime.Now - lastSelectTime).TotalSeconds > 60 * 10)
+                            {
+                                lastSelectTime = DateTime.Now;
+                            }
+                            else
+                            {
+                                if (configs.Count > lastSelectIndex && lastSelectIndex >= 0 && configs[lastSelectIndex].isEnable() && !forceChange)
+                                {
+                                    return lastSelectIndex;
+                                }
+                            }
+                        }
                         List<double> chances = new List<double>();
                         double lastBeginVal = 0;
                         foreach (ServerIndex s in serverList)
@@ -128,6 +163,7 @@ namespace Shadowsocks.Model
                             double target = randomGennarator.NextDouble() * lastBeginVal;
                             serverListIndex = lowerBound(chances, target);
                             serverListIndex = serverList[serverListIndex].index;
+                            lastSelectIndex = serverListIndex;
                             return serverListIndex;
                         }
                     }
@@ -143,16 +179,19 @@ namespace Shadowsocks.Model
                         }
                         if (algorithm == 4 && randomGennarator.Next(3) == 0)
                         {
+                            lastSelectIndex = curIndex;
                             return curIndex;
                         }
                         {
                             double target = randomGennarator.NextDouble() * lastBeginVal;
                             serverListIndex = lowerBound(chances, target);
                             serverListIndex = serverList[serverListIndex].index;
+                            lastSelectIndex = serverListIndex;
                             return serverListIndex;
                         }
                     }
                 }
+                lastSelectIndex = serverListIndex;
                 return serverListIndex;
             }
             else
@@ -194,7 +233,7 @@ namespace Shadowsocks.Model
             {
                 if (forceRandom)
                 {
-                    int index = serverStrategy.Select(configs, this.index, randomAlgorithm);
+                    int index = serverStrategy.Select(configs, this.index, randomAlgorithm, true);
                     if (index == -1) return GetDefaultServer();
                     return configs[index];
                 }
