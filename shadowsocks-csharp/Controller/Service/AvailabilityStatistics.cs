@@ -28,6 +28,7 @@ namespace Shadowsocks.Controller
         private const int DelayBeforeStart = 1000;
         public Statistics RawStatistics { get; private set; }
         public Statistics FilteredStatistics { get; private set; }
+        public static readonly DateTime UnknownDateTime = new DateTime(1970, 1, 1);
         private int Repeat => _config.RepeatTimesNum;
         private const int RetryInterval = 2*60*1000; //retry 2 minutes after failed
         private int Interval => (int) TimeSpan.FromMinutes(_config.DataCollectionMinutes).TotalMilliseconds; 
@@ -220,13 +221,8 @@ namespace Shadowsocks.Controller
                 {
                     var currentHour = DateTime.Now.Hour;
                     filteredData = filteredData.Where(data =>
-                    {
-                        DateTime dateTime;
-                        DateTime.TryParseExact(data.Timestamp, DateTimePattern, null,
-                            DateTimeStyles.None, out dateTime);
-                        var result = dateTime.Hour.Equals(currentHour);
-                        return result;
-                    });
+                        data.Timestamp != UnknownDateTime && data.Timestamp.Hour.Equals(currentHour)
+                    );
                     if (filteredData.LongCount() == 0) return;
                 }
                 var dataList = filteredData as List<RawStatisticsData> ?? filteredData.ToList();
@@ -252,7 +248,7 @@ namespace Shadowsocks.Controller
                     let strings = l.Split(new[] {","}, StringSplitOptions.RemoveEmptyEntries)
                     let rawData = new RawStatisticsData
                     {
-                        Timestamp = strings[0],
+                        Timestamp = ParseExactOrUnknown(strings[0]),
                         ServerName = strings[1],
                         ICMPStatus = strings[2],
                         RoundtripTime = int.Parse(strings[3]),
@@ -274,6 +270,12 @@ namespace Shadowsocks.Controller
             }
         }
 
+        private DateTime ParseExactOrUnknown(string str)
+        {
+            DateTime dateTime;
+            return !DateTime.TryParseExact(str, DateTimePattern, null, DateTimeStyles.None, out dateTime) ? UnknownDateTime : dateTime;
+        }
+
         public class State
         {
             public DataList dataList = new DataList();
@@ -284,7 +286,7 @@ namespace Shadowsocks.Controller
 
         public class RawStatisticsData
         {
-            public string Timestamp;
+            public DateTime Timestamp;
             public string ServerName;
             public string ICMPStatus;
             public int RoundtripTime;

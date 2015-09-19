@@ -29,13 +29,12 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea1 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.Legend legend1 = new System.Windows.Forms.DataVisualization.Charting.Legend();
-            System.Windows.Forms.DataVisualization.Charting.Series series1 = new System.Windows.Forms.DataVisualization.Charting.Series();
-            System.Windows.Forms.DataVisualization.Charting.Series series2 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea3 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Legend legend3 = new System.Windows.Forms.DataVisualization.Charting.Legend();
+            System.Windows.Forms.DataVisualization.Charting.Series series5 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.Series series6 = new System.Windows.Forms.DataVisualization.Charting.Series();
             this.StatisticsChart = new System.Windows.Forms.DataVisualization.Charting.Chart();
             this.byISPCheckBox = new System.Windows.Forms.CheckBox();
-            this.bindingConfiguration = new System.Windows.Forms.BindingSource(this.components);
             this.label2 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
@@ -57,8 +56,9 @@
             this.calculationContainer = new System.Windows.Forms.FlowLayoutPanel();
             this.CancelButton = new System.Windows.Forms.Button();
             this.OKButton = new System.Windows.Forms.Button();
+            this.bindingConfiguration = new System.Windows.Forms.BindingSource(this.components);
+            this.serverSelector = new System.Windows.Forms.ComboBox();
             ((System.ComponentModel.ISupportInitialize)(this.StatisticsChart)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.bindingConfiguration)).BeginInit();
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
@@ -75,39 +75,40 @@
             this.splitContainer3.Panel1.SuspendLayout();
             this.splitContainer3.Panel2.SuspendLayout();
             this.splitContainer3.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.bindingConfiguration)).BeginInit();
             this.SuspendLayout();
             // 
             // StatisticsChart
             // 
             this.StatisticsChart.BackColor = System.Drawing.Color.Transparent;
-            chartArea1.AxisX.MajorGrid.Enabled = false;
-            chartArea1.AxisY.MajorGrid.Enabled = false;
-            chartArea1.AxisY2.MajorGrid.Enabled = false;
-            chartArea1.BackColor = System.Drawing.Color.Transparent;
-            chartArea1.Name = "ChartArea";
-            this.StatisticsChart.ChartAreas.Add(chartArea1);
+            chartArea3.AxisX.MajorGrid.Enabled = false;
+            chartArea3.AxisY.MajorGrid.Enabled = false;
+            chartArea3.AxisY2.MajorGrid.Enabled = false;
+            chartArea3.BackColor = System.Drawing.Color.Transparent;
+            chartArea3.Name = "ChartArea";
+            this.StatisticsChart.ChartAreas.Add(chartArea3);
             this.StatisticsChart.Dock = System.Windows.Forms.DockStyle.Fill;
-            legend1.BackColor = System.Drawing.Color.Transparent;
-            legend1.Name = "ChartLegend";
-            this.StatisticsChart.Legends.Add(legend1);
+            legend3.BackColor = System.Drawing.Color.Transparent;
+            legend3.Name = "ChartLegend";
+            this.StatisticsChart.Legends.Add(legend3);
             this.StatisticsChart.Location = new System.Drawing.Point(0, 0);
             this.StatisticsChart.Margin = new System.Windows.Forms.Padding(5, 10, 5, 10);
             this.StatisticsChart.Name = "StatisticsChart";
             this.StatisticsChart.Palette = System.Windows.Forms.DataVisualization.Charting.ChartColorPalette.Pastel;
-            series1.ChartArea = "ChartArea";
-            series1.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Bubble;
-            series1.Color = System.Drawing.Color.FromArgb(((int)(((byte)(221)))), ((int)(((byte)(88)))), ((int)(((byte)(0)))));
-            series1.Legend = "ChartLegend";
-            series1.Name = "Package Loss";
-            series1.YValuesPerPoint = 4;
-            series2.BorderWidth = 4;
-            series2.ChartArea = "ChartArea";
-            series2.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
-            series2.Color = System.Drawing.Color.FromArgb(((int)(((byte)(155)))), ((int)(((byte)(77)))), ((int)(((byte)(150)))));
-            series2.Legend = "ChartLegend";
-            series2.Name = "Ping";
-            this.StatisticsChart.Series.Add(series1);
-            this.StatisticsChart.Series.Add(series2);
+            series5.ChartArea = "ChartArea";
+            series5.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Bubble;
+            series5.Color = System.Drawing.Color.FromArgb(((int)(((byte)(221)))), ((int)(((byte)(88)))), ((int)(((byte)(0)))));
+            series5.Legend = "ChartLegend";
+            series5.Name = "Package Loss";
+            series5.YValuesPerPoint = 4;
+            series6.BorderWidth = 4;
+            series6.ChartArea = "ChartArea";
+            series6.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
+            series6.Color = System.Drawing.Color.FromArgb(((int)(((byte)(155)))), ((int)(((byte)(77)))), ((int)(((byte)(150)))));
+            series6.Legend = "ChartLegend";
+            series6.Name = "Ping";
+            this.StatisticsChart.Series.Add(series5);
+            this.StatisticsChart.Series.Add(series6);
             this.StatisticsChart.Size = new System.Drawing.Size(1061, 314);
             this.StatisticsChart.TabIndex = 2;
             // 
@@ -122,10 +123,6 @@
             this.byISPCheckBox.TabIndex = 5;
             this.byISPCheckBox.Text = "By ISP/geolocation";
             this.byISPCheckBox.UseVisualStyleBackColor = true;
-            // 
-            // bindingConfiguration
-            // 
-            this.bindingConfiguration.DataSource = typeof(Shadowsocks.Model.StatisticsStrategyConfiguration);
             // 
             // label2
             // 
@@ -162,7 +159,7 @@
             this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.groupBox1.Controls.Add(this.radioButton2);
             this.groupBox1.Controls.Add(this.radioButton1);
-            this.groupBox1.Location = new System.Drawing.Point(808, 81);
+            this.groupBox1.Location = new System.Drawing.Point(808, 114);
             this.groupBox1.Margin = new System.Windows.Forms.Padding(5, 10, 5, 10);
             this.groupBox1.Name = "groupBox1";
             this.groupBox1.Padding = new System.Windows.Forms.Padding(5, 10, 5, 10);
@@ -210,6 +207,7 @@
             // 
             // splitContainer1.Panel2
             // 
+            this.splitContainer1.Panel2.Controls.Add(this.serverSelector);
             this.splitContainer1.Panel2.Controls.Add(this.CancelButton);
             this.splitContainer1.Panel2.Controls.Add(this.OKButton);
             this.splitContainer1.Panel2.Controls.Add(this.groupBox1);
@@ -426,7 +424,7 @@
             // CancelButton
             // 
             this.CancelButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.CancelButton.Location = new System.Drawing.Point(954, 240);
+            this.CancelButton.Location = new System.Drawing.Point(954, 234);
             this.CancelButton.Name = "CancelButton";
             this.CancelButton.Size = new System.Drawing.Size(93, 43);
             this.CancelButton.TabIndex = 5;
@@ -437,13 +435,26 @@
             // OKButton
             // 
             this.OKButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.OKButton.Location = new System.Drawing.Point(855, 240);
+            this.OKButton.Location = new System.Drawing.Point(855, 234);
             this.OKButton.Name = "OKButton";
             this.OKButton.Size = new System.Drawing.Size(93, 43);
             this.OKButton.TabIndex = 4;
             this.OKButton.Text = "OK";
             this.OKButton.UseVisualStyleBackColor = true;
             this.OKButton.Click += new System.EventHandler(this.OKButton_Click);
+            // 
+            // bindingConfiguration
+            // 
+            this.bindingConfiguration.DataSource = typeof(Shadowsocks.Model.StatisticsStrategyConfiguration);
+            // 
+            // serverSelector
+            // 
+            this.serverSelector.FormattingEnabled = true;
+            this.serverSelector.Location = new System.Drawing.Point(808, 75);
+            this.serverSelector.Name = "serverSelector";
+            this.serverSelector.Size = new System.Drawing.Size(239, 36);
+            this.serverSelector.TabIndex = 6;
+            this.serverSelector.SelectedIndexChanged += new System.EventHandler(this.serverSelector_SelectedIndexChanged);
             // 
             // StatisticsStrategyConfigurationForm
             // 
@@ -458,7 +469,6 @@
             this.Name = "StatisticsStrategyConfigurationForm";
             this.Text = "StatisticsStrategyConfigurationForm";
             ((System.ComponentModel.ISupportInitialize)(this.StatisticsChart)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.bindingConfiguration)).EndInit();
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
             this.splitContainer1.Panel1.ResumeLayout(false);
@@ -478,6 +488,7 @@
             this.splitContainer3.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer3)).EndInit();
             this.splitContainer3.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.bindingConfiguration)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -507,5 +518,6 @@
         private System.Windows.Forms.BindingSource bindingConfiguration;
         private new System.Windows.Forms.Button CancelButton;
         private System.Windows.Forms.Button OKButton;
+        private System.Windows.Forms.ComboBox serverSelector;
     }
 }
