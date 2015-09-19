@@ -93,17 +93,18 @@ namespace Shadowsocks.Controller
         private int _firstPacketLength;
         // Size of receive buffer.
         public const int RecvSize = 8192;
-        public const int BufferSize = RecvSize + (RecvSize / IVEncryptor.CRC_BUF_LEN + 1) * IVEncryptor.CRC_BYTES + 48;
+        public const int RecvReserveSize = (RecvSize / IVEncryptor.CRC_BUF_LEN + 1) * IVEncryptor.CRC_BYTES + 16; // reserve for one-time auth
+        public const int BufferSize = RecvSize + RecvReserveSize + 32;
 
         private int totalRead = 0;
         private int totalWrite = 0;
 
         // remote receive buffer
-        private byte[] remoteRecvBuffer = new byte[RecvSize];
+        private byte[] remoteRecvBuffer = new byte[BufferSize];
         // remote send buffer
         private byte[] remoteSendBuffer = new byte[BufferSize];
         // connection receive buffer
-        private byte[] connetionRecvBuffer = new byte[RecvSize];
+        private byte[] connetionRecvBuffer = new byte[BufferSize];
         // connection send buffer
         private byte[] connetionSendBuffer = new byte[BufferSize];
         // Received data string.
