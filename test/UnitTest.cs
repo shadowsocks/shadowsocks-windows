@@ -84,8 +84,8 @@ namespace test
                 {
                     IEncryptor encryptor;
                     IEncryptor decryptor;
-                    encryptor = new PolarSSLEncryptor("aes-256-cfb", "barfoo!");
-                    decryptor = new PolarSSLEncryptor("aes-256-cfb", "barfoo!");
+                    encryptor = new PolarSSLEncryptor("aes-256-cfb", "barfoo!", false);
+                    decryptor = new PolarSSLEncryptor("aes-256-cfb", "barfoo!", false);
                     RunEncryptionRound(encryptor, decryptor);
                 }
             }
@@ -124,8 +124,8 @@ namespace test
                     var random = new Random();
                     IEncryptor encryptor;
                     IEncryptor decryptor;
-                    encryptor = new PolarSSLEncryptor("rc4-md5", "barfoo!");
-                    decryptor = new PolarSSLEncryptor("rc4-md5", "barfoo!");
+                    encryptor = new PolarSSLEncryptor("rc4-md5", "barfoo!", false);
+                    decryptor = new PolarSSLEncryptor("rc4-md5", "barfoo!", false);
                     RunEncryptionRound(encryptor, decryptor);
                 }
             }
@@ -164,8 +164,8 @@ namespace test
                     var random = new Random();
                     IEncryptor encryptor;
                     IEncryptor decryptor;
-                    encryptor = new SodiumEncryptor("salsa20", "barfoo!");
-                    decryptor = new SodiumEncryptor("salsa20", "barfoo!");
+                    encryptor = new SodiumEncryptor("salsa20", "barfoo!", false);
+                    decryptor = new SodiumEncryptor("salsa20", "barfoo!", false);
                     RunEncryptionRound(encryptor, decryptor);
                 }
             }
