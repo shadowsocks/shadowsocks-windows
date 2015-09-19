@@ -2,12 +2,19 @@
 using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Text;
+using System.Net;
 
 namespace Shadowsocks.Encryption
 {
     public abstract class IVEncryptor
         : EncryptorBase
     {
+        public const int ONETIMEAUTH_FLAG = 0x10;
+        public const int ADDRTYPE_MASK = 0xF;
+        public const int ONETIMEAUTH_BYTES = 16;
+        public const int CRC_BUF_LEN = 128;
+        public const int CRC_BYTES = 2;
+
         protected static byte[] tempbuf = new byte[MAX_INPUT_SIZE];
 
         protected Dictionary<string, int[]> ciphers;
@@ -25,11 +32,17 @@ namespace Shadowsocks.Encryption
         protected byte[] _key;
         protected int keyLen;
         protected int ivLen;
+        protected byte[] crc_buf;
+        protected int crc_idx = 0;
 
-        public IVEncryptor(string method, string password)
-            : base(method, password)
+        public IVEncryptor(string method, string password, bool onetimeauth)
+            : base(method, password, onetimeauth)
         {
             InitKey(method, password);
+            if (OnetimeAuth)
+            {
+                crc_buf = new byte[CRC_BUF_LEN];
+            }
         }
 
         protected abstract Dictionary<string, int[]> getCiphers();
@@ -112,6 +125,28 @@ namespace Shadowsocks.Encryption
 
         protected abstract void cipherUpdate(bool isCipher, int length, byte[] buf, byte[] outbuf);
 
+        protected int GetSSHeadLength(byte[] buf, int length)
+        {
+            int len = 0;
+            int atyp = length > 0 ? (buf[0] & ADDRTYPE_MASK) : 0;
+            if (atyp == 1)
+            {
+                len = 7; // atyp (1 bytes) + ipv4 (4 bytes) + port (2 bytes)
+            }
+            else if (atyp == 3 && length > 1)
+            {
+                int nameLen = buf[1];
+                len = 4 + nameLen; // atyp (1 bytes) + name length (1 bytes) + name (n bytes) + port (2 bytes)
+            }
+            else if (atyp == 4)
+            {
+                len = 19; // atyp (1 bytes) + ipv6 (16 bytes) + port (2 bytes)
+            }
+            if (len == 0 || len > length)
+                throw new Exception($"invalid header with addr type {atyp}");
+            return len;
+        }
+
         public override void Encrypt(byte[] buf, int length, byte[] outbuf, out int outlength)
         {
             if (!_encryptIVSent)
@@ -122,6 +157,24 @@ namespace Shadowsocks.Encryption
                 outlength = length + ivLen;
                 lock (tempbuf)
                 {
+                    if (OnetimeAuth)
+                    {
+                        lock(crc_buf)
+                        {
+                            int headLen = GetSSHeadLength(buf, length);
+                            int data_len = length - headLen;
+                            Buffer.BlockCopy(buf, headLen, buf, headLen + ONETIMEAUTH_BYTES, data_len);
+                            buf[0] |= ONETIMEAUTH_FLAG;
+                            byte[] auth = new byte[ONETIMEAUTH_BYTES];
+                            Sodium.ss_onetimeauth(auth, buf, headLen, _encryptIV, ivLen, _key, keyLen);
+                            Buffer.BlockCopy(auth, 0, buf, headLen, ONETIMEAUTH_BYTES);
+                            int buf_offset = headLen + ONETIMEAUTH_BYTES;
+                            int rc = Sodium.ss_gen_crc(buf, ref buf_offset, ref data_len, crc_buf, ref crc_idx, buf.Length);
+                            if (rc != 0)
+                                throw new Exception("failed to generate crc");
+                            length = headLen + ONETIMEAUTH_BYTES + data_len;
+                        }
+                    }
                     cipherUpdate(true, length, buf, tempbuf);
                     outlength = length + ivLen;
                     Buffer.BlockCopy(tempbuf, 0, outbuf, ivLen, length);
@@ -129,6 +182,16 @@ namespace Shadowsocks.Encryption
             }
             else
             {
+                if (OnetimeAuth)
+                {
+                    lock(crc_buf)
+                    {
+                        int buf_offset = 0;
+                        int rc = Sodium.ss_gen_crc(buf, ref buf_offset, ref length, crc_buf, ref crc_idx, buf.Length);
+                        if (rc != 0)
+                            throw new Exception("failed to generate crc");
+                    }
+                }
                 outlength = length;
                 cipherUpdate(true, length, buf, outbuf);
             }
@@ -154,5 +217,6 @@ namespace Shadowsocks.Encryption
                 cipherUpdate(false, length, buf, outbuf);
             }
         }
+
     }
 }

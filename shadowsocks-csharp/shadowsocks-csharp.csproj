@@ -205,6 +205,7 @@
     </None>
     <None Include="Data\abp.js.gz" />
     <None Include="Data\libsscrypto.dll.gz" />
+    <None Include="Data\libsscrypto2.dll.gz" />
     <None Include="Data\mgwz.dll.gz" />
     <None Include="Data\privoxy.exe.gz" />
     <None Include="Data\proxy.pac.txt.gz" />

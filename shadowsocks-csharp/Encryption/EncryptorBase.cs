@@ -8,14 +8,16 @@ namespace Shadowsocks.Encryption
     {
         public const int MAX_INPUT_SIZE = 32768;
 
-        protected EncryptorBase(string method, string password)
+        protected EncryptorBase(string method, string password, bool onetimeauth)
         {
             Method = method;
             Password = password;
+            OnetimeAuth = onetimeauth;
         }
 
         protected string Method;
         protected string Password;
+        protected bool OnetimeAuth;
 
         protected byte[] GetPasswordHash()
         {

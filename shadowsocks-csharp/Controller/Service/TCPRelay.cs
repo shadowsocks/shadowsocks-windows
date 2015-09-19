@@ -124,7 +124,7 @@ namespace Shadowsocks.Controller
             {
                 throw new ArgumentException("No server configured");
             }
-            this.encryptor = EncryptorFactory.GetEncryptor(server.method, server.password);
+            this.encryptor = EncryptorFactory.GetEncryptor(server.method, server.password, server.one_time_auth);
             this.server = server;
         }
 

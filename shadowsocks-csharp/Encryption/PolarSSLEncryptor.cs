@@ -16,8 +16,8 @@ namespace Shadowsocks.Encryption
         private IntPtr _encryptCtx = IntPtr.Zero;
         private IntPtr _decryptCtx = IntPtr.Zero;
 
-        public PolarSSLEncryptor(string method, string password)
-            : base(method, password)
+        public PolarSSLEncryptor(string method, string password, bool onetimeauth)
+            : base(method, password, onetimeauth)
         {
             InitKey(method, password);
         }

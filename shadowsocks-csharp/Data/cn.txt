@@ -39,6 +39,7 @@ Password=密码
 Encryption=加密
 Proxy Port=代理端口
 Remarks=备注
+One-time authorization=一次性授权
 OK=确定
 Cancel=取消
 New server=未配置的服务器
