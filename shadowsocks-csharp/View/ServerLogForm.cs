@@ -487,6 +487,7 @@ namespace Shadowsocks.View
                     Configuration config = controller.GetCurrentConfiguration();
                     Server server = config.configs[id];
                     server.setEnable(!server.isEnable());
+                    controller.SelectServerIndex(config.index);
                 }
                 ServerDataGrid[0, e.RowIndex].Selected = true;
             }

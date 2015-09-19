@@ -180,6 +180,12 @@
     <Compile Include="View\ServerLogForm.Designer.cs">
       <DependentUpon>ServerLogForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="View\SettingsForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="View\SettingsForm.Designer.cs">
+      <DependentUpon>SettingsForm.cs</DependentUpon>
+    </Compile>
     <EmbeddedResource Include="View\ConfigForm.resx">
       <DependentUpon>ConfigForm.cs</DependentUpon>
       <SubType>Designer</SubType>
@@ -194,6 +200,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="View\ServerLogForm.resx">
       <DependentUpon>ServerLogForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="View\SettingsForm.resx">
+      <DependentUpon>SettingsForm.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="app.config" />
     <None Include="app.manifest">

@@ -10,6 +10,7 @@ PAC=PAC 模式
 Global=全局模式
 Servers=服务器
 Edit Servers...=编辑服务器...
+Global Settings...=全局配置...
 Start on Boot=开机启动
 Allow Clients from LAN=允许来自局域网的连接
 Random Proxy=服务器负载均衡
@@ -30,6 +31,7 @@ Show Logs...=显示日志...
 About...=关于...
 Quit=退出
 Edit Servers=编辑服务器
+Global Settings=全局配置
 
 # Config Form
 
@@ -58,6 +60,9 @@ UDP over UDP if not checked=不打钩使用原生 UDP
 Recommend checked=保留功能
 Checked if server support=服务端支持的话打钩
 Link=链接
+Original=原版
+Verify header=校验头部(新TCP协议)
+Verify all=校验所有数据
 
 Balance=负载均衡
 Order=按次序

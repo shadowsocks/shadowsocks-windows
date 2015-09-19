@@ -59,41 +59,24 @@ namespace Shadowsocks.View
             ServerPortLabel.Text = I18N.GetString("Server Port");
             PasswordLabel.Text = I18N.GetString("Password");
             EncryptionLabel.Text = I18N.GetString("Encryption");
-            ProxyPortLabel.Text = I18N.GetString("Proxy Port");
             RemarksLabel.Text = I18N.GetString("Remarks");
 
             LabelExpertSetting.Text = I18N.GetString(LabelExpertSetting.Text);
             TCPoverUDPLabel.Text = I18N.GetString(TCPoverUDPLabel.Text);
             UDPoverTCPLabel.Text = I18N.GetString(UDPoverTCPLabel.Text);
-            ObfsTCPLabel.Text = I18N.GetString(ObfsTCPLabel.Text);
+            TCPProtocolLabel.Text = I18N.GetString(TCPProtocolLabel.Text);
             ObfsUDPLabel.Text = I18N.GetString(ObfsUDPLabel.Text);
             LabelNote.Text = I18N.GetString(LabelNote.Text);
             CheckTCPoverUDP.Text = I18N.GetString(CheckTCPoverUDP.Text);
             CheckUDPoverUDP.Text = I18N.GetString(CheckUDPoverUDP.Text);
-            CheckObfsTCP.Text = I18N.GetString(CheckObfsTCP.Text);
             CheckObfsUDP.Text = I18N.GetString(CheckObfsUDP.Text);
             LabelLink.Text = I18N.GetString(LabelLink.Text);
+            for (int i = 0; i < TCPProtocolComboBox.Items.Count; ++i)
+            {
+                TCPProtocolComboBox.Items[i] = I18N.GetString(TCPProtocolComboBox.Items[i].ToString());
+            }
 
             ServerGroupBox.Text = I18N.GetString("Server");
-
-            ReconnectLabel.Text = I18N.GetString("Reconnect Times");
-            TTLLabel.Text = I18N.GetString("TTL");
-            CheckAutoBan.Text = I18N.GetString("AutoBan");
-
-            Socks5ProxyGroup.Text = I18N.GetString("Socks5 Proxy");
-            CheckSocks5Proxy.Text = I18N.GetString("Socks5 Proxy On");
-            LabelS5Server.Text = I18N.GetString("Server IP");
-            LabelS5Port.Text = I18N.GetString("Server Port");
-            LabelS5Server.Text = I18N.GetString("Server IP");
-            LabelS5Port.Text = I18N.GetString("Server Port");
-            LabelS5Username.Text = I18N.GetString("Username");
-            LabelS5Password.Text = I18N.GetString("Password");
-
-            LabelRandom.Text = I18N.GetString("Balance");
-            for (int i = 0; i < RandomComboBox.Items.Count; ++i)
-            {
-                RandomComboBox.Items[i] = I18N.GetString(RandomComboBox.Items[i].ToString());
-            }
 
             OKButton.Text = I18N.GetString("OK");
             MyCancelButton.Text = I18N.GetString("Cancel");
@@ -103,7 +86,7 @@ namespace Shadowsocks.View
         {
             LoadCurrentConfiguration();
         }
-        
+
         private void ShowWindow()
         {
             this.Opacity = 1;
@@ -128,12 +111,10 @@ namespace Shadowsocks.View
                     remarks = RemarksTextBox.Text,
                     tcp_over_udp = CheckTCPoverUDP.Checked,
                     udp_over_tcp = CheckUDPoverUDP.Checked,
-                    obfs_tcp = CheckObfsTCP.Checked,
+                    tcp_protocol = TCPProtocolComboBox.SelectedIndex,
                     obfs_udp = CheckObfsUDP.Checked
                 };
-                int localPort = int.Parse(ProxyPortTextBox.Text);
                 Configuration.CheckServer(server);
-                Configuration.CheckPort(localPort);
                 int ret = 0;
                 if (_modifiedConfiguration.configs[_oldSelectedIndex].server != server.server
                     || _modifiedConfiguration.configs[_oldSelectedIndex].server_port != server.server_port
@@ -143,17 +124,6 @@ namespace Shadowsocks.View
                     ret = 1; // display changed
                 }
                 _modifiedConfiguration.configs[_oldSelectedIndex] = server;
-                _modifiedConfiguration.localPort = localPort;
-                _modifiedConfiguration.reconnectTimes = int.Parse(ReconnectText.Text);
-                _modifiedConfiguration.randomAlgorithm = RandomComboBox.SelectedIndex;
-                _modifiedConfiguration.TTL = int.Parse(TTLText.Text);
-                _modifiedConfiguration.socks5enable = CheckSocks5Proxy.Checked;
-                _modifiedConfiguration.socks5Host = TextS5Server.Text;
-                _modifiedConfiguration.socks5Port = int.Parse(TextS5Port.Text);
-                _modifiedConfiguration.socks5User = TextS5User.Text;
-                _modifiedConfiguration.socks5Pass = TextS5Pass.Text;
-
-                _modifiedConfiguration.autoban = CheckAutoBan.Checked;
 
                 return ret;
             }
@@ -204,28 +174,16 @@ namespace Shadowsocks.View
                 IPTextBox.Text = server.server;
                 ServerPortTextBox.Text = server.server_port.ToString();
                 PasswordTextBox.Text = server.password;
-                ProxyPortTextBox.Text = _modifiedConfiguration.localPort.ToString();
                 EncryptionSelect.Text = server.method ?? "aes-256-cfb";
                 RemarksTextBox.Text = server.remarks;
                 CheckTCPoverUDP.Checked = server.tcp_over_udp;
                 CheckUDPoverUDP.Checked = server.udp_over_tcp;
-                CheckObfsTCP.Checked = server.obfs_tcp;
+                TCPProtocolComboBox.SelectedIndex = server.tcp_protocol;
                 CheckObfsUDP.Checked = server.obfs_udp;
 
                 ServerGroupBox.Visible = true;
-                ReconnectText.Text = _modifiedConfiguration.reconnectTimes.ToString();
-                RandomComboBox.SelectedIndex = _modifiedConfiguration.randomAlgorithm;
-                TTLText.Text = _modifiedConfiguration.TTL.ToString();
-
-                CheckSocks5Proxy.Checked = _modifiedConfiguration.socks5enable;
-                TextS5Server.Text = _modifiedConfiguration.socks5Host;
-                TextS5Port.Text = _modifiedConfiguration.socks5Port.ToString();
-                TextS5User.Text = _modifiedConfiguration.socks5User;
-                TextS5Pass.Text = _modifiedConfiguration.socks5Pass;
 
                 TextLink.Text = controller.GetSSLinkForServer(server);
-
-                CheckAutoBan.Checked = _modifiedConfiguration.autoban;
 
                 PasswordLabel.Checked = false;
                 GenQR(TextLink.Text);

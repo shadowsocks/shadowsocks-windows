@@ -1583,7 +1583,7 @@ namespace Shadowsocks.Controller
                         {
                             if (remoteHeaderSendBuffer != null)
                             {
-                                RemoteSend(remoteHeaderSendBuffer, remoteHeaderSendBuffer.Length, server.obfs_tcp);
+                                RemoteSend(remoteHeaderSendBuffer, remoteHeaderSendBuffer.Length, server.tcp_protocol);
                                 remoteHeaderSendBuffer = null;
                             }
                         }
@@ -1912,10 +1912,10 @@ namespace Shadowsocks.Controller
             }
         }
 
-        private void RemoteSend(byte[] bytes, int length, bool obfs = false, int obfs_max = 32)
+        private void RemoteSend(byte[] bytes, int length, int tcp_protocol = 0, int obfs_max = 32)
         {
             int bytesToSend;
-            if (obfs)
+            if (tcp_protocol == 1)
             {
                 byte[] bytesToEncrypt = null;
                 int obfs_len = random.Next(obfs_max - 1) + 1;
@@ -2117,7 +2117,7 @@ namespace Shadowsocks.Controller
                             int packet = ++connectionPacketNumber;
                             if (packet == 1)
                             {
-                                RemoteSend(connetionRecvBuffer, bytesRead, server.obfs_tcp);
+                                RemoteSend(connetionRecvBuffer, bytesRead, server.tcp_protocol);
                             }
                             else
                             {

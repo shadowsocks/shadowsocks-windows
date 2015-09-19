@@ -44,6 +44,7 @@ namespace Shadowsocks.View
         private MenuItem editOnlinePACItem;
         private MenuItem SelectRandomItem;
         private ConfigForm configForm;
+        private SettingsForm settingsForm;
         private ServerLogForm serverLogForm;
         private string _urlToOpen;
         private System.Timers.Timer timerDelayCheckUpdate;
@@ -183,6 +184,7 @@ namespace Shadowsocks.View
                     this.ConfigItem = CreateMenuItem("Edit Servers...", new EventHandler(this.Config_Click)),
                     CreateMenuItem("Show QRCode...", new EventHandler(this.QRCodeItem_Click)),
                 }),
+                CreateMenuItem("Global Settings...", new EventHandler(this.Setting_Click)),
                 new MenuItem("-"),
                 this.AutoStartupItem = CreateMenuItem("Start on Boot", new EventHandler(this.AutoStartupItem_Click)),
                 this.ShareOverLANItem = CreateMenuItem("Allow Clients from LAN", new EventHandler(this.ShareOverLANItem_Click)),
@@ -335,6 +337,22 @@ namespace Shadowsocks.View
             }
         }
 
+        private void ShowSettingForm()
+        {
+            if (settingsForm != null)
+            {
+                settingsForm.Activate();
+            }
+            else
+            {
+                settingsForm = new SettingsForm(controller);
+                settingsForm.Show();
+                settingsForm.Activate();
+                settingsForm.BringToFront();
+                settingsForm.FormClosed += settingsForm_FormClosed;
+            }
+        }
+
         private void ShowServerLogForm()
         {
             if (serverLogForm != null)
@@ -357,6 +375,12 @@ namespace Shadowsocks.View
             ShowFirstTimeBalloon();
         }
 
+        void settingsForm_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            settingsForm = null;
+            Util.Utils.ReleaseMemory();
+        }
+
         void serverLogForm_FormClosed(object sender, FormClosedEventArgs e)
         {
             serverLogForm = null;
@@ -365,6 +389,11 @@ namespace Shadowsocks.View
         private void Config_Click(object sender, EventArgs e)
         {
             ShowConfigForm();
+        }
+
+        private void Setting_Click(object sender, EventArgs e)
+        {
+            ShowSettingForm();
         }
 
         private void Quit_Click(object sender, EventArgs e)

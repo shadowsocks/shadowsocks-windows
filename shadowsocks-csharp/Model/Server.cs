@@ -510,7 +510,7 @@ namespace Shadowsocks.Model
         public string remarks;
         public bool tcp_over_udp;
         public bool udp_over_tcp;
-        public bool obfs_tcp;
+        public int tcp_protocol;
         public bool obfs_udp;
         public bool enable;
 
@@ -595,7 +595,7 @@ namespace Shadowsocks.Model
             ret.remarks = (string)remarks.Clone();
             ret.enable = enable;
             ret.udp_over_tcp = udp_over_tcp;
-            ret.obfs_tcp = obfs_tcp;
+            ret.tcp_protocol = tcp_protocol;
             ret.obfs_udp = obfs_udp;
             return ret;
         }
@@ -608,7 +608,7 @@ namespace Shadowsocks.Model
             this.password = "0";
             this.remarks = "";
             this.udp_over_tcp = false;
-            this.obfs_tcp = false;
+            this.tcp_protocol = 0;
             this.obfs_udp = false;
             this.enable = true;
         }
