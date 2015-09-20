@@ -88,7 +88,8 @@ namespace Shadowsocks.Encryption
         protected static void randBytes(byte[] buf, int length)
         {
             byte[] temp = new byte[length];
-            new Random().NextBytes(temp);
+            RNGCryptoServiceProvider rngServiceProvider = new RNGCryptoServiceProvider();
+            rngServiceProvider.GetBytes(temp);
             temp.CopyTo(buf, 0);
         }
 
