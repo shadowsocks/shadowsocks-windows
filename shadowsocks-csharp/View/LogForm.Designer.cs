@@ -36,11 +36,11 @@
             this.OpenLocationMenuItem = new System.Windows.Forms.MenuItem();
             this.ExitMenuItem = new System.Windows.Forms.MenuItem();
             this.panel1 = new System.Windows.Forms.Panel();
+            this.TopMostCheckBox = new System.Windows.Forms.CheckBox();
             this.ChangeFontButton = new System.Windows.Forms.Button();
             this.CleanLogsButton = new System.Windows.Forms.Button();
             this.WrapTextCheckBox = new System.Windows.Forms.CheckBox();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
-            this.TopMostCheckBox = new System.Windows.Forms.CheckBox();
             this.panel1.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
             this.SuspendLayout();
@@ -51,13 +51,14 @@
             this.LogMessageTextBox.Dock = System.Windows.Forms.DockStyle.Fill;
             this.LogMessageTextBox.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.LogMessageTextBox.ForeColor = System.Drawing.Color.White;
-            this.LogMessageTextBox.Location = new System.Drawing.Point(3, 43);
+            this.LogMessageTextBox.Location = new System.Drawing.Point(3, 61);
+            this.LogMessageTextBox.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.LogMessageTextBox.MaxLength = 2147483647;
             this.LogMessageTextBox.Multiline = true;
             this.LogMessageTextBox.Name = "LogMessageTextBox";
             this.LogMessageTextBox.ReadOnly = true;
             this.LogMessageTextBox.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.LogMessageTextBox.Size = new System.Drawing.Size(541, 307);
+            this.LogMessageTextBox.Size = new System.Drawing.Size(632, 444);
             this.LogMessageTextBox.TabIndex = 0;
             this.LogMessageTextBox.WordWrap = false;
             // 
@@ -98,16 +99,30 @@
             this.panel1.Controls.Add(this.CleanLogsButton);
             this.panel1.Controls.Add(this.WrapTextCheckBox);
             this.panel1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panel1.Location = new System.Drawing.Point(3, 3);
+            this.panel1.Location = new System.Drawing.Point(3, 4);
+            this.panel1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(541, 34);
+            this.panel1.Size = new System.Drawing.Size(632, 49);
             this.panel1.TabIndex = 1;
+            // 
+            // TopMostCheckBox
+            // 
+            this.TopMostCheckBox.AutoSize = true;
+            this.TopMostCheckBox.Location = new System.Drawing.Point(363, 13);
+            this.TopMostCheckBox.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.TopMostCheckBox.Name = "TopMostCheckBox";
+            this.TopMostCheckBox.Size = new System.Drawing.Size(83, 21);
+            this.TopMostCheckBox.TabIndex = 3;
+            this.TopMostCheckBox.Text = "&Top most";
+            this.TopMostCheckBox.UseVisualStyleBackColor = true;
+            this.TopMostCheckBox.CheckedChanged += new System.EventHandler(this.TopMostCheckBox_CheckedChanged);
             // 
             // ChangeFontButton
             // 
-            this.ChangeFontButton.Location = new System.Drawing.Point(107, 4);
+            this.ChangeFontButton.Location = new System.Drawing.Point(125, 6);
+            this.ChangeFontButton.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.ChangeFontButton.Name = "ChangeFontButton";
-            this.ChangeFontButton.Size = new System.Drawing.Size(75, 23);
+            this.ChangeFontButton.Size = new System.Drawing.Size(87, 33);
             this.ChangeFontButton.TabIndex = 2;
             this.ChangeFontButton.Text = "&Font";
             this.ChangeFontButton.UseVisualStyleBackColor = true;
@@ -115,9 +130,10 @@
             // 
             // CleanLogsButton
             // 
-            this.CleanLogsButton.Location = new System.Drawing.Point(9, 4);
+            this.CleanLogsButton.Location = new System.Drawing.Point(10, 6);
+            this.CleanLogsButton.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.CleanLogsButton.Name = "CleanLogsButton";
-            this.CleanLogsButton.Size = new System.Drawing.Size(75, 23);
+            this.CleanLogsButton.Size = new System.Drawing.Size(87, 33);
             this.CleanLogsButton.TabIndex = 1;
             this.CleanLogsButton.Text = "&Clean logs";
             this.CleanLogsButton.UseVisualStyleBackColor = true;
@@ -126,9 +142,10 @@
             // WrapTextCheckBox
             // 
             this.WrapTextCheckBox.AutoSize = true;
-            this.WrapTextCheckBox.Location = new System.Drawing.Point(209, 9);
+            this.WrapTextCheckBox.Location = new System.Drawing.Point(244, 13);
+            this.WrapTextCheckBox.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.WrapTextCheckBox.Name = "WrapTextCheckBox";
-            this.WrapTextCheckBox.Size = new System.Drawing.Size(78, 16);
+            this.WrapTextCheckBox.Size = new System.Drawing.Size(84, 21);
             this.WrapTextCheckBox.TabIndex = 0;
             this.WrapTextCheckBox.Text = "&Wrap text";
             this.WrapTextCheckBox.UseVisualStyleBackColor = true;
@@ -142,30 +159,22 @@
             this.tableLayoutPanel1.Controls.Add(this.LogMessageTextBox, 0, 1);
             this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 0);
+            this.tableLayoutPanel1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
             this.tableLayoutPanel1.RowCount = 2;
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 40F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 57F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(547, 353);
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(638, 509);
             this.tableLayoutPanel1.TabIndex = 2;
-            // 
-            // TopMostCheckBox
-            // 
-            this.TopMostCheckBox.AutoSize = true;
-            this.TopMostCheckBox.Location = new System.Drawing.Point(311, 9);
-            this.TopMostCheckBox.Name = "TopMostCheckBox";
-            this.TopMostCheckBox.Size = new System.Drawing.Size(72, 16);
-            this.TopMostCheckBox.TabIndex = 3;
-            this.TopMostCheckBox.Text = "&Top most";
-            this.TopMostCheckBox.UseVisualStyleBackColor = true;
-            this.TopMostCheckBox.CheckedChanged += new System.EventHandler(this.TopMostCheckBox_CheckedChanged);
             // 
             // LogForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 17F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(547, 353);
+            this.ClientSize = new System.Drawing.Size(638, 509);
             this.Controls.Add(this.tableLayoutPanel1);
+            this.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.Menu = this.mainMenu1;
             this.Name = "LogForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;

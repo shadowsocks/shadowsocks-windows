@@ -185,7 +185,12 @@ namespace Shadowsocks.View
                 ServersListBox.SelectedIndex = _lastSelectedIndex;
                 return;
             }
-            ServersListBox.Items[_lastSelectedIndex] = _modifiedConfiguration.configs[_lastSelectedIndex].FriendlyName();
+            try
+            {
+                ServersListBox.Items[_lastSelectedIndex] = _modifiedConfiguration.configs[_lastSelectedIndex].FriendlyName();
+
+            }
+            catch { }
             UpdateMoveUpAndDownButton();
             LoadSelectedServer();
             _lastSelectedIndex = ServersListBox.SelectedIndex;
@@ -193,6 +198,7 @@ namespace Shadowsocks.View
 
         private void AddButton_Click(object sender, EventArgs e)
         {
+            ServerGroupBox.Enabled = true;
             if (!SaveOldSelectedServer())
             {
                 return;
@@ -216,10 +222,14 @@ namespace Shadowsocks.View
                 // can be -1
                 _lastSelectedIndex = _modifiedConfiguration.configs.Count - 1;
             }
-            ServersListBox.SelectedIndex = _lastSelectedIndex;
-            LoadConfiguration(_modifiedConfiguration);
-            ServersListBox.SelectedIndex = _lastSelectedIndex;
-            LoadSelectedServer();
+                ServersListBox.SelectedIndex = _lastSelectedIndex;
+                LoadConfiguration(_modifiedConfiguration);
+                ServersListBox.SelectedIndex = _lastSelectedIndex;
+                LoadSelectedServer();
+            if (_lastSelectedIndex < 1)
+            {
+                ServerGroupBox.Enabled = false;
+            }
         }
 
         private void OKButton_Click(object sender, EventArgs e)
