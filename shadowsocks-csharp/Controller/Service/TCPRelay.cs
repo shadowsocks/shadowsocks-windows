@@ -93,7 +93,7 @@ namespace Shadowsocks.Controller
         private int _firstPacketLength;
         // Size of receive buffer.
         public const int RecvSize = 8192;
-        public const int RecvReserveSize = (RecvSize / IVEncryptor.CRC_BUF_LEN + 1) * IVEncryptor.CRC_BYTES + 16; // reserve for one-time auth
+        public const int RecvReserveSize = (RecvSize / IVEncryptor.HASH_BUF_LEN + 1) * IVEncryptor.HASH_BYTES + IVEncryptor.ONETIMEAUTH_BYTES; // reserve for one-time auth
         public const int BufferSize = RecvSize + RecvReserveSize + 32;
 
         private int totalRead = 0;

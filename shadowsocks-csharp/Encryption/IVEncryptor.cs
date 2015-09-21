@@ -9,11 +9,17 @@ namespace Shadowsocks.Encryption
     public abstract class IVEncryptor
         : EncryptorBase
     {
+        public const int MAX_KEY_LENGTH = 64;
+        public const int MAX_IV_LENGTH = 16;
+
         public const int ONETIMEAUTH_FLAG = 0x10;
         public const int ADDRTYPE_MASK = 0xF;
+
         public const int ONETIMEAUTH_BYTES = 16;
-        public const int CRC_BUF_LEN = 128;
-        public const int CRC_BYTES = 2;
+        public const int ONETIMEAUTH_KEYBYTES = 32;
+
+        public const int HASH_BUF_LEN = 128;
+        public const int HASH_BYTES = 4;
 
         protected static byte[] tempbuf = new byte[MAX_INPUT_SIZE];
 
@@ -32,8 +38,8 @@ namespace Shadowsocks.Encryption
         protected byte[] _key;
         protected int keyLen;
         protected int ivLen;
-        protected byte[] crc_buf;
-        protected int crc_idx = 0;
+        protected byte[] hash_buf;
+        protected int hash_idx = 0;
 
         public IVEncryptor(string method, string password, bool onetimeauth)
             : base(method, password, onetimeauth)
@@ -41,7 +47,7 @@ namespace Shadowsocks.Encryption
             InitKey(method, password);
             if (OnetimeAuth)
             {
-                crc_buf = new byte[CRC_BUF_LEN];
+                hash_buf = new byte[HASH_BUF_LEN];
             }
         }
 
@@ -125,7 +131,7 @@ namespace Shadowsocks.Encryption
 
         protected abstract void cipherUpdate(bool isCipher, int length, byte[] buf, byte[] outbuf);
 
-        protected int GetSSHeadLength(byte[] buf, int length)
+        protected int ss_headlen(byte[] buf, int length)
         {
             int len = 0;
             int atyp = length > 0 ? (buf[0] & ADDRTYPE_MASK) : 0;
@@ -147,6 +153,47 @@ namespace Shadowsocks.Encryption
             return len;
         }
 
+        protected int ss_onetimeauth(byte[] auth,
+            byte[] msg, int msg_len,
+            byte[] iv, int iv_len,
+            byte[] key, int key_len)
+        {
+            byte[] auth_key = new byte[ONETIMEAUTH_KEYBYTES];
+            byte[] auth_bytes = new byte[MAX_IV_LENGTH + MAX_KEY_LENGTH];
+            Buffer.BlockCopy(iv, 0, auth_bytes, 0, ivLen);
+            Buffer.BlockCopy(key, 0, auth_bytes, ivLen, key_len);
+            Sodium.crypto_generichash(auth_key, ONETIMEAUTH_KEYBYTES, auth_bytes, (ulong)(iv_len + key_len), null, 0);
+            return Sodium.crypto_onetimeauth(auth, msg, (ulong)msg_len, auth_key);
+        }
+
+        protected void ss_gen_hash(byte[] in_buf, ref int in_offset, ref int in_len,
+            byte[] hash_buf, ref int hash_idx, int buf_size)
+        {
+            int i, j;
+            int offset = in_offset;
+            int blen = in_len;
+            int cidx = hash_idx;
+            int size = (blen / HASH_BUF_LEN + 1) * HASH_BYTES + blen;
+            if (buf_size < (size + offset))
+                throw new Exception("failed to generate hash:  buffer size insufficient");
+            byte[] hash = new byte[HASH_BYTES];
+            for (i = 0, j = offset; i < blen; i++, j++)
+            {
+                if (cidx == HASH_BUF_LEN)
+                {
+                    Sodium.crypto_generichash(hash, HASH_BYTES, hash_buf, HASH_BUF_LEN, null, 0);
+                    Buffer.BlockCopy(in_buf, j, in_buf, j + HASH_BYTES, blen - i);
+                    Buffer.BlockCopy(hash, 0, in_buf, j, HASH_BYTES);
+                    j += HASH_BYTES; cidx = 0;
+                }
+                hash_buf[cidx] = in_buf[j];
+                cidx++;
+            }
+            in_offset = j;
+            in_len = j - offset;
+            hash_idx = cidx;
+        }
+
         public override void Encrypt(byte[] buf, int length, byte[] outbuf, out int outlength)
         {
             if (!_encryptIVSent)
@@ -159,19 +206,17 @@ namespace Shadowsocks.Encryption
                 {
                     if (OnetimeAuth)
                     {
-                        lock(crc_buf)
+                        lock (hash_buf)
                         {
-                            int headLen = GetSSHeadLength(buf, length);
+                            int headLen = ss_headlen(buf, length);
                             int data_len = length - headLen;
                             Buffer.BlockCopy(buf, headLen, buf, headLen + ONETIMEAUTH_BYTES, data_len);
                             buf[0] |= ONETIMEAUTH_FLAG;
                             byte[] auth = new byte[ONETIMEAUTH_BYTES];
-                            Sodium.ss_onetimeauth(auth, buf, headLen, _encryptIV, ivLen, _key, keyLen);
+                            ss_onetimeauth(auth, buf, headLen, _encryptIV, ivLen, _key, keyLen);
                             Buffer.BlockCopy(auth, 0, buf, headLen, ONETIMEAUTH_BYTES);
                             int buf_offset = headLen + ONETIMEAUTH_BYTES;
-                            int rc = Sodium.ss_gen_crc(buf, ref buf_offset, ref data_len, crc_buf, ref crc_idx, buf.Length);
-                            if (rc != 0)
-                                throw new Exception("failed to generate crc");
+                            ss_gen_hash(buf, ref buf_offset, ref data_len, hash_buf, ref hash_idx, buf.Length);
                             length = headLen + ONETIMEAUTH_BYTES + data_len;
                         }
                     }
@@ -184,12 +229,10 @@ namespace Shadowsocks.Encryption
             {
                 if (OnetimeAuth)
                 {
-                    lock(crc_buf)
+                    lock (hash_buf)
                     {
                         int buf_offset = 0;
-                        int rc = Sodium.ss_gen_crc(buf, ref buf_offset, ref length, crc_buf, ref crc_idx, buf.Length);
-                        if (rc != 0)
-                            throw new Exception("failed to generate crc");
+                        ss_gen_hash(buf, ref buf_offset, ref length, hash_buf, ref hash_idx, buf.Length);
                     }
                 }
                 outlength = length;

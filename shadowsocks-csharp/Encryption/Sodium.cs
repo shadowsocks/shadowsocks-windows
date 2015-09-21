@@ -41,14 +41,15 @@ namespace Shadowsocks.Encryption
         public extern static int crypto_stream_chacha20_xor_ic(byte[] c, byte[] m, ulong mlen, byte[] n, ulong ic, byte[] k);
 
         [DllImport(DLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        public extern static int ss_gen_crc(byte[] buf, ref int buf_offset, ref int data_len,
-            byte[] crc_buf, ref int crc_idx, int buf_size);
+        public extern static int crypto_generichash(byte[] outbuf, uint outlen,
+            byte[] inbuf, ulong inlen,
+            byte[] key, uint keylen);
 
         [DllImport(DLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        public extern static int ss_onetimeauth(byte[] auth, 
-            byte[] msg, int msg_len, 
-            byte[] iv, int iv_len,
-            byte[] key, int key_len);
+        public extern static int crypto_onetimeauth(byte[] outbuf, byte[] inbuf, ulong inlen, byte[] k);
+
+        [DllImport(DLLNAME, CallingConvention = CallingConvention.Cdecl)]
+        public extern static int crypto_onetimeauth_verify(byte[] h, byte[] inbuf, ulong inlen, byte[] k);
     }
 }
 
