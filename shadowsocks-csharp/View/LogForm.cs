@@ -134,11 +134,19 @@ namespace Shadowsocks.View
 
         private void ChangeFontButton_Click(object sender, EventArgs e)
         {
-            FontDialog fd = new FontDialog();
-            fd.Font = LogMessageTextBox.Font;
-            if (fd.ShowDialog() == DialogResult.OK)
+            try
             {
-                LogMessageTextBox.Font = fd.Font;
+                FontDialog fd = new FontDialog();
+                fd.Font = LogMessageTextBox.Font;
+                if (fd.ShowDialog() == DialogResult.OK)
+                {
+                    LogMessageTextBox.Font = new Font(fd.Font.FontFamily, fd.Font.Size, fd.Font.Style);
+                }
+            }
+            catch (Exception ex)
+            {
+                Logging.LogUsefulException(ex);
+                MessageBox.Show(ex.Message);
             }
         }
 
