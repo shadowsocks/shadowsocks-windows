@@ -280,6 +280,12 @@ namespace Shadowsocks.Controller
             }
         }
 
+        public void ToggleCheckingUpdate(bool enabled)
+        {
+            _config.autoCheckUpdate = enabled;
+            Configuration.Save(_config);
+        }
+
         protected void Reload()
         {
             // some logic in configuration updated the config when saving, we need to read it again
