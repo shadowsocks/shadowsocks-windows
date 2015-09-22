@@ -141,7 +141,7 @@ namespace Shadowsocks.Controller
             asserts.Sort(new VersionComparer());
         }
 
-        class Asset
+        public class Asset
         {
             public bool prerelease;
             public string name;
