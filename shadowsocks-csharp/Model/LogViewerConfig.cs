@@ -25,6 +25,24 @@ namespace Shadowsocks.Model
             this.toolbarShown = false;
         }
 
+        public Font GetFont()
+        {
+            try
+            {
+                return new Font(fontName, fontSize);
+            }
+            catch (Exception)
+            {
+                return new Font("Console", 8F);
+            }
+        }
+
+        public void SetFont(Font font)
+        {
+            fontName = font.Name;
+            fontSize = font.Size;
+        }
+
         public Color GetBackgroundColor()
         {
             try
@@ -51,7 +69,6 @@ namespace Shadowsocks.Model
             catch (Exception)
             {
                 return ColorTranslator.FromHtml("white");
-                throw;
             }
         }
 

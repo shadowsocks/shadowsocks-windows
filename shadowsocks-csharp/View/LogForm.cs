@@ -1,6 +1,4 @@
-﻿using Shadowsocks.Controller;
-using Shadowsocks.Properties;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -10,6 +8,10 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 
+using Shadowsocks.Controller;
+using Shadowsocks.Properties;
+using Shadowsocks.Model;
+
 namespace Shadowsocks.View
 {
     public partial class LogForm : Form
@@ -18,28 +20,24 @@ namespace Shadowsocks.View
         string filename;
         Timer timer;
         const int BACK_OFFSET = 65536;
-        Model.Configuration config;
+        ShadowsocksController controller;
 
-        public LogForm(string filename)
+        public LogForm(ShadowsocksController controller, string filename)
         {
+            this.controller = controller;
             this.filename = filename;
             InitializeComponent();
             this.Icon = Icon.FromHandle(Resources.ssw128.GetHicon());
 
-            config = Model.Configuration.Load();
-            if (config.logViewer == null)
-            {
-                config.logViewer = new Model.LogViewerConfig();
-            }
-            else
-            {
-                topMostTrigger = config.logViewer.topMost;
-                wrapTextTrigger = config.logViewer.wrapText;
-                toolbarTrigger = config.logViewer.toolbarShown;
-                LogMessageTextBox.Font = new Font(config.logViewer.fontName, config.logViewer.fontSize);
-                LogMessageTextBox.BackColor = config.logViewer.GetBackgroundColor();
-                LogMessageTextBox.ForeColor = config.logViewer.GetTextColor();
-            }
+            LogViewerConfig config = controller.GetConfigurationCopy().logViewer;
+            if (config == null)
+                config = new LogViewerConfig();
+            topMostTrigger = config.topMost;
+            wrapTextTrigger = config.wrapText;
+            toolbarTrigger = config.toolbarShown;
+            LogMessageTextBox.BackColor = config.GetBackgroundColor();
+            LogMessageTextBox.ForeColor = config.GetTextColor();
+            LogMessageTextBox.Font = config.GetFont();
 
             UpdateTexts();
         }
@@ -134,14 +132,16 @@ namespace Shadowsocks.View
         private void LogForm_FormClosing(object sender, FormClosingEventArgs e)
         {
             timer.Stop();
-            config.logViewer.topMost = topMostTrigger;
-            config.logViewer.wrapText = wrapTextTrigger;
-            config.logViewer.toolbarShown = toolbarTrigger;
-            config.logViewer.fontName = LogMessageTextBox.Font.Name;
-            config.logViewer.fontSize = LogMessageTextBox.Font.Size;
-            config.logViewer.SetBackgroundColor(LogMessageTextBox.BackColor);
-            config.logViewer.SetTextColor(LogMessageTextBox.ForeColor);
-            Model.Configuration.Save(config);
+            LogViewerConfig config = controller.GetConfigurationCopy().logViewer;
+            if (config == null)
+                config = new LogViewerConfig();
+            config.topMost = topMostTrigger;
+            config.wrapText = wrapTextTrigger;
+            config.toolbarShown = toolbarTrigger;
+            config.SetFont(LogMessageTextBox.Font);
+            config.SetBackgroundColor(LogMessageTextBox.BackColor);
+            config.SetTextColor(LogMessageTextBox.ForeColor);
+            controller.SaveLogViewerConfig(config);
         }
 
         private void OpenLocationMenuItem_Click(object sender, EventArgs e)

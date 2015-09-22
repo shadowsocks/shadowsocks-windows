@@ -286,6 +286,12 @@ namespace Shadowsocks.Controller
             Configuration.Save(_config);
         }
 
+        public void SaveLogViewerConfig(LogViewerConfig newConfig)
+        {
+            _config.logViewer = newConfig;
+            Configuration.Save(_config);
+        }
+
         protected void Reload()
         {
             // some logic in configuration updated the config when saving, we need to read it again
