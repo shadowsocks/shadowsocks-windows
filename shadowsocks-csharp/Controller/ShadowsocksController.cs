@@ -122,7 +122,6 @@ namespace Shadowsocks.Controller
         {
             _config.configs = servers;
             _config.localPort = localPort;
-            SaveConfig(_config);
         }
 
         public bool AddServerBySSURL(string ssURL)
