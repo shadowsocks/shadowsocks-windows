@@ -439,7 +439,7 @@ namespace Shadowsocks.View
         {
             string argument = Logging.LogFile;
 
-            new LogForm(argument).Show();
+            new LogForm(controller, argument).Show();
         }
 
         private void QRCodeItem_Click(object sender, EventArgs e)
