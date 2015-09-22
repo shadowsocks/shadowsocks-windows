@@ -4,6 +4,7 @@ using System.Text;
 using System.Net;
 using System.Net.Sockets;
 using Shadowsocks.Encryption;
+using Shadowsocks.Obfs;
 using Shadowsocks.Model;
 using System.Timers;
 
@@ -165,6 +166,7 @@ namespace Shadowsocks.Controller
                 handler.socks5RemoteUsername = _config.socks5User;
                 handler.socks5RemotePassword = _config.socks5Pass;
             }
+            handler.obfs = ObfsFactory.GetObfs(handler.server.obfs);
             handler.TTL = _config.TTL;
             handler.autoSwitchOff = _config.autoban;
 
@@ -246,9 +248,11 @@ namespace Shadowsocks.Controller
         // Reconnect
         public int reconnectTimesRemain = 0;
         protected int reconnectTimes = 0;
-        //public Encryptor encryptor;
+        // Encryptor
         protected IEncryptor encryptor;
         protected IEncryptor encryptorUDP;
+        //
+        public IObfs obfs;
         // remote socket.
         protected Socket remote;
         protected Socket remoteUDP;
@@ -735,6 +739,11 @@ namespace Shadowsocks.Controller
                     remoteTDP = null;
                 }
 
+                if (obfs != null)
+                {
+                    obfs.Dispose();
+                    obfs = null;
+                }
                 lock (encryptionLock)
                 {
                     lock (decryptionLock)
@@ -1277,6 +1286,7 @@ namespace Shadowsocks.Controller
                 encryptor = EncryptorFactory.GetEncryptor(server.method, server.password);
                 encryptorUDP = EncryptorFactory.GetEncryptor(server.method, server.password);
             }
+            this.obfs = ObfsFactory.GetObfs(server.obfs);
             closed = false;
             {
                 IPAddress ipAddress;
@@ -1546,6 +1556,7 @@ namespace Shadowsocks.Controller
 
                 connectionPacketNumber = 0;
                 remoteUDPRecvBufferLength = 0;
+                obfs.SetHost(server.server, server.server_port);
 
                 ResetTimeout(TTL);
 
@@ -1631,13 +1642,25 @@ namespace Shadowsocks.Controller
                 {
                     int bytesToSend;
                     byte[] remoteSendBuffer = new byte[RecvSize];
+                    byte[] remoteRecvObfsBuffer = new byte[RecvSize];
+                    int obfsRecvSize;
+                    if (obfs.ClientDecode(remoteRecvBuffer, bytesRead, remoteRecvObfsBuffer, out obfsRecvSize))
+                    {
+                        RemoteSend(connetionRecvBuffer, 0);
+                        doRemoteTCPRecv();
+                    }
+                    if (obfsRecvSize == 0)
+                    {
+                        doRemoteTCPRecv();
+                        return;
+                    }
                     lock (decryptionLock)
                     {
                         if (closed)
                         {
                             return;
                         }
-                        encryptor.Decrypt(remoteRecvBuffer, bytesRead, remoteSendBuffer, out bytesToSend);
+                        encryptor.Decrypt(remoteRecvObfsBuffer, obfsRecvSize, remoteSendBuffer, out bytesToSend);
                     }
                     if (connectionUDP == null)
                         Logging.LogBin(LogLevel.Debug, "remote recv", remoteSendBuffer, bytesToSend);
@@ -1959,9 +1982,13 @@ namespace Shadowsocks.Controller
                     encryptor.Encrypt(bytes, length, connetionSendBuffer, out bytesToSend);
                 }
             }
+            byte[] connetionSendObfsBuffer = new byte[BufferSize];
+            int obfsSendSize;
+            this.obfs.ClientEncode(connetionSendBuffer, bytesToSend, connetionSendObfsBuffer, out obfsSendSize);
             server.ServerSpeedLog().AddUploadBytes(bytesToSend);
             speedTester.AddUploadSize(bytesToSend);
-            remote.BeginSend(connetionSendBuffer, 0, bytesToSend, 0, new AsyncCallback(PipeRemoteSendCallback), null);
+            //remote.BeginSend(connetionSendBuffer, 0, bytesToSend, 0, new AsyncCallback(PipeRemoteSendCallback), null);
+            remote.BeginSend(connetionSendObfsBuffer, 0, obfsSendSize, 0, new AsyncCallback(PipeRemoteSendCallback), null);
         }
 
         private void RemoteTDPSend(byte[] bytes, int length)
@@ -2113,16 +2140,14 @@ namespace Shadowsocks.Controller
                     }
                     else
                     {
+                        int packet = ++connectionPacketNumber;
+                        if (packet == 1)
                         {
-                            int packet = ++connectionPacketNumber;
-                            if (packet == 1)
-                            {
-                                RemoteSend(connetionRecvBuffer, bytesRead, server.tcp_protocol);
-                            }
-                            else
-                            {
-                                RemoteSend(connetionRecvBuffer, bytesRead);
-                            }
+                            RemoteSend(connetionRecvBuffer, bytesRead, server.tcp_protocol);
+                        }
+                        else
+                        {
+                            RemoteSend(connetionRecvBuffer, bytesRead);
                         }
                     }
                 }

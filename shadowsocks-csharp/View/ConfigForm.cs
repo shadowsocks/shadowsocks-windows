@@ -108,6 +108,7 @@ namespace Shadowsocks.View
                     server_port = int.Parse(ServerPortTextBox.Text),
                     password = PasswordTextBox.Text,
                     method = EncryptionSelect.Text,
+                    obfs = ObfsCombo.Text,
                     remarks = RemarksTextBox.Text,
                     tcp_over_udp = CheckTCPoverUDP.Checked,
                     udp_over_tcp = CheckUDPoverUDP.Checked,
@@ -175,6 +176,7 @@ namespace Shadowsocks.View
                 ServerPortTextBox.Text = server.server_port.ToString();
                 PasswordTextBox.Text = server.password;
                 EncryptionSelect.Text = server.method ?? "aes-256-cfb";
+                ObfsCombo.Text = server.obfs ?? "plain";
                 RemarksTextBox.Text = server.remarks;
                 CheckTCPoverUDP.Checked = server.tcp_over_udp;
                 CheckUDPoverUDP.Checked = server.udp_over_tcp;

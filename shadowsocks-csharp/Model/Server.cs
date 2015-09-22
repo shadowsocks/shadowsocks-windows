@@ -507,6 +507,7 @@ namespace Shadowsocks.Model
         public int server_port;
         public string password;
         public string method;
+        public string obfs;
         public string remarks;
         public bool tcp_over_udp;
         public bool udp_over_tcp;
@@ -592,6 +593,7 @@ namespace Shadowsocks.Model
             ret.server_port = server_port;
             ret.password = (string)password.Clone();
             ret.method = (string)method.Clone();
+            ret.obfs = (string)obfs.Clone();
             ret.remarks = (string)remarks.Clone();
             ret.enable = enable;
             ret.udp_over_tcp = udp_over_tcp;
@@ -605,6 +607,7 @@ namespace Shadowsocks.Model
             this.server = "127.0.0.1";
             this.server_port = 8388;
             this.method = "aes-256-cfb";
+            this.obfs = "plain";
             this.password = "0";
             this.remarks = "";
             this.udp_over_tcp = false;

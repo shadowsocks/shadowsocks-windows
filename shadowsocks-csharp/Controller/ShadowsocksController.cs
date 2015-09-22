@@ -94,6 +94,7 @@ namespace Shadowsocks.Controller
                         if (mergeConfig.configs[i].server == servers[j].server
                             && mergeConfig.configs[i].server_port == servers[j].server_port
                             && mergeConfig.configs[i].method == servers[j].method
+                            && mergeConfig.configs[i].obfs == servers[j].obfs
                             && mergeConfig.configs[i].password == servers[j].password
                             && mergeConfig.configs[i].tcp_over_udp == servers[j].tcp_over_udp
                             && mergeConfig.configs[i].udp_over_tcp == servers[j].udp_over_tcp
@@ -115,6 +116,7 @@ namespace Shadowsocks.Controller
                     if (mergeConfig.configs[i].server == servers[j].server
                         && mergeConfig.configs[i].server_port == servers[j].server_port
                         && mergeConfig.configs[i].method == servers[j].method
+                        && mergeConfig.configs[i].obfs == servers[j].obfs
                         && mergeConfig.configs[i].password == servers[j].password
                         && mergeConfig.configs[i].tcp_over_udp == servers[j].tcp_over_udp
                         && mergeConfig.configs[i].udp_over_tcp == servers[j].udp_over_tcp

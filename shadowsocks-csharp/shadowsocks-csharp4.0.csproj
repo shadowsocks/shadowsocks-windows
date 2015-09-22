@@ -145,6 +145,11 @@
     <Compile Include="Controller\PACServer.cs" />
     <Compile Include="Model\Server.cs" />
     <Compile Include="Model\Configuration.cs" />
+    <Compile Include="Obfs\HttpSimpleObfs.cs" />
+    <Compile Include="Obfs\IObfs.cs" />
+    <Compile Include="Obfs\ObfsBase.cs" />
+    <Compile Include="Obfs\ObfsFactory.cs" />
+    <Compile Include="Obfs\Plain.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
