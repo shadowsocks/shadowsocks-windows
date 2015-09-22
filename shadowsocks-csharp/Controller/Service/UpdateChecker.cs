@@ -14,9 +14,10 @@ namespace Shadowsocks.Controller
     {
         private const string UpdateURL = "https://api.github.com/repos/shadowsocks/shadowsocks-windows/releases";
 
+        public bool NewVersionFound;
         public string LatestVersionNumber;
         public string LatestVersionURL;
-        public event EventHandler NewVersionFound;
+        public event EventHandler CheckUpdateCompleted;
 
         public const string Version = "2.5.8";
 
@@ -114,17 +115,17 @@ namespace Shadowsocks.Controller
                     }
                 }
 
-                if (versions.Count == 0)
+                if (versions.Count != 0)
                 {
-                    return;
+                    // sort versions
+                    SortVersions(versions);
+                    NewVersionFound = true;
+                    LatestVersionURL = versions[versions.Count - 1];
+                    LatestVersionNumber = ParseVersionFromURL(LatestVersionURL);
                 }
-                // sort versions
-                SortVersions(versions);
-                LatestVersionURL = versions[versions.Count - 1];
-                LatestVersionNumber = ParseVersionFromURL(LatestVersionURL);
-                if (NewVersionFound != null)
+                if (CheckUpdateCompleted != null)
                 {
-                    NewVersionFound(this, new EventArgs());
+                    CheckUpdateCompleted(this, new EventArgs());
                 }
             }
             catch (Exception ex)

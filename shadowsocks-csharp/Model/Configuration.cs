@@ -23,6 +23,7 @@ namespace Shadowsocks.Model
         public string pacUrl;
         public bool useOnlinePac;
         public bool availabilityStatistics;
+        public bool autoCheckUpdate;
 
         private static string CONFIG_FILE = "gui-config.json";
 
@@ -76,6 +77,7 @@ namespace Shadowsocks.Model
                     index = 0,
                     isDefault = true,
                     localPort = 1080,
+                    autoCheckUpdate = true,
                     configs = new List<Server>()
                     {
                         GetDefaultServer()
