@@ -255,7 +255,7 @@ namespace Shadowsocks.View
         {
             if (updateChecker.NewVersionFound)
             {
-                ShowBalloonTip(String.Format(I18N.GetString("Shadowsocks {0} Update Found"), updateChecker.LatestVersionNumber), I18N.GetString("Click here to download"), ToolTipIcon.Info, 5000);
+                ShowBalloonTip(String.Format(I18N.GetString("Shadowsocks {0} Update Found"), updateChecker.LatestVersionNumber), I18N.GetString("Click here to update"), ToolTipIcon.Info, 5000);
                 _notifyIcon.BalloonTipClicked += notifyIcon1_BalloonTipClicked;
                 _isFirstRun = false;
             }
@@ -269,8 +269,9 @@ namespace Shadowsocks.View
 
         void notifyIcon1_BalloonTipClicked(object sender, EventArgs e)
         {
-            System.Diagnostics.Process.Start(updateChecker.LatestVersionURL);
             _notifyIcon.BalloonTipClicked -= notifyIcon1_BalloonTipClicked;
+            string argument = "/select, \"" + updateChecker.LatestVersionLocalName + "\"";
+            System.Diagnostics.Process.Start("explorer.exe", argument);
         }
 
 
