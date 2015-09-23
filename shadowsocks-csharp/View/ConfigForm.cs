@@ -48,7 +48,7 @@ namespace Shadowsocks.View
             EncryptionLabel.Text = I18N.GetString("Encryption");
             ProxyPortLabel.Text = I18N.GetString("Proxy Port");
             RemarksLabel.Text = I18N.GetString("Remarks");
-            OneTimeAuth.Text = I18N.GetString("Onetime Authentication");
+            OneTimeAuth.Text = I18N.GetString("Onetime Authentication (Experimental)");
             ServerGroupBox.Text = I18N.GetString("Server");
             OKButton.Text = I18N.GetString("OK");
             MyCancelButton.Text = I18N.GetString("Cancel");
