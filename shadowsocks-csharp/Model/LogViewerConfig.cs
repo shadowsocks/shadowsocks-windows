@@ -16,7 +16,7 @@ namespace Shadowsocks.Model
 
         public LogViewerConfig()
         {
-            this.fontName = "Console";
+            this.fontName = "Consolas";
             this.fontSize = 8;
             this.bgColor = "black";
             this.textColor = "white";
@@ -29,7 +29,7 @@ namespace Shadowsocks.Model
         {
             try
             {
-                return new Font(fontName, fontSize);
+                return new Font(fontName, fontSize, FontStyle.Regular);
             }
             catch (Exception)
             {
