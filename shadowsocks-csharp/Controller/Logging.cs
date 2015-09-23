@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Shadowsocks.Util;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net.Sockets;
@@ -14,14 +15,14 @@ namespace Shadowsocks.Controller
         {
             try
             {
-                string temppath = Path.GetTempPath();
+                string temppath = Utils.GetTempPath();
                 LogFile = Path.Combine(temppath, "shadowsocks.log");
                 FileStream fs = new FileStream(LogFile, FileMode.Append);
                 StreamWriterWithTimestamp sw = new StreamWriterWithTimestamp(fs);
                 sw.AutoFlush = true;
                 Console.SetOut(sw);
                 Console.SetError(sw);
-                
+
                 return true;
             }
             catch (IOException e)
@@ -29,6 +30,14 @@ namespace Shadowsocks.Controller
                 Console.WriteLine(e.ToString());
                 return false;
             }
+        }
+
+        public static void Debug(object o)
+        {
+
+#if DEBUG
+            Console.WriteLine(o);
+#endif
         }
 
         public static void LogUsefulException(Exception e)
@@ -55,12 +64,14 @@ namespace Shadowsocks.Controller
                     Console.WriteLine(e);
                 }
             }
+            else if (e is ObjectDisposedException)
+            {
+            }
             else
             {
                 Console.WriteLine(e);
             }
         }
-
     }
 
     // Simply extended System.IO.StreamWriter for adding timestamp workaround

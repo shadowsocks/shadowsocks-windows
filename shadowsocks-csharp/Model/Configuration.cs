@@ -11,12 +11,20 @@ namespace Shadowsocks.Model
     public class Configuration
     {
         public List<Server> configs;
+
+        // when strategy is set, index is ignored
+        public string strategy;
         public int index;
         public bool global;
         public bool enabled;
         public bool shareOverLan;
         public bool isDefault;
         public int localPort;
+        public string pacUrl;
+        public bool useOnlinePac;
+        public bool availabilityStatistics;
+        public bool autoCheckUpdate;
+        public LogViewerConfig logViewer;
 
         private static string CONFIG_FILE = "gui-config.json";
 
@@ -50,6 +58,13 @@ namespace Shadowsocks.Model
                 {
                     config.localPort = 1080;
                 }
+                if (config.index == -1)
+                {
+                    if (config.strategy == null)
+                    {
+                        config.index = 0;
+                    }
+                }
                 return config;
             }
             catch (Exception e)
@@ -63,6 +78,7 @@ namespace Shadowsocks.Model
                     index = 0,
                     isDefault = true,
                     localPort = 1080,
+                    autoCheckUpdate = true,
                     configs = new List<Server>()
                     {
                         GetDefaultServer()
@@ -77,9 +93,16 @@ namespace Shadowsocks.Model
             {
                 config.index = config.configs.Count - 1;
             }
-            if (config.index < 0)
+            if (config.index < -1)
             {
-                config.index = 0;
+                config.index = -1;
+            }
+            if (config.index == -1)
+            {
+                if (config.strategy == null)
+                {
+                    config.index = 0;
+                }
             }
             config.isDefault = false;
             try
@@ -115,6 +138,15 @@ namespace Shadowsocks.Model
             if (port <= 0 || port > 65535)
             {
                 throw new ArgumentException(I18N.GetString("Port out of range"));
+            }
+        }
+
+        public static void CheckLocalPort(int port)
+        {
+            CheckPort(port);
+            if (port == 8123)
+            {
+                throw new ArgumentException(I18N.GetString("Port can't be 8123"));
             }
         }
 

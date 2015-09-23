@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -10,7 +10,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Shadowsocks</RootNamespace>
     <AssemblyName>Shadowsocks</AssemblyName>
-    <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <StartupObject>
     </StartupObject>
@@ -21,8 +21,7 @@
     <UpgradeBackupLocation>
     </UpgradeBackupLocation>
     <OldToolsVersion>3.5</OldToolsVersion>
-    <TargetFrameworkProfile>
-    </TargetFrameworkProfile>
+    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
@@ -63,6 +62,7 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.VisualBasic" />
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
@@ -123,14 +123,18 @@
     <Compile Include="3rd\zxing\ResultPoint.cs" />
     <Compile Include="3rd\zxing\ResultPointCallback.cs" />
     <Compile Include="3rd\zxing\WriterException.cs" />
-    <Compile Include="Controller\AutoStartup.cs" />
+    <Compile Include="Controller\Service\AvailabilityStatistics.cs" />
+    <Compile Include="Controller\Strategy\HighAvailabilityStrategy.cs" />
+    <Compile Include="Controller\Strategy\SimplyChooseByStatisticsStrategy.cs" />
+    <Compile Include="Controller\System\AutoStartup.cs" />
     <Compile Include="Controller\FileManager.cs" />
-    <Compile Include="Controller\GFWListUpdater.cs" />
+    <Compile Include="Controller\Service\GFWListUpdater.cs" />
     <Compile Include="Controller\I18N.cs" />
-    <Compile Include="Controller\Listener.cs" />
+    <Compile Include="Controller\Service\Listener.cs" />
     <Compile Include="Controller\Logging.cs" />
-    <Compile Include="Controller\PortForwarder.cs" />
-    <Compile Include="Controller\UpdateChecker.cs" />
+    <Compile Include="Controller\Service\PortForwarder.cs" />
+    <Compile Include="Controller\Service\UDPRelay.cs" />
+    <Compile Include="Controller\Service\UpdateChecker.cs" />
     <Compile Include="Encryption\EncryptorBase.cs" />
     <Compile Include="Encryption\EncryptorFactory.cs" />
     <Compile Include="Encryption\IVEncryptor.cs" />
@@ -140,7 +144,8 @@
     <Compile Include="Encryption\SodiumEncryptor.cs" />
     <Compile Include="Encryption\TableEncryptor.cs" />
     <Compile Include="Encryption\IEncryptor.cs" />
-    <Compile Include="Controller\PACServer.cs" />
+    <Compile Include="Controller\Service\PACServer.cs" />
+    <Compile Include="Model\LogViewerConfig.cs" />
     <Compile Include="Model\Server.cs" />
     <Compile Include="Model\Configuration.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
@@ -148,6 +153,9 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="Controller\Strategy\BalancingStrategy.cs" />
+    <Compile Include="Controller\Strategy\StrategyManager.cs" />
+    <Compile Include="Controller\Strategy\IStrategy.cs" />
     <Compile Include="Util\Util.cs" />
     <Compile Include="View\ConfigForm.cs">
       <SubType>Form</SubType>
@@ -155,12 +163,18 @@
     <Compile Include="View\ConfigForm.Designer.cs">
       <DependentUpon>ConfigForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Controller\Local.cs" />
-    <Compile Include="Controller\PolipoRunner.cs" />
+    <Compile Include="Controller\Service\TCPRelay.cs" />
+    <Compile Include="Controller\Service\PolipoRunner.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Controller\ShadowsocksController.cs" />
-    <Compile Include="Controller\SystemProxy.cs" />
+    <Compile Include="Controller\System\SystemProxy.cs" />
+    <Compile Include="View\LogForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="View\LogForm.Designer.cs">
+      <DependentUpon>LogForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="View\MenuViewController.cs" />
     <Compile Include="View\QRCodeForm.cs">
       <SubType>Form</SubType>
@@ -180,6 +194,9 @@
       <SubType>Designer</SubType>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <EmbeddedResource Include="View\LogForm.resx">
+      <DependentUpon>LogForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="View\QRCodeForm.resx">
       <DependentUpon>QRCodeForm.cs</DependentUpon>
     </EmbeddedResource>
@@ -189,7 +206,8 @@
     </None>
     <None Include="Data\abp.js.gz" />
     <None Include="Data\libsscrypto.dll.gz" />
-    <None Include="Data\polipo.exe.gz" />
+    <None Include="Data\mgwz.dll.gz" />
+    <None Include="Data\privoxy.exe.gz" />
     <None Include="Data\proxy.pac.txt.gz" />
   </ItemGroup>
   <ItemGroup>
@@ -198,8 +216,9 @@
     <None Include="Resources\ss24.png" />
     <None Include="Resources\ssw128.png" />
     <Content Include="Data\cn.txt" />
+    <Content Include="Data\privoxy_conf.txt" />
+    <Content Include="Data\user-rule.txt" />
     <Content Include="shadowsocks.ico" />
-    <None Include="Data\polipo_config.txt" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">

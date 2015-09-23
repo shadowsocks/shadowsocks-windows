@@ -12,12 +12,16 @@ namespace Shadowsocks.Controller
         static I18N()
         {
             Strings = new Dictionary<string, string>();
-            
+
             if (System.Globalization.CultureInfo.CurrentCulture.IetfLanguageTag.ToLowerInvariant().StartsWith("zh"))
             {
                 string[] lines = Regex.Split(Resources.cn, "\r\n|\r|\n");
                 foreach (string line in lines)
                 {
+                    if (line.StartsWith("#"))
+                    {
+                        continue;
+                    }
                     string[] kv = Regex.Split(line, "=");
                     if (kv.Length == 2)
                     {

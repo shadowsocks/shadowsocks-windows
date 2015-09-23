@@ -5,6 +5,8 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading;
 using System.Net.Sockets;
+using Shadowsocks.Controller.Strategy;
+using System.Net;
 
 namespace Shadowsocks.Controller
 {
@@ -20,8 +22,10 @@ namespace Shadowsocks.Controller
         private Listener _listener;
         private PACServer _pacServer;
         private Configuration _config;
+        private StrategyManager _strategyManager;
         private PolipoRunner polipoRunner;
         private GFWListUpdater gfwListUpdater;
+        private AvailabilityStatistics _availabilityStatics;
         private bool stopped = false;
 
         private bool _systemProxyIsDirty = false;
@@ -35,9 +39,10 @@ namespace Shadowsocks.Controller
         public event EventHandler EnableStatusChanged;
         public event EventHandler EnableGlobalChanged;
         public event EventHandler ShareOverLANStatusChanged;
-        
+
         // when user clicked Edit PAC, and PAC file has already created
         public event EventHandler<PathEventArgs> PACFileReadyToOpen;
+        public event EventHandler<PathEventArgs> UserRuleFileReadyToOpen;
 
         public event EventHandler<GFWListUpdater.ResultEventArgs> UpdatePACFromGFWListCompleted;
 
@@ -48,6 +53,8 @@ namespace Shadowsocks.Controller
         public ShadowsocksController()
         {
             _config = Configuration.Load();
+            _strategyManager = new StrategyManager(this);
+            StartReleasingMemory();
         }
 
         public void Start()
@@ -69,16 +76,53 @@ namespace Shadowsocks.Controller
         }
 
         // always return copy
-        public Configuration GetConfiguration()
+        public Configuration GetConfigurationCopy()
         {
             return Configuration.Load();
+        }
+
+        // always return current instance
+        public Configuration GetCurrentConfiguration()
+        {
+            return _config;
+        }
+
+        public IList<IStrategy> GetStrategies()
+        {
+            return _strategyManager.GetStrategies();
+        }
+
+        public IStrategy GetCurrentStrategy()
+        {
+            foreach (var strategy in _strategyManager.GetStrategies())
+            {
+                if (strategy.ID == this._config.strategy)
+                {
+                    return strategy;
+                }
+            }
+            return null;
+        }
+
+        public Server GetAServer(IStrategyCallerType type, IPEndPoint localIPEndPoint)
+        {
+            IStrategy strategy = GetCurrentStrategy();
+            if (strategy != null)
+            {
+                return strategy.GetAServer(type, localIPEndPoint);
+            }
+            if (_config.index < 0)
+            {
+                _config.index = 0;
+            }
+            return GetCurrentServer();
         }
 
         public void SaveServers(List<Server> servers, int localPort)
         {
             _config.configs = servers;
             _config.localPort = localPort;
-            SaveConfig(_config);
+            Configuration.Save(_config);
         }
 
         public bool AddServerBySSURL(string ssURL)
@@ -133,6 +177,14 @@ namespace Shadowsocks.Controller
         public void SelectServerIndex(int index)
         {
             _config.index = index;
+            _config.strategy = null;
+            SaveConfig(_config);
+        }
+
+        public void SelectStrategy(string strategyID)
+        {
+            _config.index = -1;
+            _config.strategy = strategyID;
             SaveConfig(_config);
         }
 
@@ -166,9 +218,23 @@ namespace Shadowsocks.Controller
             }
         }
 
+        public void TouchUserRuleFile()
+        {
+            string userRuleFilename = _pacServer.TouchUserRuleFile();
+            if (UserRuleFileReadyToOpen != null)
+            {
+                UserRuleFileReadyToOpen(this, new PathEventArgs() { Path = userRuleFilename });
+            }
+        }
+
         public string GetQRCodeForCurrentServer()
         {
             Server server = GetCurrentServer();
+            return GetQRCode(server);
+        }
+
+        public static string GetQRCode(Server server)
+        {
             string parts = server.method + ":" + server.password + "@" + server.server + ":" + server.server_port;
             string base64 = System.Convert.ToBase64String(Encoding.UTF8.GetBytes(parts));
             return "ss://" + base64;
@@ -180,6 +246,50 @@ namespace Shadowsocks.Controller
             {
                 gfwListUpdater.UpdatePACFromGFWList(_config);
             }
+        }
+
+        public void ToggleAvailabilityStatistics(bool enabled)
+        {
+            if (_availabilityStatics != null)
+            {
+                _availabilityStatics.Set(enabled);
+                _config.availabilityStatistics = enabled;
+                SaveConfig(_config);
+            }
+        }
+
+        public void SavePACUrl(string pacUrl)
+        {
+            _config.pacUrl = pacUrl;
+            UpdateSystemProxy();
+            SaveConfig(_config);
+            if (ConfigChanged != null)
+            {
+                ConfigChanged(this, new EventArgs());
+            }
+        }
+
+        public void UseOnlinePAC(bool useOnlinePac)
+        {
+            _config.useOnlinePac = useOnlinePac;
+            UpdateSystemProxy();
+            SaveConfig(_config);
+            if (ConfigChanged != null)
+            {
+                ConfigChanged(this, new EventArgs());
+            }
+        }
+
+        public void ToggleCheckingUpdate(bool enabled)
+        {
+            _config.autoCheckUpdate = enabled;
+            Configuration.Save(_config);
+        }
+
+        public void SaveLogViewerConfig(LogViewerConfig newConfig)
+        {
+            _config.logViewer = newConfig;
+            Configuration.Save(_config);
         }
 
         protected void Reload()
@@ -209,6 +319,12 @@ namespace Shadowsocks.Controller
                 _listener.Stop();
             }
 
+            if (_availabilityStatics == null)
+            {
+                _availabilityStatics = new AvailabilityStatistics();
+                _availabilityStatics.UpdateConfiguration(_config);
+            }
+
             // don't put polipoRunner.Start() before pacServer.Stop()
             // or bind will fail when switching bind address from 0.0.0.0 to 127.0.0.1
             // though UseShellExecute is set to true now
@@ -216,11 +332,19 @@ namespace Shadowsocks.Controller
             polipoRunner.Stop();
             try
             {
+                var strategy = GetCurrentStrategy();
+                if (strategy != null)
+                {
+                    strategy.ReloadServers();
+                }
+
                 polipoRunner.Start(_config);
 
-                Local local = new Local(_config);
+                TCPRelay tcpRelay = new TCPRelay(this);
+                UDPRelay udpRelay = new UDPRelay(this);
                 List<Listener.Service> services = new List<Listener.Service>();
-                services.Add(local);
+                services.Add(tcpRelay);
+                services.Add(udpRelay);
                 services.Add(_pacServer);
                 services.Add(new PortForwarder(polipoRunner.RunningPort));
                 _listener = new Listener(services);
@@ -248,16 +372,14 @@ namespace Shadowsocks.Controller
             }
 
             UpdateSystemProxy();
-            Util.Utils.ReleaseMemory();
+            Util.Utils.ReleaseMemory(true);
         }
-
 
         protected void SaveConfig(Configuration newConfig)
         {
             Configuration.Save(newConfig);
             Reload();
         }
-
 
         private void UpdateSystemProxy()
         {
@@ -305,7 +427,7 @@ namespace Shadowsocks.Controller
         {
             while (true)
             {
-                Util.Utils.ReleaseMemory();
+                Util.Utils.ReleaseMemory(false);
                 Thread.Sleep(30 * 1000);
             }
         }

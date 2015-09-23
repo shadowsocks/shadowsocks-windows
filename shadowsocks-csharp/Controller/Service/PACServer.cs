@@ -16,6 +16,8 @@ namespace Shadowsocks.Controller
     {
         public static string PAC_FILE = "pac.txt";
 
+        public static string USER_RULE_FILE = "user-rule.txt";
+
         FileSystemWatcher watcher;
         private Configuration _config;
 
@@ -31,8 +33,12 @@ namespace Shadowsocks.Controller
             this._config = config;
         }
 
-        public bool Handle(byte[] firstPacket, int length, Socket socket)
+        public bool Handle(byte[] firstPacket, int length, Socket socket, object state)
         {
+            if (socket.ProtocolType != ProtocolType.Tcp)
+            {
+                return false;
+            }
             try
             {
                 string request = Encoding.UTF8.GetString(firstPacket, 0, length);
@@ -80,7 +86,6 @@ namespace Shadowsocks.Controller
             }
         }
 
-
         public string TouchPACFile()
         {
             if (File.Exists(PAC_FILE))
@@ -91,6 +96,19 @@ namespace Shadowsocks.Controller
             {
                 FileManager.UncompressFile(PAC_FILE, Resources.proxy_pac_txt);
                 return PAC_FILE;
+            }
+        }
+
+        internal string TouchUserRuleFile()
+        {
+            if (File.Exists(USER_RULE_FILE))
+            {
+                return USER_RULE_FILE;
+            }
+            else
+            {
+                File.WriteAllText(USER_RULE_FILE, Resources.user_rule);
+                return USER_RULE_FILE;
             }
         }
 
@@ -127,7 +145,7 @@ Connection: Close
 ", System.Text.Encoding.UTF8.GetBytes(pac).Length) + pac;
                 byte[] response = System.Text.Encoding.UTF8.GetBytes(text);
                 socket.BeginSend(response, 0, response.Length, 0, new AsyncCallback(SendCallback), socket);
-                Util.Utils.ReleaseMemory();
+                Util.Utils.ReleaseMemory(true);
             }
             catch (Exception e)
             {
