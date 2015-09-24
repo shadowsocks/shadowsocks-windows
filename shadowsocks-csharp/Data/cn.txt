@@ -22,8 +22,8 @@ Scan QRCode from Screen...=扫描屏幕上的二维码...
 Availability Statistics=统计可用性
 Show Logs...=显示日志...
 Updates...=更新...
-Check Updates...=检查更新
-Automatically Check Updates=自动检查更新
+Check for Updates...=检查更新
+Check for Updates at Startup=启动时检查更新
 About...=关于...
 Quit=退出
 Edit Servers=编辑服务器
@@ -55,11 +55,11 @@ Move D&own=下移(&O)
 &Open Location=在资源管理器中打开(&O)
 E&xit=退出(&X)
 &View=视图(&V)
-&Clean logs=清空日志(&C)
-Change &font=设置字体(&F)
-&Wrap text=自动换行(&W)
-&Top most=置顶(&T)
-&Show toolbar=显示工具栏(&S)
+&Clean Logs=清空日志(&C)
+Change &Font=设置字体(&F)
+&Wrap Text=自动换行(&W)
+&Top Most=置顶(&T)
+&Show Toolbar=显示工具栏(&S)
 Log Viewer=日志查看器
 
 # QRCode Form

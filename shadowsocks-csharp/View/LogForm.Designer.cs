@@ -107,25 +107,25 @@
             // CleanLogsMenuItem
             // 
             this.CleanLogsMenuItem.Index = 0;
-            this.CleanLogsMenuItem.Text = "&Clean logs";
+            this.CleanLogsMenuItem.Text = "&Clean Logs";
             this.CleanLogsMenuItem.Click += new System.EventHandler(this.CleanLogsMenuItem_Click);
             // 
             // ChangeFontMenuItem
             // 
             this.ChangeFontMenuItem.Index = 1;
-            this.ChangeFontMenuItem.Text = "Change &font";
+            this.ChangeFontMenuItem.Text = "Change &Font";
             this.ChangeFontMenuItem.Click += new System.EventHandler(this.ChangeFontMenuItem_Click);
             // 
             // WrapTextMenuItem
             // 
             this.WrapTextMenuItem.Index = 2;
-            this.WrapTextMenuItem.Text = "&Wrap text";
+            this.WrapTextMenuItem.Text = "&Wrap Text";
             this.WrapTextMenuItem.Click += new System.EventHandler(this.WrapTextMenuItem_Click);
             // 
             // TopMostMenuItem
             // 
             this.TopMostMenuItem.Index = 3;
-            this.TopMostMenuItem.Text = "&Top most";
+            this.TopMostMenuItem.Text = "&Top Most";
             this.TopMostMenuItem.Click += new System.EventHandler(this.TopMostMenuItem_Click);
             // 
             // MenuItemSeparater
@@ -136,7 +136,7 @@
             // ShowToolbarMenuItem
             // 
             this.ShowToolbarMenuItem.Index = 5;
-            this.ShowToolbarMenuItem.Text = "&Show toolbar";
+            this.ShowToolbarMenuItem.Text = "&Show Toolbar";
             this.ShowToolbarMenuItem.Click += new System.EventHandler(this.ShowToolbarMenuItem_Click);
             // 
             // TopMostCheckBox
@@ -148,7 +148,7 @@
             this.TopMostCheckBox.Name = "TopMostCheckBox";
             this.TopMostCheckBox.Size = new System.Drawing.Size(72, 23);
             this.TopMostCheckBox.TabIndex = 3;
-            this.TopMostCheckBox.Text = "&Top most";
+            this.TopMostCheckBox.Text = "&Top Most";
             this.TopMostCheckBox.UseVisualStyleBackColor = true;
             this.TopMostCheckBox.CheckedChanged += new System.EventHandler(this.TopMostCheckBox_CheckedChanged);
             // 
@@ -170,7 +170,7 @@
             this.CleanLogsButton.Name = "CleanLogsButton";
             this.CleanLogsButton.Size = new System.Drawing.Size(75, 23);
             this.CleanLogsButton.TabIndex = 1;
-            this.CleanLogsButton.Text = "&Clean logs";
+            this.CleanLogsButton.Text = "&Clean Logs";
             this.CleanLogsButton.UseVisualStyleBackColor = true;
             this.CleanLogsButton.Click += new System.EventHandler(this.CleanLogsButton_Click);
             // 
@@ -183,7 +183,7 @@
             this.WrapTextCheckBox.Name = "WrapTextCheckBox";
             this.WrapTextCheckBox.Size = new System.Drawing.Size(78, 23);
             this.WrapTextCheckBox.TabIndex = 0;
-            this.WrapTextCheckBox.Text = "&Wrap text";
+            this.WrapTextCheckBox.Text = "&Wrap Text";
             this.WrapTextCheckBox.UseVisualStyleBackColor = true;
             this.WrapTextCheckBox.CheckedChanged += new System.EventHandler(this.WrapTextCheckBox_CheckedChanged);
             // 

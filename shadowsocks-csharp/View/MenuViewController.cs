@@ -191,9 +191,9 @@ namespace Shadowsocks.View
                 new MenuItem("-"),
                 CreateMenuItem("Show Logs...", new EventHandler(this.ShowLogItem_Click)),
                 CreateMenuGroup("Updates...", new MenuItem[] {
-                    CreateMenuItem("Check Updates...", new EventHandler(this.checkUpdatesItem_Click)),
+                    CreateMenuItem("Check for Updates...", new EventHandler(this.checkUpdatesItem_Click)),
                     new MenuItem("-"),
-                    this.autoCheckUpdatesToggleItem = CreateMenuItem("Automatically Check Updates", new EventHandler(this.autoCheckUpdatesToggleItem_Click)),
+                    this.autoCheckUpdatesToggleItem = CreateMenuItem("Check for Updates at Startup", new EventHandler(this.autoCheckUpdatesToggleItem_Click)),
                 }),
                 CreateMenuItem("About...", new EventHandler(this.AboutItem_Click)),
                 new MenuItem("-"),

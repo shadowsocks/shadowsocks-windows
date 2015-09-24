@@ -47,16 +47,16 @@ namespace Shadowsocks.View
             FileMenuItem.Text = I18N.GetString("&File");
             OpenLocationMenuItem.Text = I18N.GetString("&Open Location");
             ExitMenuItem.Text = I18N.GetString("E&xit");
-            CleanLogsButton.Text = I18N.GetString("&Clean logs");
-            ChangeFontButton.Text = I18N.GetString("Change &font");
-            WrapTextCheckBox.Text = I18N.GetString("&Wrap text");
-            TopMostCheckBox.Text = I18N.GetString("&Top most");
+            CleanLogsButton.Text = I18N.GetString("&Clean Logs");
+            ChangeFontButton.Text = I18N.GetString("Change &Font");
+            WrapTextCheckBox.Text = I18N.GetString("&Wrap Text");
+            TopMostCheckBox.Text = I18N.GetString("&Top Most");
             ViewMenuItem.Text = I18N.GetString("&View");
-            CleanLogsMenuItem.Text = I18N.GetString("&Clean logs");
-            ChangeFontMenuItem.Text = I18N.GetString("Change &font");
-            WrapTextMenuItem.Text = I18N.GetString("&Wrap text");
-            TopMostMenuItem.Text = I18N.GetString("&Top most");
-            ShowToolbarMenuItem.Text = I18N.GetString("&Show toolbar");
+            CleanLogsMenuItem.Text = I18N.GetString("&Clean Logs");
+            ChangeFontMenuItem.Text = I18N.GetString("Change &Font");
+            WrapTextMenuItem.Text = I18N.GetString("&Wrap Text");
+            TopMostMenuItem.Text = I18N.GetString("&Top Most");
+            ShowToolbarMenuItem.Text = I18N.GetString("&Show Toolbar");
             this.Text = I18N.GetString("Log Viewer");
         }
 
