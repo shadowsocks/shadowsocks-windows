@@ -6,8 +6,8 @@ namespace Shadowsocks.Encryption
     public class TableEncryptor
         : EncryptorBase
     {
-        public TableEncryptor(string method, string password, bool onetimeauth)
-            : base(method, password, onetimeauth)
+        public TableEncryptor(string method, string password, bool onetimeauth, bool isudp)
+            : base(method, password, onetimeauth, isudp)
         {
             byte[] hash = GetPasswordHash();
             // TODO endian
@@ -31,7 +31,7 @@ namespace Shadowsocks.Encryption
             return new List<string>(new string[]{"table"});
         }
 
-        public override void Encrypt(byte[] buf, int length, byte[] outbuf, out int outlength, bool udp)
+        public override void Encrypt(byte[] buf, int length, byte[] outbuf, out int outlength)
         {
             byte[] result = new byte[length];
             for (int i = 0; i < length; i++)

@@ -40,8 +40,8 @@ namespace Shadowsocks.Encryption
         protected uint counter = 0;
         protected byte[] _keyBuffer = null;
 
-        public IVEncryptor(string method, string password, bool onetimeauth)
-            : base(method, password, onetimeauth)
+        public IVEncryptor(string method, string password, bool onetimeauth, bool isudp)
+            : base(method, password, onetimeauth, isudp)
         {
             InitKey(method, password);
         }
@@ -183,38 +183,65 @@ namespace Shadowsocks.Encryption
             return hash;
         }
 
-        public override void Encrypt(byte[] buf, int length, byte[] outbuf, out int outlength, bool udp)
+        protected void reactBuffer4TCP(byte[] buf, ref int length)
         {
             if (!_encryptIVSent)
             {
-                _encryptIVSent = true;
+                int headLen = getHeadLen(buf, length);
+                int dataLen = length - headLen;
+                buf[0] |= ONETIMEAUTH_FLAG;
+                byte[] hash = genOnetimeAuthHash(buf, headLen);
+                Buffer.BlockCopy(buf, headLen, buf, headLen + ONETIMEAUTH_BYTES + AUTH_BYTES, dataLen);
+                Buffer.BlockCopy(hash, 0, buf, headLen, ONETIMEAUTH_BYTES);
+                hash = genHash(buf, headLen + ONETIMEAUTH_BYTES + AUTH_BYTES, dataLen);
+                Buffer.BlockCopy(hash, 0, buf, headLen + ONETIMEAUTH_BYTES + CLEN_BYTES, ONETIMEAUTH_BYTES);
+                byte[] lenBytes = BitConverter.GetBytes((ushort)IPAddress.HostToNetworkOrder((short)dataLen));
+                Buffer.BlockCopy(lenBytes, 0, buf, headLen + ONETIMEAUTH_BYTES, CLEN_BYTES);
+                length = headLen + ONETIMEAUTH_BYTES + AUTH_BYTES + dataLen;
+            }
+            else
+            {
+                byte[] hash = genHash(buf, 0, length);
+                Buffer.BlockCopy(buf, 0, buf, AUTH_BYTES, length);
+                byte[] lenBytes = BitConverter.GetBytes((ushort)IPAddress.HostToNetworkOrder((short)length));
+                Buffer.BlockCopy(lenBytes, 0, buf, 0, CLEN_BYTES);
+                Buffer.BlockCopy(hash, 0, buf, CLEN_BYTES, ONETIMEAUTH_BYTES);
+                length += AUTH_BYTES;
+            }
+        }
+
+        protected void reactBuffer4UDP(byte[] buf, ref int length)
+        {
+            buf[0] |= ONETIMEAUTH_FLAG;
+            byte[] hash = genOnetimeAuthHash(buf, length);
+            Buffer.BlockCopy(hash, 0, buf, length, ONETIMEAUTH_BYTES);
+            length += ONETIMEAUTH_BYTES;
+        }
+
+        protected void reactBuffer(byte[] buf, ref int length)
+        {
+            if (OnetimeAuth && ivLen > 0)
+            {
+                if (!IsUDP)
+                {
+                    reactBuffer4TCP(buf, ref length);
+                }
+                else
+                {
+                    reactBuffer4UDP(buf, ref length);
+                }
+            }
+        }
+
+        public override void Encrypt(byte[] buf, int length, byte[] outbuf, out int outlength)
+        {
+            if (!_encryptIVSent)
+            {
                 randBytes(outbuf, ivLen);
                 initCipher(outbuf, true);
                 outlength = length + ivLen;
-                if (OnetimeAuth && ivLen > 0)
-                {
-                    if(!udp)
-                    {
-                        int headLen = getHeadLen(buf, length);
-                        int dataLen = length - headLen;
-                        buf[0] |= ONETIMEAUTH_FLAG;
-                        byte[] hash = genOnetimeAuthHash(buf, headLen);
-                        Buffer.BlockCopy(buf, headLen, buf, headLen + ONETIMEAUTH_BYTES + AUTH_BYTES, dataLen);
-                        Buffer.BlockCopy(hash, 0, buf, headLen, ONETIMEAUTH_BYTES);
-                        hash = genHash(buf, headLen + ONETIMEAUTH_BYTES + AUTH_BYTES, dataLen);
-                        Buffer.BlockCopy(hash, 0, buf, headLen + ONETIMEAUTH_BYTES + CLEN_BYTES, ONETIMEAUTH_BYTES);
-                        byte[] lenBytes = BitConverter.GetBytes((ushort)IPAddress.HostToNetworkOrder((short)dataLen));
-                        Buffer.BlockCopy(lenBytes, 0, buf, headLen + ONETIMEAUTH_BYTES, CLEN_BYTES);
-                        length = headLen + ONETIMEAUTH_BYTES + AUTH_BYTES + dataLen;
-                    }
-                    else
-                    {
-                        buf[0] |= ONETIMEAUTH_FLAG;
-                        byte[] hash = genOnetimeAuthHash(buf, length);
-                        Buffer.BlockCopy(hash, 0, buf, length, ONETIMEAUTH_BYTES);
-                        length += ONETIMEAUTH_BYTES;
-                    }
-                }
+                reactBuffer(buf, ref length);
+                _encryptIVSent = true;
                 lock (tempbuf)
                 {
                     cipherUpdate(true, length, buf, tempbuf);
@@ -224,15 +251,7 @@ namespace Shadowsocks.Encryption
             }
             else
             {
-                if (OnetimeAuth && ivLen > 0)
-                {
-                    byte[] hash = genHash(buf, 0, length);
-                    Buffer.BlockCopy(buf, 0, buf, AUTH_BYTES, length);
-                    byte[] lenBytes = BitConverter.GetBytes((ushort)IPAddress.HostToNetworkOrder((short)length));
-                    Buffer.BlockCopy(lenBytes, 0, buf, 0, CLEN_BYTES);
-                    Buffer.BlockCopy(hash, 0, buf, CLEN_BYTES, ONETIMEAUTH_BYTES);
-                    length += AUTH_BYTES;
-                }
+                reactBuffer(buf, ref length);
                 outlength = length;
                 cipherUpdate(true, length, buf, outbuf);
             }

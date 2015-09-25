@@ -31,21 +31,21 @@ namespace test
             int outLen2 = 0;
             var random = new Random();
             random.NextBytes(plain);
-            encryptor.Encrypt(plain, plain.Length, cipher, out outLen, false);
+            encryptor.Encrypt(plain, plain.Length, cipher, out outLen);
             decryptor.Decrypt(cipher, outLen, plain2, out outLen2);
             Assert.AreEqual(plain.Length, outLen2);
             for (int j = 0; j < plain.Length; j++)
             {
                 Assert.AreEqual(plain[j], plain2[j]);
             }
-            encryptor.Encrypt(plain, 1000, cipher, out outLen, false);
+            encryptor.Encrypt(plain, 1000, cipher, out outLen);
             decryptor.Decrypt(cipher, outLen, plain2, out outLen2);
             Assert.AreEqual(1000, outLen2);
             for (int j = 0; j < outLen2; j++)
             {
                 Assert.AreEqual(plain[j], plain2[j]);
             }
-            encryptor.Encrypt(plain, 12333, cipher, out outLen, false);
+            encryptor.Encrypt(plain, 12333, cipher, out outLen);
             decryptor.Decrypt(cipher, outLen, plain2, out outLen2);
             Assert.AreEqual(12333, outLen2);
             for (int j = 0; j < outLen2; j++)
@@ -84,8 +84,8 @@ namespace test
                 {
                     IEncryptor encryptor;
                     IEncryptor decryptor;
-                    encryptor = new PolarSSLEncryptor("aes-256-cfb", "barfoo!", false);
-                    decryptor = new PolarSSLEncryptor("aes-256-cfb", "barfoo!", false);
+                    encryptor = new PolarSSLEncryptor("aes-256-cfb", "barfoo!", false, false);
+                    decryptor = new PolarSSLEncryptor("aes-256-cfb", "barfoo!", false, false);
                     RunEncryptionRound(encryptor, decryptor);
                 }
             }
@@ -124,8 +124,8 @@ namespace test
                     var random = new Random();
                     IEncryptor encryptor;
                     IEncryptor decryptor;
-                    encryptor = new PolarSSLEncryptor("rc4-md5", "barfoo!", false);
-                    decryptor = new PolarSSLEncryptor("rc4-md5", "barfoo!", false);
+                    encryptor = new PolarSSLEncryptor("rc4-md5", "barfoo!", false, false);
+                    decryptor = new PolarSSLEncryptor("rc4-md5", "barfoo!", false, false);
                     RunEncryptionRound(encryptor, decryptor);
                 }
             }
@@ -164,8 +164,8 @@ namespace test
                     var random = new Random();
                     IEncryptor encryptor;
                     IEncryptor decryptor;
-                    encryptor = new SodiumEncryptor("salsa20", "barfoo!", false);
-                    decryptor = new SodiumEncryptor("salsa20", "barfoo!", false);
+                    encryptor = new SodiumEncryptor("salsa20", "barfoo!", false, false);
+                    decryptor = new SodiumEncryptor("salsa20", "barfoo!", false, false);
                     RunEncryptionRound(encryptor, decryptor);
                 }
             }

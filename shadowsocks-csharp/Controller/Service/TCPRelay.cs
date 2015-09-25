@@ -125,7 +125,7 @@ namespace Shadowsocks.Controller
             {
                 throw new ArgumentException("No server configured");
             }
-            this.encryptor = EncryptorFactory.GetEncryptor(server.method, server.password, server.one_time_auth);
+            this.encryptor = EncryptorFactory.GetEncryptor(server.method, server.password, server.one_time_auth, false);
             this.server = server;
         }
 
@@ -586,7 +586,7 @@ namespace Shadowsocks.Controller
                         {
                             return;
                         }
-                        encryptor.Encrypt(connetionRecvBuffer, bytesRead, connetionSendBuffer, out bytesToSend, false);
+                        encryptor.Encrypt(connetionRecvBuffer, bytesRead, connetionSendBuffer, out bytesToSend);
                     }
                     remote.BeginSend(connetionSendBuffer, 0, bytesToSend, 0, new AsyncCallback(PipeRemoteSendCallback), null);
 
