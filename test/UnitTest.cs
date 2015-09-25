@@ -25,27 +25,27 @@ namespace test
         private void RunEncryptionRound(IEncryptor encryptor, IEncryptor decryptor)
         {
             byte[] plain = new byte[16384];
-            byte[] cipher = new byte[plain.Length + 16];
+            byte[] cipher = new byte[plain.Length + 16 + IVEncryptor.ONETIMEAUTH_BYTES + IVEncryptor.AUTH_BYTES];
             byte[] plain2 = new byte[plain.Length + 16];
             int outLen = 0;
             int outLen2 = 0;
             var random = new Random();
             random.NextBytes(plain);
-            encryptor.Encrypt(plain, plain.Length, cipher, out outLen);
+            encryptor.Encrypt(plain, plain.Length, cipher, out outLen, false);
             decryptor.Decrypt(cipher, outLen, plain2, out outLen2);
             Assert.AreEqual(plain.Length, outLen2);
             for (int j = 0; j < plain.Length; j++)
             {
                 Assert.AreEqual(plain[j], plain2[j]);
             }
-            encryptor.Encrypt(plain, 1000, cipher, out outLen);
+            encryptor.Encrypt(plain, 1000, cipher, out outLen, false);
             decryptor.Decrypt(cipher, outLen, plain2, out outLen2);
             Assert.AreEqual(1000, outLen2);
             for (int j = 0; j < outLen2; j++)
             {
                 Assert.AreEqual(plain[j], plain2[j]);
             }
-            encryptor.Encrypt(plain, 12333, cipher, out outLen);
+            encryptor.Encrypt(plain, 12333, cipher, out outLen, false);
             decryptor.Decrypt(cipher, outLen, plain2, out outLen2);
             Assert.AreEqual(12333, outLen2);
             for (int j = 0; j < outLen2; j++)

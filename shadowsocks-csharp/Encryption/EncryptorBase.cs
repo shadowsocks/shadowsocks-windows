@@ -26,7 +26,7 @@ namespace Shadowsocks.Encryption
             return hash;
         }
 
-        public abstract void Encrypt(byte[] buf, int length, byte[] outbuf, out int outlength);
+        public abstract void Encrypt(byte[] buf, int length, byte[] outbuf, out int outlength, bool udp);
 
         public abstract void Decrypt(byte[] buf, int length, byte[] outbuf, out int outlength);
 

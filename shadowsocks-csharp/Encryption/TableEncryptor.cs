@@ -31,7 +31,7 @@ namespace Shadowsocks.Encryption
             return new List<string>(new string[]{"table"});
         }
 
-        public override void Encrypt(byte[] buf, int length, byte[] outbuf, out int outlength)
+        public override void Encrypt(byte[] buf, int length, byte[] outbuf, out int outlength, bool udp)
         {
             byte[] result = new byte[length];
             for (int i = 0; i < length; i++)

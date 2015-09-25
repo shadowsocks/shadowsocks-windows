@@ -27,7 +27,7 @@ namespace Shadowsocks.Encryption
             }
         }
 
-        public static IEncryptor GetEncryptor(string method, string password, bool onetimeauth = false)
+        public static IEncryptor GetEncryptor(string method, string password, bool onetimeauth)
         {
             if (string.IsNullOrEmpty(method))
             {
