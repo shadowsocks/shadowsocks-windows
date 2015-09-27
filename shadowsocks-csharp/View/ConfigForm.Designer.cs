@@ -29,6 +29,8 @@
         private void InitializeComponent()
         {
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
+            this.ObfsCombo = new System.Windows.Forms.ComboBox();
+            this.labelObfs = new System.Windows.Forms.Label();
             this.IPLabel = new System.Windows.Forms.Label();
             this.ServerPortLabel = new System.Windows.Forms.Label();
             this.IPTextBox = new System.Windows.Forms.TextBox();
@@ -67,8 +69,6 @@
             this.tableLayoutPanel3 = new System.Windows.Forms.TableLayoutPanel();
             this.MyCancelButton = new System.Windows.Forms.Button();
             this.OKButton = new System.Windows.Forms.Button();
-            this.labelObfs = new System.Windows.Forms.Label();
-            this.ObfsCombo = new System.Windows.Forms.ComboBox();
             this.tableLayoutPanel1.SuspendLayout();
             this.ServerGroupBox.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.PictureQRcode)).BeginInit();
@@ -130,6 +130,30 @@
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
             this.tableLayoutPanel1.Size = new System.Drawing.Size(304, 326);
             this.tableLayoutPanel1.TabIndex = 0;
+            // 
+            // ObfsCombo
+            // 
+            this.ObfsCombo.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.ObfsCombo.FormattingEnabled = true;
+            this.ObfsCombo.Items.AddRange(new object[] {
+            "plain",
+            "http_simple",
+            "tls_simple",
+            "random_head"});
+            this.ObfsCombo.Location = new System.Drawing.Point(92, 198);
+            this.ObfsCombo.Name = "ObfsCombo";
+            this.ObfsCombo.Size = new System.Drawing.Size(206, 22);
+            this.ObfsCombo.TabIndex = 34;
+            // 
+            // labelObfs
+            // 
+            this.labelObfs.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.labelObfs.AutoSize = true;
+            this.labelObfs.Location = new System.Drawing.Point(54, 202);
+            this.labelObfs.Name = "labelObfs";
+            this.labelObfs.Size = new System.Drawing.Size(32, 14);
+            this.labelObfs.TabIndex = 33;
+            this.labelObfs.Text = "Obfs";
             // 
             // IPLabel
             // 
@@ -602,28 +626,6 @@
             this.OKButton.Text = "OK";
             this.OKButton.UseVisualStyleBackColor = true;
             this.OKButton.Click += new System.EventHandler(this.OKButton_Click);
-            // 
-            // labelObfs
-            // 
-            this.labelObfs.Anchor = System.Windows.Forms.AnchorStyles.Right;
-            this.labelObfs.AutoSize = true;
-            this.labelObfs.Location = new System.Drawing.Point(54, 202);
-            this.labelObfs.Name = "labelObfs";
-            this.labelObfs.Size = new System.Drawing.Size(32, 14);
-            this.labelObfs.TabIndex = 33;
-            this.labelObfs.Text = "Obfs";
-            // 
-            // ObfsCombo
-            // 
-            this.ObfsCombo.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.ObfsCombo.FormattingEnabled = true;
-            this.ObfsCombo.Items.AddRange(new object[] {
-            "plain",
-            "http_simple"});
-            this.ObfsCombo.Location = new System.Drawing.Point(92, 198);
-            this.ObfsCombo.Name = "ObfsCombo";
-            this.ObfsCombo.Size = new System.Drawing.Size(206, 22);
-            this.ObfsCombo.TabIndex = 34;
             // 
             // ConfigForm
             // 

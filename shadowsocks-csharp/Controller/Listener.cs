@@ -26,6 +26,11 @@ namespace Shadowsocks.Controller
             this._services = services;
         }
 
+        public IList<Service> GetServices()
+        {
+            return _services;
+        }
+
         private bool CheckIfPortInUse(int port)
         {
             IPGlobalProperties ipProperties = IPGlobalProperties.GetIPGlobalProperties();
@@ -37,6 +42,16 @@ namespace Shadowsocks.Controller
                 {
                     return true;
                 }
+            }
+            return false;
+        }
+
+        public bool isConfigChange(Configuration config)
+        {
+            if (this._shareOverLAN != config.shareOverLan
+                || ((IPEndPoint)_socket.LocalEndPoint).Port != config.localPort)
+            {
+                return true;
             }
             return false;
         }

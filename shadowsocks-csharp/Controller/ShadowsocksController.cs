@@ -364,27 +364,36 @@ namespace Shadowsocks.Controller
                 gfwListUpdater.Error += pacServer_PACUpdateError;
             }
 
-            if (_listener != null)
-            {
-                _listener.Stop();
-            }
-
             // don't put polipoRunner.Start() before pacServer.Stop()
             // or bind will fail when switching bind address from 0.0.0.0 to 127.0.0.1
             // though UseShellExecute is set to true now
             // http://stackoverflow.com/questions/10235093/socket-doesnt-close-after-application-exits-if-a-launched-process-is-open
-            polipoRunner.Stop();
             try
             {
-                polipoRunner.Start(_config);
+                if (_listener != null && !_listener.isConfigChange(_config))
+                {
+                    Local local = new Local(_config);
+                    _listener.GetServices()[0] = local;
+                }
+                else
+                {
+                    if (_listener != null)
+                    {
+                        _listener.Stop();
+                        _listener = null;
+                    }
 
-                Local local = new Local(_config);
-                List<Listener.Service> services = new List<Listener.Service>();
-                services.Add(local);
-                services.Add(_pacServer);
-                services.Add(new PortForwarder(polipoRunner.RunningPort));
-                _listener = new Listener(services);
-                _listener.Start(_config);
+                    polipoRunner.Stop();
+                    polipoRunner.Start(_config);
+
+                    Local local = new Local(_config);
+                    List<Listener.Service> services = new List<Listener.Service>();
+                    services.Add(local);
+                    services.Add(_pacServer);
+                    services.Add(new PortForwarder(polipoRunner.RunningPort));
+                    _listener = new Listener(services);
+                    _listener.Start(_config);
+                }
             }
             catch (Exception e)
             {

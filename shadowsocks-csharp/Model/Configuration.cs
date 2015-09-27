@@ -84,6 +84,10 @@ namespace Shadowsocks.Model
             {
                 randomGennarator = new Random();
                 lastSelectIndex = -1;
+            }
+            if (configs.Count <= lastSelectIndex || lastSelectIndex < 0 || !configs[lastSelectIndex].isEnable())
+            {
+                lastSelectIndex = -1;
                 lastSelectTime = DateTime.Now;
                 lastUserSelectIndex = curIndex;
             }

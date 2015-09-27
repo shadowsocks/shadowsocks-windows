@@ -286,7 +286,6 @@ namespace Shadowsocks.View
             Configuration config = controller.GetConfiguration();
             UpdateServersMenu();
             enableItem.Checked = config.enabled;
-            modeItem.Enabled = config.enabled;
             globalModeItem.Checked = config.global;
             PACModeItem.Checked = !config.global;
             ShareOverLANItem.Checked = config.shareOverLan;
