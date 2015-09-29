@@ -387,15 +387,7 @@ namespace Shadowsocks.View
                         {
                             SetCellText(cell, serverSpeedLog.errorTimeoutTimes);
                         }
-                        // ErrorTimeoutTimes
-                        else if (columnName == "ConnectNoData")
-                        {
-                            long val = serverSpeedLog.errorNoDataTimes;
-                            Color col = Color.FromArgb(255, (byte)Math.Max(0, 255 - val * 8), (byte)Math.Max(0, 255 - val * 8));
-                            SetBackColor(cell, col);
-                            SetCellText(cell, val);
-                        }
-                        // ErrorTimeoutTimes
+                        // ErrorContinurousTimes
                         else if (columnName == "Continuous")
                         {
                             long val = serverSpeedLog.errorContinurousTimes;
@@ -409,8 +401,7 @@ namespace Shadowsocks.View
                             if (serverSpeedLog.totalConnectTimes > 0)
                             {
                                 double percent = (serverSpeedLog.errorConnectTimes
-                                    + serverSpeedLog.errorTimeoutTimes
-                                    + serverSpeedLog.errorNoDataTimes)
+                                    + serverSpeedLog.errorTimeoutTimes)
                                     * 100.00 / serverSpeedLog.totalConnectTimes;
                                 SetBackColor(cell, Color.FromArgb(255, (byte)(255 - percent * 2), (byte)(255 - percent * 2)));
                                 if (percent < 1e-4)
@@ -516,7 +507,6 @@ namespace Shadowsocks.View
                 }
                 if (ServerDataGrid.Columns[e.ColumnIndex].Name == "ConnectError"
                     || ServerDataGrid.Columns[e.ColumnIndex].Name == "ConnectTimeout"
-                    || ServerDataGrid.Columns[e.ColumnIndex].Name == "ConnectNoData"
                     || ServerDataGrid.Columns[e.ColumnIndex].Name == "Continuous"
                     )
                 {
@@ -583,7 +573,6 @@ namespace Shadowsocks.View
                 || e.Column.Name == "Connecting"
                 || e.Column.Name == "ConnectError"
                 || e.Column.Name == "ConnectTimeout"
-                || e.Column.Name == "ConnectNoData"
                 || e.Column.Name == "Continuous"
                 )
             {

@@ -374,6 +374,11 @@ namespace Shadowsocks.Controller
                 {
                     Local local = new Local(_config);
                     _listener.GetServices()[0] = local;
+                    if (polipoRunner.HasExited())
+                    {
+                        polipoRunner.Stop();
+                        polipoRunner.Start(_config);
+                    }
                 }
                 else
                 {

@@ -478,14 +478,6 @@ namespace Shadowsocks.Controller
                     if (lastErrCode == 0)
                     {
                         lastErrCode = -1;
-                        if (this.State != ConnectState.CONNECTED || this.State != ConnectState.END)
-                        {
-                            server.ServerSpeedLog().AddNoDataTimes();
-                            if (server.ServerSpeedLog().ErrorContinurousTimes >= AutoSwitchOffErrorTimes && autoSwitchOff)
-                            {
-                                server.setEnable(false);
-                            }
-                        }
                     }
                     return 0;
                 }
@@ -1668,7 +1660,6 @@ namespace Shadowsocks.Controller
                         Logging.LogBin(LogLevel.Debug, "udp remote recv", remoteSendBuffer, bytesToSend);
 
                     server.ServerSpeedLog().AddDownloadBytes(bytesToSend);
-                    server.ServerSpeedLog().HasData();
                     speedTester.AddDownloadSize(bytesToSend);
 
                     if (connectionUDP == null)
@@ -1719,14 +1710,6 @@ namespace Shadowsocks.Controller
                     if (lastErrCode == 0)
                     {
                         lastErrCode = 8;
-                        if (speedTester.sizeDownload == 0)
-                        {
-                            server.ServerSpeedLog().AddNoDataTimes();
-                            if (server.ServerSpeedLog().ErrorContinurousTimes >= AutoSwitchOffErrorTimes && autoSwitchOff)
-                            {
-                                server.setEnable(false);
-                            }
-                        }
                     }
                     CheckClose();
                 }
@@ -1773,7 +1756,6 @@ namespace Shadowsocks.Controller
                         Array.Copy(remoteRecvBuffer, remoteSendBuffer, bytesToSend);
                     }
                     server.ServerSpeedLog().AddDownloadBytes(bytesToSend);
-                    server.ServerSpeedLog().HasData();
                     speedTester.AddDownloadSize(bytesToSend);
 
                     ConnectionSend(remoteSendBuffer, bytesToSend);
@@ -1786,14 +1768,6 @@ namespace Shadowsocks.Controller
                     if (lastErrCode == 0)
                     {
                         lastErrCode = 8;
-                        if (speedTester.sizeDownload == 0)
-                        {
-                            server.ServerSpeedLog().AddNoDataTimes();
-                            if (server.ServerSpeedLog().ErrorContinurousTimes >= AutoSwitchOffErrorTimes && autoSwitchOff)
-                            {
-                                server.setEnable(false);
-                            }
-                        }
                     }
                     CheckClose();
                 }
@@ -1898,7 +1872,6 @@ namespace Shadowsocks.Controller
                         Logging.LogBin(LogLevel.Debug, "udp remote recv", remoteSendBuffer, bytesToSend);
 
                     server.ServerSpeedLog().AddDownloadBytes(bytesToSend);
-                    server.ServerSpeedLog().HasData();
                     speedTester.AddDownloadSize(bytesToSend);
 
                     if (connectionUDP == null)
@@ -1914,14 +1887,6 @@ namespace Shadowsocks.Controller
                     if (lastErrCode == 0)
                     {
                         lastErrCode = 8;
-                        if (speedTester.sizeDownload == 0)
-                        {
-                            server.ServerSpeedLog().AddNoDataTimes();
-                            if (server.ServerSpeedLog().ErrorContinurousTimes >= AutoSwitchOffErrorTimes && autoSwitchOff)
-                            {
-                                server.setEnable(false);
-                            }
-                        }
                     }
                     CheckClose();
                 }

@@ -89,7 +89,7 @@ namespace Shadowsocks.Model
             {
                 lastSelectIndex = -1;
                 lastSelectTime = DateTime.Now;
-                lastUserSelectIndex = curIndex;
+                lastUserSelectIndex = -1;
             }
             if (lastUserSelectIndex != curIndex)
             {

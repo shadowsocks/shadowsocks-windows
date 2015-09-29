@@ -14,11 +14,11 @@ namespace Shadowsocks.Controller
                 RegistryKey runKey = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Run", true);
                 if (enabled)
                 {
-                    runKey.SetValue("Shadowsocks", path);
+                    runKey.SetValue("ShadowsocksR", path);
                 }
                 else
                 {
-                    runKey.DeleteValue("Shadowsocks");
+                    runKey.DeleteValue("ShadowsocksR");
                 }
                 runKey.Close();
                 return true;
@@ -40,7 +40,7 @@ namespace Shadowsocks.Controller
                 runKey.Close();
                 foreach (string item in runList)
                 {
-                    if (item.Equals("Shadowsocks"))
+                    if (item.Equals("ShadowsocksR"))
                         return true;
                 }
                 return false;

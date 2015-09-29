@@ -27,7 +27,6 @@ namespace Shadowsocks.Model
         public long totalDisconnectTimes;
         public long errorConnectTimes;
         public long errorTimeoutTimes;
-        public long errorNoDataTimes;
         public long errorContinurousTimes;
         public long totalUploadBytes;
         public long totalDownloadBytes;
@@ -42,7 +41,6 @@ namespace Shadowsocks.Model
         private long totalDisconnectTimes = 0;
         private long errorConnectTimes = 0;
         private long errorTimeoutTimes = 0;
-        private long errorNoDataTimes = 0;
         private long errorContinurousTimes = 0;
         private long transUpload = 0;
         private long transDownload = 0;
@@ -64,7 +62,6 @@ namespace Shadowsocks.Model
                 ret.totalDisconnectTimes = totalDisconnectTimes;
                 ret.errorConnectTimes = errorConnectTimes;
                 ret.errorTimeoutTimes = errorTimeoutTimes;
-                ret.errorNoDataTimes = errorNoDataTimes;
                 ret.errorContinurousTimes = errorContinurousTimes;
                 ret.totalUploadBytes = transUpload;
                 ret.totalDownloadBytes = transDownload;
@@ -109,16 +106,6 @@ namespace Shadowsocks.Model
                 lock (this)
                 {
                     return errorTimeoutTimes;
-                }
-            }
-        }
-        public long ErrorNoDataTimes
-        {
-            get
-            {
-                lock (this)
-                {
-                    return errorNoDataTimes;
                 }
             }
         }
@@ -288,7 +275,6 @@ namespace Shadowsocks.Model
                 totalDisconnectTimes = 0;
                 errorConnectTimes = 0;
                 errorTimeoutTimes = 0;
-                errorNoDataTimes = 0;
                 errorContinurousTimes = 0;
             }
         }
@@ -303,7 +289,6 @@ namespace Shadowsocks.Model
                 totalDisconnectTimes = 0;
                 errorConnectTimes = 0;
                 errorTimeoutTimes = 0;
-                errorNoDataTimes = 0;
                 errorContinurousTimes = 0;
                 transUpload = 0;
                 transDownload = 0;
@@ -332,22 +317,6 @@ namespace Shadowsocks.Model
                 errorContinurousTimes += 1;
             }
         }
-        public void AddNoDataTimes()
-        {
-            lock (this)
-            {
-                errorNoDataTimes += 1;
-                errorContinurousTimes += 1;
-            }
-        }
-        public void HasData()
-        {
-            lock (this)
-            {
-                errorNoDataTimes = 0;
-                errorContinurousTimes = 0;
-            }
-        }
         public void AddTimeoutTimes()
         {
             lock (this)
@@ -367,6 +336,7 @@ namespace Shadowsocks.Model
         {
             lock (this)
             {
+                errorContinurousTimes = 0;
                 transDownload += bytes;
                 if (transLog == null)
                     transLog = new List<TransLog>();

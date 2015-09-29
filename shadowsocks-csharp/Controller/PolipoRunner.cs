@@ -20,7 +20,6 @@ namespace Shadowsocks.Controller
 
         static PolipoRunner()
         {
-
             runningPath = Path.Combine(System.Windows.Forms.Application.StartupPath, @"temp"); // Path.GetTempPath();
             if (!Directory.Exists(runningPath))
             {
@@ -43,6 +42,11 @@ namespace Shadowsocks.Controller
             {
                 return _runningPort;
             }
+        }
+
+        public bool HasExited()
+        {
+            return _process.HasExited;
         }
 
         public void Start(Configuration configuration)
@@ -93,7 +97,6 @@ namespace Shadowsocks.Controller
                 //_process.StartInfo.RedirectStandardError = true;
                 _process.Start();
             }
-            RefreshTrayArea();
         }
 
         public void Stop()
@@ -116,7 +119,7 @@ namespace Shadowsocks.Controller
 
         private int GetFreePort()
         {
-            int defaultPort = 8123;
+            int defaultPort = 60000;
             try
             {
                 IPGlobalProperties properties = IPGlobalProperties.GetIPGlobalProperties();
@@ -127,8 +130,9 @@ namespace Shadowsocks.Controller
                 {
                     usedPorts.Add(endPoint.Port);
                 }
-                for (int port = defaultPort; port <= 65535; port++)
+                for (int nTry = 0; nTry < 1000; nTry++)
                 {
+                    int port = new Random().Next(10000, 65536);
                     if (!usedPorts.Contains(port))
                     {
                         return port;

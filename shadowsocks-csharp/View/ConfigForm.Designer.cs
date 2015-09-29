@@ -225,14 +225,12 @@
             this.EncryptionSelect.ImeMode = System.Windows.Forms.ImeMode.NoControl;
             this.EncryptionSelect.ItemHeight = 14;
             this.EncryptionSelect.Items.AddRange(new object[] {
-            "table",
-            "rc4-md5",
-            "salsa20",
-            "chacha20",
             "aes-256-cfb",
             "aes-192-cfb",
             "aes-128-cfb",
-            "rc4"});
+            "chacha20",
+            "salsa20",
+            "rc4-md5"});
             this.EncryptionSelect.Location = new System.Drawing.Point(92, 90);
             this.EncryptionSelect.Name = "EncryptionSelect";
             this.EncryptionSelect.Size = new System.Drawing.Size(206, 22);

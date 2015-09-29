@@ -28,7 +28,7 @@ namespace Shadowsocks.Obfs
             "?keyword=", "",
             "search?src=typd&q=", "&lang=en",
             "s?ie=utf-8&f=8&rsv_bp=1&rsv_idx=1&ch=&bar=&wd=", "&rn=",
-            "post.php?id=", "&",
+            "post.php?id=", "&goto=view.php",
         };
 
         private static string[] _request_useragent = new string[]

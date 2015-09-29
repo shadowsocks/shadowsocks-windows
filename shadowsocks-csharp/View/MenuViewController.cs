@@ -43,6 +43,7 @@ namespace Shadowsocks.View
         private MenuItem editGFWUserRuleItem;
         private MenuItem editOnlinePACItem;
         private MenuItem SelectRandomItem;
+        private MenuItem UpdateItem;
         private ConfigForm configForm;
         private SettingsForm settingsForm;
         private ServerLogForm serverLogForm;
@@ -93,9 +94,13 @@ namespace Shadowsocks.View
         private void timer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
             updateChecker.CheckUpdate(controller.GetConfiguration());
-            timerDelayCheckUpdate.Elapsed -= timer_Elapsed;
-            timerDelayCheckUpdate.Stop();
-            timerDelayCheckUpdate = null;
+            {
+                timerDelayCheckUpdate.Elapsed -= timer_Elapsed;
+                timerDelayCheckUpdate.Stop();
+                timerDelayCheckUpdate = new System.Timers.Timer(1000.0 * 60 * 60 * 2);
+                timerDelayCheckUpdate.Elapsed += timer_Elapsed;
+                timerDelayCheckUpdate.Start();
+            }
         }
 
         void controller_Errored(object sender, System.IO.ErrorEventArgs e)
@@ -189,6 +194,7 @@ namespace Shadowsocks.View
                 this.AutoStartupItem = CreateMenuItem("Start on Boot", new EventHandler(this.AutoStartupItem_Click)),
                 this.ShareOverLANItem = CreateMenuItem("Allow Clients from LAN", new EventHandler(this.ShareOverLANItem_Click)),
                 this.SelectRandomItem = CreateMenuItem("Random Proxy", new EventHandler(this.SelectRandomItem_Click)),
+                this.UpdateItem = CreateMenuItem("Update available", new EventHandler(this.UpdateItem_Clicked)),
                 new MenuItem("-"),
                 CreateMenuItem("Scan QRCode from Screen...", new EventHandler(this.ScanQRCodeItem_Click)),
                 CreateMenuItem("Copy Address from clipboard...", new EventHandler(this.CopyAddress_Click)),
@@ -203,6 +209,7 @@ namespace Shadowsocks.View
                 new MenuItem("-"),
                 CreateMenuItem("Quit", new EventHandler(this.Quit_Click))
             });
+            this.UpdateItem.Visible = false;
         }
 
         private void controller_ConfigChanged(object sender, EventArgs e)
@@ -268,15 +275,26 @@ namespace Shadowsocks.View
             }
             else
             {
-                ShowBalloonTip(String.Format(I18N.GetString("{0} {1} Update Found"), UpdateChecker.Name, updateChecker.LatestVersionNumber), I18N.GetString("Click here to download"), ToolTipIcon.Info, 5000);
-                _notifyIcon.BalloonTipClicked += notifyIcon1_BalloonTipClicked;
+                if (!this.UpdateItem.Visible)
+                {
+                    ShowBalloonTip(String.Format(I18N.GetString("{0} {1} Update Found"), UpdateChecker.Name, updateChecker.LatestVersionNumber),
+                        I18N.GetString("Click menu to download"), ToolTipIcon.Info, 5000);
+                    _notifyIcon.BalloonTipClicked += notifyIcon1_BalloonTipClicked;
+                }
+                this.UpdateItem.Visible = true;
+                this.UpdateItem.Text = String.Format(I18N.GetString("New version {0} {1} available"), UpdateChecker.Name, updateChecker.LatestVersionNumber);
             }
             _isFirstRun = false;
         }
 
-        void notifyIcon1_BalloonTipClicked(object sender, EventArgs e)
+        void UpdateItem_Clicked(object sender, EventArgs e)
         {
             System.Diagnostics.Process.Start(updateChecker.LatestVersionURL);
+        }
+
+        void notifyIcon1_BalloonTipClicked(object sender, EventArgs e)
+        {
+            //System.Diagnostics.Process.Start(updateChecker.LatestVersionURL);
             _notifyIcon.BalloonTipClicked -= notifyIcon1_BalloonTipClicked;
         }
 
