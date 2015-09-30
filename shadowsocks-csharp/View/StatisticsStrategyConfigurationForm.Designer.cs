@@ -260,9 +260,9 @@
             this.label9.Location = new System.Drawing.Point(8, 175);
             this.label9.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
             this.label9.Name = "label9";
-            this.label9.Size = new System.Drawing.Size(164, 27);
+            this.label9.Size = new System.Drawing.Size(162, 27);
             this.label9.TabIndex = 20;
-            this.label9.Text = "Collect Data per";
+            this.label9.Text = "Collect data per";
             // 
             // label8
             // 
