@@ -20,8 +20,8 @@ namespace Shadowsocks.Encryption
         protected ulong _encryptIC;
         protected ulong _decryptIC;
 
-        public SodiumEncryptor(string method, string password)
-            : base(method, password)
+        public SodiumEncryptor(string method, string password, bool onetimeauth, bool isudp)
+            : base(method, password, onetimeauth, isudp)
         {
             InitKey(method, password);
         }

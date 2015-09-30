@@ -93,17 +93,18 @@ namespace Shadowsocks.Controller
         private int _firstPacketLength;
         // Size of receive buffer.
         public const int RecvSize = 8192;
-        public const int BufferSize = RecvSize + 32;
+        public const int RecvReserveSize = IVEncryptor.ONETIMEAUTH_BYTES + IVEncryptor.AUTH_BYTES; // reserve for one-time auth
+        public const int BufferSize = RecvSize + RecvReserveSize + 32;
 
         private int totalRead = 0;
         private int totalWrite = 0;
 
         // remote receive buffer
-        private byte[] remoteRecvBuffer = new byte[RecvSize];
+        private byte[] remoteRecvBuffer = new byte[BufferSize];
         // remote send buffer
         private byte[] remoteSendBuffer = new byte[BufferSize];
         // connection receive buffer
-        private byte[] connetionRecvBuffer = new byte[RecvSize];
+        private byte[] connetionRecvBuffer = new byte[BufferSize];
         // connection send buffer
         private byte[] connetionSendBuffer = new byte[BufferSize];
         // Received data string.
@@ -124,7 +125,7 @@ namespace Shadowsocks.Controller
             {
                 throw new ArgumentException("No server configured");
             }
-            this.encryptor = EncryptorFactory.GetEncryptor(server.method, server.password);
+            this.encryptor = EncryptorFactory.GetEncryptor(server.method, server.password, server.one_time_auth, false);
             this.server = server;
         }
 

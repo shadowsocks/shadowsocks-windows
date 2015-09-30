@@ -48,6 +48,7 @@ namespace Shadowsocks.View
             EncryptionLabel.Text = I18N.GetString("Encryption");
             ProxyPortLabel.Text = I18N.GetString("Proxy Port");
             RemarksLabel.Text = I18N.GetString("Remarks");
+            OneTimeAuth.Text = I18N.GetString("Onetime Authentication (Experimental)");
             ServerGroupBox.Text = I18N.GetString("Server");
             OKButton.Text = I18N.GetString("OK");
             MyCancelButton.Text = I18N.GetString("Cancel");
@@ -82,7 +83,8 @@ namespace Shadowsocks.View
                     server_port = int.Parse(ServerPortTextBox.Text),
                     password = PasswordTextBox.Text,
                     method = EncryptionSelect.Text,
-                    remarks = RemarksTextBox.Text
+                    remarks = RemarksTextBox.Text,
+                    one_time_auth = OneTimeAuth.Checked
                 };
                 int localPort = int.Parse(ProxyPortTextBox.Text);
                 Configuration.CheckServer(server);
@@ -115,6 +117,7 @@ namespace Shadowsocks.View
                 ProxyPortTextBox.Text = _modifiedConfiguration.localPort.ToString();
                 EncryptionSelect.Text = server.method ?? "aes-256-cfb";
                 RemarksTextBox.Text = server.remarks;
+                OneTimeAuth.Checked = server.one_time_auth;
             }
         }
 
@@ -317,6 +320,19 @@ namespace Shadowsocks.View
             if (ServersListBox.SelectedIndex < ServersListBox.Items.Count - 1)
             {
                 MoveConfigItem(+1);  // +1 means move forward
+            }
+        }
+
+        private void EncryptionSelect_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (EncryptionSelect.Text == "rc4" || EncryptionSelect.Text == "table")
+            {
+                OneTimeAuth.Enabled = false;
+                OneTimeAuth.Checked = false;
+            }
+            else
+            {
+                OneTimeAuth.Enabled = true;
             }
         }
     }

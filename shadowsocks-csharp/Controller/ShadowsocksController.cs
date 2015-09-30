@@ -126,7 +126,7 @@ namespace Shadowsocks.Controller
         {
             _config.configs = servers;
             _config.localPort = localPort;
-            SaveConfig(_config);
+            Configuration.Save(_config);
         }
 
         public void SaveStrategyConfigurations(StatisticsStrategyConfiguration configuration)
@@ -286,6 +286,18 @@ namespace Shadowsocks.Controller
             {
                 ConfigChanged(this, new EventArgs());
             }
+        }
+
+        public void ToggleCheckingUpdate(bool enabled)
+        {
+            _config.autoCheckUpdate = enabled;
+            Configuration.Save(_config);
+        }
+
+        public void SaveLogViewerConfig(LogViewerConfig newConfig)
+        {
+            _config.logViewer = newConfig;
+            Configuration.Save(_config);
         }
 
         protected void Reload()

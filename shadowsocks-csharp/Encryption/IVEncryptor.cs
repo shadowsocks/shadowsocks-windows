@@ -2,12 +2,24 @@
 using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Text;
+using System.Net;
 
 namespace Shadowsocks.Encryption
 {
     public abstract class IVEncryptor
         : EncryptorBase
     {
+        public const int MAX_KEY_LENGTH = 64;
+        public const int MAX_IV_LENGTH = 16;
+
+        public const int ONETIMEAUTH_FLAG = 0x10;
+        public const int ADDRTYPE_MASK = 0xF;
+
+        public const int ONETIMEAUTH_BYTES = 10;
+
+        public const int CLEN_BYTES = 2;
+        public const int AUTH_BYTES = ONETIMEAUTH_BYTES + CLEN_BYTES;
+
         protected static byte[] tempbuf = new byte[MAX_INPUT_SIZE];
 
         protected Dictionary<string, int[]> ciphers;
@@ -25,9 +37,11 @@ namespace Shadowsocks.Encryption
         protected byte[] _key;
         protected int keyLen;
         protected int ivLen;
+        protected uint counter = 0;
+        protected byte[] _keyBuffer = null;
 
-        public IVEncryptor(string method, string password)
-            : base(method, password)
+        public IVEncryptor(string method, string password, bool onetimeauth, bool isudp)
+            : base(method, password, onetimeauth, isudp)
         {
             InitKey(method, password);
         }
@@ -112,14 +126,122 @@ namespace Shadowsocks.Encryption
 
         protected abstract void cipherUpdate(bool isCipher, int length, byte[] buf, byte[] outbuf);
 
+        protected int getHeadLen(byte[] buf, int length)
+        {
+            int len = 0;
+            int atyp = length > 0 ? (buf[0] & ADDRTYPE_MASK) : 0;
+            if (atyp == 1)
+            {
+                len = 7; // atyp (1 bytes) + ipv4 (4 bytes) + port (2 bytes)
+            }
+            else if (atyp == 3 && length > 1)
+            {
+                int nameLen = buf[1];
+                len = 4 + nameLen; // atyp (1 bytes) + name length (1 bytes) + name (n bytes) + port (2 bytes)
+            }
+            else if (atyp == 4)
+            {
+                len = 19; // atyp (1 bytes) + ipv6 (16 bytes) + port (2 bytes)
+            }
+            if (len == 0 || len > length)
+                throw new Exception($"invalid header with addr type {atyp}");
+            return len;
+        }
+
+        protected byte[] genOnetimeAuthHash(byte[] msg, int msg_len)
+        {
+            byte[] auth = new byte[ONETIMEAUTH_BYTES];
+            byte[] hash = new byte[20];
+            byte[] auth_key = new byte[MAX_IV_LENGTH + MAX_KEY_LENGTH];
+            Buffer.BlockCopy(_encryptIV, 0, auth_key, 0, ivLen);
+            Buffer.BlockCopy(_key, 0, auth_key, ivLen, keyLen);
+            Sodium.ss_sha1_hmac_ex(auth_key, (uint)(ivLen + keyLen),
+                msg, 0, (uint)msg_len, hash);
+            Buffer.BlockCopy(hash, 0, auth, 0, ONETIMEAUTH_BYTES);
+            return auth;
+        }
+
+        protected void updateKeyBuffer()
+        {
+            if (_keyBuffer == null)
+            {
+                _keyBuffer = new byte[MAX_IV_LENGTH + 4];
+                Buffer.BlockCopy(_encryptIV, 0, _keyBuffer, 0, ivLen);
+            }
+
+            byte[] counter_bytes = BitConverter.GetBytes((uint)IPAddress.HostToNetworkOrder((int)counter));
+            Buffer.BlockCopy(counter_bytes, 0, _keyBuffer, ivLen, 4);
+            counter++;
+        }
+
+        protected byte[] genHash(byte[] buf, int offset, int len)
+        {
+            byte[] hash = new byte[20];
+            updateKeyBuffer();
+            Sodium.ss_sha1_hmac_ex(_keyBuffer, (uint)_keyBuffer.Length,
+                buf, offset, (uint)len, hash);
+            return hash;
+        }
+
+        protected void reactBuffer4TCP(byte[] buf, ref int length)
+        {
+            if (!_encryptIVSent)
+            {
+                int headLen = getHeadLen(buf, length);
+                int dataLen = length - headLen;
+                buf[0] |= ONETIMEAUTH_FLAG;
+                byte[] hash = genOnetimeAuthHash(buf, headLen);
+                Buffer.BlockCopy(buf, headLen, buf, headLen + ONETIMEAUTH_BYTES + AUTH_BYTES, dataLen);
+                Buffer.BlockCopy(hash, 0, buf, headLen, ONETIMEAUTH_BYTES);
+                hash = genHash(buf, headLen + ONETIMEAUTH_BYTES + AUTH_BYTES, dataLen);
+                Buffer.BlockCopy(hash, 0, buf, headLen + ONETIMEAUTH_BYTES + CLEN_BYTES, ONETIMEAUTH_BYTES);
+                byte[] lenBytes = BitConverter.GetBytes((ushort)IPAddress.HostToNetworkOrder((short)dataLen));
+                Buffer.BlockCopy(lenBytes, 0, buf, headLen + ONETIMEAUTH_BYTES, CLEN_BYTES);
+                length = headLen + ONETIMEAUTH_BYTES + AUTH_BYTES + dataLen;
+            }
+            else
+            {
+                byte[] hash = genHash(buf, 0, length);
+                Buffer.BlockCopy(buf, 0, buf, AUTH_BYTES, length);
+                byte[] lenBytes = BitConverter.GetBytes((ushort)IPAddress.HostToNetworkOrder((short)length));
+                Buffer.BlockCopy(lenBytes, 0, buf, 0, CLEN_BYTES);
+                Buffer.BlockCopy(hash, 0, buf, CLEN_BYTES, ONETIMEAUTH_BYTES);
+                length += AUTH_BYTES;
+            }
+        }
+
+        protected void reactBuffer4UDP(byte[] buf, ref int length)
+        {
+            buf[0] |= ONETIMEAUTH_FLAG;
+            byte[] hash = genOnetimeAuthHash(buf, length);
+            Buffer.BlockCopy(hash, 0, buf, length, ONETIMEAUTH_BYTES);
+            length += ONETIMEAUTH_BYTES;
+        }
+
+        protected void reactBuffer(byte[] buf, ref int length)
+        {
+            if (OnetimeAuth && ivLen > 0)
+            {
+                if (!IsUDP)
+                {
+                    reactBuffer4TCP(buf, ref length);
+                }
+                else
+                {
+                    reactBuffer4UDP(buf, ref length);
+                }
+            }
+        }
+
         public override void Encrypt(byte[] buf, int length, byte[] outbuf, out int outlength)
         {
             if (!_encryptIVSent)
             {
-                _encryptIVSent = true;
                 randBytes(outbuf, ivLen);
                 initCipher(outbuf, true);
                 outlength = length + ivLen;
+                reactBuffer(buf, ref length);
+                _encryptIVSent = true;
                 lock (tempbuf)
                 {
                     cipherUpdate(true, length, buf, tempbuf);
@@ -129,6 +251,7 @@ namespace Shadowsocks.Encryption
             }
             else
             {
+                reactBuffer(buf, ref length);
                 outlength = length;
                 cipherUpdate(true, length, buf, outbuf);
             }
@@ -154,5 +277,6 @@ namespace Shadowsocks.Encryption
                 cipherUpdate(false, length, buf, outbuf);
             }
         }
+
     }
 }

@@ -13,19 +13,19 @@ namespace test
         [TestMethod]
         public void TestCompareVersion()
         {
-            Assert.IsTrue(UpdateChecker.CompareVersion("2.3.1.0", "2.3.1") == 0);
-            Assert.IsTrue(UpdateChecker.CompareVersion("1.2", "1.3") < 0);
-            Assert.IsTrue(UpdateChecker.CompareVersion("1.3", "1.2") > 0);
-            Assert.IsTrue(UpdateChecker.CompareVersion("1.3", "1.3") == 0);
-            Assert.IsTrue(UpdateChecker.CompareVersion("1.2.1", "1.2") > 0);
-            Assert.IsTrue(UpdateChecker.CompareVersion("2.3.1", "2.4") < 0);
-            Assert.IsTrue(UpdateChecker.CompareVersion("1.3.2", "1.3.1") > 0);
+            Assert.IsTrue(UpdateChecker.Asset.CompareVersion("2.3.1.0", "2.3.1") == 0);
+            Assert.IsTrue(UpdateChecker.Asset.CompareVersion("1.2", "1.3") < 0);
+            Assert.IsTrue(UpdateChecker.Asset.CompareVersion("1.3", "1.2") > 0);
+            Assert.IsTrue(UpdateChecker.Asset.CompareVersion("1.3", "1.3") == 0);
+            Assert.IsTrue(UpdateChecker.Asset.CompareVersion("1.2.1", "1.2") > 0);
+            Assert.IsTrue(UpdateChecker.Asset.CompareVersion("2.3.1", "2.4") < 0);
+            Assert.IsTrue(UpdateChecker.Asset.CompareVersion("1.3.2", "1.3.1") > 0);
         }
 
         private void RunEncryptionRound(IEncryptor encryptor, IEncryptor decryptor)
         {
             byte[] plain = new byte[16384];
-            byte[] cipher = new byte[plain.Length + 16];
+            byte[] cipher = new byte[plain.Length + 16 + IVEncryptor.ONETIMEAUTH_BYTES + IVEncryptor.AUTH_BYTES];
             byte[] plain2 = new byte[plain.Length + 16];
             int outLen = 0;
             int outLen2 = 0;
@@ -84,8 +84,8 @@ namespace test
                 {
                     IEncryptor encryptor;
                     IEncryptor decryptor;
-                    encryptor = new PolarSSLEncryptor("aes-256-cfb", "barfoo!");
-                    decryptor = new PolarSSLEncryptor("aes-256-cfb", "barfoo!");
+                    encryptor = new PolarSSLEncryptor("aes-256-cfb", "barfoo!", false, false);
+                    decryptor = new PolarSSLEncryptor("aes-256-cfb", "barfoo!", false, false);
                     RunEncryptionRound(encryptor, decryptor);
                 }
             }
@@ -124,8 +124,8 @@ namespace test
                     var random = new Random();
                     IEncryptor encryptor;
                     IEncryptor decryptor;
-                    encryptor = new PolarSSLEncryptor("rc4-md5", "barfoo!");
-                    decryptor = new PolarSSLEncryptor("rc4-md5", "barfoo!");
+                    encryptor = new PolarSSLEncryptor("rc4-md5", "barfoo!", false, false);
+                    decryptor = new PolarSSLEncryptor("rc4-md5", "barfoo!", false, false);
                     RunEncryptionRound(encryptor, decryptor);
                 }
             }
@@ -164,8 +164,8 @@ namespace test
                     var random = new Random();
                     IEncryptor encryptor;
                     IEncryptor decryptor;
-                    encryptor = new SodiumEncryptor("salsa20", "barfoo!");
-                    decryptor = new SodiumEncryptor("salsa20", "barfoo!");
+                    encryptor = new SodiumEncryptor("salsa20", "barfoo!", false, false);
+                    decryptor = new SodiumEncryptor("salsa20", "barfoo!", false, false);
                     RunEncryptionRound(encryptor, decryptor);
                 }
             }

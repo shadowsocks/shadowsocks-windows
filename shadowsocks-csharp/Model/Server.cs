@@ -17,6 +17,7 @@ namespace Shadowsocks.Model
         public string password;
         public string method;
         public string remarks;
+        public bool one_time_auth;
 
         public override int GetHashCode()
         {
@@ -52,6 +53,7 @@ namespace Shadowsocks.Model
             this.method = "aes-256-cfb";
             this.password = "";
             this.remarks = "";
+            this.one_time_auth = false;
         }
 
         public Server(string ssURL) : this()
@@ -88,6 +90,9 @@ namespace Shadowsocks.Model
                 string[] parts = beforeAt.Split(new[] { ':' });
                 this.method = parts[0];
                 this.password = parts[1];
+
+                //TODO: read one_time_auth
+
             }
             catch (IndexOutOfRangeException)
             {

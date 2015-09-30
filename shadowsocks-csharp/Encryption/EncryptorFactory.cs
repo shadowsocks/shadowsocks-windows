@@ -8,7 +8,7 @@ namespace Shadowsocks.Encryption
     {
         private static Dictionary<string, Type> _registeredEncryptors;
 
-        private static Type[] _constructorTypes = new Type[] { typeof(string), typeof(string) };
+        private static Type[] _constructorTypes = new Type[] { typeof(string), typeof(string), typeof(bool), typeof(bool) };
 
         static EncryptorFactory()
         {
@@ -27,7 +27,7 @@ namespace Shadowsocks.Encryption
             }
         }
 
-        public static IEncryptor GetEncryptor(string method, string password)
+        public static IEncryptor GetEncryptor(string method, string password, bool onetimeauth, bool isudp)
         {
             if (string.IsNullOrEmpty(method))
             {
@@ -36,7 +36,7 @@ namespace Shadowsocks.Encryption
             method = method.ToLowerInvariant();
             Type t = _registeredEncryptors[method];
             ConstructorInfo c = t.GetConstructor(_constructorTypes);
-            IEncryptor result = (IEncryptor)c.Invoke(new object[] { method, password });
+            IEncryptor result = (IEncryptor)c.Invoke(new object[] { method, password, onetimeauth, isudp });
             return result;
         }
     }

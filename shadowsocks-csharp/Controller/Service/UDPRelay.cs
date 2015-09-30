@@ -74,13 +74,13 @@ namespace Shadowsocks.Controller
             }
             public void Send(byte[] data, int length)
             {
-                IEncryptor encryptor = EncryptorFactory.GetEncryptor(_server.method, _server.password);
-                byte[] dataIn = new byte[length - 3];
+                IEncryptor encryptor = EncryptorFactory.GetEncryptor(_server.method, _server.password, _server.one_time_auth, true);
+                byte[] dataIn = new byte[length - 3 + IVEncryptor.ONETIMEAUTH_BYTES];
                 Array.Copy(data, 3, dataIn, 0, length - 3);
-                byte[] dataOut = new byte[length - 3 + 16];
+                byte[] dataOut = new byte[length - 3 + 16 + IVEncryptor.ONETIMEAUTH_BYTES];
                 int outlen;
-                encryptor.Encrypt(dataIn, dataIn.Length, dataOut, out outlen);
-                _remote.SendTo(dataOut, _remoteEndPoint);
+                encryptor.Encrypt(dataIn, length - 3, dataOut, out outlen);
+                _remote.SendTo(dataOut, outlen, SocketFlags.None, _remoteEndPoint);
             }
             public void Receive()
             {
@@ -97,7 +97,7 @@ namespace Shadowsocks.Controller
                     byte[] dataOut = new byte[bytesRead];
                     int outlen;
 
-                    IEncryptor encryptor = EncryptorFactory.GetEncryptor(_server.method, _server.password);
+                    IEncryptor encryptor = EncryptorFactory.GetEncryptor(_server.method, _server.password, _server.one_time_auth, true);
                     encryptor.Decrypt(_buffer, bytesRead, dataOut, out outlen);
 
                     byte[] sendBuf = new byte[outlen + 3];
