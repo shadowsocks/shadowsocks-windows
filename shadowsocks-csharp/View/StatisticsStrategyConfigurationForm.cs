@@ -7,6 +7,7 @@ using System.Windows.Forms.DataVisualization.Charting;
 using Shadowsocks.Controller;
 using Shadowsocks.Model;
 using SimpleJson;
+using System.Net.NetworkInformation;
 
 namespace Shadowsocks.View
 {
@@ -15,7 +16,7 @@ namespace Shadowsocks.View
         private readonly ShadowsocksController _controller;
         private StatisticsStrategyConfiguration _configuration;
         private DataTable _dataTable = new DataTable();
-        private List<string> _servers; 
+        private List<string> _servers;
 
         public StatisticsStrategyConfigurationForm(ShadowsocksController controller)
         {
@@ -55,11 +56,11 @@ namespace Shadowsocks.View
             _dataTable.Columns.Add("Ping", typeof (int));
 
             StatisticsChart.Series["Package Loss"].XValueMember = "Timestamp";
-            StatisticsChart.Series["Package Loss"].YValueMembers = "PackageLoss";
+            StatisticsChart.Series["Package Loss"].YValueMembers = "Package Loss";
             StatisticsChart.Series["Ping"].XValueMember = "Timestamp";
             StatisticsChart.Series["Ping"].YValueMembers = "Ping";
             StatisticsChart.DataSource = _dataTable;
-            loadChartData(serverSelector.SelectedText);
+            loadChartData();
             StatisticsChart.DataBind();
         }
 
@@ -80,20 +81,60 @@ namespace Shadowsocks.View
             Close();
         }
 
-        private void loadChartData(string serverName)
+        private void loadChartData()
         {
+            string serverName = _servers[serverSelector.SelectedIndex];
             _dataTable.Rows.Clear();
             List<AvailabilityStatistics.RawStatisticsData> statistics;
             if (!_controller.availabilityStatistics.FilteredStatistics.TryGetValue(serverName, out statistics)) return;
-            foreach (var data in statistics)
+            IEnumerable<IGrouping<int, AvailabilityStatistics.RawStatisticsData>> dataGroups;
+            if (allMode.Checked)
             {
-                _dataTable.Rows.Add(data.Timestamp, (float) new Random().Next() % 50, new Random().Next() % 200);
+                dataGroups = statistics.GroupBy(data => data.Timestamp.DayOfYear);
+                StatisticsChart.ChartAreas["DataArea"].AxisX.LabelStyle.Format = "MM/dd/yyyy";
+                StatisticsChart.ChartAreas["DataArea"].AxisX2.LabelStyle.Format = "MM/dd/yyyy";
             }
+            else
+            {
+                dataGroups = statistics.GroupBy(data => data.Timestamp.Hour);
+                StatisticsChart.ChartAreas["DataArea"].AxisX.LabelStyle.Format = "HH:00";
+                StatisticsChart.ChartAreas["DataArea"].AxisX2.LabelStyle.Format = "HH:00";
+            }
+            var finalData = from dataGroup in dataGroups
+                            orderby dataGroup.Key
+                            select new
+                            {
+                                Timestamp = dataGroup.First().Timestamp,
+                                Ping = (int)dataGroup.Average(data => data.RoundtripTime),
+                                PackageLoss = (int)
+                                              (dataGroup.Count(data => data.ICMPStatus.Equals(IPStatus.TimedOut.ToString()))
+                                              / (float)dataGroup.Count() * 100)
+                            };
+            foreach (var data in finalData)
+            {
+                _dataTable.Rows.Add(data.Timestamp, data.PackageLoss, data.Ping);
+            }
+            StatisticsChart.DataBind();
         }
 
         private void serverSelector_SelectedIndexChanged(object sender, EventArgs e)
         {
-            loadChartData(_servers[serverSelector.SelectedIndex]);
+            loadChartData();
+        }
+
+        private void chartModeSelector_Enter(object sender, EventArgs e)
+        {
+
+        }
+
+        private void dayMode_CheckedChanged(object sender, EventArgs e)
+        {
+            loadChartData();
+        }
+
+        private void allMode_CheckedChanged(object sender, EventArgs e)
+        {
+            loadChartData();
         }
     }
 }

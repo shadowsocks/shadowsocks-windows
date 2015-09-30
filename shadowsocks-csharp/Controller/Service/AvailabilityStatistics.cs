@@ -82,32 +82,41 @@ namespace Shadowsocks.Controller
         public static async Task<DataList> GetGeolocationAndIsp()
         {
             Logging.Debug("Retrive information of geolocation and isp");
-            const string api = "http://ip-api.com/json";
-            var ret = new DataList
+            const string API = "http://ip-api.com/json";
+            const string alternativeAPI = "http://www.telize.com/geoip"; //must be compatible with current API
+            var result = await GetInfoFromAPI(API);
+            if (result != null) return result;
+            result = await GetInfoFromAPI(alternativeAPI);
+            if (result != null) return result;
+            return new DataList
             {
                 new DataUnit(State.Geolocation, State.Unknown),
                 new DataUnit(State.ISP, State.Unknown)
             };
+        }
+
+        private static async Task<DataList> GetInfoFromAPI(string API)
+        {
             string jsonString;
             try
             {
-                jsonString = await new HttpClient().GetStringAsync(api);
+                jsonString = await new HttpClient().GetStringAsync(API);
             }
             catch (HttpRequestException e)
             {
                 Logging.LogUsefulException(e);
-                return ret;
+                return null;
             }
             dynamic obj;
-            if (!SimpleJson.SimpleJson.TryDeserializeObject(jsonString, out obj)) return ret;
+            if (!SimpleJson.SimpleJson.TryDeserializeObject(jsonString, out obj)) return null;
             string country = obj["country"];
             string city = obj["city"];
             string isp = obj["isp"];
-            string regionName = obj["regionName"];
-            if (country == null || city == null || isp == null || regionName == null) return ret;
-            ret[0] = new DataUnit(State.Geolocation, $"{country} | {regionName} | {city}");
-            ret[1] = new DataUnit(State.ISP, isp);
-            return ret;
+            if (country == null || city == null || isp == null) return null;
+            return new DataList {
+                new DataUnit(State.Geolocation, $"{country} {city}"),
+                new DataUnit(State.ISP, isp)
+            };
         }
 
         private async Task<List<DataList>> ICMPTest(Server server)
@@ -195,7 +204,7 @@ namespace Shadowsocks.Controller
             _servers = config.configs;
         }
 
-        private void FilterRawStatistics()
+        private async void FilterRawStatistics()
         {
             if (FilteredStatistics == null)
             {
@@ -206,7 +215,7 @@ namespace Shadowsocks.Controller
                 var filteredData = rawData;
                 if (_config.ByIsp)
                 {
-                    var current = GetGeolocationAndIsp().Result;
+                    var current = await GetGeolocationAndIsp();
                     filteredData =
                         filteredData.Where(
                             data =>
@@ -230,7 +239,7 @@ namespace Shadowsocks.Controller
                 FilteredStatistics[serverName] = dataList;
             }
         }
-        
+
         private void LoadRawStatistics()
         {
             try
