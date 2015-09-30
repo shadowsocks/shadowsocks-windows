@@ -83,7 +83,7 @@ namespace Shadowsocks.Controller
         {
             Logging.Debug("Retrive information of geolocation and isp");
             const string API = "http://ip-api.com/json";
-            const string alternativeAPI = "http://www.telize.com/geoip"; //must be compatible with current API
+            const string alternativeAPI = "http://www.telize.com/geoip"; //must be comptible with current API
             var result = await GetInfoFromAPI(API);
             if (result != null) return result;
             result = await GetInfoFromAPI(alternativeAPI);
@@ -114,8 +114,8 @@ namespace Shadowsocks.Controller
             string isp = obj["isp"];
             if (country == null || city == null || isp == null) return null;
             return new DataList {
-                new DataUnit(State.Geolocation, $"{country} {city}"),
-                new DataUnit(State.ISP, isp)
+                new DataUnit(State.Geolocation, $"\"{country} {city}\""),
+                new DataUnit(State.ISP, $"\"{isp}\"")
             };
         }
 
@@ -206,6 +206,7 @@ namespace Shadowsocks.Controller
 
         private async void FilterRawStatistics()
         {
+            if (RawStatistics == null) return;
             if (FilteredStatistics == null)
             {
                 FilteredStatistics = new Statistics();
