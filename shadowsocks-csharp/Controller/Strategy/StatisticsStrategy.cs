@@ -88,10 +88,7 @@ namespace Shadowsocks.Controller.Strategy
                                   }
                                   ).Aggregate((result1, result2) => result1.score > result2.score ? result1 : result2);
 
-                if (!_currentServer.Equals(bestResult.server)) //output when enabled
-                {
-                   LogWhenEnabled($"Switch to server: {bestResult.server.FriendlyName()} by statistics: score {bestResult.score}");
-                }
+               LogWhenEnabled($"Switch to server: {bestResult.server.FriendlyName()} by statistics: score {bestResult.score}");
                 _currentServer = bestResult.server;
             }
             catch (Exception e)
