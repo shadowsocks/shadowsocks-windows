@@ -42,10 +42,13 @@ namespace Shadowsocks.View
                 + I18N.GetString(" Version") + UpdateChecker.FullVersion
                 + ")";
 
+            checkShareOverLan.Text = I18N.GetString(checkShareOverLan.Text);
             ProxyPortLabel.Text = I18N.GetString("Proxy Port");
-
             ReconnectLabel.Text = I18N.GetString("Reconnect Times");
             TTLLabel.Text = I18N.GetString("TTL");
+
+            checkAutoStartup.Text = I18N.GetString(checkAutoStartup.Text);
+            checkRandom.Text = I18N.GetString(checkRandom.Text);
             CheckAutoBan.Text = I18N.GetString("AutoBan");
 
             Socks5ProxyGroup.Text = I18N.GetString("Socks5 Proxy");
@@ -85,8 +88,15 @@ namespace Shadowsocks.View
                 int localPort = int.Parse(ProxyPortTextBox.Text);
                 Configuration.CheckPort(localPort);
                 int ret = 0;
+                _modifiedConfiguration.shareOverLan = checkShareOverLan.Checked;
                 _modifiedConfiguration.localPort = localPort;
                 _modifiedConfiguration.reconnectTimes = int.Parse(ReconnectText.Text);
+
+                if (checkAutoStartup.Checked != AutoStartup.Check() && !AutoStartup.Set(checkAutoStartup.Checked))
+                {
+                    MessageBox.Show(I18N.GetString("Failed to update registry"));
+                }
+                _modifiedConfiguration.random = checkRandom.Checked;
                 _modifiedConfiguration.randomAlgorithm = RandomComboBox.SelectedIndex;
                 _modifiedConfiguration.TTL = int.Parse(TTLText.Text);
                 _modifiedConfiguration.socks5enable = CheckSocks5Proxy.Checked;
@@ -108,8 +118,12 @@ namespace Shadowsocks.View
 
         private void LoadSelectedServer()
         {
+            checkShareOverLan.Checked = _modifiedConfiguration.shareOverLan;
             ProxyPortTextBox.Text = _modifiedConfiguration.localPort.ToString();
             ReconnectText.Text = _modifiedConfiguration.reconnectTimes.ToString();
+
+            checkAutoStartup.Checked = AutoStartup.Check();
+            checkRandom.Checked = _modifiedConfiguration.random;
             RandomComboBox.SelectedIndex = _modifiedConfiguration.randomAlgorithm;
             TTLText.Text = _modifiedConfiguration.TTL.ToString();
 

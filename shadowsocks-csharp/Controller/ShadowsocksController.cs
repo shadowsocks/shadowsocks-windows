@@ -34,8 +34,8 @@ namespace Shadowsocks.Controller
         public event EventHandler ConfigChanged;
         public event EventHandler EnableStatusChanged;
         public event EventHandler EnableGlobalChanged;
-        public event EventHandler ShareOverLANStatusChanged;
-        public event EventHandler SelectRandomStatusChanged;
+        //public event EventHandler ShareOverLANStatusChanged;
+        //public event EventHandler SelectRandomStatusChanged;
         public event EventHandler ShowConfigFormEvent;
 
         // when user clicked Edit PAC, and PAC file has already created
@@ -161,8 +161,10 @@ namespace Shadowsocks.Controller
         {
             List<Server> missingServers = MergeConfiguration(_config, config.configs);
             _config.configs = config.configs;
+            _config.shareOverLan = config.shareOverLan;
             _config.localPort = config.localPort;
             _config.reconnectTimes = config.reconnectTimes;
+            _config.random = config.random;
             _config.randomAlgorithm = config.randomAlgorithm;
             _config.TTL = config.TTL;
             _config.socks5enable = config.socks5enable;
@@ -217,25 +219,25 @@ namespace Shadowsocks.Controller
             }
         }
 
-        public void ToggleShareOverLAN(bool enabled)
-        {
-            _config.shareOverLan = enabled;
-            SaveConfig(_config);
-            if (ShareOverLANStatusChanged != null)
-            {
-                ShareOverLANStatusChanged(this, new EventArgs());
-            }
-        }
+        //public void ToggleShareOverLAN(bool enabled)
+        //{
+        //    _config.shareOverLan = enabled;
+        //    SaveConfig(_config);
+        //    if (ShareOverLANStatusChanged != null)
+        //    {
+        //        ShareOverLANStatusChanged(this, new EventArgs());
+        //    }
+        //}
 
-        public void ToggleSelectRandom(bool enabled)
-        {
-            _config.random = enabled;
-            SaveConfig(_config);
-            if (SelectRandomStatusChanged != null)
-            {
-                SelectRandomStatusChanged(this, new EventArgs());
-            }
-        }
+        //public void ToggleSelectRandom(bool enabled)
+        //{
+        //    _config.random = enabled;
+        //    SaveConfig(_config);
+        //    if (SelectRandomStatusChanged != null)
+        //    {
+        //        SelectRandomStatusChanged(this, new EventArgs());
+        //    }
+        //}
 
         public void SelectServerIndex(int index)
         {

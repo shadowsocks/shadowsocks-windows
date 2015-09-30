@@ -29,8 +29,8 @@ namespace Shadowsocks.View
         private bool _isFirstRun;
         private MenuItem enableItem;
         private MenuItem modeItem;
-        private MenuItem AutoStartupItem;
-        private MenuItem ShareOverLANItem;
+        //private MenuItem AutoStartupItem;
+        //private MenuItem ShareOverLANItem;
         private MenuItem SeperatorItem;
         private MenuItem ConfigItem;
         private MenuItem ServersItem;
@@ -42,7 +42,7 @@ namespace Shadowsocks.View
         private MenuItem updateFromGFWListItem;
         private MenuItem editGFWUserRuleItem;
         private MenuItem editOnlinePACItem;
-        private MenuItem SelectRandomItem;
+        //private MenuItem SelectRandomItem;
         private MenuItem UpdateItem;
         private ConfigForm configForm;
         private SettingsForm settingsForm;
@@ -60,8 +60,8 @@ namespace Shadowsocks.View
             controller.ConfigChanged += controller_ConfigChanged;
             controller.PACFileReadyToOpen += controller_FileReadyToOpen;
             controller.UserRuleFileReadyToOpen += controller_FileReadyToOpen;
-            controller.ShareOverLANStatusChanged += controller_ShareOverLANStatusChanged;
-            controller.SelectRandomStatusChanged += controller_SelectRandomStatusChanged;
+            //controller.ShareOverLANStatusChanged += controller_ShareOverLANStatusChanged;
+            //controller.SelectRandomStatusChanged += controller_SelectRandomStatusChanged;
             controller.EnableGlobalChanged += controller_EnableGlobalChanged;
             controller.Errored += controller_Errored;
             controller.UpdatePACFromGFWListCompleted += controller_UpdatePACFromGFWListCompleted;
@@ -184,16 +184,17 @@ namespace Shadowsocks.View
                     this.editGFWUserRuleItem = CreateMenuItem("Edit User Rule for GFWList...", new EventHandler(this.EditUserRuleFileForGFWListItem_Click)),
                     this.editOnlinePACItem = CreateMenuItem("Edit Online PAC URL...", new EventHandler(this.UpdateOnlinePACURLItem_Click)),
                 }),
+                new MenuItem("-"),
                 this.ServersItem = CreateMenuGroup("Servers", new MenuItem[] {
                     this.SeperatorItem = new MenuItem("-"),
                     this.ConfigItem = CreateMenuItem("Edit Servers...", new EventHandler(this.Config_Click)),
                     CreateMenuItem("Show QRCode...", new EventHandler(this.QRCodeItem_Click)),
                 }),
                 CreateMenuItem("Global Settings...", new EventHandler(this.Setting_Click)),
-                new MenuItem("-"),
-                this.AutoStartupItem = CreateMenuItem("Start on Boot", new EventHandler(this.AutoStartupItem_Click)),
-                this.ShareOverLANItem = CreateMenuItem("Allow Clients from LAN", new EventHandler(this.ShareOverLANItem_Click)),
-                this.SelectRandomItem = CreateMenuItem("Random Proxy", new EventHandler(this.SelectRandomItem_Click)),
+                //new MenuItem("-"),
+                //this.AutoStartupItem = CreateMenuItem("Start on Boot", new EventHandler(this.AutoStartupItem_Click)),
+                //this.ShareOverLANItem = CreateMenuItem("Allow Clients from LAN", new EventHandler(this.ShareOverLANItem_Click)),
+                //this.SelectRandomItem = CreateMenuItem("Enable balance", new EventHandler(this.SelectRandomItem_Click)),
                 this.UpdateItem = CreateMenuItem("Update available", new EventHandler(this.UpdateItem_Clicked)),
                 new MenuItem("-"),
                 CreateMenuItem("Scan QRCode from Screen...", new EventHandler(this.ScanQRCodeItem_Click)),
@@ -224,15 +225,15 @@ namespace Shadowsocks.View
             modeItem.Enabled = enableItem.Checked;
         }
 
-        void controller_ShareOverLANStatusChanged(object sender, EventArgs e)
-        {
-            ShareOverLANItem.Checked = controller.GetConfiguration().shareOverLan;
-        }
+        //void controller_ShareOverLANStatusChanged(object sender, EventArgs e)
+        //{
+        //    ShareOverLANItem.Checked = controller.GetConfiguration().shareOverLan;
+        //}
 
-        void controller_SelectRandomStatusChanged(object sender, EventArgs e)
-        {
-            SelectRandomItem.Checked = controller.GetConfiguration().random;
-        }
+        //void controller_SelectRandomStatusChanged(object sender, EventArgs e)
+        //{
+        //    SelectRandomItem.Checked = controller.GetConfiguration().random;
+        //}
 
         void controller_EnableGlobalChanged(object sender, EventArgs e)
         {
@@ -304,11 +305,12 @@ namespace Shadowsocks.View
             Configuration config = controller.GetConfiguration();
             UpdateServersMenu();
             enableItem.Checked = config.enabled;
+            modeItem.Enabled = config.enabled;
             globalModeItem.Checked = config.global;
             PACModeItem.Checked = !config.global;
-            ShareOverLANItem.Checked = config.shareOverLan;
-            SelectRandomItem.Checked = config.random;
-            AutoStartupItem.Checked = AutoStartup.Check();
+            //ShareOverLANItem.Checked = config.shareOverLan;
+            //SelectRandomItem.Checked = config.random;
+            //AutoStartupItem.Checked = AutoStartup.Check();
             onlinePACItem.Checked = onlinePACItem.Enabled && config.useOnlinePac;
             localPACItem.Checked = !onlinePACItem.Checked;
             UpdatePACItemsEnabledStatus();
@@ -468,17 +470,17 @@ namespace Shadowsocks.View
             controller.ToggleGlobal(false);
         }
 
-        private void ShareOverLANItem_Click(object sender, EventArgs e)
-        {
-            ShareOverLANItem.Checked = !ShareOverLANItem.Checked;
-            controller.ToggleShareOverLAN(ShareOverLANItem.Checked);
-        }
+        //private void ShareOverLANItem_Click(object sender, EventArgs e)
+        //{
+        //    ShareOverLANItem.Checked = !ShareOverLANItem.Checked;
+        //    controller.ToggleShareOverLAN(ShareOverLANItem.Checked);
+        //}
 
-        private void SelectRandomItem_Click(object sender, EventArgs e)
-        {
-            SelectRandomItem.Checked = !SelectRandomItem.Checked;
-            controller.ToggleSelectRandom(SelectRandomItem.Checked);
-        }
+        //private void SelectRandomItem_Click(object sender, EventArgs e)
+        //{
+        //    SelectRandomItem.Checked = !SelectRandomItem.Checked;
+        //    controller.ToggleSelectRandom(SelectRandomItem.Checked);
+        //}
 
         private void EditPACFileItem_Click(object sender, EventArgs e)
         {
@@ -649,14 +651,14 @@ namespace Shadowsocks.View
             Process.Start(_urlToOpen);
         }
 
-        private void AutoStartupItem_Click(object sender, EventArgs e)
-        {
-            AutoStartupItem.Checked = !AutoStartupItem.Checked;
-            if (!AutoStartup.Set(AutoStartupItem.Checked))
-            {
-                MessageBox.Show(I18N.GetString("Failed to update registry"));
-            }
-        }
+        //private void AutoStartupItem_Click(object sender, EventArgs e)
+        //{
+        //    AutoStartupItem.Checked = !AutoStartupItem.Checked;
+        //    if (!AutoStartup.Set(AutoStartupItem.Checked))
+        //    {
+        //        MessageBox.Show(I18N.GetString("Failed to update registry"));
+        //    }
+        //}
 
         private void LocalPACItem_Click(object sender, EventArgs e)
         {

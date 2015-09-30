@@ -55,6 +55,9 @@
             this.TextS5Port = new System.Windows.Forms.TextBox();
             this.LabelS5Username = new System.Windows.Forms.Label();
             this.CheckSocks5Proxy = new System.Windows.Forms.CheckBox();
+            this.checkRandom = new System.Windows.Forms.CheckBox();
+            this.checkAutoStartup = new System.Windows.Forms.CheckBox();
+            this.checkShareOverLan = new System.Windows.Forms.CheckBox();
             this.tableLayoutPanel1.SuspendLayout();
             this.tableLayoutPanel10.SuspendLayout();
             this.tableLayoutPanel3.SuspendLayout();
@@ -78,7 +81,7 @@
             this.tableLayoutPanel1.RowCount = 2;
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(576, 237);
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(576, 271);
             this.tableLayoutPanel1.TabIndex = 0;
             // 
             // tableLayoutPanel10
@@ -89,13 +92,13 @@
             this.tableLayoutPanel10.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLayoutPanel10.Controls.Add(this.tableLayoutPanel3, 0, 2);
             this.tableLayoutPanel10.Controls.Add(this.tableLayoutPanel5, 0, 1);
-            this.tableLayoutPanel10.Location = new System.Drawing.Point(360, 76);
+            this.tableLayoutPanel10.Location = new System.Drawing.Point(340, 109);
             this.tableLayoutPanel10.Name = "tableLayoutPanel10";
             this.tableLayoutPanel10.RowCount = 3;
-            this.tableLayoutPanel10.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 23F));
             this.tableLayoutPanel10.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel10.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel10.Size = new System.Drawing.Size(193, 158);
+            this.tableLayoutPanel10.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel10.Size = new System.Drawing.Size(233, 159);
             this.tableLayoutPanel10.TabIndex = 20;
             // 
             // tableLayoutPanel3
@@ -109,7 +112,7 @@
             this.tableLayoutPanel3.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 23F));
             this.tableLayoutPanel3.Controls.Add(this.MyCancelButton, 1, 0);
             this.tableLayoutPanel3.Controls.Add(this.OKButton, 0, 0);
-            this.tableLayoutPanel3.Location = new System.Drawing.Point(6, 116);
+            this.tableLayoutPanel3.Location = new System.Drawing.Point(26, 117);
             this.tableLayoutPanel3.Margin = new System.Windows.Forms.Padding(3, 3, 0, 3);
             this.tableLayoutPanel3.Name = "tableLayoutPanel3";
             this.tableLayoutPanel3.RowCount = 1;
@@ -151,26 +154,28 @@
             this.tableLayoutPanel5.ColumnCount = 2;
             this.tableLayoutPanel5.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tableLayoutPanel5.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
-            this.tableLayoutPanel5.Controls.Add(this.ProxyPortTextBox, 1, 0);
-            this.tableLayoutPanel5.Controls.Add(this.ProxyPortLabel, 0, 0);
-            this.tableLayoutPanel5.Controls.Add(this.ReconnectLabel, 0, 1);
-            this.tableLayoutPanel5.Controls.Add(this.ReconnectText, 1, 1);
-            this.tableLayoutPanel5.Controls.Add(this.TTLLabel, 0, 2);
-            this.tableLayoutPanel5.Controls.Add(this.TTLText, 1, 2);
-            this.tableLayoutPanel5.Location = new System.Drawing.Point(0, 23);
+            this.tableLayoutPanel5.Controls.Add(this.ProxyPortTextBox, 1, 1);
+            this.tableLayoutPanel5.Controls.Add(this.ProxyPortLabel, 0, 1);
+            this.tableLayoutPanel5.Controls.Add(this.ReconnectLabel, 0, 2);
+            this.tableLayoutPanel5.Controls.Add(this.ReconnectText, 1, 2);
+            this.tableLayoutPanel5.Controls.Add(this.TTLLabel, 0, 3);
+            this.tableLayoutPanel5.Controls.Add(this.TTLText, 1, 3);
+            this.tableLayoutPanel5.Controls.Add(this.checkShareOverLan, 1, 0);
+            this.tableLayoutPanel5.Location = new System.Drawing.Point(0, 0);
             this.tableLayoutPanel5.Margin = new System.Windows.Forms.Padding(0);
             this.tableLayoutPanel5.Name = "tableLayoutPanel5";
             this.tableLayoutPanel5.Padding = new System.Windows.Forms.Padding(3);
-            this.tableLayoutPanel5.RowCount = 3;
+            this.tableLayoutPanel5.RowCount = 4;
             this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel5.Size = new System.Drawing.Size(193, 90);
+            this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel5.Size = new System.Drawing.Size(233, 114);
             this.tableLayoutPanel5.TabIndex = 9;
             // 
             // ProxyPortTextBox
             // 
-            this.ProxyPortTextBox.Location = new System.Drawing.Point(78, 6);
+            this.ProxyPortTextBox.Location = new System.Drawing.Point(78, 30);
             this.ProxyPortTextBox.MaxLength = 10;
             this.ProxyPortTextBox.Name = "ProxyPortTextBox";
             this.ProxyPortTextBox.Size = new System.Drawing.Size(109, 22);
@@ -181,7 +186,7 @@
             // 
             this.ProxyPortLabel.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.ProxyPortLabel.AutoSize = true;
-            this.ProxyPortLabel.Location = new System.Drawing.Point(8, 10);
+            this.ProxyPortLabel.Location = new System.Drawing.Point(8, 34);
             this.ProxyPortLabel.Name = "ProxyPortLabel";
             this.ProxyPortLabel.Size = new System.Drawing.Size(64, 14);
             this.ProxyPortLabel.TabIndex = 3;
@@ -191,7 +196,7 @@
             // 
             this.ReconnectLabel.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.ReconnectLabel.AutoSize = true;
-            this.ReconnectLabel.Location = new System.Drawing.Point(6, 38);
+            this.ReconnectLabel.Location = new System.Drawing.Point(6, 62);
             this.ReconnectLabel.Name = "ReconnectLabel";
             this.ReconnectLabel.Size = new System.Drawing.Size(66, 14);
             this.ReconnectLabel.TabIndex = 3;
@@ -199,7 +204,7 @@
             // 
             // ReconnectText
             // 
-            this.ReconnectText.Location = new System.Drawing.Point(78, 34);
+            this.ReconnectText.Location = new System.Drawing.Point(78, 58);
             this.ReconnectText.MaxLength = 10;
             this.ReconnectText.Name = "ReconnectText";
             this.ReconnectText.Size = new System.Drawing.Size(109, 22);
@@ -210,7 +215,7 @@
             // 
             this.TTLLabel.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.TTLLabel.AutoSize = true;
-            this.TTLLabel.Location = new System.Drawing.Point(43, 66);
+            this.TTLLabel.Location = new System.Drawing.Point(43, 90);
             this.TTLLabel.Name = "TTLLabel";
             this.TTLLabel.Size = new System.Drawing.Size(29, 14);
             this.TTLLabel.TabIndex = 3;
@@ -218,7 +223,7 @@
             // 
             // TTLText
             // 
-            this.TTLText.Location = new System.Drawing.Point(78, 62);
+            this.TTLText.Location = new System.Drawing.Point(78, 86);
             this.TTLText.MaxLength = 10;
             this.TTLText.Name = "TTLText";
             this.TTLText.Size = new System.Drawing.Size(109, 22);
@@ -227,27 +232,32 @@
             // 
             // tableLayoutPanel2
             // 
+            this.tableLayoutPanel2.AutoSize = true;
             this.tableLayoutPanel2.ColumnCount = 2;
-            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 27.46781F));
-            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 72.53219F));
-            this.tableLayoutPanel2.Controls.Add(this.LabelRandom, 0, 0);
-            this.tableLayoutPanel2.Controls.Add(this.RandomComboBox, 1, 0);
-            this.tableLayoutPanel2.Controls.Add(this.CheckAutoBan, 1, 1);
+            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel2.Controls.Add(this.LabelRandom, 0, 2);
+            this.tableLayoutPanel2.Controls.Add(this.RandomComboBox, 1, 2);
+            this.tableLayoutPanel2.Controls.Add(this.CheckAutoBan, 1, 3);
+            this.tableLayoutPanel2.Controls.Add(this.checkRandom, 1, 1);
+            this.tableLayoutPanel2.Controls.Add(this.checkAutoStartup, 1, 0);
             this.tableLayoutPanel2.Location = new System.Drawing.Point(340, 3);
             this.tableLayoutPanel2.Name = "tableLayoutPanel2";
-            this.tableLayoutPanel2.RowCount = 2;
+            this.tableLayoutPanel2.RowCount = 4;
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel2.Size = new System.Drawing.Size(233, 54);
+            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel2.Size = new System.Drawing.Size(169, 100);
             this.tableLayoutPanel2.TabIndex = 21;
             // 
             // LabelRandom
             // 
             this.LabelRandom.AutoSize = true;
             this.LabelRandom.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.LabelRandom.Location = new System.Drawing.Point(3, 0);
+            this.LabelRandom.Location = new System.Drawing.Point(3, 48);
             this.LabelRandom.Name = "LabelRandom";
-            this.LabelRandom.Size = new System.Drawing.Size(57, 28);
+            this.LabelRandom.Size = new System.Drawing.Size(48, 28);
             this.LabelRandom.TabIndex = 12;
             this.LabelRandom.Text = "Balance";
             this.LabelRandom.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
@@ -264,7 +274,7 @@
             "LowException",
             "SelectedFirst",
             "Timer"});
-            this.RandomComboBox.Location = new System.Drawing.Point(93, 3);
+            this.RandomComboBox.Location = new System.Drawing.Point(57, 51);
             this.RandomComboBox.Name = "RandomComboBox";
             this.RandomComboBox.Size = new System.Drawing.Size(109, 22);
             this.RandomComboBox.TabIndex = 13;
@@ -273,7 +283,7 @@
             // 
             this.CheckAutoBan.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.CheckAutoBan.AutoSize = true;
-            this.CheckAutoBan.Location = new System.Drawing.Point(111, 32);
+            this.CheckAutoBan.Location = new System.Drawing.Point(75, 79);
             this.CheckAutoBan.Name = "CheckAutoBan";
             this.CheckAutoBan.Size = new System.Drawing.Size(73, 18);
             this.CheckAutoBan.TabIndex = 18;
@@ -400,6 +410,36 @@
             this.CheckSocks5Proxy.Text = "Socks5 Proxy On";
             this.CheckSocks5Proxy.UseVisualStyleBackColor = true;
             // 
+            // checkRandom
+            // 
+            this.checkRandom.AutoSize = true;
+            this.checkRandom.Location = new System.Drawing.Point(57, 27);
+            this.checkRandom.Name = "checkRandom";
+            this.checkRandom.Size = new System.Drawing.Size(107, 18);
+            this.checkRandom.TabIndex = 19;
+            this.checkRandom.Text = "Enable balance";
+            this.checkRandom.UseVisualStyleBackColor = true;
+            // 
+            // checkAutoStartup
+            // 
+            this.checkAutoStartup.AutoSize = true;
+            this.checkAutoStartup.Location = new System.Drawing.Point(57, 3);
+            this.checkAutoStartup.Name = "checkAutoStartup";
+            this.checkAutoStartup.Size = new System.Drawing.Size(101, 18);
+            this.checkAutoStartup.TabIndex = 20;
+            this.checkAutoStartup.Text = "Start on Boot";
+            this.checkAutoStartup.UseVisualStyleBackColor = true;
+            // 
+            // checkShareOverLan
+            // 
+            this.checkShareOverLan.AutoSize = true;
+            this.checkShareOverLan.Location = new System.Drawing.Point(78, 6);
+            this.checkShareOverLan.Name = "checkShareOverLan";
+            this.checkShareOverLan.Size = new System.Drawing.Size(149, 18);
+            this.checkShareOverLan.TabIndex = 5;
+            this.checkShareOverLan.Text = "Allow Clients from LAN";
+            this.checkShareOverLan.UseVisualStyleBackColor = true;
+            // 
             // SettingsForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
@@ -464,5 +504,8 @@
         private System.Windows.Forms.Label LabelRandom;
         private System.Windows.Forms.ComboBox RandomComboBox;
         private System.Windows.Forms.CheckBox CheckAutoBan;
+        private System.Windows.Forms.CheckBox checkRandom;
+        private System.Windows.Forms.CheckBox checkAutoStartup;
+        private System.Windows.Forms.CheckBox checkShareOverLan;
     }
 }
