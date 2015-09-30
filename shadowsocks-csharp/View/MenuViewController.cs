@@ -30,7 +30,6 @@ namespace Shadowsocks.View
         private MenuItem enableItem;
         private MenuItem modeItem;
         private MenuItem AutoStartupItem;
-        private MenuItem AvailabilityStatistics;
         private MenuItem ShareOverLANItem;
         private MenuItem SeperatorItem;
         private MenuItem ConfigItem;
@@ -172,6 +171,7 @@ namespace Shadowsocks.View
                 this.ServersItem = CreateMenuGroup("Servers", new MenuItem[] {
                     this.SeperatorItem = new MenuItem("-"),
                     this.ConfigItem = CreateMenuItem("Edit Servers...", new EventHandler(this.Config_Click)),
+                    CreateMenuItem("Statistics Config...", StatisticsConfigItem_Click),
                     CreateMenuItem("Show QRCode...", new EventHandler(this.QRCodeItem_Click)),
                     CreateMenuItem("Scan QRCode from Screen...", new EventHandler(this.ScanQRCodeItem_Click))
                 }),
@@ -186,7 +186,6 @@ namespace Shadowsocks.View
                 }),
                 new MenuItem("-"),
                 this.AutoStartupItem = CreateMenuItem("Start on Boot", new EventHandler(this.AutoStartupItem_Click)),
-                this.AvailabilityStatistics = CreateMenuItem("Availability Statistics", new EventHandler(this.AvailabilityStatisticsItem_Click)),
                 this.ShareOverLANItem = CreateMenuItem("Allow Clients from LAN", new EventHandler(this.ShareOverLANItem_Click)),
                 new MenuItem("-"),
                 CreateMenuItem("Show Logs...", new EventHandler(this.ShowLogItem_Click)),
@@ -200,6 +199,7 @@ namespace Shadowsocks.View
                 CreateMenuItem("Quit", new EventHandler(this.Quit_Click))
             });
         }
+
 
         private void controller_ConfigChanged(object sender, EventArgs e)
         {
@@ -285,7 +285,6 @@ namespace Shadowsocks.View
             PACModeItem.Checked = !config.global;
             ShareOverLANItem.Checked = config.shareOverLan;
             AutoStartupItem.Checked = AutoStartup.Check();
-            AvailabilityStatistics.Checked = config.availabilityStatistics;
             onlinePACItem.Checked = onlinePACItem.Enabled && config.useOnlinePac;
             localPACItem.Checked = !onlinePACItem.Checked;
             UpdatePACItemsEnabledStatus();
@@ -441,6 +440,12 @@ namespace Shadowsocks.View
 
             new LogForm(controller, argument).Show();
         }
+        
+        private void StatisticsConfigItem_Click(object sender, EventArgs e)
+        {
+            StatisticsStrategyConfigurationForm form = new StatisticsStrategyConfigurationForm(controller);
+            form.Show();
+        }
 
         private void QRCodeItem_Click(object sender, EventArgs e)
         {
@@ -549,11 +554,6 @@ namespace Shadowsocks.View
             if (!AutoStartup.Set(AutoStartupItem.Checked)) {
                 MessageBox.Show(I18N.GetString("Failed to update registry"));
             }
-        }
-
-        private void AvailabilityStatisticsItem_Click(object sender, EventArgs e) {
-            AvailabilityStatistics.Checked = !AvailabilityStatistics.Checked;
-            controller.ToggleAvailabilityStatistics(AvailabilityStatistics.Checked);
         }
 
         private void LocalPACItem_Click(object sender, EventArgs e)
