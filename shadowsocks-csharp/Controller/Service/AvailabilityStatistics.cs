@@ -102,7 +102,7 @@ namespace Shadowsocks.Controller
             {
                 jsonString = await new HttpClient().GetStringAsync(API);
             }
-            catch (HttpRequestException e)
+            catch (Exception e)
             {
                 Logging.LogUsefulException(e);
                 return null;
