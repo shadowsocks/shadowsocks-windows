@@ -20,7 +20,7 @@ namespace Shadowsocks.Controller
         {
             if(TrLogStream == null)
             {
-                TrLogStream = new StreamWriter(File.Open(TrafficLogFile, FileMode.Append));
+                TrLogStream = new StreamWriter(File.Open(TrafficLogFile, FileMode.Append, FileAccess.Write, FileShare.Read));
 
                 TrLogStream.WriteLine("New round of net traffic logging:" + DateTime.Now.ToString());
 

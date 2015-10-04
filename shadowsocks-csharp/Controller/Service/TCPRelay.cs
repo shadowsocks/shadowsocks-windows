@@ -586,7 +586,7 @@ namespace Shadowsocks.Controller
 
                     if (this.relay.LogTraffic)
                     {
-                        Logging.LogNetTraffic("***Pipe raw and decrypted msg from remote");
+                        Logging.LogNetTraffic("***Pipe raw and decrypted msg from remote, raw and decrypted:");
                         Logging.LogNetTraffic(remoteRecvBuffer);
                         Logging.LogNetTraffic(remoteSendBuffer);
                     }
@@ -645,7 +645,7 @@ namespace Shadowsocks.Controller
 
                     if (this.relay.LogTraffic)
                     {
-                        Logging.LogNetTraffic("***Pipe raw and decrypted msg from client");
+                        Logging.LogNetTraffic("***Pipe raw and encrypted msg from client:");
                         Logging.LogNetTraffic(connetionRecvBuffer);
                         Logging.LogNetTraffic(connetionSendBuffer);
                     }
