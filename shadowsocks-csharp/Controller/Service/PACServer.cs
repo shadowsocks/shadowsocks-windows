@@ -43,7 +43,7 @@ namespace Shadowsocks.Controller
             {
                 string request = Encoding.UTF8.GetString(firstPacket, 0, length);
                 string[] lines = request.Split('\r', '\n');
-                bool hostMatch = false, pathMatch = false, useSocks = false;
+                bool hostMatch = false, pathMatch = false, useSocks = true;
                 foreach (string line in lines)
                 {
                     string[] kv = line.Split(new char[]{':'}, 2);
@@ -191,6 +191,7 @@ Connection: Close
 
         private string GetPACAddress(byte[] requestBuf, int length, IPEndPoint localEndPoint, bool useSocks)
         {
+            string pacSockHeader = _config.pacSockHeader;
             //try
             //{
             //    string requestString = Encoding.UTF8.GetString(requestBuf);
@@ -204,7 +205,7 @@ Connection: Close
             //{
             //    Console.WriteLine(e);
             //}
-            return (useSocks ? "SOCKS5 " : "PROXY ") + localEndPoint.Address + ":" + this._config.localPort + ";";
+            return (useSocks ? pacSockHeader + " " : "PROXY ") + localEndPoint.Address + ":" + this._config.localPort + ";";
         }
     }
 }

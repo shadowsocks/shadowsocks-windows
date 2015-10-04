@@ -21,6 +21,14 @@ namespace Shadowsocks.Controller
             get; set;
         }
 
+        public bool LogTraffic
+        {
+            get
+            {
+                return Configuration.Load().logNetTraffic;
+            }
+        }
+
         public TCPRelay(ShadowsocksController controller)
         {
             this._controller = controller;
@@ -34,12 +42,19 @@ namespace Shadowsocks.Controller
             {
                 return false;
             }
-            if (length < 2 || firstPacket[0] != 5)
+            if (this.LogTraffic)
+            {
+                Logging.LogNetTraffic("***Socks handshake with local first round.");
+                Logging.LogNetTraffic(firstPacket);
+            }
+
+            byte socksver = firstPacket[0];
+            if (length < 2 || socksver != 5 && socksver != 4) //ie 9 and less only support socks4
             {
                 return false;
             }
             socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, true);
-            Handler handler = new Handler();
+            Handler handler = new Handler(); // each connection served by an individual handler.
             handler.connection = socket;
             handler.controller = _controller;
             handler.relay = this;
@@ -114,7 +129,6 @@ namespace Shadowsocks.Controller
         private bool closed = false;
 
         private object encryptionLock = new object();
-        private object decryptionLock = new object();
 
         private DateTime _startConnectTime;
 
@@ -184,18 +198,17 @@ namespace Shadowsocks.Controller
                     Logging.LogUsefulException(e);
                 }
             }
-            lock (encryptionLock)
-            {
-                lock (decryptionLock)
+            lock (encryptionLock) // need lock?
+            {             
+                if (encryptor != null)
                 {
-                    if (encryptor != null)
-                    {
-                        ((IDisposable)encryptor).Dispose();
-                    }
+                    ((IDisposable)encryptor).Dispose();
                 }
+                
             }
         }
 
+        // socks4 has only one handshake round, socks5 two
         private void HandshakeReceive()
         {
             if (closed)
@@ -208,18 +221,29 @@ namespace Shadowsocks.Controller
 
                 if (bytesRead > 1)
                 {
-                    byte[] response = { 5, 0 };
-                    if (_firstPacket[0] != 5)
+                    byte ver = _firstPacket[0];
+                    byte[] response;
+
+                    if (ver == 4)
                     {
-                        // reject socks 4
-                        response = new byte[] { 0, 91 };
-                        Console.WriteLine("socks 5 protocol error");
+                        response = new byte[] { 0, 0x5a, 0,0, 0,0, 0,0 }; // 5a= grant
+                        // socks 4 is now handshake completed.                        
+                        connection.BeginSend(response, 0, response.Length, 0, new AsyncCallback(ResponseCallback), null);
                     }
-                    connection.BeginSend(response, 0, response.Length, 0, new AsyncCallback(HandshakeSendCallback), null);
+                    else if (ver == 5)
+                    {
+                        response = new byte[] { ver, 0 }; // chose auth method: _firstPacket[2], or auth success: 0
+                        connection.BeginSend(response, 0, response.Length, 0, new AsyncCallback(HandshakeSendCallback), null);
+                    }
+                    else
+                    { // dont know what to reply
+                        // response = new byte[] { 0, 0x5b }; // reject socks 4
+                        Close();
+                    }
                 }
                 else
                 {
-                    this.Close();
+                    Close();
                 }
             }
             catch (Exception e)
@@ -237,16 +261,9 @@ namespace Shadowsocks.Controller
             }
             try
             {
+                // socks5 handshake completed.
                 connection.EndSend(ar);
-
-                // +----+-----+-------+------+----------+----------+
-                // |VER | CMD |  RSV  | ATYP | DST.ADDR | DST.PORT |
-                // +----+-----+-------+------+----------+----------+
-                // | 1  |  1  | X'00' |  1   | Variable |    2     |
-                // +----+-----+-------+------+----------+----------+
-                // Skip first 3 bytes
-                // TODO validate
-                connection.BeginReceive(connetionRecvBuffer, 0, 3, 0,
+                connection.BeginReceive(connetionRecvBuffer, 0, connetionRecvBuffer.Length, 0,
                     new AsyncCallback(handshakeReceive2Callback), null);
             }
             catch (Exception e)
@@ -256,6 +273,7 @@ namespace Shadowsocks.Controller
             }
         }
 
+        // Socks5 connection request received, check now
         private void handshakeReceive2Callback(IAsyncResult ar)
         {
             if (closed)
@@ -266,8 +284,26 @@ namespace Shadowsocks.Controller
             {
                 int bytesRead = connection.EndReceive(ar);
 
+                if (this.relay.LogTraffic)
+                {
+                    Logging.LogNetTraffic("***Socks handshake with local second round.");
+                    Logging.LogNetTraffic(connetionRecvBuffer);
+                }
+
+                // +----+-----+-------+------+----------+----------+
+                // |VER | CMD |  RSV  | ATYP | DST.ADDR | DST.PORT |
+                // +----+-----+-------+------+----------+----------+
+                // | 1  |  1  | X'00' |  1   | Variable |    2     |
+                // +----+-----+-------+------+----------+----------+
+                // CMD: 1 connect, 2 bind, 3 udp
+                // note the dst might be a dns name or ipv6
+                // TODO validate
+
                 if (bytesRead >= 3)
                 {
+                    // response format:
+                    // ver, status (0=ok), reserved, adrType(1=ipv4), (4 or 16 bytes, or dns name), port(2bytes)
+
                     command = connetionRecvBuffer[1];
                     if (command == 1)
                     {
@@ -282,7 +318,7 @@ namespace Shadowsocks.Controller
                 else
                 {
                     Console.WriteLine("failed to recv data in handshakeReceive2Callback");
-                    this.Close();
+                    Close();
                 }
             }
             catch (Exception e)
@@ -299,6 +335,8 @@ namespace Shadowsocks.Controller
             int port = endPoint.Port;
             byte[] response = new byte[4 + address.Length + 2];
             response[0] = 5;
+            // response format:
+            // ver, status (0=ok), reserved, adrType(1=ipv4), (4 or 16 bytes, or dns name), port(2bytes)
             if (endPoint.AddressFamily == AddressFamily.InterNetwork)
             {
                 response[3] = 1;
@@ -313,6 +351,7 @@ namespace Shadowsocks.Controller
             connection.BeginSend(response, 0, response.Length, 0, new AsyncCallback(ReadAll), true);
         }
 
+        // not completed yet?
         private void ReadAll(IAsyncResult ar)
         {
             if (closed)
@@ -348,6 +387,7 @@ namespace Shadowsocks.Controller
             }
         }
 
+        // Completed negociating with local on socks
         private void ResponseCallback(IAsyncResult ar)
         {
             try
@@ -401,7 +441,7 @@ namespace Shadowsocks.Controller
                 connectTimer.Server = server;
 
                 connected = false;
-                // Connect to the remote endpoint.
+                // Completed negociating with local on socks, and now Connect to the remote socks endpoint.
                 remote.BeginConnect(remoteEP,
                     new AsyncCallback(ConnectCallback), connectTimer);
             }
@@ -425,6 +465,8 @@ namespace Shadowsocks.Controller
                 strategy.SetFailure(server);
             }
             Console.WriteLine(String.Format("{0} timed out", server.FriendlyName()));
+
+            // endConnect first?
             remote.Close();
             RetryConnect();
         }
@@ -443,6 +485,7 @@ namespace Shadowsocks.Controller
             }
         }
 
+        // completed sock negociating with local and also connected with the remote socks server now.
         private void ConnectCallback(IAsyncResult ar)
         {
             Server server = null;
@@ -462,6 +505,9 @@ namespace Shadowsocks.Controller
                 remote.EndConnect(ar);
 
                 connected = true;
+
+                if (this.relay.LogTraffic)
+                    Logging.LogNetTraffic("***Connected with remote.");
 
                 //Console.WriteLine("Socket connected to {0}",
                 //    remote.RemoteEndPoint.ToString());
@@ -528,7 +574,7 @@ namespace Shadowsocks.Controller
                 {
                     this.lastActivity = DateTime.Now;
                     int bytesToSend;
-                    lock (decryptionLock)
+                    lock (encryptionLock) // need lock?
                     {
                         if (closed)
                         {
@@ -537,6 +583,13 @@ namespace Shadowsocks.Controller
                         encryptor.Decrypt(remoteRecvBuffer, bytesRead, remoteSendBuffer, out bytesToSend);
                     }
                     connection.BeginSend(remoteSendBuffer, 0, bytesToSend, 0, new AsyncCallback(PipeConnectionSendCallback), null);
+
+                    if (this.relay.LogTraffic)
+                    {
+                        Logging.LogNetTraffic("***Pipe raw and decrypted msg from remote");
+                        Logging.LogNetTraffic(remoteRecvBuffer);
+                        Logging.LogNetTraffic(remoteSendBuffer);
+                    }
 
                     IStrategy strategy = controller.GetCurrentStrategy();
                     if (strategy != null)
@@ -589,6 +642,13 @@ namespace Shadowsocks.Controller
                         encryptor.Encrypt(connetionRecvBuffer, bytesRead, connetionSendBuffer, out bytesToSend);
                     }
                     remote.BeginSend(connetionSendBuffer, 0, bytesToSend, 0, new AsyncCallback(PipeRemoteSendCallback), null);
+
+                    if (this.relay.LogTraffic)
+                    {
+                        Logging.LogNetTraffic("***Pipe raw and decrypted msg from client");
+                        Logging.LogNetTraffic(connetionRecvBuffer);
+                        Logging.LogNetTraffic(connetionSendBuffer);
+                    }
 
                     IStrategy strategy = controller.GetCurrentStrategy();
                     if (strategy != null)

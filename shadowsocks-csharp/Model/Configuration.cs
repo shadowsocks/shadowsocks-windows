@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Windows.Forms;
-using SimpleJson;
 
 namespace Shadowsocks.Model
 {
@@ -26,6 +25,10 @@ namespace Shadowsocks.Model
         public bool availabilityStatistics;
         public bool autoCheckUpdate;
         public LogViewerConfig logViewer;
+
+        // used to format pac sock header, SOCKS, SOCKS4, SOCKS5
+        public string pacSockHeader;
+        public bool logNetTraffic;
 
         private static string CONFIG_FILE = "gui-config.json";
 
@@ -66,6 +69,11 @@ namespace Shadowsocks.Model
                         config.index = 0;
                     }
                 }
+                if(string.IsNullOrEmpty(config.pacSockHeader ))
+                {
+                    config.pacSockHeader = "SOCKS";
+                }
+
                 return config;
             }
             catch (Exception e)

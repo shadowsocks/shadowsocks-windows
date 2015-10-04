@@ -123,8 +123,8 @@ namespace Shadowsocks.Controller
             byte[] savedLegacySetting = (byte[])registry.GetValue("SavedLegacySettings");
             if (set)
             {
-                defConnection[8] = Convert.ToByte(defConnection[8] & 8);
-                savedLegacySetting[8] = Convert.ToByte(savedLegacySetting[8] & 8);
+                defConnection[8] = Convert.ToByte(defConnection[8] | 8);
+                savedLegacySetting[8] = Convert.ToByte(savedLegacySetting[8] | 8);
             }
             else
             {

@@ -203,6 +203,7 @@ namespace Shadowsocks.Controller
                 // no service found for this
                 if (conn.ProtocolType == ProtocolType.Tcp)
                 {
+                    
                     conn.Close();
                 }
             }

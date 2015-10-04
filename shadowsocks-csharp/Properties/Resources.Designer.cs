@@ -10,8 +10,8 @@
 
 namespace Shadowsocks.Properties {
     using System;
-
-
+    
+    
     /// <summary>
     ///   A strongly-typed resource class, for looking up localized strings, etc.
     /// </summary>
@@ -31,7 +31,7 @@ namespace Shadowsocks.Properties {
         [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
         internal Resources() {
         }
-
+        
         /// <summary>
         ///   Returns the cached ResourceManager instance used by this class.
         /// </summary>
@@ -45,7 +45,7 @@ namespace Shadowsocks.Properties {
                 return resourceMan;
             }
         }
-
+        
         /// <summary>
         ///   Overrides the current thread's CurrentUICulture property for all
         ///   resource lookups using this strongly typed resource class.
@@ -59,7 +59,7 @@ namespace Shadowsocks.Properties {
                 resourceCulture = value;
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
@@ -69,7 +69,7 @@ namespace Shadowsocks.Properties {
                 return ((byte[])(obj));
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to # translation for Simplified Chinese
         ///
@@ -99,7 +99,7 @@ namespace Shadowsocks.Properties {
                 return ResourceManager.GetString("cn", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
@@ -109,40 +109,7 @@ namespace Shadowsocks.Properties {
                 return ((byte[])(obj));
             }
         }
-
-        /// <summary>
-        ///   Looks up a localized resource of type System.Byte[].
-        /// </summary>
-        internal static byte[] mgwz_dll {
-            get {
-                object obj = ResourceManager.GetObject("mgwz_dll", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-
-        /// <summary>
-        ///   Looks up a localized string similar to listen-address __POLIPO_BIND_IP__:8123
-        ///show-on-task-bar 0
-        ///activity-animation 0
-        ///forward-socks5 / 127.0.0.1:__SOCKS_PORT__ .
-        ///hide-console.
-        /// </summary>
-        internal static string privoxy_conf {
-            get {
-                return ResourceManager.GetString("privoxy_conf", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   Looks up a localized resource of type System.Byte[].
-        /// </summary>
-        internal static byte[] privoxy_exe {
-            get {
-                object obj = ResourceManager.GetObject("privoxy_exe", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-
+        
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
@@ -152,7 +119,7 @@ namespace Shadowsocks.Properties {
                 return ((byte[])(obj));
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
@@ -162,7 +129,7 @@ namespace Shadowsocks.Properties {
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
@@ -172,7 +139,7 @@ namespace Shadowsocks.Properties {
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
@@ -182,7 +149,7 @@ namespace Shadowsocks.Properties {
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
@@ -192,7 +159,7 @@ namespace Shadowsocks.Properties {
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to ! Put user rules line by line in this file.
         ///! See https://adblockplus.org/en/filter-cheatsheet

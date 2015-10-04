@@ -165,6 +165,9 @@ namespace Shadowsocks.View
         private void DoCleanLogs()
         {
             LogMessageTextBox.Clear();
+
+            FileStream f= File.Open(filename, FileMode.Truncate);
+            f.Close();
         }
 
         private void CleanLogsMenuItem_Click(object sender, EventArgs e)

@@ -1,5 +1,6 @@
 ﻿using Shadowsocks.Util;
 using System;
+using System.Windows.Forms;
 using System.Collections.Generic;
 using System.IO;
 using System.Net.Sockets;
@@ -9,14 +10,30 @@ namespace Shadowsocks.Controller
 {
     public class Logging
     {
-        public static string LogFile;
+        public static string LogFile = Path.Combine(Utils.GetTempPath(), "shadowsocks.log");
 
+        private static string TrafficLogFile = Path.Combine(Application.StartupPath, "shadowsocks-tr.log");
+
+        private static StreamWriter TrLogStream = null;
+
+        private static StreamWriter GetLogStream()
+        {
+            if(TrLogStream == null)
+            {
+                TrLogStream = new StreamWriter(File.Open(TrafficLogFile, FileMode.Append));
+
+                TrLogStream.WriteLine("New round of net traffic logging:" + DateTime.Now.ToString());
+
+                Application.ApplicationExit += Cleanup;
+            }
+
+            return TrLogStream;
+        }
+                
         public static bool OpenLogFile()
         {
             try
             {
-                string temppath = Utils.GetTempPath();
-                LogFile = Path.Combine(temppath, "shadowsocks.log");
                 FileStream fs = new FileStream(LogFile, FileMode.Append);
                 StreamWriterWithTimestamp sw = new StreamWriterWithTimestamp(fs);
                 sw.AutoFlush = true;
@@ -72,6 +89,23 @@ namespace Shadowsocks.Controller
                 Console.WriteLine(e);
             }
         }
+
+        public static void LogNetTraffic(string msg)
+        {
+            GetLogStream().WriteLine(StreamWriterWithTimestamp.GetTimestamp() + msg);
+        }
+
+        public static void LogNetTraffic(byte[] msgbin)
+        {
+            string msg = Hex.EncodeHexString(msgbin);
+            GetLogStream().WriteLine(StreamWriterWithTimestamp.GetTimestamp() + msg);
+        }
+
+        static void Cleanup(object sender, System.EventArgs arg)
+        {
+            if(TrLogStream != null)
+                TrLogStream.Dispose();
+        }
     }
 
     // Simply extended System.IO.StreamWriter for adding timestamp workaround
@@ -81,7 +115,7 @@ namespace Shadowsocks.Controller
         {
         }
 
-        private string GetTimestamp()
+        public static string GetTimestamp()
         {
             return "[" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "] ";
         }
