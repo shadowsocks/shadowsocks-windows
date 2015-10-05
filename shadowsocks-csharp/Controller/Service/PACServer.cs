@@ -191,6 +191,7 @@ Connection: Close
 
         private string GetPACAddress(byte[] requestBuf, int length, IPEndPoint localEndPoint, bool useSocks)
         {
+            string pacSockHeader = _config.pacSockHeader;
             //try
             //{
             //    string requestString = Encoding.UTF8.GetString(requestBuf);
@@ -204,7 +205,7 @@ Connection: Close
             //{
             //    Console.WriteLine(e);
             //}
-            return (useSocks ? "SOCKS5 " : "PROXY ") + localEndPoint.Address + ":" + this._config.localPort + ";";
+            return (useSocks ? pacSockHeader + " " : "PROXY ") + localEndPoint.Address + ":" + this._config.localPort + ";";
         }
     }
 }

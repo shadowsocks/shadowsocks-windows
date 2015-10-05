@@ -23,6 +23,12 @@ namespace Shadowsocks.Model
         public string pacUrl;
         public bool useOnlinePac;
         public bool availabilityStatistics;
+        public bool autoCheckUpdate;
+        public LogViewerConfig logViewer;
+
+        // used to format pac sock header, SOCKS, SOCKS4, SOCKS5
+        public string pacSockHeader;
+        public bool logNetTraffic;
 
         private static string CONFIG_FILE = "gui-config.json";
 
@@ -63,6 +69,11 @@ namespace Shadowsocks.Model
                         config.index = 0;
                     }
                 }
+                if(string.IsNullOrEmpty(config.pacSockHeader ))
+                {
+                    config.pacSockHeader = "SOCKS";
+                }
+
                 return config;
             }
             catch (Exception e)
@@ -76,6 +87,7 @@ namespace Shadowsocks.Model
                     index = 0,
                     isDefault = true,
                     localPort = 1080,
+                    autoCheckUpdate = true,
                     configs = new List<Server>()
                     {
                         GetDefaultServer()

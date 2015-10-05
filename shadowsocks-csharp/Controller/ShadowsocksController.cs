@@ -280,6 +280,18 @@ namespace Shadowsocks.Controller
             }
         }
 
+        public void ToggleCheckingUpdate(bool enabled)
+        {
+            _config.autoCheckUpdate = enabled;
+            Configuration.Save(_config);
+        }
+
+        public void SaveLogViewerConfig(LogViewerConfig newConfig)
+        {
+            _config.logViewer = newConfig;
+            Configuration.Save(_config);
+        }
+
         protected void Reload()
         {
             // some logic in configuration updated the config when saving, we need to read it again
@@ -317,7 +329,9 @@ namespace Shadowsocks.Controller
             // or bind will fail when switching bind address from 0.0.0.0 to 127.0.0.1
             // though UseShellExecute is set to true now
             // http://stackoverflow.com/questions/10235093/socket-doesnt-close-after-application-exits-if-a-launched-process-is-open
+
             polipoRunner.Stop();
+
             try
             {
                 var strategy = GetCurrentStrategy();
@@ -334,7 +348,9 @@ namespace Shadowsocks.Controller
                 services.Add(tcpRelay);
                 services.Add(udpRelay);
                 services.Add(_pacServer);
+
                 services.Add(new PortForwarder(polipoRunner.RunningPort));
+
                 _listener = new Listener(services);
                 _listener.Start(_config);
             }

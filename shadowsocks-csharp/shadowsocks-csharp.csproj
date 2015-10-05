@@ -124,6 +124,7 @@
     <Compile Include="3rd\zxing\ResultPointCallback.cs" />
     <Compile Include="3rd\zxing\WriterException.cs" />
     <Compile Include="Controller\Service\AvailabilityStatistics.cs" />
+    <Compile Include="Controller\Service\PortForwarder.cs" />
     <Compile Include="Controller\Strategy\HighAvailabilityStrategy.cs" />
     <Compile Include="Controller\Strategy\SimplyChooseByStatisticsStrategy.cs" />
     <Compile Include="Controller\System\AutoStartup.cs" />
@@ -132,7 +133,6 @@
     <Compile Include="Controller\I18N.cs" />
     <Compile Include="Controller\Service\Listener.cs" />
     <Compile Include="Controller\Logging.cs" />
-    <Compile Include="Controller\Service\PortForwarder.cs" />
     <Compile Include="Controller\Service\UDPRelay.cs" />
     <Compile Include="Controller\Service\UpdateChecker.cs" />
     <Compile Include="Encryption\EncryptorBase.cs" />
@@ -145,16 +145,18 @@
     <Compile Include="Encryption\TableEncryptor.cs" />
     <Compile Include="Encryption\IEncryptor.cs" />
     <Compile Include="Controller\Service\PACServer.cs" />
+    <Compile Include="Model\LogViewerConfig.cs" />
     <Compile Include="Model\Server.cs" />
     <Compile Include="Model\Configuration.cs" />
+    <Compile Include="Controller\Strategy\BalancingStrategy.cs" />
+    <Compile Include="Controller\Strategy\StrategyManager.cs" />
+    <Compile Include="Controller\Strategy\IStrategy.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="Controller\Strategy\BalancingStrategy.cs" />
-    <Compile Include="Controller\Strategy\StrategyManager.cs" />
-    <Compile Include="Controller\Strategy\IStrategy.cs" />
+    <Compile Include="Util\Hex.cs" />
     <Compile Include="Util\Util.cs" />
     <Compile Include="View\ConfigForm.cs">
       <SubType>Form</SubType>
