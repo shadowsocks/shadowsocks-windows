@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Shadowsocks.Controller;
+using Shadowsocks.Properties;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -8,10 +10,6 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 
-using Shadowsocks.Controller;
-using Shadowsocks.Properties;
-using Shadowsocks.Model;
-
 namespace Shadowsocks.View
 {
     public partial class LogForm : Form
@@ -20,24 +18,12 @@ namespace Shadowsocks.View
         string filename;
         Timer timer;
         const int BACK_OFFSET = 65536;
-        ShadowsocksController controller;
 
-        public LogForm(ShadowsocksController controller, string filename)
+        public LogForm(string filename)
         {
-            this.controller = controller;
             this.filename = filename;
             InitializeComponent();
             this.Icon = Icon.FromHandle(Resources.ssw128.GetHicon());
-
-            LogViewerConfig config = controller.GetConfigurationCopy().logViewer;
-            if (config == null)
-                config = new LogViewerConfig();
-            topMostTrigger = config.topMost;
-            wrapTextTrigger = config.wrapText;
-            toolbarTrigger = config.toolbarShown;
-            LogMessageTextBox.BackColor = config.GetBackgroundColor();
-            LogMessageTextBox.ForeColor = config.GetTextColor();
-            LogMessageTextBox.Font = config.GetFont();
 
             UpdateTexts();
         }
@@ -47,16 +33,10 @@ namespace Shadowsocks.View
             FileMenuItem.Text = I18N.GetString("&File");
             OpenLocationMenuItem.Text = I18N.GetString("&Open Location");
             ExitMenuItem.Text = I18N.GetString("E&xit");
-            CleanLogsButton.Text = I18N.GetString("&Clean Logs");
-            ChangeFontButton.Text = I18N.GetString("Change &Font");
-            WrapTextCheckBox.Text = I18N.GetString("&Wrap Text");
-            TopMostCheckBox.Text = I18N.GetString("&Top Most");
-            ViewMenuItem.Text = I18N.GetString("&View");
-            CleanLogsMenuItem.Text = I18N.GetString("&Clean Logs");
-            ChangeFontMenuItem.Text = I18N.GetString("Change &Font");
-            WrapTextMenuItem.Text = I18N.GetString("&Wrap Text");
-            TopMostMenuItem.Text = I18N.GetString("&Top Most");
-            ShowToolbarMenuItem.Text = I18N.GetString("&Show Toolbar");
+            CleanLogsButton.Text = I18N.GetString("&Clean logs");
+            ChangeFontButton.Text = I18N.GetString("&Font");
+            WrapTextCheckBox.Text = I18N.GetString("&Wrap text");
+            TopMostCheckBox.Text = I18N.GetString("&Top most");
             this.Text = I18N.GetString("Log Viewer");
         }
 
@@ -78,7 +58,7 @@ namespace Shadowsocks.View
 
                 string line = "";
                 while ((line = reader.ReadLine()) != null)
-                    LogMessageTextBox.AppendText(line + Environment.NewLine);
+                    LogMessageTextBox.AppendText(line + "\r\n");
 
                 LogMessageTextBox.ScrollToCaret();
 
@@ -98,7 +78,7 @@ namespace Shadowsocks.View
                 while ((line = reader.ReadLine()) != null)
                 {
                     changed = true;
-                    LogMessageTextBox.AppendText(line + Environment.NewLine);
+                    LogMessageTextBox.AppendText(line + "\r\n");
                 }
 
                 if (changed)
@@ -117,31 +97,11 @@ namespace Shadowsocks.View
             timer.Interval = 300;
             timer.Tick += Timer_Tick;
             timer.Start();
-
-            topMostTriggerLock = true;
-            this.TopMost = TopMostMenuItem.Checked = TopMostCheckBox.Checked = topMostTrigger;
-            topMostTriggerLock = false;
-
-            wrapTextTriggerLock = true;
-            LogMessageTextBox.WordWrap = WrapTextMenuItem.Checked = WrapTextCheckBox.Checked = wrapTextTrigger;
-            wrapTextTriggerLock = false;
-
-            ToolbarFlowLayoutPanel.Visible = ShowToolbarMenuItem.Checked = toolbarTrigger;
         }
 
         private void LogForm_FormClosing(object sender, FormClosingEventArgs e)
         {
             timer.Stop();
-            LogViewerConfig config = controller.GetConfigurationCopy().logViewer;
-            if (config == null)
-                config = new LogViewerConfig();
-            config.topMost = topMostTrigger;
-            config.wrapText = wrapTextTrigger;
-            config.toolbarShown = toolbarTrigger;
-            config.SetFont(LogMessageTextBox.Font);
-            config.SetBackgroundColor(LogMessageTextBox.BackColor);
-            config.SetTextColor(LogMessageTextBox.ForeColor);
-            controller.SaveLogViewerConfig(config);
         }
 
         private void OpenLocationMenuItem_Click(object sender, EventArgs e)
@@ -161,128 +121,30 @@ namespace Shadowsocks.View
             LogMessageTextBox.ScrollToCaret();
         }
 
-        #region Clean up the content in LogMessageTextBox.
-        private void DoCleanLogs()
+        private void WrapTextCheckBox_CheckedChanged(object sender, EventArgs e)
         {
-            LogMessageTextBox.Clear();
-
-            FileStream f= File.Open(filename, FileMode.Truncate);
-            f.Close();
-        }
-
-        private void CleanLogsMenuItem_Click(object sender, EventArgs e)
-        {
-            DoCleanLogs();
+            LogMessageTextBox.WordWrap = WrapTextCheckBox.Checked;
+            LogMessageTextBox.ScrollToCaret();
         }
 
         private void CleanLogsButton_Click(object sender, EventArgs e)
         {
-            DoCleanLogs();
-        }
-        #endregion
-
-        #region Change the font settings applied in LogMessageTextBox.
-        private void DoChangeFont()
-        {
-            try
-            {
-                FontDialog fd = new FontDialog();
-                fd.Font = LogMessageTextBox.Font;
-                if (fd.ShowDialog() == DialogResult.OK)
-                {
-                    LogMessageTextBox.Font = new Font(fd.Font.FontFamily, fd.Font.Size, fd.Font.Style);
-                }
-            }
-            catch (Exception ex)
-            {
-                Logging.LogUsefulException(ex);
-                MessageBox.Show(ex.Message);
-            }
-        }
-
-        private void ChangeFontMenuItem_Click(object sender, EventArgs e)
-        {
-            DoChangeFont();
+            LogMessageTextBox.Clear();
         }
 
         private void ChangeFontButton_Click(object sender, EventArgs e)
         {
-            DoChangeFont();
-        }
-        #endregion
-
-        #region Trigger the log messages wrapable, or not.
-        bool wrapTextTrigger = false;
-        bool wrapTextTriggerLock = false;
-
-        private void TriggerWrapText()
-        {
-            wrapTextTriggerLock = true;
-
-            wrapTextTrigger = !wrapTextTrigger;
-            LogMessageTextBox.WordWrap = wrapTextTrigger;
-            LogMessageTextBox.ScrollToCaret();
-            WrapTextMenuItem.Checked = WrapTextCheckBox.Checked = wrapTextTrigger;
-
-            wrapTextTriggerLock = false;
-        }
-
-        private void WrapTextMenuItem_Click(object sender, EventArgs e)
-        {
-            if (!wrapTextTriggerLock)
+            FontDialog fd = new FontDialog();
+            fd.Font = LogMessageTextBox.Font;
+            if (fd.ShowDialog() == DialogResult.OK)
             {
-                TriggerWrapText();
+                LogMessageTextBox.Font = fd.Font;
             }
-        }
-
-        private void WrapTextCheckBox_CheckedChanged(object sender, EventArgs e)
-        {
-            if (!wrapTextTriggerLock)
-            {
-                TriggerWrapText();
-            }
-        }
-        #endregion
-
-        #region Trigger this window top most, or not.
-        bool topMostTrigger = false;
-        bool topMostTriggerLock = false;
-
-        private void TriggerTopMost()
-        {
-            topMostTriggerLock = true;
-
-            topMostTrigger = !topMostTrigger;
-            this.TopMost = topMostTrigger;
-            TopMostMenuItem.Checked = TopMostCheckBox.Checked = topMostTrigger;
-
-            topMostTriggerLock = false;
         }
 
         private void TopMostCheckBox_CheckedChanged(object sender, EventArgs e)
         {
-            if (!topMostTriggerLock)
-            {
-                TriggerTopMost();
-            }
-        }
-
-        private void TopMostMenuItem_Click(object sender, EventArgs e)
-        {
-            if (!topMostTriggerLock)
-            {
-                TriggerTopMost();
-            }
-        }
-        #endregion
-
-        private bool toolbarTrigger = false;
-
-        private void ShowToolbarMenuItem_Click(object sender, EventArgs e)
-        {
-            toolbarTrigger = !toolbarTrigger;
-            ToolbarFlowLayoutPanel.Visible = toolbarTrigger;
-            ShowToolbarMenuItem.Checked = toolbarTrigger;
+            this.TopMost = TopMostCheckBox.Checked;
         }
     }
 }

@@ -26,7 +26,6 @@ namespace Shadowsocks.View
         private ContextMenu contextMenu1;
 
         private bool _isFirstRun;
-        private bool _isStartupChecking;
         private MenuItem enableItem;
         private MenuItem modeItem;
         private MenuItem AutoStartupItem;
@@ -43,7 +42,6 @@ namespace Shadowsocks.View
         private MenuItem updateFromGFWListItem;
         private MenuItem editGFWUserRuleItem;
         private MenuItem editOnlinePACItem;
-        private MenuItem autoCheckUpdatesToggleItem;
         private ConfigForm configForm;
         private string _urlToOpen;
 
@@ -70,19 +68,13 @@ namespace Shadowsocks.View
             _notifyIcon.MouseDoubleClick += notifyIcon1_DoubleClick;
 
             this.updateChecker = new UpdateChecker();
-            updateChecker.CheckUpdateCompleted += updateChecker_CheckUpdateCompleted;
+            updateChecker.NewVersionFound += updateChecker_NewVersionFound;
 
             LoadCurrentConfiguration();
 
-            Configuration config = controller.GetConfigurationCopy();
+            updateChecker.CheckUpdate(controller.GetConfigurationCopy());
 
-            if (config.autoCheckUpdate)
-            {
-                _isStartupChecking = true;
-                updateChecker.CheckUpdate(config);
-            }
-
-            if (config.isDefault)
+            if (controller.GetConfigurationCopy().isDefault)
             {
                 _isFirstRun = true;
                 ShowConfigForm();
@@ -190,11 +182,6 @@ namespace Shadowsocks.View
                 this.ShareOverLANItem = CreateMenuItem("Allow Clients from LAN", new EventHandler(this.ShareOverLANItem_Click)),
                 new MenuItem("-"),
                 CreateMenuItem("Show Logs...", new EventHandler(this.ShowLogItem_Click)),
-                CreateMenuGroup("Updates...", new MenuItem[] {
-                    CreateMenuItem("Check for Updates...", new EventHandler(this.checkUpdatesItem_Click)),
-                    new MenuItem("-"),
-                    this.autoCheckUpdatesToggleItem = CreateMenuItem("Check for Updates at Startup", new EventHandler(this.autoCheckUpdatesToggleItem_Click)),
-                }),
                 CreateMenuItem("About...", new EventHandler(this.AboutItem_Click)),
                 new MenuItem("-"),
                 CreateMenuItem("Quit", new EventHandler(this.Quit_Click))
@@ -251,27 +238,17 @@ namespace Shadowsocks.View
             ShowBalloonTip(I18N.GetString("Shadowsocks"), result, ToolTipIcon.Info, 1000);
         }
 
-        void updateChecker_CheckUpdateCompleted(object sender, EventArgs e)
+        void updateChecker_NewVersionFound(object sender, EventArgs e)
         {
-            if (updateChecker.NewVersionFound)
-            {
-                ShowBalloonTip(String.Format(I18N.GetString("Shadowsocks {0} Update Found"), updateChecker.LatestVersionNumber), I18N.GetString("Click here to update"), ToolTipIcon.Info, 5000);
-                _notifyIcon.BalloonTipClicked += notifyIcon1_BalloonTipClicked;
-                _isFirstRun = false;
-            }
-            else if (!_isStartupChecking)
-            {
-                ShowBalloonTip(I18N.GetString("Shadowsocks"), I18N.GetString("No update is available"), ToolTipIcon.Info, 5000);
-                _isFirstRun = false;
-            }
-            _isStartupChecking = false;
+            ShowBalloonTip(String.Format(I18N.GetString("Shadowsocks {0} Update Found"), updateChecker.LatestVersionNumber), I18N.GetString("Click here to download"), ToolTipIcon.Info, 5000);
+            _notifyIcon.BalloonTipClicked += notifyIcon1_BalloonTipClicked;
+            _isFirstRun = false;
         }
 
         void notifyIcon1_BalloonTipClicked(object sender, EventArgs e)
         {
+            System.Diagnostics.Process.Start(updateChecker.LatestVersionURL);
             _notifyIcon.BalloonTipClicked -= notifyIcon1_BalloonTipClicked;
-            string argument = "/select, \"" + updateChecker.LatestVersionLocalName + "\"";
-            System.Diagnostics.Process.Start("explorer.exe", argument);
         }
 
 
@@ -289,7 +266,6 @@ namespace Shadowsocks.View
             onlinePACItem.Checked = onlinePACItem.Enabled && config.useOnlinePac;
             localPACItem.Checked = !onlinePACItem.Checked;
             UpdatePACItemsEnabledStatus();
-            UpdateUpdateMenu();
         }
 
         private void UpdateServersMenu()
@@ -367,7 +343,7 @@ namespace Shadowsocks.View
             if (_isFirstRun)
             {
                 _notifyIcon.BalloonTipTitle = I18N.GetString("Shadowsocks is here");
-                _notifyIcon.BalloonTipText = I18N.GetString("You can turn on/off Shadowsocks in the context menu");
+                _notifyIcon.BalloonTipText =  I18N.GetString("You can turn on/off Shadowsocks in the context menu");
                 _notifyIcon.BalloonTipIcon = ToolTipIcon.Info;
                 _notifyIcon.ShowBalloonTip(0);
                 _isFirstRun = false;
@@ -439,7 +415,7 @@ namespace Shadowsocks.View
         {
             string argument = Logging.LogFile;
 
-            new LogForm(controller, argument).Show();
+            new LogForm(argument).Show();
         }
 
         private void QRCodeItem_Click(object sender, EventArgs e)
@@ -614,24 +590,6 @@ namespace Shadowsocks.View
                 this.editGFWUserRuleItem.Enabled = false;
                 this.editOnlinePACItem.Enabled = true;
             }
-        }
-
-        private void UpdateUpdateMenu()
-        {
-            Configuration configuration = controller.GetConfigurationCopy();
-            autoCheckUpdatesToggleItem.Checked = configuration.autoCheckUpdate;
-        }
-
-        private void autoCheckUpdatesToggleItem_Click(object sender, EventArgs e)
-        {
-            Configuration configuration = controller.GetConfigurationCopy();
-            controller.ToggleCheckingUpdate(!configuration.autoCheckUpdate);
-            UpdateUpdateMenu();
-        }
-
-        private void checkUpdatesItem_Click(object sender, EventArgs e)
-        {
-            updateChecker.CheckUpdate(controller.GetConfigurationCopy());
         }
     }
 }

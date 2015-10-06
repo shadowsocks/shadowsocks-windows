@@ -97,7 +97,7 @@ namespace Shadowsocks.Controller
 
         public static void LogNetTraffic(byte[] msgbin)
         {
-            string msg = Hex.EncodeHexString(msgbin);
+            string msg = Hex.EncodeHexStringTrimTrail(msgbin);
             GetLogStream().WriteLine(StreamWriterWithTimestamp.GetTimestamp() + msg);
         }
 

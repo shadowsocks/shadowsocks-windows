@@ -147,14 +147,14 @@
     <Compile Include="Model\LogViewerConfig.cs" />
     <Compile Include="Model\Server.cs" />
     <Compile Include="Model\Configuration.cs" />
+    <Compile Include="Controller\Strategy\BalancingStrategy.cs" />
+    <Compile Include="Controller\Strategy\StrategyManager.cs" />
+    <Compile Include="Controller\Strategy\IStrategy.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="Controller\Strategy\BalancingStrategy.cs" />
-    <Compile Include="Controller\Strategy\StrategyManager.cs" />
-    <Compile Include="Controller\Strategy\IStrategy.cs" />
     <Compile Include="Util\Hex.cs" />
     <Compile Include="Util\Util.cs" />
     <Compile Include="View\ConfigForm.cs">
@@ -209,7 +209,6 @@
     <None Include="Data\proxy.pac.txt.gz" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="README.md" />
     <None Include="Resources\ss20.png" />
     <None Include="Resources\ss16.png" />
     <None Include="Resources\ss24.png" />

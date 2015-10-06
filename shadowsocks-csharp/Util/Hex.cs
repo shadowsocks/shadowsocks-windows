@@ -24,7 +24,67 @@ namespace Shadowsocks.Util
 			return ((num < 10) ? ((char)((ushort)(num + 0x30))) : ((char)((ushort)(num + 0x37))));
 		}
 
-		public static string EncodeHexString(byte[] sArray)
+        /// <summary>
+        /// return len of trail zil.
+        /// </summary>
+        private static int Chech4TrimTrail( byte[] sArray)
+        {
+            int len = sArray.Length, i;
+
+            for (i = len - 1; i >= 0; i--)
+            {
+                if (sArray[i] != 0)
+                {
+                    i++;
+                    break;
+                }
+            } // i: -1, len, 
+            if (i == -1) i = 0;
+
+            if ((len -= i) >= 12)  // suffix with "00 rep: xxxx"
+                return len;
+            else
+                return 0;
+       }
+
+        public static string EncodeHexStringTrimTrail(byte[] sArray)
+        {
+            if (sArray == null)
+            {
+                return null;
+            }
+
+            string format = "00 rep: {0:x4}";
+            int count = sArray.Length;
+            int trim = Chech4TrimTrail(sArray);
+            if (trim < 12) trim = 0;
+            int lleft = count - trim ;
+
+            char[] chArray1 = new char[lleft + lleft + 12]; // stringbuilder
+
+            int srcIndex = 0;
+            int destIndex = 0;
+            while (srcIndex < lleft)
+            {
+                int num2 = sArray[srcIndex++];
+
+                chArray1[destIndex++] = Hex.Digit2Hex((num2 & 0xF0) >> 4);
+                chArray1[destIndex++] = Hex.Digit2Hex(num2 & 0xF);
+
+                // chArray1.Append(Hex.Digit2Hex((num2 & 0xF0) >> 4));
+                // chArray1.Append(Hex.Digit2Hex(num2 & 0xF));
+            }
+
+            if (trim > 0)
+            {
+                char[] formated = string.Format(format, (short)trim).ToCharArray();
+                Array.Copy(formated, 0, chArray1, destIndex, formated.Length );
+            }
+
+            return new string(chArray1);
+        }
+
+        public static string EncodeHexString(byte[] sArray)
 		{
 			if (sArray == null)
 			{

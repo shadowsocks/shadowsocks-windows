@@ -49,7 +49,7 @@ namespace Shadowsocks.Controller
             }
 
             byte socksver = firstPacket[0];
-            if (length < 2 || socksver != 5 && socksver != 4) //ie 9 and less only support socks4
+            if (length < 2 || socksver != 5 && socksver != 4) //ie 9 only support socks4?
             {
                 return false;
             }
@@ -108,18 +108,17 @@ namespace Shadowsocks.Controller
         private int _firstPacketLength;
         // Size of receive buffer.
         public const int RecvSize = 8192;
-        public const int RecvReserveSize = IVEncryptor.ONETIMEAUTH_BYTES + IVEncryptor.AUTH_BYTES; // reserve for one-time auth
-        public const int BufferSize = RecvSize + RecvReserveSize + 32;
+        public const int BufferSize = RecvSize + 32;
 
         private int totalRead = 0;
         private int totalWrite = 0;
 
         // remote receive buffer
-        private byte[] remoteRecvBuffer = new byte[BufferSize];
+        private byte[] remoteRecvBuffer = new byte[RecvSize];
         // remote send buffer
         private byte[] remoteSendBuffer = new byte[BufferSize];
         // connection receive buffer
-        private byte[] connetionRecvBuffer = new byte[BufferSize];
+        private byte[] connetionRecvBuffer = new byte[RecvSize];
         // connection send buffer
         private byte[] connetionSendBuffer = new byte[BufferSize];
         // Received data string.
@@ -139,7 +138,7 @@ namespace Shadowsocks.Controller
             {
                 throw new ArgumentException("No server configured");
             }
-            this.encryptor = EncryptorFactory.GetEncryptor(server.method, server.password, server.one_time_auth, false);
+            this.encryptor = EncryptorFactory.GetEncryptor(server.method, server.password);
             this.server = server;
         }
 
@@ -199,12 +198,11 @@ namespace Shadowsocks.Controller
                 }
             }
             lock (encryptionLock) // need lock?
-            {             
+            {
                 if (encryptor != null)
                 {
                     ((IDisposable)encryptor).Dispose();
                 }
-                
             }
         }
 
@@ -226,7 +224,7 @@ namespace Shadowsocks.Controller
 
                     if (ver == 4)
                     {
-                        response = new byte[] { 0, 0x5a, 0,0, 0,0, 0,0 }; // 5a= grant
+                        response = new byte[] { 0, 0x5a, 0, 0, 0, 0, 0, 0 }; // 5a= grant
                         // socks 4 is now handshake completed.                        
                         connection.BeginSend(response, 0, response.Length, 0, new AsyncCallback(ResponseCallback), null);
                     }
@@ -238,12 +236,13 @@ namespace Shadowsocks.Controller
                     else
                     { // dont know what to reply
                         // response = new byte[] { 0, 0x5b }; // reject socks 4
-                        Close();
+                        this.Close();
+                        Console.WriteLine("socks protocol error");
                     }
                 }
                 else
                 {
-                    Close();
+                    this.Close();
                 }
             }
             catch (Exception e)
@@ -263,7 +262,7 @@ namespace Shadowsocks.Controller
             {
                 // socks5 handshake completed.
                 connection.EndSend(ar);
-                connection.BeginReceive(connetionRecvBuffer, 0, connetionRecvBuffer.Length, 0,
+                connection.BeginReceive(connetionRecvBuffer, 0, 3, 0,   // only take the first 3 bytes, !! not connetionRecvBuffer.Length
                     new AsyncCallback(handshakeReceive2Callback), null);
             }
             catch (Exception e)
@@ -318,7 +317,7 @@ namespace Shadowsocks.Controller
                 else
                 {
                     Console.WriteLine("failed to recv data in handshakeReceive2Callback");
-                    Close();
+                    this.Close();
                 }
             }
             catch (Exception e)

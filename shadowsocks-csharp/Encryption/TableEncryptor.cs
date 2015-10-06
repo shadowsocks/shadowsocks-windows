@@ -6,8 +6,8 @@ namespace Shadowsocks.Encryption
     public class TableEncryptor
         : EncryptorBase
     {
-        public TableEncryptor(string method, string password, bool onetimeauth, bool isudp)
-            : base(method, password, onetimeauth, isudp)
+        public TableEncryptor(string method, string password)
+            : base(method, password)
         {
             byte[] hash = GetPasswordHash();
             // TODO endian

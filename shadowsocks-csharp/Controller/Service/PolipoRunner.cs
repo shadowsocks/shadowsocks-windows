@@ -13,12 +13,11 @@ using Shadowsocks.Util;
 
 namespace Shadowsocks.Controller
 {
-    // no longer used
     class PolipoRunner
     {
 
         public void Start(Configuration c)
-        {
+        {       
             RefreshTrayArea();
         }
 
