@@ -49,7 +49,7 @@ namespace Shadowsocks.Controller
         public bool isConfigChange(Configuration config)
         {
             if (this._shareOverLAN != config.shareOverLan
-                || ((IPEndPoint)_socket.LocalEndPoint).Port != config.localPort)
+                || _socket == null || ((IPEndPoint)_socket.LocalEndPoint).Port != config.localPort)
             {
                 return true;
             }

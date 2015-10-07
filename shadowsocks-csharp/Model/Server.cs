@@ -336,7 +336,6 @@ namespace Shadowsocks.Model
         {
             lock (this)
             {
-                errorContinurousTimes = 0;
                 transDownload += bytes;
                 if (transLog == null)
                     transLog = new List<TransLog>();
@@ -352,6 +351,13 @@ namespace Shadowsocks.Model
                         transLog.RemoveAt(0);
                     }
                 }
+            }
+        }
+        public void ResetContinurousTimes()
+        {
+            lock (this)
+            {
+                errorContinurousTimes = 0;
             }
         }
         public void AddConnectTime(int millisecond)

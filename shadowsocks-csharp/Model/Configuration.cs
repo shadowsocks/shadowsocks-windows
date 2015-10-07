@@ -52,7 +52,8 @@ namespace Shadowsocks.Model
                 return 500;
             else
             {
-                double chance = 10000.0 / serverSpeedLog.AvgConnectTime;
+                long connections = serverSpeedLog.TotalConnectTimes - serverSpeedLog.TotalDisconnectTimes;
+                double chance = 10000.0 / serverSpeedLog.AvgConnectTime - connections * 5;
                 if (chance > 500) chance = 500;
                 chance -= serverSpeedLog.ErrorContinurousTimes * 10;
                 if (chance < 1) chance = 1;
@@ -70,7 +71,8 @@ namespace Shadowsocks.Model
                 return 1;
             else
             {
-                double chance = 20.0 / (serverSpeedLog.AvgConnectTime / 500 + 1);
+                long connections = serverSpeedLog.TotalConnectTimes - serverSpeedLog.TotalDisconnectTimes;
+                double chance = 20.0 / (serverSpeedLog.AvgConnectTime / 500 + 1) - connections;
                 if (chance > 500) chance = 500;
                 chance -= serverSpeedLog.ErrorContinurousTimes * 2;
                 if (chance < 1) chance = 1;

@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
+using System.Runtime.InteropServices;
 
 using ZXing;
 using ZXing.Common;
@@ -73,7 +74,7 @@ namespace Shadowsocks.View
             _notifyIcon.Visible = true;
             _notifyIcon.ContextMenu = contextMenu1;
             _notifyIcon.MouseClick += notifyIcon1_Click;
-            _notifyIcon.MouseDoubleClick += notifyIcon1_DoubleClick;
+            //_notifyIcon.MouseDoubleClick += notifyIcon1_DoubleClick;
 
             this.updateChecker = new UpdateChecker();
             updateChecker.NewVersionFound += updateChecker_NewVersionFound;
@@ -94,6 +95,7 @@ namespace Shadowsocks.View
         private void timer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
             updateChecker.CheckUpdate(controller.GetConfiguration());
+            if (timerDelayCheckUpdate != null)
             {
                 timerDelayCheckUpdate.Elapsed -= timer_Elapsed;
                 timerDelayCheckUpdate.Stop();
@@ -281,6 +283,10 @@ namespace Shadowsocks.View
                     ShowBalloonTip(String.Format(I18N.GetString("{0} {1} Update Found"), UpdateChecker.Name, updateChecker.LatestVersionNumber),
                         I18N.GetString("Click menu to download"), ToolTipIcon.Info, 5000);
                     _notifyIcon.BalloonTipClicked += notifyIcon1_BalloonTipClicked;
+
+                    timerDelayCheckUpdate.Elapsed -= timer_Elapsed;
+                    timerDelayCheckUpdate.Stop();
+                    timerDelayCheckUpdate = null;
                 }
                 this.UpdateItem.Visible = true;
                 this.UpdateItem.Text = String.Format(I18N.GetString("New version {0} {1} available"), UpdateChecker.Name, updateChecker.LatestVersionNumber);
@@ -439,19 +445,26 @@ namespace Shadowsocks.View
             Process.Start("https://github.com/breakwa11/shadowsocks-rss");
         }
 
-        private void notifyIcon1_Click(object sender, MouseEventArgs e)
-        {
-            if (e.Button == MouseButtons.Middle)
-            {
-                ShowServerLogForm();
-            }
-        }
+        [DllImport("user32.dll")]
+        private static extern short GetAsyncKeyState(System.Windows.Forms.Keys vKey);
 
-        private void notifyIcon1_DoubleClick(object sender, MouseEventArgs e)
+        private void notifyIcon1_Click(object sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Left)
             {
-                ShowConfigForm();
+                GetAsyncKeyState(Keys.ShiftKey);
+                if (GetAsyncKeyState(Keys.ShiftKey) < 0)
+                {
+                    ShowSettingForm();
+                }
+                else
+                {
+                    ShowConfigForm();
+                }
+            }
+            else if (e.Button == MouseButtons.Middle)
+            {
+                ShowServerLogForm();
             }
         }
 

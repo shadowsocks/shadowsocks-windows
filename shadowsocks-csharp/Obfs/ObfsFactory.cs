@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Reflection;
 
 namespace Shadowsocks.Obfs
@@ -21,6 +20,10 @@ namespace Shadowsocks.Obfs
             foreach (string method in HttpSimpleObfs.SupportedObfs())
             {
                 _registeredObfs.Add(method, typeof(HttpSimpleObfs));
+            }
+            foreach (string method in VerifySimpleObfs.SupportedObfs())
+            {
+                _registeredObfs.Add(method, typeof(VerifySimpleObfs));
             }
         }
 

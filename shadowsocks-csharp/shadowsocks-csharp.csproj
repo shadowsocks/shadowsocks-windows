@@ -150,6 +150,7 @@
     <Compile Include="Obfs\ObfsBase.cs" />
     <Compile Include="Obfs\ObfsFactory.cs" />
     <Compile Include="Obfs\Plain.cs" />
+    <Compile Include="Obfs\VerifySimpleObfs.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>

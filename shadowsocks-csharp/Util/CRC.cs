@@ -6,9 +6,9 @@ namespace Shadowsocks.Util
 {
     class CRC32
     {
-        static protected ulong[] Crc32Table;
+        protected static ulong[] Crc32Table;
         //生成CRC32码表  
-        static public void CreateCRC32Table()
+        public static void CreateCRC32Table()
         {
             ulong Crc;
             Crc32Table = new ulong[256];
@@ -28,7 +28,7 @@ namespace Shadowsocks.Util
         }
 
         //获取字符串的CRC32校验值
-        static public ulong CalcCRC32(byte[] input, int len, ulong value = 0xffffffff)
+        public static ulong CalcCRC32(byte[] input, int len, ulong value = 0xffffffff)
         {
             //生成码表
             if (Crc32Table == null)
@@ -61,12 +61,20 @@ namespace Shadowsocks.Util
 
         public byte[] CheckCRC32(byte[] buffer)
         {
-            ulong crc = ~CalcCRC32(buffer, buffer.Length);
-            if (crc != 0xffffffff00000000u)
+            ulong crc = CalcCRC32(buffer, buffer.Length);
+            if (crc != 0xffffffffu)
                 return null;
             byte[] ret = new byte[buffer.Length - 4];
             Array.Copy(buffer, ret, buffer.Length - 4);
             return ret;
+        }
+
+        public static bool CheckCRC32(byte[] buffer, int length)
+        {
+            ulong crc = CalcCRC32(buffer, length);
+            if (crc != 0xffffffffu)
+                return false;
+            return true;
         }
     }
 }

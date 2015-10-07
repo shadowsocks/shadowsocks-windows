@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace Shadowsocks.Obfs
 {
@@ -160,9 +159,9 @@ namespace Shadowsocks.Obfs
                 }
                 else if (Method == "http_simple")
                 {
-                    if (datalength > 128)
+                    if (datalength > 64)
                     {
-                        headdata = new byte[random.Next(1, 128)];
+                        headdata = new byte[random.Next(1, 64)];
                     }
                     else
                     {
