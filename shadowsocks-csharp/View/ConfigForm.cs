@@ -84,7 +84,7 @@ namespace Shadowsocks.View
                     password = PasswordTextBox.Text,
                     method = EncryptionSelect.Text,
                     remarks = RemarksTextBox.Text,
-                    one_time_auth = OneTimeAuth.Checked
+                    auth = OneTimeAuth.Checked
                 };
                 int localPort = int.Parse(ProxyPortTextBox.Text);
                 Configuration.CheckServer(server);
@@ -117,7 +117,7 @@ namespace Shadowsocks.View
                 ProxyPortTextBox.Text = _modifiedConfiguration.localPort.ToString();
                 EncryptionSelect.Text = server.method ?? "aes-256-cfb";
                 RemarksTextBox.Text = server.remarks;
-                OneTimeAuth.Checked = server.one_time_auth;
+                OneTimeAuth.Checked = server.auth;
             }
         }
 
