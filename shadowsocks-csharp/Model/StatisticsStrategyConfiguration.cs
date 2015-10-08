@@ -6,7 +6,6 @@ using System.Reflection;
 using Shadowsocks.Controller;
 using Shadowsocks.Controller.Strategy;
 using SimpleJson;
-using Newtonsoft.Json;
 
 namespace Shadowsocks.Model
 {
@@ -29,10 +28,10 @@ namespace Shadowsocks.Model
             try
             {
                 var content = File.ReadAllText(ConfigFile);
-                var configuration = JsonConvert.DeserializeObject<StatisticsStrategyConfiguration>(content);
+                var configuration = SimpleJson.SimpleJson.DeserializeObject<StatisticsStrategyConfiguration>(content);
                 return configuration;
             }
-            catch (FileNotFoundException e)
+            catch (FileNotFoundException)
             {
                 var configuration = new StatisticsStrategyConfiguration();
                 Save(configuration);
@@ -49,7 +48,7 @@ namespace Shadowsocks.Model
         {
             try
             {
-                var content = JsonConvert.SerializeObject(configuration, Formatting.Indented);
+                var content = SimpleJson.SimpleJson.SerializeObject(configuration);
                 File.WriteAllText(ConfigFile, content);
             }
             catch (Exception e)
