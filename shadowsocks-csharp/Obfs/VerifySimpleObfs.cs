@@ -38,7 +38,7 @@ namespace Shadowsocks.Obfs
 
         public override byte[] ClientPreEncrypt(byte[] plaindata, int datalength, out int outlength)
         {
-            byte[] outdata = new byte[RecvBufferSize];
+            byte[] outdata = new byte[datalength + datalength / 10 + 32];
             byte[] packdata = new byte[9000];
             byte[] data = plaindata;
             outlength = 0;
@@ -64,21 +64,20 @@ namespace Shadowsocks.Obfs
             return outdata;
         }
 
-        public override bool ClientEncode(byte[] encryptdata, int datalength, byte[] outdata, out int outlength)
+        public override byte[] ClientEncode(byte[] encryptdata, int datalength, out int outlength)
         {
-            Array.Copy(encryptdata, 0, outdata, 0, datalength);
             outlength = datalength;
-            return false;
+            return encryptdata;
         }
-        public override bool ClientDecode(byte[] encryptdata, int datalength, byte[] outdata, out int outlength)
+        public override byte[] ClientDecode(byte[] encryptdata, int datalength, out int outlength, out bool needsendback)
         {
-            Array.Copy(encryptdata, 0, outdata, 0, datalength);
             outlength = datalength;
-            return false;
+            needsendback = false;
+            return encryptdata;
         }
         public override byte[] ClientPostDecrypt(byte[] plaindata, int datalength, out int outlength)
         {
-            byte[] outdata = new byte[RecvBufferSize];
+            byte[] outdata = new byte[recv_buf_len + datalength];
             Array.Copy(plaindata, 0, recv_buf, recv_buf_len, datalength);
             recv_buf_len += datalength;
             outlength = 0;

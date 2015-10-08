@@ -74,6 +74,10 @@ namespace Shadowsocks.Controller
                 {
                     // already closed
                 }
+                else if (se.SocketErrorCode == SocketError.Shutdown)
+                {
+                    // ignore
+                }
                 else
                 {
                     Console.WriteLine(e);
@@ -141,6 +145,10 @@ namespace Shadowsocks.Controller
                 {
                     Logging.Log(LogLevel.Warn, "Proxy server [" + remarks + "(" + server + ")] "
                         + "connection timeout");
+                    return true;
+                }
+                else if (se.SocketErrorCode == SocketError.Shutdown)
+                {
                     return true;
                 }
                 else

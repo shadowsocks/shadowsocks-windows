@@ -69,16 +69,16 @@ namespace Shadowsocks.Obfs
             return ret;
         }
 
-        public override bool ClientEncode(byte[] encryptdata, int datalength, byte[] outdata, out int outlength)
+        public override byte[] ClientEncode(byte[] encryptdata, int datalength, out int outlength)
         {
             if (raw_trans_sent)
             {
-                Array.Copy(encryptdata, 0, outdata, 0, datalength);
                 outlength = datalength;
-                return false;
+                return encryptdata;
             }
             else
             {
+                byte[] outdata = new byte[datalength + 4096];
                 byte[] headdata;
                 if (Method == "tls_simple" || Method == "random_head")
                 {
@@ -196,7 +196,7 @@ namespace Shadowsocks.Obfs
                     + "Host: " + Host + ":" + Port.ToString() + "\r\n"
                     + "Connection: Upgrade, HTTP2-Settings\r\n"
                     + "Upgrade: h2c\r\n"
-                    + "HTTP2-Settings: " + Convert.ToBase64String(encryptdata, 0, datalength).Replace('-', '+').Replace('_', '/') + "\r\n"
+                    + "HTTP2-Settings: " + Convert.ToBase64String(encryptdata, 0, datalength).Replace('+', '-').Replace('/', '_') + "\r\n"
                     + "\r\n";
                     for (int i = 0; i < http_buf.Length; ++i)
                     {
@@ -210,7 +210,7 @@ namespace Shadowsocks.Obfs
                     outlength = 0;
                 }
                 has_sent_header = true;
-                return false;
+                return outdata;
             }
         }
 
@@ -232,21 +232,23 @@ namespace Shadowsocks.Obfs
             return -1;
         }
 
-        public override bool ClientDecode(byte[] encryptdata, int datalength, byte[] outdata, out int outlength)
+        public override byte[] ClientDecode(byte[] encryptdata, int datalength, out int outlength, out bool needsendback)
         {
             if (raw_trans_recv)
             {
-                Array.Copy(encryptdata, 0, outdata, 0, datalength);
                 outlength = datalength;
-                return false;
+                needsendback = false;
+                return encryptdata;
             }
             else
             {
+                byte[] outdata = new byte[datalength];
                 if (Method == "tls_simple" || Method == "random_head")
                 {
                     outlength = 0;
                     raw_trans_recv = true;
-                    return true;
+                    needsendback = false;
+                    return encryptdata;
                 }
                 else
                 {
@@ -262,8 +264,9 @@ namespace Shadowsocks.Obfs
                     {
                         outlength = 0;
                     }
+                    needsendback = false;
                 }
-                return false;
+                return outdata;
             }
         }
 

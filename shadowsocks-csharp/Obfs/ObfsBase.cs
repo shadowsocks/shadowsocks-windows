@@ -17,8 +17,8 @@ namespace Shadowsocks.Obfs
             outlength = datalength;
             return plaindata;
         }
-        public abstract bool ClientEncode(byte[] encryptdata, int datalength, byte[] outdata, out int outlength);
-        public abstract bool ClientDecode(byte[] encryptdata, int datalength, byte[] outdata, out int outlength);
+        public abstract byte[] ClientEncode(byte[] encryptdata, int datalength, out int outlength);
+        public abstract byte[] ClientDecode(byte[] encryptdata, int datalength, out int outlength, out bool needsendback);
         public virtual byte[] ClientPostDecrypt(byte[] plaindata, int datalength, out int outlength)
         {
             outlength = datalength;

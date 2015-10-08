@@ -266,7 +266,7 @@ namespace Shadowsocks.Controller
         protected int _firstPacketLength;
         // Size of receive buffer.
         protected const int RecvSize = 16384;
-        protected const int BufferSize = RecvSize + 32;
+        protected const int BufferSize = RecvSize * 2 + 4096;
         protected const int AutoSwitchOffErrorTimes = 50;
         // remote receive buffer
         protected byte[] remoteRecvBuffer = new byte[RecvSize];
@@ -462,7 +462,7 @@ namespace Shadowsocks.Controller
                     if (lastErrCode == 0)
                     {
                         lastErrCode = 8;
-                        if (speedTester.sizeDownload == 0)
+                        if (speedTester != null && speedTester.sizeDownload == 0)
                         {
                             server.ServerSpeedLog().AddTimeoutTimes();
                             if (server.ServerSpeedLog().ErrorContinurousTimes >= AutoSwitchOffErrorTimes && autoSwitchOff)
@@ -1634,9 +1634,10 @@ namespace Shadowsocks.Controller
                 {
                     int bytesToSend = 0;
                     byte[] remoteSendBuffer = new byte[RecvSize];
-                    byte[] remoteRecvObfsBuffer = new byte[RecvSize];
                     int obfsRecvSize;
-                    if (obfs.ClientDecode(remoteRecvBuffer, bytesRead, remoteRecvObfsBuffer, out obfsRecvSize))
+                    bool needsendback;
+                    byte[] remoteRecvObfsBuffer = obfs.ClientDecode(remoteRecvBuffer, bytesRead, out obfsRecvSize, out needsendback);
+                    if (needsendback)
                     {
                         RemoteSend(connetionRecvBuffer, 0);
                         doRemoteTCPRecv();
@@ -1957,9 +1958,8 @@ namespace Shadowsocks.Controller
                     encryptor.Encrypt(bytesToEncrypt, outlength, connetionSendBuffer, out bytesToSend);
                 }
             }
-            byte[] connetionSendObfsBuffer = new byte[BufferSize];
             int obfsSendSize;
-            this.obfs.ClientEncode(connetionSendBuffer, bytesToSend, connetionSendObfsBuffer, out obfsSendSize);
+            byte[] connetionSendObfsBuffer = this.obfs.ClientEncode(connetionSendBuffer, bytesToSend, out obfsSendSize);
             server.ServerSpeedLog().AddUploadBytes(bytesToSend);
             speedTester.AddUploadSize(bytesToSend);
             //remote.BeginSend(connetionSendBuffer, 0, bytesToSend, 0, new AsyncCallback(PipeRemoteSendCallback), null);
@@ -2129,7 +2129,7 @@ namespace Shadowsocks.Controller
                         {
                             RemoteSend(connetionRecvBuffer, bytesRead);
 
-                            if (speedTester.sizeDownload > 0)
+                            if (speedTester != null && speedTester.sizeDownload > 0)
                             {
                                 server.ServerSpeedLog().ResetContinurousTimes();
                             }

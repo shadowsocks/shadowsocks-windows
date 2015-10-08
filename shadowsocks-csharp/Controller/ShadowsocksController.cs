@@ -288,6 +288,8 @@ namespace Shadowsocks.Controller
         {
             Server server = GetCurrentServer();
             string parts = server.method + ":" + server.password + "@" + server.server + ":" + server.server_port;
+            if (server.obfs != "plain")
+                parts = server.obfs + ":" + parts;
             string base64 = System.Convert.ToBase64String(Encoding.UTF8.GetBytes(parts));
             return "ss://" + base64;
         }
@@ -295,13 +297,18 @@ namespace Shadowsocks.Controller
         public string GetSSLinkForServer(Server server)
         {
             string parts = server.method + ":" + server.password + "@" + server.server + ":" + server.server_port;
+            if (server.obfs != "plain")
+                parts = server.obfs + ":" + parts;
             string base64 = System.Convert.ToBase64String(Encoding.UTF8.GetBytes(parts));
             return "ss://" + base64;
         }
 
         public string GetSSRemarksLinkForServer(Server server)
         {
-            string parts = server.method + ":" + server.password + "@" + server.server + ":" + server.server_port + "#" + server.remarks;
+            string remarks = server.remarks;
+            string parts = server.method + ":" + server.password + "@" + server.server + ":" + server.server_port + "#" + remarks;
+            if (server.obfs != "plain")
+                parts = server.obfs + ":" + parts;
             string base64 = System.Convert.ToBase64String(Encoding.UTF8.GetBytes(parts));
             return "ss://" + base64;
         }

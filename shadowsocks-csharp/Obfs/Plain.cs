@@ -18,17 +18,16 @@ namespace Shadowsocks.Obfs
             return new List<string>(_obfs.Keys);
         }
 
-        public override bool ClientEncode(byte[] encryptdata, int datalength, byte[] outdata, out int outlength)
+        public override byte[] ClientEncode(byte[] encryptdata, int datalength, out int outlength)
         {
-            Array.Copy(encryptdata, 0, outdata, 0, datalength);
             outlength = datalength;
-            return false;
+            return encryptdata;
         }
-        public override bool ClientDecode(byte[] encryptdata, int datalength, byte[] outdata, out int outlength)
+        public override byte[] ClientDecode(byte[] encryptdata, int datalength, out int outlength, out bool needsendback)
         {
-            Array.Copy(encryptdata, 0, outdata, 0, datalength);
             outlength = datalength;
-            return false;
+            needsendback = false;
+            return encryptdata;
         }
 
         public override void Dispose()

@@ -5,8 +5,8 @@ namespace Shadowsocks.Obfs
     public interface IObfs : IDisposable
     {
         byte[] ClientPreEncrypt(byte[] plaindata, int datalength, out int outlength);
-        bool ClientEncode(byte[] encryptdata, int datalength, byte[] outdata, out int outlength);
-        bool ClientDecode(byte[] encryptdata, int datalength, byte[] outdata, out int outlength); // return true if need to send data
+        byte[] ClientEncode(byte[] encryptdata, int datalength, out int outlength);
+        byte[] ClientDecode(byte[] encryptdata, int datalength, out int outlength, out bool needsendback);
         byte[] ClientPostDecrypt(byte[] plaindata, int datalength, out int outlength);
         void SetHost(string host, int port);
     }

@@ -532,6 +532,18 @@ namespace Shadowsocks.Model
         {
             serverSpeedLog = log;
         }
+        public string RemarksString()
+        {
+            string remarks = this.remarks.Replace('-', '+').Replace('_', '/');
+            try
+            {
+                return Encoding.UTF8.GetString(System.Convert.FromBase64String(remarks));
+            }
+            catch (FormatException)
+            {
+                return this.remarks;
+            }
+        }
         public string FriendlyName()
         {
             if (string.IsNullOrEmpty(server))
@@ -553,11 +565,11 @@ namespace Shadowsocks.Model
             {
                 if (server.IndexOf(':') >= 0)
                 {
-                    return remarks + " ([" + server + "]:" + server_port + ")";
+                    return RemarksString() + " ([" + server + "]:" + server_port + ")";
                 }
                 else
                 {
-                    return remarks + " (" + server + ":" + server_port + ")";
+                    return RemarksString() + " (" + server + ":" + server_port + ")";
                 }
             }
         }
@@ -631,7 +643,9 @@ namespace Shadowsocks.Model
                 if (remarkIndexLastAt > 0)
                 {
                     if (remarkIndexLastAt + 1 < data.Length)
+                    {
                         this.remarks = data.Substring(remarkIndexLastAt + 1);
+                    }
                     data = data.Substring(0, remarkIndexLastAt);
                 }
 
@@ -642,8 +656,12 @@ namespace Shadowsocks.Model
 
                 string beforeAt = data.Substring(0, indexLastAt);
                 string[] parts = beforeAt.Split(new[] { ':' });
-                this.method = parts[0];
-                this.password = parts[1];
+                this.method = parts[parts.Length - 2];
+                this.password = parts[parts.Length - 1];
+                if (parts.Length >= 3)
+                {
+                    this.obfs = parts[parts.Length - 3];
+                }
             }
             catch (IndexOutOfRangeException)
             {
