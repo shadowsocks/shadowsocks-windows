@@ -1132,8 +1132,8 @@ namespace SimpleJson
 
         protected static void FeedIndent(int level, StringBuilder builder)
         {
-            for (int i = 0; i < level * 2; i++)
-                builder.Append(" ");
+            for (int i = 0; i < level; i++)
+                builder.Append("  ");
         }
 
         /// <summary>
