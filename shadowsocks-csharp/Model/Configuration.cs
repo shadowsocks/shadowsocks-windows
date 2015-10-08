@@ -297,6 +297,41 @@ namespace Shadowsocks.Model
                 {
                     config.localPort = 1080;
                 }
+                // revert base64 encode for version 3.5.4
+                {
+                    int base64_encode = 0;
+                    foreach (var server in config.configs)
+                    {
+                        string remarks = server.remarks;
+                        if (remarks.Length == 0)
+                            continue;
+                        if (server.remarks[remarks.Length - 1] == '=')
+                        {
+                            server.remarks_base64 = remarks;
+                            if (server.remarks_base64 == server.remarks)
+                            {
+                                server.remarks = remarks;
+                                base64_encode = 0;
+                                break;
+                            }
+                            else
+                            {
+                                base64_encode++;
+                            }
+                            server.remarks = remarks;
+                        }
+                    }
+                    if (base64_encode > 0)
+                    {
+                        foreach (var server in config.configs)
+                        {
+                            string remarks = server.remarks;
+                            if (remarks.Length == 0)
+                                continue;
+                            server.remarks_base64 = remarks;
+                        }
+                    }
+                }
                 return config;
             }
             catch (Exception e)

@@ -99,7 +99,6 @@ namespace Shadowsocks.Controller
                             && mergeConfig.configs[i].tcp_over_udp == servers[j].tcp_over_udp
                             && mergeConfig.configs[i].udp_over_tcp == servers[j].udp_over_tcp
                             && mergeConfig.configs[i].tcp_protocol == servers[j].tcp_protocol
-                            //&& mergeConfig.configs[i].remarks == servers[j].remarks
                             )
                         {
                             servers[j].CopyServer(mergeConfig.configs[i]);
@@ -121,7 +120,6 @@ namespace Shadowsocks.Controller
                         && mergeConfig.configs[i].tcp_over_udp == servers[j].tcp_over_udp
                         && mergeConfig.configs[i].udp_over_tcp == servers[j].udp_over_tcp
                         && mergeConfig.configs[i].tcp_protocol == servers[j].tcp_protocol
-                        //&& mergeConfig.configs[i].remarks == servers[j].remarks
                         )
                     {
                         break;
@@ -305,7 +303,7 @@ namespace Shadowsocks.Controller
 
         public string GetSSRemarksLinkForServer(Server server)
         {
-            string remarks = server.remarks;
+            string remarks = server.remarks_base64;
             string parts = server.method + ":" + server.password + "@" + server.server + ":" + server.server_port + "#" + remarks;
             if (server.obfs != "plain")
                 parts = server.obfs + ":" + parts;

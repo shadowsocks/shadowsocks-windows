@@ -484,7 +484,7 @@ namespace Shadowsocks.Model
         public string password;
         public string method;
         public string obfs;
-        public string remarks;
+        public string remarks_base64;
         public bool tcp_over_udp;
         public bool udp_over_tcp;
         public int tcp_protocol;
@@ -532,16 +532,27 @@ namespace Shadowsocks.Model
         {
             serverSpeedLog = log;
         }
-        public string RemarksString()
+        public string remarks
         {
-            string remarks = this.remarks.Replace('-', '+').Replace('_', '/');
-            try
+            get
             {
-                return Encoding.UTF8.GetString(System.Convert.FromBase64String(remarks));
+                if (this.remarks_base64.Length == 0)
+                    return this.remarks_base64;
+                string remarks = this.remarks_base64.Replace('-', '+').Replace('_', '/');
+                try
+                {
+                    return Encoding.UTF8.GetString(System.Convert.FromBase64String(remarks));
+                }
+                catch (FormatException)
+                {
+                    remarks = remarks_base64;
+                    remarks_base64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(remarks_base64)).Replace('+', '-').Replace('/', '_');
+                    return remarks;
+                }
             }
-            catch (FormatException)
+            set
             {
-                return this.remarks;
+                remarks_base64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(value)).Replace('+', '-').Replace('/', '_');
             }
         }
         public string FriendlyName()
@@ -550,7 +561,7 @@ namespace Shadowsocks.Model
             {
                 return I18N.GetString("New server");
             }
-            if (string.IsNullOrEmpty(remarks))
+            if (string.IsNullOrEmpty(remarks_base64))
             {
                 if (server.IndexOf(':') >= 0)
                 {
@@ -565,11 +576,11 @@ namespace Shadowsocks.Model
             {
                 if (server.IndexOf(':') >= 0)
                 {
-                    return RemarksString() + " ([" + server + "]:" + server_port + ")";
+                    return remarks + " ([" + server + "]:" + server_port + ")";
                 }
                 else
                 {
-                    return RemarksString() + " (" + server + ":" + server_port + ")";
+                    return remarks + " (" + server + ":" + server_port + ")";
                 }
             }
         }
@@ -582,7 +593,7 @@ namespace Shadowsocks.Model
             ret.password = (string)password.Clone();
             ret.method = (string)method.Clone();
             ret.obfs = (string)obfs.Clone();
-            ret.remarks = (string)remarks.Clone();
+            ret.remarks_base64 = (string)remarks_base64.Clone();
             ret.enable = enable;
             ret.udp_over_tcp = udp_over_tcp;
             ret.tcp_protocol = tcp_protocol;
@@ -597,7 +608,7 @@ namespace Shadowsocks.Model
             this.method = "aes-256-cfb";
             this.obfs = "plain";
             this.password = "0";
-            this.remarks = "";
+            this.remarks_base64 = "";
             this.udp_over_tcp = false;
             this.tcp_protocol = 0;
             this.obfs_udp = false;
@@ -644,7 +655,7 @@ namespace Shadowsocks.Model
                 {
                     if (remarkIndexLastAt + 1 < data.Length)
                     {
-                        this.remarks = data.Substring(remarkIndexLastAt + 1);
+                        this.remarks_base64 = data.Substring(remarkIndexLastAt + 1);
                     }
                     data = data.Substring(0, remarkIndexLastAt);
                 }

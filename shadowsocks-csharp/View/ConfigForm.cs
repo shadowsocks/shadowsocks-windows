@@ -111,7 +111,7 @@ namespace Shadowsocks.View
                     password = PasswordTextBox.Text,
                     method = EncryptionSelect.Text,
                     obfs = ObfsCombo.Text,
-                    remarks = Convert.ToBase64String(Encoding.UTF8.GetBytes(RemarksTextBox.Text)).Replace('+', '-').Replace('/', '_'),
+                    remarks = RemarksTextBox.Text,
                     tcp_over_udp = CheckTCPoverUDP.Checked,
                     udp_over_tcp = CheckUDPoverUDP.Checked,
                     tcp_protocol = TCPProtocolComboBox.SelectedIndex,
@@ -121,7 +121,7 @@ namespace Shadowsocks.View
                 int ret = 0;
                 if (_modifiedConfiguration.configs[_oldSelectedIndex].server != server.server
                     || _modifiedConfiguration.configs[_oldSelectedIndex].server_port != server.server_port
-                    || _modifiedConfiguration.configs[_oldSelectedIndex].remarks != server.remarks
+                    || _modifiedConfiguration.configs[_oldSelectedIndex].remarks_base64 != server.remarks_base64
                     )
                 {
                     ret = 1; // display changed
@@ -179,7 +179,7 @@ namespace Shadowsocks.View
                 PasswordTextBox.Text = server.password;
                 EncryptionSelect.Text = server.method ?? "aes-256-cfb";
                 ObfsCombo.Text = server.obfs ?? "plain";
-                RemarksTextBox.Text = server.RemarksString(); //server.remarks;
+                RemarksTextBox.Text = server.remarks;
                 CheckTCPoverUDP.Checked = server.tcp_over_udp;
                 CheckUDPoverUDP.Checked = server.udp_over_tcp;
                 TCPProtocolComboBox.SelectedIndex = server.tcp_protocol;
