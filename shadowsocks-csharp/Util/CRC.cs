@@ -40,6 +40,18 @@ namespace Shadowsocks.Util
             }
             return value ^ 0xffffffff;
         }
+        public static ulong CalcCRC32(byte[] input, int index, int len, ulong value = 0xffffffff)
+        {
+            //生成码表
+            if (Crc32Table == null)
+                CreateCRC32Table();
+            byte[] buffer = input;
+            for (int i = index; i < len; i++)
+            {
+                value = (value >> 8) ^ Crc32Table[(value & 0xFF) ^ buffer[i]];
+            }
+            return value ^ 0xffffffff;
+        }
 
         public static void SetCRC32(byte[] buffer)
         {
@@ -53,6 +65,14 @@ namespace Shadowsocks.Util
         public static void SetCRC32(byte[] buffer, int length)
         {
             ulong crc = ~CalcCRC32(buffer, length - 4);
+            buffer[length - 1] = (byte)(crc >> 24);
+            buffer[length - 2] = (byte)(crc >> 16);
+            buffer[length - 3] = (byte)(crc >> 8);
+            buffer[length - 4] = (byte)(crc);
+        }
+        public static void SetCRC32(byte[] buffer, int index, int length)
+        {
+            ulong crc = ~CalcCRC32(buffer, index, length - 4);
             buffer[length - 1] = (byte)(crc >> 24);
             buffer[length - 2] = (byte)(crc >> 16);
             buffer[length - 3] = (byte)(crc >> 8);
@@ -76,5 +96,22 @@ namespace Shadowsocks.Util
                 return false;
             return true;
         }
+    }
+    class Alder32
+    {
+        public static ulong CalcAlder32(byte[] input, int len, ulong value = 0xffffffff)
+        {
+            ulong a = 1;
+            ulong b = 0;
+            for (int i = 0; i < len; i++)
+            {
+                a += input[i];
+                b += a;
+            }
+            a %= 65521;
+            b %= 65521;
+            return (b << 16) + a;
+        }
+
     }
 }

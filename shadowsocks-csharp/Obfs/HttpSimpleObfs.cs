@@ -247,7 +247,7 @@ namespace Shadowsocks.Obfs
                 {
                     outlength = 0;
                     raw_trans_recv = true;
-                    needsendback = false;
+                    needsendback = true;
                     return encryptdata;
                 }
                 else

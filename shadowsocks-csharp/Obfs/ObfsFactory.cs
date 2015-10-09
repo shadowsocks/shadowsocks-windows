@@ -25,6 +25,10 @@ namespace Shadowsocks.Obfs
             {
                 _registeredObfs.Add(method, typeof(VerifySimpleObfs));
             }
+            foreach (string method in VerifyDeflateObfs.SupportedObfs())
+            {
+                _registeredObfs.Add(method, typeof(VerifyDeflateObfs));
+            }
         }
 
         public static IObfs GetObfs(string method)
