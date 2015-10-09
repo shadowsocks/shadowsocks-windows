@@ -1,6 +1,37 @@
 Shadowsocks for Windows
 =======================
+No-Privoxy Version
 
+This project is forked from ShadowSocks/ShadowSocks-Windows.
+The old version depends on Privoxy, although an open source project product 
+(hosted on SourceForge.net), but since nobody claimed to have checked its 
+source, so its  security clearness is un-guarantied, and this product, as a 
+highly security-sensitive middle man, I would like it be truly reliable, so I 
+removed the dependency on Privoxy.  A side-benefit of this removal is a 
+shorter path to the final browsing target. In the old version, the path is like this:  
+your browser ->local:1080 by shadowsocks.proxy -> local: 8033 by 
+Privoxy.translator -> local:1080 by shadowsocks.forwarder -> External Socks 
+server -> final target, so you can see it's a really twisted path. In the No-Privoxy 
+version, the path is shortened.
+Another external dependency is libsscrypto, and I happily found it to be another 
+project on git, it's here: https://github.com/shadowsocks/libsscrypto . So I kept it.
+
+This version is tested on IE 8, 11, Firefox, Chrome, and sadly it only work for 
+Chrome. So if you use Chrome and care about security, then this one may be a 
+better alternative.
+
+Extra Usage Notes (besides the old  version):
+1. You'd better to use [Enable System Proxy], and set mode to [Pac].
+2. Added a feature to help debug, the setting is in gui-config.json,  logNetTraffic, if you 
+set it to true, then the network traffic will be logged, you can then see the net traffic 
+between the browser, shadowsocks, and extern socks server.
+3. Added a setting in gui-config.json, pacSockHeader, its values: Socks5, Socks, Socks4,  
+you should leave it as Socks5.
+
+John Xie @Beijing
+
+
+=======================
 [![Build Status]][Appveyor]
 
 [中文说明]
@@ -80,4 +111,6 @@ GPLv3
 [latest release]: https://github.com/shadowsocks/shadowsocks-csharp/releases
 [GFWList]:        https://github.com/gfwlist/gfwlist
 [Servers]:        https://github.com/shadowsocks/shadowsocks/wiki/Ports-and-Clients#linux--server-side
-[中文说明]:       https://github.com/shadowsocks/shadowsocks-windows/wiki/Shadowsocks-Windows-%E4%BD%BF%E7%94%A8%E8%AF%B4%E6%98%8E
+[中文说明]:       https://github.com/shadowsocks/shadowsocks-windows/wiki/Shadowsocks-Windows-%E4%BD%BF
+
+%E7%94%A8%E8%AF%B4%E6%98%8E
