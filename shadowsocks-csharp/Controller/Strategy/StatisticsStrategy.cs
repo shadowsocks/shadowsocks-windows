@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Threading;
+using Newtonsoft.Json;
 using Shadowsocks.Model;
 
 namespace Shadowsocks.Controller.Strategy
@@ -65,7 +66,7 @@ namespace Shadowsocks.Controller.Strategy
             score += statisticsData.MinResponse*factor;
             if (!config.Calculations.TryGetValue("MaxResponse", out factor)) factor = 0;
             score += statisticsData.MaxResponse*factor;
-            Logging.Debug($"{serverName}  {SimpleJson.SimpleJson.SerializeObject(statisticsData)}");
+            Logging.Debug($"{serverName}  {JsonConvert.SerializeObject(statisticsData)}");
             return score;
         }
 
