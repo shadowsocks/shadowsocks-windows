@@ -17,7 +17,7 @@ namespace Shadowsocks.Model
         public string password;
         public string method;
         public string remarks;
-        public bool one_time_auth;
+        public bool auth;
 
         public override int GetHashCode()
         {
@@ -53,7 +53,7 @@ namespace Shadowsocks.Model
             this.method = "aes-256-cfb";
             this.password = "";
             this.remarks = "";
-            this.one_time_auth = false;
+            this.auth = false;
         }
 
         public Server(string ssURL) : this()

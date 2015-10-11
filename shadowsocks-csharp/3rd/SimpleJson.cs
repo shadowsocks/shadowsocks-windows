@@ -580,7 +580,7 @@ namespace SimpleJson
         public static string SerializeObject(object json, IJsonSerializerStrategy jsonSerializerStrategy)
         {
             StringBuilder builder = new StringBuilder(BUILDER_CAPACITY);
-            bool success = SerializeValue(jsonSerializerStrategy, json, builder);
+            bool success = SerializeValue(jsonSerializerStrategy, json, 0, builder);
             return (success ? builder.ToString() : null);
         }
 
@@ -966,7 +966,7 @@ namespace SimpleJson
             return TOKEN_NONE;
         }
 
-        protected static bool SerializeValue(IJsonSerializerStrategy jsonSerializerStrategy, object value, StringBuilder builder)
+        protected static bool SerializeValue(IJsonSerializerStrategy jsonSerializerStrategy, object value, int level, StringBuilder builder)
         {
             bool success = true;
 
@@ -975,15 +975,15 @@ namespace SimpleJson
             else if (value is IDictionary<string, object>)
             {
                 IDictionary<string, object> dict = (IDictionary<string, object>)value;
-                success = SerializeObject(jsonSerializerStrategy, dict.Keys, dict.Values, builder);
+                success = SerializeObject(jsonSerializerStrategy, dict.Keys, dict.Values, level, builder);
             }
             else if (value is IDictionary<string, string>)
             {
                 IDictionary<string, string> dict = (IDictionary<string, string>)value;
-                success = SerializeObject(jsonSerializerStrategy, dict.Keys, dict.Values, builder);
+                success = SerializeObject(jsonSerializerStrategy, dict.Keys, dict.Values, level, builder);
             }
             else if (value is IEnumerable)
-                success = SerializeArray(jsonSerializerStrategy, (IEnumerable)value, builder);
+                success = SerializeArray(jsonSerializerStrategy, (IEnumerable)value, level, builder);
             else if (IsNumeric(value))
                 success = SerializeNumber(value, builder);
             else if (value is Boolean)
@@ -995,15 +995,17 @@ namespace SimpleJson
                 object serializedObject;
                 success = jsonSerializerStrategy.SerializeNonPrimitiveObject(value, out serializedObject);
                 if (success)
-                    SerializeValue(jsonSerializerStrategy, serializedObject, builder);
+                    SerializeValue(jsonSerializerStrategy, serializedObject, level, builder);
             }
 
             return success;
         }
 
-        protected static bool SerializeObject(IJsonSerializerStrategy jsonSerializerStrategy, IEnumerable keys, IEnumerable values, StringBuilder builder)
+        protected static bool SerializeObject(IJsonSerializerStrategy jsonSerializerStrategy, IEnumerable keys, IEnumerable values, int level, StringBuilder builder)
         {
             builder.Append("{\r\n");
+
+            level++;
 
             IEnumerator ke = keys.GetEnumerator();
             IEnumerator ve = values.GetEnumerator();
@@ -1017,39 +1019,50 @@ namespace SimpleJson
                 if (!first)
                     builder.Append(",\r\n");
 
+                FeedIndent(level, builder);
+
                 if (key is string)
                     SerializeString((string)key, builder);
                 else
-                    if (!SerializeValue(jsonSerializerStrategy, value, builder)) return false;
+                    if (!SerializeValue(jsonSerializerStrategy, value, level, builder)) return false;
 
                 builder.Append(" : ");
-                if (!SerializeValue(jsonSerializerStrategy, value, builder))
+                if (!SerializeValue(jsonSerializerStrategy, value, level, builder))
                     return false;
 
                 first = false;
             }
 
-            builder.Append("}\r\n");
+            builder.Append("\r\n");
+            FeedIndent(level - 1, builder);
+            builder.Append("}");
             return true;
         }
 
-        protected static bool SerializeArray(IJsonSerializerStrategy jsonSerializerStrategy, IEnumerable anArray, StringBuilder builder)
+        protected static bool SerializeArray(IJsonSerializerStrategy jsonSerializerStrategy, IEnumerable anArray, int level, StringBuilder builder)
         {
-            builder.Append("[\r\n  ");
+
+            builder.Append("[\r\n");
+
+            level++;
 
             bool first = true;
             foreach (object value in anArray)
             {
                 if (!first)
-                    builder.Append(",\r\n  ");
+                    builder.Append(",\r\n");
 
-                if (!SerializeValue(jsonSerializerStrategy, value, builder))
+                FeedIndent(level, builder);
+
+                if (!SerializeValue(jsonSerializerStrategy, value, level, builder))
                     return false;
 
                 first = false;
             }
 
-            builder.Append("\r\n]");
+            builder.Append("\r\n");
+            FeedIndent(level - 1, builder);
+            builder.Append("]");
             return true;
         }
 
@@ -1115,6 +1128,12 @@ namespace SimpleJson
             }
 
             return true;
+        }
+
+        protected static void FeedIndent(int level, StringBuilder builder)
+        {
+            for (int i = 0; i < level; i++)
+                builder.Append("  ");
         }
 
         /// <summary>
