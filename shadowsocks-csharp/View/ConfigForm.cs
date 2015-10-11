@@ -188,7 +188,10 @@ namespace Shadowsocks.View
                 ServersListBox.SelectedIndex = _lastSelectedIndex;
                 return;
             }
-            ServersListBox.Items[_lastSelectedIndex] = _modifiedConfiguration.configs[_lastSelectedIndex].FriendlyName();
+            if (_lastSelectedIndex >= 0)
+            {
+                ServersListBox.Items[_lastSelectedIndex] = _modifiedConfiguration.configs[_lastSelectedIndex].FriendlyName();
+            }
             UpdateMoveUpAndDownButton();
             LoadSelectedServer();
             _lastSelectedIndex = ServersListBox.SelectedIndex;
