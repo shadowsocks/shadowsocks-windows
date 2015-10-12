@@ -180,9 +180,11 @@ namespace Shadowsocks.View
                     this.localPACItem = CreateMenuItem("Local PAC", new EventHandler(this.LocalPACItem_Click)),
                     this.onlinePACItem = CreateMenuItem("Online PAC", new EventHandler(this.OnlinePACItem_Click)),
                     new MenuItem("-"),
-                    this.editLocalPACItem = CreateMenuItem("Edit Local PAC File...", new EventHandler(this.EditPACFileItem_Click)),
+                    this.updateFromGFWListItem = CreateMenuItem("Update Local PAC from LanIPList", new EventHandler(this.UpdatePACFromLanIPListItem_Click)),
                     this.updateFromGFWListItem = CreateMenuItem("Update Local PAC from ChnIPList", new EventHandler(this.UpdatePACFromCNIPListItem_Click)),
                     this.updateFromGFWListItem = CreateMenuItem("Update Local PAC from GFWList", new EventHandler(this.UpdatePACFromGFWListItem_Click)),
+                    new MenuItem("-"),
+                    this.editLocalPACItem = CreateMenuItem("Edit Local PAC File...", new EventHandler(this.EditPACFileItem_Click)),
                     this.editGFWUserRuleItem = CreateMenuItem("Edit User Rule for GFWList...", new EventHandler(this.EditUserRuleFileForGFWListItem_Click)),
                     this.editOnlinePACItem = CreateMenuItem("Edit Online PAC URL...", new EventHandler(this.UpdateOnlinePACURLItem_Click)),
                 }),
@@ -424,6 +426,22 @@ namespace Shadowsocks.View
         private void Quit_Click(object sender, EventArgs e)
         {
             controller.Stop();
+            if (configForm != null)
+            {
+                configForm.Close();
+                configForm = null;
+            }
+            if (serverLogForm != null)
+            {
+                serverLogForm.Close();
+                serverLogForm = null;
+            }
+            if (timerDelayCheckUpdate != null)
+            {
+                timerDelayCheckUpdate.Elapsed -= timer_Elapsed;
+                timerDelayCheckUpdate.Stop();
+                timerDelayCheckUpdate = null;
+            }
             _notifyIcon.Visible = false;
             Application.Exit();
         }
@@ -503,6 +521,11 @@ namespace Shadowsocks.View
         private void UpdatePACFromGFWListItem_Click(object sender, EventArgs e)
         {
             controller.UpdatePACFromGFWList();
+        }
+
+        private void UpdatePACFromLanIPListItem_Click(object sender, EventArgs e)
+        {
+            controller.UpdatePACFromOnlinePac("https://raw.githubusercontent.com/breakwa11/gfw_whitelist/master/ss_lanip.pac");
         }
 
         private void UpdatePACFromCNIPListItem_Click(object sender, EventArgs e)

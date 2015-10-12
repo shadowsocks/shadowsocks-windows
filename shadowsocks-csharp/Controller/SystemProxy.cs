@@ -26,6 +26,18 @@ namespace Shadowsocks.Controller
             _refreshReturn = InternetSetOption(IntPtr.Zero, INTERNET_OPTION_REFRESH, IntPtr.Zero, 0);
         }
 
+        public static void RegistrySetValue(RegistryKey registry, string name, object value)
+        {
+            try
+            {
+                registry.SetValue(name, value);
+            }
+            catch (Exception e)
+            {
+                Logging.LogUsefulException(e);
+            }
+        }
+
         public static void Update(Configuration config, bool forceDisable)
         {
             bool global = config.global;
@@ -43,9 +55,9 @@ namespace Shadowsocks.Controller
                 {
                     if (global)
                     {
-                        registry.SetValue("ProxyEnable", 1);
-                        registry.SetValue("ProxyServer", "127.0.0.1:" + config.localPort.ToString());
-                        registry.SetValue("AutoConfigURL", "");
+                        RegistrySetValue(registry, "ProxyEnable", 1);
+                        RegistrySetValue(registry, "ProxyServer", "127.0.0.1:" + config.localPort.ToString());
+                        RegistrySetValue(registry, "AutoConfigURL", "");
                     }
                     else
                     {
@@ -54,17 +66,17 @@ namespace Shadowsocks.Controller
                             pacUrl = config.pacUrl;
                         else
                             pacUrl = "http://127.0.0.1:" + config.localPort.ToString() + "/pac?t=" + GetTimestamp(DateTime.Now);
-                        registry.SetValue("ProxyEnable", 0);
+                        RegistrySetValue(registry, "ProxyEnable", 0);
                         var readProxyServer = registry.GetValue("ProxyServer");
-                        registry.SetValue("ProxyServer", "");
-                        registry.SetValue("AutoConfigURL", pacUrl);
+                        RegistrySetValue(registry, "ProxyServer", "");
+                        RegistrySetValue(registry, "AutoConfigURL", pacUrl);
                     }
                 }
                 else
                 {
-                    registry.SetValue("ProxyEnable", 0);
-                    registry.SetValue("ProxyServer", "");
-                    registry.SetValue("AutoConfigURL", "");
+                    RegistrySetValue(registry, "ProxyEnable", 0);
+                    RegistrySetValue(registry, "ProxyServer", "");
+                    RegistrySetValue(registry, "AutoConfigURL", "");
                 }
                 //Set AutoDetectProxy Off
                 IEAutoDetectProxy(false);
@@ -133,8 +145,8 @@ namespace Shadowsocks.Controller
                 defConnection[8] = Convert.ToByte(defConnection[8] & ~8);
                 savedLegacySetting[8] = Convert.ToByte(savedLegacySetting[8] & ~8);
             }
-            registry.SetValue("DefaultConnectionSettings", defConnection);
-            registry.SetValue("SavedLegacySettings", savedLegacySetting);
+            RegistrySetValue(registry, "DefaultConnectionSettings", defConnection);
+            RegistrySetValue(registry, "SavedLegacySettings", savedLegacySetting);
         }
     }
 }

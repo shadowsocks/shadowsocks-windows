@@ -47,6 +47,8 @@ namespace Shadowsocks.Obfs
             {
                 int outlen;
                 PackData(data, unit_len, packdata, out outlen);
+                if (outdata.Length < outlength + outlen)
+                    Array.Resize(ref outdata, outlength + outlen);
                 Array.Copy(packdata, 0, outdata, outlength, outlen);
                 outlength += outlen;
                 datalength -= unit_len;
@@ -58,6 +60,8 @@ namespace Shadowsocks.Obfs
             {
                 int outlen;
                 PackData(data, datalength, packdata, out outlen);
+                if (outdata.Length < outlength + outlen)
+                    Array.Resize(ref outdata, outlength + outlen);
                 Array.Copy(packdata, 0, outdata, outlength, outlen);
                 outlength += outlen;
             }
@@ -95,6 +99,10 @@ namespace Shadowsocks.Obfs
                 {
                     int pos = recv_buf[2] + 2;
                     int outlen = len - pos - 4;
+                    if (outlength + outlen > outdata.Length)
+                    {
+                        Array.Resize(ref outdata, outlength + outlen);
+                    }
                     Array.Copy(recv_buf, pos, outdata, outlength, outlen);
                     outlength += outlen;
                     recv_buf_len -= len;
@@ -160,6 +168,8 @@ namespace Shadowsocks.Obfs
             {
                 int outlen;
                 PackData(data, unit_len, packdata, out outlen);
+                if (outdata.Length < outlength + outlen)
+                    Array.Resize(ref outdata, outlength + outlen);
                 Array.Copy(packdata, 0, outdata, outlength, outlen);
                 outlength += outlen;
                 datalength -= unit_len;
@@ -171,6 +181,8 @@ namespace Shadowsocks.Obfs
             {
                 int outlen;
                 PackData(data, datalength, packdata, out outlen);
+                if (outdata.Length < outlength + outlen)
+                    Array.Resize(ref outdata, outlength + outlen);
                 Array.Copy(packdata, 0, outdata, outlength, outlen);
                 outlength += outlen;
             }
@@ -220,11 +232,9 @@ namespace Shadowsocks.Obfs
                     {
                         throw new Exception("ClientPostDecrypt data decompress ERROR");
                     }
-                    while (outlength + outlen > outdata.Length)
+                    if (outlength + outlen > outdata.Length)
                     {
-                        byte[] newout = new byte[outdata.Length * 2 + 1024];
-                        outdata.CopyTo(newout, 0);
-                        outdata = newout;
+                        Array.Resize(ref outdata, outlength + outlen);
                     }
                     Array.Copy(buf, 0, outdata, outlength, outlen);
                     outlength += outlen;

@@ -129,9 +129,11 @@ namespace Shadowsocks.Controller
 
                 IPEndPoint localEndPoint = (IPEndPoint)socket.LocalEndPoint;
 
-                string proxy = GetPACAddress(firstPacket, length, localEndPoint, useSocks);
+                string proxy_socks5 = GetPACAddress(firstPacket, length, localEndPoint, true);
 
-                pac = pac.Replace("__PROXY__", proxy);
+                string proxy_http = GetPACAddress(firstPacket, length, localEndPoint, false);
+
+                pac = pac.Replace("__PROXY__", proxy_socks5 + proxy_http + "DIRECT;");
 
                 string text = String.Format(@"HTTP/1.1 200 OK
 Server: Shadowsocks
@@ -201,7 +203,12 @@ Connection: Close
             //{
             //    Console.WriteLine(e);
             //}
-            return (useSocks ? "SOCKS5 " : "PROXY ") + localEndPoint.Address + ":" + this._config.localPort + ";";
+            if (useSocks)
+            {
+                return "SOCKS5 " + localEndPoint.Address + ":" + this._config.localPort + ";"
+                    + "SOCKS " + localEndPoint.Address + ":" + this._config.localPort + ";";
+            }
+            return "PROXY " + localEndPoint.Address + ":" + this._config.localPort + ";";
         }
     }
 }
