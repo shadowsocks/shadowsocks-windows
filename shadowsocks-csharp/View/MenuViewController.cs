@@ -477,12 +477,12 @@ namespace Shadowsocks.View
                 }
                 else
                 {
-                    ShowConfigForm();
+                    ShowServerLogForm();
                 }
             }
             else if (e.Button == MouseButtons.Middle)
             {
-                ShowServerLogForm();
+                ShowConfigForm();
             }
         }
 

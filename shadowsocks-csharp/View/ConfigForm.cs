@@ -189,7 +189,7 @@ namespace Shadowsocks.View
 
                 TextLink.Text = controller.GetSSLinkForServer(server);
 
-                PasswordLabel.Checked = false;
+                PasswordLabel.Checked = true;
                 GenQR(TextLink.Text);
                 //IPTextBox.Focus();
             }
