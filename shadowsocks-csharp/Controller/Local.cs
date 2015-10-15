@@ -1548,7 +1548,15 @@ namespace Shadowsocks.Controller
 
                 connectionPacketNumber = 0;
                 remoteUDPRecvBufferLength = 0;
-                obfs.SetHost(server.server, server.server_port);
+                lock (encryptionLock)
+                {
+                    if (server.getObfsdata() == null)
+                    {
+                        server.setObfsdata(obfs.InitData());
+                    }
+                }
+                int mss = (int)this.remote.GetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.IpTimeToLive /* == TCP_MAXSEG */);
+                obfs.SetHost(new ServerInfo(server.server, server.server_port, mss, server.obfsparam, server.getObfsdata()));
 
                 ResetTimeout(TTL);
 

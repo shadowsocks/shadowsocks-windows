@@ -11,12 +11,19 @@ namespace Shadowsocks.Obfs
         {
         }
         private static Dictionary<string, int[]> _obfs = new Dictionary<string, int[]> {
-                {"verify_simple", new int[]{}},
+                {"verify_simple", new int[]{1, 0, 0}},
         };
+
+        private IObfs subObfs;
 
         public static List<string> SupportedObfs()
         {
             return new List<string>(_obfs.Keys);
+        }
+
+        public override Dictionary<string, int[]> GetObfs()
+        {
+            return _obfs;
         }
 
         private const int RecvBufferSize = 65536 * 2;
@@ -48,7 +55,7 @@ namespace Shadowsocks.Obfs
                 int outlen;
                 PackData(data, unit_len, packdata, out outlen);
                 if (outdata.Length < outlength + outlen)
-                    Array.Resize(ref outdata, outlength + outlen);
+                    Array.Resize(ref outdata, (outlength + outlen) * 2);
                 Array.Copy(packdata, 0, outdata, outlength, outlen);
                 outlength += outlen;
                 datalength -= unit_len;
@@ -61,20 +68,40 @@ namespace Shadowsocks.Obfs
                 int outlen;
                 PackData(data, datalength, packdata, out outlen);
                 if (outdata.Length < outlength + outlen)
-                    Array.Resize(ref outdata, outlength + outlen);
+                    Array.Resize(ref outdata, (outlength + outlen) * 2);
                 Array.Copy(packdata, 0, outdata, outlength, outlen);
                 outlength += outlen;
+            }
+            if (subObfs == null && Server.param != null && Server.param.Length > 0)
+            {
+                try
+                {
+                    subObfs = ObfsFactory.GetObfs(Server.param);
+                }
+                catch(Exception)
+                {
+                    // do nothing
+                }
+                Server.param = null;
             }
             return outdata;
         }
 
         public override byte[] ClientEncode(byte[] encryptdata, int datalength, out int outlength)
         {
+            if (subObfs != null)
+            {
+                return subObfs.ClientEncode(encryptdata, datalength, out outlength);
+            }
             outlength = datalength;
             return encryptdata;
         }
         public override byte[] ClientDecode(byte[] encryptdata, int datalength, out int outlength, out bool needsendback)
         {
+            if (subObfs != null)
+            {
+                return subObfs.ClientDecode(encryptdata, datalength, out outlength, out needsendback);
+            }
             outlength = datalength;
             needsendback = false;
             return encryptdata;
@@ -101,7 +128,7 @@ namespace Shadowsocks.Obfs
                     int outlen = len - pos - 4;
                     if (outlength + outlen > outdata.Length)
                     {
-                        Array.Resize(ref outdata, outlength + outlen);
+                        Array.Resize(ref outdata, (outlength + outlen) * 2);
                     }
                     Array.Copy(recv_buf, pos, outdata, outlength, outlen);
                     outlength += outlen;
@@ -128,7 +155,7 @@ namespace Shadowsocks.Obfs
         {
         }
         private static Dictionary<string, int[]> _obfs = new Dictionary<string, int[]> {
-                {"verify_deflate", new int[]{}},
+                {"verify_deflate", new int[]{1, 0, 0}},
         };
 
         public static List<string> SupportedObfs()
@@ -136,7 +163,14 @@ namespace Shadowsocks.Obfs
             return new List<string>(_obfs.Keys);
         }
 
+        public override Dictionary<string, int[]> GetObfs()
+        {
+            return _obfs;
+        }
+
         private const int RecvBufferSize = 65536 * 2;
+
+        private IObfs subObfs;
 
         private byte[] recv_buf = new byte[RecvBufferSize];
         private int recv_buf_len = 0;
@@ -169,7 +203,7 @@ namespace Shadowsocks.Obfs
                 int outlen;
                 PackData(data, unit_len, packdata, out outlen);
                 if (outdata.Length < outlength + outlen)
-                    Array.Resize(ref outdata, outlength + outlen);
+                    Array.Resize(ref outdata, (outlength + outlen) * 2);
                 Array.Copy(packdata, 0, outdata, outlength, outlen);
                 outlength += outlen;
                 datalength -= unit_len;
@@ -182,20 +216,40 @@ namespace Shadowsocks.Obfs
                 int outlen;
                 PackData(data, datalength, packdata, out outlen);
                 if (outdata.Length < outlength + outlen)
-                    Array.Resize(ref outdata, outlength + outlen);
+                    Array.Resize(ref outdata, (outlength + outlen) * 2);
                 Array.Copy(packdata, 0, outdata, outlength, outlen);
                 outlength += outlen;
+            }
+            if (subObfs == null && Server.param != null && Server.param.Length > 0)
+            {
+                try
+                {
+                    subObfs = ObfsFactory.GetObfs(Server.param);
+                }
+                catch (Exception)
+                {
+                    // do nothing
+                }
+                Server.param = null;
             }
             return outdata;
         }
 
         public override byte[] ClientEncode(byte[] encryptdata, int datalength, out int outlength)
         {
+            if (subObfs != null)
+            {
+                return subObfs.ClientEncode(encryptdata, datalength, out outlength);
+            }
             outlength = datalength;
             return encryptdata;
         }
         public override byte[] ClientDecode(byte[] encryptdata, int datalength, out int outlength, out bool needsendback)
         {
+            if (subObfs != null)
+            {
+                return subObfs.ClientDecode(encryptdata, datalength, out outlength, out needsendback);
+            }
             outlength = datalength;
             needsendback = false;
             return encryptdata;
@@ -234,7 +288,7 @@ namespace Shadowsocks.Obfs
                     }
                     if (outlength + outlen > outdata.Length)
                     {
-                        Array.Resize(ref outdata, outlength + outlen);
+                        Array.Resize(ref outdata, (outlength + outlen) * 2);
                     }
                     Array.Copy(buf, 0, outdata, outlength, outlen);
                     outlength += outlen;

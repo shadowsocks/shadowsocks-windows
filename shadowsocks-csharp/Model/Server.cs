@@ -484,6 +484,7 @@ namespace Shadowsocks.Model
         public string password;
         public string method;
         public string obfs;
+        public string obfsparam;
         public string remarks_base64;
         public bool tcp_over_udp;
         public bool udp_over_tcp;
@@ -491,6 +492,7 @@ namespace Shadowsocks.Model
         public bool obfs_udp;
         public bool enable;
 
+        private object obfsdata;
         private ServerSpeedLog serverSpeedLog = new ServerSpeedLog();
         private DnsBuffer dnsBuffer = new DnsBuffer();
         private DnsBuffer dnsTargetBuffer = new DnsBuffer();
@@ -593,6 +595,7 @@ namespace Shadowsocks.Model
             ret.password = (string)password.Clone();
             ret.method = (string)method.Clone();
             ret.obfs = (string)obfs.Clone();
+            ret.obfsparam = (string)obfsparam.Clone();
             ret.remarks_base64 = (string)remarks_base64.Clone();
             ret.enable = enable;
             ret.udp_over_tcp = udp_over_tcp;
@@ -607,6 +610,7 @@ namespace Shadowsocks.Model
             this.server_port = 8388;
             this.method = "aes-256-cfb";
             this.obfs = "plain";
+            this.obfsparam = "";
             this.password = "0";
             this.remarks_base64 = "";
             this.udp_over_tcp = false;
@@ -688,6 +692,15 @@ namespace Shadowsocks.Model
         public void setEnable(bool enable)
         {
             this.enable = enable;
+        }
+
+        public object getObfsdata()
+        {
+            return this.obfsdata;
+        }
+        public void setObfsdata(object data)
+        {
+            this.obfsdata = data;
         }
     }
 }
