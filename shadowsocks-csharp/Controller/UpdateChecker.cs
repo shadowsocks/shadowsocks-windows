@@ -13,7 +13,7 @@ namespace Shadowsocks.Controller
     public class UpdateChecker
     {
         //private const string UpdateURL = "https://sourceforge.net/api/file/index/project-id/1817190/path/dist/mtime/desc/limit/10/rss";
-        private const string UpdateURL = "https://github.com/breakwa11/shadowsocks-rss/raw/master/shadowsocks-win.xml";
+        private const string UpdateURL = "https://raw.github.com/breakwa11/shadowsocks-rss/master/shadowsocks-win.xml";
 
         public string LatestVersionNumber;
         public string LatestVersionURL;
@@ -21,7 +21,7 @@ namespace Shadowsocks.Controller
 
         public const string Name = "ShadowsocksR";
         public const string Copyright = "Copyright © BreakWall 2015";
-        public const string Version = "3.5.8";
+        public const string Version = "3.5.9";
         public const string FullVersion = Version + "";
 
         private static bool UseProxy = true;

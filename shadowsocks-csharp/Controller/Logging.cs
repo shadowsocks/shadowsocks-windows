@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Net.Sockets;
 using System.Text;
@@ -50,6 +51,18 @@ namespace Shadowsocks.Controller
             Console.WriteLine(o);
 #endif
         }
+        private static string ToString(StackFrame[] stacks)
+        {
+            string result = string.Empty;
+            foreach (StackFrame stack in stacks)
+            {
+                result += string.Format("{0} {1} {2} {3}\r\n", stack.GetFileName(),
+                    stack.GetFileLineNumber(),
+                    stack.GetFileColumnNumber(),
+                    stack.GetMethod().ToString());
+            }
+            return result;
+        }
 
         public static void LogUsefulException(Exception e)
         {
@@ -81,6 +94,9 @@ namespace Shadowsocks.Controller
                 else
                 {
                     Console.WriteLine(e);
+#if DEBUG
+                    Console.WriteLine(ToString(new StackTrace().GetFrames()));
+#endif
                 }
             }
             else if (e is System.ObjectDisposedException)
@@ -90,6 +106,9 @@ namespace Shadowsocks.Controller
             else
             {
                 Console.WriteLine(e);
+#if DEBUG
+                Console.WriteLine(ToString(new StackTrace().GetFrames()));
+#endif
             }
         }
 
@@ -155,6 +174,9 @@ namespace Shadowsocks.Controller
                 {
                     Logging.Log(LogLevel.Info, "Proxy server [" + remarks + "(" + server + ")] "
                         + Convert.ToString(se.SocketErrorCode) + ":" + se.Message);
+#if DEBUG
+                    Console.WriteLine(ToString(new StackTrace().GetFrames()));
+#endif
                     return true;
                 }
             }

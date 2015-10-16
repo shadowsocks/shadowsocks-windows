@@ -1555,7 +1555,15 @@ namespace Shadowsocks.Controller
                         server.setObfsdata(obfs.InitData());
                     }
                 }
-                int mss = (int)this.remote.GetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.IpTimeToLive /* == TCP_MAXSEG */);
+                int mss = 1440;
+                try
+                {
+                    mss = (int)this.remote.GetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.IpTimeToLive /* == TCP_MAXSEG */);
+                }
+                catch (Exception e)
+                {
+                    //Console.WriteLine(e);
+                }
                 obfs.SetHost(new ServerInfo(server.server, server.server_port, mss, server.obfsparam, server.getObfsdata()));
 
                 ResetTimeout(TTL);
