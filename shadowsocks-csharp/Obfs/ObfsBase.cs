@@ -1,4 +1,6 @@
 ﻿
+using System.Collections.Generic;
+
 namespace Shadowsocks.Obfs
 {
     public abstract class ObfsBase: IObfs
@@ -9,8 +11,9 @@ namespace Shadowsocks.Obfs
         }
 
         protected string Method;
-        protected string Host;
-        protected int Port;
+        protected ServerInfo Server;
+
+        public abstract Dictionary<string, int[]> GetObfs();
 
         public virtual byte[] ClientPreEncrypt(byte[] plaindata, int datalength, out int outlength)
         {
@@ -25,10 +28,13 @@ namespace Shadowsocks.Obfs
             return plaindata;
         }
         public abstract void Dispose();
-        public void SetHost(string host, int port)
+        public virtual object InitData()
         {
-            Host = host;
-            Port = port;
+            return null;
+        }
+        public void SetHost(ServerInfo serverInfo)
+        {
+            Server = serverInfo;
         }
     }
 }

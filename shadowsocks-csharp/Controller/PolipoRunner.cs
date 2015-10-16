@@ -25,6 +25,7 @@ namespace Shadowsocks.Controller
             {
                 Directory.CreateDirectory(runningPath);
             }
+            Kill();
             try
             {
                 FileManager.UncompressFile(runningPath + "/ss_privoxy.exe", Resources.privoxy_exe);
@@ -49,36 +50,41 @@ namespace Shadowsocks.Controller
             return _process.HasExited;
         }
 
+        public static void Kill()
+        {
+            Process[] existingPolipo = Process.GetProcessesByName("ss_privoxy");
+            foreach (Process p in existingPolipo)
+            {
+                string str;
+                try
+                {
+                    str = p.MainModule.FileName;
+                }
+                catch (Exception)
+                {
+                    continue;
+                }
+                if (str == Path.GetFullPath(runningPath + "/ss_privoxy.exe"))
+                {
+                    try
+                    {
+                        p.Kill();
+                        p.WaitForExit();
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine(e.ToString());
+                    }
+                }
+            }
+        }
+
         public void Start(Configuration configuration)
         {
             Server server = configuration.GetCurrentServer();
             if (_process == null)
             {
-                Process[] existingPolipo = Process.GetProcessesByName("ss_privoxy");
-                foreach (Process p in existingPolipo)
-                {
-                    string str;
-                    try
-                    {
-                        str = p.MainModule.FileName;
-                    }
-                    catch (Exception)
-                    {
-                        continue;
-                    }
-                    if (str == Path.GetFullPath(runningPath + "/ss_privoxy.exe"))
-                    {
-                        try
-                        {
-                            p.Kill();
-                            p.WaitForExit();
-                        }
-                        catch (Exception e)
-                        {
-                            Console.WriteLine(e.ToString());
-                        }
-                    }
-                }
+                Kill();
                 string polipoConfig = Resources.privoxy_conf;
                 _runningPort = this.GetFreePort();
                 polipoConfig = polipoConfig.Replace("__SOCKS_PORT__", configuration.localPort.ToString());

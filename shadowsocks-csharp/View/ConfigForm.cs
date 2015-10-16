@@ -65,6 +65,8 @@ namespace Shadowsocks.View
             TCPoverUDPLabel.Text = I18N.GetString(TCPoverUDPLabel.Text);
             UDPoverTCPLabel.Text = I18N.GetString(UDPoverTCPLabel.Text);
             TCPProtocolLabel.Text = I18N.GetString(TCPProtocolLabel.Text);
+            labelObfs.Text = I18N.GetString(labelObfs.Text);
+            labelObfsParam.Text = I18N.GetString(labelObfsParam.Text);
             ObfsUDPLabel.Text = I18N.GetString(ObfsUDPLabel.Text);
             LabelNote.Text = I18N.GetString(LabelNote.Text);
             CheckTCPoverUDP.Text = I18N.GetString(CheckTCPoverUDP.Text);
@@ -111,6 +113,7 @@ namespace Shadowsocks.View
                     password = PasswordTextBox.Text,
                     method = EncryptionSelect.Text,
                     obfs = ObfsCombo.Text,
+                    obfsparam = textObfsParam.Text,
                     remarks = RemarksTextBox.Text,
                     tcp_over_udp = CheckTCPoverUDP.Checked,
                     udp_over_tcp = CheckUDPoverUDP.Checked,
@@ -179,6 +182,7 @@ namespace Shadowsocks.View
                 PasswordTextBox.Text = server.password;
                 EncryptionSelect.Text = server.method ?? "aes-256-cfb";
                 ObfsCombo.Text = server.obfs ?? "plain";
+                textObfsParam.Text = server.obfsparam;
                 RemarksTextBox.Text = server.remarks;
                 CheckTCPoverUDP.Checked = server.tcp_over_udp;
                 CheckUDPoverUDP.Checked = server.udp_over_tcp;
@@ -393,5 +397,18 @@ namespace Shadowsocks.View
             }
         }
 
+        private void ObfsCombo_TextChanged(object sender, EventArgs e)
+        {
+            Obfs.ObfsBase obfs = (Obfs.ObfsBase)Obfs.ObfsFactory.GetObfs(ObfsCombo.Text);
+            int[] properties = obfs.GetObfs()[ObfsCombo.Text];
+            if (properties[2] > 0)
+            {
+                textObfsParam.Enabled = true;
+            }
+            else
+            {
+                textObfsParam.Enabled = false;
+            }
+        }
     }
 }
