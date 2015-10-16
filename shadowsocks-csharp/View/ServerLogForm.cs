@@ -496,8 +496,13 @@ namespace Shadowsocks.View
                 if (ServerDataGrid.Columns[e.ColumnIndex].Name == "Connecting")
                 {
                     Configuration config = controller.GetCurrentConfiguration();
-                    Server server = config.configs[id];
-                    server.GetConnections().CloseAll();
+                    //Server server = config.configs[id];
+                    //server.GetConnections().CloseAll();
+                    for (int idd = 0; idd < config.configs.Count; ++idd)
+                    {
+                        Server server = config.configs[idd];
+                        server.GetConnections().CloseAll();
+                    }
                 }
                 if (ServerDataGrid.Columns[e.ColumnIndex].Name == "ErrorPercent")
                 {
