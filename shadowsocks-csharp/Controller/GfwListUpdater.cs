@@ -14,9 +14,15 @@ namespace Shadowsocks.Controller
     {
         private const string GFWLIST_URL = "https://raw.githubusercontent.com/gfwlist/gfwlist/master/gfwlist.txt";
 
+        private const string GFWLIST_TEMPLATE_URL = "https://raw.githubusercontent.com/breakwa11/gfw_whitelist/master/ss_gfw.pac";
+
         private static string PAC_FILE = PACServer.PAC_FILE;
 
         private static string USER_RULE_FILE = PACServer.USER_RULE_FILE;
+
+        private static string gfwlist_template = null;
+
+        private Configuration lastConfig;
 
         public event EventHandler<ResultEventArgs> UpdateCompleted;
 
@@ -29,6 +35,34 @@ namespace Shadowsocks.Controller
             public ResultEventArgs(bool success)
             {
                 this.Success = success;
+            }
+        }
+
+        private void http_DownloadGFWTemplateCompleted(object sender, DownloadStringCompletedEventArgs e)
+        {
+            try
+            {
+                string result = e.Result;
+                if (result.IndexOf("__RULES__") > 0 && result.IndexOf("FindProxyForURL") > 0)
+                {
+                    gfwlist_template = result;
+                    if (lastConfig != null)
+                    {
+                        UpdatePACFromGFWList(lastConfig);
+                    }
+                    lastConfig = null;
+                }
+                else
+                {
+                    Error(this, new ErrorEventArgs(new Exception("Download ERROR")));
+                }
+            }
+            catch (Exception ex)
+            {
+                if (Error != null)
+                {
+                    Error(this, new ErrorEventArgs(ex));
+                }
             }
         }
 
@@ -48,7 +82,7 @@ namespace Shadowsocks.Controller
                         lines.Add(rule);
                     }
                 }
-                string abpContent = Utils.UnGzip(Resources.abp_js);
+                string abpContent = gfwlist_template;
                 abpContent = abpContent.Replace("__RULES__", SimpleJson.SimpleJson.SerializeObject(lines));
                 if (File.Exists(PAC_FILE))
                 {
@@ -106,10 +140,21 @@ namespace Shadowsocks.Controller
 
         public void UpdatePACFromGFWList(Configuration config)
         {
-            WebClient http = new WebClient();
-            http.Proxy = new WebProxy(IPAddress.Loopback.ToString(), config.localPort);
-            http.DownloadStringCompleted += http_DownloadStringCompleted;
-            http.DownloadStringAsync(new Uri(GFWLIST_URL));
+            if (gfwlist_template == null)
+            {
+                lastConfig = config;
+                WebClient http = new WebClient();
+                http.Proxy = new WebProxy(IPAddress.Loopback.ToString(), config.localPort);
+                http.DownloadStringCompleted += http_DownloadGFWTemplateCompleted;
+                http.DownloadStringAsync(new Uri(GFWLIST_TEMPLATE_URL));
+            }
+            else
+            {
+                WebClient http = new WebClient();
+                http.Proxy = new WebProxy(IPAddress.Loopback.ToString(), config.localPort);
+                http.DownloadStringCompleted += http_DownloadStringCompleted;
+                http.DownloadStringAsync(new Uri(GFWLIST_URL));
+            }
         }
 
         public void UpdatePACFromGFWList(Configuration config, string url)

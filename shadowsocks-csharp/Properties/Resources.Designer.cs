@@ -61,16 +61,6 @@ namespace Shadowsocks.Properties {
         }
         
         /// <summary>
-        ///   查找 System.Byte[] 类型的本地化资源。
-        /// </summary>
-        internal static byte[] abp_js {
-            get {
-                object obj = ResourceManager.GetObject("abp_js", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
         ///   查找类似 # translation for Simplified Chinese
         ///
         ///Shadowsocks=Shadowsocks
@@ -83,16 +73,16 @@ namespace Shadowsocks.Properties {
         ///Global=全局模式
         ///Servers=服务器
         ///Edit Servers...=编辑服务器...
+        ///Global Settings...=选项设置...
         ///Start on Boot=开机启动
         ///Allow Clients from LAN=允许来自局域网的连接
-        ///Random Proxy=服务器负载均衡
+        ///Enable balance=服务器负载均衡
         ///Local PAC=使用本地 PAC
         ///Online PAC=使用在线 PAC
-        ///Edit Local PAC File...=编辑本地 PAC 文件...
-        ///Update Local PAC from ChnIPList=从 ChnIPList 更新本地 PAC
-        ///Update Local PAC from GFWList=从 GFWList 更新本地 PAC
-        ///Edit User Rule for GFWList...=编辑 GFWList 的用户规则...
-        ///Show QRCode. [字符串的其余部分被截断]&quot;; 的本地化字符串。
+        ///Update Local PAC from LanIPList=更新本地PAC为绕过局域网IP
+        ///Update Local PAC from ChnIPList=更新本地PAC为绕过中国IP
+        ///Update Local PAC from GFWList=更新本地PAC为GFWList
+        ///Edit Local PAC File...=编辑本地 PAC  [字符串的其余部分被截断]&quot;; 的本地化字符串。
         /// </summary>
         internal static string cn {
             get {
