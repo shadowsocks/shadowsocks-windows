@@ -4,7 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Runtime.InteropServices;
-using System.Text;
+using System.Security.Cryptography;
 
 namespace Shadowsocks.Util
 {
@@ -40,6 +40,14 @@ namespace Shadowsocks.Util
                 }
                 return System.Text.Encoding.UTF8.GetString(sb.ToArray());
             }
+        }
+
+        public static void RandBytes(byte[] buf, int length)
+        {
+            byte[] temp = new byte[length];
+            RNGCryptoServiceProvider rngServiceProvider = new RNGCryptoServiceProvider();
+            rngServiceProvider.GetBytes(temp);
+            temp.CopyTo(buf, 0);
         }
 
         [DllImport("kernel32.dll")]

@@ -6,19 +6,22 @@ namespace Shadowsocks.Controller
 {
     class AutoStartup
     {
+        static string Key = "ShadowsocksR_" + Application.StartupPath.GetHashCode();
+
         public static bool Set(bool enabled)
         {
+            RegistryKey runKey = null;
             try
             {
                 string path = Application.ExecutablePath;
-                RegistryKey runKey = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Run", true);
+                runKey = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Run", true);
                 if (enabled)
                 {
-                    runKey.SetValue("ShadowsocksR", path);
+                    runKey.SetValue(Key, path);
                 }
                 else
                 {
-                    runKey.DeleteValue("ShadowsocksR");
+                    runKey.DeleteValue(Key);
                 }
                 runKey.Close();
                 return true;
@@ -28,19 +31,34 @@ namespace Shadowsocks.Controller
                 Logging.LogUsefulException(e);
                 return false;
             }
+            finally
+            {
+                if (runKey != null)
+                {
+                    try
+                    {
+                        runKey.Close();
+                    }
+                    catch (Exception e)
+                    {
+                        Logging.LogUsefulException(e);
+                    }
+                }
+            }
         }
 
         public static bool Check()
         {
+            RegistryKey runKey = null;
             try
             {
                 string path = Application.ExecutablePath;
-                RegistryKey runKey = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Run");
+                runKey = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Run");
                 string[] runList = runKey.GetValueNames();
                 runKey.Close();
                 foreach (string item in runList)
                 {
-                    if (item.Equals("ShadowsocksR"))
+                    if (item.Equals(Key))
                         return true;
                 }
                 return false;
@@ -49,6 +67,20 @@ namespace Shadowsocks.Controller
             {
                 Logging.LogUsefulException(e);
                 return false;
+            }
+            finally
+            {
+                if (runKey != null)
+                {
+                    try
+                    {
+                        runKey.Close();
+                    }
+                    catch (Exception e)
+                    {
+                        Logging.LogUsefulException(e);
+                    }
+                }
             }
         }
     }

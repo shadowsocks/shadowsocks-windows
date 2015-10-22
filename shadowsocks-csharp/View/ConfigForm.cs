@@ -21,6 +21,9 @@ namespace Shadowsocks.View
         // this is a copy of configuration that we are working on
         private Configuration _modifiedConfiguration;
         private int _oldSelectedIndex = -1;
+        private string _oldSelectedID = null;
+
+        private string _SelectedID = null;
 
         public ConfigForm(ShadowsocksController controller, UpdateChecker updateChecker)
         {
@@ -41,6 +44,8 @@ namespace Shadowsocks.View
             controller.ConfigChanged += controller_ConfigChanged;
 
             LoadCurrentConfiguration();
+            if (_modifiedConfiguration.index >= 0 && _modifiedConfiguration.index < _modifiedConfiguration.configs.Count)
+                _oldSelectedID = _modifiedConfiguration.configs[_modifiedConfiguration.index].id;
         }
 
         private void UpdateTexts()
@@ -118,7 +123,8 @@ namespace Shadowsocks.View
                     tcp_over_udp = CheckTCPoverUDP.Checked,
                     udp_over_tcp = CheckUDPoverUDP.Checked,
                     tcp_protocol = TCPProtocolComboBox.SelectedIndex,
-                    obfs_udp = CheckObfsUDP.Checked
+                    obfs_udp = CheckObfsUDP.Checked,
+                    id = _SelectedID
                 };
                 Configuration.CheckServer(server);
                 int ret = 0;
@@ -128,6 +134,17 @@ namespace Shadowsocks.View
                     )
                 {
                     ret = 1; // display changed
+                }
+                Server oldServer = _modifiedConfiguration.configs[_oldSelectedIndex];
+                if (oldServer.server == server.server
+                    && oldServer.server_port == server.server_port
+                    && oldServer.password == server.password
+                    && oldServer.method == server.method
+                    && oldServer.obfs == server.obfs
+                    && oldServer.obfsparam == server.obfsparam
+                    )
+                {
+                    server.setObfsData(oldServer.getObfsData());
                 }
                 _modifiedConfiguration.configs[_oldSelectedIndex] = server;
 
@@ -188,6 +205,7 @@ namespace Shadowsocks.View
                 CheckUDPoverUDP.Checked = server.udp_over_tcp;
                 TCPProtocolComboBox.SelectedIndex = server.tcp_protocol;
                 CheckObfsUDP.Checked = server.obfs_udp;
+                _SelectedID = server.id;
 
                 ServerGroupBox.Visible = true;
 
@@ -310,6 +328,17 @@ namespace Shadowsocks.View
                 MessageBox.Show(I18N.GetString("Please add at least one server"));
                 return;
             }
+            if (_oldSelectedID != null)
+            {
+                for (int i = 0; i < _modifiedConfiguration.configs.Count; ++i)
+                {
+                    if (_modifiedConfiguration.configs[i].id == _oldSelectedID)
+                    {
+                        _modifiedConfiguration.index = i;
+                        break;
+                    }
+                }
+            }
             controller.SaveServersConfig(_modifiedConfiguration);
             this.Close();
         }
@@ -336,13 +365,11 @@ namespace Shadowsocks.View
             SaveOldSelectedServer();
             if (index > 0 && index < _modifiedConfiguration.configs.Count)
             {
-                Server server = _modifiedConfiguration.configs[index - 1].Clone();
                 _modifiedConfiguration.configs.Reverse(index - 1, 2);
                 _oldSelectedIndex = index - 1;
                 ServersListBox.SelectedIndex = index - 1;
                 LoadConfiguration(_modifiedConfiguration);
                 ServersListBox.SelectedIndex = _oldSelectedIndex;
-                //SetServerListSelectedIndex(_oldSelectedIndex);
                 LoadSelectedServer();
             }
         }
@@ -354,13 +381,11 @@ namespace Shadowsocks.View
             SaveOldSelectedServer();
             if (_oldSelectedIndex >= 0 && _oldSelectedIndex < _modifiedConfiguration.configs.Count - 1)
             {
-                Server server = _modifiedConfiguration.configs[index + 1].Clone();
                 _modifiedConfiguration.configs.Reverse(index, 2);
                 _oldSelectedIndex = index + 1;
                 ServersListBox.SelectedIndex = index + 1;
                 LoadConfiguration(_modifiedConfiguration);
                 ServersListBox.SelectedIndex = _oldSelectedIndex;
-                //SetServerListSelectedIndex(_oldSelectedIndex);
                 LoadSelectedServer();
             }
         }
@@ -399,15 +424,22 @@ namespace Shadowsocks.View
 
         private void ObfsCombo_TextChanged(object sender, EventArgs e)
         {
-            Obfs.ObfsBase obfs = (Obfs.ObfsBase)Obfs.ObfsFactory.GetObfs(ObfsCombo.Text);
-            int[] properties = obfs.GetObfs()[ObfsCombo.Text];
-            if (properties[2] > 0)
+            try
+            {
+                Obfs.ObfsBase obfs = (Obfs.ObfsBase)Obfs.ObfsFactory.GetObfs(ObfsCombo.Text);
+                int[] properties = obfs.GetObfs()[ObfsCombo.Text];
+                if (properties[2] > 0)
+                {
+                    textObfsParam.Enabled = true;
+                }
+                else
+                {
+                    textObfsParam.Enabled = false;
+                }
+            }
+            catch
             {
                 textObfsParam.Enabled = true;
-            }
-            else
-            {
-                textObfsParam.Enabled = false;
             }
         }
     }

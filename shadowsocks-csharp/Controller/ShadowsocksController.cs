@@ -159,6 +159,7 @@ namespace Shadowsocks.Controller
         {
             List<Server> missingServers = MergeConfiguration(_config, config.configs);
             _config.configs = config.configs;
+            _config.index = config.index;
             _config.shareOverLan = config.shareOverLan;
             _config.localPort = config.localPort;
             _config.reconnectTimes = config.reconnectTimes;
@@ -176,6 +177,7 @@ namespace Shadowsocks.Controller
             {
                 s.GetConnections().CloseAll();
             }
+            SelectServerIndex(_config.index);
         }
 
         public bool AddServerBySSURL(string ssURL)

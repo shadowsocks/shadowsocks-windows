@@ -32,7 +32,7 @@ namespace Shadowsocks.Obfs
         {
             return null;
         }
-        public void SetHost(ServerInfo serverInfo)
+        public virtual void SetServerInfo(ServerInfo serverInfo)
         {
             Server = serverInfo;
         }

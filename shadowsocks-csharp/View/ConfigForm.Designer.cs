@@ -137,7 +137,6 @@
             // 
             // ObfsCombo
             // 
-            this.ObfsCombo.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.ObfsCombo.FormattingEnabled = true;
             this.ObfsCombo.Items.AddRange(new object[] {
             "plain",
@@ -145,7 +144,8 @@
             "tls_simple",
             "random_head",
             "verify_simple",
-            "verify_deflate"});
+            "verify_deflate",
+            "auth_simple"});
             this.ObfsCombo.Location = new System.Drawing.Point(92, 226);
             this.ObfsCombo.Name = "ObfsCombo";
             this.ObfsCombo.Size = new System.Drawing.Size(206, 22);
@@ -440,7 +440,7 @@
             this.DeleteButton.Location = new System.Drawing.Point(100, 0);
             this.DeleteButton.Margin = new System.Windows.Forms.Padding(0);
             this.DeleteButton.Name = "DeleteButton";
-            this.DeleteButton.Size = new System.Drawing.Size(100, 23);
+            this.DeleteButton.Size = new System.Drawing.Size(100, 32);
             this.DeleteButton.TabIndex = 7;
             this.DeleteButton.Text = "&Delete";
             this.DeleteButton.UseVisualStyleBackColor = true;
@@ -451,7 +451,7 @@
             this.AddButton.Location = new System.Drawing.Point(0, 0);
             this.AddButton.Margin = new System.Windows.Forms.Padding(0);
             this.AddButton.Name = "AddButton";
-            this.AddButton.Size = new System.Drawing.Size(100, 23);
+            this.AddButton.Size = new System.Drawing.Size(100, 32);
             this.AddButton.TabIndex = 6;
             this.AddButton.Text = "&Add";
             this.AddButton.UseVisualStyleBackColor = true;
@@ -537,7 +537,7 @@
             // 
             this.LinkUpdate.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.LinkUpdate.AutoSize = true;
-            this.LinkUpdate.Location = new System.Drawing.Point(39, 337);
+            this.LinkUpdate.Location = new System.Drawing.Point(39, 346);
             this.LinkUpdate.Margin = new System.Windows.Forms.Padding(5);
             this.LinkUpdate.Name = "LinkUpdate";
             this.LinkUpdate.Size = new System.Drawing.Size(122, 14);
@@ -564,15 +564,15 @@
             this.tableLayoutPanel4.RowCount = 2;
             this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel4.Size = new System.Drawing.Size(200, 46);
+            this.tableLayoutPanel4.Size = new System.Drawing.Size(200, 64);
             this.tableLayoutPanel4.TabIndex = 8;
             // 
             // DownButton
             // 
-            this.DownButton.Location = new System.Drawing.Point(100, 23);
+            this.DownButton.Location = new System.Drawing.Point(100, 32);
             this.DownButton.Margin = new System.Windows.Forms.Padding(0);
             this.DownButton.Name = "DownButton";
-            this.DownButton.Size = new System.Drawing.Size(100, 23);
+            this.DownButton.Size = new System.Drawing.Size(100, 32);
             this.DownButton.TabIndex = 9;
             this.DownButton.Text = "Down";
             this.DownButton.UseVisualStyleBackColor = true;
@@ -580,10 +580,10 @@
             // 
             // UpButton
             // 
-            this.UpButton.Location = new System.Drawing.Point(0, 23);
+            this.UpButton.Location = new System.Drawing.Point(0, 32);
             this.UpButton.Margin = new System.Windows.Forms.Padding(0);
             this.UpButton.Name = "UpButton";
-            this.UpButton.Size = new System.Drawing.Size(100, 23);
+            this.UpButton.Size = new System.Drawing.Size(100, 32);
             this.UpButton.TabIndex = 8;
             this.UpButton.Text = "Up";
             this.UpButton.UseVisualStyleBackColor = true;
@@ -652,8 +652,7 @@
             // 
             // ConfigForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
             this.AutoSize = true;
             this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.ClientSize = new System.Drawing.Size(906, 478);

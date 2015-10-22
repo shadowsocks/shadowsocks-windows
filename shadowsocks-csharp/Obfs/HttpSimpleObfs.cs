@@ -174,9 +174,15 @@ namespace Shadowsocks.Obfs
                     }
                     Array.Copy(encryptdata, 0, headdata, 0, headdata.Length);
                     int request_path_index = new Random().Next(_request_path.Length / 2) * 2;
+                    string host = Server.host;
+                    if (Server.param.Length > 0)
+                    {
+                        string[] hosts = Server.param.Split(",".ToCharArray());
+                        host = hosts[random.Next(hosts.Length)];
+                    }
                     string http_buf =
                         "GET /" + _request_path[request_path_index] + data2urlencode(headdata, headdata.Length) + _request_path[request_path_index + 1] + " HTTP/1.1\r\n"
-                        + "Host: " + (Server.param.Length > 0 ? Server.param : Server.host) + (Server.port == 80 ? "" : ":" + Server.port.ToString()) + "\r\n"
+                        + "Host: " + host + (Server.port == 80 ? "" : ":" + Server.port.ToString()) + "\r\n"
                         + "User-Agent: " + _request_useragent[_useragent_index] + "\r\n"
                         + "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\r\n"
                         + "Accept-Language: en-US,en;q=0.8\r\n"
@@ -197,8 +203,14 @@ namespace Shadowsocks.Obfs
                 }
                 else if (Method == "http2_simple")
                 {
+                    string host = Server.host;
+                    if (Server.param.Length > 0)
+                    {
+                        string[] hosts = Server.param.Split(",".ToCharArray());
+                        host = hosts[random.Next(hosts.Length)];
+                    }
                     string http_buf = "GET / HTTP/1.1\r\n"
-                    + "Host: " + (Server.param.Length > 0 ? Server.param : Server.host) + (Server.port == 80 ? "" : ":" + Server.port.ToString()) + "\r\n"
+                    + "Host: " + host + (Server.port == 80 ? "" : ":" + Server.port.ToString()) + "\r\n"
                     + "Connection: Upgrade, HTTP2-Settings\r\n"
                     + "Upgrade: h2c\r\n"
                     + "HTTP2-Settings: " + Convert.ToBase64String(encryptdata, 0, datalength).Replace('+', '-').Replace('/', '_') + "\r\n"

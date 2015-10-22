@@ -678,7 +678,7 @@ namespace Shadowsocks.Controller
                     sock.Shutdown(SocketShutdown.Both);
                     sock.Close();
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
                     //Logging.LogUsefulException(e);
                 }
@@ -1548,23 +1548,27 @@ namespace Shadowsocks.Controller
 
                 connectionPacketNumber = 0;
                 remoteUDPRecvBufferLength = 0;
-                lock (encryptionLock)
+                if (remote != null)
                 {
-                    if (server.getObfsdata() == null)
+                    lock (encryptionLock)
                     {
-                        server.setObfsdata(obfs.InitData());
+                        if (server.getObfsData() == null)
+                        {
+                            server.setObfsData(obfs.InitData());
+                        }
                     }
+                    int mss = 1440;
+                    try
+                    {
+                        mss = (int)this.remote.GetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.IpTimeToLive /* == TCP_MAXSEG */);
+                    }
+                    catch (Exception)
+                    {
+                        //Console.WriteLine(e);
+                    }
+                    IPEndPoint remoteEPremote = (IPEndPoint)remote.RemoteEndPoint;
+                    obfs.SetServerInfo(new ServerInfo(remoteEPremote.Address.ToString(), server.server_port, mss, server.obfsparam, server.getObfsData()));
                 }
-                int mss = 1440;
-                try
-                {
-                    mss = (int)this.remote.GetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.IpTimeToLive /* == TCP_MAXSEG */);
-                }
-                catch (Exception e)
-                {
-                    //Console.WriteLine(e);
-                }
-                obfs.SetHost(new ServerInfo(server.server, server.server_port, mss, server.obfsparam, server.getObfsdata()));
 
                 ResetTimeout(TTL);
 

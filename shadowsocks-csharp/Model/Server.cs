@@ -167,28 +167,6 @@ namespace Shadowsocks.Model
                         totalBytes += transLog[i].size;
                     }
 
-                    if (false)
-                    {
-                        for (int i = 1; i < transLog.Count; ++i)
-                        {
-                            long speed = (long)(transLog[i].size / (transLog[i].recvTime - transLog[i - 1].recvTime).TotalSeconds);
-                            if (speed > maxTransDownload)
-                                maxTransDownload = speed;
-                        }
-                    }
-                    else if (false)
-                    {
-                        int maxSpeed = 0;
-                        if (speedLog != null)
-                        {
-                            for (int i = 0; i < speedLog.Count; ++i)
-                            {
-                                maxSpeed = Math.Max(maxSpeed, speedLog[i].size);
-                            }
-                        }
-                        maxTransDownload = maxSpeed;
-                    }
-                    else //if (false)
                     {
                         long sumBytes = 0;
                         int iBeg = 0;
@@ -491,6 +469,7 @@ namespace Shadowsocks.Model
         public int tcp_protocol;
         public bool obfs_udp;
         public bool enable;
+        public string id;
 
         private object obfsdata;
         private ServerSpeedLog serverSpeedLog = new ServerSpeedLog();
@@ -601,6 +580,8 @@ namespace Shadowsocks.Model
             ret.udp_over_tcp = udp_over_tcp;
             ret.tcp_protocol = tcp_protocol;
             ret.obfs_udp = obfs_udp;
+            ret.id = id;
+            ret.obfsdata = obfsdata;
             return ret;
         }
 
@@ -617,6 +598,9 @@ namespace Shadowsocks.Model
             this.tcp_protocol = 0;
             this.obfs_udp = false;
             this.enable = true;
+            byte[] id = new byte[16];
+            Util.Utils.RandBytes(id, id.Length);
+            this.id = BitConverter.ToString(id);
         }
 
         public Server(string ssURL) : this()
@@ -694,11 +678,11 @@ namespace Shadowsocks.Model
             this.enable = enable;
         }
 
-        public object getObfsdata()
+        public object getObfsData()
         {
             return this.obfsdata;
         }
-        public void setObfsdata(object data)
+        public void setObfsData(object data)
         {
             this.obfsdata = data;
         }
