@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Net.Sockets;
 using System.Text;
+using Shadowsocks.Obfs;
 
 namespace Shadowsocks.Controller
 {
@@ -115,7 +116,14 @@ namespace Shadowsocks.Controller
         public static bool LogSocketException(string remarks, string server, Exception e)
         {
             // just log useful exceptions, not all of them
-            if (e is SocketException)
+            if (e is ObfsException)
+            {
+                ObfsException oe = (ObfsException)e;
+                Logging.Log(LogLevel.Error, "Proxy server [" + remarks + "(" + server + ")] "
+                    + oe.Message);
+                return true;
+            }
+            else if (e is SocketException)
             {
                 SocketException se = (SocketException)e;
                 if (se.SocketErrorCode == SocketError.ConnectionAborted)
@@ -196,6 +204,7 @@ namespace Shadowsocks.Controller
 
         public static void LogBin(LogLevel level, string info, byte[] data, int length)
         {
+#if DEBUG
             return;
             string s = "";
             for (int i = 0; i < length; ++i)
@@ -204,6 +213,7 @@ namespace Shadowsocks.Controller
                 s += " " + fs.Substring(fs.Length - 2, 2);
             }
             Log(level, info + s);
+#endif
         }
 
     }

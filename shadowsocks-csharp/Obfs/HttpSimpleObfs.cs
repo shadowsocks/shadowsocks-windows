@@ -109,7 +109,7 @@ namespace Shadowsocks.Obfs
                     }
                     else if (Method == "random_head")
                     {
-                        int size = random.Next(96) + 4;
+                        int size = random.Next(96) + 8;
                         byte[] rnd = new byte[size];
                         random.NextBytes(rnd);
                         Util.CRC32.SetCRC32(rnd);

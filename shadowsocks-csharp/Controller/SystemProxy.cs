@@ -38,6 +38,70 @@ namespace Shadowsocks.Controller
             }
         }
 
+        public static int GetFIPS()
+        {
+            RegistryKey registry = null;
+            try
+            {
+                registry = Registry.LocalMachine.OpenSubKey("SYSTEM\\CurrentControlSet\\Control\\Lsa\\FipsAlgorithmPolicy", false);
+                var readProxyServer = registry.GetValue("Enabled");
+                return (int)readProxyServer;
+            }
+            catch (Exception e)
+            {
+                Logging.LogUsefulException(e);
+                // TODO this should be moved into views
+                //MessageBox.Show(I18N.GetString("Failed to update registry"));
+            }
+            finally
+            {
+                if (registry != null)
+                {
+                    try
+                    {
+                        registry.Close();
+                    }
+                    catch (Exception e)
+                    {
+                        Logging.LogUsefulException(e);
+                    }
+                }
+            }
+            return -1;
+        }
+
+        public static bool SetFIPS(int val)
+        {
+            RegistryKey registry = null;
+            try
+            {
+                registry = Registry.LocalMachine.OpenSubKey("SYSTEM\\CurrentControlSet\\Control\\Lsa\\FipsAlgorithmPolicy", true);
+                RegistrySetValue(registry, "Enabled", val);
+                return true;
+            }
+            catch (Exception e)
+            {
+                Logging.LogUsefulException(e);
+                // TODO this should be moved into views
+                //MessageBox.Show(I18N.GetString("Failed to update registry"));
+            }
+            finally
+            {
+                if (registry != null)
+                {
+                    try
+                    {
+                        registry.Close();
+                    }
+                    catch (Exception e)
+                    {
+                        Logging.LogUsefulException(e);
+                    }
+                }
+            }
+            return false;
+        }
+
         public static void Update(Configuration config, bool forceDisable)
         {
             bool global = config.global;

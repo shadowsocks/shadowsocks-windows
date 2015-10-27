@@ -27,6 +27,7 @@ namespace Shadowsocks.Model
         public long totalDisconnectTimes;
         public long errorConnectTimes;
         public long errorTimeoutTimes;
+        public long errorEncryptTimes;
         public long errorContinurousTimes;
         public long totalUploadBytes;
         public long totalDownloadBytes;
@@ -41,6 +42,7 @@ namespace Shadowsocks.Model
         private long totalDisconnectTimes = 0;
         private long errorConnectTimes = 0;
         private long errorTimeoutTimes = 0;
+        private long errorEncryptTimes = 0;
         private long errorContinurousTimes = 0;
         private long transUpload = 0;
         private long transDownload = 0;
@@ -62,6 +64,7 @@ namespace Shadowsocks.Model
                 ret.totalDisconnectTimes = totalDisconnectTimes;
                 ret.errorConnectTimes = errorConnectTimes;
                 ret.errorTimeoutTimes = errorTimeoutTimes;
+                ret.errorEncryptTimes = errorEncryptTimes;
                 ret.errorContinurousTimes = errorContinurousTimes;
                 ret.totalUploadBytes = transUpload;
                 ret.totalDownloadBytes = transDownload;
@@ -106,6 +109,16 @@ namespace Shadowsocks.Model
                 lock (this)
                 {
                     return errorTimeoutTimes;
+                }
+            }
+        }
+        public long ErrorEncryptTimes
+        {
+            get
+            {
+                lock (this)
+                {
+                    return errorEncryptTimes;
                 }
             }
         }
@@ -253,6 +266,7 @@ namespace Shadowsocks.Model
                 totalDisconnectTimes = 0;
                 errorConnectTimes = 0;
                 errorTimeoutTimes = 0;
+                errorEncryptTimes = 0;
                 errorContinurousTimes = 0;
             }
         }
@@ -267,6 +281,7 @@ namespace Shadowsocks.Model
                 totalDisconnectTimes = 0;
                 errorConnectTimes = 0;
                 errorTimeoutTimes = 0;
+                errorEncryptTimes = 0;
                 errorContinurousTimes = 0;
                 transUpload = 0;
                 transDownload = 0;
@@ -300,6 +315,14 @@ namespace Shadowsocks.Model
             lock (this)
             {
                 errorTimeoutTimes += 1;
+                errorContinurousTimes += 1;
+            }
+        }
+        public void AddErrorEncryptTimes()
+        {
+            lock (this)
+            {
+                errorEncryptTimes += 1;
                 errorContinurousTimes += 1;
             }
         }
@@ -382,8 +405,8 @@ namespace Shadowsocks.Model
         public void UpdateDns(string host, IPAddress ip)
         {
             updateTime = DateTime.Now;
-            this.ip = ip;
-            this.host = host;
+            this.ip = new IPAddress(ip.GetAddressBytes());
+            this.host = (string)host.Clone();
         }
     }
     public class Connections
