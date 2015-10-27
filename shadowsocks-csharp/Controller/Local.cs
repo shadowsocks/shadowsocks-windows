@@ -256,6 +256,7 @@ namespace Shadowsocks.Controller
         // remote socket.
         protected Socket remote;
         protected Socket remoteUDP;
+        protected IPEndPoint remoteTCPEndPoint;
         protected IPEndPoint remoteUDPEndPoint;
         // TDP
         protected TDPHandler remoteTDP;
@@ -592,6 +593,7 @@ namespace Shadowsocks.Controller
         private void BeginConnect(IPAddress ipAddress, int serverPort)
         {
             IPEndPoint remoteEP = new IPEndPoint(ipAddress, serverPort);
+            remoteTCPEndPoint = remoteEP;
             remoteUDPEndPoint = remoteEP;
 
             if (server.tcp_over_udp && connectionUDP == null)
@@ -1561,6 +1563,37 @@ namespace Shadowsocks.Controller
             return 0;
         }
 
+        private void SetObfsPlugin()
+        {
+            if (remote != null)
+            {
+                lock (encryptionLock)
+                {
+                    if (server.getObfsData() == null)
+                    {
+                        server.setObfsData(obfs.InitData());
+                    }
+                }
+                int mss = 1440;
+                try
+                {
+                    mss = (int)this.remote.GetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.IpTimeToLive /* == TCP_MAXSEG */);
+                }
+                catch (Exception)
+                {
+                    //Console.WriteLine(e);
+                }
+                try
+                {
+                    obfs.SetServerInfo(new ServerInfo(remoteTCPEndPoint.Address.ToString(), server.server_port, mss, server.obfsparam, server.getObfsData()));
+                }
+                catch (Exception)
+                {
+                    obfs.SetServerInfo(new ServerInfo(server.server, server.server_port, mss, server.obfsparam, server.getObfsData()));
+                }
+            }
+        }
+
         // 2 sides connection start
         private void StartPipe()
         {
@@ -1579,27 +1612,7 @@ namespace Shadowsocks.Controller
 
                 connectionPacketNumber = 0;
                 remoteUDPRecvBufferLength = 0;
-                if (remote != null)
-                {
-                    lock (encryptionLock)
-                    {
-                        if (server.getObfsData() == null)
-                        {
-                            server.setObfsData(obfs.InitData());
-                        }
-                    }
-                    int mss = 1440;
-                    try
-                    {
-                        mss = (int)this.remote.GetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.IpTimeToLive /* == TCP_MAXSEG */);
-                    }
-                    catch (Exception)
-                    {
-                        //Console.WriteLine(e);
-                    }
-                    IPEndPoint remoteEPremote = (IPEndPoint)remote.RemoteEndPoint;
-                    obfs.SetServerInfo(new ServerInfo(remoteEPremote.Address.ToString(), server.server_port, mss, server.obfsparam, server.getObfsData()));
-                }
+                SetObfsPlugin();
 
                 ResetTimeout(TTL);
 

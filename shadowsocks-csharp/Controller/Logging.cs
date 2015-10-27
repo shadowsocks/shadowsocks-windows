@@ -95,9 +95,9 @@ namespace Shadowsocks.Controller
                 else
                 {
                     Console.WriteLine(e);
-#if DEBUG
+//#if DEBUG
                     Console.WriteLine(ToString(new StackTrace().GetFrames()));
-#endif
+//#endif
                 }
             }
             else if (e is System.ObjectDisposedException)
@@ -107,9 +107,9 @@ namespace Shadowsocks.Controller
             else
             {
                 Console.WriteLine(e);
-#if DEBUG
+//#if DEBUG
                 Console.WriteLine(ToString(new StackTrace().GetFrames()));
-#endif
+//#endif
             }
         }
 
@@ -182,9 +182,9 @@ namespace Shadowsocks.Controller
                 {
                     Logging.Log(LogLevel.Info, "Proxy server [" + remarks + "(" + server + ")] "
                         + Convert.ToString(se.SocketErrorCode) + ":" + se.Message);
-#if DEBUG
+//#if DEBUG
                     Console.WriteLine(ToString(new StackTrace().GetFrames()));
-#endif
+//#endif
                     return true;
                 }
             }
