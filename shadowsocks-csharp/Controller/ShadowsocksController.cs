@@ -284,21 +284,40 @@ namespace Shadowsocks.Controller
             }
         }
 
+        protected string GetObfsPartOfSSLink(Server server)
+        {
+            string parts = "";
+            if (server.obfs.Length > 0 && server.obfs != "plain")
+            {
+                parts = server.obfs + ":" + parts;
+                if (server.obfsparam.Length > 0)
+                {
+                    parts = server.obfsparam + ":" + parts;
+                    //if (server.obfsparam.IndexOf(',') < 0)
+                    //{
+                    //    parts = server.obfsparam + ":" + parts;
+                    //}
+                    //else
+                    //{
+                    //    int pos = server.obfsparam.IndexOf(',');
+                    //    parts = server.obfsparam + ":" + parts;
+                    //}
+                }
+            }
+            return parts + server.method + ":" + server.password + "@" + server.server + ":" + server.server_port;
+        }
+
         public string GetSSLinkForCurrentServer()
         {
             Server server = GetCurrentServer();
-            string parts = server.method + ":" + server.password + "@" + server.server + ":" + server.server_port;
-            if (server.obfs != "plain")
-                parts = server.obfs + ":" + parts;
+            string parts = GetObfsPartOfSSLink(server);
             string base64 = System.Convert.ToBase64String(Encoding.UTF8.GetBytes(parts));
             return "ss://" + base64;
         }
 
         public string GetSSLinkForServer(Server server)
         {
-            string parts = server.method + ":" + server.password + "@" + server.server + ":" + server.server_port;
-            if (server.obfs != "plain")
-                parts = server.obfs + ":" + parts;
+            string parts = GetObfsPartOfSSLink(server);
             string base64 = System.Convert.ToBase64String(Encoding.UTF8.GetBytes(parts));
             return "ss://" + base64;
         }
@@ -306,9 +325,7 @@ namespace Shadowsocks.Controller
         public string GetSSRemarksLinkForServer(Server server)
         {
             string remarks = server.remarks_base64;
-            string parts = server.method + ":" + server.password + "@" + server.server + ":" + server.server_port + "#" + remarks;
-            if (server.obfs != "plain")
-                parts = server.obfs + ":" + parts;
+            string parts = GetObfsPartOfSSLink(server) + "#" + remarks;
             string base64 = System.Convert.ToBase64String(Encoding.UTF8.GetBytes(parts));
             return "ss://" + base64;
         }

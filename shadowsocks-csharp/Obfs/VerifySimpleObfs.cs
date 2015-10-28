@@ -390,7 +390,6 @@ namespace Shadowsocks.Obfs
             Array.Copy(BitConverter.GetBytes(utc_time), 0, outdata, rand_len + 2, 4);
 
             Array.Copy(data, 0, outdata, rand_len + 12 + 2, datalength);
-            has_sent_header = true;
             outdata[0] = (byte)(outlength >> 8);
             outdata[1] = (byte)(outlength);
             outdata[2] = (byte)(rand_len);
@@ -406,7 +405,8 @@ namespace Shadowsocks.Obfs
             const int unit_len = 8100;
             if (!has_sent_header)
             {
-                int _datalength = Math.Max(random.Next(32) + 4, datalength);
+                int headsize = GetHeadSize(plaindata, 30);
+                int _datalength = Math.Min(random.Next(32) + headsize, datalength);
                 int outlen;
                 PackAuthData(data, _datalength, packdata, out outlen);
                 has_sent_header = true;
@@ -416,7 +416,7 @@ namespace Shadowsocks.Obfs
                 outlength += outlen;
                 datalength -= _datalength;
                 byte[] newdata = new byte[datalength];
-                Array.Copy(data, unit_len, newdata, 0, newdata.Length);
+                Array.Copy(data, _datalength, newdata, 0, newdata.Length);
                 data = newdata;
             }
             while (datalength > unit_len)

@@ -670,6 +670,16 @@ namespace Shadowsocks.Model
                     }
                     data = data.Substring(0, remarkIndexLastAt);
                 }
+                remarkIndexLastAt = data.IndexOf('/', indexLastAt);
+                string param = "";
+                if (remarkIndexLastAt > 0)
+                {
+                    if (remarkIndexLastAt + 1 < data.Length)
+                    {
+                        param = data.Substring(remarkIndexLastAt + 1);
+                    }
+                    data = data.Substring(0, remarkIndexLastAt);
+                }
 
                 string afterAt = data.Substring(indexLastAt + 1);
                 int indexLastColon = afterAt.LastIndexOf(':');
@@ -683,6 +693,14 @@ namespace Shadowsocks.Model
                 if (parts.Length >= 3)
                 {
                     this.obfs = parts[parts.Length - 3];
+                }
+                if (parts.Length >= 4)
+                {
+                    this.obfsparam = parts[parts.Length - 4];
+                    if (param.Length > 0)
+                    {
+                        this.obfsparam += "," + param;
+                    }
                 }
             }
             catch (IndexOutOfRangeException)

@@ -271,8 +271,8 @@ namespace Shadowsocks.View
                         // TotalConnecting
                         else if (columnName == "Connecting")
                         {
-                            SetCellText(cell, server.GetConnections().Count);
-                            //SetCellText(cell, serverSpeedLog.totalConnectTimes - serverSpeedLog.totalDisconnectTimes);
+                            //SetCellText(cell, server.GetConnections().Count);
+                            SetCellText(cell, serverSpeedLog.totalConnectTimes - serverSpeedLog.totalDisconnectTimes);
                         }
                         // AvgConnectTime
                         else if (columnName == "AvgLatency")

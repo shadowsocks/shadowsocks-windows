@@ -166,7 +166,6 @@ namespace Shadowsocks.Controller
                 handler.socks5RemoteUsername = _config.socks5User;
                 handler.socks5RemotePassword = _config.socks5Pass;
             }
-            handler.obfs = ObfsFactory.GetObfs(handler.server.obfs);
             handler.TTL = _config.TTL;
             handler.autoSwitchOff = _config.autoban;
 
@@ -289,6 +288,7 @@ namespace Shadowsocks.Controller
 
         protected object encryptionLock = new object();
         protected object decryptionLock = new object();
+        protected object obfsLock = new object();
         protected object recvUDPoverTCPLock = new object();
 
         protected bool connectionTCPIdle;
@@ -386,7 +386,7 @@ namespace Shadowsocks.Controller
                             }
                         }
                     }
-                    connection.Shutdown(SocketShutdown.Both);
+                    connection.Shutdown(SocketShutdown.Send);
                 }
             }
             catch (Exception)
@@ -517,10 +517,13 @@ namespace Shadowsocks.Controller
             reconnectTimesRemain--;
             reconnectTimes++;
 
-            lock (server)
+            if (this.State != ConnectState.HANDSHAKE && this.State != ConnectState.READY)
             {
-                server.ServerSpeedLog().AddDisconnectTimes();
-                server.GetConnections().DecRef(this.connection);
+                lock (server)
+                {
+                    server.ServerSpeedLog().AddDisconnectTimes();
+                    server.GetConnections().DecRef(this.connection);
+                }
             }
 
             if (reconnectTimes < 2)
@@ -560,7 +563,6 @@ namespace Shadowsocks.Controller
             speedTester.sizeDownload = 0;
 
             lastErrCode = 0;
-            obfs = ObfsFactory.GetObfs(server.obfs);
 
             try
             {
@@ -737,10 +739,13 @@ namespace Shadowsocks.Controller
                 {
                     if (this.State != ConnectState.END)
                     {
-                        this.State = ConnectState.END;
-                        server.ServerSpeedLog().AddDisconnectTimes();
-                        server.GetConnections().DecRef(this.connection);
+                        if (this.State != ConnectState.HANDSHAKE && this.State != ConnectState.READY)
+                        {
+                            server.ServerSpeedLog().AddDisconnectTimes();
+                            server.GetConnections().DecRef(this.connection);
+                        }
                         server.ServerSpeedLog().AddSpeedLog(new TransLog((int)speedTester.GetAvgDownloadSpeed(), DateTime.Now));
+                        this.State = ConnectState.END;
                     }
                     getCurrentServer = null;
                     ResetTimeout(0);
@@ -1300,6 +1305,7 @@ namespace Shadowsocks.Controller
         }
         private void Connect()
         {
+            closed = false;
             lock (server)
             {
                 server.ServerSpeedLog().AddConnectTimes();
@@ -1312,7 +1318,6 @@ namespace Shadowsocks.Controller
                 encryptorUDP = EncryptorFactory.GetEncryptor(server.method, server.password);
             }
             this.obfs = ObfsFactory.GetObfs(server.obfs);
-            closed = false;
             {
                 IPAddress ipAddress;
                 string serverURI = server.server;
@@ -1567,7 +1572,7 @@ namespace Shadowsocks.Controller
         {
             if (remote != null)
             {
-                lock (encryptionLock)
+                lock (obfsLock)
                 {
                     if (server.getObfsData() == null)
                     {
