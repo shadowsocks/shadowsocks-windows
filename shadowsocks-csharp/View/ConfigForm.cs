@@ -198,7 +198,14 @@ namespace Shadowsocks.View
                 ServerPortTextBox.Text = server.server_port.ToString();
                 PasswordTextBox.Text = server.password;
                 EncryptionSelect.Text = server.method ?? "aes-256-cfb";
-                TCPProtocolComboBox.Text = server.protocol ?? "origin";
+                if (server.protocol == null || server.protocol.Length == 0)
+                {
+                    TCPProtocolComboBox.Text = "origin";
+                }
+                else
+                {
+                    TCPProtocolComboBox.Text = server.protocol ?? "origin";
+                }
                 ObfsCombo.Text = server.obfs ?? "plain";
                 textObfsParam.Text = server.obfsparam;
                 RemarksTextBox.Text = server.remarks;

@@ -130,7 +130,7 @@ namespace Shadowsocks.Controller
 
         public void Stop()
         {
-            ResetTimeout(0);
+            ResetTimeout(0, null);
             if (_socket != null)
             {
                 _socket.Close();
@@ -143,7 +143,7 @@ namespace Shadowsocks.Controller
             }
         }
 
-        private void ResetTimeout(Double time)
+        private void ResetTimeout(Double time, Socket socket)
         {
             if (time <= 0 && timer == null)
                 return;
@@ -155,7 +155,8 @@ namespace Shadowsocks.Controller
                     if (timer != null)
                     {
                         timer.Enabled = false;
-                        timer.Elapsed -= timer_Elapsed;
+                        //timer.
+                        timer.Elapsed -= (sender, e) => timer_Elapsed(sender, e, socket);
                         timer.Dispose();
                         timer = null;
                     }
@@ -165,7 +166,7 @@ namespace Shadowsocks.Controller
                     if (timer == null)
                     {
                         timer = new System.Timers.Timer(time * 1000.0);
-                        timer.Elapsed += timer_Elapsed;
+                        timer.Elapsed += (sender, e) => timer_Elapsed(sender, e, socket);
                         timer.Start();
                     }
                     else
@@ -178,19 +179,19 @@ namespace Shadowsocks.Controller
             }
         }
 
-        private void timer_Elapsed(object sender, ElapsedEventArgs eventArgs)
+        private void timer_Elapsed(object sender, ElapsedEventArgs eventArgs, Socket socket)
         {
             if (timer == null)
             {
                 return;
             }
-            Socket listener = (Socket)sender;
+            Socket listener = socket;
             try
             {
                 listener.BeginAccept(
                     new AsyncCallback(AcceptCallback),
                     listener);
-                ResetTimeout(0);
+                ResetTimeout(0, listener);
             }
             catch (ObjectDisposedException)
             {
@@ -199,7 +200,7 @@ namespace Shadowsocks.Controller
             catch (Exception e)
             {
                 Logging.LogUsefulException(e);
-                ResetTimeout(5);
+                ResetTimeout(5, listener);
             }
         }
 
@@ -241,7 +242,7 @@ namespace Shadowsocks.Controller
                 catch (Exception e)
                 {
                     Logging.LogUsefulException(e);
-                    ResetTimeout(5);
+                    ResetTimeout(5, listener);
                 }
             }
         }

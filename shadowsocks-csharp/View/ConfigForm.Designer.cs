@@ -97,21 +97,21 @@
             this.tableLayoutPanel1.Controls.Add(this.PasswordTextBox, 1, 2);
             this.tableLayoutPanel1.Controls.Add(this.EncryptionLabel, 0, 3);
             this.tableLayoutPanel1.Controls.Add(this.EncryptionSelect, 1, 3);
-            this.tableLayoutPanel1.Controls.Add(this.LabelLink, 0, 5);
-            this.tableLayoutPanel1.Controls.Add(this.TextLink, 1, 5);
-            this.tableLayoutPanel1.Controls.Add(this.RemarksLabel, 0, 4);
-            this.tableLayoutPanel1.Controls.Add(this.RemarksTextBox, 1, 4);
+            this.tableLayoutPanel1.Controls.Add(this.LabelLink, 0, 6);
+            this.tableLayoutPanel1.Controls.Add(this.TextLink, 1, 6);
+            this.tableLayoutPanel1.Controls.Add(this.RemarksLabel, 0, 5);
+            this.tableLayoutPanel1.Controls.Add(this.RemarksTextBox, 1, 5);
             this.tableLayoutPanel1.Controls.Add(this.ObfsUDPLabel, 0, 12);
             this.tableLayoutPanel1.Controls.Add(this.CheckObfsUDP, 1, 12);
-            this.tableLayoutPanel1.Controls.Add(this.TCPProtocolLabel, 0, 7);
+            this.tableLayoutPanel1.Controls.Add(this.TCPProtocolLabel, 0, 4);
             this.tableLayoutPanel1.Controls.Add(this.UDPoverTCPLabel, 0, 11);
             this.tableLayoutPanel1.Controls.Add(this.CheckUDPoverUDP, 1, 11);
-            this.tableLayoutPanel1.Controls.Add(this.LabelNote, 1, 6);
-            this.tableLayoutPanel1.Controls.Add(this.LabelExpertSetting, 0, 6);
+            this.tableLayoutPanel1.Controls.Add(this.LabelNote, 1, 7);
+            this.tableLayoutPanel1.Controls.Add(this.LabelExpertSetting, 0, 7);
             this.tableLayoutPanel1.Controls.Add(this.PasswordLabel, 0, 2);
             this.tableLayoutPanel1.Controls.Add(this.TCPoverUDPLabel, 0, 10);
             this.tableLayoutPanel1.Controls.Add(this.CheckTCPoverUDP, 1, 10);
-            this.tableLayoutPanel1.Controls.Add(this.TCPProtocolComboBox, 1, 7);
+            this.tableLayoutPanel1.Controls.Add(this.TCPProtocolComboBox, 1, 4);
             this.tableLayoutPanel1.Controls.Add(this.labelObfsParam, 0, 9);
             this.tableLayoutPanel1.Controls.Add(this.textObfsParam, 1, 9);
             this.tableLayoutPanel1.Location = new System.Drawing.Point(8, 21);
@@ -245,7 +245,7 @@
             // 
             this.LabelLink.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.LabelLink.AutoSize = true;
-            this.LabelLink.Location = new System.Drawing.Point(58, 150);
+            this.LabelLink.Location = new System.Drawing.Point(58, 178);
             this.LabelLink.Name = "LabelLink";
             this.LabelLink.Size = new System.Drawing.Size(28, 14);
             this.LabelLink.TabIndex = 11;
@@ -254,7 +254,7 @@
             // TextLink
             // 
             this.TextLink.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.TextLink.Location = new System.Drawing.Point(92, 146);
+            this.TextLink.Location = new System.Drawing.Point(92, 174);
             this.TextLink.MaxLength = 32;
             this.TextLink.Name = "TextLink";
             this.TextLink.Size = new System.Drawing.Size(206, 22);
@@ -267,7 +267,7 @@
             // 
             this.RemarksLabel.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.RemarksLabel.AutoSize = true;
-            this.RemarksLabel.Location = new System.Drawing.Point(34, 122);
+            this.RemarksLabel.Location = new System.Drawing.Point(34, 150);
             this.RemarksLabel.Name = "RemarksLabel";
             this.RemarksLabel.Size = new System.Drawing.Size(52, 14);
             this.RemarksLabel.TabIndex = 9;
@@ -276,7 +276,7 @@
             // RemarksTextBox
             // 
             this.RemarksTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.RemarksTextBox.Location = new System.Drawing.Point(92, 118);
+            this.RemarksTextBox.Location = new System.Drawing.Point(92, 146);
             this.RemarksTextBox.MaxLength = 32;
             this.RemarksTextBox.Name = "RemarksTextBox";
             this.RemarksTextBox.Size = new System.Drawing.Size(206, 22);
@@ -310,7 +310,7 @@
             // 
             this.TCPProtocolLabel.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.TCPProtocolLabel.AutoSize = true;
-            this.TCPProtocolLabel.Location = new System.Drawing.Point(8, 202);
+            this.TCPProtocolLabel.Location = new System.Drawing.Point(8, 122);
             this.TCPProtocolLabel.Margin = new System.Windows.Forms.Padding(3, 5, 3, 5);
             this.TCPProtocolLabel.Name = "TCPProtocolLabel";
             this.TCPProtocolLabel.Size = new System.Drawing.Size(78, 14);
@@ -342,7 +342,7 @@
             // 
             this.LabelNote.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.LabelNote.AutoSize = true;
-            this.LabelNote.Location = new System.Drawing.Point(94, 176);
+            this.LabelNote.Location = new System.Drawing.Point(94, 204);
             this.LabelNote.Margin = new System.Windows.Forms.Padding(5);
             this.LabelNote.Name = "LabelNote";
             this.LabelNote.Size = new System.Drawing.Size(171, 14);
@@ -353,7 +353,7 @@
             // 
             this.LabelExpertSetting.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.LabelExpertSetting.AutoSize = true;
-            this.LabelExpertSetting.Location = new System.Drawing.Point(8, 176);
+            this.LabelExpertSetting.Location = new System.Drawing.Point(8, 204);
             this.LabelExpertSetting.Margin = new System.Windows.Forms.Padding(5);
             this.LabelExpertSetting.Name = "LabelExpertSetting";
             this.LabelExpertSetting.Size = new System.Drawing.Size(76, 14);
@@ -402,7 +402,7 @@
             "verify_simple",
             "verify_deflate",
             "auth_simple"});
-            this.TCPProtocolComboBox.Location = new System.Drawing.Point(92, 198);
+            this.TCPProtocolComboBox.Location = new System.Drawing.Point(92, 118);
             this.TCPProtocolComboBox.Name = "TCPProtocolComboBox";
             this.TCPProtocolComboBox.Size = new System.Drawing.Size(206, 22);
             this.TCPProtocolComboBox.TabIndex = 32;
@@ -629,6 +629,7 @@
             // 
             // MyCancelButton
             // 
+            this.MyCancelButton.AutoSize = true;
             this.MyCancelButton.DialogResult = System.Windows.Forms.DialogResult.Cancel;
             this.MyCancelButton.Dock = System.Windows.Forms.DockStyle.Right;
             this.MyCancelButton.Location = new System.Drawing.Point(84, 3);
@@ -642,6 +643,7 @@
             // 
             // OKButton
             // 
+            this.OKButton.AutoSize = true;
             this.OKButton.DialogResult = System.Windows.Forms.DialogResult.OK;
             this.OKButton.Dock = System.Windows.Forms.DockStyle.Right;
             this.OKButton.Location = new System.Drawing.Point(3, 3);
@@ -684,6 +686,7 @@
             this.tableLayoutPanel5.ResumeLayout(false);
             this.tableLayoutPanel5.PerformLayout();
             this.tableLayoutPanel3.ResumeLayout(false);
+            this.tableLayoutPanel3.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
