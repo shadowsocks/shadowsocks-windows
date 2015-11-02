@@ -137,15 +137,13 @@
             // 
             // ObfsCombo
             // 
+            this.ObfsCombo.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.ObfsCombo.FormattingEnabled = true;
             this.ObfsCombo.Items.AddRange(new object[] {
             "plain",
             "http_simple",
             "tls_simple",
-            "random_head",
-            "verify_simple",
-            "verify_deflate",
-            "auth_simple"});
+            "random_head"});
             this.ObfsCombo.Location = new System.Drawing.Point(92, 226);
             this.ObfsCombo.Name = "ObfsCombo";
             this.ObfsCombo.Size = new System.Drawing.Size(206, 22);
@@ -400,8 +398,10 @@
             this.TCPProtocolComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.TCPProtocolComboBox.FormattingEnabled = true;
             this.TCPProtocolComboBox.Items.AddRange(new object[] {
-            "Original",
-            "Verify header"});
+            "origin",
+            "verify_simple",
+            "verify_deflate",
+            "auth_simple"});
             this.TCPProtocolComboBox.Location = new System.Drawing.Point(92, 198);
             this.TCPProtocolComboBox.Name = "TCPProtocolComboBox";
             this.TCPProtocolComboBox.Size = new System.Drawing.Size(206, 22);

@@ -147,6 +147,7 @@ Connection: Close
             catch (Exception e)
             {
                 Console.WriteLine(e);
+                socket.Shutdown(SocketShutdown.Both);
                 socket.Close();
             }
         }
@@ -156,7 +157,8 @@ Connection: Close
             Socket conn = (Socket)ar.AsyncState;
             try
             {
-                conn.Shutdown(SocketShutdown.Send);
+                conn.Shutdown(SocketShutdown.Both);
+                conn.Close();
             }
             catch
             { }

@@ -94,11 +94,11 @@ namespace Shadowsocks.Controller
                         if (mergeConfig.configs[i].server == servers[j].server
                             && mergeConfig.configs[i].server_port == servers[j].server_port
                             && mergeConfig.configs[i].method == servers[j].method
+                            && mergeConfig.configs[i].protocol == servers[j].protocol
                             && mergeConfig.configs[i].obfs == servers[j].obfs
                             && mergeConfig.configs[i].password == servers[j].password
                             && mergeConfig.configs[i].tcp_over_udp == servers[j].tcp_over_udp
                             && mergeConfig.configs[i].udp_over_tcp == servers[j].udp_over_tcp
-                            && mergeConfig.configs[i].tcp_protocol == servers[j].tcp_protocol
                             )
                         {
                             servers[j].CopyServer(mergeConfig.configs[i]);
@@ -115,11 +115,11 @@ namespace Shadowsocks.Controller
                     if (mergeConfig.configs[i].server == servers[j].server
                         && mergeConfig.configs[i].server_port == servers[j].server_port
                         && mergeConfig.configs[i].method == servers[j].method
+                        && mergeConfig.configs[i].protocol == servers[j].protocol
                         && mergeConfig.configs[i].obfs == servers[j].obfs
                         && mergeConfig.configs[i].password == servers[j].password
                         && mergeConfig.configs[i].tcp_over_udp == servers[j].tcp_over_udp
                         && mergeConfig.configs[i].udp_over_tcp == servers[j].udp_over_tcp
-                        && mergeConfig.configs[i].tcp_protocol == servers[j].tcp_protocol
                         )
                     {
                         break;
@@ -287,6 +287,10 @@ namespace Shadowsocks.Controller
         protected string GetObfsPartOfSSLink(Server server)
         {
             string parts = "";
+            if (server.protocol.Length > 0 && server.protocol != "origin")
+            {
+                parts = server.protocol + ":" + parts;
+            }
             if (server.obfs.Length > 0 && server.obfs != "plain")
             {
                 parts = server.obfs + ":" + parts;

@@ -5,6 +5,7 @@ using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Text;
+using System.Timers;
 
 namespace Shadowsocks.Controller
 {
@@ -20,6 +21,8 @@ namespace Shadowsocks.Controller
         Socket _socket;
         Socket _socket_v6;
         IList<Service> _services;
+        protected System.Timers.Timer timer;
+        protected object timerLock = new object();
 
         public Listener(IList<Service> services)
         {
@@ -127,6 +130,7 @@ namespace Shadowsocks.Controller
 
         public void Stop()
         {
+            ResetTimeout(0);
             if (_socket != null)
             {
                 _socket.Close();
@@ -136,6 +140,66 @@ namespace Shadowsocks.Controller
             {
                 _socket_v6.Close();
                 _socket_v6 = null;
+            }
+        }
+
+        private void ResetTimeout(Double time)
+        {
+            if (time <= 0 && timer == null)
+                return;
+
+            lock (timerLock)
+            {
+                if (time <= 0)
+                {
+                    if (timer != null)
+                    {
+                        timer.Enabled = false;
+                        timer.Elapsed -= timer_Elapsed;
+                        timer.Dispose();
+                        timer = null;
+                    }
+                }
+                else
+                {
+                    if (timer == null)
+                    {
+                        timer = new System.Timers.Timer(time * 1000.0);
+                        timer.Elapsed += timer_Elapsed;
+                        timer.Start();
+                    }
+                    else
+                    {
+                        timer.Interval = time * 1000.0;
+                        timer.Stop();
+                        timer.Start();
+                    }
+                }
+            }
+        }
+
+        private void timer_Elapsed(object sender, ElapsedEventArgs eventArgs)
+        {
+            if (timer == null)
+            {
+                return;
+            }
+            Socket listener = (Socket)sender;
+            try
+            {
+                listener.BeginAccept(
+                    new AsyncCallback(AcceptCallback),
+                    listener);
+                ResetTimeout(0);
+            }
+            catch (ObjectDisposedException)
+            {
+                // do nothing
+            }
+            catch (Exception e)
+            {
+                Logging.LogUsefulException(e);
+                ResetTimeout(5);
             }
         }
 
@@ -177,6 +241,7 @@ namespace Shadowsocks.Controller
                 catch (Exception e)
                 {
                     Logging.LogUsefulException(e);
+                    ResetTimeout(5);
                 }
             }
         }
@@ -200,11 +265,13 @@ namespace Shadowsocks.Controller
                 }
                 // no service found for this
                 // shouldn't happen
+                conn.Shutdown(SocketShutdown.Both);
                 conn.Close();
             }
             catch (Exception e)
             {
                 Console.WriteLine(e);
+                conn.Shutdown(SocketShutdown.Both);
                 conn.Close();
             }
         }

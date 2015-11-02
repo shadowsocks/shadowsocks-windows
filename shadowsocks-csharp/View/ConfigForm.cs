@@ -122,7 +122,7 @@ namespace Shadowsocks.View
                     remarks = RemarksTextBox.Text,
                     tcp_over_udp = CheckTCPoverUDP.Checked,
                     udp_over_tcp = CheckUDPoverUDP.Checked,
-                    tcp_protocol = TCPProtocolComboBox.SelectedIndex,
+                    protocol = TCPProtocolComboBox.Text,
                     obfs_udp = CheckObfsUDP.Checked,
                     id = _SelectedID
                 };
@@ -198,12 +198,12 @@ namespace Shadowsocks.View
                 ServerPortTextBox.Text = server.server_port.ToString();
                 PasswordTextBox.Text = server.password;
                 EncryptionSelect.Text = server.method ?? "aes-256-cfb";
+                TCPProtocolComboBox.Text = server.protocol ?? "origin";
                 ObfsCombo.Text = server.obfs ?? "plain";
                 textObfsParam.Text = server.obfsparam;
                 RemarksTextBox.Text = server.remarks;
                 CheckTCPoverUDP.Checked = server.tcp_over_udp;
                 CheckUDPoverUDP.Checked = server.udp_over_tcp;
-                TCPProtocolComboBox.SelectedIndex = server.tcp_protocol;
                 CheckObfsUDP.Checked = server.obfs_udp;
                 _SelectedID = server.id;
 
