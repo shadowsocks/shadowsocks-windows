@@ -27,6 +27,7 @@ namespace Shadowsocks.Model
         public long totalDisconnectTimes;
         public long errorConnectTimes;
         public long errorTimeoutTimes;
+        public long errorEncryptTimes;
         public long errorContinurousTimes;
         public long totalUploadBytes;
         public long totalDownloadBytes;
@@ -41,6 +42,7 @@ namespace Shadowsocks.Model
         private long totalDisconnectTimes = 0;
         private long errorConnectTimes = 0;
         private long errorTimeoutTimes = 0;
+        private long errorEncryptTimes = 0;
         private long errorContinurousTimes = 0;
         private long transUpload = 0;
         private long transDownload = 0;
@@ -62,6 +64,7 @@ namespace Shadowsocks.Model
                 ret.totalDisconnectTimes = totalDisconnectTimes;
                 ret.errorConnectTimes = errorConnectTimes;
                 ret.errorTimeoutTimes = errorTimeoutTimes;
+                ret.errorEncryptTimes = errorEncryptTimes;
                 ret.errorContinurousTimes = errorContinurousTimes;
                 ret.totalUploadBytes = transUpload;
                 ret.totalDownloadBytes = transDownload;
@@ -106,6 +109,16 @@ namespace Shadowsocks.Model
                 lock (this)
                 {
                     return errorTimeoutTimes;
+                }
+            }
+        }
+        public long ErrorEncryptTimes
+        {
+            get
+            {
+                lock (this)
+                {
+                    return errorEncryptTimes;
                 }
             }
         }
@@ -167,28 +180,6 @@ namespace Shadowsocks.Model
                         totalBytes += transLog[i].size;
                     }
 
-                    if (false)
-                    {
-                        for (int i = 1; i < transLog.Count; ++i)
-                        {
-                            long speed = (long)(transLog[i].size / (transLog[i].recvTime - transLog[i - 1].recvTime).TotalSeconds);
-                            if (speed > maxTransDownload)
-                                maxTransDownload = speed;
-                        }
-                    }
-                    else if (false)
-                    {
-                        int maxSpeed = 0;
-                        if (speedLog != null)
-                        {
-                            for (int i = 0; i < speedLog.Count; ++i)
-                            {
-                                maxSpeed = Math.Max(maxSpeed, speedLog[i].size);
-                            }
-                        }
-                        maxTransDownload = maxSpeed;
-                    }
-                    else //if (false)
                     {
                         long sumBytes = 0;
                         int iBeg = 0;
@@ -275,6 +266,7 @@ namespace Shadowsocks.Model
                 totalDisconnectTimes = 0;
                 errorConnectTimes = 0;
                 errorTimeoutTimes = 0;
+                errorEncryptTimes = 0;
                 errorContinurousTimes = 0;
             }
         }
@@ -289,6 +281,7 @@ namespace Shadowsocks.Model
                 totalDisconnectTimes = 0;
                 errorConnectTimes = 0;
                 errorTimeoutTimes = 0;
+                errorEncryptTimes = 0;
                 errorContinurousTimes = 0;
                 transUpload = 0;
                 transDownload = 0;
@@ -322,6 +315,14 @@ namespace Shadowsocks.Model
             lock (this)
             {
                 errorTimeoutTimes += 1;
+                errorContinurousTimes += 1;
+            }
+        }
+        public void AddErrorEncryptTimes()
+        {
+            lock (this)
+            {
+                errorEncryptTimes += 1;
                 errorContinurousTimes += 1;
             }
         }
@@ -404,8 +405,8 @@ namespace Shadowsocks.Model
         public void UpdateDns(string host, IPAddress ip)
         {
             updateTime = DateTime.Now;
-            this.ip = ip;
-            this.host = host;
+            this.ip = new IPAddress(ip.GetAddressBytes());
+            this.host = (string)host.Clone();
         }
     }
     public class Connections
@@ -491,6 +492,7 @@ namespace Shadowsocks.Model
         public int tcp_protocol;
         public bool obfs_udp;
         public bool enable;
+        public string id;
 
         private object obfsdata;
         private ServerSpeedLog serverSpeedLog = new ServerSpeedLog();
@@ -601,6 +603,8 @@ namespace Shadowsocks.Model
             ret.udp_over_tcp = udp_over_tcp;
             ret.tcp_protocol = tcp_protocol;
             ret.obfs_udp = obfs_udp;
+            ret.id = id;
+            ret.obfsdata = obfsdata;
             return ret;
         }
 
@@ -617,6 +621,9 @@ namespace Shadowsocks.Model
             this.tcp_protocol = 0;
             this.obfs_udp = false;
             this.enable = true;
+            byte[] id = new byte[16];
+            Util.Utils.RandBytes(id, id.Length);
+            this.id = BitConverter.ToString(id);
         }
 
         public Server(string ssURL) : this()
@@ -663,6 +670,16 @@ namespace Shadowsocks.Model
                     }
                     data = data.Substring(0, remarkIndexLastAt);
                 }
+                remarkIndexLastAt = data.IndexOf('/', indexLastAt);
+                string param = "";
+                if (remarkIndexLastAt > 0)
+                {
+                    if (remarkIndexLastAt + 1 < data.Length)
+                    {
+                        param = data.Substring(remarkIndexLastAt + 1);
+                    }
+                    data = data.Substring(0, remarkIndexLastAt);
+                }
 
                 string afterAt = data.Substring(indexLastAt + 1);
                 int indexLastColon = afterAt.LastIndexOf(':');
@@ -676,6 +693,14 @@ namespace Shadowsocks.Model
                 if (parts.Length >= 3)
                 {
                     this.obfs = parts[parts.Length - 3];
+                }
+                if (parts.Length >= 4)
+                {
+                    this.obfsparam = parts[parts.Length - 4];
+                    if (param.Length > 0)
+                    {
+                        this.obfsparam += "," + param;
+                    }
                 }
             }
             catch (IndexOutOfRangeException)
@@ -694,11 +719,11 @@ namespace Shadowsocks.Model
             this.enable = enable;
         }
 
-        public object getObfsdata()
+        public object getObfsData()
         {
             return this.obfsdata;
         }
-        public void setObfsdata(object data)
+        public void setObfsData(object data)
         {
             this.obfsdata = data;
         }

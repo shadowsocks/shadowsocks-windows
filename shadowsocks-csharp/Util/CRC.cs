@@ -6,9 +6,9 @@ namespace Shadowsocks.Util
 {
     class CRC32
     {
-        protected static ulong[] Crc32Table;
+        protected static ulong[] Crc32Table = CreateCRC32Table();
         //生成CRC32码表  
-        public static void CreateCRC32Table()
+        public static ulong[] CreateCRC32Table()
         {
             ulong Crc;
             Crc32Table = new ulong[256];
@@ -25,26 +25,16 @@ namespace Shadowsocks.Util
                 }
                 Crc32Table[i] = Crc;
             }
+            return Crc32Table;
         }
 
         //获取字符串的CRC32校验值
         public static ulong CalcCRC32(byte[] input, int len, ulong value = 0xffffffff)
         {
-            //生成码表
-            if (Crc32Table == null)
-                CreateCRC32Table();
-            byte[] buffer = input;
-            for (int i = 0; i < len; i++)
-            {
-                value = (value >> 8) ^ Crc32Table[(value & 0xFF) ^ buffer[i]];
-            }
-            return value ^ 0xffffffff;
+            return CalcCRC32(input, 0, len, value);
         }
         public static ulong CalcCRC32(byte[] input, int index, int len, ulong value = 0xffffffff)
         {
-            //生成码表
-            if (Crc32Table == null)
-                CreateCRC32Table();
             byte[] buffer = input;
             for (int i = index; i < len; i++)
             {
@@ -55,20 +45,12 @@ namespace Shadowsocks.Util
 
         public static void SetCRC32(byte[] buffer)
         {
-            ulong crc = ~CalcCRC32(buffer, buffer.Length - 4);
-            buffer[buffer.Length - 1] = (byte)(crc >> 24);
-            buffer[buffer.Length - 2] = (byte)(crc >> 16);
-            buffer[buffer.Length - 3] = (byte)(crc >> 8);
-            buffer[buffer.Length - 4] = (byte)(crc);
+            SetCRC32(buffer, 0, buffer.Length);
         }
 
         public static void SetCRC32(byte[] buffer, int length)
         {
-            ulong crc = ~CalcCRC32(buffer, length - 4);
-            buffer[length - 1] = (byte)(crc >> 24);
-            buffer[length - 2] = (byte)(crc >> 16);
-            buffer[length - 3] = (byte)(crc >> 8);
-            buffer[length - 4] = (byte)(crc);
+            SetCRC32(buffer, 0, length);
         }
         public static void SetCRC32(byte[] buffer, int index, int length)
         {
@@ -77,16 +59,6 @@ namespace Shadowsocks.Util
             buffer[length - 2] = (byte)(crc >> 16);
             buffer[length - 3] = (byte)(crc >> 8);
             buffer[length - 4] = (byte)(crc);
-        }
-
-        public byte[] CheckCRC32(byte[] buffer)
-        {
-            ulong crc = CalcCRC32(buffer, buffer.Length);
-            if (crc != 0xffffffffu)
-                return null;
-            byte[] ret = new byte[buffer.Length - 4];
-            Array.Copy(buffer, ret, buffer.Length - 4);
-            return ret;
         }
 
         public static bool CheckCRC32(byte[] buffer, int length)

@@ -240,7 +240,6 @@ namespace Shadowsocks.View
                     int id = (int)id_cell.Value;
                     Server server = config.configs[id];
                     ServerSpeedLogShow serverSpeedLog = ServerSpeedLogList[id];
-                    const byte colAdd = 2;
                     listOrder[id] = list_index;
                     rowChange = false;
                     for (int curcol = 0; curcol < ServerDataGrid.Columns.Count; ++curcol)
@@ -272,8 +271,8 @@ namespace Shadowsocks.View
                         // TotalConnecting
                         else if (columnName == "Connecting")
                         {
-                            SetCellText(cell, server.GetConnections().Count);
-                            //SetCellText(cell, serverSpeedLog.totalConnectTimes - serverSpeedLog.totalDisconnectTimes);
+                            //SetCellText(cell, server.GetConnections().Count);
+                            SetCellText(cell, serverSpeedLog.totalConnectTimes - serverSpeedLog.totalDisconnectTimes);
                         }
                         // AvgConnectTime
                         else if (columnName == "AvgLatency")

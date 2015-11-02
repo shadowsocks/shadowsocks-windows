@@ -13,10 +13,6 @@ namespace Shadowsocks.Encryption
         static EncryptorFactory()
         {
             _registeredEncryptors = new Dictionary<string, Type>();
-            foreach (string method in TableEncryptor.SupportedCiphers())
-            {
-                _registeredEncryptors.Add(method, typeof(TableEncryptor));
-            }
             foreach (string method in PolarSSLEncryptor.SupportedCiphers())
             {
                 _registeredEncryptors.Add(method, typeof(PolarSSLEncryptor));
@@ -31,7 +27,7 @@ namespace Shadowsocks.Encryption
         {
             if (string.IsNullOrEmpty(method))
             {
-                method = "table";
+                method = "aes-256-cfb";
             }
             method = method.ToLowerInvariant();
             Type t = _registeredEncryptors[method];

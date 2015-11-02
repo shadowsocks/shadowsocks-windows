@@ -38,6 +38,70 @@ namespace Shadowsocks.Controller
             }
         }
 
+        public static int GetFIPS()
+        {
+            RegistryKey registry = null;
+            try
+            {
+                registry = Registry.LocalMachine.OpenSubKey("SYSTEM\\CurrentControlSet\\Control\\Lsa\\FipsAlgorithmPolicy", false);
+                var readProxyServer = registry.GetValue("Enabled");
+                return (int)readProxyServer;
+            }
+            catch (Exception e)
+            {
+                Logging.LogUsefulException(e);
+                // TODO this should be moved into views
+                //MessageBox.Show(I18N.GetString("Failed to update registry"));
+            }
+            finally
+            {
+                if (registry != null)
+                {
+                    try
+                    {
+                        registry.Close();
+                    }
+                    catch (Exception e)
+                    {
+                        Logging.LogUsefulException(e);
+                    }
+                }
+            }
+            return -1;
+        }
+
+        public static bool SetFIPS(int val)
+        {
+            RegistryKey registry = null;
+            try
+            {
+                registry = Registry.LocalMachine.OpenSubKey("SYSTEM\\CurrentControlSet\\Control\\Lsa\\FipsAlgorithmPolicy", true);
+                RegistrySetValue(registry, "Enabled", val);
+                return true;
+            }
+            catch (Exception e)
+            {
+                Logging.LogUsefulException(e);
+                // TODO this should be moved into views
+                //MessageBox.Show(I18N.GetString("Failed to update registry"));
+            }
+            finally
+            {
+                if (registry != null)
+                {
+                    try
+                    {
+                        registry.Close();
+                    }
+                    catch (Exception e)
+                    {
+                        Logging.LogUsefulException(e);
+                    }
+                }
+            }
+            return false;
+        }
+
         public static void Update(Configuration config, bool forceDisable)
         {
             bool global = config.global;
@@ -46,11 +110,10 @@ namespace Shadowsocks.Controller
             {
                 enabled = false;
             }
+            RegistryKey registry = null;
             try
             {
-                RegistryKey registry =
-                    Registry.CurrentUser.OpenSubKey("Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings",
-                        true);
+                registry = Registry.CurrentUser.OpenSubKey("Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings", true);
                 if (enabled)
                 {
                     if (global)
@@ -90,16 +153,29 @@ namespace Shadowsocks.Controller
                 // TODO this should be moved into views
                 MessageBox.Show(I18N.GetString("Failed to update registry"));
             }
+            finally
+            {
+                if (registry != null)
+                {
+                    try
+                    {
+                        registry.Close();
+                    }
+                    catch (Exception e)
+                    {
+                        Logging.LogUsefulException(e);
+                    }
+                }
+            }
         }
 
         private static void CopyProxySettingFromLan()
         {
-            RegistryKey registry =
-                Registry.CurrentUser.OpenSubKey("Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings\\Connections",
-                    true);
-            var defaultValue = registry.GetValue("DefaultConnectionSettings");
+            RegistryKey registry = null;
             try
             {
+                registry = Registry.CurrentUser.OpenSubKey("Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings\\Connections", true);
+                var defaultValue = registry.GetValue("DefaultConnectionSettings");
                 var connections = registry.GetValueNames();
                 foreach (String each in connections)
                 {
@@ -117,6 +193,20 @@ namespace Shadowsocks.Controller
             {
                 Logging.LogUsefulException(e);
             }
+            finally
+            {
+                if (registry != null)
+                {
+                    try
+                    {
+                        registry.Close();
+                    }
+                    catch (Exception e)
+                    {
+                        Logging.LogUsefulException(e);
+                    }
+                }
+            }
         }
 
         private static String GetTimestamp(DateTime value)
@@ -130,23 +220,40 @@ namespace Shadowsocks.Controller
         /// <param name="set">Provide 'true' if you want to check the 'Automatically detect Proxy' check box. To uncheck, pass 'false'</param>
         private static void IEAutoDetectProxy(bool set)
         {
-            RegistryKey registry =
-                Registry.CurrentUser.OpenSubKey("Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings\\Connections",
-                    true);
-            byte[] defConnection = (byte[])registry.GetValue("DefaultConnectionSettings");
-            byte[] savedLegacySetting = (byte[])registry.GetValue("SavedLegacySettings");
-            if (set)
+            RegistryKey registry = null;
+            try
             {
-                defConnection[8] = Convert.ToByte(defConnection[8] & 8);
-                savedLegacySetting[8] = Convert.ToByte(savedLegacySetting[8] & 8);
+                registry = Registry.CurrentUser.OpenSubKey("Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings\\Connections",
+                        true);
+                byte[] defConnection = (byte[])registry.GetValue("DefaultConnectionSettings");
+                byte[] savedLegacySetting = (byte[])registry.GetValue("SavedLegacySettings");
+                if (set)
+                {
+                    defConnection[8] = Convert.ToByte(defConnection[8] & 8);
+                    savedLegacySetting[8] = Convert.ToByte(savedLegacySetting[8] & 8);
+                }
+                else
+                {
+                    defConnection[8] = Convert.ToByte(defConnection[8] & ~8);
+                    savedLegacySetting[8] = Convert.ToByte(savedLegacySetting[8] & ~8);
+                }
+                RegistrySetValue(registry, "DefaultConnectionSettings", defConnection);
+                RegistrySetValue(registry, "SavedLegacySettings", savedLegacySetting);
             }
-            else
+            finally
             {
-                defConnection[8] = Convert.ToByte(defConnection[8] & ~8);
-                savedLegacySetting[8] = Convert.ToByte(savedLegacySetting[8] & ~8);
+                if (registry != null)
+                {
+                    try
+                    {
+                        registry.Close();
+                    }
+                    catch (Exception e)
+                    {
+                        Logging.LogUsefulException(e);
+                    }
+                }
             }
-            RegistrySetValue(registry, "DefaultConnectionSettings", defConnection);
-            RegistrySetValue(registry, "SavedLegacySettings", savedLegacySetting);
         }
     }
 }

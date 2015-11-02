@@ -166,7 +166,6 @@ namespace Shadowsocks.Controller
                 handler.socks5RemoteUsername = _config.socks5User;
                 handler.socks5RemotePassword = _config.socks5Pass;
             }
-            handler.obfs = ObfsFactory.GetObfs(handler.server.obfs);
             handler.TTL = _config.TTL;
             handler.autoSwitchOff = _config.autoban;
 
@@ -256,6 +255,7 @@ namespace Shadowsocks.Controller
         // remote socket.
         protected Socket remote;
         protected Socket remoteUDP;
+        protected IPEndPoint remoteTCPEndPoint;
         protected IPEndPoint remoteUDPEndPoint;
         // TDP
         protected TDPHandler remoteTDP;
@@ -267,7 +267,7 @@ namespace Shadowsocks.Controller
         // Size of receive buffer.
         protected const int RecvSize = 16384;
         protected const int BufferSize = RecvSize * 2 + 4096;
-        protected const int AutoSwitchOffErrorTimes = 50;
+        protected const int AutoSwitchOffErrorTimes = 3;
         // remote receive buffer
         protected byte[] remoteRecvBuffer = new byte[RecvSize];
         // remote send buffer
@@ -288,6 +288,7 @@ namespace Shadowsocks.Controller
 
         protected object encryptionLock = new object();
         protected object decryptionLock = new object();
+        protected object obfsLock = new object();
         protected object recvUDPoverTCPLock = new object();
 
         protected bool connectionTCPIdle;
@@ -385,7 +386,7 @@ namespace Shadowsocks.Controller
                             }
                         }
                     }
-                    connection.Shutdown(SocketShutdown.Both);
+                    connection.Shutdown(SocketShutdown.Send);
                 }
             }
             catch (Exception)
@@ -397,7 +398,23 @@ namespace Shadowsocks.Controller
         public int LogSocketException(Exception e)
         {
             // just log useful exceptions, not all of them
-            if (e is SocketException)
+            if (e is ObfsException)
+            {
+                ObfsException oe = (ObfsException)e;
+                if (lastErrCode == 0)
+                {
+                    lastErrCode = 16;
+                    server.ServerSpeedLog().AddErrorEncryptTimes();
+                    if (server.ServerSpeedLog().ErrorEncryptTimes >= 2
+                        && server.ServerSpeedLog().ErrorContinurousTimes >= AutoSwitchOffErrorTimes
+                        && autoSwitchOff)
+                    {
+                        server.setEnable(false);
+                    }
+                }
+                return 1; // proxy DNS error
+            }
+            else if (e is SocketException)
             {
                 SocketException se = (SocketException)e;
                 if (se.SocketErrorCode == SocketError.ConnectionAborted)
@@ -411,7 +428,9 @@ namespace Shadowsocks.Controller
                     {
                         lastErrCode = 1;
                         server.ServerSpeedLog().AddErrorTimes();
-                        if (server.ServerSpeedLog().ErrorConnectTimes >= 3 && autoSwitchOff)
+                        if (server.ServerSpeedLog().ErrorConnectTimes >= 3
+                            && server.ServerSpeedLog().ErrorContinurousTimes >= AutoSwitchOffErrorTimes
+                            && autoSwitchOff)
                         {
                             server.setEnable(false);
                         }
@@ -437,7 +456,9 @@ namespace Shadowsocks.Controller
                     {
                         lastErrCode = 1;
                         server.ServerSpeedLog().AddErrorTimes();
-                        if (server.ServerSpeedLog().ErrorConnectTimes >= 3 && autoSwitchOff)
+                        if (server.ServerSpeedLog().ErrorConnectTimes >= 3
+                            && server.ServerSpeedLog().ErrorContinurousTimes >= AutoSwitchOffErrorTimes
+                            && autoSwitchOff)
                         {
                             server.setEnable(false);
                         }
@@ -450,7 +471,9 @@ namespace Shadowsocks.Controller
                     {
                         lastErrCode = 3;
                         server.ServerSpeedLog().AddErrorTimes();
-                        if (server.ServerSpeedLog().ErrorConnectTimes >= 3 && autoSwitchOff)
+                        if (server.ServerSpeedLog().ErrorConnectTimes >= 3
+                            && server.ServerSpeedLog().ErrorContinurousTimes >= AutoSwitchOffErrorTimes
+                            && autoSwitchOff)
                         {
                             server.setEnable(false);
                         }
@@ -465,7 +488,9 @@ namespace Shadowsocks.Controller
                         if (speedTester != null && speedTester.sizeDownload == 0)
                         {
                             server.ServerSpeedLog().AddTimeoutTimes();
-                            if (server.ServerSpeedLog().ErrorContinurousTimes >= AutoSwitchOffErrorTimes && autoSwitchOff)
+                            if (server.ServerSpeedLog().ErrorTimeoutTimes >= 3
+                                && server.ServerSpeedLog().ErrorContinurousTimes >= AutoSwitchOffErrorTimes
+                                && autoSwitchOff)
                             {
                                 server.setEnable(false);
                             }
@@ -492,10 +517,13 @@ namespace Shadowsocks.Controller
             reconnectTimesRemain--;
             reconnectTimes++;
 
-            lock (server)
+            if (this.State != ConnectState.HANDSHAKE && this.State != ConnectState.READY)
             {
-                server.ServerSpeedLog().AddDisconnectTimes();
-                server.GetConnections().DecRef(this.connection);
+                lock (server)
+                {
+                    server.ServerSpeedLog().AddDisconnectTimes();
+                    server.GetConnections().DecRef(this.connection);
+                }
             }
 
             if (reconnectTimes < 2)
@@ -521,6 +549,11 @@ namespace Shadowsocks.Controller
                     Logging.LogUsefulException(e);
                 }
                 remoteTDP = null;
+            }
+            if (obfs != null)
+            {
+                obfs.Dispose();
+                obfs = null;
             }
 
             connectionShutdown = false;
@@ -562,6 +595,7 @@ namespace Shadowsocks.Controller
         private void BeginConnect(IPAddress ipAddress, int serverPort)
         {
             IPEndPoint remoteEP = new IPEndPoint(ipAddress, serverPort);
+            remoteTCPEndPoint = remoteEP;
             remoteUDPEndPoint = remoteEP;
 
             if (server.tcp_over_udp && connectionUDP == null)
@@ -634,6 +668,7 @@ namespace Shadowsocks.Controller
                 IPHostEntry ipHostInfo = Dns.EndGetHostEntry(ar);
                 ipAddress = ipHostInfo.AddressList[0];
                 int serverPort = server.server_port;
+                server.DnsBuffer().UpdateDns(server.server, ipAddress);
                 BeginConnect(ipAddress, serverPort);
             }
             catch (Exception e)
@@ -678,7 +713,7 @@ namespace Shadowsocks.Controller
                     sock.Shutdown(SocketShutdown.Both);
                     sock.Close();
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
                     //Logging.LogUsefulException(e);
                 }
@@ -704,10 +739,13 @@ namespace Shadowsocks.Controller
                 {
                     if (this.State != ConnectState.END)
                     {
-                        this.State = ConnectState.END;
-                        server.ServerSpeedLog().AddDisconnectTimes();
-                        server.GetConnections().DecRef(this.connection);
+                        if (this.State != ConnectState.HANDSHAKE && this.State != ConnectState.READY)
+                        {
+                            server.ServerSpeedLog().AddDisconnectTimes();
+                            server.GetConnections().DecRef(this.connection);
+                        }
                         server.ServerSpeedLog().AddSpeedLog(new TransLog((int)speedTester.GetAvgDownloadSpeed(), DateTime.Now));
+                        this.State = ConnectState.END;
                     }
                     getCurrentServer = null;
                     ResetTimeout(0);
@@ -1267,6 +1305,7 @@ namespace Shadowsocks.Controller
         }
         private void Connect()
         {
+            closed = false;
             lock (server)
             {
                 server.ServerSpeedLog().AddConnectTimes();
@@ -1279,7 +1318,6 @@ namespace Shadowsocks.Controller
                 encryptorUDP = EncryptorFactory.GetEncryptor(server.method, server.password);
             }
             this.obfs = ObfsFactory.GetObfs(server.obfs);
-            closed = false;
             {
                 IPAddress ipAddress;
                 string serverURI = server.server;
@@ -1530,6 +1568,37 @@ namespace Shadowsocks.Controller
             return 0;
         }
 
+        private void SetObfsPlugin()
+        {
+            if (remote != null)
+            {
+                lock (obfsLock)
+                {
+                    if (server.getObfsData() == null)
+                    {
+                        server.setObfsData(obfs.InitData());
+                    }
+                }
+                int mss = 1440;
+                try
+                {
+                    mss = (int)this.remote.GetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.IpTimeToLive /* == TCP_MAXSEG */);
+                }
+                catch (Exception)
+                {
+                    //Console.WriteLine(e);
+                }
+                try
+                {
+                    obfs.SetServerInfo(new ServerInfo(remoteTCPEndPoint.Address.ToString(), server.server_port, mss, server.obfsparam, server.getObfsData()));
+                }
+                catch (Exception)
+                {
+                    obfs.SetServerInfo(new ServerInfo(server.server, server.server_port, mss, server.obfsparam, server.getObfsData()));
+                }
+            }
+        }
+
         // 2 sides connection start
         private void StartPipe()
         {
@@ -1548,23 +1617,7 @@ namespace Shadowsocks.Controller
 
                 connectionPacketNumber = 0;
                 remoteUDPRecvBufferLength = 0;
-                lock (encryptionLock)
-                {
-                    if (server.getObfsdata() == null)
-                    {
-                        server.setObfsdata(obfs.InitData());
-                    }
-                }
-                int mss = 1440;
-                try
-                {
-                    mss = (int)this.remote.GetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.IpTimeToLive /* == TCP_MAXSEG */);
-                }
-                catch (Exception e)
-                {
-                    //Console.WriteLine(e);
-                }
-                obfs.SetHost(new ServerInfo(server.server, server.server_port, mss, server.obfsparam, server.getObfsdata()));
+                SetObfsPlugin();
 
                 ResetTimeout(TTL);
 

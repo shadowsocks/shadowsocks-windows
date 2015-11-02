@@ -2,6 +2,14 @@
 
 namespace Shadowsocks.Obfs
 {
+    public class ObfsException : Exception
+    {
+        public ObfsException(string info)
+            : base(info)
+        {
+
+        }
+    }
     public class ServerInfo
     {
         public string host;
@@ -26,6 +34,6 @@ namespace Shadowsocks.Obfs
         byte[] ClientDecode(byte[] encryptdata, int datalength, out int outlength, out bool needsendback);
         byte[] ClientPostDecrypt(byte[] plaindata, int datalength, out int outlength);
         object InitData();
-        void SetHost(ServerInfo serverInfo);
+        void SetServerInfo(ServerInfo serverInfo);
     }
 }

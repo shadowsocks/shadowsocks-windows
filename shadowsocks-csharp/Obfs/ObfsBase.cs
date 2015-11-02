@@ -32,9 +32,21 @@ namespace Shadowsocks.Obfs
         {
             return null;
         }
-        public void SetHost(ServerInfo serverInfo)
+        public virtual void SetServerInfo(ServerInfo serverInfo)
         {
             Server = serverInfo;
+        }
+        public int GetHeadSize(byte[] plaindata, int defaultValue)
+        {
+            if (plaindata == null || plaindata.Length < 2)
+                return defaultValue;
+            if (plaindata[0] == 1)
+                return 7;
+            if (plaindata[0] == 4)
+                return 19;
+            if (plaindata[0] == 3)
+                return 4 + plaindata[1];
+            return defaultValue;
         }
     }
 }
