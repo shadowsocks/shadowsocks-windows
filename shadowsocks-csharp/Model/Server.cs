@@ -43,6 +43,7 @@ namespace Shadowsocks.Model
         private long errorConnectTimes = 0;
         private long errorTimeoutTimes = 0;
         private long errorEncryptTimes = 0;
+        private int  lastError = 0;
         private long errorContinurousTimes = 0;
         private long transUpload = 0;
         private long transDownload = 0;
@@ -267,6 +268,7 @@ namespace Shadowsocks.Model
                 errorConnectTimes = 0;
                 errorTimeoutTimes = 0;
                 errorEncryptTimes = 0;
+                lastError = 0;
                 errorContinurousTimes = 0;
             }
         }
@@ -282,6 +284,7 @@ namespace Shadowsocks.Model
                 errorConnectTimes = 0;
                 errorTimeoutTimes = 0;
                 errorEncryptTimes = 0;
+                lastError = 0;
                 errorContinurousTimes = 0;
                 transUpload = 0;
                 transDownload = 0;
@@ -307,7 +310,15 @@ namespace Shadowsocks.Model
             lock (this)
             {
                 errorConnectTimes += 1;
-                errorContinurousTimes += 1;
+                if (lastError == 1)
+                {
+                    errorContinurousTimes += 1;
+                }
+                else
+                {
+                    lastError = 1;
+                    errorContinurousTimes = 0;
+                }
             }
         }
         public void AddTimeoutTimes()
@@ -315,7 +326,15 @@ namespace Shadowsocks.Model
             lock (this)
             {
                 errorTimeoutTimes += 1;
-                errorContinurousTimes += 1;
+                if (lastError == 2)
+                {
+                    errorContinurousTimes += 1;
+                }
+                else
+                {
+                    lastError = 2;
+                    errorContinurousTimes = 0;
+                }
             }
         }
         public void AddErrorEncryptTimes()
@@ -323,7 +342,15 @@ namespace Shadowsocks.Model
             lock (this)
             {
                 errorEncryptTimes += 1;
-                errorContinurousTimes += 1;
+                if (lastError == 3)
+                {
+                    errorContinurousTimes += 1;
+                }
+                else
+                {
+                    lastError = 3;
+                    errorContinurousTimes = 0;
+                }
             }
         }
         public void AddUploadBytes(long bytes)
@@ -358,6 +385,7 @@ namespace Shadowsocks.Model
         {
             lock (this)
             {
+                lastError = 0;
                 errorContinurousTimes = 0;
             }
         }
@@ -458,8 +486,8 @@ namespace Shadowsocks.Model
             {
                 try
                 {
-                    socket.Shutdown(SocketShutdown.Send);
-                    //socket.Shutdown(SocketShutdown.Both);
+                    //socket.Shutdown(SocketShutdown.Send);
+                    socket.Shutdown(SocketShutdown.Both);
                     //socket.Close();
                 }
                 catch
@@ -489,11 +517,12 @@ namespace Shadowsocks.Model
         public string remarks_base64;
         public bool tcp_over_udp;
         public bool udp_over_tcp;
-        public int tcp_protocol;
+        public string protocol;
         public bool obfs_udp;
         public bool enable;
         public string id;
 
+        private object protocoldata;
         private object obfsdata;
         private ServerSpeedLog serverSpeedLog = new ServerSpeedLog();
         private DnsBuffer dnsBuffer = new DnsBuffer();
@@ -601,9 +630,10 @@ namespace Shadowsocks.Model
             ret.remarks_base64 = (string)remarks_base64.Clone();
             ret.enable = enable;
             ret.udp_over_tcp = udp_over_tcp;
-            ret.tcp_protocol = tcp_protocol;
+            ret.protocol = protocol;
             ret.obfs_udp = obfs_udp;
             ret.id = id;
+            ret.protocoldata = protocoldata;
             ret.obfsdata = obfsdata;
             return ret;
         }
@@ -618,7 +648,7 @@ namespace Shadowsocks.Model
             this.password = "0";
             this.remarks_base64 = "";
             this.udp_over_tcp = false;
-            this.tcp_protocol = 0;
+            this.protocol = "origin";
             this.obfs_udp = false;
             this.enable = true;
             byte[] id = new byte[16];
@@ -690,16 +720,34 @@ namespace Shadowsocks.Model
                 string[] parts = beforeAt.Split(new[] { ':' });
                 this.method = parts[parts.Length - 2];
                 this.password = parts[parts.Length - 1];
-                if (parts.Length >= 3)
-                {
-                    this.obfs = parts[parts.Length - 3];
-                }
                 if (parts.Length >= 4)
                 {
-                    this.obfsparam = parts[parts.Length - 4];
+                    this.protocol = parts[parts.Length - 3];
+                    this.obfs = parts[parts.Length - 4];
                     if (param.Length > 0)
                     {
-                        this.obfsparam += "," + param;
+                        this.obfsparam = param;
+                    }
+                }
+                else if (parts.Length >= 3)
+                {
+                    string part = parts[parts.Length - 3];
+                    try
+                    {
+                        Obfs.ObfsBase obfs = (Obfs.ObfsBase)Obfs.ObfsFactory.GetObfs(part);
+                        int[] properties = obfs.GetObfs()[part];
+                        if (properties[0] > 0)
+                        {
+                            this.protocol = part;
+                        }
+                        else
+                        {
+                            this.obfs = part;
+                        }
+                    }
+                    catch
+                    {
+
                     }
                 }
             }
@@ -726,6 +774,15 @@ namespace Shadowsocks.Model
         public void setObfsData(object data)
         {
             this.obfsdata = data;
+        }
+
+        public object getProtocolData()
+        {
+            return this.protocoldata;
+        }
+        public void setProtocolData(object data)
+        {
+            this.protocoldata = data;
         }
     }
 }
