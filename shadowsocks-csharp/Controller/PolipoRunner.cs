@@ -47,6 +47,8 @@ namespace Shadowsocks.Controller
 
         public bool HasExited()
         {
+            if (_process == null)
+                return true;
             return _process.HasExited;
         }
 
@@ -81,6 +83,8 @@ namespace Shadowsocks.Controller
 
         public void Start(Configuration configuration)
         {
+            if (configuration.buildinHttpProxy)
+                return;
             Server server = configuration.GetCurrentServer();
             if (_process == null)
             {

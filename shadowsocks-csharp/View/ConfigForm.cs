@@ -64,7 +64,7 @@ namespace Shadowsocks.View
             ServerPortLabel.Text = I18N.GetString("Server Port");
             PasswordLabel.Text = I18N.GetString("Password");
             EncryptionLabel.Text = I18N.GetString("Encryption");
-            RemarksLabel.Text = I18N.GetString("Remarks");
+            checkRemarks.Text = I18N.GetString("Remarks");
 
             LabelExpertSetting.Text = I18N.GetString(LabelExpertSetting.Text);
             TCPoverUDPLabel.Text = I18N.GetString(TCPoverUDPLabel.Text);
@@ -216,7 +216,14 @@ namespace Shadowsocks.View
 
                 ServerGroupBox.Visible = true;
 
-                TextLink.Text = controller.GetSSLinkForServer(server);
+                if (checkRemarks.Checked)
+                {
+                    TextLink.Text = controller.GetSSRemarksLinkForServer(server);
+                }
+                else
+                {
+                    TextLink.Text = controller.GetSSLinkForServer(server);
+                }
 
                 PasswordLabel.Checked = false;
                 GenQR(TextLink.Text);
@@ -448,6 +455,12 @@ namespace Shadowsocks.View
             {
                 textObfsParam.Enabled = true;
             }
+        }
+
+        private void checkRemarks_CheckedChanged(object sender, EventArgs e)
+        {
+            SaveOldSelectedServer();
+            LoadSelectedServer();
         }
     }
 }

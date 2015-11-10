@@ -40,7 +40,6 @@
             this.EncryptionSelect = new System.Windows.Forms.ComboBox();
             this.LabelLink = new System.Windows.Forms.Label();
             this.TextLink = new System.Windows.Forms.TextBox();
-            this.RemarksLabel = new System.Windows.Forms.Label();
             this.RemarksTextBox = new System.Windows.Forms.TextBox();
             this.ObfsUDPLabel = new System.Windows.Forms.Label();
             this.CheckObfsUDP = new System.Windows.Forms.CheckBox();
@@ -71,6 +70,7 @@
             this.tableLayoutPanel3 = new System.Windows.Forms.TableLayoutPanel();
             this.MyCancelButton = new System.Windows.Forms.Button();
             this.OKButton = new System.Windows.Forms.Button();
+            this.checkRemarks = new System.Windows.Forms.CheckBox();
             this.tableLayoutPanel1.SuspendLayout();
             this.ServerGroupBox.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.PictureQRcode)).BeginInit();
@@ -99,7 +99,6 @@
             this.tableLayoutPanel1.Controls.Add(this.EncryptionSelect, 1, 3);
             this.tableLayoutPanel1.Controls.Add(this.LabelLink, 0, 6);
             this.tableLayoutPanel1.Controls.Add(this.TextLink, 1, 6);
-            this.tableLayoutPanel1.Controls.Add(this.RemarksLabel, 0, 5);
             this.tableLayoutPanel1.Controls.Add(this.RemarksTextBox, 1, 5);
             this.tableLayoutPanel1.Controls.Add(this.ObfsUDPLabel, 0, 12);
             this.tableLayoutPanel1.Controls.Add(this.CheckObfsUDP, 1, 12);
@@ -114,6 +113,7 @@
             this.tableLayoutPanel1.Controls.Add(this.TCPProtocolComboBox, 1, 4);
             this.tableLayoutPanel1.Controls.Add(this.labelObfsParam, 0, 9);
             this.tableLayoutPanel1.Controls.Add(this.textObfsParam, 1, 9);
+            this.tableLayoutPanel1.Controls.Add(this.checkRemarks, 0, 5);
             this.tableLayoutPanel1.Location = new System.Drawing.Point(8, 21);
             this.tableLayoutPanel1.Margin = new System.Windows.Forms.Padding(0);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
@@ -262,16 +262,6 @@
             this.TextLink.WordWrap = false;
             this.TextLink.Enter += new System.EventHandler(this.TextBox_Enter);
             this.TextLink.MouseUp += new System.Windows.Forms.MouseEventHandler(this.TextBox_MouseUp);
-            // 
-            // RemarksLabel
-            // 
-            this.RemarksLabel.Anchor = System.Windows.Forms.AnchorStyles.Right;
-            this.RemarksLabel.AutoSize = true;
-            this.RemarksLabel.Location = new System.Drawing.Point(34, 150);
-            this.RemarksLabel.Name = "RemarksLabel";
-            this.RemarksLabel.Size = new System.Drawing.Size(52, 14);
-            this.RemarksLabel.TabIndex = 9;
-            this.RemarksLabel.Text = "Remarks";
             // 
             // RemarksTextBox
             // 
@@ -655,6 +645,18 @@
             this.OKButton.UseVisualStyleBackColor = true;
             this.OKButton.Click += new System.EventHandler(this.OKButton_Click);
             // 
+            // checkRemarks
+            // 
+            this.checkRemarks.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.checkRemarks.AutoSize = true;
+            this.checkRemarks.Location = new System.Drawing.Point(15, 148);
+            this.checkRemarks.Name = "checkRemarks";
+            this.checkRemarks.Size = new System.Drawing.Size(71, 18);
+            this.checkRemarks.TabIndex = 36;
+            this.checkRemarks.Text = "Remarks";
+            this.checkRemarks.UseVisualStyleBackColor = true;
+            this.checkRemarks.CheckedChanged += new System.EventHandler(this.checkRemarks_CheckedChanged);
+            // 
             // ConfigForm
             // 
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
@@ -708,7 +710,6 @@
         private System.Windows.Forms.GroupBox ServerGroupBox;
         private System.Windows.Forms.ListBox ServersListBox;
         private System.Windows.Forms.TextBox RemarksTextBox;
-        private System.Windows.Forms.Label RemarksLabel;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel2;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel4;
         private System.Windows.Forms.Button DownButton;
@@ -737,6 +738,7 @@
         private System.Windows.Forms.Label labelObfs;
         private System.Windows.Forms.Label labelObfsParam;
         private System.Windows.Forms.TextBox textObfsParam;
+        private System.Windows.Forms.CheckBox checkRemarks;
     }
 }
 

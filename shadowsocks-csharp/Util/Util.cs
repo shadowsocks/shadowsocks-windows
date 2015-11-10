@@ -50,6 +50,30 @@ namespace Shadowsocks.Util
             temp.CopyTo(buf, 0);
         }
 
+        public static int FindStr(byte[] target, int targetLength, byte[] m)
+        {
+            if (m.Length > 0 && targetLength >= m.Length)
+            {
+                for (int i = 0; i <= targetLength - m.Length; ++i)
+                {
+                    if (target[i] == m[0])
+                    {
+                        int j = 1;
+                        for (; j < m.Length; ++j)
+                        {
+                            if (target[i + j] != m[j])
+                                break;
+                        }
+                        if (j >= m.Length)
+                        {
+                            return i;
+                        }
+                    }
+                }
+            }
+            return -1;
+        }
+
         [DllImport("kernel32.dll")]
         [return: MarshalAs(UnmanagedType.Bool)]
         private static extern bool SetProcessWorkingSetSize(IntPtr process,

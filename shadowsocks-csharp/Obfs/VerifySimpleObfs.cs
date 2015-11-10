@@ -35,7 +35,7 @@ namespace Shadowsocks.Obfs
             {
                 try
                 {
-                    string[] paramsList = serverInfo.param.Split(",".ToCharArray(), 2);
+                    string[] paramsList = serverInfo.param.Split(new[] { ',' }, 2);
                     string subParam = "";
                     if (paramsList.Length > 1)
                     {
@@ -151,7 +151,7 @@ namespace Shadowsocks.Obfs
             while (recv_buf_len > 2)
             {
                 int len = (recv_buf[0] << 8) + recv_buf[1];
-                if (len >= 8192)
+                if (len >= 8192 || len < 7)
                 {
                     throw new ObfsException("ClientPostDecrypt data error");
                 }
@@ -272,7 +272,7 @@ namespace Shadowsocks.Obfs
             while (recv_buf_len > 2)
             {
                 int len = (recv_buf[0] << 8) + recv_buf[1];
-                if (len >= 32768)
+                if (len >= 32768 || len < 6)
                 {
                     throw new ObfsException("ClientPostDecrypt data error");
                 }
@@ -452,7 +452,7 @@ namespace Shadowsocks.Obfs
             while (recv_buf_len > 2)
             {
                 int len = (recv_buf[0] << 8) + recv_buf[1];
-                if (len >= 8192)
+                if (len >= 8192 || len < 7)
                 {
                     throw new ObfsException("ClientPostDecrypt data error");
                 }

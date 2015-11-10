@@ -228,7 +228,10 @@ namespace Shadowsocks.Model
         public int socks5Port;
         public string socks5User;
         public string socks5Pass;
+        public string authUser;
+        public string authPass;
         public bool autoban;
+        public bool buildinHttpProxy;
         private ServerSelectStrategy serverStrategy = new ServerSelectStrategy();
 
         private static string CONFIG_FILE = "gui-config.json";

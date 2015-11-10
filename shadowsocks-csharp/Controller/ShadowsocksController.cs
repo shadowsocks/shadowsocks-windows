@@ -35,7 +35,7 @@ namespace Shadowsocks.Controller
         public event EventHandler EnableStatusChanged;
         public event EventHandler EnableGlobalChanged;
         //public event EventHandler ShareOverLANStatusChanged;
-        //public event EventHandler SelectRandomStatusChanged;
+        public event EventHandler SelectRandomStatusChanged;
         public event EventHandler ShowConfigFormEvent;
 
         // when user clicked Edit PAC, and PAC file has already created
@@ -160,6 +160,7 @@ namespace Shadowsocks.Controller
             List<Server> missingServers = MergeConfiguration(_config, config.configs);
             _config.configs = config.configs;
             _config.index = config.index;
+            _config.buildinHttpProxy = config.buildinHttpProxy;
             _config.shareOverLan = config.shareOverLan;
             _config.localPort = config.localPort;
             _config.reconnectTimes = config.reconnectTimes;
@@ -229,15 +230,15 @@ namespace Shadowsocks.Controller
         //    }
         //}
 
-        //public void ToggleSelectRandom(bool enabled)
-        //{
-        //    _config.random = enabled;
-        //    SaveConfig(_config);
-        //    if (SelectRandomStatusChanged != null)
-        //    {
-        //        SelectRandomStatusChanged(this, new EventArgs());
-        //    }
-        //}
+        public void ToggleSelectRandom(bool enabled)
+        {
+            _config.random = enabled;
+            SaveConfig(_config);
+            if (SelectRandomStatusChanged != null)
+            {
+                SelectRandomStatusChanged(this, new EventArgs());
+            }
+        }
 
         public void SelectServerIndex(int index)
         {
@@ -294,21 +295,13 @@ namespace Shadowsocks.Controller
             if (server.obfs.Length > 0 && server.obfs != "plain")
             {
                 parts = server.obfs + ":" + parts;
-                if (server.obfsparam.Length > 0)
-                {
-                    parts = server.obfsparam + ":" + parts;
-                    //if (server.obfsparam.IndexOf(',') < 0)
-                    //{
-                    //    parts = server.obfsparam + ":" + parts;
-                    //}
-                    //else
-                    //{
-                    //    int pos = server.obfsparam.IndexOf(',');
-                    //    parts = server.obfsparam + ":" + parts;
-                    //}
-                }
             }
-            return parts + server.method + ":" + server.password + "@" + server.server + ":" + server.server_port;
+            parts = parts + server.method + ":" + server.password + "@" + server.server + ":" + server.server_port;
+            if (server.obfs.Length > 0 && server.obfs != "plain" && server.obfsparam.Length > 0)
+            {
+                parts += "/" + System.Convert.ToBase64String(Encoding.UTF8.GetBytes(server.obfsparam));
+            }
+            return parts;
         }
 
         public string GetSSLinkForCurrentServer()
@@ -425,7 +418,10 @@ namespace Shadowsocks.Controller
                     List<Listener.Service> services = new List<Listener.Service>();
                     services.Add(local);
                     services.Add(_pacServer);
-                    services.Add(new PortForwarder(polipoRunner.RunningPort));
+                    if (!_config.buildinHttpProxy)
+                    {
+                        services.Add(new PortForwarder(polipoRunner.RunningPort));
+                    }
                     _listener = new Listener(services);
                     _listener.Start(_config);
                 }

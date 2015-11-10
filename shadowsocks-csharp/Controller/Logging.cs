@@ -100,10 +100,6 @@ namespace Shadowsocks.Controller
 //#endif
                 }
             }
-            else if (e is System.ObjectDisposedException)
-            {
-                // ignore
-            }
             else
             {
                 Console.WriteLine(e);

@@ -146,8 +146,75 @@ namespace Shadowsocks.Controller
 
         public bool Handle(byte[] firstPacket, int length, Socket socket)
         {
-            if (length < 2
-                || (firstPacket[0] != 5 && firstPacket[0] != 4))
+            if (length < 2)
+            {
+                return false;
+            }
+            bool accept = false;
+            if (firstPacket[0] == 5 || firstPacket[0] == 4)
+            {
+                accept = true;
+            }
+            else if (length > 8
+                && firstPacket[0] == 'C'
+                && firstPacket[1] == 'O'
+                && firstPacket[2] == 'N'
+                && firstPacket[3] == 'N'
+                && firstPacket[4] == 'E'
+                && firstPacket[5] == 'C'
+                && firstPacket[6] == 'T'
+                && firstPacket[7] == ' ')
+            {
+                accept = true;
+            }
+            else if (_config.buildinHttpProxy)
+            {
+                if (length > 8
+                  && firstPacket[0] == 'G'
+                  && firstPacket[1] == 'E'
+                  && firstPacket[2] == 'T'
+                  && firstPacket[3] == ' '
+                  && firstPacket[4] == 'h'
+                  && firstPacket[5] == 't'
+                  && firstPacket[6] == 't'
+                  && firstPacket[7] == 'p'
+                  && firstPacket[8] == ':'
+                  )
+                {
+                    accept = true;
+                }
+                else if (length > 9
+                    && firstPacket[0] == 'P'
+                    && firstPacket[1] == 'O'
+                    && firstPacket[2] == 'S'
+                    && firstPacket[3] == 'T'
+                    && firstPacket[4] == ' '
+                    && firstPacket[5] == 'h'
+                    && firstPacket[6] == 't'
+                    && firstPacket[7] == 't'
+                    && firstPacket[8] == 'p'
+                    && firstPacket[9] == ':'
+                    )
+                {
+                    accept = true;
+                }
+                else if (length > 9
+                    && firstPacket[0] == 'H'
+                    && firstPacket[1] == 'E'
+                    && firstPacket[2] == 'A'
+                    && firstPacket[3] == 'D'
+                    && firstPacket[4] == ' '
+                    && firstPacket[5] == 'h'
+                    && firstPacket[6] == 't'
+                    && firstPacket[7] == 't'
+                    && firstPacket[8] == 'p'
+                    && firstPacket[9] == ':'
+                    )
+                {
+                    accept = true;
+                }
+            }
+            if (!accept)
             {
                 return false;
             }
@@ -169,61 +236,14 @@ namespace Shadowsocks.Controller
             }
             handler.TTL = _config.TTL;
             handler.autoSwitchOff = _config.autoban;
+            if (_config.authUser != null && _config.authUser.Length > 0)
+            {
+                string authStr = _config.authUser + ":" + (_config.authPass ?? "");
+                handler.httpAuthString = System.Convert.ToBase64String(Encoding.UTF8.GetBytes(authStr));
+            }
 
             handler.Start(firstPacket, length);
             return true;
-        }
-    }
-
-    class SpeedTester
-    {
-        public DateTime timeConnectBegin;
-        public DateTime timeConnectEnd;
-        public DateTime timeBeginUpload;
-        public DateTime timeBeginDownload;
-        public long sizeUpload = 0;
-        public long sizeDownload = 0;
-        private List<TransLog> sizeDownloadList = new List<TransLog>();
-
-        public void BeginConnect()
-        {
-            timeConnectBegin = DateTime.Now;
-        }
-
-        public void EndConnect()
-        {
-            timeConnectEnd = DateTime.Now;
-        }
-
-        public void BeginUpload()
-        {
-            timeBeginUpload = DateTime.Now;
-        }
-
-        public void BeginDownload()
-        {
-            timeBeginDownload = DateTime.Now;
-        }
-
-        public void AddDownloadSize(int size)
-        {
-            if (sizeDownloadList.Count == 2)
-                sizeDownloadList[1] = new TransLog(size, DateTime.Now);
-            else
-                sizeDownloadList.Add(new TransLog(size, DateTime.Now));
-            sizeDownload += size;
-        }
-
-        public void AddUploadSize(int size)
-        {
-            sizeUpload += size;
-        }
-
-        public long GetAvgDownloadSpeed()
-        {
-            if (sizeDownloadList == null || sizeDownloadList.Count < 2 || (sizeDownloadList[sizeDownloadList.Count - 1].recvTime - sizeDownloadList[0].recvTime).TotalSeconds <= 0.001)
-                return 0;
-            return (long)((sizeDownload - sizeDownloadList[0].size) / (sizeDownloadList[sizeDownloadList.Count - 1].recvTime - sizeDownloadList[0].recvTime).TotalSeconds);
         }
     }
 
@@ -276,6 +296,9 @@ namespace Shadowsocks.Controller
         protected byte[] remoteSendBuffer = new byte[BufferSize];
         // remote header send buffer
         protected byte[] remoteHeaderSendBuffer;
+        // http proxy
+        public string httpAuthString;
+        protected HttpProxyState httpProxyState;
         // connection receive buffer
         protected byte[] connetionRecvBuffer = new byte[RecvSize];
         // connection send buffer
@@ -413,7 +436,7 @@ namespace Shadowsocks.Controller
                         server.setEnable(false);
                     }
                 }
-                return 1; // proxy DNS error
+                return 16; // ObfsException(decrypt error)
             }
             else if (e is SocketException)
             {
@@ -675,7 +698,14 @@ namespace Shadowsocks.Controller
                 IPHostEntry ipHostInfo = Dns.EndGetHostEntry(ar);
                 ipAddress = ipHostInfo.AddressList[0];
                 int serverPort = server.server_port;
-                server.DnsBuffer().UpdateDns(server.server, ipAddress);
+                if (socks5RemotePort > 0)
+                {
+                    server.DnsBuffer().UpdateDns(socks5RemoteHost, ipAddress);
+                }
+                else
+                {
+                    server.DnsBuffer().UpdateDns(server.server, ipAddress);
+                }
                 BeginConnect(ipAddress, serverPort);
             }
             catch (Exception e)
@@ -1002,19 +1032,88 @@ namespace Shadowsocks.Controller
             return false;
         }
 
-        private static bool IsIPv4MappedToIPv6(IPAddress ip)
+        private void RspHttpHandshakeReceive()
         {
-            if (ip.AddressFamily == AddressFamily.InterNetwork)
-                return true;
-            byte[] addr = ip.GetAddressBytes();
-            for (int i = 0; i < 10; ++i)
-                if (addr[0] != 0)
-                    return false;
-            if (addr[10] != 0xFF || addr[11] != 0xFF)
+            command = 1; // Set TCP connect command
+            httpProxyState = new HttpProxyState();
+            httpProxyState.httpAuthString = httpAuthString;
+            int err = httpProxyState.HandshakeReceive(_firstPacket, _firstPacketLength, ref remoteHeaderSendBuffer);
+            if (err == 1)
             {
-                return false;
+                connection.BeginReceive(connetionRecvBuffer, 0, _firstPacket.Length, 0,
+                    new AsyncCallback(HttpHandshakeRecv), null);
             }
-            return true;
+            else if (err == 2)
+            {
+                string dataSend = "HTTP/1.1 407 Unauthorized\r\nProxy-Authenticate: Basic realm=\"SSR\"\r\n\r\n";
+                byte[] httpData = System.Text.Encoding.UTF8.GetBytes(dataSend);
+                connection.BeginSend(httpData, 0, httpData.Length, 0, new AsyncCallback(HttpHandshakeAuthEndSend), null);
+            }
+            else if (err == 3)
+            {
+                Connect();
+            }
+            else if (err == 4)
+            {
+                Connect();
+            }
+            else if (err == 0)
+            {
+                string dataSend = "HTTP/1.1 200 Connection Established\r\n\r\n";
+                byte[] httpData = System.Text.Encoding.UTF8.GetBytes(dataSend);
+                connection.BeginSend(httpData, 0, httpData.Length, 0, new AsyncCallback(StartConnect), null);
+            }
+        }
+
+        private void HttpHandshakeAuthEndSend(IAsyncResult ar)
+        {
+            if (closed)
+            {
+                return;
+            }
+            try
+            {
+                connection.EndSend(ar);
+                connection.BeginReceive(connetionRecvBuffer, 0, _firstPacket.Length, 0,
+                    new AsyncCallback(HttpHandshakeRecv), null);
+            }
+            catch (Exception e)
+            {
+                LogSocketException(e);
+                if (!Logging.LogSocketException(server.remarks, server.server, e))
+                    Logging.LogUsefulException(e);
+                this.Close();
+            }
+        }
+
+        private void HttpHandshakeRecv(IAsyncResult ar)
+        {
+            if (closed)
+            {
+                return;
+            }
+            try
+            {
+                int bytesRead = connection.EndReceive(ar);
+                if (bytesRead > 0)
+                {
+                    Array.Copy(connetionRecvBuffer, _firstPacket, bytesRead);
+                    _firstPacketLength = bytesRead;
+                    RspHttpHandshakeReceive();
+                }
+                else
+                {
+                    Console.WriteLine("failed to recv data in RspHttpHandshakeAuthRecv");
+                    this.Close();
+                }
+            }
+            catch (Exception e)
+            {
+                LogSocketException(e);
+                if (!Logging.LogSocketException(server.remarks, server.server, e))
+                    Logging.LogUsefulException(e);
+                this.Close();
+            }
         }
 
         private void RspSocks4aHandshakeReceive()
@@ -1087,9 +1186,13 @@ namespace Shadowsocks.Controller
                     {
                         RspSocks4aHandshakeReceive();
                     }
-                    else
+                    else if (_firstPacket[0] == 5 && _firstPacketLength >= 2)
                     {
                         RspSocks5HandshakeReceive();
+                    }
+                    else
+                    {
+                        RspHttpHandshakeReceive();
                     }
                 }
                 else
@@ -1390,6 +1493,7 @@ namespace Shadowsocks.Controller
                 }
                 if (socks5RemotePort > 0)
                 {
+                    remoteTCPEndPoint = null;
                     if (ConnectProxyServer(server.server, server.server_port, remote, (int)SocketError.ConnectionReset))
                     {
                         if (server.tcp_over_udp && remoteTDP != null)
@@ -1600,20 +1704,28 @@ namespace Shadowsocks.Controller
                 {
                     //Console.WriteLine(e);
                 }
-                try
+                if (remoteTCPEndPoint != null)
                 {
-                    protocol.SetServerInfo(new ServerInfo(remoteTCPEndPoint.Address.ToString(), server.server_port, mss, "", server.getProtocolData()));
+                    try
+                    {
+                        protocol.SetServerInfo(new ServerInfo(remoteTCPEndPoint.Address.ToString(), server.server_port, mss, "", server.getProtocolData()));
+                    }
+                    catch (Exception)
+                    {
+                        protocol.SetServerInfo(new ServerInfo(server.server, server.server_port, mss, "", server.getProtocolData()));
+                    }
+                    try
+                    {
+                        obfs.SetServerInfo(new ServerInfo(remoteTCPEndPoint.Address.ToString(), server.server_port, mss, server.obfsparam, server.getObfsData()));
+                    }
+                    catch (Exception)
+                    {
+                        obfs.SetServerInfo(new ServerInfo(server.server, server.server_port, mss, server.obfsparam, server.getObfsData()));
+                    }
                 }
-                catch (Exception)
+                else
                 {
                     protocol.SetServerInfo(new ServerInfo(server.server, server.server_port, mss, "", server.getProtocolData()));
-                }
-                try
-                {
-                    obfs.SetServerInfo(new ServerInfo(remoteTCPEndPoint.Address.ToString(), server.server_port, mss, server.obfsparam, server.getObfsData()));
-                }
-                catch (Exception)
-                {
                     obfs.SetServerInfo(new ServerInfo(server.server, server.server_port, mss, server.obfsparam, server.getObfsData()));
                 }
             }
@@ -1652,10 +1764,24 @@ namespace Shadowsocks.Controller
                             //RemoteTDPSend(remoteHeaderSendBuffer, remoteHeaderSendBuffer.Length);
                             //remoteHeaderSendBuffer = null;
                         }
-                        else
+                        else if (httpProxyState != null)
                         {
-                            //RemoteSend(remoteHeaderSendBuffer, remoteHeaderSendBuffer.Length);
-                            //remoteHeaderSendBuffer = null;
+                            RemoteSend(remoteHeaderSendBuffer, remoteHeaderSendBuffer.Length);
+                            byte[] buffer = new byte[0];
+                            int buffer_len = 0;
+                            if (httpProxyState.httpProxy)
+                            {
+                                httpProxyState.ParseHttpRequest(ref buffer, ref buffer_len, ref remoteHeaderSendBuffer);
+                                if (remoteHeaderSendBuffer != null && remoteHeaderSendBuffer.Length > 0)
+                                {
+                                    RemoteSend(remoteHeaderSendBuffer, remoteHeaderSendBuffer.Length);
+                                }
+                            }
+                            remoteHeaderSendBuffer = null;
+                            if (!httpProxyState.httpProxy)
+                            {
+                                httpProxyState = null;
+                            }
                         }
                     }
                     else // UDP
@@ -1759,6 +1885,15 @@ namespace Shadowsocks.Controller
 
                     if (connectionUDP == null)
                     {
+                        try
+                        {
+                            string a = System.Text.Encoding.UTF8.GetString(remoteSendBuffer, 0, bytesToSend);
+                            a += '.';
+                        }
+                        catch
+                        {
+
+                        }
                         connection.BeginSend(remoteSendBuffer, 0, bytesToSend, 0, new AsyncCallback(PipeConnectionSendCallback), null);
                     }
                     else
@@ -2160,6 +2295,21 @@ namespace Shadowsocks.Controller
                     else
                     {
                         Logging.LogBin(LogLevel.Debug, "remote send", connetionRecvBuffer, bytesRead);
+                    }
+                    if (httpProxyState != null)
+                    {
+                        if (true && httpProxyState.httpProxy)
+                        {
+                            httpProxyState.ParseHttpRequest(ref connetionRecvBuffer, ref bytesRead, ref remoteHeaderSendBuffer);
+                        }
+                        else
+                        {
+                            if (httpProxyState.httpRequestBuffer != null && httpProxyState.httpRequestBuffer.Length > 0)
+                            {
+                                RemoteSend(httpProxyState.httpRequestBuffer, httpProxyState.httpRequestBuffer.Length);
+                                httpProxyState.httpRequestBuffer = null;
+                            }
+                        }
                     }
                     if (server.tcp_over_udp &&
                             remoteTDP != null)

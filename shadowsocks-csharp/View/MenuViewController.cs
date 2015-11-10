@@ -43,7 +43,7 @@ namespace Shadowsocks.View
         private MenuItem updateFromGFWListItem;
         private MenuItem editGFWUserRuleItem;
         private MenuItem editOnlinePACItem;
-        //private MenuItem SelectRandomItem;
+        private MenuItem SelectRandomItem;
         private MenuItem UpdateItem;
         private ConfigForm configForm;
         private SettingsForm settingsForm;
@@ -62,7 +62,7 @@ namespace Shadowsocks.View
             controller.PACFileReadyToOpen += controller_FileReadyToOpen;
             controller.UserRuleFileReadyToOpen += controller_FileReadyToOpen;
             //controller.ShareOverLANStatusChanged += controller_ShareOverLANStatusChanged;
-            //controller.SelectRandomStatusChanged += controller_SelectRandomStatusChanged;
+            controller.SelectRandomStatusChanged += controller_SelectRandomStatusChanged;
             controller.EnableGlobalChanged += controller_EnableGlobalChanged;
             controller.Errored += controller_Errored;
             controller.UpdatePACFromGFWListCompleted += controller_UpdatePACFromGFWListCompleted;
@@ -180,8 +180,9 @@ namespace Shadowsocks.View
                     this.localPACItem = CreateMenuItem("Local PAC", new EventHandler(this.LocalPACItem_Click)),
                     this.onlinePACItem = CreateMenuItem("Online PAC", new EventHandler(this.OnlinePACItem_Click)),
                     new MenuItem("-"),
-                    this.updateFromGFWListItem = CreateMenuItem("Update Local PAC from LanIPList", new EventHandler(this.UpdatePACFromLanIPListItem_Click)),
-                    this.updateFromGFWListItem = CreateMenuItem("Update Local PAC from ChnIPList", new EventHandler(this.UpdatePACFromCNIPListItem_Click)),
+                    this.updateFromGFWListItem = CreateMenuItem("Update Local PAC from Lan IP List", new EventHandler(this.UpdatePACFromLanIPListItem_Click)),
+                    this.updateFromGFWListItem = CreateMenuItem("Update Local PAC from Chn White List", new EventHandler(this.UpdatePACFromCNWhiteListItem_Click)),
+                    this.updateFromGFWListItem = CreateMenuItem("Update Local PAC from Chn IP List", new EventHandler(this.UpdatePACFromCNIPListItem_Click)),
                     this.updateFromGFWListItem = CreateMenuItem("Update Local PAC from GFWList", new EventHandler(this.UpdatePACFromGFWListItem_Click)),
                     new MenuItem("-"),
                     this.editLocalPACItem = CreateMenuItem("Edit Local PAC File...", new EventHandler(this.EditPACFileItem_Click)),
@@ -198,7 +199,7 @@ namespace Shadowsocks.View
                 //new MenuItem("-"),
                 //this.AutoStartupItem = CreateMenuItem("Start on Boot", new EventHandler(this.AutoStartupItem_Click)),
                 //this.ShareOverLANItem = CreateMenuItem("Allow Clients from LAN", new EventHandler(this.ShareOverLANItem_Click)),
-                //this.SelectRandomItem = CreateMenuItem("Enable balance", new EventHandler(this.SelectRandomItem_Click)),
+                this.SelectRandomItem = CreateMenuItem("Enable balance", new EventHandler(this.SelectRandomItem_Click)),
                 this.UpdateItem = CreateMenuItem("Update available", new EventHandler(this.UpdateItem_Clicked)),
                 new MenuItem("-"),
                 CreateMenuItem("Scan QRCode from Screen...", new EventHandler(this.ScanQRCodeItem_Click)),
@@ -234,10 +235,10 @@ namespace Shadowsocks.View
         //    ShareOverLANItem.Checked = controller.GetConfiguration().shareOverLan;
         //}
 
-        //void controller_SelectRandomStatusChanged(object sender, EventArgs e)
-        //{
-        //    SelectRandomItem.Checked = controller.GetConfiguration().random;
-        //}
+        void controller_SelectRandomStatusChanged(object sender, EventArgs e)
+        {
+            SelectRandomItem.Checked = controller.GetConfiguration().random;
+        }
 
         void controller_EnableGlobalChanged(object sender, EventArgs e)
         {
@@ -307,7 +308,6 @@ namespace Shadowsocks.View
             _notifyIcon.BalloonTipClicked -= notifyIcon1_BalloonTipClicked;
         }
 
-
         private void LoadCurrentConfiguration()
         {
             Configuration config = controller.GetConfiguration();
@@ -317,7 +317,7 @@ namespace Shadowsocks.View
             globalModeItem.Checked = config.global;
             PACModeItem.Checked = !config.global;
             //ShareOverLANItem.Checked = config.shareOverLan;
-            //SelectRandomItem.Checked = config.random;
+            SelectRandomItem.Checked = config.random;
             //AutoStartupItem.Checked = AutoStartup.Check();
             onlinePACItem.Checked = onlinePACItem.Enabled && config.useOnlinePac;
             localPACItem.Checked = !onlinePACItem.Checked;
@@ -507,11 +507,11 @@ namespace Shadowsocks.View
         //    controller.ToggleShareOverLAN(ShareOverLANItem.Checked);
         //}
 
-        //private void SelectRandomItem_Click(object sender, EventArgs e)
-        //{
-        //    SelectRandomItem.Checked = !SelectRandomItem.Checked;
-        //    controller.ToggleSelectRandom(SelectRandomItem.Checked);
-        //}
+        private void SelectRandomItem_Click(object sender, EventArgs e)
+        {
+            SelectRandomItem.Checked = !SelectRandomItem.Checked;
+            controller.ToggleSelectRandom(SelectRandomItem.Checked);
+        }
 
         private void EditPACFileItem_Click(object sender, EventArgs e)
         {
@@ -526,6 +526,11 @@ namespace Shadowsocks.View
         private void UpdatePACFromLanIPListItem_Click(object sender, EventArgs e)
         {
             controller.UpdatePACFromOnlinePac("https://raw.githubusercontent.com/breakwa11/gfw_whitelist/master/ss_lanip.pac");
+        }
+
+        private void UpdatePACFromCNWhiteListItem_Click(object sender, EventArgs e)
+        {
+            controller.UpdatePACFromOnlinePac("https://raw.githubusercontent.com/breakwa11/gfw_whitelist/master/ss_white.pac");
         }
 
         private void UpdatePACFromCNIPListItem_Click(object sender, EventArgs e)

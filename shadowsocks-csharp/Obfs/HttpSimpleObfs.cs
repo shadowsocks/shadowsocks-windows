@@ -177,7 +177,7 @@ namespace Shadowsocks.Obfs
                     string host = Server.host;
                     if (Server.param.Length > 0)
                     {
-                        string[] hosts = Server.param.Split(",".ToCharArray());
+                        string[] hosts = Server.param.Split(',');
                         host = hosts[random.Next(hosts.Length)];
                     }
                     string http_buf =
@@ -206,7 +206,7 @@ namespace Shadowsocks.Obfs
                     string host = Server.host;
                     if (Server.param.Length > 0)
                     {
-                        string[] hosts = Server.param.Split(",".ToCharArray());
+                        string[] hosts = Server.param.Split(',');
                         host = hosts[random.Next(hosts.Length)];
                     }
                     string http_buf = "GET / HTTP/1.1\r\n"
