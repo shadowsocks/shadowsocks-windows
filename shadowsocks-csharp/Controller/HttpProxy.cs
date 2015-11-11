@@ -291,7 +291,7 @@ namespace Shadowsocks.Controller
             return request;
         }
 
-        public void ParseHttpRequest(ref byte[] connetionRecvBuffer, ref int bytesRead, ref byte[] remoteHeaderSendBuffer)
+        public void ParseHttpRequest(byte[] connetionRecvBuffer, ref int bytesRead, ref byte[] remoteHeaderSendBuffer)
         {
             byte[] buffer = new byte[bytesRead];
             byte[] block = new byte[] { (byte)'\r', (byte)'\n', (byte)'\r', (byte)'\n' };
