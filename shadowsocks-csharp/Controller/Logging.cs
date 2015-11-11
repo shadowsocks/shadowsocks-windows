@@ -57,10 +57,7 @@ namespace Shadowsocks.Controller
             string result = string.Empty;
             foreach (StackFrame stack in stacks)
             {
-                result += string.Format("{0} {1} {2} {3}\r\n", stack.GetFileName(),
-                    stack.GetFileLineNumber(),
-                    stack.GetFileColumnNumber(),
-                    stack.GetMethod().ToString());
+                result += string.Format("{0}\r\n", stack.GetMethod().ToString());
             }
             return result;
         }
