@@ -1062,7 +1062,7 @@ namespace Shadowsocks.Controller
             }
             else if (err == 2)
             {
-                string dataSend = "HTTP/1.1 407 Unauthorized\r\nProxy-Authenticate: Basic realm=\"SSR\"\r\n\r\n";
+                string dataSend = "HTTP/1.1 407 Proxy Authentication Required\r\nProxy-Authenticate: Basic realm=\"SSR\"\r\n\r\n";
                 byte[] httpData = System.Text.Encoding.UTF8.GetBytes(dataSend);
                 connection.BeginSend(httpData, 0, httpData.Length, 0, new AsyncCallback(HttpHandshakeAuthEndSend), null);
             }

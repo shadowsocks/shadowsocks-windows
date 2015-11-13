@@ -54,6 +54,7 @@
             this.TCPProtocolComboBox = new System.Windows.Forms.ComboBox();
             this.labelObfsParam = new System.Windows.Forms.Label();
             this.textObfsParam = new System.Windows.Forms.TextBox();
+            this.checkRemarks = new System.Windows.Forms.CheckBox();
             this.panel2 = new System.Windows.Forms.Panel();
             this.DeleteButton = new System.Windows.Forms.Button();
             this.AddButton = new System.Windows.Forms.Button();
@@ -70,7 +71,6 @@
             this.tableLayoutPanel3 = new System.Windows.Forms.TableLayoutPanel();
             this.MyCancelButton = new System.Windows.Forms.Button();
             this.OKButton = new System.Windows.Forms.Button();
-            this.checkRemarks = new System.Windows.Forms.CheckBox();
             this.tableLayoutPanel1.SuspendLayout();
             this.ServerGroupBox.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.PictureQRcode)).BeginInit();
@@ -137,6 +137,7 @@
             // 
             // ObfsCombo
             // 
+            this.ObfsCombo.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             this.ObfsCombo.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.ObfsCombo.FormattingEnabled = true;
             this.ObfsCombo.Items.AddRange(new object[] {
@@ -223,8 +224,7 @@
             // 
             // EncryptionSelect
             // 
-            this.EncryptionSelect.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
+            this.EncryptionSelect.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             this.EncryptionSelect.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.EncryptionSelect.FormattingEnabled = true;
             this.EncryptionSelect.ImeMode = System.Windows.Forms.ImeMode.NoControl;
@@ -385,6 +385,7 @@
             // 
             // TCPProtocolComboBox
             // 
+            this.TCPProtocolComboBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             this.TCPProtocolComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.TCPProtocolComboBox.FormattingEnabled = true;
             this.TCPProtocolComboBox.Items.AddRange(new object[] {
@@ -414,6 +415,18 @@
             this.textObfsParam.Name = "textObfsParam";
             this.textObfsParam.Size = new System.Drawing.Size(206, 22);
             this.textObfsParam.TabIndex = 35;
+            // 
+            // checkRemarks
+            // 
+            this.checkRemarks.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.checkRemarks.AutoSize = true;
+            this.checkRemarks.Location = new System.Drawing.Point(15, 148);
+            this.checkRemarks.Name = "checkRemarks";
+            this.checkRemarks.Size = new System.Drawing.Size(71, 18);
+            this.checkRemarks.TabIndex = 36;
+            this.checkRemarks.Text = "Remarks";
+            this.checkRemarks.UseVisualStyleBackColor = true;
+            this.checkRemarks.CheckedChanged += new System.EventHandler(this.checkRemarks_CheckedChanged);
             // 
             // panel2
             // 
@@ -644,18 +657,6 @@
             this.OKButton.Text = "OK";
             this.OKButton.UseVisualStyleBackColor = true;
             this.OKButton.Click += new System.EventHandler(this.OKButton_Click);
-            // 
-            // checkRemarks
-            // 
-            this.checkRemarks.Anchor = System.Windows.Forms.AnchorStyles.Right;
-            this.checkRemarks.AutoSize = true;
-            this.checkRemarks.Location = new System.Drawing.Point(15, 148);
-            this.checkRemarks.Name = "checkRemarks";
-            this.checkRemarks.Size = new System.Drawing.Size(71, 18);
-            this.checkRemarks.TabIndex = 36;
-            this.checkRemarks.Text = "Remarks";
-            this.checkRemarks.UseVisualStyleBackColor = true;
-            this.checkRemarks.CheckedChanged += new System.EventHandler(this.checkRemarks_CheckedChanged);
             // 
             // ConfigForm
             // 

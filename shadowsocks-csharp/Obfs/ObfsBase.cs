@@ -40,11 +40,12 @@ namespace Shadowsocks.Obfs
         {
             if (plaindata == null || plaindata.Length < 2)
                 return defaultValue;
-            if (plaindata[0] == 1)
+            int head_type = plaindata[0] & 0xF;
+            if (head_type == 1)
                 return 7;
-            if (plaindata[0] == 4)
+            if (head_type == 4)
                 return 19;
-            if (plaindata[0] == 3)
+            if (head_type == 3)
                 return 4 + plaindata[1];
             return defaultValue;
         }
