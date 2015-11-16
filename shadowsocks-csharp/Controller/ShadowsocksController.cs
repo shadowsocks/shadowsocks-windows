@@ -299,7 +299,7 @@ namespace Shadowsocks.Controller
             parts = parts + server.method + ":" + server.password + "@" + server.server + ":" + server.server_port;
             if (server.obfs.Length > 0 && server.obfs != "plain" && server.obfsparam.Length > 0)
             {
-                parts += "/" + System.Convert.ToBase64String(Encoding.UTF8.GetBytes(server.obfsparam));
+                parts += "/" + System.Convert.ToBase64String(Encoding.UTF8.GetBytes(server.obfsparam)).Replace('+', '-').Replace('/', '_');
             }
             return parts;
         }
@@ -308,14 +308,14 @@ namespace Shadowsocks.Controller
         {
             Server server = GetCurrentServer();
             string parts = GetObfsPartOfSSLink(server);
-            string base64 = System.Convert.ToBase64String(Encoding.UTF8.GetBytes(parts));
+            string base64 = System.Convert.ToBase64String(Encoding.UTF8.GetBytes(parts)).Replace('+', '-').Replace('/', '_');
             return "ss://" + base64;
         }
 
         public string GetSSLinkForServer(Server server)
         {
             string parts = GetObfsPartOfSSLink(server);
-            string base64 = System.Convert.ToBase64String(Encoding.UTF8.GetBytes(parts));
+            string base64 = System.Convert.ToBase64String(Encoding.UTF8.GetBytes(parts)).Replace('+', '-').Replace('/', '_');
             return "ss://" + base64;
         }
 
@@ -323,7 +323,7 @@ namespace Shadowsocks.Controller
         {
             string remarks = server.remarks_base64;
             string parts = GetObfsPartOfSSLink(server) + "#" + remarks;
-            string base64 = System.Convert.ToBase64String(Encoding.UTF8.GetBytes(parts));
+            string base64 = System.Convert.ToBase64String(Encoding.UTF8.GetBytes(parts)).Replace('+', '-').Replace('/', '_');
             return "ss://" + base64;
         }
 

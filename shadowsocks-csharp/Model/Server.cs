@@ -726,7 +726,7 @@ namespace Shadowsocks.Model
                     this.obfs = parts[parts.Length - 4];
                     if (param.Length > 0)
                     {
-                        this.obfsparam = param;
+                        this.obfsparam = Encoding.UTF8.GetString(System.Convert.FromBase64String(param.Replace('-', '+').Replace('_', '/')));
                     }
                 }
                 else if (parts.Length >= 3)

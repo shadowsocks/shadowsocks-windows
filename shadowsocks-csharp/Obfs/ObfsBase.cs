@@ -36,7 +36,7 @@ namespace Shadowsocks.Obfs
         {
             Server = serverInfo;
         }
-        public int GetHeadSize(byte[] plaindata, int defaultValue)
+        public static int GetHeadSize(byte[] plaindata, int defaultValue)
         {
             if (plaindata == null || plaindata.Length < 2)
                 return defaultValue;

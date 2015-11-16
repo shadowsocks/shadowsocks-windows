@@ -1241,8 +1241,8 @@ namespace Shadowsocks.Controller
                 // +----+-----+-------+------+----------+----------+
                 // | 1  |  1  | X'00' |  1   | Variable |    2     |
                 // +----+-----+-------+------+----------+----------+
-                // Recv first 3 bytes
-                connection.BeginReceive(connetionRecvBuffer, 0, 3, 0,
+                // Recv first 5 bytes, need 2 bytes to know the head length
+                connection.BeginReceive(connetionRecvBuffer, 0, 5, 0,
                     new AsyncCallback(HandshakeReceive2Callback), null);
             }
             catch (Exception e)
@@ -1721,35 +1721,36 @@ namespace Shadowsocks.Controller
                 {
                     //Console.WriteLine(e);
                 }
+                int head_len = ObfsBase.GetHeadSize(remoteHeaderSendBuffer, 30);
                 if (remoteTCPEndPoint != null)
                 {
                     try
                     {
                         protocol.SetServerInfo(new ServerInfo(remoteTCPEndPoint.Address.ToString(), server.server_port, "", server.getProtocolData(),
-                            encryptor.getIV(), encryptor.getKey(), remoteHeaderSendBuffer.Length, mss));
+                            encryptor.getIV(), encryptor.getKey(), head_len, mss));
                     }
                     catch (Exception)
                     {
                         protocol.SetServerInfo(new ServerInfo(server.server, server.server_port, "", server.getProtocolData(),
-                            encryptor.getIV(), encryptor.getKey(), remoteHeaderSendBuffer.Length, mss));
+                            encryptor.getIV(), encryptor.getKey(), head_len, mss));
                     }
                     try
                     {
                         obfs.SetServerInfo(new ServerInfo(remoteTCPEndPoint.Address.ToString(), server.server_port, server.obfsparam, server.getObfsData(),
-                            encryptor.getIV(), encryptor.getKey(), remoteHeaderSendBuffer.Length, mss));
+                            encryptor.getIV(), encryptor.getKey(), head_len, mss));
                     }
                     catch (Exception)
                     {
                         obfs.SetServerInfo(new ServerInfo(server.server, server.server_port, server.obfsparam, server.getObfsData(),
-                            encryptor.getIV(), encryptor.getKey(), remoteHeaderSendBuffer.Length, mss));
+                            encryptor.getIV(), encryptor.getKey(), head_len, mss));
                     }
                 }
                 else
                 {
                     protocol.SetServerInfo(new ServerInfo(server.server, server.server_port, "", server.getProtocolData(),
-                        encryptor.getIV(), encryptor.getKey(), remoteHeaderSendBuffer.Length, mss));
+                        encryptor.getIV(), encryptor.getKey(), head_len, mss));
                     obfs.SetServerInfo(new ServerInfo(server.server, server.server_port, server.obfsparam, server.getObfsData(),
-                        encryptor.getIV(), encryptor.getKey(), remoteHeaderSendBuffer.Length, mss));
+                        encryptor.getIV(), encryptor.getKey(), head_len, mss));
                 }
             }
         }
