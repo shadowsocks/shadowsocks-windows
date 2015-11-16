@@ -20,7 +20,7 @@ namespace Shadowsocks.Controller
         private Listener _listener;
         private PACServer _pacServer;
         private Configuration _config;
-        private PolipoRunner polipoRunner;
+        private HttpProxyRunner polipoRunner;
         private GFWListUpdater gfwListUpdater;
         private bool stopped = false;
 
@@ -372,7 +372,7 @@ namespace Shadowsocks.Controller
 
             if (polipoRunner == null)
             {
-                polipoRunner = new PolipoRunner();
+                polipoRunner = new HttpProxyRunner();
             }
             if (_pacServer == null)
             {

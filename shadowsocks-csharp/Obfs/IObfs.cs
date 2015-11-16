@@ -14,17 +14,23 @@ namespace Shadowsocks.Obfs
     {
         public string host;
         public int port;
-        public int tcp_mss;
         public string param;
         public object data;
+        public int tcp_mss;
+        public byte[] iv;
+        public byte[] key;
+        public int head_len;
 
-        public ServerInfo(string host, int port, int tcp_mss, string param, object data)
+        public ServerInfo(string host, int port, string param, object data, byte[] iv, byte[] key, int head_len, int tcp_mss)
         {
             this.host = host;
             this.port = port;
-            this.tcp_mss = tcp_mss;
             this.param = param;
             this.data = data;
+            this.iv = iv;
+            this.key = key;
+            this.head_len = head_len;
+            this.tcp_mss = tcp_mss;
         }
     }
     public interface IObfs : IDisposable

@@ -1725,25 +1725,31 @@ namespace Shadowsocks.Controller
                 {
                     try
                     {
-                        protocol.SetServerInfo(new ServerInfo(remoteTCPEndPoint.Address.ToString(), server.server_port, mss, "", server.getProtocolData()));
+                        protocol.SetServerInfo(new ServerInfo(remoteTCPEndPoint.Address.ToString(), server.server_port, "", server.getProtocolData(),
+                            encryptor.getIV(), encryptor.getKey(), remoteHeaderSendBuffer.Length, mss));
                     }
                     catch (Exception)
                     {
-                        protocol.SetServerInfo(new ServerInfo(server.server, server.server_port, mss, "", server.getProtocolData()));
+                        protocol.SetServerInfo(new ServerInfo(server.server, server.server_port, "", server.getProtocolData(),
+                            encryptor.getIV(), encryptor.getKey(), remoteHeaderSendBuffer.Length, mss));
                     }
                     try
                     {
-                        obfs.SetServerInfo(new ServerInfo(remoteTCPEndPoint.Address.ToString(), server.server_port, mss, server.obfsparam, server.getObfsData()));
+                        obfs.SetServerInfo(new ServerInfo(remoteTCPEndPoint.Address.ToString(), server.server_port, server.obfsparam, server.getObfsData(),
+                            encryptor.getIV(), encryptor.getKey(), remoteHeaderSendBuffer.Length, mss));
                     }
                     catch (Exception)
                     {
-                        obfs.SetServerInfo(new ServerInfo(server.server, server.server_port, mss, server.obfsparam, server.getObfsData()));
+                        obfs.SetServerInfo(new ServerInfo(server.server, server.server_port, server.obfsparam, server.getObfsData(),
+                            encryptor.getIV(), encryptor.getKey(), remoteHeaderSendBuffer.Length, mss));
                     }
                 }
                 else
                 {
-                    protocol.SetServerInfo(new ServerInfo(server.server, server.server_port, mss, "", server.getProtocolData()));
-                    obfs.SetServerInfo(new ServerInfo(server.server, server.server_port, mss, server.obfsparam, server.getObfsData()));
+                    protocol.SetServerInfo(new ServerInfo(server.server, server.server_port, "", server.getProtocolData(),
+                        encryptor.getIV(), encryptor.getKey(), remoteHeaderSendBuffer.Length, mss));
+                    obfs.SetServerInfo(new ServerInfo(server.server, server.server_port, server.obfsparam, server.getObfsData(),
+                        encryptor.getIV(), encryptor.getKey(), remoteHeaderSendBuffer.Length, mss));
                 }
             }
         }
@@ -1894,15 +1900,6 @@ namespace Shadowsocks.Controller
 
                     if (connectionUDP == null)
                     {
-                        try
-                        {
-                            string a = System.Text.Encoding.UTF8.GetString(remoteSendBuffer, 0, bytesToSend);
-                            a += '.';
-                        }
-                        catch
-                        {
-
-                        }
                         connection.BeginSend(remoteSendBuffer, 0, bytesToSend, 0, new AsyncCallback(PipeConnectionSendCallback), null);
                     }
                     else

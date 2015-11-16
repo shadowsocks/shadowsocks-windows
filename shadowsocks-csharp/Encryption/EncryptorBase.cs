@@ -30,5 +30,7 @@ namespace Shadowsocks.Encryption
         public abstract void Reset();
 
         public abstract void Dispose();
+        public abstract byte[] getIV();
+        public abstract byte[] getKey();
     }
 }

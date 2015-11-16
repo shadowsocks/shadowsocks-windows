@@ -12,13 +12,13 @@ using System.Runtime.InteropServices;
 
 namespace Shadowsocks.Controller
 {
-    class PolipoRunner
+    class HttpProxyRunner
     {
         private Process _process;
         private static string runningPath;
         private int _runningPort;
 
-        static PolipoRunner()
+        static HttpProxyRunner()
         {
             runningPath = Path.Combine(System.Windows.Forms.Application.StartupPath, @"temp"); // Path.GetTempPath();
             if (!Directory.Exists(runningPath))

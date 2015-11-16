@@ -24,6 +24,7 @@ namespace Shadowsocks.Encryption
         protected int[] _cipherInfo;
         protected byte[] _key;
         protected int keyLen;
+        protected byte[] _iv;
         protected int ivLen;
 
 
@@ -34,6 +35,15 @@ namespace Shadowsocks.Encryption
         }
 
         protected abstract Dictionary<string, int[]> getCiphers();
+
+        public override byte[] getIV()
+        {
+            return _iv;
+        }
+        public override byte[] getKey()
+        {
+            return (byte[])_key.Clone();
+        }
 
         protected void InitKey(string method, string password)
         {
@@ -61,6 +71,8 @@ namespace Shadowsocks.Encryption
                 bytesToKey(passbuf, _key);
                 CachedKeys[k] = _key;
             }
+            Array.Resize(ref _iv, ivLen);
+            randBytes(_iv, ivLen);
         }
 
         protected void bytesToKey(byte[] password, byte[] key)
@@ -118,7 +130,7 @@ namespace Shadowsocks.Encryption
             if (!_encryptIVSent)
             {
                 _encryptIVSent = true;
-                randBytes(outbuf, ivLen);
+                Buffer.BlockCopy(_iv, 0, outbuf, 0, ivLen);
                 initCipher(outbuf, true);
                 outlength = length + ivLen;
                 lock (tempbuf)

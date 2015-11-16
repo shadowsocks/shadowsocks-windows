@@ -166,7 +166,7 @@
       <DependentUpon>ConfigForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Controller\Local.cs" />
-    <Compile Include="Controller\PolipoRunner.cs" />
+    <Compile Include="Controller\HttpProxyRunner.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Controller\ShadowsocksController.cs" />

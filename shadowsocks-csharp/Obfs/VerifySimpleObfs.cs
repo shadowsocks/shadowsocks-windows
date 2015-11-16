@@ -4,9 +4,8 @@ using Shadowsocks.Controller;
 
 namespace Shadowsocks.Obfs
 {
-    public class SubEncodeObfs
+    public class VerifyData
     {
-        public object subObfs;
     }
 
     public abstract class VerifySimpleBase : ObfsBase
@@ -16,8 +15,6 @@ namespace Shadowsocks.Obfs
         {
         }
 
-        protected IObfs subObfs;
-
         protected const int RecvBufferSize = 65536 * 2;
 
         protected byte[] recv_buf = new byte[RecvBufferSize];
@@ -26,54 +23,21 @@ namespace Shadowsocks.Obfs
 
         public override object InitData()
         {
-            return new SubEncodeObfs();
+            return new VerifyData();
         }
 
         public override void SetServerInfo(ServerInfo serverInfo)
         {
-            if (subObfs == null && serverInfo.param != null && serverInfo.param.Length > 0)
-            {
-                try
-                {
-                    string[] paramsList = serverInfo.param.Split(new[] { ',' }, 2);
-                    string subParam = "";
-                    if (paramsList.Length > 1)
-                    {
-                        subObfs = ObfsFactory.GetObfs(paramsList[0]);
-                        subParam = paramsList[1];
-                    }
-                    else
-                    {
-                        subObfs = ObfsFactory.GetObfs(serverInfo.param);
-                    }
-                    if (((SubEncodeObfs)serverInfo.data).subObfs == null)
-                        ((SubEncodeObfs)serverInfo.data).subObfs = subObfs.InitData();
-                    subObfs.SetServerInfo(new ServerInfo(serverInfo.host, serverInfo.port, serverInfo.tcp_mss, subParam, ((SubEncodeObfs)serverInfo.data).subObfs));
-                }
-                catch (Exception)
-                {
-                    // do nothing
-                }
-                serverInfo.param = null;
-            }
             base.SetServerInfo(serverInfo);
         }
 
         public override byte[] ClientEncode(byte[] encryptdata, int datalength, out int outlength)
         {
-            if (subObfs != null)
-            {
-                return subObfs.ClientEncode(encryptdata, datalength, out outlength);
-            }
             outlength = datalength;
             return encryptdata;
         }
         public override byte[] ClientDecode(byte[] encryptdata, int datalength, out int outlength, out bool needsendback)
         {
-            if (subObfs != null)
-            {
-                return subObfs.ClientDecode(encryptdata, datalength, out outlength, out needsendback);
-            }
             outlength = datalength;
             needsendback = false;
             return encryptdata;
@@ -248,18 +212,6 @@ namespace Shadowsocks.Obfs
                 Array.Copy(packdata, 0, outdata, outlength, outlen);
                 outlength += outlen;
             }
-            if (subObfs == null && Server.param != null && Server.param.Length > 0)
-            {
-                try
-                {
-                    subObfs = ObfsFactory.GetObfs(Server.param);
-                }
-                catch (Exception)
-                {
-                    // do nothing
-                }
-                Server.param = null;
-            }
             return outdata;
         }
 
@@ -318,7 +270,7 @@ namespace Shadowsocks.Obfs
         }
     }
 
-    public class AuthData : SubEncodeObfs
+    public class AuthData : VerifyData
     {
         public byte[] clientID;
         public UInt32 connectionID;

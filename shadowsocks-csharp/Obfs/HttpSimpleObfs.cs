@@ -164,7 +164,7 @@ namespace Shadowsocks.Obfs
                 }
                 else if (Method == "http_simple")
                 {
-                    int headsize = GetHeadSize(encryptdata, 30);
+                    int headsize = Server.iv.Length + Server.head_len;
                     if (datalength - headsize > 64)
                     {
                         headdata = new byte[headsize + random.Next(0, 64)];
