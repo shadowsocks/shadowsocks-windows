@@ -124,7 +124,7 @@
             this.Server.MinimumWidth = 2;
             this.Server.Name = "Server";
             this.Server.ReadOnly = true;
-            this.Server.Width = 200;
+            this.Server.Width = 170;
             // 
             // Enable
             // 
@@ -218,7 +218,6 @@
             this.ConnectTimeout.Name = "ConnectTimeout";
             this.ConnectTimeout.ReadOnly = true;
             this.ConnectTimeout.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-            this.ConnectTimeout.Visible = false;
             this.ConnectTimeout.Width = 28;
             // 
             // Continuous

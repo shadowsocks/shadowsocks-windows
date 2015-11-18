@@ -29,6 +29,10 @@ namespace Shadowsocks.Obfs
             {
                 _registeredObfs.Add(method, typeof(VerifyDeflateObfs));
             }
+            foreach (string method in VerifySHA1Obfs.SupportedObfs())
+            {
+                _registeredObfs.Add(method, typeof(VerifySHA1Obfs));
+            }
             foreach (string method in AuthSimple.SupportedObfs())
             {
                 _registeredObfs.Add(method, typeof(AuthSimple));

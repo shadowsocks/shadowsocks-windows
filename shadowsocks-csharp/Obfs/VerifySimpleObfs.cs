@@ -1,6 +1,8 @@
 ﻿using System;
+using System.IO;
 using System.Collections.Generic;
 using Shadowsocks.Controller;
+using System.Security.Cryptography;
 
 namespace Shadowsocks.Obfs
 {
@@ -270,26 +272,18 @@ namespace Shadowsocks.Obfs
         }
     }
 
-    public class AuthData : VerifyData
+    public class VerifySHA1Obfs : VerifySimpleBase
     {
-        public byte[] clientID;
-        public UInt32 connectionID;
-    }
-
-    public class AuthSimple : VerifySimpleBase
-    {
-        public AuthSimple(string method)
+        public VerifySHA1Obfs(string method)
             : base(method)
         {
             has_sent_header = false;
             has_recv_header = false;
+            pack_id = 0;
         }
         private static Dictionary<string, int[]> _obfs = new Dictionary<string, int[]> {
-            {"auth_simple", new int[]{1, 0, 1}},
+                {"verify_sha1", new int[]{1, 0, 1}},
         };
-
-        protected bool has_sent_header;
-        protected bool has_recv_header;
 
         public static List<string> SupportedObfs()
         {
@@ -301,51 +295,42 @@ namespace Shadowsocks.Obfs
             return _obfs;
         }
 
-        public override object InitData()
-        {
-            return new AuthData();
-        }
+        private bool has_sent_header;
+        private bool has_recv_header;
+        private uint pack_id;
 
         public void PackData(byte[] data, int datalength, byte[] outdata, out int outlength)
         {
-            int rand_len = random.Next(16) + 1;
-            outlength = rand_len + datalength + 6;
-            Array.Copy(data, 0, outdata, rand_len + 2, datalength);
-            outdata[0] = (byte)(outlength >> 8);
-            outdata[1] = (byte)(outlength);
-            outdata[2] = (byte)(rand_len);
-            Util.CRC32.SetCRC32(outdata, outlength);
-        }
+            byte[] key = new byte[Server.iv.Length + 4];
+            Server.iv.CopyTo(key, 0);
+            {
+                byte[] id = BitConverter.GetBytes(pack_id);
+                pack_id += 1;
+                Array.Reverse(id);
+                id.CopyTo(key, Server.iv.Length);
+            }
+            Array.Copy(data, 0, outdata, 12, datalength);
 
+            HMACSHA1 sha1 = new HMACSHA1(key);
+            byte[] sha1data = sha1.ComputeHash(data, 0, datalength);
+            Array.Copy(sha1data, 0, outdata, 2, 10);
+            outdata[0] = (byte)(datalength >> 8);
+            outdata[1] = (byte)(datalength & 0xff);
+            outlength = datalength + 12;
+        }
         public void PackAuthData(byte[] data, int datalength, byte[] outdata, out int outlength)
         {
-            int rand_len = random.Next(16) + 1;
-            outlength = rand_len + datalength + 6 + 12;
-            lock ((AuthData)this.Server.data)
-            {
-                if (((AuthData)this.Server.data).connectionID > 0xFF000000)
-                {
-                    ((AuthData)this.Server.data).clientID = null;
-                }
-                if (((AuthData)this.Server.data).clientID == null)
-                {
-                    ((AuthData)this.Server.data).clientID = new byte[4];
-                    random.NextBytes(((AuthData)this.Server.data).clientID);
-                    ((AuthData)this.Server.data).connectionID = (UInt32)random.Next(0x1000000);
-                }
-                ((AuthData)this.Server.data).connectionID += 1;
-                Array.Copy(((AuthData)this.Server.data).clientID, 0, outdata, rand_len + 4 + 2, 4);
-                Array.Copy(BitConverter.GetBytes(((AuthData)this.Server.data).connectionID), 0, outdata, rand_len + 8 + 2, 4);
-            }
-            UInt64 utc_time_second = (UInt64)Math.Floor(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1, 0, 0, 0)).TotalSeconds);
-            UInt32 utc_time = (UInt32)(utc_time_second);
-            Array.Copy(BitConverter.GetBytes(utc_time), 0, outdata, rand_len + 2, 4);
+            byte[] key = new byte[Server.iv.Length + Server.key.Length];
+            Server.iv.CopyTo(key, 0);
+            Server.key.CopyTo(key, Server.iv.Length);
+            Array.Copy(data, 0, outdata, 0, datalength);
+            outdata[0] |= 0x10;
 
-            Array.Copy(data, 0, outdata, rand_len + 12 + 2, datalength);
-            outdata[0] = (byte)(outlength >> 8);
-            outdata[1] = (byte)(outlength);
-            outdata[2] = (byte)(rand_len);
-            Util.CRC32.SetCRC32(outdata, outlength);
+            HMACSHA1 sha1 = new HMACSHA1(key);
+            byte[] sha1data = sha1.ComputeHash(outdata, 0, datalength);
+
+            Array.Copy(sha1data, 0, outdata, datalength, 10);
+            outlength = datalength + 10;
         }
 
         public override byte[] ClientPreEncrypt(byte[] plaindata, int datalength, out int outlength)
@@ -358,7 +343,7 @@ namespace Shadowsocks.Obfs
             if (!has_sent_header)
             {
                 int headsize = GetHeadSize(plaindata, 30);
-                int _datalength = Math.Min(random.Next(32) + headsize, datalength);
+                int _datalength = headsize;
                 int outlen;
                 PackAuthData(data, _datalength, packdata, out outlen);
                 has_sent_header = true;
@@ -397,44 +382,13 @@ namespace Shadowsocks.Obfs
         }
         public override byte[] ClientPostDecrypt(byte[] plaindata, int datalength, out int outlength)
         {
-            byte[] outdata = new byte[recv_buf_len + datalength];
-            Array.Copy(plaindata, 0, recv_buf, recv_buf_len, datalength);
-            recv_buf_len += datalength;
-            outlength = 0;
-            while (recv_buf_len > 2)
-            {
-                int len = (recv_buf[0] << 8) + recv_buf[1];
-                if (len >= 8192 || len < 7)
-                {
-                    throw new ObfsException("ClientPostDecrypt data error");
-                }
-                if (len > recv_buf_len)
-                    break;
-
-                if (Util.CRC32.CheckCRC32(recv_buf, len))
-                {
-                    int pos = recv_buf[2] + 2;
-                    int outlen = len - pos - 4;
-                    if (outlength + outlen > outdata.Length)
-                    {
-                        Array.Resize(ref outdata, (outlength + outlen) * 2);
-                    }
-                    Array.Copy(recv_buf, pos, outdata, outlength, outlen);
-                    outlength += outlen;
-                    recv_buf_len -= len;
-                    Array.Copy(recv_buf, len, recv_buf, 0, recv_buf_len);
-                    //len = (recv_buf[0] << 8) + recv_buf[1];
-                }
-                else
-                {
-                    throw new ObfsException("ClientPostDecrypt data uncorrect CRC32");
-                }
-            }
-            return outdata;
+            outlength = datalength;
+            return plaindata;
         }
 
         public override void Dispose()
         {
         }
     }
+
 }

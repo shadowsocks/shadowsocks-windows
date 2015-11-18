@@ -98,15 +98,8 @@ namespace Shadowsocks.Controller
                     if (line.StartsWith("Content-Length: "))
                     {
                         string len = line.Substring("Content-Length: ".Length);
-                        httpContentLength = Convert.ToInt32(len);
+                        httpContentLength = Convert.ToInt32(len) + 2;  // 2 bytes of CRLF
                     }
-                    //if (line.StartsWith("Transfer-Encoding: "))
-                    //{
-                    //    if (line.StartsWith("Transfer-Encoding: chunked"))
-                    //    {
-                    //        chunked = true;
-                    //    }
-                    //}
                 }
                 host = ParseHostAndPort(host, out port);
                 if (cmdItems[1].StartsWith("http://"))
@@ -239,7 +232,7 @@ namespace Shadowsocks.Controller
                     if (line.StartsWith("Content-Length: "))
                     {
                         string len = line.Substring("Content-Length: ".Length);
-                        httpContentLength = Convert.ToInt32(len);
+                        httpContentLength = Convert.ToInt32(len) + 2;  // 2 bytes of CRLF
                     }
                 }
                 if (host.Length == 0) return "";
@@ -287,6 +280,7 @@ namespace Shadowsocks.Controller
             {
                 string cmd = cmdItems[0] + " " + cmdItems[1] + "\r\n";
                 request = cmd + data.Split(new string[] { "\r\n" }, 2, StringSplitOptions.RemoveEmptyEntries)[1];
+                request.Replace("\r\nProxy-Connection: ", "\r\nConnection: ");
             }
             return request;
         }

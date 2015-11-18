@@ -230,12 +230,12 @@
             this.EncryptionSelect.ImeMode = System.Windows.Forms.ImeMode.NoControl;
             this.EncryptionSelect.ItemHeight = 14;
             this.EncryptionSelect.Items.AddRange(new object[] {
-            "aes-256-cfb",
-            "aes-192-cfb",
+            "rc4-md5",
             "aes-128-cfb",
-            "chacha20",
+            "aes-192-cfb",
+            "aes-256-cfb",
             "salsa20",
-            "rc4-md5"});
+            "chacha20"});
             this.EncryptionSelect.Location = new System.Drawing.Point(92, 90);
             this.EncryptionSelect.Name = "EncryptionSelect";
             this.EncryptionSelect.Size = new System.Drawing.Size(206, 22);
@@ -392,6 +392,7 @@
             "origin",
             "verify_simple",
             "verify_deflate",
+            "verify_sha1",
             "auth_simple"});
             this.TCPProtocolComboBox.Location = new System.Drawing.Point(92, 118);
             this.TCPProtocolComboBox.Name = "TCPProtocolComboBox";

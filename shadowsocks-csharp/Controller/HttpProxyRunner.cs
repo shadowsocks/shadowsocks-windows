@@ -105,7 +105,14 @@ namespace Shadowsocks.Controller
                 _process.StartInfo.CreateNoWindow = true;
                 //_process.StartInfo.RedirectStandardOutput = true;
                 //_process.StartInfo.RedirectStandardError = true;
-                _process.Start();
+                try
+                {
+                    _process.Start();
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e.ToString());
+                }
             }
         }
 
