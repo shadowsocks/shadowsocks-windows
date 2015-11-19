@@ -173,7 +173,6 @@ namespace Shadowsocks.Controller
             _config.socks5User = config.socks5User;
             _config.socks5Pass = config.socks5Pass;
             _config.autoban = config.autoban;
-            SaveConfig(_config);
             foreach (Server s in missingServers)
             {
                 s.GetConnections().CloseAll();
@@ -401,6 +400,10 @@ namespace Shadowsocks.Controller
                     {
                         polipoRunner.Stop();
                         polipoRunner.Start(_config);
+                    }
+                    else if (_config.buildinHttpProxy)
+                    {
+                        polipoRunner.Stop();
                     }
                 }
                 else

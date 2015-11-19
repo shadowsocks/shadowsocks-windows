@@ -18,6 +18,7 @@ namespace Shadowsocks.Controller
 
         Configuration _config;
         bool _shareOverLAN;
+        bool _buildinHttpProxy;
         Socket _socket;
         Socket _socket_v6;
         IList<Service> _services;
@@ -52,7 +53,7 @@ namespace Shadowsocks.Controller
         public bool isConfigChange(Configuration config)
         {
             if (this._shareOverLAN != config.shareOverLan
-                || this._config.buildinHttpProxy != config.buildinHttpProxy
+                || _buildinHttpProxy != config.buildinHttpProxy
                 || _socket == null
                 || ((IPEndPoint)_socket.LocalEndPoint).Port != config.localPort)
             {
@@ -65,6 +66,7 @@ namespace Shadowsocks.Controller
         {
             this._config = config;
             this._shareOverLAN = config.shareOverLan;
+            this._buildinHttpProxy = config.buildinHttpProxy;
 
             if (CheckIfPortInUse(_config.localPort))
                 throw new Exception(I18N.GetString("Port already in use"));
