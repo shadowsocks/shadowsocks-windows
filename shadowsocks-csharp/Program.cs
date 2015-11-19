@@ -37,9 +37,9 @@ namespace Shadowsocks
                     return;
                 }
                 Directory.SetCurrentDirectory(Application.StartupPath);
-#if !DEBUG
+
                 Logging.OpenLogFile();
-#endif
+
                 ShadowsocksController controller = new ShadowsocksController();
 
                 MenuViewController viewController = new MenuViewController(controller);

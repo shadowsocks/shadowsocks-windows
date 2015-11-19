@@ -215,6 +215,7 @@ namespace Shadowsocks.Controller
                         response = new byte[] { 0, 91 };
                         Console.WriteLine("socks 5 protocol error");
                     }
+                    Logging.Debug($"======Send Local Port, size:" + response.Length);
                     connection.BeginSend(response, 0, response.Length, 0, new AsyncCallback(HandshakeSendCallback), null);
                 }
                 else
@@ -246,6 +247,7 @@ namespace Shadowsocks.Controller
                 // +----+-----+-------+------+----------+----------+
                 // Skip first 3 bytes
                 // TODO validate
+                Logging.Debug($"======Receive Local Port, size:" + 3);
                 connection.BeginReceive(connetionRecvBuffer, 0, 3, 0,
                     new AsyncCallback(handshakeReceive2Callback), null);
             }
@@ -272,6 +274,7 @@ namespace Shadowsocks.Controller
                     if (command == 1)
                     {
                         byte[] response = { 5, 0, 0, 1, 0, 0, 0, 0, 0, 0 };
+                        Logging.Debug($"======Send Local Port, size:" + response.Length);
                         connection.BeginSend(response, 0, response.Length, 0, new AsyncCallback(ResponseCallback), null);
                     }
                     else if (command == 3)
@@ -310,6 +313,7 @@ namespace Shadowsocks.Controller
             address.CopyTo(response, 4);
             response[response.Length - 1] = (byte)(port & 0xFF);
             response[response.Length - 2] = (byte)((port >> 8) & 0xFF);
+            Logging.Debug($"======Send Local Port, size:" + response.Length);
             connection.BeginSend(response, 0, response.Length, 0, new AsyncCallback(ReadAll), true);
         }
 
@@ -324,6 +328,7 @@ namespace Shadowsocks.Controller
                 if (ar.AsyncState != null)
                 {
                     connection.EndSend(ar);
+                    Logging.Debug($"======Receive Local Port, size:" + RecvSize);
                     connection.BeginReceive(connetionRecvBuffer, 0, RecvSize, 0,
                         new AsyncCallback(ReadAll), null);
                 }
@@ -332,6 +337,7 @@ namespace Shadowsocks.Controller
                     int bytesRead = connection.EndReceive(ar);
                     if (bytesRead > 0)
                     {
+                        Logging.Debug($"======Receive Local Port, size:" + RecvSize);
                         connection.BeginReceive(connetionRecvBuffer, 0, RecvSize, 0,
                             new AsyncCallback(ReadAll), null);
                     }
@@ -402,6 +408,7 @@ namespace Shadowsocks.Controller
 
                 connected = false;
                 // Connect to the remote endpoint.
+                Logging.Debug($"++++++Connect Server Port");
                 remote.BeginConnect(remoteEP,
                     new AsyncCallback(ConnectCallback), connectTimer);
             }
@@ -501,8 +508,10 @@ namespace Shadowsocks.Controller
             }
             try
             {
+                Logging.Debug($"++++++Receive Server Port, size:" + RecvSize);
                 remote.BeginReceive(remoteRecvBuffer, 0, RecvSize, 0,
                     new AsyncCallback(PipeRemoteReceiveCallback), null);
+                Logging.Debug($"======Receive Local Port, size:"+ RecvSize);
                 connection.BeginReceive(connetionRecvBuffer, 0, RecvSize, 0,
                     new AsyncCallback(PipeConnectionReceiveCallback), null);
             }
@@ -536,6 +545,7 @@ namespace Shadowsocks.Controller
                         }
                         encryptor.Decrypt(remoteRecvBuffer, bytesRead, remoteSendBuffer, out bytesToSend);
                     }
+                    Logging.Debug($"======Send Local Port, size:" + bytesToSend);
                     connection.BeginSend(remoteSendBuffer, 0, bytesToSend, 0, new AsyncCallback(PipeConnectionSendCallback), null);
 
                     IStrategy strategy = controller.GetCurrentStrategy();
@@ -588,6 +598,7 @@ namespace Shadowsocks.Controller
                         }
                         encryptor.Encrypt(connetionRecvBuffer, bytesRead, connetionSendBuffer, out bytesToSend);
                     }
+                    Logging.Debug($"++++++Send Server Port, size:" + bytesToSend);
                     remote.BeginSend(connetionSendBuffer, 0, bytesToSend, 0, new AsyncCallback(PipeRemoteSendCallback), null);
 
                     IStrategy strategy = controller.GetCurrentStrategy();
@@ -619,6 +630,7 @@ namespace Shadowsocks.Controller
             try
             {
                 remote.EndSend(ar);
+                Logging.Debug($"======Receive Local Port, size:" + RecvSize);
                 connection.BeginReceive(this.connetionRecvBuffer, 0, RecvSize, 0,
                     new AsyncCallback(PipeConnectionReceiveCallback), null);
             }
@@ -638,6 +650,7 @@ namespace Shadowsocks.Controller
             try
             {
                 connection.EndSend(ar);
+                Logging.Debug($"++++++Receive Server Port, size:" + RecvSize);
                 remote.BeginReceive(this.remoteRecvBuffer, 0, RecvSize, 0,
                     new AsyncCallback(PipeRemoteReceiveCallback), null);
             }
