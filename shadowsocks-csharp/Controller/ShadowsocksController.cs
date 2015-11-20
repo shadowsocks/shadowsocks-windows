@@ -160,7 +160,6 @@ namespace Shadowsocks.Controller
             List<Server> missingServers = MergeConfiguration(_config, config.configs);
             _config.configs = config.configs;
             _config.index = config.index;
-            _config.buildinHttpProxy = config.buildinHttpProxy;
             _config.shareOverLan = config.shareOverLan;
             _config.localPort = config.localPort;
             _config.reconnectTimes = config.reconnectTimes;
@@ -401,10 +400,6 @@ namespace Shadowsocks.Controller
                         polipoRunner.Stop();
                         polipoRunner.Start(_config);
                     }
-                    else if (_config.buildinHttpProxy)
-                    {
-                        polipoRunner.Stop();
-                    }
                 }
                 else
                 {
@@ -421,10 +416,7 @@ namespace Shadowsocks.Controller
                     List<Listener.Service> services = new List<Listener.Service>();
                     services.Add(local);
                     services.Add(_pacServer);
-                    if (!_config.buildinHttpProxy)
-                    {
-                        services.Add(new PortForwarder(polipoRunner.RunningPort));
-                    }
+                    services.Add(new PortForwarder(polipoRunner.RunningPort));
                     _listener = new Listener(services);
                     _listener.Start(_config);
                 }

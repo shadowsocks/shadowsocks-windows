@@ -58,7 +58,6 @@
             this.TextS5Port = new System.Windows.Forms.TextBox();
             this.LabelS5Username = new System.Windows.Forms.Label();
             this.CheckSocks5Proxy = new System.Windows.Forms.CheckBox();
-            this.checkBuildinHttpProxy = new System.Windows.Forms.CheckBox();
             this.tableLayoutPanel1.SuspendLayout();
             this.tableLayoutPanel10.SuspendLayout();
             this.tableLayoutPanel3.SuspendLayout();
@@ -93,13 +92,13 @@
             this.tableLayoutPanel10.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLayoutPanel10.Controls.Add(this.tableLayoutPanel3, 0, 2);
             this.tableLayoutPanel10.Controls.Add(this.tableLayoutPanel5, 0, 1);
-            this.tableLayoutPanel10.Location = new System.Drawing.Point(340, 109);
+            this.tableLayoutPanel10.Location = new System.Drawing.Point(340, 133);
             this.tableLayoutPanel10.Name = "tableLayoutPanel10";
             this.tableLayoutPanel10.RowCount = 3;
             this.tableLayoutPanel10.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel10.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel10.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel10.Size = new System.Drawing.Size(233, 183);
+            this.tableLayoutPanel10.Size = new System.Drawing.Size(233, 159);
             this.tableLayoutPanel10.TabIndex = 20;
             // 
             // tableLayoutPanel3
@@ -113,7 +112,7 @@
             this.tableLayoutPanel3.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 23F));
             this.tableLayoutPanel3.Controls.Add(this.MyCancelButton, 1, 0);
             this.tableLayoutPanel3.Controls.Add(this.OKButton, 0, 0);
-            this.tableLayoutPanel3.Location = new System.Drawing.Point(26, 141);
+            this.tableLayoutPanel3.Location = new System.Drawing.Point(26, 117);
             this.tableLayoutPanel3.Margin = new System.Windows.Forms.Padding(3, 3, 0, 3);
             this.tableLayoutPanel3.Name = "tableLayoutPanel3";
             this.tableLayoutPanel3.RowCount = 1;
@@ -162,7 +161,6 @@
             this.tableLayoutPanel5.Controls.Add(this.TTLLabel, 0, 4);
             this.tableLayoutPanel5.Controls.Add(this.TTLText, 1, 4);
             this.tableLayoutPanel5.Controls.Add(this.checkShareOverLan, 1, 1);
-            this.tableLayoutPanel5.Controls.Add(this.checkBuildinHttpProxy, 1, 0);
             this.tableLayoutPanel5.Location = new System.Drawing.Point(0, 0);
             this.tableLayoutPanel5.Margin = new System.Windows.Forms.Padding(0);
             this.tableLayoutPanel5.Name = "tableLayoutPanel5";
@@ -173,12 +171,12 @@
             this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel5.Size = new System.Drawing.Size(233, 138);
+            this.tableLayoutPanel5.Size = new System.Drawing.Size(233, 114);
             this.tableLayoutPanel5.TabIndex = 9;
             // 
             // ProxyPortTextBox
             // 
-            this.ProxyPortTextBox.Location = new System.Drawing.Point(78, 54);
+            this.ProxyPortTextBox.Location = new System.Drawing.Point(78, 30);
             this.ProxyPortTextBox.MaxLength = 10;
             this.ProxyPortTextBox.Name = "ProxyPortTextBox";
             this.ProxyPortTextBox.Size = new System.Drawing.Size(109, 22);
@@ -189,7 +187,7 @@
             // 
             this.ProxyPortLabel.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.ProxyPortLabel.AutoSize = true;
-            this.ProxyPortLabel.Location = new System.Drawing.Point(8, 58);
+            this.ProxyPortLabel.Location = new System.Drawing.Point(8, 34);
             this.ProxyPortLabel.Name = "ProxyPortLabel";
             this.ProxyPortLabel.Size = new System.Drawing.Size(64, 14);
             this.ProxyPortLabel.TabIndex = 3;
@@ -199,7 +197,7 @@
             // 
             this.ReconnectLabel.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.ReconnectLabel.AutoSize = true;
-            this.ReconnectLabel.Location = new System.Drawing.Point(6, 86);
+            this.ReconnectLabel.Location = new System.Drawing.Point(6, 62);
             this.ReconnectLabel.Name = "ReconnectLabel";
             this.ReconnectLabel.Size = new System.Drawing.Size(66, 14);
             this.ReconnectLabel.TabIndex = 3;
@@ -207,7 +205,7 @@
             // 
             // ReconnectText
             // 
-            this.ReconnectText.Location = new System.Drawing.Point(78, 82);
+            this.ReconnectText.Location = new System.Drawing.Point(78, 58);
             this.ReconnectText.MaxLength = 10;
             this.ReconnectText.Name = "ReconnectText";
             this.ReconnectText.Size = new System.Drawing.Size(109, 22);
@@ -218,7 +216,7 @@
             // 
             this.TTLLabel.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.TTLLabel.AutoSize = true;
-            this.TTLLabel.Location = new System.Drawing.Point(43, 114);
+            this.TTLLabel.Location = new System.Drawing.Point(43, 90);
             this.TTLLabel.Name = "TTLLabel";
             this.TTLLabel.Size = new System.Drawing.Size(29, 14);
             this.TTLLabel.TabIndex = 3;
@@ -226,7 +224,7 @@
             // 
             // TTLText
             // 
-            this.TTLText.Location = new System.Drawing.Point(78, 110);
+            this.TTLText.Location = new System.Drawing.Point(78, 86);
             this.TTLText.MaxLength = 10;
             this.TTLText.Name = "TTLText";
             this.TTLText.Size = new System.Drawing.Size(109, 22);
@@ -236,7 +234,7 @@
             // checkShareOverLan
             // 
             this.checkShareOverLan.AutoSize = true;
-            this.checkShareOverLan.Location = new System.Drawing.Point(78, 30);
+            this.checkShareOverLan.Location = new System.Drawing.Point(78, 6);
             this.checkShareOverLan.Name = "checkShareOverLan";
             this.checkShareOverLan.Size = new System.Drawing.Size(149, 18);
             this.checkShareOverLan.TabIndex = 5;
@@ -443,16 +441,6 @@
             this.CheckSocks5Proxy.Text = "Socks5 Proxy On";
             this.CheckSocks5Proxy.UseVisualStyleBackColor = true;
             // 
-            // checkBuildinHttpProxy
-            // 
-            this.checkBuildinHttpProxy.AutoSize = true;
-            this.checkBuildinHttpProxy.Location = new System.Drawing.Point(78, 6);
-            this.checkBuildinHttpProxy.Name = "checkBuildinHttpProxy";
-            this.checkBuildinHttpProxy.Size = new System.Drawing.Size(126, 18);
-            this.checkBuildinHttpProxy.TabIndex = 6;
-            this.checkBuildinHttpProxy.Text = "Build-in http proxy";
-            this.checkBuildinHttpProxy.UseVisualStyleBackColor = true;
-            // 
             // SettingsForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
@@ -520,6 +508,5 @@
         private System.Windows.Forms.CheckBox checkRandom;
         private System.Windows.Forms.CheckBox checkAutoStartup;
         private System.Windows.Forms.CheckBox checkShareOverLan;
-        private System.Windows.Forms.CheckBox checkBuildinHttpProxy;
     }
 }

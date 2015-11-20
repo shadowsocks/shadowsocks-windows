@@ -81,7 +81,6 @@ Socks5 Proxy=Socks5代理（前置代理）
 Socks5 Proxy On=开启Socks5
 Username=用户名
 
-Build-in http proxy=内置http代理(目前有bug)
 Proxy Port=本地端口
 Reconnect Times=重连次数
 TTL=超时秒数

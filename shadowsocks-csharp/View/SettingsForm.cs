@@ -43,7 +43,6 @@ namespace Shadowsocks.View
                 + ")";
 
             checkShareOverLan.Text = I18N.GetString(checkShareOverLan.Text);
-            checkBuildinHttpProxy.Text = I18N.GetString(checkBuildinHttpProxy.Text);
             ProxyPortLabel.Text = I18N.GetString("Proxy Port");
             ReconnectLabel.Text = I18N.GetString("Reconnect Times");
             TTLLabel.Text = I18N.GetString("TTL");
@@ -89,7 +88,6 @@ namespace Shadowsocks.View
                 int localPort = int.Parse(ProxyPortTextBox.Text);
                 Configuration.CheckPort(localPort);
                 int ret = 0;
-                _modifiedConfiguration.buildinHttpProxy = checkBuildinHttpProxy.Checked;
                 _modifiedConfiguration.shareOverLan = checkShareOverLan.Checked;
                 _modifiedConfiguration.localPort = localPort;
                 _modifiedConfiguration.reconnectTimes = int.Parse(ReconnectText.Text);
@@ -120,7 +118,6 @@ namespace Shadowsocks.View
 
         private void LoadSelectedServer()
         {
-            checkBuildinHttpProxy.Checked = _modifiedConfiguration.buildinHttpProxy;
             checkShareOverLan.Checked = _modifiedConfiguration.shareOverLan;
             ProxyPortTextBox.Text = _modifiedConfiguration.localPort.ToString();
             ReconnectText.Text = _modifiedConfiguration.reconnectTimes.ToString();
