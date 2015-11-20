@@ -1799,7 +1799,7 @@ namespace Shadowsocks.Controller
                         int buffer_len = 0;
                         if (httpProxyState.httpProxy)
                         {
-                            httpProxyState.ParseHttpRequest(buffer, ref buffer_len, ref remoteHeaderSendBuffer);
+                            httpProxyState.ParseHttpRequest(buffer, ref buffer_len);
                             if (remoteHeaderSendBuffer != null && remoteHeaderSendBuffer.Length > 0)
                             {
                                 RemoteSend(remoteHeaderSendBuffer, remoteHeaderSendBuffer.Length);
@@ -2305,7 +2305,7 @@ namespace Shadowsocks.Controller
                     {
                         if (httpProxyState.httpProxy)
                         {
-                            httpProxyState.ParseHttpRequest(connetionRecvBuffer, ref bytesRead, ref remoteHeaderSendBuffer);
+                            httpProxyState.ParseHttpRequest(connetionRecvBuffer, ref bytesRead);
                         }
                         else if (httpProxyState.httpRequestBuffer != null && httpProxyState.httpRequestBuffer.Length > 0)
                         {

@@ -12,6 +12,8 @@ namespace Shadowsocks.Controller
         public byte[] httpRequestBuffer;
         public int httpContentLength = 0;
         public string httpAuthString;
+        protected bool hostChange;
+        protected string httpHost;
 
         private static string ParseHostAndPort(string str, out int port)
         {
@@ -49,40 +51,55 @@ namespace Shadowsocks.Controller
             return host;
         }
 
-        public int HandshakeReceive(byte[] _firstPacket, int _firstPacketLength, ref byte[] remoteHeaderSendBuffer)
+        protected string ParseURL(string url, string host, int port)
         {
-            byte[] block = new byte[] { (byte)'\r', (byte)'\n', (byte)'\r', (byte)'\n' };
-            int pos;
-            if (httpRequestBuffer == null)
-                httpRequestBuffer = new byte[_firstPacketLength];
-            else
+            if (url.StartsWith("http://"))
             {
-                Array.Resize(ref httpRequestBuffer, httpRequestBuffer.Length + _firstPacketLength);
+                url = url.Substring(7);
             }
-            Array.Copy(_firstPacket, 0, httpRequestBuffer, httpRequestBuffer.Length - _firstPacketLength, _firstPacketLength);
-            pos = Util.Utils.FindStr(httpRequestBuffer, httpRequestBuffer.Length, block);
-            if (pos < 0)
+            if (url.StartsWith("["))
             {
-                return 1;
+                if (url.StartsWith("[" + host + "]"))
+                {
+                    url = url.Substring(host.Length + 2);
+                }
             }
-            string data = System.Text.Encoding.UTF8.GetString(httpRequestBuffer, 0, pos + 4);
+            else if (url.StartsWith(host))
             {
-                byte[] nextbuffer = new byte[httpRequestBuffer.Length - (pos + 4)];
-                Array.Copy(httpRequestBuffer, pos + 4, nextbuffer, 0, nextbuffer.Length);
-                httpRequestBuffer = nextbuffer;
+                url = url.Substring(host.Length);
             }
-            string[] dataParts = data.Split(new string[] { "\r\n\r\n" }, 2, StringSplitOptions.RemoveEmptyEntries);
-            string header = dataParts[0];
-            string[] lines = header.Split(new string[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
-            remoteHeaderSendBuffer = null;
+            if (url.StartsWith(":"))
+            {
+                if (url.StartsWith(":" + port.ToString()))
+                {
+                    url = url.Substring((":" + port.ToString()).Length);
+                }
+            }
+            if (!url.StartsWith("/"))
+            {
+                int pos_slash = url.IndexOf('/');
+                int pos_space = url.IndexOf(' ');
+                if (pos_slash > 0 && pos_slash < pos_space)
+                {
+                    url = url.Substring(pos_slash);
+                }
+            }
+            if (url.StartsWith(" "))
+            {
+                url = "/" + url;
+            }
+            return url;
+        }
+
+        protected void ParseHttpRequestHeader(string header, ref string[] lines, out string host, out int port, out string cmd)
+        {
+            lines = header.Split(new string[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
             string[] cmdItems = lines[0].Split(new[] { ' ' }, 2);
             string hostLine = cmdItems[1];
             hostLine = hostLine.Split(' ')[0];
-            string host = "";
-            int port = 80;
-            //bool chunked = false;
-            httpProxy = false;
-            httpContentLength = 0;
+            host = "";
+            port = 80;
+            cmd = "";
             if (cmdItems[0] == "CONNECT")
             {
                 host = ParseHostAndPort(hostLine, out port);
@@ -94,6 +111,18 @@ namespace Shadowsocks.Controller
                     if (line.StartsWith("Host: "))
                     {
                         host = line.Substring(6);
+                        if (httpHost != host)
+                        {
+                            if (httpHost != null)
+                            {
+                                hostChange = true;
+                            }
+                            else
+                            {
+                                hostChange = false;
+                            }
+                            httpHost = host;
+                        }
                     }
                     if (line.StartsWith("Content-Length: "))
                     {
@@ -101,43 +130,16 @@ namespace Shadowsocks.Controller
                         httpContentLength = Convert.ToInt32(len) + 2;  // 2 bytes of CRLF
                     }
                 }
+                if (host.Length == 0)
+                    return;
                 host = ParseHostAndPort(host, out port);
-                if (cmdItems[1].StartsWith("http://"))
-                {
-                    cmdItems[1] = cmdItems[1].Substring(7);
-                }
-                if (cmdItems[1].StartsWith("["))
-                {
-                    if (cmdItems[1].StartsWith("[" + host + "]"))
-                    {
-                        cmdItems[1] = cmdItems[1].Substring(host.Length + 2);
-                    }
-                }
-                else if (cmdItems[1].StartsWith(host))
-                {
-                    cmdItems[1] = cmdItems[1].Substring(host.Length);
-                }
-                if (cmdItems[1].StartsWith(":"))
-                {
-                    if (cmdItems[1].StartsWith(":" + port.ToString()))
-                    {
-                        cmdItems[1] = cmdItems[1].Substring((":" + port.ToString()).Length);
-                    }
-                }
-                if (!cmdItems[1].StartsWith("/"))
-                {
-                    int pos_slash = cmdItems[1].IndexOf('/');
-                    int pos_space = cmdItems[1].IndexOf(' ');
-                    if (pos_slash > 0 && pos_slash < pos_space)
-                    {
-                        cmdItems[1] = cmdItems[1].Substring(pos_slash);
-                    }
-                }
-                if (cmdItems[1].StartsWith(" "))
-                {
-                    cmdItems[1] = "/" + cmdItems[1];
-                }
+                cmdItems[1] = ParseURL(cmdItems[1], host, port);
             }
+            cmd = cmdItems[0] + " " + cmdItems[1] + "\r\n";
+        }
+
+        public void HostToHandshakeBuffer(string host, int port, ref byte[] remoteHeaderSendBuffer)
+        {
             if (host.Length > 0)
             {
                 IPAddress ipAddress;
@@ -167,16 +169,53 @@ namespace Shadowsocks.Controller
                 remoteHeaderSendBuffer[remoteHeaderSendBuffer.Length - 2] = (byte)(port >> 8);
                 remoteHeaderSendBuffer[remoteHeaderSendBuffer.Length - 1] = (byte)(port & 0xff);
             }
-            if (cmdItems[0] != "CONNECT")
+        }
+
+        public int HandshakeReceive(byte[] _firstPacket, int _firstPacketLength, ref byte[] remoteHeaderSendBuffer)
+        {
+            remoteHeaderSendBuffer = null;
+            byte[] block = new byte[] { (byte)'\r', (byte)'\n', (byte)'\r', (byte)'\n' };
+            int pos;
+            if (httpRequestBuffer == null)
+                httpRequestBuffer = new byte[_firstPacketLength];
+            else
             {
-                string cmd = cmdItems[0] + " " + cmdItems[1] + "\r\n";
+                Array.Resize(ref httpRequestBuffer, httpRequestBuffer.Length + _firstPacketLength);
+            }
+            Array.Copy(_firstPacket, 0, httpRequestBuffer, httpRequestBuffer.Length - _firstPacketLength, _firstPacketLength);
+            pos = Util.Utils.FindStr(httpRequestBuffer, httpRequestBuffer.Length, block);
+            if (pos < 0)
+            {
+                return 1;
+            }
+            string data = System.Text.Encoding.UTF8.GetString(httpRequestBuffer, 0, pos + 4);
+            {
+                byte[] nextbuffer = new byte[httpRequestBuffer.Length - (pos + 4)];
+                Array.Copy(httpRequestBuffer, pos + 4, nextbuffer, 0, nextbuffer.Length);
+                httpRequestBuffer = nextbuffer;
+            }
+            string[] dataParts = data.Split(new string[] { "\r\n\r\n" }, 2, StringSplitOptions.RemoveEmptyEntries);
+            string header = dataParts[0];
+            httpProxy = false;
+            httpContentLength = 0;
+
+            string[] lines = null;
+            string host;
+            int port;
+            string cmd;
+            ParseHttpRequestHeader(header, ref lines, out host, out port, out cmd);
+
+            HostToHandshakeBuffer(host, port, ref remoteHeaderSendBuffer);
+            if (!cmd.StartsWith("CONNECT"))
+            {
                 string httpRequest = cmd + data.Split(new string[] { "\r\n" }, 2, StringSplitOptions.RemoveEmptyEntries)[1];
-                httpRequest.Replace("\r\nProxy-Connection: ", "\r\nConnection: ");
+                httpRequest = httpRequest.Replace("\r\nProxy-Connection: ", "\r\nConnection: ");
                 int len = remoteHeaderSendBuffer.Length;
                 byte[] httpData = System.Text.Encoding.UTF8.GetBytes(httpRequest);
                 Array.Resize(ref remoteHeaderSendBuffer, len + httpData.Length);
                 httpData.CopyTo(remoteHeaderSendBuffer, len);
                 httpProxy = true;
+                Logging.Log(LogLevel.Debug, httpRequest);
             }
             bool auth_ok = false;
             if (httpAuthString == null || httpAuthString.Length == 0)
@@ -208,84 +247,26 @@ namespace Shadowsocks.Controller
             return 0;
         }
 
-        private string ParseHttpRequest(byte[] buffer, int bufferLen, ref byte[] remoteHeaderSendBuffer)
+        private string ParseHttpRequest(byte[] buffer, int bufferLen)
         {
-            string request = "";
+            string httpRequest = "";
             string data = System.Text.Encoding.UTF8.GetString(buffer);
             string[] dataParts = data.Split(new string[] { "\r\n\r\n" }, 2, StringSplitOptions.RemoveEmptyEntries);
             string header = dataParts[0];
-            string[] lines = header.Split(new string[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
-            remoteHeaderSendBuffer = null;
-            string[] cmdItems = lines[0].Split(new[] { ' ' }, 2);
-            string hostLine = cmdItems[1];
-            hostLine = hostLine.Split(' ')[0];
-            string host = "";
-            int port = 80;
-            if (hostLine.StartsWith("http://"))
-            {
-                foreach (string line in lines)
-                {
-                    if (line.StartsWith("Host: "))
-                    {
-                        host = line.Substring(6);
-                    }
-                    if (line.StartsWith("Content-Length: "))
-                    {
-                        string len = line.Substring("Content-Length: ".Length);
-                        httpContentLength = Convert.ToInt32(len) + 2;  // 2 bytes of CRLF
-                    }
-                }
-                if (host.Length == 0) return "";
-                host = ParseHostAndPort(host, out port);
-                if (cmdItems[1].StartsWith("http://"))
-                {
-                    cmdItems[1] = cmdItems[1].Substring(7);
-                }
-                if (cmdItems[1].StartsWith("["))
-                {
-                    if (cmdItems[1].StartsWith("[" + host + "]"))
-                    {
-                        cmdItems[1] = cmdItems[1].Substring(host.Length + 2);
-                    }
-                }
-                else if (cmdItems[1].StartsWith(host))
-                {
-                    cmdItems[1] = cmdItems[1].Substring(host.Length);
-                }
-                if (cmdItems[1].StartsWith(":"))
-                {
-                    if (cmdItems[1].StartsWith(":" + port.ToString()))
-                    {
-                        cmdItems[1] = cmdItems[1].Substring((":" + port.ToString()).Length);
-                    }
-                }
-                if (!cmdItems[1].StartsWith("/"))
-                {
-                    int pos_slash = cmdItems[1].IndexOf('/');
-                    int pos_space = cmdItems[1].IndexOf(' ');
-                    if (pos_slash > 0 && pos_slash < pos_space)
-                    {
-                        cmdItems[1] = cmdItems[1].Substring(pos_slash);
-                    }
-                }
-                if (cmdItems[1].StartsWith(" "))
-                {
-                    cmdItems[1] = "/" + cmdItems[1];
-                }
-            }
-            else
-            {
-                return "";
-            }
-            {
-                string cmd = cmdItems[0] + " " + cmdItems[1] + "\r\n";
-                request = cmd + data.Split(new string[] { "\r\n" }, 2, StringSplitOptions.RemoveEmptyEntries)[1];
-                request.Replace("\r\nProxy-Connection: ", "\r\nConnection: ");
-            }
-            return request;
+
+            string[] lines = null;
+            string host;
+            int port;
+            string cmd;
+            ParseHttpRequestHeader(header, ref lines, out host, out port, out cmd);
+
+            httpRequest = cmd + data.Split(new string[] { "\r\n" }, 2, StringSplitOptions.RemoveEmptyEntries)[1];
+            httpRequest = httpRequest.Replace("\r\nProxy-Connection: ", "\r\nConnection: ");
+            Logging.Log(LogLevel.Info, httpRequest);
+            return httpRequest;
         }
 
-        public void ParseHttpRequest(byte[] connetionRecvBuffer, ref int bytesRead, ref byte[] remoteHeaderSendBuffer)
+        public void ParseHttpRequest(byte[] connetionRecvBuffer, ref int bytesRead)
         {
             byte[] buffer = new byte[bytesRead];
             byte[] block = new byte[] { (byte)'\r', (byte)'\n', (byte)'\r', (byte)'\n' };
@@ -324,7 +305,7 @@ namespace Shadowsocks.Controller
                         Array.Resize(ref httpRequestBuffer, httpRequestBuffer.Length + pos + 4);
                     }
                     Array.Copy(buffer, 0, httpRequestBuffer, httpRequestBuffer.Length - (pos + 4), pos + 4);
-                    string req = ParseHttpRequest(httpRequestBuffer, httpRequestBuffer.Length, ref remoteHeaderSendBuffer);
+                    string req = ParseHttpRequest(httpRequestBuffer, httpRequestBuffer.Length);
                     if (req.Length > 0)
                     {
                         byte[] buf = System.Text.Encoding.UTF8.GetBytes(req);
