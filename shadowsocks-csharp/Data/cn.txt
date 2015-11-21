@@ -77,8 +77,11 @@ SelectedFirst=选中优先
 Timer=定时切换
 AutoBan=自动禁用出错服务器
 
-Socks5 Proxy=Socks5代理（前置代理）
-Socks5 Proxy On=开启Socks5
+Proxy=代理服务器
+Proxy On=开启代理
+Socks5(support UDP)=Socks5(支持UDP)
+Http tunnel=Http隧道
+TCP Port tunnel=TCP端口转发(需要相关混淆插件)
 Username=用户名
 
 Proxy Port=本地端口

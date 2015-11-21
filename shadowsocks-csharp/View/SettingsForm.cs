@@ -51,8 +51,8 @@ namespace Shadowsocks.View
             checkRandom.Text = I18N.GetString(checkRandom.Text);
             CheckAutoBan.Text = I18N.GetString("AutoBan");
 
-            Socks5ProxyGroup.Text = I18N.GetString("Socks5 Proxy");
-            CheckSocks5Proxy.Text = I18N.GetString("Socks5 Proxy On");
+            Socks5ProxyGroup.Text = I18N.GetString("Proxy");
+            CheckSockProxy.Text = I18N.GetString("Proxy On");
             LabelS5Server.Text = I18N.GetString("Server IP");
             LabelS5Port.Text = I18N.GetString("Server Port");
             LabelS5Server.Text = I18N.GetString("Server IP");
@@ -61,6 +61,10 @@ namespace Shadowsocks.View
             LabelS5Password.Text = I18N.GetString("Password");
 
             LabelRandom.Text = I18N.GetString("Balance");
+            for (int i = 0; i < comboProxyType.Items.Count; ++i)
+            {
+                comboProxyType.Items[i] = I18N.GetString(comboProxyType.Items[i].ToString());
+            }
             for (int i = 0; i < RandomComboBox.Items.Count; ++i)
             {
                 RandomComboBox.Items[i] = I18N.GetString(RandomComboBox.Items[i].ToString());
@@ -99,11 +103,12 @@ namespace Shadowsocks.View
                 _modifiedConfiguration.random = checkRandom.Checked;
                 _modifiedConfiguration.randomAlgorithm = RandomComboBox.SelectedIndex;
                 _modifiedConfiguration.TTL = int.Parse(TTLText.Text);
-                _modifiedConfiguration.socks5enable = CheckSocks5Proxy.Checked;
-                _modifiedConfiguration.socks5Host = TextS5Server.Text;
-                _modifiedConfiguration.socks5Port = int.Parse(TextS5Port.Text);
-                _modifiedConfiguration.socks5User = TextS5User.Text;
-                _modifiedConfiguration.socks5Pass = TextS5Pass.Text;
+                _modifiedConfiguration.proxyEnable = CheckSockProxy.Checked;
+                _modifiedConfiguration.proxyType = comboProxyType.SelectedIndex;
+                _modifiedConfiguration.proxyHost = TextS5Server.Text;
+                _modifiedConfiguration.proxyPort = int.Parse(TextS5Port.Text);
+                _modifiedConfiguration.proxyAuthUser = TextS5User.Text;
+                _modifiedConfiguration.proxyAuthPass = TextS5Pass.Text;
 
                 _modifiedConfiguration.autoban = CheckAutoBan.Checked;
 
@@ -127,11 +132,12 @@ namespace Shadowsocks.View
             RandomComboBox.SelectedIndex = _modifiedConfiguration.randomAlgorithm;
             TTLText.Text = _modifiedConfiguration.TTL.ToString();
 
-            CheckSocks5Proxy.Checked = _modifiedConfiguration.socks5enable;
-            TextS5Server.Text = _modifiedConfiguration.socks5Host;
-            TextS5Port.Text = _modifiedConfiguration.socks5Port.ToString();
-            TextS5User.Text = _modifiedConfiguration.socks5User;
-            TextS5Pass.Text = _modifiedConfiguration.socks5Pass;
+            CheckSockProxy.Checked = _modifiedConfiguration.proxyEnable;
+            comboProxyType.SelectedIndex = _modifiedConfiguration.proxyType;
+            TextS5Server.Text = _modifiedConfiguration.proxyHost;
+            TextS5Port.Text = _modifiedConfiguration.proxyPort.ToString();
+            TextS5User.Text = _modifiedConfiguration.proxyAuthUser;
+            TextS5Pass.Text = _modifiedConfiguration.proxyAuthPass;
 
             CheckAutoBan.Checked = _modifiedConfiguration.autoban;
         }

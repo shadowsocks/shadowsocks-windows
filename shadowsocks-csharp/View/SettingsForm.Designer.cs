@@ -49,15 +49,16 @@
             this.checkAutoStartup = new System.Windows.Forms.CheckBox();
             this.Socks5ProxyGroup = new System.Windows.Forms.GroupBox();
             this.tableLayoutPanel9 = new System.Windows.Forms.TableLayoutPanel();
-            this.TextS5Pass = new System.Windows.Forms.TextBox();
-            this.TextS5User = new System.Windows.Forms.TextBox();
+            this.CheckSockProxy = new System.Windows.Forms.CheckBox();
             this.LabelS5Password = new System.Windows.Forms.Label();
-            this.LabelS5Server = new System.Windows.Forms.Label();
-            this.LabelS5Port = new System.Windows.Forms.Label();
-            this.TextS5Server = new System.Windows.Forms.TextBox();
-            this.TextS5Port = new System.Windows.Forms.TextBox();
             this.LabelS5Username = new System.Windows.Forms.Label();
-            this.CheckSocks5Proxy = new System.Windows.Forms.CheckBox();
+            this.TextS5Pass = new System.Windows.Forms.TextBox();
+            this.LabelS5Port = new System.Windows.Forms.Label();
+            this.TextS5User = new System.Windows.Forms.TextBox();
+            this.LabelS5Server = new System.Windows.Forms.Label();
+            this.TextS5Port = new System.Windows.Forms.TextBox();
+            this.TextS5Server = new System.Windows.Forms.TextBox();
+            this.comboProxyType = new System.Windows.Forms.ComboBox();
             this.tableLayoutPanel1.SuspendLayout();
             this.tableLayoutPanel10.SuspendLayout();
             this.tableLayoutPanel3.SuspendLayout();
@@ -331,115 +332,130 @@
             this.Socks5ProxyGroup.Margin = new System.Windows.Forms.Padding(14, 0, 0, 0);
             this.Socks5ProxyGroup.Name = "Socks5ProxyGroup";
             this.tableLayoutPanel1.SetRowSpan(this.Socks5ProxyGroup, 2);
-            this.Socks5ProxyGroup.Size = new System.Drawing.Size(323, 185);
+            this.Socks5ProxyGroup.Size = new System.Drawing.Size(323, 206);
             this.Socks5ProxyGroup.TabIndex = 19;
             this.Socks5ProxyGroup.TabStop = false;
-            this.Socks5ProxyGroup.Text = "Socks5 Proxy";
+            this.Socks5ProxyGroup.Text = "Proxy";
             // 
             // tableLayoutPanel9
             // 
             this.tableLayoutPanel9.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.tableLayoutPanel9.AutoSize = true;
             this.tableLayoutPanel9.ColumnCount = 2;
-            this.tableLayoutPanel9.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 29.39189F));
-            this.tableLayoutPanel9.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 70.60811F));
-            this.tableLayoutPanel9.Controls.Add(this.TextS5Pass, 1, 4);
-            this.tableLayoutPanel9.Controls.Add(this.TextS5User, 1, 3);
-            this.tableLayoutPanel9.Controls.Add(this.LabelS5Password, 0, 4);
-            this.tableLayoutPanel9.Controls.Add(this.LabelS5Server, 0, 1);
-            this.tableLayoutPanel9.Controls.Add(this.LabelS5Port, 0, 2);
-            this.tableLayoutPanel9.Controls.Add(this.TextS5Server, 1, 1);
-            this.tableLayoutPanel9.Controls.Add(this.TextS5Port, 1, 2);
-            this.tableLayoutPanel9.Controls.Add(this.LabelS5Username, 0, 3);
-            this.tableLayoutPanel9.Controls.Add(this.CheckSocks5Proxy, 1, 0);
-            this.tableLayoutPanel9.Location = new System.Drawing.Point(-30, 24);
+            this.tableLayoutPanel9.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tableLayoutPanel9.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tableLayoutPanel9.Controls.Add(this.CheckSockProxy, 1, 0);
+            this.tableLayoutPanel9.Controls.Add(this.LabelS5Password, 0, 5);
+            this.tableLayoutPanel9.Controls.Add(this.LabelS5Username, 0, 4);
+            this.tableLayoutPanel9.Controls.Add(this.TextS5Pass, 1, 5);
+            this.tableLayoutPanel9.Controls.Add(this.LabelS5Port, 0, 3);
+            this.tableLayoutPanel9.Controls.Add(this.TextS5User, 1, 4);
+            this.tableLayoutPanel9.Controls.Add(this.LabelS5Server, 0, 2);
+            this.tableLayoutPanel9.Controls.Add(this.TextS5Port, 1, 3);
+            this.tableLayoutPanel9.Controls.Add(this.TextS5Server, 1, 2);
+            this.tableLayoutPanel9.Controls.Add(this.comboProxyType, 1, 1);
+            this.tableLayoutPanel9.Location = new System.Drawing.Point(8, 21);
             this.tableLayoutPanel9.Name = "tableLayoutPanel9";
-            this.tableLayoutPanel9.RowCount = 5;
+            this.tableLayoutPanel9.RowCount = 6;
             this.tableLayoutPanel9.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel9.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel9.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel9.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel9.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel9.Size = new System.Drawing.Size(350, 140);
+            this.tableLayoutPanel9.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel9.Size = new System.Drawing.Size(309, 164);
             this.tableLayoutPanel9.TabIndex = 0;
             // 
-            // TextS5Pass
+            // CheckSockProxy
             // 
-            this.TextS5Pass.Location = new System.Drawing.Point(105, 111);
-            this.TextS5Pass.Name = "TextS5Pass";
-            this.TextS5Pass.Size = new System.Drawing.Size(236, 22);
-            this.TextS5Pass.TabIndex = 7;
-            // 
-            // TextS5User
-            // 
-            this.TextS5User.Location = new System.Drawing.Point(105, 83);
-            this.TextS5User.Name = "TextS5User";
-            this.TextS5User.Size = new System.Drawing.Size(236, 22);
-            this.TextS5User.TabIndex = 6;
+            this.CheckSockProxy.AutoSize = true;
+            this.CheckSockProxy.Location = new System.Drawing.Point(70, 3);
+            this.CheckSockProxy.Name = "CheckSockProxy";
+            this.CheckSockProxy.Size = new System.Drawing.Size(76, 18);
+            this.CheckSockProxy.TabIndex = 8;
+            this.CheckSockProxy.Text = "Proxy On";
+            this.CheckSockProxy.UseVisualStyleBackColor = true;
             // 
             // LabelS5Password
             // 
             this.LabelS5Password.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.LabelS5Password.AutoSize = true;
-            this.LabelS5Password.Location = new System.Drawing.Point(41, 117);
+            this.LabelS5Password.Location = new System.Drawing.Point(6, 143);
             this.LabelS5Password.Name = "LabelS5Password";
             this.LabelS5Password.Size = new System.Drawing.Size(58, 14);
             this.LabelS5Password.TabIndex = 5;
             this.LabelS5Password.Text = "Password";
             // 
-            // LabelS5Server
-            // 
-            this.LabelS5Server.Anchor = System.Windows.Forms.AnchorStyles.Right;
-            this.LabelS5Server.AutoSize = true;
-            this.LabelS5Server.Location = new System.Drawing.Point(42, 31);
-            this.LabelS5Server.Name = "LabelS5Server";
-            this.LabelS5Server.Size = new System.Drawing.Size(57, 14);
-            this.LabelS5Server.TabIndex = 0;
-            this.LabelS5Server.Text = "Server IP";
-            // 
-            // LabelS5Port
-            // 
-            this.LabelS5Port.Anchor = System.Windows.Forms.AnchorStyles.Right;
-            this.LabelS5Port.AutoSize = true;
-            this.LabelS5Port.Location = new System.Drawing.Point(69, 59);
-            this.LabelS5Port.Name = "LabelS5Port";
-            this.LabelS5Port.Size = new System.Drawing.Size(30, 14);
-            this.LabelS5Port.TabIndex = 1;
-            this.LabelS5Port.Text = "Port";
-            // 
-            // TextS5Server
-            // 
-            this.TextS5Server.Location = new System.Drawing.Point(105, 27);
-            this.TextS5Server.Name = "TextS5Server";
-            this.TextS5Server.Size = new System.Drawing.Size(236, 22);
-            this.TextS5Server.TabIndex = 2;
-            // 
-            // TextS5Port
-            // 
-            this.TextS5Port.Location = new System.Drawing.Point(105, 55);
-            this.TextS5Port.Name = "TextS5Port";
-            this.TextS5Port.Size = new System.Drawing.Size(236, 22);
-            this.TextS5Port.TabIndex = 3;
-            // 
             // LabelS5Username
             // 
             this.LabelS5Username.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.LabelS5Username.AutoSize = true;
-            this.LabelS5Username.Location = new System.Drawing.Point(38, 87);
+            this.LabelS5Username.Location = new System.Drawing.Point(3, 115);
             this.LabelS5Username.Name = "LabelS5Username";
             this.LabelS5Username.Size = new System.Drawing.Size(61, 14);
             this.LabelS5Username.TabIndex = 4;
             this.LabelS5Username.Text = "Username";
             // 
-            // CheckSocks5Proxy
+            // TextS5Pass
             // 
-            this.CheckSocks5Proxy.AutoSize = true;
-            this.CheckSocks5Proxy.Location = new System.Drawing.Point(105, 3);
-            this.CheckSocks5Proxy.Name = "CheckSocks5Proxy";
-            this.CheckSocks5Proxy.Size = new System.Drawing.Size(118, 18);
-            this.CheckSocks5Proxy.TabIndex = 8;
-            this.CheckSocks5Proxy.Text = "Socks5 Proxy On";
-            this.CheckSocks5Proxy.UseVisualStyleBackColor = true;
+            this.TextS5Pass.Location = new System.Drawing.Point(70, 139);
+            this.TextS5Pass.Name = "TextS5Pass";
+            this.TextS5Pass.Size = new System.Drawing.Size(236, 22);
+            this.TextS5Pass.TabIndex = 7;
+            // 
+            // LabelS5Port
+            // 
+            this.LabelS5Port.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.LabelS5Port.AutoSize = true;
+            this.LabelS5Port.Location = new System.Drawing.Point(34, 87);
+            this.LabelS5Port.Name = "LabelS5Port";
+            this.LabelS5Port.Size = new System.Drawing.Size(30, 14);
+            this.LabelS5Port.TabIndex = 1;
+            this.LabelS5Port.Text = "Port";
+            // 
+            // TextS5User
+            // 
+            this.TextS5User.Location = new System.Drawing.Point(70, 111);
+            this.TextS5User.Name = "TextS5User";
+            this.TextS5User.Size = new System.Drawing.Size(236, 22);
+            this.TextS5User.TabIndex = 6;
+            // 
+            // LabelS5Server
+            // 
+            this.LabelS5Server.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.LabelS5Server.AutoSize = true;
+            this.LabelS5Server.Location = new System.Drawing.Point(7, 59);
+            this.LabelS5Server.Name = "LabelS5Server";
+            this.LabelS5Server.Size = new System.Drawing.Size(57, 14);
+            this.LabelS5Server.TabIndex = 0;
+            this.LabelS5Server.Text = "Server IP";
+            // 
+            // TextS5Port
+            // 
+            this.TextS5Port.Location = new System.Drawing.Point(70, 83);
+            this.TextS5Port.Name = "TextS5Port";
+            this.TextS5Port.Size = new System.Drawing.Size(236, 22);
+            this.TextS5Port.TabIndex = 3;
+            // 
+            // TextS5Server
+            // 
+            this.TextS5Server.Location = new System.Drawing.Point(70, 55);
+            this.TextS5Server.Name = "TextS5Server";
+            this.TextS5Server.Size = new System.Drawing.Size(236, 22);
+            this.TextS5Server.TabIndex = 2;
+            // 
+            // comboProxyType
+            // 
+            this.comboProxyType.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboProxyType.FormattingEnabled = true;
+            this.comboProxyType.Items.AddRange(new object[] {
+            "Socks5(support UDP)",
+            "Http tunnel",
+            "TCP Port tunnel"});
+            this.comboProxyType.Location = new System.Drawing.Point(70, 27);
+            this.comboProxyType.Name = "comboProxyType";
+            this.comboProxyType.Size = new System.Drawing.Size(236, 22);
+            this.comboProxyType.TabIndex = 9;
             // 
             // SettingsForm
             // 
@@ -489,7 +505,7 @@
         private System.Windows.Forms.TextBox TextS5Server;
         private System.Windows.Forms.TextBox TextS5Port;
         private System.Windows.Forms.Label LabelS5Username;
-        private System.Windows.Forms.CheckBox CheckSocks5Proxy;
+        private System.Windows.Forms.CheckBox CheckSockProxy;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel10;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel3;
         private System.Windows.Forms.Button MyCancelButton;
@@ -508,5 +524,6 @@
         private System.Windows.Forms.CheckBox checkRandom;
         private System.Windows.Forms.CheckBox checkAutoStartup;
         private System.Windows.Forms.CheckBox checkShareOverLan;
+        private System.Windows.Forms.ComboBox comboProxyType;
     }
 }

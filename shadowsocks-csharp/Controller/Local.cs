@@ -184,12 +184,13 @@ namespace Shadowsocks.Controller
             handler.reconnectTimesRemain = _config.reconnectTimes;
 
             handler.server = _config.GetCurrentServer(true);
-            if (_config.socks5enable)
+            if (_config.proxyEnable)
             {
-                handler.socks5RemoteHost = _config.socks5Host;
-                handler.socks5RemotePort = _config.socks5Port;
-                handler.socks5RemoteUsername = _config.socks5User;
-                handler.socks5RemotePassword = _config.socks5Pass;
+                handler.proxyType = _config.proxyType;
+                handler.socks5RemoteHost = _config.proxyHost;
+                handler.socks5RemotePort = _config.proxyPort;
+                handler.socks5RemoteUsername = _config.proxyAuthUser;
+                handler.socks5RemotePassword = _config.proxyAuthPass;
             }
             handler.TTL = _config.TTL;
             handler.autoSwitchOff = _config.autoban;
@@ -225,7 +226,8 @@ namespace Shadowsocks.Controller
         public Socket connection;
         public Socket connectionUDP;
         protected IPEndPoint connectionUDPEndPoint;
-        // Server socks5 proxy
+        // Server proxy
+        public int proxyType = 0;
         public string socks5RemoteHost;
         public int socks5RemotePort = 0;
         public string socks5RemoteUsername;
@@ -797,7 +799,31 @@ namespace Shadowsocks.Controller
             }
         }
 
-        private bool ConnectProxyServer(string strRemoteHost, int iRemotePort, Socket sProxyServer, int socketErrorCode)
+        private bool ConnectHttpProxyServer(string strRemoteHost, int iRemotePort, Socket sProxyServer, int socketErrorCode)
+        {
+            string host = (strRemoteHost.IndexOf(':') >= 0 ? "[" + strRemoteHost + "]" : strRemoteHost) + ":" + iRemotePort.ToString();
+            string authstr = System.Convert.ToBase64String(Encoding.UTF8.GetBytes(socks5RemoteUsername + ":" + socks5RemotePassword));
+            string cmd = "CONNECT " + host + " HTTP/1.1\r\n"
+                + "Host: " + host + "\r\n"
+                + "Proxy-Connection: Keep-Alive\r\n";
+            cmd += "Proxy-Authorization: Basic " + authstr + "\r\n";
+            cmd += "\r\n";
+            byte[] httpData = System.Text.Encoding.UTF8.GetBytes(cmd);
+            sProxyServer.Send(httpData, httpData.Length, SocketFlags.None);
+            byte[] byReceive = new byte[1024];
+            int iRecCount = sProxyServer.Receive(byReceive, byReceive.Length, SocketFlags.None);
+            if (iRecCount > 13)
+            {
+                string data = System.Text.Encoding.UTF8.GetString(byReceive, 0, iRecCount);
+                if (data.StartsWith("HTTP/1.1 200"))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private bool ConnectSocks5ProxyServer(string strRemoteHost, int iRemotePort, Socket sProxyServer, int socketErrorCode)
         {
             //构造Socks5代理服务器第一连接头(无用户名密码)
             byte[] bySock5Send = new Byte[10];
@@ -995,6 +1021,22 @@ namespace Shadowsocks.Controller
                 return true;
             }
             return false;
+        }
+
+        private bool ConnectProxyServer(string strRemoteHost, int iRemotePort, Socket sProxyServer, int socketErrorCode)
+        {
+            if (proxyType == 0)
+            {
+                return ConnectSocks5ProxyServer(strRemoteHost, iRemotePort, sProxyServer, socketErrorCode);
+            }
+            else if (proxyType == 1)
+            {
+                return ConnectHttpProxyServer(strRemoteHost, iRemotePort, sProxyServer, socketErrorCode);
+            }
+            else
+            {
+                return true;
+            }
         }
 
         private void RspHttpHandshakeReceive()

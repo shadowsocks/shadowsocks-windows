@@ -166,11 +166,12 @@ namespace Shadowsocks.Controller
             _config.random = config.random;
             _config.randomAlgorithm = config.randomAlgorithm;
             _config.TTL = config.TTL;
-            _config.socks5enable = config.socks5enable;
-            _config.socks5Host = config.socks5Host;
-            _config.socks5Port = config.socks5Port;
-            _config.socks5User = config.socks5User;
-            _config.socks5Pass = config.socks5Pass;
+            _config.proxyEnable = config.proxyEnable;
+            _config.proxyType = config.proxyType;
+            _config.proxyHost = config.proxyHost;
+            _config.proxyPort = config.proxyPort;
+            _config.proxyAuthUser = config.proxyAuthUser;
+            _config.proxyAuthPass = config.proxyAuthPass;
             _config.autoban = config.autoban;
             foreach (Server s in missingServers)
             {
