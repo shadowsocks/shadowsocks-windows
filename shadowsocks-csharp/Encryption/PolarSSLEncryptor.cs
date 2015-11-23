@@ -60,7 +60,7 @@ namespace Shadowsocks.Encryption
                 realkey = new byte[keyLen];
                 Array.Copy(_key, 0, temp, 0, keyLen);
                 Array.Copy(iv, 0, temp, keyLen, ivLen);
-                realkey = MD5.Create().ComputeHash(temp);
+                realkey = MbedTLS.MD5(temp);
             }
             else
             {

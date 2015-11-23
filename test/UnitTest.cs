@@ -22,6 +22,21 @@ namespace test
             Assert.IsTrue(UpdateChecker.Asset.CompareVersion("1.3.2", "1.3.1") > 0);
         }
 
+        [TestMethod]
+        public void TestMD5()
+        {
+            for (int len = 1; len < 64; len++)
+            {
+                System.Security.Cryptography.MD5 md5 = System.Security.Cryptography.MD5.Create();
+                byte[] bytes = new byte[len];
+                var random = new Random();
+                random.NextBytes(bytes);
+                string md5str = Convert.ToBase64String(md5.ComputeHash(bytes));
+                string md5str2 = Convert.ToBase64String(MbedTLS.MD5(bytes));
+                Assert.IsTrue(md5str == md5str2);
+            }
+        }
+
         private void RunEncryptionRound(IEncryptor encryptor, IEncryptor decryptor)
         {
             byte[] plain = new byte[16384];

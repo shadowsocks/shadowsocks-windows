@@ -83,16 +83,15 @@ namespace Shadowsocks.Encryption
             byte[] md5sum = null;
             while (i < key.Length)
             {
-                MD5 md5 = MD5.Create();
                 if (i == 0)
                 {
-                    md5sum = md5.ComputeHash(password);
+                    md5sum = MbedTLS.MD5(password);
                 }
                 else
                 {
                     md5sum.CopyTo(result, 0);
                     password.CopyTo(result, md5sum.Length);
-                    md5sum = md5.ComputeHash(result);
+                    md5sum = MbedTLS.MD5(result);
                 }
                 md5sum.CopyTo(key, i);
                 i += md5sum.Length;
