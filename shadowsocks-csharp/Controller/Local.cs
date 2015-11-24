@@ -801,12 +801,39 @@ namespace Shadowsocks.Controller
 
         private bool ConnectHttpProxyServer(string strRemoteHost, int iRemotePort, Socket sProxyServer, int socketErrorCode)
         {
+            IPAddress ipAdd;
+            bool ForceRemoteDnsResolve = false;
+            bool parsed = IPAddress.TryParse(strRemoteHost, out ipAdd);
+            if (!parsed && !ForceRemoteDnsResolve)
+            {
+                if (server.DnsTargetBuffer().isExpired(strRemoteHost))
+                {
+                    try
+                    {
+                        IPHostEntry ipHostInfo = Dns.GetHostEntry(strRemoteHost);
+                        ipAdd = ipHostInfo.AddressList[0];
+                        server.DnsTargetBuffer().UpdateDns(strRemoteHost, ipAdd);
+                    }
+                    catch (Exception)
+                    {
+                    }
+                }
+                else
+                {
+                    ipAdd = server.DnsTargetBuffer().ip;
+                }
+            }
+            if (ipAdd != null)
+            {
+                strRemoteHost = ipAdd.ToString();
+            }
             string host = (strRemoteHost.IndexOf(':') >= 0 ? "[" + strRemoteHost + "]" : strRemoteHost) + ":" + iRemotePort.ToString();
             string authstr = System.Convert.ToBase64String(Encoding.UTF8.GetBytes(socks5RemoteUsername + ":" + socks5RemotePassword));
-            string cmd = "CONNECT " + host + " HTTP/1.1\r\n"
+            string cmd = "CONNECT " + host + " HTTP/1.0\r\n"
                 + "Host: " + host + "\r\n"
                 + "Proxy-Connection: Keep-Alive\r\n";
-            cmd += "Proxy-Authorization: Basic " + authstr + "\r\n";
+            if (socks5RemoteUsername.Length > 0)
+                cmd += "Proxy-Authorization: Basic " + authstr + "\r\n";
             cmd += "\r\n";
             byte[] httpData = System.Text.Encoding.UTF8.GetBytes(cmd);
             sProxyServer.Send(httpData, httpData.Length, SocketFlags.None);
@@ -815,7 +842,7 @@ namespace Shadowsocks.Controller
             if (iRecCount > 13)
             {
                 string data = System.Text.Encoding.UTF8.GetString(byReceive, 0, iRecCount);
-                if (data.StartsWith("HTTP/1.1 200"))
+                if (data.StartsWith("HTTP/1.1 200") || data.StartsWith("HTTP/1.0 200"))
                 {
                     return true;
                 }

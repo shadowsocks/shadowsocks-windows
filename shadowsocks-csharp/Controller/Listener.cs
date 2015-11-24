@@ -156,7 +156,6 @@ namespace Shadowsocks.Controller
                     if (timer != null)
                     {
                         timer.Enabled = false;
-                        //timer.
                         timer.Elapsed -= (sender, e) => timer_Elapsed(sender, e, socket);
                         timer.Dispose();
                         timer = null;
