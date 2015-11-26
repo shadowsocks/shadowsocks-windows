@@ -62,18 +62,22 @@ namespace Shadowsocks.Encryption
             }
             keyLen = ciphers[_method][0];
             ivLen = ciphers[_method][1];
-            if (CachedKeys.ContainsKey(k))
+            if (!CachedKeys.ContainsKey(k))
             {
+                lock (CachedKeys)
+                {
+                    if (!CachedKeys.ContainsKey(k))
+                    {
+                        byte[] passbuf = Encoding.UTF8.GetBytes(password);
+                        _key = new byte[32];
+                        byte[] iv = new byte[16];
+                        bytesToKey(passbuf, _key);
+                        CachedKeys[k] = _key;
+                    }
+                }
+            }
+            if (_key == null)
                 _key = CachedKeys[k];
-            }
-            else
-            {
-                byte[] passbuf = Encoding.UTF8.GetBytes(password);
-                _key = new byte[32];
-                byte[] iv = new byte[16];
-                bytesToKey(passbuf, _key);
-                CachedKeys[k] = _key;
-            }
         }
 
         protected void bytesToKey(byte[] password, byte[] key)
