@@ -69,9 +69,9 @@ namespace Shadowsocks.Util
             return true;
         }
     }
-    class Alder32
+    class Adler32
     {
-        public static ulong CalcAlder32(byte[] input, int len, ulong value = 0xffffffff)
+        public static ulong CalcAdler32(byte[] input, int len)
         {
             ulong a = 1;
             ulong b = 0;
@@ -85,5 +85,11 @@ namespace Shadowsocks.Util
             return (b << 16) + a;
         }
 
+        public static bool CheckAdler32(byte[] input, int len)
+        {
+            ulong adler32 = CalcAdler32(input, len - 4);
+            int checksum = (input[len - 1] << 24) | (input[len - 2] << 16) | (input[len - 3] << 8) | input[len - 4];
+            return (int)adler32 == checksum;
+        }
     }
 }

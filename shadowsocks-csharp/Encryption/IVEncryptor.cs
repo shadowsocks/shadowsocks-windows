@@ -42,7 +42,9 @@ namespace Shadowsocks.Encryption
         }
         public override byte[] getKey()
         {
-            return (byte[])_key.Clone();
+            byte[] key = (byte[])_key.Clone();
+            Array.Resize(ref key, keyLen);
+            return key;
         }
 
         protected void InitKey(string method, string password)
