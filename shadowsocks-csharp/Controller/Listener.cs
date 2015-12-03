@@ -204,6 +204,20 @@ namespace Shadowsocks.Controller
             }
         }
 
+        protected bool isLAN(Socket socket)
+        {
+            byte[] addr = ((IPEndPoint)socket.RemoteEndPoint).Address.GetAddressBytes();
+            if (addr.Length == 4)
+            {
+                if (addr[0] == 10) return true;
+                if (addr[0] == 127 && addr[1] == 0 && addr[2] == 0) return true;
+                if (addr[0] == 172 && addr[1] >= 16 && addr[1] <= 31) return true;
+                if (addr[0] == 192 && addr[1] >= 168) return true;
+                return false;
+            }
+            return true;
+        }
+
         public void AcceptCallback(IAsyncResult ar)
         {
             Socket listener = (Socket)ar.AsyncState;
@@ -211,14 +225,22 @@ namespace Shadowsocks.Controller
             {
                 Socket conn = listener.EndAccept(ar);
 
-                byte[] buf = new byte[4096];
-                object[] state = new object[] {
-                    conn,
-                    buf
-                };
+                if (!isLAN(conn))
+                {
+                    conn.Shutdown(SocketShutdown.Both);
+                    conn.Close();
+                }
+                else
+                {
+                    byte[] buf = new byte[4096];
+                    object[] state = new object[] {
+                        conn,
+                        buf
+                    };
 
-                conn.BeginReceive(buf, 0, buf.Length, 0,
-                    new AsyncCallback(ReceiveCallback), state);
+                    conn.BeginReceive(buf, 0, buf.Length, 0,
+                        new AsyncCallback(ReceiveCallback), state);
+                }
             }
             catch (ObjectDisposedException)
             {
