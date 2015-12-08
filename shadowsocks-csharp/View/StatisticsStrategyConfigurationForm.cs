@@ -85,6 +85,9 @@ namespace Shadowsocks.View
         {
             string serverName = _servers[serverSelector.SelectedIndex];
             _dataTable.Rows.Clear();
+
+            //return directly when no data is usable
+            if (_controller.availabilityStatistics?.FilteredStatistics == null) return;
             List<AvailabilityStatistics.RawStatisticsData> statistics;
             if (!_controller.availabilityStatistics.FilteredStatistics.TryGetValue(serverName, out statistics)) return;
             IEnumerable<IGrouping<int, AvailabilityStatistics.RawStatisticsData>> dataGroups;
