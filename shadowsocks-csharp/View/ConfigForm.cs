@@ -19,7 +19,7 @@ namespace Shadowsocks.View
         // this is a copy of configuration that we are working on
         private Configuration _modifiedConfiguration;
         private int _lastSelectedIndex = -1;
-
+        public List<Server> _onlineConfig;
         public ConfigForm(ShadowsocksController controller)
         {
             this.Font = System.Drawing.SystemFonts.MessageBoxFont;
@@ -42,6 +42,7 @@ namespace Shadowsocks.View
         {
             AddButton.Text = I18N.GetString("&Add");
             DeleteButton.Text = I18N.GetString("&Delete");
+            ProviderButton.Text = I18N.GetString("&Import");
             IPLabel.Text = I18N.GetString("Server IP");
             ServerPortLabel.Text = I18N.GetString("Server Port");
             PasswordLabel.Text = I18N.GetString("Password");
@@ -54,6 +55,7 @@ namespace Shadowsocks.View
             MyCancelButton.Text = I18N.GetString("Cancel");
             MoveUpButton.Text = I18N.GetString("Move &Up");
             MoveDownButton.Text = I18N.GetString("Move D&own");
+            ProviderLabel.Text = I18N.GetString("Provider");
             this.Text = I18N.GetString("Edit Servers");
         }
 
@@ -84,6 +86,8 @@ namespace Shadowsocks.View
                     password = PasswordTextBox.Text,
                     method = EncryptionSelect.Text,
                     remarks = RemarksTextBox.Text,
+                    fingerprint = FingerprintTextBox.Text,
+                    provider = ProviderTextBox.Text,
                     auth = OneTimeAuth.Checked
                 };
                 int localPort = int.Parse(ProxyPortTextBox.Text);
@@ -117,6 +121,8 @@ namespace Shadowsocks.View
                 ProxyPortTextBox.Text = _modifiedConfiguration.localPort.ToString();
                 EncryptionSelect.Text = server.method ?? "aes-256-cfb";
                 RemarksTextBox.Text = server.remarks;
+                ProviderTextBox.Text = server.provider;
+                FingerprintTextBox.Text = server.fingerprint;
                 OneTimeAuth.Checked = server.auth;
             }
         }
@@ -337,6 +343,33 @@ namespace Shadowsocks.View
             {
                 OneTimeAuth.Enabled = true;
             }
+        }
+
+        private void ProviderButton_Click(object sender, EventArgs e)
+        {
+            ImportFromWebForm formx = new ImportFromWebForm();
+            formx.Owner = this;
+            formx.ShowDialog();
+            if (this._onlineConfig != null)
+            {
+                string fp = this._onlineConfig[0].fingerprint;
+                List<Server> TempConfigs = new List<Server>();
+                foreach(Server server in _modifiedConfiguration.configs)
+                {
+                    if (server.fingerprint != fp)
+                    {
+                        TempConfigs.Add(server);
+                    }
+                }
+                _modifiedConfiguration.configs = TempConfigs;
+                foreach (Server server in this._onlineConfig)
+                {
+                    _modifiedConfiguration.configs.Add(server);
+                }
+                LoadConfiguration(_modifiedConfiguration);
+                controller.SaveServers(_modifiedConfiguration.configs, _modifiedConfiguration.localPort);
+            }
+            
         }
     }
 }

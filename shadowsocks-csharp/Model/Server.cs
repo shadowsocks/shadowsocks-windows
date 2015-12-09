@@ -18,6 +18,9 @@ namespace Shadowsocks.Model
         public string method;
         public string remarks;
         public bool auth;
+        public string provider;
+        public string fingerprint;
+
 
         public override int GetHashCode()
         {
@@ -54,6 +57,8 @@ namespace Shadowsocks.Model
             this.password = "";
             this.remarks = "";
             this.auth = false;
+            this.fingerprint = "";
+            this.provider = "local";
         }
 
         public Server(string ssURL) : this()

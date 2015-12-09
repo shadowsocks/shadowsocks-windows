@@ -311,7 +311,17 @@ namespace Shadowsocks.View
             Configuration configuration = controller.GetConfigurationCopy();
             foreach (var server in configuration.configs)
             {
+                if (server.provider != "local" && server.provider != "") { continue; }
                 MenuItem item = new MenuItem(server.FriendlyName());
+                item.Tag = i - strategyCount;
+                item.Click += AServerItem_Click;
+                items.Add(i, item);
+                i++;
+            }
+            foreach (var server in configuration.configs)
+            {
+                if (server.provider == "local") { continue; }
+                MenuItem item = new MenuItem(server.provider+" | "+server.FriendlyName());
                 item.Tag = i - strategyCount;
                 item.Click += AServerItem_Click;
                 items.Add(i, item);
