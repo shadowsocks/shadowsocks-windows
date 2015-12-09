@@ -179,7 +179,10 @@ namespace Shadowsocks.Obfs
             outdata[1] = (byte)(outlength);
             Array.Copy(comdata, 0, outdata, 2, outlen);
             ulong adler = Util.Adler32.CalcAdler32(data, datalength);
-            BitConverter.GetBytes((uint)adler).CopyTo(outdata, outlength - 4);
+            outdata[outlength - 4] = (byte)(adler >> 24);
+            outdata[outlength - 3] = (byte)(adler >> 16);
+            outdata[outlength - 2] = (byte)(adler >> 8);
+            outdata[outlength - 1] = (byte)(adler);
         }
 
         public override byte[] ClientPreEncrypt(byte[] plaindata, int datalength, out int outlength)
@@ -234,7 +237,11 @@ namespace Shadowsocks.Obfs
                 byte[] buf = FileManager.DeflateDecompress(recv_buf, 2, len - 6, out outlen);
                 if (buf != null)
                 {
-                    if (Util.Adler32.CheckAdler32(buf, outlen))
+                    ulong alder = Util.Adler32.CalcAdler32(buf, outlen);
+                    if (recv_buf[len - 4] == (byte)(alder >> 24)
+                        && recv_buf[len - 3] == (byte)(alder >> 16)
+                        && recv_buf[len - 2] == (byte)(alder >> 8)
+                        && recv_buf[len - 1] == (byte)(alder))
                     {
                         //pass
                     }
