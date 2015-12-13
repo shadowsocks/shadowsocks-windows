@@ -9,6 +9,7 @@ using Shadowsocks.Controller;
 using System.Windows.Forms;
 using System.Collections;
 using Shadowsocks.Model;
+using Shadowsocks.Properties;
 
 namespace Shadowsocks.View
 {
@@ -19,6 +20,7 @@ namespace Shadowsocks.View
         public ImportFromWebForm()
         {
             this.Font = System.Drawing.SystemFonts.MessageBoxFont;
+            this.Icon = Icon.FromHandle(Resources.ssw128.GetHicon());
             InitializeComponent();
             UpdateTexts();
 

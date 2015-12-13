@@ -28,7 +28,6 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ImportFromWebForm));
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.URLTextBox = new System.Windows.Forms.TextBox();
             this.ConfigListBox = new System.Windows.Forms.ListBox();
@@ -151,7 +150,6 @@
             this.ClientSize = new System.Drawing.Size(432, 339);
             this.Controls.Add(this.tableLayoutPanel1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
-            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "ImportFromWebForm";
