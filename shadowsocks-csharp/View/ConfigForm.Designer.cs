@@ -56,6 +56,11 @@
             this.ProxyPortLabel = new System.Windows.Forms.Label();
             this.tableLayoutPanel3 = new System.Windows.Forms.TableLayoutPanel();
             this.tableLayoutPanel4 = new System.Windows.Forms.TableLayoutPanel();
+            this.ProviderLabel = new System.Windows.Forms.Label();
+            this.ProviderTextBox = new System.Windows.Forms.TextBox();
+            this.FingerprintTextBox = new System.Windows.Forms.TextBox();
+            this.tableLayoutPanel7 = new System.Windows.Forms.TableLayoutPanel();
+            this.ProviderButton = new System.Windows.Forms.Button();
             this.tableLayoutPanel1.SuspendLayout();
             this.ServerGroupBox.SuspendLayout();
             this.tableLayoutPanel2.SuspendLayout();
@@ -63,6 +68,7 @@
             this.tableLayoutPanel5.SuspendLayout();
             this.tableLayoutPanel3.SuspendLayout();
             this.tableLayoutPanel4.SuspendLayout();
+            this.tableLayoutPanel7.SuspendLayout();
             this.SuspendLayout();
             // 
             // tableLayoutPanel1
@@ -82,12 +88,15 @@
             this.tableLayoutPanel1.Controls.Add(this.PasswordTextBox, 1, 2);
             this.tableLayoutPanel1.Controls.Add(this.EncryptionLabel, 0, 3);
             this.tableLayoutPanel1.Controls.Add(this.EncryptionSelect, 1, 3);
-            this.tableLayoutPanel1.Controls.Add(this.OneTimeAuth, 1, 6);
+            this.tableLayoutPanel1.Controls.Add(this.OneTimeAuth, 1, 8);
+            this.tableLayoutPanel1.Controls.Add(this.ProviderLabel, 0, 6);
+            this.tableLayoutPanel1.Controls.Add(this.ProviderTextBox, 1, 6);
+            this.tableLayoutPanel1.Controls.Add(this.FingerprintTextBox, 1, 7);
             this.tableLayoutPanel1.Location = new System.Drawing.Point(8, 21);
             this.tableLayoutPanel1.Margin = new System.Windows.Forms.Padding(0);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
             this.tableLayoutPanel1.Padding = new System.Windows.Forms.Padding(3);
-            this.tableLayoutPanel1.RowCount = 7;
+            this.tableLayoutPanel1.RowCount = 9;
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
@@ -95,7 +104,9 @@
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(249, 162);
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(249, 216);
             this.tableLayoutPanel1.TabIndex = 0;
             // 
             // RemarksTextBox
@@ -213,7 +224,7 @@
             // OneTimeAuth
             // 
             this.OneTimeAuth.AutoSize = true;
-            this.OneTimeAuth.Location = new System.Drawing.Point(83, 140);
+            this.OneTimeAuth.Location = new System.Drawing.Point(83, 194);
             this.OneTimeAuth.Name = "OneTimeAuth";
             this.OneTimeAuth.Size = new System.Drawing.Size(156, 16);
             this.OneTimeAuth.TabIndex = 5;
@@ -288,7 +299,7 @@
             this.ServerGroupBox.Location = new System.Drawing.Point(178, 0);
             this.ServerGroupBox.Margin = new System.Windows.Forms.Padding(12, 0, 0, 0);
             this.ServerGroupBox.Name = "ServerGroupBox";
-            this.ServerGroupBox.Size = new System.Drawing.Size(260, 200);
+            this.ServerGroupBox.Size = new System.Drawing.Size(260, 254);
             this.ServerGroupBox.TabIndex = 0;
             this.ServerGroupBox.TabStop = false;
             this.ServerGroupBox.Text = "Server";
@@ -312,20 +323,22 @@
             this.tableLayoutPanel2.ColumnCount = 2;
             this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
-            this.tableLayoutPanel2.Controls.Add(this.tableLayoutPanel6, 0, 2);
-            this.tableLayoutPanel2.Controls.Add(this.tableLayoutPanel5, 1, 1);
-            this.tableLayoutPanel2.Controls.Add(this.tableLayoutPanel3, 1, 2);
+            this.tableLayoutPanel2.Controls.Add(this.tableLayoutPanel6, 0, 3);
+            this.tableLayoutPanel2.Controls.Add(this.tableLayoutPanel5, 1, 2);
+            this.tableLayoutPanel2.Controls.Add(this.tableLayoutPanel3, 1, 3);
             this.tableLayoutPanel2.Controls.Add(this.ServersListBox, 0, 0);
             this.tableLayoutPanel2.Controls.Add(this.ServerGroupBox, 1, 0);
-            this.tableLayoutPanel2.Controls.Add(this.tableLayoutPanel4, 0, 1);
+            this.tableLayoutPanel2.Controls.Add(this.tableLayoutPanel4, 0, 2);
+            this.tableLayoutPanel2.Controls.Add(this.tableLayoutPanel7, 0, 1);
             this.tableLayoutPanel2.Location = new System.Drawing.Point(12, 12);
             this.tableLayoutPanel2.Margin = new System.Windows.Forms.Padding(0);
             this.tableLayoutPanel2.Name = "tableLayoutPanel2";
-            this.tableLayoutPanel2.RowCount = 3;
+            this.tableLayoutPanel2.RowCount = 4;
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel2.Size = new System.Drawing.Size(438, 265);
+            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel2.Size = new System.Drawing.Size(438, 351);
             this.tableLayoutPanel2.TabIndex = 7;
             // 
             // tableLayoutPanel6
@@ -338,7 +351,7 @@
             this.tableLayoutPanel6.Controls.Add(this.MoveDownButton, 1, 0);
             this.tableLayoutPanel6.Controls.Add(this.MoveUpButton, 0, 0);
             this.tableLayoutPanel6.Dock = System.Windows.Forms.DockStyle.Top;
-            this.tableLayoutPanel6.Location = new System.Drawing.Point(0, 233);
+            this.tableLayoutPanel6.Location = new System.Drawing.Point(0, 319);
             this.tableLayoutPanel6.Margin = new System.Windows.Forms.Padding(0);
             this.tableLayoutPanel6.Name = "tableLayoutPanel6";
             this.tableLayoutPanel6.RowCount = 1;
@@ -381,7 +394,7 @@
             this.tableLayoutPanel5.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tableLayoutPanel5.Controls.Add(this.ProxyPortTextBox, 1, 0);
             this.tableLayoutPanel5.Controls.Add(this.ProxyPortLabel, 0, 0);
-            this.tableLayoutPanel5.Location = new System.Drawing.Point(242, 200);
+            this.tableLayoutPanel5.Location = new System.Drawing.Point(242, 286);
             this.tableLayoutPanel5.Margin = new System.Windows.Forms.Padding(0);
             this.tableLayoutPanel5.Name = "tableLayoutPanel5";
             this.tableLayoutPanel5.Padding = new System.Windows.Forms.Padding(3);
@@ -425,7 +438,7 @@
             this.tableLayoutPanel3.Controls.Add(this.MyCancelButton, 1, 0);
             this.tableLayoutPanel3.Controls.Add(this.OKButton, 0, 0);
             this.tableLayoutPanel3.Dock = System.Windows.Forms.DockStyle.Right;
-            this.tableLayoutPanel3.Location = new System.Drawing.Point(279, 236);
+            this.tableLayoutPanel3.Location = new System.Drawing.Point(279, 322);
             this.tableLayoutPanel3.Margin = new System.Windows.Forms.Padding(3, 3, 0, 3);
             this.tableLayoutPanel3.Name = "tableLayoutPanel3";
             this.tableLayoutPanel3.RowCount = 1;
@@ -443,13 +456,65 @@
             this.tableLayoutPanel4.Controls.Add(this.DeleteButton, 1, 0);
             this.tableLayoutPanel4.Controls.Add(this.AddButton, 0, 0);
             this.tableLayoutPanel4.Dock = System.Windows.Forms.DockStyle.Top;
-            this.tableLayoutPanel4.Location = new System.Drawing.Point(0, 200);
+            this.tableLayoutPanel4.Location = new System.Drawing.Point(0, 286);
             this.tableLayoutPanel4.Margin = new System.Windows.Forms.Padding(0);
             this.tableLayoutPanel4.Name = "tableLayoutPanel4";
             this.tableLayoutPanel4.RowCount = 1;
             this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel4.Size = new System.Drawing.Size(166, 32);
             this.tableLayoutPanel4.TabIndex = 8;
+            // 
+            // ProviderLabel
+            // 
+            this.ProviderLabel.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.ProviderLabel.AutoSize = true;
+            this.ProviderLabel.Location = new System.Drawing.Point(24, 144);
+            this.ProviderLabel.Name = "ProviderLabel";
+            this.ProviderLabel.Size = new System.Drawing.Size(53, 12);
+            this.ProviderLabel.TabIndex = 10;
+            this.ProviderLabel.Text = "Provider";
+            // 
+            // ProviderTextBox
+            // 
+            this.ProviderTextBox.Location = new System.Drawing.Point(83, 140);
+            this.ProviderTextBox.Name = "ProviderTextBox";
+            this.ProviderTextBox.ReadOnly = true;
+            this.ProviderTextBox.Size = new System.Drawing.Size(160, 21);
+            this.ProviderTextBox.TabIndex = 11;
+            // 
+            // FingerprintTextBox
+            // 
+            this.FingerprintTextBox.Location = new System.Drawing.Point(83, 167);
+            this.FingerprintTextBox.Name = "FingerprintTextBox";
+            this.FingerprintTextBox.Size = new System.Drawing.Size(160, 21);
+            this.FingerprintTextBox.TabIndex = 12;
+            this.FingerprintTextBox.Visible = false;
+            // 
+            // tableLayoutPanel7
+            // 
+            this.tableLayoutPanel7.ColumnCount = 2;
+            this.tableLayoutPanel7.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel7.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel7.Controls.Add(this.ProviderButton, 0, 0);
+            this.tableLayoutPanel7.Location = new System.Drawing.Point(0, 254);
+            this.tableLayoutPanel7.Margin = new System.Windows.Forms.Padding(0);
+            this.tableLayoutPanel7.Name = "tableLayoutPanel7";
+            this.tableLayoutPanel7.RowCount = 1;
+            this.tableLayoutPanel7.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel7.Size = new System.Drawing.Size(166, 32);
+            this.tableLayoutPanel7.TabIndex = 11;
+            // 
+            // ProviderButton
+            // 
+            this.ProviderButton.Dock = System.Windows.Forms.DockStyle.Left;
+            this.ProviderButton.Location = new System.Drawing.Point(0, 6);
+            this.ProviderButton.Margin = new System.Windows.Forms.Padding(0, 6, 3, 3);
+            this.ProviderButton.Name = "ProviderButton";
+            this.ProviderButton.Size = new System.Drawing.Size(80, 23);
+            this.ProviderButton.TabIndex = 0;
+            this.ProviderButton.Text = "&Import";
+            this.ProviderButton.UseVisualStyleBackColor = true;
+            this.ProviderButton.Click += new System.EventHandler(this.ProviderButton_Click);
             // 
             // ConfigForm
             // 
@@ -483,6 +548,7 @@
             this.tableLayoutPanel5.PerformLayout();
             this.tableLayoutPanel3.ResumeLayout(false);
             this.tableLayoutPanel4.ResumeLayout(false);
+            this.tableLayoutPanel7.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -518,6 +584,11 @@
         private System.Windows.Forms.Button MoveDownButton;
         private System.Windows.Forms.Button MoveUpButton;
         private System.Windows.Forms.CheckBox OneTimeAuth;
+        private System.Windows.Forms.Label ProviderLabel;
+        private System.Windows.Forms.TextBox ProviderTextBox;
+        private System.Windows.Forms.TextBox FingerprintTextBox;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel7;
+        private System.Windows.Forms.Button ProviderButton;
     }
 }
 

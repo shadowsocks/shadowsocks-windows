@@ -48,6 +48,17 @@ Cancel=取消
 New server=未配置的服务器
 Move &Up=上移(&U)
 Move D&own=下移(&O)
+Provider=来源
+&Import=导入(&I)
+
+# Import From Web Form
+
+URL=发布者地址
+&Remove=移除选定配置(&R)
+&Add Config=添加以上配置(&A)
+&Get=获取(&G)
+Import=从发布者获得配置
+No valid configs to import!=无可用配置!
 
 # Log Form
 

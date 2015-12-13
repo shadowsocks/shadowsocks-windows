@@ -39,7 +39,10 @@ namespace Shadowsocks
                 Directory.SetCurrentDirectory(Application.StartupPath);
 
                 Logging.OpenLogFile();
-
+                if (!Directory.Exists(System.Environment.CurrentDirectory + "\\keys"))
+                {
+                    Directory.CreateDirectory(System.Environment.CurrentDirectory + "\\keys");
+                }
                 ShadowsocksController controller = new ShadowsocksController();
 
                 MenuViewController viewController = new MenuViewController(controller);
