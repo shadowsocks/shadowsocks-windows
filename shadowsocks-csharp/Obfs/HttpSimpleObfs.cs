@@ -79,6 +79,7 @@ namespace Shadowsocks.Obfs
         {
             if (raw_trans_sent)
             {
+                SentLength += datalength;
                 outlength = datalength;
                 return encryptdata;
             }
@@ -102,6 +103,7 @@ namespace Shadowsocks.Obfs
                             foreach (byte[] data in data_buffer)
                             {
                                 Array.Copy(data, 0, outdata, outlength, data.Length);
+                                SentLength += data.Length;
                                 outlength += data.Length;
                             }
                             data_buffer.Clear();
@@ -200,6 +202,7 @@ namespace Shadowsocks.Obfs
                     {
                         Array.Copy(encryptdata, headdata.Length, outdata, http_buf.Length, datalength - headdata.Length);
                     }
+                    SentLength += headdata.Length;
                     outlength = http_buf.Length + datalength - headdata.Length;
                     raw_trans_sent = true;
                 }
@@ -221,6 +224,7 @@ namespace Shadowsocks.Obfs
                     {
                         outdata[i] = (byte)http_buf[i];
                     }
+                    SentLength += datalength;
                     outlength = http_buf.Length;
                     raw_trans_sent = true;
                 }
@@ -317,6 +321,7 @@ namespace Shadowsocks.Obfs
         private bool raw_trans_sent;
         private bool raw_trans_recv;
         private List<byte[]> data_buffer = new List<byte[]>();
+        protected static RNGCryptoServiceProvider g_random = new RNGCryptoServiceProvider();
         private Random random = new Random();
 
         public static List<string> SupportedObfs()
@@ -351,7 +356,7 @@ namespace Shadowsocks.Obfs
             int outlength = 32;
             {
                 byte[] randomdata = new byte[18];
-                random.NextBytes(randomdata);
+                g_random.GetBytes(randomdata);
                 randomdata.CopyTo(outdata, 4);
             }
             lock ((TlsAuthData)this.Server.data)
@@ -359,7 +364,7 @@ namespace Shadowsocks.Obfs
                 if (((TlsAuthData)this.Server.data).clientID == null)
                 {
                     ((TlsAuthData)this.Server.data).clientID = new byte[32];
-                    random.NextBytes(((TlsAuthData)this.Server.data).clientID);
+                    g_random.GetBytes(((TlsAuthData)this.Server.data).clientID);
                 }
             }
             UInt64 utc_time_second = (UInt64)Math.Floor(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1, 0, 0, 0)).TotalSeconds);
@@ -375,6 +380,7 @@ namespace Shadowsocks.Obfs
         {
             if (raw_trans_sent)
             {
+                SentLength += datalength;
                 outlength = datalength;
                 return encryptdata;
             }
@@ -402,10 +408,12 @@ namespace Shadowsocks.Obfs
                         hmac_sha1(hmac_data, hmac_data.Length);
 
                         data_buffer.Insert(0, hmac_data);
+                        SentLength -= hmac_data.Length;
                     }
                     foreach (byte[] data in data_buffer)
                     {
                         Array.Copy(data, 0, outdata, outlength, data.Length);
+                        SentLength += data.Length;
                         outlength += data.Length;
                     }
                     data_buffer.Clear();

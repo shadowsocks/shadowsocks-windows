@@ -41,5 +41,6 @@ namespace Shadowsocks.Obfs
         byte[] ClientPostDecrypt(byte[] plaindata, int datalength, out int outlength);
         object InitData();
         void SetServerInfo(ServerInfo serverInfo);
+        long getSentLength();
     }
 }

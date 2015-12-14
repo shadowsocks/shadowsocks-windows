@@ -272,6 +272,8 @@ namespace Shadowsocks.Controller
         protected byte[] connetionRecvBuffer = new byte[RecvSize * 4];
         // connection send buffer
         protected byte[] connetionSendBuffer = new byte[BufferSize * 4];
+        // connection send buffer
+        protected List<byte[]> connetionSendBufferList = new List<byte[]>();
 
         protected byte[] remoteUDPRecvBuffer = new byte[RecvSize * 4];
         protected int remoteUDPRecvBufferLength = 0;
@@ -519,7 +521,7 @@ namespace Shadowsocks.Controller
                 }
             }
 
-            if (reconnectTimes < 2)
+            if (reconnectTimes <= reconnectTimesRemain)
             {
                 server = this.getCurrentServer(true);
             }
@@ -637,7 +639,6 @@ namespace Shadowsocks.Controller
                     ConnectState _state = this.State;
                     if (_state == ConnectState.CONNECTING)
                     {
-                        this.State = ConnectState.CONNECTED;
                         StartPipe();
                     }
                     else if (_state == ConnectState.CONNECTED)
@@ -707,6 +708,18 @@ namespace Shadowsocks.Controller
                     return true;
                 }
             }
+            //else if (this.State == ConnectState.CONNECTED)
+            //{
+            //    if ( obfs.getSentLength() == 0 && connetionSendBufferList != null )
+            //    {
+            //        if (reconnectTimesRemain > 0)
+            //        {
+            //            this.State = ConnectState.CONNECTING;
+            //            this.ReConnect();
+            //            return true;
+            //        }
+            //    }
+            //}
             return false;
         }
 
@@ -1523,7 +1536,6 @@ namespace Shadowsocks.Controller
                 ConnectState _state = this.State;
                 if (_state == ConnectState.CONNECTING)
                 {
-                    this.State = ConnectState.CONNECTED;
                     StartPipe();
                 }
                 else if (_state == ConnectState.CONNECTED)
@@ -1556,7 +1568,6 @@ namespace Shadowsocks.Controller
                 ConnectState _state = this.State;
                 if (_state == ConnectState.CONNECTING)
                 {
-                    this.State = ConnectState.CONNECTED;
                     StartPipe();
                 }
                 else if (_state == ConnectState.CONNECTED)
@@ -1773,6 +1784,21 @@ namespace Shadowsocks.Controller
                     {
                         doRemoteTDPRecv();
                     }
+                    else if (connetionSendBufferList != null && connetionSendBufferList.Count > 0)
+                    {
+                        foreach (byte[] buffer in connetionSendBufferList)
+                        {
+                            if (server.tcp_over_udp &&
+                                    remoteTDP != null)
+                            {
+                                RemoteTDPSend(buffer, buffer.Length);
+                            }
+                            else
+                            {
+                                RemoteSend(buffer, buffer.Length);
+                            }
+                        }
+                    }
                     else if (httpProxyState != null)
                     {
                         RemoteSend(remoteHeaderSendBuffer, remoteHeaderSendBuffer.Length);
@@ -1799,6 +1825,7 @@ namespace Shadowsocks.Controller
                         }
                     }
                 }
+                this.State = ConnectState.CONNECTED;
 
                 // remote recv first
                 doRemoteTCPRecv();
@@ -2247,10 +2274,10 @@ namespace Shadowsocks.Controller
 
         private void PipeConnectionReceiveCallback(IAsyncResult ar)
         {
-            if (closed)
-            {
-                return;
-            }
+            //if (closed)
+            //{
+            //    return;
+            //}
             try
             {
                 int bytesRead = endConnectionTCPRecv(ar);
@@ -2268,6 +2295,20 @@ namespace Shadowsocks.Controller
                     else
                     {
                         Logging.LogBin(LogLevel.Debug, "remote send", connetionRecvBuffer, bytesRead);
+                    }
+                    if (obfs != null && obfs.getSentLength() > 0)
+                    {
+                        connetionSendBufferList = null;
+                    }
+                    else if (connetionSendBufferList != null)
+                    {
+                        byte[] data = new byte[bytesRead];
+                        Array.Copy(connetionRecvBuffer, data, data.Length);
+                        connetionSendBufferList.Add(data);
+                    }
+                    if (closed || State != ConnectState.CONNECTED)
+                    {
+                        return;
                     }
                     if (server.tcp_over_udp &&
                             remoteTDP != null)

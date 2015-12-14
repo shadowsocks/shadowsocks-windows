@@ -204,15 +204,76 @@ namespace Shadowsocks.Controller
             }
         }
 
+
+        protected bool isMatchSubNet(IPAddress ip, IPAddress net, int netmask)
+        {
+            byte[] addr = ip.GetAddressBytes();
+            byte[] net_addr = net.GetAddressBytes();
+            int i = 8, index = 0;
+            for (; i < netmask; i += 8, index += 1)
+            {
+                if (addr[index] != net_addr[index])
+                    return false;
+            }
+            if ((addr[index] >> (i - netmask)) != (net_addr[index] >> (i - netmask)))
+                return false;
+            return true;
+        }
+
+        protected bool isMatchSubNet(IPAddress ip, string netmask)
+        {
+            string[] mask = netmask.Split('/');
+            IPAddress netmask_ip = IPAddress.Parse(mask[0]);
+            if (ip.AddressFamily == netmask_ip.AddressFamily)
+            {
+                try
+                {
+                    return isMatchSubNet(ip, netmask_ip, Convert.ToInt16(mask[1]));
+                }
+                catch
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                return false;
+            }
+        }
+
         protected bool isLAN(Socket socket)
         {
+            IPAddress ip = ((IPEndPoint)socket.RemoteEndPoint).Address;
             byte[] addr = ((IPEndPoint)socket.RemoteEndPoint).Address.GetAddressBytes();
             if (addr.Length == 4)
             {
-                if (addr[0] == 10) return true;
-                if (addr[0] == 127 && addr[1] == 0 && addr[2] == 0) return true;
-                if (addr[0] == 172 && addr[1] >= 16 && addr[1] <= 31) return true;
-                if (addr[0] == 192 && addr[1] >= 168) return true;
+                string[] netmasks = new string[]
+                {
+                    "0.0.0.0/8",
+                    "10.0.0.0/8",
+                    //"100.64.0.0/10", //部分地区运营商貌似在使用这个，这个可能不安全
+                    "127.0.0.0/8",
+                    "169.254.0.0/16",
+                    "172.16.0.0/12",
+                    "192.0.0.0/24",
+                    "192.0.2.0/24",
+                    "192.168.0.0/16",
+                    "198.18.0.0/15",
+                    "198.51.100.0/24",
+                    "203.0.113.0/24",
+                    "::1/128",
+                    "fc00::/7",
+                    "fe80::/10"
+                };
+                foreach (string netmask in netmasks)
+                {
+                    if (isMatchSubNet(ip, netmask))
+                        return true;
+                }
+                //if (addr[0] == 10) return true;
+                //if (addr[0] == 127 && addr[1] == 0 && addr[2] == 0) return true;
+                //if (addr[0] == 172 && addr[1] >= 16 && addr[1] <= 31) return true;
+                //if (addr[0] == 192 && addr[1] >= 168) return true;
                 return false;
             }
             return true;

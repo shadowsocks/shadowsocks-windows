@@ -136,7 +136,6 @@ namespace Shadowsocks.Obfs
                     outlength += outlen;
                     recv_buf_len -= len;
                     Array.Copy(recv_buf, len, recv_buf, 0, recv_buf_len);
-                    //len = (recv_buf[0] << 8) + recv_buf[1];
                 }
                 else
                 {

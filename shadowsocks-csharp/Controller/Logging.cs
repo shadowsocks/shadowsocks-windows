@@ -116,6 +116,11 @@ namespace Shadowsocks.Controller
                     + oe.Message);
                 return true;
             }
+            else if (e is ObjectDisposedException)
+            {
+                // ignore
+                return true;
+            }
             else if (e is SocketException)
             {
                 SocketException se = (SocketException)e;

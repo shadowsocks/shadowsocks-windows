@@ -27,6 +27,7 @@ namespace Shadowsocks.Obfs
         public override byte[] ClientEncode(byte[] encryptdata, int datalength, out int outlength)
         {
             outlength = datalength;
+            SentLength += outlength;
             return encryptdata;
         }
         public override byte[] ClientDecode(byte[] encryptdata, int datalength, out int outlength, out bool needsendback)

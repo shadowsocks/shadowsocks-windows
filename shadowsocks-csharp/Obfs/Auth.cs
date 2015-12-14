@@ -25,6 +25,7 @@ namespace Shadowsocks.Obfs
 
         protected bool has_sent_header;
         protected bool has_recv_header;
+        protected static RNGCryptoServiceProvider g_random = new RNGCryptoServiceProvider();
 
         public static List<string> SupportedObfs()
         {
@@ -54,7 +55,7 @@ namespace Shadowsocks.Obfs
 
         public void PackAuthData(byte[] data, int datalength, byte[] outdata, out int outlength)
         {
-            int rand_len = random.Next(16) + 1;
+            int rand_len = random.Next(250) + 1;
             outlength = rand_len + datalength + 6 + 12;
             lock ((AuthData)this.Server.data)
             {
@@ -65,7 +66,7 @@ namespace Shadowsocks.Obfs
                 if (((AuthData)this.Server.data).clientID == null)
                 {
                     ((AuthData)this.Server.data).clientID = new byte[4];
-                    random.NextBytes(((AuthData)this.Server.data).clientID);
+                    g_random.GetBytes(((AuthData)this.Server.data).clientID);
                     ((AuthData)this.Server.data).connectionID = (UInt32)random.Next(0x1000000);
                 }
                 ((AuthData)this.Server.data).connectionID += 1;
@@ -186,6 +187,7 @@ namespace Shadowsocks.Obfs
 
         protected bool has_sent_header;
         protected bool has_recv_header;
+        protected static RNGCryptoServiceProvider g_random = new RNGCryptoServiceProvider();
 
         public static List<string> SupportedObfs()
         {
@@ -216,7 +218,7 @@ namespace Shadowsocks.Obfs
 
         public void PackAuthData(byte[] data, int datalength, byte[] outdata, out int outlength)
         {
-            int rand_len = random.Next(128) + 1;
+            int rand_len = random.Next(250) + 1;
             int data_offset = rand_len + 4 + 2;
             outlength = data_offset + datalength + 12 + 10;
             lock ((AuthData)this.Server.data)
@@ -228,7 +230,7 @@ namespace Shadowsocks.Obfs
                 if (((AuthData)this.Server.data).clientID == null)
                 {
                     ((AuthData)this.Server.data).clientID = new byte[4];
-                    random.NextBytes(((AuthData)this.Server.data).clientID);
+                    g_random.GetBytes(((AuthData)this.Server.data).clientID);
                     ((AuthData)this.Server.data).connectionID = (UInt32)random.Next(0x1000000);
                 }
                 ((AuthData)this.Server.data).connectionID += 1;
@@ -332,7 +334,6 @@ namespace Shadowsocks.Obfs
                     outlength += outlen;
                     recv_buf_len -= len;
                     Array.Copy(recv_buf, len, recv_buf, 0, recv_buf_len);
-                    //len = (recv_buf[0] << 8) + recv_buf[1];
                 }
                 else
                 {

@@ -12,6 +12,7 @@ namespace Shadowsocks.Obfs
 
         protected string Method;
         protected ServerInfo Server;
+        protected long SentLength;
 
         public abstract Dictionary<string, int[]> GetObfs();
 
@@ -48,6 +49,10 @@ namespace Shadowsocks.Obfs
             if (head_type == 3)
                 return 4 + plaindata[1];
             return defaultValue;
+        }
+        public long getSentLength()
+        {
+            return SentLength;
         }
     }
 }
