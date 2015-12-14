@@ -144,7 +144,8 @@
             "plain",
             "http_simple",
             "tls_simple",
-            "random_head"});
+            "random_head",
+            "tls1.0_session_auth"});
             this.ObfsCombo.Location = new System.Drawing.Point(92, 226);
             this.ObfsCombo.Name = "ObfsCombo";
             this.ObfsCombo.Size = new System.Drawing.Size(206, 22);

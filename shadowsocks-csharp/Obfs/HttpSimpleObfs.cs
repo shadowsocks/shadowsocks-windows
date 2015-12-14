@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Security.Cryptography;
 
 namespace Shadowsocks.Obfs
 {
@@ -137,7 +138,7 @@ namespace Shadowsocks.Obfs
                             ssl_buf.Add(c);
                         }
                         // client version
-                        ssl_buf.Insert(0, (byte)3);
+                        ssl_buf.Insert(0, (byte)1);
                         ssl_buf.Insert(0, (byte)3);
                         // length
                         ssl_buf.Insert(0, (byte)(ssl_buf.Count % 256));
@@ -285,6 +286,213 @@ namespace Shadowsocks.Obfs
                     needsendback = false;
                 }
                 return outdata;
+            }
+        }
+
+        public override void Dispose()
+        {
+        }
+    }
+    public class TlsAuthData
+    {
+        public byte[] clientID;
+    }
+
+    class TlsAuthObfs : ObfsBase
+    {
+        public TlsAuthObfs(string method)
+            : base(method)
+        {
+            has_sent_header = false;
+            has_recv_header = false;
+            raw_trans_sent = false;
+            raw_trans_recv = false;
+        }
+        private static Dictionary<string, int[]> _obfs = new Dictionary<string, int[]> {
+                {"tls1.0_session_auth", new int[]  {0, 1, 0}},
+        };
+
+        private bool has_sent_header;
+        private bool has_recv_header;
+        private bool raw_trans_sent;
+        private bool raw_trans_recv;
+        private List<byte[]> data_buffer = new List<byte[]>();
+        private Random random = new Random();
+
+        public static List<string> SupportedObfs()
+        {
+            return new List<string>(_obfs.Keys);
+        }
+
+        public override Dictionary<string, int[]> GetObfs()
+        {
+            return _obfs;
+        }
+
+        public override object InitData()
+        {
+            return new TlsAuthData();
+        }
+
+        protected void hmac_sha1(byte[] data, int length)
+        {
+            byte[] key = new byte[Server.key.Length + 32];
+            Server.key.CopyTo(key, 0);
+            ((TlsAuthData)this.Server.data).clientID.CopyTo(key, Server.key.Length);
+
+            HMACSHA1 sha1 = new HMACSHA1(key);
+            byte[] sha1data = sha1.ComputeHash(data, 0, length - 10);
+
+            Array.Copy(sha1data, 0, data, length - 10, 10);
+        }
+
+        public void PackAuthData(byte[] outdata)
+        {
+            int outlength = 32;
+            {
+                byte[] randomdata = new byte[18];
+                random.NextBytes(randomdata);
+                randomdata.CopyTo(outdata, 4);
+            }
+            lock ((TlsAuthData)this.Server.data)
+            {
+                if (((TlsAuthData)this.Server.data).clientID == null)
+                {
+                    ((TlsAuthData)this.Server.data).clientID = new byte[32];
+                    random.NextBytes(((TlsAuthData)this.Server.data).clientID);
+                }
+            }
+            UInt64 utc_time_second = (UInt64)Math.Floor(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1, 0, 0, 0)).TotalSeconds);
+            UInt32 utc_time = (UInt32)(utc_time_second);
+            byte[] time_bytes = BitConverter.GetBytes(utc_time);
+            Array.Reverse(time_bytes);
+            Array.Copy(time_bytes, 0, outdata, 0, 4);
+
+            hmac_sha1(outdata, outlength);
+        }
+
+        public override byte[] ClientEncode(byte[] encryptdata, int datalength, out int outlength)
+        {
+            if (raw_trans_sent)
+            {
+                outlength = datalength;
+                return encryptdata;
+            }
+            byte[] outdata = new byte[datalength + 4096];
+            if (has_sent_header)
+            {
+                outlength = 0;
+                if (datalength > 0)
+                {
+                    byte[] data = new byte[datalength];
+                    Array.Copy(encryptdata, 0, data, 0, datalength);
+                    data_buffer.Add(data);
+                }
+                else
+                {
+                    {
+                        byte[] hmac_data = new byte[44];
+                        byte[] rnd = new byte[22];
+                        random.NextBytes(rnd);
+
+                        byte[] handshake_finish = System.Text.Encoding.ASCII.GetBytes("\x14\x03\x01\x00\x01\x01" + "\x16\x03\x01\x00\x01\x20");
+                        handshake_finish.CopyTo(hmac_data, 0);
+                        rnd.CopyTo(hmac_data, 12);
+
+                        hmac_sha1(hmac_data, hmac_data.Length);
+
+                        data_buffer.Insert(0, hmac_data);
+                    }
+                    foreach (byte[] data in data_buffer)
+                    {
+                        Array.Copy(data, 0, outdata, outlength, data.Length);
+                        outlength += data.Length;
+                    }
+                    data_buffer.Clear();
+                    raw_trans_sent = true;
+                }
+            }
+            else
+            {
+                byte[] rnd = new byte[32];
+                PackAuthData(rnd);
+                List<byte> ssl_buf = new List<byte>();
+                string str_buf = "0016c02bc02fc00ac009c013c01400330039002f0035000a0100006fff01000100000a00080006001700180019000b0002010000230000337400000010002900270568322d31360568322d31350568322d313402683208737064792f332e3108687474702f312e31000500050100000000000d001600140401050106010201040305030603020304020202";
+                foreach (byte b in rnd)
+                {
+                    ssl_buf.Add(b);
+                }
+                ssl_buf.Add(32);
+                foreach (byte b in ((TlsAuthData)this.Server.data).clientID)
+                {
+                    ssl_buf.Add(b);
+                }
+                for (int i = 0; i < str_buf.Length; i += 2)
+                {
+                    byte c = (byte)(str_buf[i] | str_buf[i + 1] * 16);
+                    ssl_buf.Add(c);
+                }
+                // client version
+                ssl_buf.Insert(0, (byte)1); // version
+                ssl_buf.Insert(0, (byte)3);
+                // length
+                ssl_buf.Insert(0, (byte)(ssl_buf.Count % 256));
+                ssl_buf.Insert(0, (byte)((ssl_buf.Count - 1) / 256));
+                ssl_buf.Insert(0, (byte)0);
+                ssl_buf.Insert(0, (byte)1); // client hello
+                // length
+                ssl_buf.Insert(0, (byte)(ssl_buf.Count % 256));
+                ssl_buf.Insert(0, (byte)((ssl_buf.Count - 1) / 256));
+                //
+                ssl_buf.Insert(0, (byte)0x1); // version
+                ssl_buf.Insert(0, (byte)0x3);
+                ssl_buf.Insert(0, (byte)0x16);
+                for (int i = 0; i < ssl_buf.Count; ++i)
+                {
+                    outdata[i] = (byte)ssl_buf[i];
+                }
+                outlength = ssl_buf.Count;
+
+                byte[] data = new byte[datalength];
+                Array.Copy(encryptdata, 0, data, 0, datalength);
+                data_buffer.Add(data);
+            }
+            has_sent_header = true;
+            return outdata;
+        }
+
+        public override byte[] ClientDecode(byte[] encryptdata, int datalength, out int outlength, out bool needsendback)
+        {
+            if (raw_trans_recv)
+            {
+                outlength = datalength;
+                needsendback = false;
+                return encryptdata;
+            }
+            else
+            {
+                byte[] outdata = new byte[datalength];
+                if (datalength < 11 + 32 + 1 + 32)
+                {
+                    throw new ObfsException("ClientDecode data error");
+                }
+                else
+                {
+                    byte[] hmacsha1 = new byte[10];
+                    byte[] data = new byte[32];
+                    Array.Copy(encryptdata, 11, data, 0, 22);
+                    hmac_sha1(data, data.Length);
+                    Array.Copy(data, 22, hmacsha1, 0, 10);
+
+                    if (Util.Utils.FindStr(encryptdata, 11 + 32 + 1 + 32, hmacsha1) != 11 + 22)
+                    {
+                        throw new ObfsException("ClientDecode data error: wrong sha1");
+                    }
+                }
+                outlength = 0;
+                raw_trans_recv = true;
+                needsendback = true;
+                return encryptdata;
             }
         }
 

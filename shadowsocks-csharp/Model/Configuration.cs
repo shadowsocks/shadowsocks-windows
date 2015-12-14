@@ -183,7 +183,7 @@ namespace Shadowsocks.Model
                             chances.Add(lastBeginVal + chance);
                             lastBeginVal += chance;
                         }
-                        if (algorithm == 4 && randomGennarator.Next(3) == 0)
+                        if (algorithm == 4 && randomGennarator.Next(3) == 0 && configs[curIndex].isEnable())
                         {
                             lastSelectIndex = curIndex;
                             return curIndex;
