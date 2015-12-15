@@ -123,7 +123,7 @@ namespace Shadowsocks.Controller
         {
             Logging.Debug("Ping " + server.FriendlyName());
             if (server.server == "") return null;
-            var IP = Dns.GetHostAddresses(server.server).First(ip => ip.AddressFamily == AddressFamily.InterNetwork);
+            var IP = Dns.GetHostAddresses(server.server).First(ip => (ip.AddressFamily == AddressFamily.InterNetwork || ip.AddressFamily == AddressFamily.InterNetworkV6));
             var ping = new Ping();
             var ret = new List<DataList>();
             foreach (
