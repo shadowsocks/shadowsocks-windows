@@ -28,12 +28,41 @@ namespace Shadowsocks.Controller
 
         public const string Version = "2.5.8";
 
+        private class CheckUpdateTimer : System.Timers.Timer
+        {
+            public Configuration config;
+
+            public CheckUpdateTimer(int p) : base(p)
+            {
+            }
+        }
+
+        public void CheckUpdate(Configuration config, int delay)
+        {
+            CheckUpdateTimer timer = new CheckUpdateTimer(delay);
+            timer.AutoReset = false;
+            timer.Elapsed += Timer_Elapsed;
+            timer.config = config;
+            timer.Enabled = true;
+        }
+
+        private void Timer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+        {
+            CheckUpdateTimer timer = (CheckUpdateTimer)sender;
+            Configuration config = timer.config;
+            timer.Elapsed -= Timer_Elapsed;
+            timer.Enabled = false;
+            timer.Dispose();
+            CheckUpdate(config);
+        }
+
         public void CheckUpdate(Configuration config)
         {
             this.config = config;
 
             try
             {
+                Logging.Debug("Checking updates...");
                 WebClient http = CreateWebClient();
                 http.DownloadStringCompleted += http_DownloadStringCompleted;
                 http.DownloadStringAsync(new Uri(UpdateURL));
@@ -81,9 +110,13 @@ namespace Shadowsocks.Controller
 
                     startDownload();
                 }
-                else if (CheckUpdateCompleted != null)
+                else
                 {
-                    CheckUpdateCompleted(this, new EventArgs());
+                    Logging.Debug("No update is available");
+                    if (CheckUpdateCompleted != null)
+                    {
+                        CheckUpdateCompleted(this, new EventArgs());
+                    }
                 }
             }
             catch (Exception ex)
@@ -117,6 +150,7 @@ namespace Shadowsocks.Controller
                     Logging.LogUsefulException(e.Error);
                     return;
                 }
+                Logging.Debug($"New version {LatestVersionNumber} found: {LatestVersionLocalName}");
                 if (CheckUpdateCompleted != null)
                 {
                     CheckUpdateCompleted(this, new EventArgs());
