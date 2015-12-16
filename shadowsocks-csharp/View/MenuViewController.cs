@@ -66,7 +66,9 @@ namespace Shadowsocks.View
             UpdateTrayIcon();
             _notifyIcon.Visible = true;
             _notifyIcon.ContextMenu = contextMenu1;
+            _notifyIcon.BalloonTipClicked += notifyIcon1_BalloonTipClicked;
             _notifyIcon.MouseDoubleClick += notifyIcon1_DoubleClick;
+            _notifyIcon.BalloonTipClosed += _notifyIcon_BalloonTipClosed;
 
             this.updateChecker = new UpdateChecker();
             updateChecker.CheckUpdateCompleted += updateChecker_CheckUpdateCompleted;
@@ -78,7 +80,7 @@ namespace Shadowsocks.View
             if (config.autoCheckUpdate)
             {
                 _isStartupChecking = true;
-                updateChecker.CheckUpdate(config);
+                updateChecker.CheckUpdate(config, 3000);
             }
 
             if (config.isDefault)
@@ -256,7 +258,6 @@ namespace Shadowsocks.View
             if (updateChecker.NewVersionFound)
             {
                 ShowBalloonTip(String.Format(I18N.GetString("Shadowsocks {0} Update Found"), updateChecker.LatestVersionNumber), I18N.GetString("Click here to update"), ToolTipIcon.Info, 5000);
-                _notifyIcon.BalloonTipClicked += notifyIcon1_BalloonTipClicked;
                 _isFirstRun = false;
             }
             else if (!_isStartupChecking)
@@ -269,9 +270,23 @@ namespace Shadowsocks.View
 
         void notifyIcon1_BalloonTipClicked(object sender, EventArgs e)
         {
-            _notifyIcon.BalloonTipClicked -= notifyIcon1_BalloonTipClicked;
-            string argument = "/select, \"" + updateChecker.LatestVersionLocalName + "\"";
-            System.Diagnostics.Process.Start("explorer.exe", argument);
+            if (updateChecker.NewVersionFound)
+            {
+                updateChecker.NewVersionFound = false; /* Reset the flag */
+                if (System.IO.File.Exists(updateChecker.LatestVersionLocalName))
+                {
+                    string argument = "/select, \"" + updateChecker.LatestVersionLocalName + "\"";
+                    System.Diagnostics.Process.Start("explorer.exe", argument);
+                }
+            }
+        }
+
+        private void _notifyIcon_BalloonTipClosed(object sender, EventArgs e)
+        {
+            if (updateChecker.NewVersionFound)
+            {
+                updateChecker.NewVersionFound = false; /* Reset the flag */
+            }
         }
 
 
