@@ -18,6 +18,8 @@ namespace Shadowsocks.Controller
 
         private static string USER_RULE_FILE = PACServer.USER_RULE_FILE;
 
+        private static string USER_ABP_FILE = PACServer.USER_ABP_FILE;
+
         public event EventHandler<ResultEventArgs> UpdateCompleted;
 
         public event ErrorEventHandler Error;
@@ -48,7 +50,15 @@ namespace Shadowsocks.Controller
                         lines.Add(rule);
                     }
                 }
-                string abpContent = Utils.UnGzip(Resources.abp_js);
+                string abpContent;
+                if (File.Exists(USER_ABP_FILE))
+                {
+                    abpContent = File.ReadAllText(USER_ABP_FILE, Encoding.UTF8);
+                }
+                else
+                {
+                    abpContent = Utils.UnGzip(Resources.abp_js);
+                }
                 abpContent = abpContent.Replace("__RULES__", SimpleJson.SimpleJson.SerializeObject(lines));
                 if (File.Exists(PAC_FILE))
                 {
