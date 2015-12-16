@@ -182,6 +182,7 @@ namespace Shadowsocks.Controller
             handler.getCurrentServer = delegate (bool usingRandom, bool forceRandom) { return _config.GetCurrentServer(usingRandom, forceRandom); };
             handler.connection = socket;
             handler.reconnectTimesRemain = _config.reconnectTimes;
+            handler.forceRandom = _config.random;
 
             handler.server = _config.GetCurrentServer(true);
             if (_config.proxyEnable)
@@ -237,6 +238,7 @@ namespace Shadowsocks.Controller
         // Reconnect
         public int reconnectTimesRemain = 0;
         protected int reconnectTimes = 0;
+        public bool forceRandom = false;
         // Encryptor
         protected IEncryptor encryptor;
         protected IEncryptor encryptorUDP;
@@ -381,7 +383,14 @@ namespace Shadowsocks.Controller
                             }
                         }
                     }
-                    connection.Shutdown(SocketShutdown.Both);
+                    if (remote != null && (State == ConnectState.CONNECTED))
+                    {
+                        remote.Shutdown(SocketShutdown.Both);
+                    }
+                    else
+                    {
+                        connection.Shutdown(SocketShutdown.Both);
+                    }
                 }
             }
             catch (Exception)
@@ -521,14 +530,7 @@ namespace Shadowsocks.Controller
                 }
             }
 
-            if (reconnectTimes <= reconnectTimesRemain)
-            {
-                server = this.getCurrentServer(true);
-            }
-            else
-            {
-                server = this.getCurrentServer(true, true);
-            }
+            server = this.getCurrentServer(true, forceRandom);
 
             CloseSocket(ref remote);
             CloseSocket(ref remoteUDP);
@@ -649,8 +651,22 @@ namespace Shadowsocks.Controller
                 else
                 {
                     speedTester.BeginConnect();
-                    remote.BeginConnect(remoteEP,
+                    IAsyncResult result = remote.BeginConnect(remoteEP,
                         new AsyncCallback(ConnectCallback), null);
+                    if (reconnectTimesRemain + reconnectTimes > 0)
+                    {
+                        bool success = result.AsyncWaitHandle.WaitOne((int)(5 * 1000), true);
+                        if (!success)
+                        {
+                            remote.Close();
+                            lastErrCode = 8;
+                            server.ServerSpeedLog().AddTimeoutTimes();
+                            if (server.ServerSpeedLog().ErrorContinurousTimes >= AutoSwitchOffErrorTimes && autoSwitchOff)
+                            {
+                                server.setEnable(false);
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -708,18 +724,18 @@ namespace Shadowsocks.Controller
                     return true;
                 }
             }
-            //else if (this.State == ConnectState.CONNECTED)
-            //{
-            //    if ( obfs.getSentLength() == 0 && connetionSendBufferList != null )
-            //    {
-            //        if (reconnectTimesRemain > 0)
-            //        {
-            //            this.State = ConnectState.CONNECTING;
-            //            this.ReConnect();
-            //            return true;
-            //        }
-            //    }
-            //}
+            else if (this.State == ConnectState.CONNECTED)
+            {
+                if (obfs.getSentLength() == 0 && connetionSendBufferList != null)
+                {
+                    if (reconnectTimesRemain > 0)
+                    {
+                        this.State = ConnectState.CONNECTING;
+                        this.ReConnect();
+                        return true;
+                    }
+                }
+            }
             return false;
         }
 
