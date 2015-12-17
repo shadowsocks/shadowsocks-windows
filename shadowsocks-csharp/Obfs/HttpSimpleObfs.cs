@@ -401,7 +401,7 @@ namespace Shadowsocks.Obfs
                         byte[] rnd = new byte[22];
                         random.NextBytes(rnd);
 
-                        byte[] handshake_finish = System.Text.Encoding.ASCII.GetBytes("\x14\x03\x01\x00\x01\x01" + "\x16\x03\x01\x00\x01\x20");
+                        byte[] handshake_finish = System.Text.Encoding.ASCII.GetBytes("\x14\x03\x01\x00\x01\x01" + "\x16\x03\x01\x00\x20");
                         handshake_finish.CopyTo(hmac_data, 0);
                         rnd.CopyTo(hmac_data, 12);
 

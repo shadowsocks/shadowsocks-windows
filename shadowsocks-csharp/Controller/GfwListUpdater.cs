@@ -24,6 +24,8 @@ namespace Shadowsocks.Controller
 
         private Configuration lastConfig;
 
+        private Random random = new Random();
+
         public event EventHandler<ResultEventArgs> UpdateCompleted;
 
         public event ErrorEventHandler Error;
@@ -146,14 +148,14 @@ namespace Shadowsocks.Controller
                 WebClient http = new WebClient();
                 http.Proxy = new WebProxy(IPAddress.Loopback.ToString(), config.localPort);
                 http.DownloadStringCompleted += http_DownloadGFWTemplateCompleted;
-                http.DownloadStringAsync(new Uri(GFWLIST_TEMPLATE_URL));
+                http.DownloadStringAsync(new Uri(GFWLIST_TEMPLATE_URL + "?rnd=" + random.Next().ToString()));
             }
             else
             {
                 WebClient http = new WebClient();
                 http.Proxy = new WebProxy(IPAddress.Loopback.ToString(), config.localPort);
                 http.DownloadStringCompleted += http_DownloadStringCompleted;
-                http.DownloadStringAsync(new Uri(GFWLIST_URL));
+                http.DownloadStringAsync(new Uri(GFWLIST_URL + "?rnd=" + random.Next().ToString()));
             }
         }
 
@@ -162,7 +164,7 @@ namespace Shadowsocks.Controller
             WebClient http = new WebClient();
             http.Proxy = new WebProxy(IPAddress.Loopback.ToString(), config.localPort);
             http.DownloadStringCompleted += http_DownloadPACCompleted;
-            http.DownloadStringAsync(new Uri(url));
+            http.DownloadStringAsync(new Uri(url + "?rnd=" + random.Next().ToString()));
         }
 
         public List<string> ParseResult(string response)

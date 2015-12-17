@@ -1737,7 +1737,15 @@ namespace Shadowsocks.Controller
                 {
                     //Console.WriteLine(e);
                 }
-                int head_len = ObfsBase.GetHeadSize(remoteHeaderSendBuffer, 30);
+                int head_len;
+                if (connetionSendBufferList != null && connetionSendBufferList.Count > 0)
+                {
+                    head_len = ObfsBase.GetHeadSize(connetionSendBufferList[0], 30);
+                }
+                else
+                {
+                    head_len = ObfsBase.GetHeadSize(remoteHeaderSendBuffer, 30);
+                }
                 if (remoteTCPEndPoint != null)
                 {
                     try
@@ -1818,6 +1826,12 @@ namespace Shadowsocks.Controller
                     else if (httpProxyState != null)
                     {
                         RemoteSend(remoteHeaderSendBuffer, remoteHeaderSendBuffer.Length);
+                        if (remoteHeaderSendBuffer != null)
+                        {
+                            byte[] data = new byte[remoteHeaderSendBuffer.Length];
+                            Array.Copy(remoteHeaderSendBuffer, data, data.Length);
+                            connetionSendBufferList.Add(data);
+                        }
                         remoteHeaderSendBuffer = null;
                         httpProxyState = null;
                     }
