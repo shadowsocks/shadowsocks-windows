@@ -201,6 +201,7 @@
             "rc4-md5",
             "salsa20",
             "chacha20",
+            "chacha20-ietf",
             "aes-256-cfb",
             "aes-192-cfb",
             "aes-128-cfb"});
