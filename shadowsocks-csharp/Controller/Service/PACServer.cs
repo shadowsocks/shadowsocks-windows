@@ -18,6 +18,8 @@ namespace Shadowsocks.Controller
 
         public static string USER_RULE_FILE = "user-rule.txt";
 
+        public static string USER_ABP_FILE = "abp.txt";
+
         FileSystemWatcher watcher;
         private Configuration _config;
 
