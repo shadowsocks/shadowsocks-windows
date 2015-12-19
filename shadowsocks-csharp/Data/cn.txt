@@ -104,7 +104,7 @@ Upload=上传\n流量
 Download=下载\n流量
 Error=错误
 Timeout=超时
-NoData=空连
+Empty Response=空连
 Error Percent=出错\n比例
 Continuous=连错
 

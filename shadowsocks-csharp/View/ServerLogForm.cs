@@ -379,12 +379,20 @@ namespace Shadowsocks.View
                         // ErrorConnectTimes
                         else if (columnName == "ConnectError")
                         {
-                            SetCellText(cell, serverSpeedLog.errorConnectTimes);
+                            long val = serverSpeedLog.errorConnectTimes + serverSpeedLog.errorDecodeTimes;
+                            Color col = Color.FromArgb(255, (byte)Math.Max(0, 255 - val * 2.5), (byte)Math.Max(0, 255 - val * 2.5));
+                            SetBackColor(cell, col);
+                            SetCellText(cell, val);
                         }
                         // ErrorTimeoutTimes
                         else if (columnName == "ConnectTimeout")
                         {
                             SetCellText(cell, serverSpeedLog.errorTimeoutTimes);
+                        }
+                        // ErrorTimeoutTimes
+                        else if (columnName == "ConnectEmpty")
+                        {
+                            SetCellText(cell, serverSpeedLog.errorEmptyTimes);
                         }
                         // ErrorContinurousTimes
                         else if (columnName == "Continuous")
@@ -397,16 +405,15 @@ namespace Shadowsocks.View
                         // ErrorPersent
                         else if (columnName == "ErrorPercent")
                         {
-                            if (serverSpeedLog.totalConnectTimes > 0)
+                            if (serverSpeedLog.errorLogTimes + serverSpeedLog.totalConnectTimes - serverSpeedLog.totalDisconnectTimes > 0)
                             {
                                 double percent = (serverSpeedLog.errorConnectTimes
-                                    + serverSpeedLog.errorTimeoutTimes)
-                                    * 100.00 / serverSpeedLog.totalConnectTimes;
+                                    + serverSpeedLog.errorTimeoutTimes
+                                    + serverSpeedLog.errorDecodeTimes)
+                                    * 100.00
+                                    / (serverSpeedLog.errorLogTimes + serverSpeedLog.totalConnectTimes - serverSpeedLog.totalDisconnectTimes);
                                 SetBackColor(cell, Color.FromArgb(255, (byte)(255 - percent * 2), (byte)(255 - percent * 2)));
-                                if (percent < 1e-4)
-                                    SetCellText(cell, percent.ToString("F0") + "%");
-                                else
-                                    SetCellText(cell, percent.ToString("F2") + "%");
+                                SetCellText(cell, percent.ToString("F0") + "%");
                             }
                             else
                             {

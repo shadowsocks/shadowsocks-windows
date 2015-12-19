@@ -179,21 +179,37 @@ namespace Shadowsocks.Obfs
                     Array.Copy(encryptdata, 0, headdata, 0, headdata.Length);
                     int request_path_index = new Random().Next(_request_path.Length / 2) * 2;
                     string host = Server.host;
+                    string custom_head = "";
                     if (Server.param.Length > 0)
                     {
-                        string[] hosts = Server.param.Split(',');
+                        string[] custom_heads = Server.param.Split(new char[] { '#' }, 2);
+                        string param = Server.param;
+                        if (custom_heads.Length > 1)
+                        {
+                            custom_head = custom_heads[1];
+                            param = custom_heads[0];
+                        }
+                        string[] hosts = param.Split(',');
                         host = hosts[random.Next(hosts.Length)];
                     }
                     string http_buf =
                         "GET /" + _request_path[request_path_index] + data2urlencode(headdata, headdata.Length) + _request_path[request_path_index + 1] + " HTTP/1.1\r\n"
-                        + "Host: " + host + (Server.port == 80 ? "" : ":" + Server.port.ToString()) + "\r\n"
-                        + "User-Agent: " + _request_useragent[_useragent_index] + "\r\n"
+                        + "Host: " + host + (Server.port == 80 ? "" : ":" + Server.port.ToString()) + "\r\n";
+                    if (custom_head.Length > 0)
+                    {
+                        http_buf += custom_head.Replace("\\n", "\r\n") + "\r\n\r\n";
+                    }
+                    else
+                    {
+                        http_buf +=
+                        "User-Agent: " + _request_useragent[_useragent_index] + "\r\n"
                         + "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\r\n"
                         + "Accept-Language: en-US,en;q=0.8\r\n"
                         + "Accept-Encoding: gzip, deflate\r\n"
                         + "DNT: 1\r\n"
                         + "Connection: keep-alive\r\n"
                         + "\r\n";
+                    }
                     for (int i = 0; i < http_buf.Length; ++i)
                     {
                         outdata[i] = (byte)http_buf[i];

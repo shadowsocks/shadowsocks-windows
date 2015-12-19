@@ -45,6 +45,7 @@
             this.ErrorPercent = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.ConnectError = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.ConnectTimeout = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.ConnectEmpty = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Continuous = new System.Windows.Forms.DataGridViewTextBoxColumn();
             ((System.ComponentModel.ISupportInitialize)(this.ServerDataGrid)).BeginInit();
             this.tableLayoutPanel1.SuspendLayout();
@@ -71,6 +72,7 @@
             this.ErrorPercent,
             this.ConnectError,
             this.ConnectTimeout,
+            this.ConnectEmpty,
             this.Continuous});
             this.ServerDataGrid.Dock = System.Windows.Forms.DockStyle.Fill;
             this.ServerDataGrid.Location = new System.Drawing.Point(0, 0);
@@ -199,7 +201,7 @@
             this.ErrorPercent.Name = "ErrorPercent";
             this.ErrorPercent.ReadOnly = true;
             this.ErrorPercent.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-            this.ErrorPercent.Width = 60;
+            this.ErrorPercent.Width = 48;
             // 
             // ConnectError
             // 
@@ -208,7 +210,6 @@
             this.ConnectError.Name = "ConnectError";
             this.ConnectError.ReadOnly = true;
             this.ConnectError.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-            this.ConnectError.Visible = false;
             this.ConnectError.Width = 28;
             // 
             // ConnectTimeout
@@ -220,11 +221,21 @@
             this.ConnectTimeout.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
             this.ConnectTimeout.Width = 28;
             // 
+            // ConnectEmpty
+            // 
+            this.ConnectEmpty.HeaderText = "Empty Response";
+            this.ConnectEmpty.MinimumWidth = 2;
+            this.ConnectEmpty.Name = "ConnectEmpty";
+            this.ConnectEmpty.ReadOnly = true;
+            this.ConnectEmpty.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            this.ConnectEmpty.Width = 28;
+            // 
             // Continuous
             // 
             this.Continuous.HeaderText = "Continuous";
             this.Continuous.Name = "Continuous";
             this.Continuous.ReadOnly = true;
+            this.Continuous.Visible = false;
             this.Continuous.Width = 28;
             // 
             // ServerLogForm
@@ -263,6 +274,7 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn ErrorPercent;
         private System.Windows.Forms.DataGridViewTextBoxColumn ConnectError;
         private System.Windows.Forms.DataGridViewTextBoxColumn ConnectTimeout;
+        private System.Windows.Forms.DataGridViewTextBoxColumn ConnectEmpty;
         private System.Windows.Forms.DataGridViewTextBoxColumn Continuous;
     }
 }
