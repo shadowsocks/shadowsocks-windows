@@ -513,6 +513,7 @@ namespace Shadowsocks.View
                 }
                 if (ServerDataGrid.Columns[e.ColumnIndex].Name == "ConnectError"
                     || ServerDataGrid.Columns[e.ColumnIndex].Name == "ConnectTimeout"
+                    || ServerDataGrid.Columns[e.ColumnIndex].Name == "ConnectEmpty"
                     || ServerDataGrid.Columns[e.ColumnIndex].Name == "Continuous"
                     )
                 {

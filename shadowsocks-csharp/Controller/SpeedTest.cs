@@ -14,6 +14,7 @@ namespace Shadowsocks.Controller
         public DateTime timeBeginDownload;
         public long sizeUpload = 0;
         public long sizeDownload = 0;
+        public long sizeRecv = 0;
         private List<TransLog> sizeDownloadList = new List<TransLog>();
 
         public void BeginConnect()
@@ -43,6 +44,11 @@ namespace Shadowsocks.Controller
             else
                 sizeDownloadList.Add(new TransLog(size, DateTime.Now));
             sizeDownload += size;
+        }
+
+        public void AddRecvSize(int size)
+        {
+            sizeRecv += size;
         }
 
         public void AddUploadSize(int size)

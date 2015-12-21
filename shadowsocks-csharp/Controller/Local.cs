@@ -713,6 +713,7 @@ namespace Shadowsocks.Controller
 
             speedTester.sizeUpload = 0;
             speedTester.sizeDownload = 0;
+            speedTester.sizeRecv = 0;
 
             lastErrCode = 0;
             Thread.Sleep(100);
@@ -914,7 +915,7 @@ namespace Shadowsocks.Controller
             }
             if (lastErrCode == 0)
             {
-                if (speedTester.sizeDownload == 0 && speedTester.sizeUpload > 0)
+                if (speedTester.sizeRecv == 0 && speedTester.sizeUpload > 0)
                     server.ServerSpeedLog().AddErrorEmptyTimes();
                 else
                     server.ServerSpeedLog().AddNoErrorTimes();
@@ -2094,6 +2095,7 @@ namespace Shadowsocks.Controller
                         {
                             server.ServerSpeedLog().ResetContinurousTimes();
                         }
+                        speedTester.AddRecvSize(bytesToSend);
                         connection.BeginSend(remoteSendBuffer, 0, bytesToSend, 0, new AsyncCallback(PipeConnectionSendCallback), null);
                     }
                     else
@@ -2126,6 +2128,7 @@ namespace Shadowsocks.Controller
                         {
                             foreach (byte[] buffer in buffer_list)
                             {
+                                speedTester.AddRecvSize(buffer.Length);
                                 connectionUDP.BeginSendTo(buffer, 0, buffer.Length, SocketFlags.None, connectionUDPEndPoint, new AsyncCallback(PipeConnectionUDPSendCallback), null);
                             }
                         }
@@ -2176,6 +2179,7 @@ namespace Shadowsocks.Controller
                         }
                         Array.Copy(remoteRecvBuffer, remoteSendBuffer, bytesToSend);
                     }
+                    speedTester.AddRecvSize(bytesToSend);
                     ConnectionSend(remoteSendBuffer, bytesToSend);
                 }
                 else
@@ -2288,6 +2292,7 @@ namespace Shadowsocks.Controller
                     else
                         Logging.LogBin(LogLevel.Debug, "udp remote recv", remoteSendBuffer, bytesToSend);
 
+                    speedTester.AddRecvSize(bytesToSend);
                     if (connectionUDP == null)
                         connection.BeginSend(remoteSendBuffer, 0, bytesToSend, 0, new AsyncCallback(PipeConnectionSendCallback), null);
                     else
