@@ -168,8 +168,8 @@ namespace Shadowsocks.Controller
                 }
                 else if (se.SocketErrorCode == SocketError.TimedOut)
                 {
-                    Logging.Log(LogLevel.Warn, "Proxy server [" + remarks + "(" + server + ")] "
-                        + "connection timeout");
+                    //Logging.Log(LogLevel.Warn, "Proxy server [" + remarks + "(" + server + ")] "
+                    //    + "connection timeout");
                     return true;
                 }
                 else if (se.SocketErrorCode == SocketError.Shutdown)

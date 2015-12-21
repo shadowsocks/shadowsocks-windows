@@ -413,13 +413,13 @@ namespace Shadowsocks.Obfs
                 else
                 {
                     {
-                        byte[] hmac_data = new byte[44];
+                        byte[] hmac_data = new byte[43];
                         byte[] rnd = new byte[22];
                         random.NextBytes(rnd);
 
                         byte[] handshake_finish = System.Text.Encoding.ASCII.GetBytes("\x14\x03\x01\x00\x01\x01" + "\x16\x03\x01\x00\x20");
                         handshake_finish.CopyTo(hmac_data, 0);
-                        rnd.CopyTo(hmac_data, 12);
+                        rnd.CopyTo(hmac_data, handshake_finish.Length);
 
                         hmac_sha1(hmac_data, hmac_data.Length);
 

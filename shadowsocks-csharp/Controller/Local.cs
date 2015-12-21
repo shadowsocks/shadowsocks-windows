@@ -555,7 +555,8 @@ namespace Shadowsocks.Controller
                     lastErrCode = 16;
                     server.ServerSpeedLog().AddErrorDecodeTimes();
                     if (server.ServerSpeedLog().ErrorEncryptTimes >= 2
-                        && server.ServerSpeedLog().ErrorContinurousTimes >= AutoSwitchOffErrorTimes)
+                        && server.ServerSpeedLog().ErrorContinurousTimes >= AutoSwitchOffErrorTimes
+                        && autoSwitchOff)
                     {
                         server.setEnable(false);
                     }
@@ -570,7 +571,8 @@ namespace Shadowsocks.Controller
                     lastErrCode = 16;
                     server.ServerSpeedLog().AddErrorDecodeTimes();
                     if (server.ServerSpeedLog().ErrorEncryptTimes >= 2
-                        && server.ServerSpeedLog().ErrorContinurousTimes >= AutoSwitchOffErrorTimes)
+                        && server.ServerSpeedLog().ErrorContinurousTimes >= AutoSwitchOffErrorTimes
+                        && autoSwitchOff)
                     {
                         server.setEnable(false);
                     }
@@ -648,16 +650,6 @@ namespace Shadowsocks.Controller
                     if (lastErrCode == 0)
                     {
                         lastErrCode = 8;
-                        if (speedTester.sizeDownload == 0)
-                        {
-                            server.ServerSpeedLog().AddTimeoutTimes();
-                            if (server.ServerSpeedLog().ErrorTimeoutTimes >= 3
-                                && server.ServerSpeedLog().ErrorContinurousTimes >= AutoSwitchOffErrorTimes
-                                && autoSwitchOff)
-                            {
-                                server.setEnable(false);
-                            }
-                        }
                     }
                     return 8; // proxy server no response too slow
                 }
@@ -820,10 +812,6 @@ namespace Shadowsocks.Controller
                             remote.Close();
                             lastErrCode = 8;
                             server.ServerSpeedLog().AddTimeoutTimes();
-                            if (server.ServerSpeedLog().ErrorContinurousTimes >= AutoSwitchOffErrorTimes && autoSwitchOff)
-                            {
-                                server.setEnable(false);
-                            }
                         }
                     }
                 }
