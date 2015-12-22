@@ -1,7 +1,12 @@
 Backup/
 bin/
 obj/
+pub/
+7zip*/
+temp/
 shadowsocks-csharp/shadowsocks-csharp.csproj.user
 TestResults
 *.suo
+*.user
+*.exe
 

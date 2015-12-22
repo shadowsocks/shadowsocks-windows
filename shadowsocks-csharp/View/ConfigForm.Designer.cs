@@ -237,7 +237,8 @@
             "aes-192-cfb",
             "aes-256-cfb",
             "salsa20",
-            "chacha20"});
+            "chacha20",
+            "chacha20-ietf"});
             this.EncryptionSelect.Location = new System.Drawing.Point(92, 90);
             this.EncryptionSelect.Name = "EncryptionSelect";
             this.EncryptionSelect.Size = new System.Drawing.Size(206, 22);

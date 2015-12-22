@@ -113,7 +113,7 @@ namespace Shadowsocks.View
                 }
                 Server server = new Server
                 {
-                    server = IPTextBox.Text,
+                    server = IPTextBox.Text.Trim(),
                     server_port = int.Parse(ServerPortTextBox.Text),
                     password = PasswordTextBox.Text,
                     method = EncryptionSelect.Text,

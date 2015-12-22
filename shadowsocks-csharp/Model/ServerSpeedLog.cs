@@ -337,6 +337,7 @@ namespace Shadowsocks.Model
             lock (this)
             {
                 errList.AddLast(0);
+                errorEmptyTimes = 0;
                 FixErrList();
             }
         }
@@ -400,7 +401,7 @@ namespace Shadowsocks.Model
             {
                 errorEmptyTimes += 1;
                 errorContinurousTimes += 1;
-                errList.AddLast(4);
+                errList.AddLast(0);
                 if (lastError == 4)
                 {
                 }

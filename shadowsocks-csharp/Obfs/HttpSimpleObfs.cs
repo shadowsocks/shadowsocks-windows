@@ -375,12 +375,13 @@ namespace Shadowsocks.Obfs
                 g_random.GetBytes(randomdata);
                 randomdata.CopyTo(outdata, 4);
             }
-            lock ((TlsAuthData)this.Server.data)
+            TlsAuthData authData = (TlsAuthData)this.Server.data;
+            lock (authData)
             {
-                if (((TlsAuthData)this.Server.data).clientID == null)
+                if (authData.clientID == null)
                 {
-                    ((TlsAuthData)this.Server.data).clientID = new byte[32];
-                    g_random.GetBytes(((TlsAuthData)this.Server.data).clientID);
+                    authData.clientID = new byte[32];
+                    g_random.GetBytes(authData.clientID);
                 }
             }
             UInt64 utc_time_second = (UInt64)Math.Floor(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1, 0, 0, 0)).TotalSeconds);

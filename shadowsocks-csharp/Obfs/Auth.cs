@@ -57,21 +57,22 @@ namespace Shadowsocks.Obfs
         {
             int rand_len = random.Next(250) + 1;
             outlength = rand_len + datalength + 6 + 12;
-            lock ((AuthData)this.Server.data)
+            AuthData authData = (AuthData)this.Server.data;
+            lock (authData)
             {
-                if (((AuthData)this.Server.data).connectionID > 0xFF000000)
+                if (authData.connectionID > 0xFF000000)
                 {
-                    ((AuthData)this.Server.data).clientID = null;
+                    authData.clientID = null;
                 }
-                if (((AuthData)this.Server.data).clientID == null)
+                if (authData.clientID == null)
                 {
-                    ((AuthData)this.Server.data).clientID = new byte[4];
-                    g_random.GetBytes(((AuthData)this.Server.data).clientID);
-                    ((AuthData)this.Server.data).connectionID = (UInt32)random.Next(0x1000000);
+                    authData.clientID = new byte[4];
+                    g_random.GetBytes(authData.clientID);
+                    authData.connectionID = (UInt32)random.Next(0x1000000);
                 }
-                ((AuthData)this.Server.data).connectionID += 1;
-                Array.Copy(((AuthData)this.Server.data).clientID, 0, outdata, rand_len + 4 + 2, 4);
-                Array.Copy(BitConverter.GetBytes(((AuthData)this.Server.data).connectionID), 0, outdata, rand_len + 8 + 2, 4);
+                authData.connectionID += 1;
+                Array.Copy(authData.clientID, 0, outdata, rand_len + 4 + 2, 4);
+                Array.Copy(BitConverter.GetBytes(authData.connectionID), 0, outdata, rand_len + 8 + 2, 4);
             }
             UInt64 utc_time_second = (UInt64)Math.Floor(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1, 0, 0, 0)).TotalSeconds);
             UInt32 utc_time = (UInt32)(utc_time_second);
@@ -221,21 +222,22 @@ namespace Shadowsocks.Obfs
             int rand_len = random.Next(250) + 1;
             int data_offset = rand_len + 4 + 2;
             outlength = data_offset + datalength + 12 + 10;
-            lock ((AuthData)this.Server.data)
+            AuthData authData = (AuthData)this.Server.data;
+            lock (authData)
             {
-                if (((AuthData)this.Server.data).connectionID > 0xFF000000)
+                if (authData.connectionID > 0xFF000000)
                 {
-                    ((AuthData)this.Server.data).clientID = null;
+                    authData.clientID = null;
                 }
-                if (((AuthData)this.Server.data).clientID == null)
+                if (authData.clientID == null)
                 {
-                    ((AuthData)this.Server.data).clientID = new byte[4];
-                    g_random.GetBytes(((AuthData)this.Server.data).clientID);
-                    ((AuthData)this.Server.data).connectionID = (UInt32)random.Next(0x1000000);
+                    authData.clientID = new byte[4];
+                    g_random.GetBytes(authData.clientID);
+                    authData.connectionID = (UInt32)random.Next(0x1000000);
                 }
-                ((AuthData)this.Server.data).connectionID += 1;
-                Array.Copy(((AuthData)this.Server.data).clientID, 0, outdata, data_offset + 4, 4);
-                Array.Copy(BitConverter.GetBytes(((AuthData)this.Server.data).connectionID), 0, outdata, data_offset + 8, 4);
+                authData.connectionID += 1;
+                Array.Copy(authData.clientID, 0, outdata, data_offset + 4, 4);
+                Array.Copy(BitConverter.GetBytes(authData.connectionID), 0, outdata, data_offset + 8, 4);
             }
             UInt64 utc_time_second = (UInt64)Math.Floor(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1, 0, 0, 0)).TotalSeconds);
             UInt32 utc_time = (UInt32)(utc_time_second);

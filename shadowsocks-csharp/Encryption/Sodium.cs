@@ -14,8 +14,7 @@ namespace Shadowsocks.Encryption
 
         static Sodium()
         {
-            string tempPath = Path.GetTempPath();
-            string dllPath = tempPath + "/libsscrypto.dll";
+            string dllPath = Path.Combine(System.Windows.Forms.Application.StartupPath, @"temp") + "/libsscrypto.dll";
             try
             {
                 FileManager.UncompressFile(dllPath, Resources.libsscrypto_dll);
@@ -39,5 +38,8 @@ namespace Shadowsocks.Encryption
 
         [DllImport(DLLNAME, CallingConvention = CallingConvention.Cdecl)]
         public extern static void crypto_stream_chacha20_xor_ic(byte[] c, byte[] m, ulong mlen, byte[] n, ulong ic, byte[] k);
+
+        [DllImport(DLLNAME, CallingConvention = CallingConvention.Cdecl)]
+        public extern static int crypto_stream_chacha20_ietf_xor_ic(byte[] c, byte[] m, ulong mlen, byte[] n, uint ic, byte[] k);
     }
 }

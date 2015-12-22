@@ -61,18 +61,22 @@ namespace Shadowsocks.Encryption
             }
             keyLen = ciphers[_method][0];
             ivLen = ciphers[_method][1];
-            if (CachedKeys.ContainsKey(k))
+            if (!CachedKeys.ContainsKey(k))
             {
+                lock (CachedKeys)
+                {
+                    if (!CachedKeys.ContainsKey(k))
+                    {
+                        byte[] passbuf = Encoding.UTF8.GetBytes(password);
+                        _key = new byte[32];
+                        byte[] iv = new byte[16];
+                        bytesToKey(passbuf, _key);
+                        CachedKeys[k] = _key;
+                    }
+                }
+            }
+            if (_key == null)
                 _key = CachedKeys[k];
-            }
-            else
-            {
-                byte[] passbuf = Encoding.UTF8.GetBytes(password);
-                _key = new byte[32];
-                byte[] iv = new byte[16];
-                bytesToKey(passbuf, _key);
-                CachedKeys[k] = _key;
-            }
             Array.Resize(ref _iv, ivLen);
             randBytes(_iv, ivLen);
         }
@@ -84,16 +88,15 @@ namespace Shadowsocks.Encryption
             byte[] md5sum = null;
             while (i < key.Length)
             {
-                MD5 md5 = MD5.Create();
                 if (i == 0)
                 {
-                    md5sum = md5.ComputeHash(password);
+                    md5sum = MbedTLS.MD5(password);
                 }
                 else
                 {
                     md5sum.CopyTo(result, 0);
                     password.CopyTo(result, md5sum.Length);
-                    md5sum = md5.ComputeHash(result);
+                    md5sum = MbedTLS.MD5(result);
                 }
                 md5sum.CopyTo(key, i);
                 i += md5sum.Length;

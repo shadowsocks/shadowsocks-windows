@@ -392,7 +392,10 @@ namespace Shadowsocks.View
                         // ErrorTimeoutTimes
                         else if (columnName == "ConnectEmpty")
                         {
-                            SetCellText(cell, serverSpeedLog.errorEmptyTimes);
+                            long val = serverSpeedLog.errorEmptyTimes;
+                            Color col = Color.FromArgb(255, (byte)Math.Max(0, 255 - val * 8), (byte)Math.Max(0, 255 - val * 8));
+                            SetBackColor(cell, col);
+                            SetCellText(cell, val);
                         }
                         // ErrorContinurousTimes
                         else if (columnName == "Continuous")
