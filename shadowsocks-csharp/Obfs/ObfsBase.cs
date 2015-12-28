@@ -28,6 +28,16 @@ namespace Shadowsocks.Obfs
             outlength = datalength;
             return plaindata;
         }
+        public virtual byte[] ClientUdpPreEncrypt(byte[] plaindata, int datalength, out int outlength)
+        {
+            outlength = datalength;
+            return plaindata;
+        }
+        public virtual byte[] ClientUdpPostDecrypt(byte[] plaindata, int datalength, out int outlength)
+        {
+            outlength = datalength;
+            return plaindata;
+        }
         public abstract void Dispose();
         public virtual object InitData()
         {
@@ -36,6 +46,10 @@ namespace Shadowsocks.Obfs
         public virtual void SetServerInfo(ServerInfo serverInfo)
         {
             Server = serverInfo;
+        }
+        public virtual void SetServerInfoIV(byte[] iv)
+        {
+            Server.SetIV(iv);
         }
         public static int GetHeadSize(byte[] plaindata, int defaultValue)
         {

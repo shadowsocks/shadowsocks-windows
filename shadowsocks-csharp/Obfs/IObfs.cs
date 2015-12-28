@@ -32,6 +32,11 @@ namespace Shadowsocks.Obfs
             this.head_len = head_len;
             this.tcp_mss = tcp_mss;
         }
+
+        public void SetIV(byte[] iv)
+        {
+            this.iv = iv;
+        }
     }
     public interface IObfs : IDisposable
     {
@@ -39,8 +44,11 @@ namespace Shadowsocks.Obfs
         byte[] ClientEncode(byte[] encryptdata, int datalength, out int outlength);
         byte[] ClientDecode(byte[] encryptdata, int datalength, out int outlength, out bool needsendback);
         byte[] ClientPostDecrypt(byte[] plaindata, int datalength, out int outlength);
+        byte[] ClientUdpPreEncrypt(byte[] plaindata, int datalength, out int outlength);
+        byte[] ClientUdpPostDecrypt(byte[] plaindata, int datalength, out int outlength);
         object InitData();
         void SetServerInfo(ServerInfo serverInfo);
+        void SetServerInfoIV(byte[] iv);
         long getSentLength();
     }
 }

@@ -303,12 +303,12 @@
             // 
             this.TCPProtocolLabel.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.TCPProtocolLabel.AutoSize = true;
-            this.TCPProtocolLabel.Location = new System.Drawing.Point(8, 122);
+            this.TCPProtocolLabel.Location = new System.Drawing.Point(34, 122);
             this.TCPProtocolLabel.Margin = new System.Windows.Forms.Padding(3, 5, 3, 5);
             this.TCPProtocolLabel.Name = "TCPProtocolLabel";
-            this.TCPProtocolLabel.Size = new System.Drawing.Size(78, 14);
+            this.TCPProtocolLabel.Size = new System.Drawing.Size(52, 14);
             this.TCPProtocolLabel.TabIndex = 24;
-            this.TCPProtocolLabel.Text = "TCP Protocol";
+            this.TCPProtocolLabel.Text = "Protocol";
             // 
             // UDPoverTCPLabel
             // 

@@ -385,6 +385,16 @@ namespace Shadowsocks.Obfs
             return plaindata;
         }
 
+        public override byte[] ClientUdpPreEncrypt(byte[] plaindata, int datalength, out int outlength)
+        {
+            byte[] packdata = new byte[datalength + 10];
+            outlength = datalength + 10;
+            int _datalength = datalength;
+            int outlen;
+            PackAuthData(plaindata, datalength, packdata, out outlen);
+            return packdata;
+        }
+
         public override void Dispose()
         {
         }

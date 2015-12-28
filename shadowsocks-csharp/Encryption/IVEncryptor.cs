@@ -179,6 +179,8 @@ namespace Shadowsocks.Encryption
             _decryptIVReceived = false;
             _encryptIVOffset = 0; // SSL
             _decryptIVOffset = 0; // SSL
+            Array.Resize(ref _iv, ivLen);
+            randBytes(_iv, ivLen);
         }
 
     }

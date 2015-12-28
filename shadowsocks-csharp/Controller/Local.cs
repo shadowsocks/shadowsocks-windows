@@ -1870,7 +1870,7 @@ namespace Shadowsocks.Controller
 
         private void SetObfsPlugin()
         {
-            if (remote != null)
+            //if (remote != null)
             {
                 lock (obfsLock)
                 {
@@ -2293,10 +2293,12 @@ namespace Shadowsocks.Controller
                         Logging.LogBin(LogLevel.Debug, "udp remote recv", remoteSendBuffer, bytesToSend);
 
                     speedTester.AddRecvSize(bytesToSend);
+                    int obfsSendSize;
+                    byte[] obfsBuffer = this.protocol.ClientUdpPostDecrypt(remoteSendBuffer, bytesToSend, out obfsSendSize);
                     if (connectionUDP == null)
-                        connection.BeginSend(remoteSendBuffer, 0, bytesToSend, 0, new AsyncCallback(PipeConnectionSendCallback), null);
+                        connection.BeginSend(obfsBuffer, 0, obfsSendSize, 0, new AsyncCallback(PipeConnectionSendCallback), null);
                     else
-                        connectionUDP.BeginSendTo(remoteSendBuffer, 0, bytesToSend, SocketFlags.None, connectionUDPEndPoint, new AsyncCallback(PipeConnectionUDPSendCallback), null);
+                        connectionUDP.BeginSendTo(remoteSendBuffer, 0, obfsSendSize, SocketFlags.None, connectionUDPEndPoint, new AsyncCallback(PipeConnectionUDPSendCallback), null);
                 }
                 else
                 {
@@ -2331,10 +2333,10 @@ namespace Shadowsocks.Controller
                 }
             }
             int obfsSendSize;
-            byte[] connetionSendObfsBuffer = this.obfs.ClientEncode(connetionSendBuffer, bytesToSend, out obfsSendSize);
+            byte[] obfsBuffer = this.obfs.ClientEncode(connetionSendBuffer, bytesToSend, out obfsSendSize);
             server.ServerSpeedLog().AddUploadBytes(obfsSendSize);
             speedTester.AddUploadSize(obfsSendSize);
-            remote.BeginSend(connetionSendObfsBuffer, 0, obfsSendSize, 0, new AsyncCallback(PipeRemoteSendCallback), null);
+            remote.BeginSend(obfsBuffer, 0, obfsSendSize, 0, new AsyncCallback(PipeRemoteSendCallback), null);
         }
 
         private void RemoteTDPSend(byte[] bytes, int length)
@@ -2344,26 +2346,30 @@ namespace Shadowsocks.Controller
             remoteTDP.BeginSendTo(bytes, length, new AsyncCallback(PipeRemoteTDPSendCallback), null);
         }
 
-        private void RemoteSendto(byte[] bytes, int length, bool obfs, int obfs_max = 40)
+        private void RemoteSendto(byte[] bytes, int length)
         {
             int bytesToSend;
             byte[] bytesToEncrypt = null;
             int bytes_beg = 3;
             length -= bytes_beg;
-            if (socks5RemotePort > 0) //ignore obfs, TODO: need test
-            {
-                bytesToEncrypt = new byte[length];
-                Array.Copy(bytes, bytes_beg, bytesToEncrypt, 0, length);
-                lock (encryptionLock)
-                {
-                    if (closed)
-                    {
-                        return;
-                    }
-                    encryptorUDP.Reset();
-                    encryptorUDP.Encrypt(bytesToEncrypt, length, connetionSendBuffer, out bytesToSend);
-                }
 
+            bytesToEncrypt = new byte[length];
+            Array.Copy(bytes, bytes_beg, bytesToEncrypt, 0, length);
+            lock (encryptionLock)
+            {
+                if (closed)
+                {
+                    return;
+                }
+                encryptorUDP.Reset();
+                this.protocol.SetServerInfoIV(encryptorUDP.getIV());
+                int obfsSendSize;
+                byte[] obfsBuffer = this.protocol.ClientUdpPreEncrypt(bytesToEncrypt, length, out obfsSendSize);
+                encryptorUDP.Encrypt(obfsBuffer, obfsSendSize, connetionSendBuffer, out bytesToSend);
+            }
+
+            if (this.socks5RemotePort > 0)
+            {
                 IPAddress ipAddress;
                 string serverURI = server.server;
                 int serverPort = server.server_port;
@@ -2403,52 +2409,6 @@ namespace Shadowsocks.Controller
 
                 bytesToSend = bytesToEncrypt.Length;
                 Array.Copy(bytesToEncrypt, connetionSendBuffer, bytesToSend);
-            }
-            else
-            {
-                if (obfs)
-                {
-                    int obfs_len = random.Next(obfs_max + 1);
-                    if (length < 24 + 16 && obfs_len > 0) // DNS: 17 + URI len + 1 + port(2) + ip(4 or 16)
-                    {
-                        if (obfs_len == 1)
-                        {
-                            bytesToEncrypt = new byte[length + 1];
-                            Array.Copy(bytes, bytes_beg, bytesToEncrypt, 1, length);
-                            bytesToEncrypt[0] = 0x81;
-                            length += 1;
-                        }
-                        else
-                        {
-                            int len = obfs_len - 2;
-                            bytesToEncrypt = new byte[length + len + 2];
-                            Array.Copy(bytes, bytes_beg, bytesToEncrypt, len + 2, length);
-                            bytesToEncrypt[0] = 0x80;
-                            bytesToEncrypt[1] = (byte)len;
-                            length += len + 2;
-                        }
-                    }
-                    else
-                    {
-                        bytesToEncrypt = new byte[length];
-                        Array.Copy(bytes, bytes_beg, bytesToEncrypt, 0, length);
-                    }
-                }
-                else
-                {
-                    bytesToEncrypt = new byte[length];
-                    Array.Copy(bytes, 3, bytesToEncrypt, 0, length);
-                }
-                Logging.LogBin(LogLevel.Debug, "remote sendto", bytesToEncrypt, length);
-                lock (encryptionLock)
-                {
-                    if (closed)
-                    {
-                        return;
-                    }
-                    encryptorUDP.Reset();
-                    encryptorUDP.Encrypt(bytesToEncrypt, length, connetionSendBuffer, out bytesToSend);
-                }
             }
             server.ServerSpeedLog().AddUploadBytes(bytesToSend);
             speedTester.AddUploadSize(bytesToSend);
@@ -2548,7 +2508,7 @@ namespace Shadowsocks.Controller
                     Logging.LogBin(LogLevel.Debug, "udp remote send", connetionRecvBuffer, bytesRead);
                     if (!server.udp_over_tcp && remoteUDP != null)
                     {
-                        RemoteSendto(connetionSendBuffer, bytesRead, server.obfs_udp);
+                        RemoteSendto(connetionSendBuffer, bytesRead);
                     }
                     else
                     {
