@@ -10,6 +10,9 @@ using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+
 using Shadowsocks.Model;
 using Shadowsocks.Util;
 
@@ -107,11 +110,18 @@ namespace Shadowsocks.Controller
                 Logging.LogUsefulException(e);
                 return null;
             }
-            dynamic obj;
-            if (!SimpleJson.SimpleJson.TryDeserializeObject(jsonString, out obj)) return null;
-            string country = obj["country"];
-            string city = obj["city"];
-            string isp = obj["isp"];
+            JObject obj;
+            try
+            {
+                obj = JObject.Parse(jsonString);
+            }
+            catch (JsonReaderException)
+            {
+                return null;
+            }
+            string country = (string)obj["country"];
+            string city = (string)obj["city"];
+            string isp = (string)obj["isp"];
             if (country == null || city == null || isp == null) return null;
             return new DataList {
                 new DataUnit(State.Geolocation, $"\"{country} {city}\""),

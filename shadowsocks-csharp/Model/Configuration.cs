@@ -1,10 +1,9 @@
-﻿using Shadowsocks.Controller;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Text;
-using System.Windows.Forms;
-using SimpleJson;
+
+using Shadowsocks.Controller;
+using Newtonsoft.Json;
 
 namespace Shadowsocks.Model
 {
@@ -53,7 +52,7 @@ namespace Shadowsocks.Model
             try
             {
                 string configContent = File.ReadAllText(CONFIG_FILE);
-                Configuration config = SimpleJson.SimpleJson.DeserializeObject<Configuration>(configContent, new JsonSerializerStrategy());
+                Configuration config = JsonConvert.DeserializeObject<Configuration>(configContent);
                 config.isDefault = false;
                 if (config.localPort == 0)
                 {
@@ -110,7 +109,7 @@ namespace Shadowsocks.Model
             {
                 using (StreamWriter sw = new StreamWriter(File.Open(CONFIG_FILE, FileMode.Create)))
                 {
-                    string jsonString = SimpleJson.SimpleJson.SerializeObject(config);
+                    string jsonString = JsonConvert.SerializeObject(config, Formatting.Indented);
                     sw.Write(jsonString);
                     sw.Flush();
                 }
@@ -164,20 +163,6 @@ namespace Shadowsocks.Model
             if (string.IsNullOrEmpty(server))
             {
                 throw new ArgumentException(I18N.GetString("Server IP can not be blank"));
-            }
-        }
-
-        // internal class
-        private class JsonSerializerStrategy : SimpleJson.PocoJsonSerializerStrategy
-        {
-            // convert string to int
-            public override object DeserializeObject(object value, Type type)
-            {
-                if (type == typeof(Int32) && value.GetType() == typeof(string))
-                {
-                    return Int32.Parse(value.ToString());
-                }
-                return base.DeserializeObject(value, type);
             }
         }
     }

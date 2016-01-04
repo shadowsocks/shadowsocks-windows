@@ -4,6 +4,8 @@ using System.IO;
 using System.Net;
 using System.Text;
 
+using Newtonsoft.Json;
+
 using Shadowsocks.Model;
 using Shadowsocks.Properties;
 using Shadowsocks.Util;
@@ -60,8 +62,8 @@ namespace Shadowsocks.Controller
                 {
                     abpContent = Utils.UnGzip(Resources.abp_js);
                 }
-                abpContent = abpContent.Replace("__RULES__", SimpleJson.SimpleJson.SerializeObject(lines));
-                if (File.Exists(PAC_FILE))
+                abpContent = abpContent.Replace("__RULES__", JsonConvert.SerializeObject(lines, Formatting.Indented));
+                if (File.Exists(PACServer.PAC_FILE))
                 {
                     string original = File.ReadAllText(PAC_FILE, Encoding.UTF8);
                     if (original == abpContent)
