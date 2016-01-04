@@ -1,9 +1,9 @@
-﻿using Shadowsocks.Util;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.IO;
 using System.Net.Sockets;
-using System.Text;
+using System.Net;
+
+using Shadowsocks.Util;
 
 namespace Shadowsocks.Controller
 {
@@ -15,8 +15,7 @@ namespace Shadowsocks.Controller
         {
             try
             {
-                string temppath = Utils.GetTempPath();
-                LogFile = Path.Combine(temppath, "shadowsocks.log");
+                LogFile = Utils.GetTempPath("shadowsocks.log");
                 FileStream fs = new FileStream(LogFile, FileMode.Append);
                 StreamWriterWithTimestamp sw = new StreamWriterWithTimestamp(fs);
                 sw.AutoFlush = true;
@@ -34,7 +33,7 @@ namespace Shadowsocks.Controller
 
         public static void Error(object o)
         {
-            Console.WriteLine("[E] "+ o);
+            Console.WriteLine("[E] " + o);
         }
 
         public static void Info(object o)
@@ -48,6 +47,25 @@ namespace Shadowsocks.Controller
             Console.WriteLine("[D] " + o);
 #endif
         }
+
+#if DEBUG
+        public static void Debug(EndPoint local, EndPoint remote, int len, string header = null, string tailer = null)
+        {
+            if (header == null && tailer == null)
+                Debug($"{local} => {remote} (size={len})");
+            else if (header == null && tailer != null)
+                Debug($"{local} => {remote} (size={len}), {tailer}");
+            else if (header != null && tailer == null)
+                Debug($"{header}: {local} => {remote} (size={len})");
+            else
+                Debug($"{header}: {local} => {remote} (size={len}), {tailer}");
+        }
+
+        public static void Debug(Socket sock, int len, string header = null, string tailer = null)
+        {
+            Debug(sock.LocalEndPoint, sock.RemoteEndPoint, len, header, tailer);
+        }
+#endif
 
         public static void LogUsefulException(Exception e)
         {

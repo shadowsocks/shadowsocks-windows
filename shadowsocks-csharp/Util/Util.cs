@@ -11,23 +11,38 @@ namespace Shadowsocks.Util
 {
     public class Utils
     {
+        private static string TempPath = null;
+
         // return path to store temporary files
         public static string GetTempPath()
         {
-            if (File.Exists(Application.StartupPath + "\\shadowsocks_portable_mode.txt"))
+            if (TempPath == null)
             {
-                try
-                {
-                    Directory.CreateDirectory(Application.StartupPath + "\\temp");
-                }
-                catch (Exception e)
-                {
-                    Logging.LogUsefulException(e);
-                }
-                // don't use "/", it will fail when we call explorer /select xxx/temp\xxx.log
-                return Application.StartupPath + "\\temp";
+                if (File.Exists(Path.Combine(Application.StartupPath, "shadowsocks_portable_mode.txt")))
+                    try
+                    {
+                        Directory.CreateDirectory(Path.Combine(Application.StartupPath, "temp"));
+                    }
+                    catch (Exception e)
+                    {
+                        TempPath = Path.GetTempPath();
+                        Logging.LogUsefulException(e);
+                    }
+                    finally
+                    {
+                        // don't use "/", it will fail when we call explorer /select xxx/temp\xxx.log
+                        TempPath = Path.Combine(Application.StartupPath, "temp");
+                    }
+                else
+                    TempPath = Path.GetTempPath();
             }
-            return Path.GetTempPath();
+            return TempPath;
+        }
+
+        // return a full path with filename combined which pointed to the temporary directory
+        public static string GetTempPath(string filename)
+        {
+            return Path.Combine(GetTempPath(), filename);
         }
 
         public static void ReleaseMemory(bool removePages)

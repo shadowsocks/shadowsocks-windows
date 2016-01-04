@@ -443,12 +443,12 @@ namespace Shadowsocks.Controller
         private void pacServer_UserRuleFileChanged(object sender, EventArgs e)
         {
             // TODO: this is a dirty hack. (from code GListUpdater.http_DownloadStringCompleted())
-            if (!File.Exists(Utils.GetTempPath() + "\\gfwlist.txt"))
+            if (!File.Exists(Utils.GetTempPath("gfwlist.txt")))
             {
                 UpdatePACFromGFWList();
                 return;
             }
-            List<string> lines = GFWListUpdater.ParseResult(File.ReadAllText(Utils.GetTempPath() + "\\gfwlist.txt"));
+            List<string> lines = GFWListUpdater.ParseResult(File.ReadAllText(Utils.GetTempPath("gfwlist.txt")));
             if (File.Exists(PACServer.USER_RULE_FILE))
             {
                 string local = File.ReadAllText(PACServer.USER_RULE_FILE, Encoding.UTF8);

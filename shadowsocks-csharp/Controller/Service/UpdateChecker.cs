@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Net;
-using System.Reflection;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.IO;
+
 using SimpleJson;
 
 using Shadowsocks.Model;
@@ -129,8 +126,7 @@ namespace Shadowsocks.Controller
         {
             try
             {
-                string temppath = Utils.GetTempPath();
-                LatestVersionLocalName = Path.Combine(temppath, LatestVersionName);
+                LatestVersionLocalName = Utils.GetTempPath(LatestVersionName);
                 WebClient http = CreateWebClient();
                 http.DownloadFileCompleted += Http_DownloadFileCompleted;
                 http.DownloadFileAsync(new Uri(LatestVersionURL), LatestVersionLocalName);
@@ -145,7 +141,7 @@ namespace Shadowsocks.Controller
         {
             try
             {
-                if(e.Error != null)
+                if (e.Error != null)
                 {
                     Logging.LogUsefulException(e.Error);
                     return;
@@ -241,6 +237,5 @@ namespace Shadowsocks.Controller
                 return Asset.CompareVersion(x.version, y.version);
             }
         }
-
     }
 }

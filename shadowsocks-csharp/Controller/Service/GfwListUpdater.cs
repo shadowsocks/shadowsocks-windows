@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
-using System.Net;
 using System.IO;
-using Shadowsocks.Properties;
-using SimpleJson;
-using Shadowsocks.Util;
+using System.Net;
+using System.Text;
+
 using Shadowsocks.Model;
+using Shadowsocks.Properties;
+using Shadowsocks.Util;
 
 namespace Shadowsocks.Controller
 {
@@ -38,13 +38,13 @@ namespace Shadowsocks.Controller
         {
             try
             {
-                File.WriteAllText(Utils.GetTempPath() + "\\gfwlist.txt", e.Result, Encoding.UTF8);
+                File.WriteAllText(Utils.GetTempPath("gfwlist.txt"), e.Result, Encoding.UTF8);
                 List<string> lines = ParseResult(e.Result);
                 if (File.Exists(USER_RULE_FILE))
                 {
                     string local = File.ReadAllText(USER_RULE_FILE, Encoding.UTF8);
                     string[] rules = local.Split(new char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
-                    foreach(string rule in rules)
+                    foreach (string rule in rules)
                     {
                         if (rule.StartsWith("!") || rule.StartsWith("["))
                             continue;
