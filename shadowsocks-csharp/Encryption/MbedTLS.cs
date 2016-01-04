@@ -19,7 +19,7 @@ namespace Shadowsocks.Encryption
             {
                 FileManager.UncompressFile(dllPath, Resources.libsscrypto_dll);
             }
-            catch (IOException ex)
+            catch (IOException)
             {
             }
             catch (Exception e)
