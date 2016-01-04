@@ -1,23 +1,21 @@
-﻿using Shadowsocks.Model;
-using Shadowsocks.Properties;
-using Shadowsocks.Util;
-using System;
+﻿using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
-using System.IO.Compression;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+
+using Shadowsocks.Model;
+using Shadowsocks.Properties;
+using Shadowsocks.Util;
 
 namespace Shadowsocks.Controller
 {
     class PACServer : Listener.Service
     {
-        public static string PAC_FILE = "pac.txt";
-        public static string USER_RULE_FILE = "user-rule.txt";
-        public static string USER_ABP_FILE = "abp.txt";
+        public static readonly string PAC_FILE = "pac.txt";
+        public static readonly string USER_RULE_FILE = "user-rule.txt";
+        public static readonly string USER_ABP_FILE = "abp.txt";
 
         FileSystemWatcher PACFileWatcher;
         FileSystemWatcher UserRuleFileWatcher;
@@ -50,7 +48,7 @@ namespace Shadowsocks.Controller
                 bool hostMatch = false, pathMatch = false, useSocks = false;
                 foreach (string line in lines)
                 {
-                    string[] kv = line.Split(new char[]{':'}, 2);
+                    string[] kv = line.Split(new char[] { ':' }, 2);
                     if (kv.Length == 2)
                     {
                         if (kv[0] == "Host")
@@ -60,14 +58,14 @@ namespace Shadowsocks.Controller
                                 hostMatch = true;
                             }
                         }
-                        else if (kv[0] == "User-Agent")
-                        {
-                            // we need to drop connections when changing servers
-                            /* if (kv[1].IndexOf("Chrome") >= 0)
-                            {
-                                useSocks = true;
-                            } */
-                        }
+                        //else if (kv[0] == "User-Agent")
+                        //{
+                        //    // we need to drop connections when changing servers
+                        //    if (kv[1].IndexOf("Chrome") >= 0)
+                        //    {
+                        //        useSocks = true;
+                        //    }
+                        //}
                     }
                     else if (kv.Length == 1)
                     {
@@ -202,7 +200,6 @@ Connection: Close
         }
 
         #region FileSystemWatcher.OnChanged()
-
         // FileSystemWatcher Changed event is raised twice
         // http://stackoverflow.com/questions/1764809/filesystemwatcher-changed-event-is-raised-twice
         private static Hashtable fileChangedTime = new Hashtable();
@@ -221,7 +218,7 @@ Connection: Close
                     PACFileChanged(this, new EventArgs());
                 }
 
-                //lastly we update the last write time in the hashtable
+                // lastly we update the last write time in the hashtable
                 fileChangedTime[path] = currentLastWriteTime;
             }
         }
@@ -239,11 +236,10 @@ Connection: Close
                     Logging.Info($"Detected: User Rule file '{e.Name}' was {e.ChangeType.ToString().ToLower()}.");
                     UserRuleFileChanged(this, new EventArgs());
                 }
-                //lastly we update the last write time in the hashtable
+                // lastly we update the last write time in the hashtable
                 fileChangedTime[path] = currentLastWriteTime;
             }
         }
-
         #endregion
 
         private string GetPACAddress(byte[] requestBuf, int length, IPEndPoint localEndPoint, bool useSocks)
