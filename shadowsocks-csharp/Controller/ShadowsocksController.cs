@@ -1,14 +1,15 @@
-﻿using System.IO;
-using Shadowsocks.Model;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Net;
+using System.Net.Sockets;
 using System.Text;
 using System.Threading;
-using System.Net.Sockets;
+
 using Shadowsocks.Controller.Strategy;
-using System.Net;
-using Shadowsocks.Util;
+using Shadowsocks.Model;
 using Shadowsocks.Properties;
+using Shadowsocks.Util;
 
 namespace Shadowsocks.Controller
 {
@@ -29,6 +30,9 @@ namespace Shadowsocks.Controller
         private GFWListUpdater gfwListUpdater;
         public AvailabilityStatistics availabilityStatistics { get; private set; }
         public StatisticsStrategyConfiguration StatisticsConfiguration { get; private set; }
+
+        public long inboundCounter = 0;
+        public long outboundCounter = 0;
 
         private bool stopped = false;
 
@@ -61,7 +65,6 @@ namespace Shadowsocks.Controller
             _strategyManager = new StrategyManager(this);
             StartReleasingMemory();
         }
-
 
         public void Start()
         {
@@ -300,6 +303,16 @@ namespace Shadowsocks.Controller
         {
             _config.logViewer = newConfig;
             Configuration.Save(_config);
+        }
+
+        public void UpdateInboundCounter(long n)
+        {
+            inboundCounter += n;
+        }
+
+        public void UpdateOutboundCounter(long n)
+        {
+            outboundCounter += n;
         }
 
         protected void Reload()

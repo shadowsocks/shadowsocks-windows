@@ -1,16 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
 using System.IO;
-using System.Linq;
-using System.Text;
 using System.Windows.Forms;
 
 using Shadowsocks.Controller;
 using Shadowsocks.Properties;
 using Shadowsocks.Model;
+using Shadowsocks.Util;
 
 namespace Shadowsocks.View
 {
@@ -112,11 +108,14 @@ namespace Shadowsocks.View
 
                 lastOffset = reader.BaseStream.Position;
             }
+
+            this.Text = $"Log Viewer [in: {Utils.FormatBandwide(controller.inboundCounter)}, out: {Utils.FormatBandwide(controller.outboundCounter)}]";
         }
 
         private void LogForm_Load(object sender, EventArgs e)
         {
             InitContent();
+
             timer = new Timer();
             timer.Interval = 300;
             timer.Tick += Timer_Tick;

@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Runtime.InteropServices;
-using System.Text;
 using System.Windows.Forms;
 
 using Shadowsocks.Controller;
@@ -83,6 +81,33 @@ namespace Shadowsocks.Util
                 }
                 return System.Text.Encoding.UTF8.GetString(sb.ToArray());
             }
+        }
+
+        public static string FormatBandwide(long n)
+        {
+            float f = n;
+            string unit = "B";
+            if (f > 1024)
+            {
+                f = f / 1024;
+                unit = "KiB";
+            }
+            if (f > 1024)
+            {
+                f = f / 1024;
+                unit = "MiB";
+            }
+            if (f > 1024)
+            {
+                f = f / 1024;
+                unit = "GiB";
+            }
+            if (f > 1024)
+            {
+                f = f / 1024;
+                unit = "TiB";
+            }
+            return $"{f:.##}{unit}";
         }
 
         [DllImport("kernel32.dll")]

@@ -1,10 +1,10 @@
-﻿using Shadowsocks.Model;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
-using System.Text;
+
+using Shadowsocks.Model;
 
 namespace Shadowsocks.Controller
 {
@@ -79,9 +79,7 @@ namespace Shadowsocks.Controller
 
                 // Start an asynchronous socket to listen for connections.
                 Logging.Info("Shadowsocks started");
-                _tcpSocket.BeginAccept(
-                    new AsyncCallback(AcceptCallback),
-                    _tcpSocket);
+                _tcpSocket.BeginAccept(new AsyncCallback(AcceptCallback), _tcpSocket);
                 UDPState udpState = new UDPState();
                 _udpSocket.BeginReceiveFrom(udpState.buffer, 0, udpState.buffer.Length, 0, ref udpState.remoteEndPoint, new AsyncCallback(RecvFromCallback), udpState);
             }

@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Net;
+using System.Net.Sockets;
+using System.Runtime.CompilerServices;
+
+using Shadowsocks.Controller.Strategy;
 using Shadowsocks.Encryption;
 using Shadowsocks.Model;
-using System.Net.Sockets;
-using System.Net;
-using System.Runtime.CompilerServices;
-using Shadowsocks.Controller.Strategy;
 
 namespace Shadowsocks.Controller
 {
@@ -14,6 +14,10 @@ namespace Shadowsocks.Controller
     {
         private ShadowsocksController _controller;
         private LRUCache<IPEndPoint, UDPHandler> _cache;
+
+        public long outbound = 0;
+        public long inbound = 0;
+
         public UDPRelay(ShadowsocksController controller)
         {
             this._controller = controller;
@@ -70,8 +74,8 @@ namespace Shadowsocks.Controller
                 }
                 _remoteEndPoint = new IPEndPoint(ipAddress, server.server_port);
                 _remote = new Socket(_remoteEndPoint.AddressFamily, SocketType.Dgram, ProtocolType.Udp);
-
             }
+
             public void Send(byte[] data, int length)
             {
                 IEncryptor encryptor = EncryptorFactory.GetEncryptor(_server.method, _server.password, _server.auth, true);
@@ -80,15 +84,17 @@ namespace Shadowsocks.Controller
                 byte[] dataOut = new byte[length - 3 + 16 + IVEncryptor.ONETIMEAUTH_BYTES];
                 int outlen;
                 encryptor.Encrypt(dataIn, length - 3, dataOut, out outlen);
-                Logging.Debug($"++++++Send Server Port, size:" + outlen);
+                Logging.Debug(_localEndPoint, _remoteEndPoint, outlen, "UDP Relay");
                 _remote.SendTo(dataOut, outlen, SocketFlags.None, _remoteEndPoint);
             }
+
             public void Receive()
             {
                 EndPoint remoteEndPoint = new IPEndPoint(IPAddress.Any, 0);
                 Logging.Debug($"++++++Receive Server Port, size:" + _buffer.Length);
                 _remote.BeginReceiveFrom(_buffer, 0, _buffer.Length, 0, ref remoteEndPoint, new AsyncCallback(RecvFromCallback), null);
             }
+
             public void RecvFromCallback(IAsyncResult ar)
             {
                 try
@@ -105,7 +111,7 @@ namespace Shadowsocks.Controller
                     byte[] sendBuf = new byte[outlen + 3];
                     Array.Copy(dataOut, 0, sendBuf, 3, outlen);
 
-                    Logging.Debug($"======Send Local Port, size:" + (outlen + 3));
+                    Logging.Debug(_localEndPoint, _remoteEndPoint, outlen, "UDP Relay");
                     _local.SendTo(sendBuf, outlen + 3, 0, _localEndPoint);
                     Receive();
                 }
@@ -121,6 +127,7 @@ namespace Shadowsocks.Controller
                 {
                 }
             }
+
             public void Close()
             {
                 try
@@ -141,7 +148,6 @@ namespace Shadowsocks.Controller
             }
         }
     }
-
 
     // cc by-sa 3.0 http://stackoverflow.com/a/3719378/1124054
     class LRUCache<K, V> where V : UDPRelay.UDPHandler
