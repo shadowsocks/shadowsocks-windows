@@ -44,6 +44,8 @@ namespace Shadowsocks.View
         private MenuItem editOnlinePACItem;
         private MenuItem autoCheckUpdatesToggleItem;
         private ConfigForm configForm;
+        private List<LogForm> logForms = new List<LogForm>();
+        private bool logFormsVisible = false;
         private string _urlToOpen;
 
         public MenuViewController(ShadowsocksController controller)
@@ -289,7 +291,6 @@ namespace Shadowsocks.View
             }
         }
 
-
         private void LoadCurrentConfiguration()
         {
             Configuration config = controller.GetConfigurationCopy();
@@ -355,6 +356,32 @@ namespace Shadowsocks.View
                 configForm.Show();
                 configForm.FormClosed += configForm_FormClosed;
             }
+        }
+
+        private void ShowLogForms()
+        {
+            if (logForms.Count == 0)
+            {
+                LogForm f = new LogForm(controller, Logging.LogFile);
+                f.Show();
+                f.FormClosed += logForm_FormClosed;
+
+                logForms.Add(f);
+                logFormsVisible = true;
+            }
+            else
+            {
+                logFormsVisible = !logFormsVisible;
+                foreach (LogForm f in logForms)
+                {
+                    f.Visible = logFormsVisible;
+                }
+            }
+        }
+
+        void logForm_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            logForms.Remove((LogForm)sender);
         }
 
         void configForm_FormClosed(object sender, FormClosedEventArgs e)
@@ -451,11 +478,13 @@ namespace Shadowsocks.View
 
         private void ShowLogItem_Click(object sender, EventArgs e)
         {
-            string argument = Logging.LogFile;
+            LogForm f = new LogForm(controller, Logging.LogFile);
+            f.Show();
+            f.FormClosed += logForm_FormClosed;
 
-            new LogForm(controller, argument).Show();
+            logForms.Add(f);
         }
-        
+
         private void StatisticsConfigItem_Click(object sender, EventArgs e)
         {
             StatisticsStrategyConfigurationForm form = new StatisticsStrategyConfigurationForm(controller);
@@ -564,9 +593,11 @@ namespace Shadowsocks.View
             Process.Start(_urlToOpen);
         }
 
-        private void AutoStartupItem_Click(object sender, EventArgs e) {
+        private void AutoStartupItem_Click(object sender, EventArgs e)
+        {
             AutoStartupItem.Checked = !AutoStartupItem.Checked;
-            if (!AutoStartup.Set(AutoStartupItem.Checked)) {
+            if (!AutoStartup.Set(AutoStartupItem.Checked))
+            {
                 MessageBox.Show(I18N.GetString("Failed to update registry"));
             }
         }

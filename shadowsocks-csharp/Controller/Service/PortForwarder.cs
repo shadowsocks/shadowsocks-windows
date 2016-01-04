@@ -140,7 +140,6 @@ namespace Shadowsocks.Controller
                     }
                     else
                     {
-                        //Console.WriteLine("bytesRead: " + bytesRead.ToString());
                         _local.Shutdown(SocketShutdown.Send);
                         _localShutdown = true;
                         CheckClose();

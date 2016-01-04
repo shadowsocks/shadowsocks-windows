@@ -38,6 +38,7 @@ namespace Shadowsocks.Controller
         {
             try
             {
+                File.WriteAllText(Utils.GetTempPath() + "\\gfwlist.txt", e.Result, Encoding.UTF8);
                 List<string> lines = ParseResult(e.Result);
                 if (File.Exists(USER_RULE_FILE))
                 {
@@ -92,7 +93,7 @@ namespace Shadowsocks.Controller
             http.DownloadStringAsync(new Uri(GFWLIST_URL));
         }
 
-        public List<string> ParseResult(string response)
+        public static List<string> ParseResult(string response)
         {
             byte[] bytes = Convert.FromBase64String(response);
             string content = Encoding.ASCII.GetString(bytes);

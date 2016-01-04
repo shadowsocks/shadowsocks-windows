@@ -26,7 +26,7 @@ namespace Shadowsocks.Encryption
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.ToString());
+                Logging.LogUsefulException(e);
             }
             LoadLibrary(dllPath);
         }

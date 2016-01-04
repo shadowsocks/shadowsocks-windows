@@ -2,6 +2,7 @@
 using Shadowsocks.Properties;
 using Shadowsocks.Util;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -15,19 +16,20 @@ namespace Shadowsocks.Controller
     class PACServer : Listener.Service
     {
         public static string PAC_FILE = "pac.txt";
-
         public static string USER_RULE_FILE = "user-rule.txt";
-
         public static string USER_ABP_FILE = "abp.txt";
 
-        FileSystemWatcher watcher;
+        FileSystemWatcher PACFileWatcher;
+        FileSystemWatcher UserRuleFileWatcher;
         private Configuration _config;
 
         public event EventHandler PACFileChanged;
+        public event EventHandler UserRuleFileChanged;
 
         public PACServer()
         {
             this.WatchPacFile();
+            this.WatchUserRuleFile();
         }
 
         public void UpdateConfiguration(Configuration config)
@@ -151,7 +153,7 @@ Connection: Close
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
+                Logging.LogUsefulException(e);
                 socket.Close();
             }
         }
@@ -169,27 +171,80 @@ Connection: Close
 
         private void WatchPacFile()
         {
-            if (watcher != null)
+            if (PACFileWatcher != null)
             {
-                watcher.Dispose();
+                PACFileWatcher.Dispose();
             }
-            watcher = new FileSystemWatcher(Directory.GetCurrentDirectory());
-            watcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.DirectoryName;
-            watcher.Filter = PAC_FILE;
-            watcher.Changed += Watcher_Changed;
-            watcher.Created += Watcher_Changed;
-            watcher.Deleted += Watcher_Changed;
-            watcher.Renamed += Watcher_Changed;
-            watcher.EnableRaisingEvents = true;
+            PACFileWatcher = new FileSystemWatcher(Directory.GetCurrentDirectory());
+            PACFileWatcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.DirectoryName;
+            PACFileWatcher.Filter = PAC_FILE;
+            PACFileWatcher.Changed += PACFileWatcher_Changed;
+            PACFileWatcher.Created += PACFileWatcher_Changed;
+            PACFileWatcher.Deleted += PACFileWatcher_Changed;
+            PACFileWatcher.Renamed += PACFileWatcher_Changed;
+            PACFileWatcher.EnableRaisingEvents = true;
         }
 
-        private void Watcher_Changed(object sender, FileSystemEventArgs e)
+        private void WatchUserRuleFile()
         {
-            if (PACFileChanged != null)
+            if (UserRuleFileWatcher != null)
             {
-                PACFileChanged(this, new EventArgs());
+                UserRuleFileWatcher.Dispose();
+            }
+            UserRuleFileWatcher = new FileSystemWatcher(Directory.GetCurrentDirectory());
+            UserRuleFileWatcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.DirectoryName;
+            UserRuleFileWatcher.Filter = USER_RULE_FILE;
+            UserRuleFileWatcher.Changed += UserRuleFileWatcher_Changed;
+            UserRuleFileWatcher.Created += UserRuleFileWatcher_Changed;
+            UserRuleFileWatcher.Deleted += UserRuleFileWatcher_Changed;
+            UserRuleFileWatcher.Renamed += UserRuleFileWatcher_Changed;
+            UserRuleFileWatcher.EnableRaisingEvents = true;
+        }
+
+        #region FileSystemWatcher.OnChanged()
+
+        // FileSystemWatcher Changed event is raised twice
+        // http://stackoverflow.com/questions/1764809/filesystemwatcher-changed-event-is-raised-twice
+        private static Hashtable fileChangedTime = new Hashtable();
+
+        private void PACFileWatcher_Changed(object sender, FileSystemEventArgs e)
+        {
+            string path = e.FullPath.ToString();
+            string currentLastWriteTime = File.GetLastWriteTime(e.FullPath).ToString();
+
+            // if there is no path info stored yet or stored path has different time of write then the one now is inspected
+            if (!fileChangedTime.ContainsKey(path) || fileChangedTime[path].ToString() != currentLastWriteTime)
+            {
+                if (PACFileChanged != null)
+                {
+                    Logging.Info($"Detected: PAC file '{e.Name}' was {e.ChangeType.ToString().ToLower()}.");
+                    PACFileChanged(this, new EventArgs());
+                }
+
+                //lastly we update the last write time in the hashtable
+                fileChangedTime[path] = currentLastWriteTime;
             }
         }
+
+        private void UserRuleFileWatcher_Changed(object sender, FileSystemEventArgs e)
+        {
+            string path = e.FullPath.ToString();
+            string currentLastWriteTime = File.GetLastWriteTime(e.FullPath).ToString();
+
+            // if there is no path info stored yet or stored path has different time of write then the one now is inspected
+            if (!fileChangedTime.ContainsKey(path) || fileChangedTime[path].ToString() != currentLastWriteTime)
+            {
+                if (UserRuleFileChanged != null)
+                {
+                    Logging.Info($"Detected: User Rule file '{e.Name}' was {e.ChangeType.ToString().ToLower()}.");
+                    UserRuleFileChanged(this, new EventArgs());
+                }
+                //lastly we update the last write time in the hashtable
+                fileChangedTime[path] = currentLastWriteTime;
+            }
+        }
+
+        #endregion
 
         private string GetPACAddress(byte[] requestBuf, int length, IPEndPoint localEndPoint, bool useSocks)
         {
@@ -204,7 +259,7 @@ Connection: Close
             //}
             //catch (Exception e)
             //{
-            //    Console.WriteLine(e);
+            //    Logging.LogUsefulException(e);
             //}
             return (useSocks ? "SOCKS5 " : "PROXY ") + localEndPoint.Address + ":" + this._config.localPort + ";";
         }

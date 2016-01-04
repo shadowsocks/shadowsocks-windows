@@ -56,7 +56,7 @@ namespace Shadowsocks.Controller
                     }
                     catch (Exception e)
                     {
-                        Console.WriteLine(e.ToString());
+                        Logging.LogUsefulException(e);
                     }
                 }
                 string polipoConfig = Resources.privoxy_conf;
@@ -94,7 +94,7 @@ namespace Shadowsocks.Controller
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine(e.ToString());
+                    Logging.LogUsefulException(e);
                 }
                 _process = null;
             }

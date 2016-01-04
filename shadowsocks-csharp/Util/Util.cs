@@ -7,6 +7,8 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Forms;
 
+using Shadowsocks.Controller;
+
 namespace Shadowsocks.Util
 {
     public class Utils
@@ -19,9 +21,10 @@ namespace Shadowsocks.Util
                 try
                 {
                     Directory.CreateDirectory(Application.StartupPath + "\\temp");
-                } catch (Exception e)
+                }
+                catch (Exception e)
                 {
-                    Console.WriteLine(e);
+                    Logging.LogUsefulException(e);
                 }
                 // don't use "/", it will fail when we call explorer /select xxx/temp\xxx.log
                 return Application.StartupPath + "\\temp";

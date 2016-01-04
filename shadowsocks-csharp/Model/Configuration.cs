@@ -72,7 +72,7 @@ namespace Shadowsocks.Model
             {
                 if (!(e is FileNotFoundException))
                 {
-                    Console.WriteLine(e);
+                    Logging.LogUsefulException(e);
                 }
                 return new Configuration
                 {
@@ -167,6 +167,7 @@ namespace Shadowsocks.Model
             }
         }
 
+        // internal class
         private class JsonSerializerStrategy : SimpleJson.PocoJsonSerializerStrategy
         {
             // convert string to int

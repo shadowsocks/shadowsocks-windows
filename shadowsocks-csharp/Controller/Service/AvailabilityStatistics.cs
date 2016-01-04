@@ -126,8 +126,7 @@ namespace Shadowsocks.Controller
             var IP = Dns.GetHostAddresses(server.server).First(ip => (ip.AddressFamily == AddressFamily.InterNetwork || ip.AddressFamily == AddressFamily.InterNetworkV6));
             var ping = new Ping();
             var ret = new List<DataList>();
-            foreach (
-                var timestamp in Enumerable.Range(0, Repeat).Select(_ => DateTime.Now.ToString(DateTimePattern)))
+            foreach (var timestamp in Enumerable.Range(0, Repeat).Select(_ => DateTime.Now.ToString(DateTimePattern)))
             {
                 //ICMP echo. we can also set options and special bytes
                 try
@@ -146,7 +145,7 @@ namespace Shadowsocks.Controller
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine($"An exception occured when eveluating {server.FriendlyName()}");
+                    Logging.Error($"An exception occured while eveluating {server.FriendlyName()}");
                     Logging.LogUsefulException(e);
                 }
             }

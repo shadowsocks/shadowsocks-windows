@@ -27,17 +27,21 @@ namespace Shadowsocks.View
             this.controller = controller;
             this.filename = filename;
             InitializeComponent();
-            this.Icon = Icon.FromHandle(Resources.ssw128.GetHicon());
+            Icon = Icon.FromHandle(Resources.ssw128.GetHicon());
 
             LogViewerConfig config = controller.GetConfigurationCopy().logViewer;
             if (config == null)
+            {
                 config = new LogViewerConfig();
-            topMostTrigger = config.topMost;
-            wrapTextTrigger = config.wrapText;
-            toolbarTrigger = config.toolbarShown;
-            LogMessageTextBox.BackColor = config.GetBackgroundColor();
-            LogMessageTextBox.ForeColor = config.GetTextColor();
-            LogMessageTextBox.Font = config.GetFont();
+            }
+            else {
+                topMostTrigger = config.topMost;
+                wrapTextTrigger = config.wrapText;
+                toolbarTrigger = config.toolbarShown;
+                LogMessageTextBox.BackColor = config.GetBackgroundColor();
+                LogMessageTextBox.ForeColor = config.GetTextColor();
+                LogMessageTextBox.Font = config.GetFont();
+            }
 
             UpdateTexts();
         }
@@ -57,7 +61,7 @@ namespace Shadowsocks.View
             WrapTextMenuItem.Text = I18N.GetString("&Wrap Text");
             TopMostMenuItem.Text = I18N.GetString("&Top Most");
             ShowToolbarMenuItem.Text = I18N.GetString("&Show Toolbar");
-            this.Text = I18N.GetString("Log Viewer");
+            Text = I18N.GetString("Log Viewer");
         }
 
         private void Timer_Tick(object sender, EventArgs e)
@@ -118,8 +122,16 @@ namespace Shadowsocks.View
             timer.Tick += Timer_Tick;
             timer.Start();
 
+            LogViewerConfig config = controller.GetConfigurationCopy().logViewer;
+            if (config == null)
+                config = new LogViewerConfig();
+            Height = config.height;
+            Width = config.width;
+            Top = config.GetBestTop();
+            Left = config.GetBestLeft();
+
             topMostTriggerLock = true;
-            this.TopMost = TopMostMenuItem.Checked = TopMostCheckBox.Checked = topMostTrigger;
+            TopMost = TopMostMenuItem.Checked = TopMostCheckBox.Checked = topMostTrigger;
             topMostTriggerLock = false;
 
             wrapTextTriggerLock = true;
@@ -141,19 +153,23 @@ namespace Shadowsocks.View
             config.SetFont(LogMessageTextBox.Font);
             config.SetBackgroundColor(LogMessageTextBox.BackColor);
             config.SetTextColor(LogMessageTextBox.ForeColor);
+            config.top = Top;
+            config.left = Left;
+            config.height = Height;
+            config.width = Width;
             controller.SaveLogViewerConfig(config);
         }
 
         private void OpenLocationMenuItem_Click(object sender, EventArgs e)
         {
             string argument = "/select, \"" + filename + "\"";
-            Console.WriteLine(argument);
+            Logging.Debug(argument);
             System.Diagnostics.Process.Start("explorer.exe", argument);
         }
 
         private void ExitMenuItem_Click(object sender, EventArgs e)
         {
-            this.Close();
+            Close();
         }
 
         private void LogForm_Shown(object sender, EventArgs e)
@@ -208,7 +224,7 @@ namespace Shadowsocks.View
         }
         #endregion
 
-        #region Trigger the log messages wrapable, or not.
+        #region Trigger the log messages to wrapable, or not.
         bool wrapTextTrigger = false;
         bool wrapTextTriggerLock = false;
 
@@ -241,7 +257,7 @@ namespace Shadowsocks.View
         }
         #endregion
 
-        #region Trigger this window top most, or not.
+        #region Trigger the window to top most, or not.
         bool topMostTrigger = false;
         bool topMostTriggerLock = false;
 
@@ -250,7 +266,7 @@ namespace Shadowsocks.View
             topMostTriggerLock = true;
 
             topMostTrigger = !topMostTrigger;
-            this.TopMost = topMostTrigger;
+            TopMost = topMostTrigger;
             TopMostMenuItem.Checked = TopMostCheckBox.Checked = topMostTrigger;
 
             topMostTriggerLock = false;

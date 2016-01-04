@@ -132,14 +132,14 @@ namespace Shadowsocks.Controller.Strategy
                 if (_currentServer == null || max.score - _currentServer.score > 200)
                 {
                     _currentServer = max;
-                    Console.WriteLine("HA switching to server: {0}", _currentServer.server.FriendlyName());
+                    Logging.Info($"HA switching to server: {_currentServer.server.FriendlyName()}");
                 }
             }
         }
 
         public void UpdateLatency(Model.Server server, TimeSpan latency)
         {
-            Logging.Debug(String.Format("latency: {0} {1}", server.FriendlyName(), latency));
+            Logging.Debug($"latency: {server.FriendlyName()} {latency}");
 
             ServerStatus status;
             if (_serverStatus.TryGetValue(server, out status))
@@ -151,7 +151,7 @@ namespace Shadowsocks.Controller.Strategy
 
         public void UpdateLastRead(Model.Server server)
         {
-            Logging.Debug(String.Format("last read: {0}", server.FriendlyName()));
+            Logging.Debug($"last read: {server.FriendlyName()}");
 
             ServerStatus status;
             if (_serverStatus.TryGetValue(server, out status))
@@ -162,7 +162,7 @@ namespace Shadowsocks.Controller.Strategy
 
         public void UpdateLastWrite(Model.Server server)
         {
-            Logging.Debug(String.Format("last write: {0}", server.FriendlyName()));
+            Logging.Debug($"last write: {server.FriendlyName()}");
 
             ServerStatus status;
             if (_serverStatus.TryGetValue(server, out status))
@@ -173,7 +173,7 @@ namespace Shadowsocks.Controller.Strategy
 
         public void SetFailure(Model.Server server)
         {
-            Logging.Debug(String.Format("failure: {0}", server.FriendlyName()));
+            Logging.Debug($"failure: {server.FriendlyName()}");
 
             ServerStatus status;
             if (_serverStatus.TryGetValue(server, out status))
