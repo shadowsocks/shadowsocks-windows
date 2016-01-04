@@ -462,8 +462,16 @@ namespace Shadowsocks.Controller
                     lines.Add(rule);
                 }
             }
-            string abpContent = Utils.UnGzip(Resources.abp_js);
-            abpContent = abpContent.Replace("__RULES__", SimpleJson.SimpleJson.SerializeObject(lines));
+            string abpContent;
+            if (File.Exists(PACServer.USER_ABP_FILE))
+            {
+                abpContent = File.ReadAllText(PACServer.USER_ABP_FILE, Encoding.UTF8);
+            }
+            else
+            {
+                abpContent = Utils.UnGzip(Resources.abp_js);
+            }
+            abpContent = abpContent.Replace("__RULES__", JsonConvert.SerializeObject(lines, Formatting.Indented));
             if (File.Exists(PACServer.PAC_FILE))
             {
                 string original = File.ReadAllText(PACServer.PAC_FILE, Encoding.UTF8);
