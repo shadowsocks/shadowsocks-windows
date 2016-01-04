@@ -109,7 +109,8 @@ namespace Shadowsocks.View
                 lastOffset = reader.BaseStream.Position;
             }
 
-            this.Text = $"Log Viewer [in: {Utils.FormatBandwide(controller.inboundCounter)}, out: {Utils.FormatBandwide(controller.outboundCounter)}]";
+            this.Text = I18N.GetString("Log Viewer") +
+                $" [in: {Utils.FormatBandwidth(controller.inboundCounter)}, out: {Utils.FormatBandwidth(controller.outboundCounter)}]";
         }
 
         private void LogForm_Load(object sender, EventArgs e)

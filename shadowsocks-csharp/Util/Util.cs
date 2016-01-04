@@ -98,7 +98,7 @@ namespace Shadowsocks.Util
             }
         }
 
-        public static string FormatBandwide(long n)
+        public static string FormatBandwidth(long n)
         {
             float f = n;
             string unit = "B";
@@ -122,7 +122,7 @@ namespace Shadowsocks.Util
                 f = f / 1024;
                 unit = "TiB";
             }
-            return $"{f:.##}{unit}";
+            return $"{f:0.##}{unit}";
         }
 
         [DllImport("kernel32.dll")]
