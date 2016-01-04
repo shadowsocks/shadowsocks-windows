@@ -84,11 +84,19 @@ namespace Shadowsocks.Controller
                 }
                 else if (se.SocketErrorCode == SocketError.NotConnected)
                 {
-                    // close when not connected
+                    // The application tried to send or receive data, and the System.Net.Sockets.Socket is not connected.
+                }
+                else if (se.SocketErrorCode == SocketError.HostUnreachable)
+                {
+                    // There is no network route to the specified host.
+                }
+                else if (se.SocketErrorCode == SocketError.TimedOut)
+                {
+                    // The connection attempt timed out, or the connected host has failed to respond.
                 }
                 else
                 {
-                    Console.WriteLine(e);
+                    Info(e);
                 }
             }
             else if (e is ObjectDisposedException)
@@ -96,7 +104,7 @@ namespace Shadowsocks.Controller
             }
             else
             {
-                Console.WriteLine(e);
+                Info(e);
             }
         }
     }
