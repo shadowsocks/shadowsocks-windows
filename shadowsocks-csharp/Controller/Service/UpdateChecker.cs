@@ -1,12 +1,9 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Net;
-using System.Reflection;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.IO;
-using SimpleJson;
+
+using Newtonsoft.Json.Linq;
 
 using Shadowsocks.Model;
 using Shadowsocks.Util;
@@ -26,7 +23,7 @@ namespace Shadowsocks.Controller
         public string LatestVersionLocalName;
         public event EventHandler CheckUpdateCompleted;
 
-        public const string Version = "2.5.8";
+        public const string Version = "2.5.8.1";
 
         private class CheckUpdateTimer : System.Timers.Timer
         {
@@ -79,26 +76,28 @@ namespace Shadowsocks.Controller
             {
                 string response = e.Result;
 
-                JsonArray result = (JsonArray)SimpleJson.SimpleJson.DeserializeObject(e.Result);
+                JArray result = JArray.Parse(response);
 
                 List<Asset> asserts = new List<Asset>();
-                foreach (JsonObject release in result)
+                if (result != null)
                 {
-                    if ((bool)release["prerelease"])
+                    foreach (JObject release in result)
                     {
-                        continue;
-                    }
-                    foreach (JsonObject asset in (JsonArray)release["assets"])
-                    {
-                        Asset ass = new Asset();
-                        ass.Parse(asset);
-                        if (ass.IsNewVersion(Version))
+                        if ((bool)release["prerelease"])
                         {
-                            asserts.Add(ass);
+                            continue;
+                        }
+                        foreach (JObject asset in (JArray)release["assets"])
+                        {
+                            Asset ass = new Asset();
+                            ass.Parse(asset);
+                            if (ass.IsNewVersion(Version))
+                            {
+                                asserts.Add(ass);
+                            }
                         }
                     }
                 }
-
                 if (asserts.Count != 0)
                 {
                     SortByVersions(asserts);
@@ -129,8 +128,7 @@ namespace Shadowsocks.Controller
         {
             try
             {
-                string temppath = Utils.GetTempPath();
-                LatestVersionLocalName = Path.Combine(temppath, LatestVersionName);
+                LatestVersionLocalName = Utils.GetTempPath(LatestVersionName);
                 WebClient http = CreateWebClient();
                 http.DownloadFileCompleted += Http_DownloadFileCompleted;
                 http.DownloadFileAsync(new Uri(LatestVersionURL), LatestVersionLocalName);
@@ -145,7 +143,7 @@ namespace Shadowsocks.Controller
         {
             try
             {
-                if(e.Error != null)
+                if (e.Error != null)
                 {
                     Logging.LogUsefulException(e.Error);
                     return;
@@ -195,7 +193,7 @@ namespace Shadowsocks.Controller
                 return CompareVersion(version, currentVersion) > 0;
             }
 
-            public void Parse(JsonObject asset)
+            public void Parse(JObject asset)
             {
                 name = (string)asset["name"];
                 browser_download_url = (string)asset["browser_download_url"];
@@ -241,6 +239,5 @@ namespace Shadowsocks.Controller
                 return Asset.CompareVersion(x.version, y.version);
             }
         }
-
     }
 }

@@ -48,6 +48,7 @@
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>ManagedMinimumRules.ruleset</CodeAnalysisRuleSet>
     <Prefer32Bit>false</Prefer32Bit>
+    <Optimize>false</Optimize>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
     <OutputPath>bin\x86\Release\</OutputPath>
@@ -169,7 +170,6 @@
     <Compile Include="3rd\zxing\qrcode\encoder\MaskUtil.cs" />
     <Compile Include="3rd\zxing\qrcode\encoder\MatrixUtil.cs" />
     <Compile Include="3rd\zxing\qrcode\encoder\QRCode.cs" />
-    <Compile Include="3rd\SimpleJson.cs" />
     <Compile Include="3rd\zxing\qrcode\QRCodeReader.cs" />
     <Compile Include="3rd\zxing\Result.cs" />
     <Compile Include="3rd\zxing\ResultMetadataType.cs" />

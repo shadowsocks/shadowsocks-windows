@@ -4,7 +4,9 @@ using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Threading;
+
 using Newtonsoft.Json;
+
 using Shadowsocks.Model;
 
 namespace Shadowsocks.Controller.Strategy
@@ -147,6 +149,5 @@ namespace Shadowsocks.Controller.Strategy
         {
             //TODO: combine this part of data with ICMP statics
         }
-
     }
 }
