@@ -202,8 +202,7 @@ namespace Shadowsocks.Controller
 
         public static void LogBin(LogLevel level, string info, byte[] data, int length)
         {
-#if DEBUG
-            return;
+#if _DEBUG
             string s = "";
             for (int i = 0; i < length; ++i)
             {

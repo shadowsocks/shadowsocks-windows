@@ -127,6 +127,7 @@
     <Compile Include="Controller\AutoStartup.cs" />
     <Compile Include="Controller\FileManager.cs" />
     <Compile Include="Controller\GFWListUpdater.cs" />
+    <Compile Include="Controller\HttpPortForwarder.cs" />
     <Compile Include="Controller\HttpProxy.cs" />
     <Compile Include="Controller\I18N.cs" />
     <Compile Include="Controller\Listener.cs" />

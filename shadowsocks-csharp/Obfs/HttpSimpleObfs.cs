@@ -10,7 +10,7 @@ namespace Shadowsocks.Obfs
             : base(method)
         {
             has_sent_header = false;
-            has_recv_header = false;
+            //has_recv_header = false;
             raw_trans_sent = false;
             raw_trans_recv = false;
         }
@@ -49,7 +49,7 @@ namespace Shadowsocks.Obfs
         private static int _useragent_index = new Random().Next(_request_useragent.Length);
 
         private bool has_sent_header;
-        private bool has_recv_header;
+        //private bool has_recv_header;
         private bool raw_trans_sent;
         private bool raw_trans_recv;
         private List<byte[]> data_buffer = new List<byte[]>();
@@ -296,7 +296,7 @@ namespace Shadowsocks.Obfs
                     {
                         outlength = datalength - (pos + 4);
                         Array.Copy(encryptdata, pos + 4, outdata, 0, outlength);
-                        has_recv_header = true;
+                        //has_recv_header = true;
                         raw_trans_recv = true;
                     }
                     else
@@ -324,7 +324,7 @@ namespace Shadowsocks.Obfs
             : base(method)
         {
             has_sent_header = false;
-            has_recv_header = false;
+            //has_recv_header = false;
             raw_trans_sent = false;
             raw_trans_recv = false;
         }
@@ -333,7 +333,7 @@ namespace Shadowsocks.Obfs
         };
 
         private bool has_sent_header;
-        private bool has_recv_header;
+        //private bool has_recv_header;
         private bool raw_trans_sent;
         private bool raw_trans_recv;
         private List<byte[]> data_buffer = new List<byte[]>();

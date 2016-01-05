@@ -229,7 +229,10 @@ namespace Shadowsocks.Model
         public int proxyPort;
         public string proxyAuthUser;
         public string proxyAuthPass;
+        public string authUser;
+        public string authPass;
         public bool autoban;
+        //public bool buildinHttpProxy;
         private ServerSelectStrategy serverStrategy = new ServerSelectStrategy();
 
         private static string CONFIG_FILE = "gui-config.json";

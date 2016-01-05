@@ -77,13 +77,15 @@ SelectedFirst=选中优先
 Timer=定时切换
 AutoBan=自动禁用出错服务器
 
-Proxy=代理服务器
-Proxy On=开启前置代理
+Remote proxy=二级（前置）代理
+Proxy On=开启二级（前置）代理
 Socks5(support UDP)=Socks5(支持UDP)
 Http tunnel=Http隧道
 TCP Port tunnel=TCP端口转发(需要相关混淆插件)
 Username=用户名
 
+Local proxy=本地代理
+Build-in http proxy=内置http代理(目前有bug)
 Proxy Port=本地端口
 Reconnect Times=重连次数
 TTL=超时秒数

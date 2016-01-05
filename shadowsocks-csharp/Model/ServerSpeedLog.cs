@@ -446,7 +446,15 @@ namespace Shadowsocks.Model
             lock (this)
             {
                 lastError = 0;
+                errorEmptyTimes = 0;
                 errorContinurousTimes = 0;
+            }
+        }
+        public void ResetEmptyTimes()
+        {
+            lock (this)
+            {
+                errorEmptyTimes = 0;
             }
         }
         public void AddConnectTime(int millisecond)

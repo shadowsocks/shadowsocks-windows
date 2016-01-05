@@ -178,6 +178,19 @@ namespace Shadowsocks.Controller
             return false;
         }
 
+        bool AuthConnection(Socket connection, string authUser, string authPass)
+        {
+            if ((_config.authUser ?? "" ).Length == 0)
+            {
+                return true;
+            }
+            if (_config.authUser == authUser && (_config.authPass ?? "") == authPass)
+            {
+                return true;
+            }
+            return false;
+        }
+
         public bool Handle(byte[] firstPacket, int length, Socket socket)
         {
             if (!Accept(firstPacket, length))
@@ -203,6 +216,12 @@ namespace Shadowsocks.Controller
             }
             handler.TTL = _config.TTL;
             handler.autoSwitchOff = _config.autoban;
+            if (_config.authUser != null && _config.authUser.Length > 0)
+            {
+                handler.authConnection = AuthConnection;
+                handler.authUser = _config.authUser ?? "";
+                handler.authPass = _config.authPass ?? "";
+            }
             if (!EncryptorLoaded)
             {
                 try
@@ -265,15 +284,9 @@ namespace Shadowsocks.Controller
 
             if (data.Length < 2) return;
 
-            if (data[0] == 5 && data[1] == 1 || data[0] == 4)
-            {
-                protocol = (Protocol)data[0];
-                return;
-            }
-
             if (data.Length > 8)
             {
-                if (data[0] == 22 && data[1] == 3)
+                if (data[0] == 22 && data[1] == 3 && (data[2] >= 0 && data[2] <= 3) )
                 {
                     protocol = Protocol.TLS;
                     return;
@@ -326,30 +339,6 @@ namespace Shadowsocks.Controller
                     throw new ProtocolException("Wrong tls response");
                 }
             }
-            else if (protocol == Protocol.SOCKS4 && recv_buffer.Length >= 2)
-            {
-                if (recv_buffer[0] == 0 && recv_buffer[1] == 90)
-                {
-                    Finish();
-                    return;
-                }
-                else
-                {
-                    throw new ProtocolException("Wrong socks response");
-                }
-            }
-            else if (protocol == Protocol.SOCKS5 && recv_buffer.Length >= 2)
-            {
-                if (recv_buffer[0] == 5 && (recv_buffer[1] == 0 || recv_buffer[1] == 2))
-                {
-                    Finish();
-                    return;
-                }
-                else
-                {
-                    throw new ProtocolException("Wrong socks5 response");
-                }
-            }
         }
 
         protected void Finish()
@@ -364,6 +353,7 @@ namespace Shadowsocks.Controller
     class Handler
     {
         public delegate Server GetCurrentServer(bool usingRandom = false, bool forceRandom = false);
+        public delegate bool AuthConnection(Socket connection, string authUser, string authPass);
         public GetCurrentServer getCurrentServer;
         public Server server;
         public Double TTL = 0; // Second
@@ -377,6 +367,7 @@ namespace Shadowsocks.Controller
         public int socks5RemotePort = 0;
         public string socks5RemoteUsername;
         public string socks5RemotePassword;
+        public AuthConnection authConnection;
         // auto ban
         public bool autoSwitchOff = true;
         // Reconnect
@@ -413,7 +404,8 @@ namespace Shadowsocks.Controller
         // remote header send buffer
         protected byte[] remoteHeaderSendBuffer;
         // http proxy
-        public string httpAuthString;
+        public string authUser;
+        public string authPass;
         protected HttpProxyState httpProxyState;
         // connection receive buffer
         protected byte[] connetionRecvBuffer = new byte[RecvSize * 4];
@@ -1041,9 +1033,10 @@ namespace Shadowsocks.Controller
             bySock5Send[0] = 5;
             bySock5Send[1] = 1;
             bySock5Send[2] = 0;
+            bySock5Send[3] = 2;
 
             //发送Socks5代理第一次连接信息
-            sProxyServer.Send(bySock5Send, 3, SocketFlags.None);
+            sProxyServer.Send(bySock5Send, 4, SocketFlags.None);
 
             byte[] bySock5Receive = new byte[32];
             int iRecCount = sProxyServer.Receive(bySock5Receive, bySock5Receive.Length, SocketFlags.None);
@@ -1254,17 +1247,63 @@ namespace Shadowsocks.Controller
         {
             command = 1; // Set TCP connect command
             httpProxyState = new HttpProxyState();
+            httpProxyState.httpAuthUser = authUser;
+            httpProxyState.httpAuthPass = authPass;
             int err = httpProxyState.HandshakeReceive(_firstPacket, _firstPacketLength, ref remoteHeaderSendBuffer);
             if (err == 1)
             {
                 connection.BeginReceive(connetionRecvBuffer, 0, _firstPacket.Length, 0,
                     new AsyncCallback(HttpHandshakeRecv), null);
             }
+            else if (err == 2)
+            {
+                string dataSend = "HTTP/1.1 407 Proxy Authentication Required\r\nProxy-Authenticate: Basic realm=\"RRR\"\r\n\r\n";
+                dataSend += "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN" +
+                            " \"http://www.w3.org/TR/1999/REC-html401-19991224/loose.dtd\">" +
+                            "<HTML>" +
+                            "  <HEAD>" +
+                            "    <TITLE>Error</TITLE>" +
+                            "    <META HTTP-EQUIV=\"Content-Type\" CONTENT=\"text/html; charset=ISO-8859-1\">" +
+                            "  </HEAD>" +
+                            "  <BODY><H1>407 Proxy Authentication Required.</H1></BODY>" +
+                            "</HTML>";
+                byte[] httpData = System.Text.Encoding.UTF8.GetBytes(dataSend);
+                connection.BeginSend(httpData, 0, httpData.Length, 0, new AsyncCallback(HttpHandshakeAuthEndSend), null);
+            }
+            else if (err == 3)
+            {
+                Connect();
+            }
+            else if (err == 4)
+            {
+                Connect();
+            }
             else if (err == 0)
             {
                 string dataSend = "HTTP/1.1 200 Connection Established\r\n\r\n";
                 byte[] httpData = System.Text.Encoding.UTF8.GetBytes(dataSend);
                 connection.BeginSend(httpData, 0, httpData.Length, 0, new AsyncCallback(StartConnect), null);
+            }
+        }
+
+        private void HttpHandshakeAuthEndSend(IAsyncResult ar)
+        {
+            if (closed)
+            {
+                return;
+            }
+            try
+            {
+                connection.EndSend(ar);
+                connection.BeginReceive(connetionRecvBuffer, 0, _firstPacket.Length, 0,
+                    new AsyncCallback(HttpHandshakeRecv), null);
+            }
+            catch (Exception e)
+            {
+                LogSocketException(e);
+                if (!Logging.LogSocketException(server.remarks, server.server, e))
+                    Logging.LogUsefulException(e);
+                this.Close();
             }
         }
 
@@ -1349,7 +1388,15 @@ namespace Shadowsocks.Controller
                 response = new byte[] { 0, 91 };
                 Console.WriteLine("socks 4/5 protocol error");
             }
-            connection.BeginSend(response, 0, response.Length, 0, new AsyncCallback(HandshakeSendCallback), null);
+            if (authConnection != null && !Util.Utils.isMatchSubNet(((IPEndPoint)connection.RemoteEndPoint).Address, "127.0.0.0/8") )
+            {
+                response[1] = 2;
+                connection.BeginSend(response, 0, response.Length, 0, new AsyncCallback(HandshakeAuthSendCallback), null);
+            }
+            else
+            {
+                connection.BeginSend(response, 0, response.Length, 0, new AsyncCallback(HandshakeSendCallback), null);
+            }
         }
 
         private void HandshakeReceive()
@@ -1364,7 +1411,8 @@ namespace Shadowsocks.Controller
 
                 if (bytesRead > 1)
                 {
-                    if (_firstPacket[0] == 4 && _firstPacketLength >= 9)
+                    if ((authConnection == null || Util.Utils.isMatchSubNet(((IPEndPoint)connection.RemoteEndPoint).Address, "127.0.0.0/8"))
+                        && _firstPacket[0] == 4 && _firstPacketLength >= 9)
                     {
                         RspSocks4aHandshakeReceive();
                     }
@@ -1379,6 +1427,65 @@ namespace Shadowsocks.Controller
                 }
                 else
                 {
+                    this.Close();
+                }
+            }
+            catch (Exception e)
+            {
+                LogSocketException(e);
+                if (!Logging.LogSocketException(server.remarks, server.server, e))
+                    Logging.LogUsefulException(e);
+                this.Close();
+            }
+        }
+
+        private void HandshakeAuthSendCallback(IAsyncResult ar)
+        {
+            if (closed)
+            {
+                return;
+            }
+            try
+            {
+                connection.EndSend(ar);
+
+                connection.BeginReceive(connetionRecvBuffer, 0, 1024, 0,
+                    new AsyncCallback(HandshakeAuthReceiveCallback), null);
+            }
+            catch (Exception e)
+            {
+                LogSocketException(e);
+                if (!Logging.LogSocketException(server.remarks, server.server, e))
+                    Logging.LogUsefulException(e);
+                this.Close();
+            }
+        }
+
+        private void HandshakeAuthReceiveCallback(IAsyncResult ar)
+        {
+            if (closed)
+            {
+                return;
+            }
+            try
+            {
+                int bytesRead = connection.EndReceive(ar);
+
+                if (bytesRead >= 3)
+                {
+                    byte user_len = connetionRecvBuffer[1];
+                    byte pass_len = connetionRecvBuffer[user_len + 2];
+                    byte[] response = { 1, 0 };
+                    string user = Encoding.UTF8.GetString(connetionRecvBuffer, 2, user_len);
+                    string pass = Encoding.UTF8.GetString(connetionRecvBuffer, user_len + 3, pass_len);
+                    if (authConnection(connection, user, pass))
+                    {
+                        connection.BeginSend(response, 0, response.Length, 0, new AsyncCallback(HandshakeSendCallback), null);
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("failed to recv data in HandshakeAuthReceiveCallback");
                     this.Close();
                 }
             }
@@ -1543,7 +1650,7 @@ namespace Shadowsocks.Controller
                 }
                 else
                 {
-                    Console.WriteLine("failed to recv data in handshakeReceive2Callback");
+                    Console.WriteLine("failed to recv data in HandshakeReceive2Callback");
                     this.Close();
                 }
             }
@@ -1647,6 +1754,7 @@ namespace Shadowsocks.Controller
                 BeginConnect(ipAddress, serverPort);
             }
         }
+
         private void StartConnect(IAsyncResult ar)
         {
             try
@@ -1988,8 +2096,24 @@ namespace Shadowsocks.Controller
                             Array.Copy(remoteHeaderSendBuffer, data, data.Length);
                             connectionSendBufferList.Add(data);
                         }
+                        //if (httpProxyState.httpProxy)
+                        //{
+                        //    byte[] buffer = new byte[0];
+                        //    int buffer_len = 0;
+                        //    httpProxyState.ParseHttpRequest(buffer, ref buffer_len);
+                        //    if (remoteHeaderSendBuffer != null && remoteHeaderSendBuffer.Length > 0)
+                        //    {
+                        //        RemoteSend(remoteHeaderSendBuffer, remoteHeaderSendBuffer.Length);
+                        //        byte[] data = new byte[remoteHeaderSendBuffer.Length];
+                        //        Array.Copy(remoteHeaderSendBuffer, data, data.Length);
+                        //        connectionSendBufferList.Add(data);
+                        //    }
+                        //}
                         remoteHeaderSendBuffer = null;
-                        httpProxyState = null;
+                        if (!httpProxyState.httpProxy)
+                        {
+                            httpProxyState = null;
+                        }
                     }
                 }
                 else // UDP
@@ -2094,6 +2218,10 @@ namespace Shadowsocks.Controller
                         if (detector.Pass)
                         {
                             server.ServerSpeedLog().ResetContinurousTimes();
+                        }
+                        else
+                        {
+                            server.ServerSpeedLog().ResetEmptyTimes();
                         }
                         speedTester.AddRecvSize(bytesToSend);
                         connection.BeginSend(remoteSendBuffer, 0, bytesToSend, 0, new AsyncCallback(PipeConnectionSendCallback), null);
@@ -2450,6 +2578,38 @@ namespace Shadowsocks.Controller
                         Array.Copy(connetionRecvBuffer, data, data.Length);
                         connectionSendBufferList.Add(data);
                     }
+                    //if (httpProxyState != null)
+                    //{
+                    //    if (httpProxyState.httpProxy)
+                    //    {
+                    //        if (httpProxyState.ParseHttpRequest(connetionRecvBuffer, ref bytesRead))
+                    //        {
+                    //            if (connectionSendBufferList == null)
+                    //            {
+                    //                connectionSendBufferList = new List<byte[]>();
+                    //                byte[] data = new byte[bytesRead];
+                    //                Array.Copy(connetionRecvBuffer, data, data.Length);
+                    //                connectionSendBufferList.Add(data);
+                    //                if (server.tcp_over_udp &&
+                    //                        remoteTDP != null)
+                    //                {
+                    //                    remoteTDP.Shutdown();
+                    //                }
+                    //                else
+                    //                {
+                    //                    remote.Shutdown(SocketShutdown.Send);
+                    //                }
+                    //                this.Close();
+                    //                return;
+                    //            }
+                    //        }
+                    //    }
+                    //    else if (httpProxyState.httpRequestBuffer != null && httpProxyState.httpRequestBuffer.Length > 0)
+                    //    {
+                    //        RemoteSend(httpProxyState.httpRequestBuffer, httpProxyState.httpRequestBuffer.Length);
+                    //        httpProxyState.httpRequestBuffer = null;
+                    //    }
+                    //}
                     if (closed || State != ConnectState.CONNECTED)
                     {
                         return;

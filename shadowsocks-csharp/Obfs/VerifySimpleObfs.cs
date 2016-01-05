@@ -277,7 +277,7 @@ namespace Shadowsocks.Obfs
             : base(method)
         {
             has_sent_header = false;
-            has_recv_header = false;
+            //has_recv_header = false;
             pack_id = 0;
         }
         private static Dictionary<string, int[]> _obfs = new Dictionary<string, int[]> {
@@ -295,7 +295,7 @@ namespace Shadowsocks.Obfs
         }
 
         private bool has_sent_header;
-        private bool has_recv_header;
+        //private bool has_recv_header;
         private uint pack_id;
 
         public void PackData(byte[] data, int datalength, byte[] outdata, out int outlength)

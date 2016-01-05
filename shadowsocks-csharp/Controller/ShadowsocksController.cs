@@ -160,7 +160,10 @@ namespace Shadowsocks.Controller
             List<Server> missingServers = MergeConfiguration(_config, config.configs);
             _config.configs = config.configs;
             _config.index = config.index;
+            //_config.buildinHttpProxy = config.buildinHttpProxy;
             _config.shareOverLan = config.shareOverLan;
+            _config.authUser = config.authUser;
+            _config.authPass = config.authPass;
             _config.localPort = config.localPort;
             _config.reconnectTimes = config.reconnectTimes;
             _config.random = config.random;
@@ -417,7 +420,7 @@ namespace Shadowsocks.Controller
                     List<Listener.Service> services = new List<Listener.Service>();
                     services.Add(local);
                     services.Add(_pacServer);
-                    services.Add(new PortForwarder(polipoRunner.RunningPort));
+                    services.Add(new HttpPortForwarder(polipoRunner.RunningPort, _config));
                     _listener = new Listener(services);
                     _listener.Start(_config);
                 }

@@ -42,6 +42,8 @@ namespace Shadowsocks.View
                 + I18N.GetString(" Version") + UpdateChecker.FullVersion
                 + ")";
 
+            ListenGroup.Text = I18N.GetString(ListenGroup.Text);
+            checkBuildinHttpProxy.Text = I18N.GetString(checkBuildinHttpProxy.Text);
             checkShareOverLan.Text = I18N.GetString(checkShareOverLan.Text);
             ProxyPortLabel.Text = I18N.GetString("Proxy Port");
             ReconnectLabel.Text = I18N.GetString("Reconnect Times");
@@ -51,7 +53,7 @@ namespace Shadowsocks.View
             checkRandom.Text = I18N.GetString(checkRandom.Text);
             CheckAutoBan.Text = I18N.GetString("AutoBan");
 
-            Socks5ProxyGroup.Text = I18N.GetString("Proxy");
+            Socks5ProxyGroup.Text = I18N.GetString(Socks5ProxyGroup.Text);
             CheckSockProxy.Text = I18N.GetString("Proxy On");
             LabelS5Server.Text = I18N.GetString("Server IP");
             LabelS5Port.Text = I18N.GetString("Server Port");
@@ -59,6 +61,8 @@ namespace Shadowsocks.View
             LabelS5Port.Text = I18N.GetString("Server Port");
             LabelS5Username.Text = I18N.GetString("Username");
             LabelS5Password.Text = I18N.GetString("Password");
+            LabelAuthUser.Text = I18N.GetString("Username");
+            LabelAuthPass.Text = I18N.GetString("Password");
 
             LabelRandom.Text = I18N.GetString("Balance");
             for (int i = 0; i < comboProxyType.Items.Count; ++i)
@@ -92,6 +96,7 @@ namespace Shadowsocks.View
                 int localPort = int.Parse(ProxyPortTextBox.Text);
                 Configuration.CheckPort(localPort);
                 int ret = 0;
+                //_modifiedConfiguration.buildinHttpProxy = checkBuildinHttpProxy.Checked;
                 _modifiedConfiguration.shareOverLan = checkShareOverLan.Checked;
                 _modifiedConfiguration.localPort = localPort;
                 _modifiedConfiguration.reconnectTimes = int.Parse(ReconnectText.Text);
@@ -109,6 +114,8 @@ namespace Shadowsocks.View
                 _modifiedConfiguration.proxyPort = int.Parse(TextS5Port.Text);
                 _modifiedConfiguration.proxyAuthUser = TextS5User.Text;
                 _modifiedConfiguration.proxyAuthPass = TextS5Pass.Text;
+                _modifiedConfiguration.authUser = TextAuthUser.Text;
+                _modifiedConfiguration.authPass = TextAuthPass.Text;
 
                 _modifiedConfiguration.autoban = CheckAutoBan.Checked;
 
@@ -123,6 +130,7 @@ namespace Shadowsocks.View
 
         private void LoadSelectedServer()
         {
+            //checkBuildinHttpProxy.Checked = _modifiedConfiguration.buildinHttpProxy;
             checkShareOverLan.Checked = _modifiedConfiguration.shareOverLan;
             ProxyPortTextBox.Text = _modifiedConfiguration.localPort.ToString();
             ReconnectText.Text = _modifiedConfiguration.reconnectTimes.ToString();
@@ -138,6 +146,8 @@ namespace Shadowsocks.View
             TextS5Port.Text = _modifiedConfiguration.proxyPort.ToString();
             TextS5User.Text = _modifiedConfiguration.proxyAuthUser;
             TextS5Pass.Text = _modifiedConfiguration.proxyAuthPass;
+            TextAuthUser.Text = _modifiedConfiguration.authUser;
+            TextAuthPass.Text = _modifiedConfiguration.authPass;
 
             CheckAutoBan.Checked = _modifiedConfiguration.autoban;
         }
