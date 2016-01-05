@@ -587,7 +587,6 @@ namespace Shadowsocks.Controller
             {
                 int bytesRead = connection.EndReceive(ar);
                 totalWrite += bytesRead;
-                tcprelay.UpdateOutboundCounter(bytesRead);
 
                 if (bytesRead > 0)
                 {
@@ -601,6 +600,7 @@ namespace Shadowsocks.Controller
                         encryptor.Encrypt(connetionRecvBuffer, bytesRead, connetionSendBuffer, out bytesToSend);
                     }
                     Logging.Debug(remote, bytesToSend, "TCP Relay", "@PipeConnectionReceiveCallback() (upload)");
+                    tcprelay.UpdateOutboundCounter(bytesToSend);
                     remote.BeginSend(connetionSendBuffer, 0, bytesToSend, 0, new AsyncCallback(PipeRemoteSendCallback), null);
 
                     IStrategy strategy = controller.GetCurrentStrategy();
