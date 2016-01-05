@@ -1,12 +1,17 @@
-﻿using System.IO;
-using Shadowsocks.Model;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Net;
+using System.Net.Sockets;
 using System.Text;
 using System.Threading;
-using System.Net.Sockets;
+
+using Newtonsoft.Json;
+
 using Shadowsocks.Controller.Strategy;
-using System.Net;
+using Shadowsocks.Model;
+using Shadowsocks.Properties;
+using Shadowsocks.Util;
 
 namespace Shadowsocks.Controller
 {
@@ -27,6 +32,9 @@ namespace Shadowsocks.Controller
         private GFWListUpdater gfwListUpdater;
         public AvailabilityStatistics availabilityStatistics { get; private set; }
         public StatisticsStrategyConfiguration StatisticsConfiguration { get; private set; }
+
+        public long inboundCounter = 0;
+        public long outboundCounter = 0;
 
         private bool stopped = false;
 
@@ -59,7 +67,6 @@ namespace Shadowsocks.Controller
             _strategyManager = new StrategyManager(this);
             StartReleasingMemory();
         }
-
 
         public void Start()
         {
@@ -300,6 +307,16 @@ namespace Shadowsocks.Controller
             Configuration.Save(_config);
         }
 
+        public void UpdateInboundCounter(long n)
+        {
+            inboundCounter += n;
+        }
+
+        public void UpdateOutboundCounter(long n)
+        {
+            outboundCounter += n;
+        }
+
         protected void Reload()
         {
             // some logic in configuration updated the config when saving, we need to read it again
@@ -314,6 +331,7 @@ namespace Shadowsocks.Controller
             {
                 _pacServer = new PACServer();
                 _pacServer.PACFileChanged += pacServer_PACFileChanged;
+                _pacServer.UserRuleFileChanged += pacServer_UserRuleFileChanged;
             }
             _pacServer.UpdateConfiguration(_config);
             if (gfwListUpdater == null)
@@ -422,6 +440,47 @@ namespace Shadowsocks.Controller
         {
             if (UpdatePACFromGFWListError != null)
                 UpdatePACFromGFWListError(this, e);
+        }
+
+        private void pacServer_UserRuleFileChanged(object sender, EventArgs e)
+        {
+            // TODO: this is a dirty hack. (from code GListUpdater.http_DownloadStringCompleted())
+            if (!File.Exists(Utils.GetTempPath("gfwlist.txt")))
+            {
+                UpdatePACFromGFWList();
+                return;
+            }
+            List<string> lines = GFWListUpdater.ParseResult(File.ReadAllText(Utils.GetTempPath("gfwlist.txt")));
+            if (File.Exists(PACServer.USER_RULE_FILE))
+            {
+                string local = File.ReadAllText(PACServer.USER_RULE_FILE, Encoding.UTF8);
+                string[] rules = local.Split(new char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+                foreach (string rule in rules)
+                {
+                    if (rule.StartsWith("!") || rule.StartsWith("["))
+                        continue;
+                    lines.Add(rule);
+                }
+            }
+            string abpContent;
+            if (File.Exists(PACServer.USER_ABP_FILE))
+            {
+                abpContent = File.ReadAllText(PACServer.USER_ABP_FILE, Encoding.UTF8);
+            }
+            else
+            {
+                abpContent = Utils.UnGzip(Resources.abp_js);
+            }
+            abpContent = abpContent.Replace("__RULES__", JsonConvert.SerializeObject(lines, Formatting.Indented));
+            if (File.Exists(PACServer.PAC_FILE))
+            {
+                string original = File.ReadAllText(PACServer.PAC_FILE, Encoding.UTF8);
+                if (original == abpContent)
+                {
+                    return;
+                }
+            }
+            File.WriteAllText(PACServer.PAC_FILE, abpContent, Encoding.UTF8);
         }
 
         private void StartReleasingMemory()

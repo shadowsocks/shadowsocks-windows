@@ -1,11 +1,8 @@
 using System;
-using System.Collections.Generic;
 using System.Text;
-using System.IO;
-using System.Diagnostics;
-using SimpleJson;
-using Shadowsocks.Controller;
 using System.Text.RegularExpressions;
+
+using Shadowsocks.Controller;
 
 namespace Shadowsocks.Model
 {

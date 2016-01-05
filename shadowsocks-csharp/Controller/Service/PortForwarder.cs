@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
-using System.Text;
 
 namespace Shadowsocks.Controller
 {
@@ -140,7 +138,6 @@ namespace Shadowsocks.Controller
                     }
                     else
                     {
-                        //Console.WriteLine("bytesRead: " + bytesRead.ToString());
                         _local.Shutdown(SocketShutdown.Send);
                         _localShutdown = true;
                         CheckClose();
