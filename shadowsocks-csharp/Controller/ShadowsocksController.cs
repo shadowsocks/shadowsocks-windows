@@ -309,12 +309,12 @@ namespace Shadowsocks.Controller
 
         public void UpdateInboundCounter(long n)
         {
-            inboundCounter += n;
+            Interlocked.Add(ref inboundCounter, n);
         }
 
         public void UpdateOutboundCounter(long n)
         {
-            outboundCounter += n;
+            Interlocked.Add(ref outboundCounter, n);
         }
 
         protected void Reload()
