@@ -227,7 +227,7 @@ namespace Shadowsocks.Controller
             this.httpHost = ParseHostAndPort(header_dict["Host"], out this.httpPort);
             if (header_dict.ContainsKey("Content-Length"))
             {
-                httpContentLength = Convert.ToInt32(header_dict["Content-Length"]) + 2;
+                httpContentLength = Convert.ToInt32(header_dict["Content-Length"]);
             }
             HostToHandshakeBuffer(this.httpHost, this.httpPort, ref remoteHeaderSendBuffer);
             if (redir)
@@ -247,9 +247,8 @@ namespace Shadowsocks.Controller
             if (httpContentLength > 0)
             {
                 int len = Math.Min(httpRequestBuffer.Length, httpContentLength);
-                byte[] httpData = httpRequestBuffer;
                 Array.Resize(ref remoteHeaderSendBuffer, len + remoteHeaderSendBuffer.Length);
-                httpData.CopyTo(remoteHeaderSendBuffer, remoteHeaderSendBuffer.Length - len);
+                Array.Copy(httpRequestBuffer, 0, remoteHeaderSendBuffer, remoteHeaderSendBuffer.Length - len, len);
                 byte[] nextbuffer = new byte[httpRequestBuffer.Length - httpContentLength];
                 Array.Copy(httpRequestBuffer, len, nextbuffer, 0, nextbuffer.Length);
                 httpRequestBuffer = nextbuffer;
