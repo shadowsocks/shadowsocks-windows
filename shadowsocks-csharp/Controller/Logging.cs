@@ -9,14 +9,14 @@ namespace Shadowsocks.Controller
 {
     public class Logging
     {
-        public static string LogFile;
+        public static string LogFilePath;
 
         public static bool OpenLogFile()
         {
             try
             {
-                LogFile = Utils.GetTempPath("shadowsocks.log");
-                FileStream fs = new FileStream(LogFile, FileMode.Append);
+                LogFilePath = Utils.GetTempPath("shadowsocks.log");
+                FileStream fs = new FileStream(LogFilePath, FileMode.Append);
                 StreamWriterWithTimestamp sw = new StreamWriterWithTimestamp(fs);
                 sw.AutoFlush = true;
                 Console.SetOut(sw);

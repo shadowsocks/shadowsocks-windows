@@ -341,7 +341,6 @@ namespace Shadowsocks.View
                 {
                     item.Checked = true;
                 }
-
             }
         }
 
@@ -363,7 +362,7 @@ namespace Shadowsocks.View
         {
             if (logForms.Count == 0)
             {
-                LogForm f = new LogForm(controller, Logging.LogFile);
+                LogForm f = new LogForm(controller, Logging.LogFilePath);
                 f.Show();
                 f.FormClosed += logForm_FormClosed;
 
@@ -491,7 +490,7 @@ namespace Shadowsocks.View
 
         private void ShowLogItem_Click(object sender, EventArgs e)
         {
-            LogForm f = new LogForm(controller, Logging.LogFile);
+            LogForm f = new LogForm(controller, Logging.LogFilePath);
             f.Show();
             f.FormClosed += logForm_FormClosed;
 
