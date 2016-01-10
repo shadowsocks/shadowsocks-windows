@@ -10,17 +10,28 @@ namespace Shadowsocks.Controller
     public class Logging
     {
         public static string LogFilePath;
+        private static DateTime LogFileCreationTime;
 
         public static bool OpenLogFile()
         {
             try
             {
                 LogFilePath = Utils.GetTempPath("shadowsocks.log");
-                FileStream fs = new FileStream(LogFilePath, FileMode.Append);
-                StreamWriterWithTimestamp sw = new StreamWriterWithTimestamp(fs);
-                sw.AutoFlush = true;
-                Console.SetOut(sw);
-                Console.SetError(sw);
+
+                if (!File.Exists(LogFilePath))
+                    using (File.Create(LogFilePath)) { }
+                LogFileCreationTime = File.GetCreationTime(LogFilePath);
+
+                if ((DateTime.Now - LogFileCreationTime).Days >= 1)
+                    RollLogFile();
+                else
+                {
+                    FileStream fs = new FileStream(LogFilePath, FileMode.Append);
+                    StreamWriterWithTimestamp sw = new StreamWriterWithTimestamp(fs);
+                    sw.AutoFlush = true;
+                    Console.SetOut(sw);
+                    Console.SetError(sw);
+                }
 
                 return true;
             }
@@ -31,20 +42,53 @@ namespace Shadowsocks.Controller
             }
         }
 
+        private static void RollLogFile()
+        {
+            Console.Out.Close();
+            Console.Error.Close();
+
+            MemoryStream ms = new MemoryStream();
+            StreamWriterWithTimestamp sw = new StreamWriterWithTimestamp(ms);
+            sw.AutoFlush = true;
+            Console.SetOut(sw);
+            Console.SetError(sw);
+
+            byte[] logContents = File.ReadAllBytes(LogFilePath);
+            string datestr = DateTime.Now.AddDays(-1).ToString("yyyyMMdd");
+            string filepath = Utils.GetTempPath($"shadowsocks.{datestr}.log.zip");
+            FileManager.CompressFile(filepath, logContents);
+
+            File.Delete(LogFilePath);
+            FileStream fs = new FileStream(LogFilePath, FileMode.CreateNew);
+            LogFileCreationTime = DateTime.Now;
+            ms.CopyTo(fs);
+            StreamWriterWithTimestamp sw2 = new StreamWriterWithTimestamp(fs);
+            sw2.AutoFlush = true;
+            Console.SetOut(sw2);
+            Console.SetError(sw2);
+        }
+
+        private static void WriteToLogFile(object o)
+        {
+            if ((DateTime.Now - LogFileCreationTime).Days >= 1)
+                RollLogFile();
+            Console.WriteLine(o);
+        }
+
         public static void Error(object o)
         {
-            Console.WriteLine("[E] " + o);
+            WriteToLogFile("[E] " + o);
         }
 
         public static void Info(object o)
         {
-            Console.WriteLine(o);
+            WriteToLogFile(o);
         }
 
         public static void Debug(object o)
         {
 #if DEBUG
-            Console.WriteLine("[D] " + o);
+            WriteToLogFile("[D] " + o);
 #endif
         }
 
