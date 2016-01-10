@@ -63,6 +63,8 @@ namespace Shadowsocks.Controller
         public ShadowsocksController()
         {
             _config = Configuration.Load();
+            inboundCounter = _config.bandwidthIn;
+            outboundCounter = _config.bandwidthOut;
             StatisticsConfiguration = StatisticsStrategyConfiguration.Load();
             _strategyManager = new StrategyManager(this);
             StartReleasingMemory();
@@ -253,7 +255,7 @@ namespace Shadowsocks.Controller
         public static string GetQRCode(Server server)
         {
             string parts = server.method + ":" + server.password + "@" + server.server + ":" + server.server_port;
-            string base64 = System.Convert.ToBase64String(Encoding.UTF8.GetBytes(parts));
+            string base64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(parts));
             return "ss://" + base64;
         }
 
@@ -310,17 +312,21 @@ namespace Shadowsocks.Controller
         public void UpdateInboundCounter(long n)
         {
             Interlocked.Add(ref inboundCounter, n);
+            _config.bandwidthIn = inboundCounter;
         }
 
         public void UpdateOutboundCounter(long n)
         {
             Interlocked.Add(ref outboundCounter, n);
+            _config.bandwidthOut = outboundCounter;
         }
 
         protected void Reload()
         {
             // some logic in configuration updated the config when saving, we need to read it again
             _config = Configuration.Load();
+            inboundCounter = _config.bandwidthIn;
+            outboundCounter = _config.bandwidthOut;
             StatisticsConfiguration = StatisticsStrategyConfiguration.Load();
 
             if (polipoRunner == null)
