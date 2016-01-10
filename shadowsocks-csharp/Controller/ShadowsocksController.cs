@@ -63,8 +63,8 @@ namespace Shadowsocks.Controller
         public ShadowsocksController()
         {
             _config = Configuration.Load();
-            inboundCounter = _config.bandwidthIn;
-            outboundCounter = _config.bandwidthOut;
+            inboundCounter = _config.GetCurrentServer().bandwidthIn;
+            outboundCounter = _config.GetCurrentServer().bandwidthOut;
             StatisticsConfiguration = StatisticsStrategyConfiguration.Load();
             _strategyManager = new StrategyManager(this);
             StartReleasingMemory();
@@ -312,21 +312,21 @@ namespace Shadowsocks.Controller
         public void UpdateInboundCounter(long n)
         {
             Interlocked.Add(ref inboundCounter, n);
-            _config.bandwidthIn = inboundCounter;
+            _config.GetCurrentServer().bandwidthIn = inboundCounter;
         }
 
         public void UpdateOutboundCounter(long n)
         {
             Interlocked.Add(ref outboundCounter, n);
-            _config.bandwidthOut = outboundCounter;
+            _config.GetCurrentServer().bandwidthOut = outboundCounter;
         }
 
         protected void Reload()
         {
             // some logic in configuration updated the config when saving, we need to read it again
             _config = Configuration.Load();
-            inboundCounter = _config.bandwidthIn;
-            outboundCounter = _config.bandwidthOut;
+            inboundCounter = _config.GetCurrentServer().bandwidthIn;
+            outboundCounter = _config.GetCurrentServer().bandwidthOut;
             StatisticsConfiguration = StatisticsStrategyConfiguration.Load();
 
             if (polipoRunner == null)
@@ -404,7 +404,7 @@ namespace Shadowsocks.Controller
             }
 
             UpdateSystemProxy();
-            Util.Utils.ReleaseMemory(true);
+            Utils.ReleaseMemory(true);
         }
 
         protected void SaveConfig(Configuration newConfig)
@@ -500,7 +500,7 @@ namespace Shadowsocks.Controller
         {
             while (true)
             {
-                Util.Utils.ReleaseMemory(false);
+                Utils.ReleaseMemory(false);
                 Thread.Sleep(30 * 1000);
             }
         }

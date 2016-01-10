@@ -11,6 +11,7 @@ using ZXing.QrCode;
 using Shadowsocks.Controller;
 using Shadowsocks.Model;
 using Shadowsocks.Properties;
+using Shadowsocks.Util;
 
 namespace Shadowsocks.View
 {
@@ -387,7 +388,7 @@ namespace Shadowsocks.View
         void configForm_FormClosed(object sender, FormClosedEventArgs e)
         {
             configForm = null;
-            Util.Utils.ReleaseMemory(true);
+            Utils.ReleaseMemory(true);
             ShowFirstTimeBalloon();
         }
 

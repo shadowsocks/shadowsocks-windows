@@ -15,6 +15,8 @@ namespace Shadowsocks.Model
         public string method;
         public string remarks;
         public bool auth;
+        public long bandwidthIn;
+        public long bandwidthOut;
 
         public override int GetHashCode()
         {

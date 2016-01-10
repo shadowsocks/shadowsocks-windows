@@ -25,8 +25,6 @@ namespace Shadowsocks.Model
         public bool availabilityStatistics;
         public bool autoCheckUpdate;
         public LogViewerConfig logViewer;
-        public long bandwidthIn;
-        public long bandwidthOut;
 
         private static string CONFIG_FILE = "gui-config.json";
 
