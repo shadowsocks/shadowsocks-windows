@@ -23,10 +23,9 @@ namespace Shadowsocks.Controller
             this.redir = redir;
         }
 
-        private static string ParseHostAndPort(string str, out int port)
+        private static string ParseHostAndPort(string str, ref int port)
         {
             string host;
-            port = 80;
             if (str.StartsWith("["))
             {
                 int pos = str.LastIndexOf(']');
@@ -223,11 +222,18 @@ namespace Shadowsocks.Controller
                 httpRequestBuffer = nextbuffer;
             }
             Dictionary<string, string> header_dict = ParseHttpHeader(data);
-            //this.httpHost = ParseHostAndPort(header_dict["@1"], out this.httpPort);
-            this.httpHost = ParseHostAndPort(header_dict["Host"], out this.httpPort);
+            this.httpPort = 80;
+            if (header_dict.ContainsKey("Host"))
+            {
+                this.httpHost = ParseHostAndPort(header_dict["Host"], ref this.httpPort);
+            }
+            else
+            {
+                this.httpHost = ParseHostAndPort(header_dict["@1"], ref this.httpPort);
+            }
             if (header_dict.ContainsKey("Content-Length"))
             {
-                httpContentLength = Convert.ToInt32(header_dict["Content-Length"]);
+                httpContentLength = Convert.ToInt32(header_dict["Content-Length"]) + 2;
             }
             HostToHandshakeBuffer(this.httpHost, this.httpPort, ref remoteHeaderSendBuffer);
             if (redir)
@@ -243,15 +249,6 @@ namespace Shadowsocks.Controller
                 Array.Resize(ref remoteHeaderSendBuffer, len + httpData.Length);
                 httpData.CopyTo(remoteHeaderSendBuffer, len);
                 httpProxy = true;
-            }
-            if (httpContentLength > 0)
-            {
-                int len = Math.Min(httpRequestBuffer.Length, httpContentLength);
-                Array.Resize(ref remoteHeaderSendBuffer, len + remoteHeaderSendBuffer.Length);
-                Array.Copy(httpRequestBuffer, 0, remoteHeaderSendBuffer, remoteHeaderSendBuffer.Length - len, len);
-                byte[] nextbuffer = new byte[httpRequestBuffer.Length - httpContentLength];
-                Array.Copy(httpRequestBuffer, len, nextbuffer, 0, nextbuffer.Length);
-                httpRequestBuffer = nextbuffer;
             }
             bool auth_ok = false;
             if (httpAuthUser == null || httpAuthUser.Length == 0)
@@ -277,6 +274,20 @@ namespace Shadowsocks.Controller
                 httpData.CopyTo(remoteHeaderSendBuffer, remoteHeaderSendBuffer.Length - len);
                 httpRequestBuffer = new byte[0];
             }
+            if (auth_ok && httpContentLength > 0)
+            {
+                int len = Math.Min(httpRequestBuffer.Length, httpContentLength);
+                Array.Resize(ref remoteHeaderSendBuffer, len + remoteHeaderSendBuffer.Length);
+                Array.Copy(httpRequestBuffer, 0, remoteHeaderSendBuffer, remoteHeaderSendBuffer.Length - len, len);
+                byte[] nextbuffer = new byte[httpRequestBuffer.Length - len];
+                Array.Copy(httpRequestBuffer, len, nextbuffer, 0, nextbuffer.Length);
+                httpRequestBuffer = nextbuffer;
+            }
+            else
+            {
+                httpContentLength = 0;
+                httpRequestBuffer = new byte[0];
+            }
             if (remoteHeaderSendBuffer == null || !auth_ok)
             {
                 return 2;
@@ -290,7 +301,7 @@ namespace Shadowsocks.Controller
 
         public string Http200()
         {
-            return "HTTP/1.1 200 Connection Established\r\n\r\n";
+            return "HTTP/1.1 200 Connection Established\r\nConnection: Keep-Alive\r\nProxy-Connection: Keep-Alive\r\n\r\n";
         }
 
         public string Http407()

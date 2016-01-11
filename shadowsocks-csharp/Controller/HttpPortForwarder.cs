@@ -49,7 +49,7 @@ namespace Shadowsocks.Controller
                 this._local = socket;
                 this._targetPort = targetPort;
                 this._config = config;
-                if ((_config.authUser ?? "").Length == 0)
+                if ((_config.authUser ?? "").Length == 0 || Util.Utils.isMatchSubNet(((IPEndPoint)this._local.RemoteEndPoint).Address, "127.0.0.0/8"))
                 {
                     Connect();
                 }
@@ -60,7 +60,10 @@ namespace Shadowsocks.Controller
             }
             private void RspHttpHandshakeReceive()
             {
-                httpProxyState = new HttpPraser(true);
+                if (httpProxyState == null)
+                {
+                    httpProxyState = new HttpPraser(true);
+                }
                 httpProxyState.httpAuthUser = _config.authUser;
                 httpProxyState.httpAuthPass = _config.authPass;
                 byte[] remoteHeaderSendBuffer = null;
