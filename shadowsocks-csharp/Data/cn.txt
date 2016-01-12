@@ -10,6 +10,7 @@ PAC=PAC 模式
 Global=全局模式
 Servers=服务器
 Edit Servers...=编辑服务器...
+Statistics Config...=统计配置...
 Start on Boot=开机启动
 Allow Clients from LAN=允许来自局域网的连接
 Local PAC=使用本地 PAC
