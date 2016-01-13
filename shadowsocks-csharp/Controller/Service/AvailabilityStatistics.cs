@@ -258,9 +258,20 @@ namespace Shadowsocks.Controller
                 Logging.Debug($"loading statistics from {path}");
                 if (!File.Exists(path))
                 {
-                    Console.WriteLine($"statistics file does not exist, try to reload {RetryInterval / 60 / 1000} minutes later");
-                    _timer.Change(RetryInterval, Interval);
-                    return;
+                    try {
+                        using (FileStream fs = File.Create(path))
+                        {
+                            //do nothing
+                        }
+                    }catch(Exception e)
+                    {
+                        Logging.LogUsefulException(e);
+                    }
+                    if (!File.Exists(path)) { 
+                        Console.WriteLine($"statistics file does not exist, try to reload {RetryInterval / 60 / 1000} minutes later");
+                        _timer.Change(RetryInterval, Interval);
+                        return;
+                    }
                 }
                 RawStatistics = (from l in File.ReadAllLines(path).Skip(1)
                                  let strings = l.Split(new[] { "," }, StringSplitOptions.RemoveEmptyEntries)
