@@ -133,16 +133,18 @@ namespace Shadowsocks.Controller
         {
             Logging.Debug("Ping " + server.FriendlyName());
             if (server.server == "") return null;
-            var IP = Dns.GetHostAddresses(server.server).First(ip => (ip.AddressFamily == AddressFamily.InterNetwork || ip.AddressFamily == AddressFamily.InterNetworkV6));
-            var ping = new Ping();
             var ret = new List<DataList>();
-            foreach (var timestamp in Enumerable.Range(0, Repeat).Select(_ => DateTime.Now.ToString(DateTimePattern)))
-            {
-                //ICMP echo. we can also set options and special bytes
-                try
+            try {
+                var IP = Dns.GetHostAddresses(server.server).First(ip => (ip.AddressFamily == AddressFamily.InterNetwork || ip.AddressFamily == AddressFamily.InterNetworkV6));
+                var ping = new Ping();
+
+                foreach (var timestamp in Enumerable.Range(0, Repeat).Select(_ => DateTime.Now.ToString(DateTimePattern)))
                 {
-                    var reply = await ping.SendTaskAsync(IP, Timeout);
-                    ret.Add(new List<KeyValuePair<string, string>>
+                    //ICMP echo. we can also set options and special bytes
+                    try
+                    {
+                        var reply = await ping.SendTaskAsync(IP, Timeout);
+                        ret.Add(new List<KeyValuePair<string, string>>
                     {
                         new KeyValuePair<string, string>("Timestamp", timestamp),
                         new KeyValuePair<string, string>("Server", server.FriendlyName()),
@@ -150,14 +152,19 @@ namespace Shadowsocks.Controller
                         new KeyValuePair<string, string>("RoundtripTime", reply?.RoundtripTime.ToString())
                         //new KeyValuePair<string, string>("data", reply.Buffer.ToString()); // The data of reply
                     });
-                    Thread.Sleep(Timeout + new Random().Next() % Timeout);
-                    //Do ICMPTest in a random frequency
+                        Thread.Sleep(Timeout + new Random().Next() % Timeout);
+                        //Do ICMPTest in a random frequency
+                    }
+                    catch (Exception e)
+                    {
+                        Logging.Error($"An exception occured while eveluating {server.FriendlyName()}");
+                        Logging.LogUsefulException(e);
+                    }
                 }
-                catch (Exception e)
-                {
-                    Logging.Error($"An exception occured while eveluating {server.FriendlyName()}");
-                    Logging.LogUsefulException(e);
-                }
+            }catch(Exception e)
+            {
+                Logging.Error($"An exception occured while eveluating {server.FriendlyName()}");
+                Logging.LogUsefulException(e);
             }
             return ret;
         }
