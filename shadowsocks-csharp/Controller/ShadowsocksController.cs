@@ -63,8 +63,6 @@ namespace Shadowsocks.Controller
         public ShadowsocksController()
         {
             _config = Configuration.Load();
-            inboundCounter = _config.GetCurrentServer().bandwidthIn;
-            outboundCounter = _config.GetCurrentServer().bandwidthOut;
             StatisticsConfiguration = StatisticsStrategyConfiguration.Load();
             _strategyManager = new StrategyManager(this);
             StartReleasingMemory();
@@ -312,21 +310,17 @@ namespace Shadowsocks.Controller
         public void UpdateInboundCounter(long n)
         {
             Interlocked.Add(ref inboundCounter, n);
-            _config.GetCurrentServer().bandwidthIn = inboundCounter;
         }
 
         public void UpdateOutboundCounter(long n)
         {
             Interlocked.Add(ref outboundCounter, n);
-            _config.GetCurrentServer().bandwidthOut = outboundCounter;
         }
 
         protected void Reload()
         {
             // some logic in configuration updated the config when saving, we need to read it again
             _config = Configuration.Load();
-            inboundCounter = _config.GetCurrentServer().bandwidthIn;
-            outboundCounter = _config.GetCurrentServer().bandwidthOut;
             StatisticsConfiguration = StatisticsStrategyConfiguration.Load();
 
             if (polipoRunner == null)
