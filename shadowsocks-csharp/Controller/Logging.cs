@@ -10,7 +10,6 @@ namespace Shadowsocks.Controller
     public class Logging
     {
         public static string LogFilePath;
-        private static DateTime LogFileCreationTime;
 
         public static bool OpenLogFile()
         {
