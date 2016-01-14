@@ -43,25 +43,5 @@ namespace Shadowsocks.Controller
             destinationFile.Close();
         }
 
-        public static void CompressFile(string fileName, byte[] content)
-        {
-            FileStream destinationFile = File.Create(fileName);
-            MemoryStream ms = new MemoryStream(content);
-
-            // Because the compressed size of the file is unknown,
-            // we are using an arbitrary buffer size.
-            byte[] buffer = new byte[4096];
-            int n;
-
-            using (GZipStream output = new GZipStream(destinationFile,
-                CompressionMode.Compress, false))
-            {
-                while ((n = ms.Read(buffer, 0, buffer.Length)) > 0)
-                {
-                    output.Write(buffer, 0, n);
-                }
-            }
-            destinationFile.Close();
-        }
     }
 }
