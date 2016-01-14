@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
-using System.Text;
 
 namespace Shadowsocks.Controller
 {
@@ -12,9 +10,7 @@ namespace Shadowsocks.Controller
         {
             try
             {
-                System.IO.FileStream _FileStream =
-                   new System.IO.FileStream(fileName, System.IO.FileMode.Create,
-                                            System.IO.FileAccess.Write);
+                FileStream _FileStream = new FileStream(fileName, FileMode.Create, FileAccess.Write);
                 _FileStream.Write(content, 0, content.Length);
                 _FileStream.Close();
                 return true;
@@ -31,7 +27,7 @@ namespace Shadowsocks.Controller
         {
             FileStream destinationFile = File.Create(fileName);
 
-            // Because the uncompressed size of the file is unknown, 
+            // Because the uncompressed size of the file is unknown,
             // we are using an arbitrary buffer size.
             byte[] buffer = new byte[4096];
             int n;
@@ -39,14 +35,30 @@ namespace Shadowsocks.Controller
             using (GZipStream input = new GZipStream(new MemoryStream(content),
                 CompressionMode.Decompress, false))
             {
-                while (true)
+                while ((n = input.Read(buffer, 0, buffer.Length)) > 0)
                 {
-                    n = input.Read(buffer, 0, buffer.Length);
-                    if (n == 0)
-                    {
-                        break;
-                    }
                     destinationFile.Write(buffer, 0, n);
+                }
+            }
+            destinationFile.Close();
+        }
+
+        public static void CompressFile(string fileName, byte[] content)
+        {
+            FileStream destinationFile = File.Create(fileName);
+            MemoryStream ms = new MemoryStream(content);
+
+            // Because the compressed size of the file is unknown,
+            // we are using an arbitrary buffer size.
+            byte[] buffer = new byte[4096];
+            int n;
+
+            using (GZipStream output = new GZipStream(destinationFile,
+                CompressionMode.Compress, false))
+            {
+                while ((n = ms.Read(buffer, 0, buffer.Length)) > 0)
+                {
+                    output.Write(buffer, 0, n);
                 }
             }
             destinationFile.Close();
