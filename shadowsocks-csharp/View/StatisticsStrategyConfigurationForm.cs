@@ -2,16 +2,15 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Net.NetworkInformation;
 using System.Windows.Forms;
-using System.Windows.Forms.DataVisualization.Charting;
+
 using Shadowsocks.Controller;
 using Shadowsocks.Model;
-using SimpleJson;
-using System.Net.NetworkInformation;
 
 namespace Shadowsocks.View
 {
-    public partial class StatisticsStrategyConfigurationForm: Form
+    public partial class StatisticsStrategyConfigurationForm : Form
     {
         private readonly ShadowsocksController _controller;
         private StatisticsStrategyConfiguration _configuration;
@@ -51,9 +50,9 @@ namespace Shadowsocks.View
 
             serverSelector.DataSource = _servers;
 
-            _dataTable.Columns.Add("Timestamp", typeof (DateTime));
-            _dataTable.Columns.Add("Package Loss", typeof (int));
-            _dataTable.Columns.Add("Ping", typeof (int));
+            _dataTable.Columns.Add("Timestamp", typeof(DateTime));
+            _dataTable.Columns.Add("Package Loss", typeof(int));
+            _dataTable.Columns.Add("Ping", typeof(int));
 
             StatisticsChart.Series["Package Loss"].XValueMember = "Timestamp";
             StatisticsChart.Series["Package Loss"].YValueMembers = "Package Loss";
@@ -63,7 +62,6 @@ namespace Shadowsocks.View
             loadChartData();
             StatisticsChart.DataBind();
         }
-
 
         private void CancelButton_Click(object sender, EventArgs e)
         {
@@ -85,6 +83,9 @@ namespace Shadowsocks.View
         {
             string serverName = _servers[serverSelector.SelectedIndex];
             _dataTable.Rows.Clear();
+
+            //return directly when no data is usable
+            if (_controller.availabilityStatistics?.FilteredStatistics == null) return;
             List<AvailabilityStatistics.RawStatisticsData> statistics;
             if (!_controller.availabilityStatistics.FilteredStatistics.TryGetValue(serverName, out statistics)) return;
             IEnumerable<IGrouping<int, AvailabilityStatistics.RawStatisticsData>> dataGroups;

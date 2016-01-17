@@ -79,12 +79,12 @@ namespace Shadowsocks.View
                 }
                 Server server = new Server
                 {
-                    server = IPTextBox.Text,
+                    server = IPTextBox.Text.Trim(),
                     server_port = int.Parse(ServerPortTextBox.Text),
                     password = PasswordTextBox.Text,
                     method = EncryptionSelect.Text,
                     remarks = RemarksTextBox.Text,
-                    one_time_auth = OneTimeAuth.Checked
+                    auth = OneTimeAuth.Checked
                 };
                 int localPort = int.Parse(ProxyPortTextBox.Text);
                 Configuration.CheckServer(server);
@@ -117,7 +117,7 @@ namespace Shadowsocks.View
                 ProxyPortTextBox.Text = _modifiedConfiguration.localPort.ToString();
                 EncryptionSelect.Text = server.method ?? "aes-256-cfb";
                 RemarksTextBox.Text = server.remarks;
-                OneTimeAuth.Checked = server.one_time_auth;
+                OneTimeAuth.Checked = server.auth;
             }
         }
 
@@ -188,7 +188,10 @@ namespace Shadowsocks.View
                 ServersListBox.SelectedIndex = _lastSelectedIndex;
                 return;
             }
-            ServersListBox.Items[_lastSelectedIndex] = _modifiedConfiguration.configs[_lastSelectedIndex].FriendlyName();
+            if (_lastSelectedIndex >= 0)
+            {
+                ServersListBox.Items[_lastSelectedIndex] = _modifiedConfiguration.configs[_lastSelectedIndex].FriendlyName();
+            }
             UpdateMoveUpAndDownButton();
             LoadSelectedServer();
             _lastSelectedIndex = ServersListBox.SelectedIndex;

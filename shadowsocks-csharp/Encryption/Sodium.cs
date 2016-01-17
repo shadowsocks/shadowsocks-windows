@@ -1,11 +1,10 @@
-﻿using Shadowsocks.Controller;
-using Shadowsocks.Properties;
-using Shadowsocks.Util;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.IO;
 using System.Runtime.InteropServices;
-using System.Text;
+
+using Shadowsocks.Controller;
+using Shadowsocks.Properties;
+using Shadowsocks.Util;
 
 namespace Shadowsocks.Encryption
 {
@@ -15,8 +14,7 @@ namespace Shadowsocks.Encryption
 
         static Sodium()
         {
-            string tempPath = Utils.GetTempPath();
-            string dllPath = tempPath + "/libsscrypto.dll";
+            string dllPath = Utils.GetTempPath("libsscrypto.dll");
             try
             {
                 FileManager.UncompressFile(dllPath, Resources.libsscrypto_dll);
@@ -26,7 +24,7 @@ namespace Shadowsocks.Encryption
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.ToString());
+                Logging.LogUsefulException(e);
             }
             LoadLibrary(dllPath);
         }
@@ -41,10 +39,12 @@ namespace Shadowsocks.Encryption
         public extern static int crypto_stream_chacha20_xor_ic(byte[] c, byte[] m, ulong mlen, byte[] n, ulong ic, byte[] k);
 
         [DllImport(DLLNAME, CallingConvention = CallingConvention.Cdecl)]
+        public extern static int crypto_stream_chacha20_ietf_xor_ic(byte[] c, byte[] m, ulong mlen, byte[] n, uint ic, byte[] k);
+
+        [DllImport(DLLNAME, CallingConvention = CallingConvention.Cdecl)]
         public extern static void ss_sha1_hmac_ex(byte[] key, uint keylen,
             byte[] input, int ioff, uint ilen,
             byte[] output);
-
     }
 }
 

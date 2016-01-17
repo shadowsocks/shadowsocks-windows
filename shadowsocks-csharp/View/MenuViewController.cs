@@ -1,15 +1,17 @@
-﻿using Shadowsocks.Controller;
-using Shadowsocks.Model;
-using Shadowsocks.Properties;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
-using System.Text;
 using System.Windows.Forms;
+
 using ZXing;
 using ZXing.Common;
 using ZXing.QrCode;
+
+using Shadowsocks.Controller;
+using Shadowsocks.Model;
+using Shadowsocks.Properties;
+using Shadowsocks.Util;
 
 namespace Shadowsocks.View
 {
@@ -44,6 +46,8 @@ namespace Shadowsocks.View
         private MenuItem editOnlinePACItem;
         private MenuItem autoCheckUpdatesToggleItem;
         private ConfigForm configForm;
+        private List<LogForm> logForms = new List<LogForm>();
+        private bool logFormsVisible = false;
         private string _urlToOpen;
 
         public MenuViewController(ShadowsocksController controller)
@@ -66,7 +70,10 @@ namespace Shadowsocks.View
             UpdateTrayIcon();
             _notifyIcon.Visible = true;
             _notifyIcon.ContextMenu = contextMenu1;
+            _notifyIcon.BalloonTipClicked += notifyIcon1_BalloonTipClicked;
+            _notifyIcon.MouseClick += notifyIcon1_Click;
             _notifyIcon.MouseDoubleClick += notifyIcon1_DoubleClick;
+            _notifyIcon.BalloonTipClosed += _notifyIcon_BalloonTipClosed;
 
             this.updateChecker = new UpdateChecker();
             updateChecker.CheckUpdateCompleted += updateChecker_CheckUpdateCompleted;
@@ -78,7 +85,7 @@ namespace Shadowsocks.View
             if (config.autoCheckUpdate)
             {
                 _isStartupChecking = true;
-                updateChecker.CheckUpdate(config);
+                updateChecker.CheckUpdate(config, 3000);
             }
 
             if (config.isDefault)
@@ -200,7 +207,6 @@ namespace Shadowsocks.View
             });
         }
 
-
         private void controller_ConfigChanged(object sender, EventArgs e)
         {
             LoadCurrentConfiguration();
@@ -256,7 +262,6 @@ namespace Shadowsocks.View
             if (updateChecker.NewVersionFound)
             {
                 ShowBalloonTip(String.Format(I18N.GetString("Shadowsocks {0} Update Found"), updateChecker.LatestVersionNumber), I18N.GetString("Click here to update"), ToolTipIcon.Info, 5000);
-                _notifyIcon.BalloonTipClicked += notifyIcon1_BalloonTipClicked;
                 _isFirstRun = false;
             }
             else if (!_isStartupChecking)
@@ -269,11 +274,24 @@ namespace Shadowsocks.View
 
         void notifyIcon1_BalloonTipClicked(object sender, EventArgs e)
         {
-            _notifyIcon.BalloonTipClicked -= notifyIcon1_BalloonTipClicked;
-            string argument = "/select, \"" + updateChecker.LatestVersionLocalName + "\"";
-            System.Diagnostics.Process.Start("explorer.exe", argument);
+            if (updateChecker.NewVersionFound)
+            {
+                updateChecker.NewVersionFound = false; /* Reset the flag */
+                if (System.IO.File.Exists(updateChecker.LatestVersionLocalName))
+                {
+                    string argument = "/select, \"" + updateChecker.LatestVersionLocalName + "\"";
+                    System.Diagnostics.Process.Start("explorer.exe", argument);
+                }
+            }
         }
 
+        private void _notifyIcon_BalloonTipClosed(object sender, EventArgs e)
+        {
+            if (updateChecker.NewVersionFound)
+            {
+                updateChecker.NewVersionFound = false; /* Reset the flag */
+            }
+        }
 
         private void LoadCurrentConfiguration()
         {
@@ -324,7 +342,6 @@ namespace Shadowsocks.View
                 {
                     item.Checked = true;
                 }
-
             }
         }
 
@@ -342,10 +359,36 @@ namespace Shadowsocks.View
             }
         }
 
+        private void ShowLogForms()
+        {
+            if (logForms.Count == 0)
+            {
+                LogForm f = new LogForm(controller, Logging.LogFilePath);
+                f.Show();
+                f.FormClosed += logForm_FormClosed;
+
+                logForms.Add(f);
+                logFormsVisible = true;
+            }
+            else
+            {
+                logFormsVisible = !logFormsVisible;
+                foreach (LogForm f in logForms)
+                {
+                    f.Visible = logFormsVisible;
+                }
+            }
+        }
+
+        void logForm_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            logForms.Remove((LogForm)sender);
+        }
+
         void configForm_FormClosed(object sender, FormClosedEventArgs e)
         {
             configForm = null;
-            Util.Utils.ReleaseMemory(true);
+            Utils.ReleaseMemory(true);
             ShowFirstTimeBalloon();
         }
 
@@ -376,6 +419,18 @@ namespace Shadowsocks.View
         private void AboutItem_Click(object sender, EventArgs e)
         {
             Process.Start("https://github.com/shadowsocks/shadowsocks-windows");
+        }
+
+        private void notifyIcon1_Click(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left)
+            {
+                // TODO: show something interesting
+            }
+            else if (e.Button == MouseButtons.Middle)
+            {
+                ShowLogForms();
+            }
         }
 
         private void notifyIcon1_DoubleClick(object sender, MouseEventArgs e)
@@ -436,11 +491,13 @@ namespace Shadowsocks.View
 
         private void ShowLogItem_Click(object sender, EventArgs e)
         {
-            string argument = Logging.LogFile;
+            LogForm f = new LogForm(controller, Logging.LogFilePath);
+            f.Show();
+            f.FormClosed += logForm_FormClosed;
 
-            new LogForm(controller, argument).Show();
+            logForms.Add(f);
         }
-        
+
         private void StatisticsConfigItem_Click(object sender, EventArgs e)
         {
             StatisticsStrategyConfigurationForm form = new StatisticsStrategyConfigurationForm(controller);
@@ -549,9 +606,11 @@ namespace Shadowsocks.View
             Process.Start(_urlToOpen);
         }
 
-        private void AutoStartupItem_Click(object sender, EventArgs e) {
+        private void AutoStartupItem_Click(object sender, EventArgs e)
+        {
             AutoStartupItem.Checked = !AutoStartupItem.Checked;
-            if (!AutoStartup.Set(AutoStartupItem.Checked)) {
+            if (!AutoStartup.Set(AutoStartupItem.Checked))
+            {
                 MessageBox.Show(I18N.GetString("Failed to update registry"));
             }
         }

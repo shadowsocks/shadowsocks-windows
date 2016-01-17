@@ -1,11 +1,8 @@
 using System;
-using System.Collections.Generic;
 using System.Text;
-using System.IO;
-using System.Diagnostics;
-using SimpleJson;
-using Shadowsocks.Controller;
 using System.Text.RegularExpressions;
+
+using Shadowsocks.Controller;
 
 namespace Shadowsocks.Model
 {
@@ -17,7 +14,7 @@ namespace Shadowsocks.Model
         public string password;
         public string method;
         public string remarks;
-        public bool one_time_auth;
+        public bool auth;
 
         public override int GetHashCode()
         {
@@ -27,7 +24,7 @@ namespace Shadowsocks.Model
         public override bool Equals(object obj)
         {
             Server o2 = (Server)obj;
-            return this.server == o2.server && this.server_port == o2.server_port;
+            return server == o2.server && server_port == o2.server_port;
         }
 
         public string FriendlyName()
@@ -48,12 +45,12 @@ namespace Shadowsocks.Model
 
         public Server()
         {
-            this.server = "";
-            this.server_port = 8388;
-            this.method = "aes-256-cfb";
-            this.password = "";
-            this.remarks = "";
-            this.one_time_auth = false;
+            server = "";
+            server_port = 8388;
+            method = "aes-256-cfb";
+            password = "";
+            remarks = "";
+            auth = false;
         }
 
         public Server(string ssURL) : this()
@@ -65,7 +62,7 @@ namespace Shadowsocks.Model
             {
                 try
                 {
-                    bytes = System.Convert.FromBase64String(base64);
+                    bytes = Convert.FromBase64String(base64);
                 }
                 catch (FormatException)
                 {
@@ -83,16 +80,15 @@ namespace Shadowsocks.Model
 
                 string afterAt = data.Substring(indexLastAt + 1);
                 int indexLastColon = afterAt.LastIndexOf(':');
-                this.server_port = int.Parse(afterAt.Substring(indexLastColon + 1));
-                this.server = afterAt.Substring(0, indexLastColon);
+                server_port = int.Parse(afterAt.Substring(indexLastColon + 1));
+                server = afterAt.Substring(0, indexLastColon);
 
                 string beforeAt = data.Substring(0, indexLastAt);
                 string[] parts = beforeAt.Split(new[] { ':' });
-                this.method = parts[0];
-                this.password = parts[1];
+                method = parts[0];
+                password = parts[1];
 
                 //TODO: read one_time_auth
-
             }
             catch (IndexOutOfRangeException)
             {

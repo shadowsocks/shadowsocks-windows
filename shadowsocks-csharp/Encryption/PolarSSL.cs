@@ -1,11 +1,10 @@
-﻿using Shadowsocks.Controller;
-using Shadowsocks.Properties;
-using Shadowsocks.Util;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.IO;
 using System.Runtime.InteropServices;
-using System.Text;
+
+using Shadowsocks.Controller;
+using Shadowsocks.Properties;
+using Shadowsocks.Util;
 
 namespace Shadowsocks.Encryption
 {
@@ -19,8 +18,7 @@ namespace Shadowsocks.Encryption
 
         static PolarSSL()
         {
-            string tempPath = Utils.GetTempPath();
-            string dllPath = tempPath + "/libsscrypto.dll";
+            string dllPath = Utils.GetTempPath("libsscrypto.dll");
             try
             {
                 FileManager.UncompressFile(dllPath, Resources.libsscrypto_dll);
@@ -30,7 +28,7 @@ namespace Shadowsocks.Encryption
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.ToString());
+                Logging.LogUsefulException(e);
             }
             LoadLibrary(dllPath);
         }
@@ -63,6 +61,5 @@ namespace Shadowsocks.Encryption
 
         [DllImport(DLLNAME, CallingConvention = CallingConvention.Cdecl)]
         public extern static int arc4_crypt(IntPtr ctx, int length, byte[] input, byte[] output);
-
     }
 }

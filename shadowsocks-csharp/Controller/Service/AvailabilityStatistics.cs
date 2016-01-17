@@ -9,6 +9,10 @@ using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
+
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+
 using Shadowsocks.Model;
 using Shadowsocks.Util;
 
@@ -30,8 +34,8 @@ namespace Shadowsocks.Controller
         public Statistics FilteredStatistics { get; private set; }
         public static readonly DateTime UnknownDateTime = new DateTime(1970, 1, 1);
         private int Repeat => _config.RepeatTimesNum;
-        private const int RetryInterval = 2*60*1000; //retry 2 minutes after failed
-        private int Interval => (int) TimeSpan.FromMinutes(_config.DataCollectionMinutes).TotalMilliseconds; 
+        private const int RetryInterval = 2 * 60 * 1000; //retry 2 minutes after failed
+        private int Interval => (int)TimeSpan.FromMinutes(_config.DataCollectionMinutes).TotalMilliseconds;
         private Timer _timer;
         private State _state;
         private List<Server> _servers;
@@ -42,8 +46,7 @@ namespace Shadowsocks.Controller
         //static constructor to initialize every public static fields before refereced
         static AvailabilityStatistics()
         {
-            var temppath = Utils.GetTempPath();
-            AvailabilityStatisticsFile = Path.Combine(temppath, StatisticsFilesName);
+            AvailabilityStatisticsFile = Utils.GetTempPath(StatisticsFilesName);
         }
 
         public AvailabilityStatistics(Configuration config, StatisticsStrategyConfiguration statisticsConfig)
@@ -107,11 +110,18 @@ namespace Shadowsocks.Controller
                 Logging.LogUsefulException(e);
                 return null;
             }
-            dynamic obj;
-            if (!SimpleJson.SimpleJson.TryDeserializeObject(jsonString, out obj)) return null;
-            string country = obj["country"];
-            string city = obj["city"];
-            string isp = obj["isp"];
+            JObject obj;
+            try
+            {
+                obj = JObject.Parse(jsonString);
+            }
+            catch (JsonReaderException)
+            {
+                return null;
+            }
+            string country = (string)obj["country"];
+            string city = (string)obj["city"];
+            string isp = (string)obj["isp"];
             if (country == null || city == null || isp == null) return null;
             return new DataList {
                 new DataUnit(State.Geolocation, $"\"{country} {city}\""),
@@ -123,11 +133,10 @@ namespace Shadowsocks.Controller
         {
             Logging.Debug("Ping " + server.FriendlyName());
             if (server.server == "") return null;
-            var IP = Dns.GetHostAddresses(server.server).First(ip => ip.AddressFamily == AddressFamily.InterNetwork);
+            var IP = Dns.GetHostAddresses(server.server).First(ip => (ip.AddressFamily == AddressFamily.InterNetwork || ip.AddressFamily == AddressFamily.InterNetworkV6));
             var ping = new Ping();
             var ret = new List<DataList>();
-            foreach (
-                var timestamp in Enumerable.Range(0, Repeat).Select(_ => DateTime.Now.ToString(DateTimePattern)))
+            foreach (var timestamp in Enumerable.Range(0, Repeat).Select(_ => DateTime.Now.ToString(DateTimePattern)))
             {
                 //ICMP echo. we can also set options and special bytes
                 try
@@ -146,7 +155,7 @@ namespace Shadowsocks.Controller
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine($"An exception occured when eveluating {server.FriendlyName()}");
+                    Logging.Error($"An exception occured while eveluating {server.FriendlyName()}");
                     Logging.LogUsefulException(e);
                 }
             }
@@ -182,11 +191,11 @@ namespace Shadowsocks.Controller
             if (!File.Exists(AvailabilityStatisticsFile))
             {
                 var headerLine = string.Join(Delimiter, data.Select(kv => kv.Key).ToArray());
-                lines = new[] {headerLine, dataLine};
+                lines = new[] { headerLine, dataLine };
             }
             else
             {
-                lines = new[] {dataLine};
+                lines = new[] { dataLine };
             }
             try
             {
@@ -249,30 +258,29 @@ namespace Shadowsocks.Controller
                 Logging.Debug($"loading statistics from {path}");
                 if (!File.Exists(path))
                 {
-                    Console.WriteLine($"statistics file does not exist, try to reload {RetryInterval/60/1000} minutes later");
+                    Console.WriteLine($"statistics file does not exist, try to reload {RetryInterval / 60 / 1000} minutes later");
                     _timer.Change(RetryInterval, Interval);
                     return;
                 }
-                RawStatistics = (from l in File.ReadAllLines(path)
-                    .Skip(1)
-                    let strings = l.Split(new[] {","}, StringSplitOptions.RemoveEmptyEntries)
-                    let rawData = new RawStatisticsData
-                    {
-                        Timestamp = ParseExactOrUnknown(strings[0]),
-                        ServerName = strings[1],
-                        ICMPStatus = strings[2],
-                        RoundtripTime = int.Parse(strings[3]),
-                        Geolocation = 5 > strings.Length ?
-                        null 
-                        : strings[4],
-                        ISP = 6 > strings.Length ? null : strings[5]
-                    }
-                    group rawData by rawData.ServerName into server
-                    select new
-                    {
-                        ServerName = server.Key,
-                        data = server.ToList()
-                    }).ToDictionary(server => server.ServerName, server=> server.data);
+                RawStatistics = (from l in File.ReadAllLines(path).Skip(1)
+                                 let strings = l.Split(new[] { "," }, StringSplitOptions.RemoveEmptyEntries)
+                                 let rawData = new RawStatisticsData
+                                 {
+                                     Timestamp = ParseExactOrUnknown(strings[0]),
+                                     ServerName = strings[1],
+                                     ICMPStatus = strings[2],
+                                     RoundtripTime = int.Parse(strings[3]),
+                                     Geolocation = 5 > strings.Length ?
+                                     null
+                                     : strings[4],
+                                     ISP = 6 > strings.Length ? null : strings[5]
+                                 }
+                                 group rawData by rawData.ServerName into server
+                                 select new
+                                 {
+                                     ServerName = server.Key,
+                                     data = server.ToList()
+                                 }).ToDictionary(server => server.ServerName, server => server.data);
             }
             catch (Exception e)
             {
@@ -301,7 +309,7 @@ namespace Shadowsocks.Controller
             public string ICMPStatus;
             public int RoundtripTime;
             public string Geolocation;
-            public string ISP ;
+            public string ISP;
         }
 
         public class StatisticsData
@@ -311,6 +319,5 @@ namespace Shadowsocks.Controller
             public int MinResponse;
             public int MaxResponse;
         }
-
     }
 }

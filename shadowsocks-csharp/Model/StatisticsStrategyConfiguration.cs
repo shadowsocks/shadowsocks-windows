@@ -3,24 +3,23 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using Shadowsocks.Controller;
-using Shadowsocks.Controller.Strategy;
-using SimpleJson;
+
 using Newtonsoft.Json;
+
+using Shadowsocks.Controller;
 
 namespace Shadowsocks.Model
 {
     [Serializable]
     public class StatisticsStrategyConfiguration
     {
-        public static readonly string ID = "com.shadowsocks.strategy.statistics"; 
+        public static readonly string ID = "com.shadowsocks.strategy.statistics";
         private bool _statisticsEnabled = true;
         private bool _byIsp = false;
         private bool _byHourOfDay = false;
         private int _choiceKeptMinutes = 10;
         private int _dataCollectionMinutes = 10;
         private int _repeatTimesNum = 4;
-
 
         private const string ConfigFile = "statistics-config.json";
 
@@ -32,7 +31,7 @@ namespace Shadowsocks.Model
                 var configuration = JsonConvert.DeserializeObject<StatisticsStrategyConfiguration>(content);
                 return configuration;
             }
-            catch (FileNotFoundException e)
+            catch (FileNotFoundException)
             {
                 var configuration = new StatisticsStrategyConfiguration();
                 Save(configuration);
@@ -62,10 +61,10 @@ namespace Shadowsocks.Model
 
         public StatisticsStrategyConfiguration()
         {
-            var availabilityStatisticsType = typeof (AvailabilityStatistics);
+            var availabilityStatisticsType = typeof(AvailabilityStatistics);
             var statisticsData = availabilityStatisticsType.GetNestedType("StatisticsData");
             var properties = statisticsData.GetFields(BindingFlags.Instance | BindingFlags.Public);
-            Calculations = properties.ToDictionary(p => p.Name, _ => (float) 0);
+            Calculations = properties.ToDictionary(p => p.Name, _ => (float)0);
         }
 
         public bool StatisticsEnabled
