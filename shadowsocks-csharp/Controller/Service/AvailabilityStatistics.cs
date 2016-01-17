@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -23,25 +24,39 @@ namespace Shadowsocks.Controller
 
     using Statistics = Dictionary<string, List<AvailabilityStatistics.RawStatisticsData>>;
 
+    //TODO: change to singleton
     public class AvailabilityStatistics
     {
-        public static readonly string DateTimePattern = "yyyy-MM-dd HH:mm:ss";
+        public const string DateTimePattern = "yyyy-MM-dd HH:mm:ss";
         private const string StatisticsFilesName = "shadowsocks.availability.csv";
         private const string Delimiter = ",";
         private const int Timeout = 500;
-        private const int DelayBeforeStart = 1000;
+        private readonly TimeSpan DelayBeforeStart = TimeSpan.FromSeconds(1);
         public Statistics RawStatistics { get; private set; }
         public Statistics FilteredStatistics { get; private set; }
         public static readonly DateTime UnknownDateTime = new DateTime(1970, 1, 1);
         private int Repeat => _config.RepeatTimesNum;
-        private const int RetryInterval = 2 * 60 * 1000; //retry 2 minutes after failed
-        private int Interval => (int)TimeSpan.FromMinutes(_config.DataCollectionMinutes).TotalMilliseconds;
+        private readonly TimeSpan RetryInterval = TimeSpan.FromMinutes(2); //retry 2 minutes after failed
+        private TimeSpan Interval => TimeSpan.FromMinutes(_config.DataCollectionMinutes);
         private Timer _timer;
+        private Timer _speedMonior;
         private State _state;
         private List<Server> _servers;
         private StatisticsStrategyConfiguration _config;
 
+        private const string Empty = "";
+
         public static string AvailabilityStatisticsFile;
+        //speed in KiB/s
+        private int _inboundSpeed = 0;
+        private int _outboundSpeed = 0;
+        private int? _latency = 0;
+        private Server _currentServer;
+        private Configuration _globalConfig;
+        private readonly ShadowsocksController _controller;
+        private long _lastInboundCounter = 0;
+        private long _lastOutboundCounter = 0;
+        private readonly TimeSpan MonitorInterval = TimeSpan.FromSeconds(1);
 
         //static constructor to initialize every public static fields before refereced
         static AvailabilityStatistics()
@@ -49,9 +64,11 @@ namespace Shadowsocks.Controller
             AvailabilityStatisticsFile = Utils.GetTempPath(StatisticsFilesName);
         }
 
-        public AvailabilityStatistics(Configuration config, StatisticsStrategyConfiguration statisticsConfig)
+        public AvailabilityStatistics(ShadowsocksController controller)
         {
-            UpdateConfiguration(config, statisticsConfig);
+            _controller = controller;
+            _globalConfig = controller.GetCurrentConfiguration();
+            UpdateConfiguration(_globalConfig, controller.StatisticsConfiguration);
         }
 
         public bool Set(StatisticsStrategyConfiguration config)
@@ -70,6 +87,7 @@ namespace Shadowsocks.Controller
                 else
                 {
                     _timer?.Dispose();
+                    _speedMonior?.Dispose();
                 }
                 return true;
             }
@@ -78,6 +96,27 @@ namespace Shadowsocks.Controller
                 Logging.LogUsefulException(e);
                 return false;
             }
+        }
+
+        private void UpdateSpeed(object state)
+        {
+            var bytes = _controller.inboundCounter - _lastInboundCounter;
+            _lastInboundCounter = _controller.inboundCounter;
+            var inboundSpeed = GetSpeedInKiBPerSecond(bytes ,MonitorInterval.TotalSeconds);
+
+            bytes = _controller.outboundCounter - _lastOutboundCounter;
+            _lastOutboundCounter = _controller.outboundCounter;
+            var outboundSpeed = GetSpeedInKiBPerSecond(bytes, MonitorInterval.TotalSeconds);
+
+            if (inboundSpeed > _inboundSpeed)
+            {
+                _inboundSpeed = inboundSpeed;
+            }
+            if (outboundSpeed > _outboundSpeed)
+            {
+                _outboundSpeed = outboundSpeed;
+            }
+            Logging.Debug($"{_currentServer.FriendlyName()}: current/max inbound {inboundSpeed}/{_inboundSpeed} KiB/s, current/max outbound {outboundSpeed}/{_outboundSpeed} KiB/s");
         }
 
         //hardcode
@@ -98,6 +137,7 @@ namespace Shadowsocks.Controller
             };
         }
 
+        //TODO: remove geolocation
         private static async Task<DataList> GetInfoFromAPI(string API)
         {
             string jsonString;
@@ -146,6 +186,9 @@ namespace Shadowsocks.Controller
                     {
                         new KeyValuePair<string, string>("Timestamp", timestamp),
                         new KeyValuePair<string, string>("Server", server.FriendlyName()),
+                        new KeyValuePair<string, string>("Latency", GetRecentLatency(server)),
+                        new KeyValuePair<string, string>("InboundSpeed", GetRecentInboundSpeed(server)),
+                        new KeyValuePair<string, string>("OutboundSpeed", GetRecentOutboundSpeed(server)),
                         new KeyValuePair<string, string>("Status", reply?.Status.ToString()),
                         new KeyValuePair<string, string>("RoundtripTime", reply?.RoundtripTime.ToString())
                         //new KeyValuePair<string, string>("data", reply.Buffer.ToString()); // The data of reply
@@ -162,11 +205,43 @@ namespace Shadowsocks.Controller
             return ret;
         }
 
+
+        private string GetRecentOutboundSpeed(Server server)
+        {
+            if (server != _currentServer) return Empty;
+            return _outboundSpeed.ToString();
+        }
+
+        private string GetRecentInboundSpeed(Server server)
+        {
+            if (server != _currentServer) return Empty;
+            return _inboundSpeed.ToString();
+        }
+
+        private string GetRecentLatency(Server server)
+        {
+            if (server != _currentServer) return Empty;
+            return _latency == null ? Empty : _latency.ToString();
+        }
+
+        private void ResetSpeed()
+        {
+            _currentServer = _globalConfig.GetCurrentServer();
+            _latency = null;
+            _inboundSpeed = 0;
+            _outboundSpeed = 0;
+        }
+
         private void Run(object obj)
         {
+            if (_speedMonior?.Change(DelayBeforeStart, MonitorInterval) == null)
+            {
+                _speedMonior = new Timer(UpdateSpeed, null, DelayBeforeStart, MonitorInterval);
+            }
             LoadRawStatistics();
             FilterRawStatistics();
             evaluate();
+            ResetSpeed();
         }
 
         private async void evaluate()
@@ -177,7 +252,6 @@ namespace Shadowsocks.Controller
                 if (dataLists == null) continue;
                 foreach (var dataList in dataLists.Where(dataList => dataList != null))
                 {
-                    await geolocationAndIsp;
                     Append(dataList, geolocationAndIsp.Result);
                 }
             }
@@ -211,6 +285,7 @@ namespace Shadowsocks.Controller
         {
             Set(statisticsConfig);
             _servers = config.configs;
+            ResetSpeed();
         }
 
         private async void FilterRawStatistics()
@@ -258,7 +333,7 @@ namespace Shadowsocks.Controller
                 Logging.Debug($"loading statistics from {path}");
                 if (!File.Exists(path))
                 {
-                    Console.WriteLine($"statistics file does not exist, try to reload {RetryInterval / 60 / 1000} minutes later");
+                    Console.WriteLine($"statistics file does not exist, try to reload {RetryInterval.TotalMinutes} minutes later");
                     _timer.Change(RetryInterval, Interval);
                     return;
                 }
@@ -302,6 +377,7 @@ namespace Shadowsocks.Controller
             public const string Unknown = "Unknown";
         }
 
+        //TODO: redesign model
         public class RawStatisticsData
         {
             public DateTime Timestamp;
@@ -318,6 +394,17 @@ namespace Shadowsocks.Controller
             public int AverageResponse;
             public int MinResponse;
             public int MaxResponse;
+        }
+
+        public void UpdateLatency(int latency)
+        {
+            _latency = latency;
+        }
+
+        private static int GetSpeedInKiBPerSecond(long bytes, double seconds)
+        {
+            var result = (int) (bytes / seconds) / 1024;
+            return result;
         }
     }
 }

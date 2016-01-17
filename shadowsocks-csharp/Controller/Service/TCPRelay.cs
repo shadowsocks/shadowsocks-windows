@@ -78,6 +78,11 @@ namespace Shadowsocks.Controller
         {
             _controller.UpdateOutboundCounter(n);
         }
+
+        public void UpdateLatency(Server server, TimeSpan latency)
+        {
+            _controller.UpdateLatency(server, latency);
+        }
     }
 
     class TCPHandler
@@ -126,6 +131,9 @@ namespace Shadowsocks.Controller
         private object decryptionLock = new object();
 
         private DateTime _startConnectTime;
+        private DateTime _startReceivingTime;
+        private DateTime _startSendingTime;
+        private int _bytesToSend;
         private TCPRelay tcprelay;  // TODO: tcprelay ?= relay
 
         public TCPHandler(TCPRelay tcprelay)
@@ -484,6 +492,7 @@ namespace Shadowsocks.Controller
                 {
                     strategy.UpdateLatency(server, latency);
                 }
+                tcprelay.UpdateLatency(server, latency);
 
                 StartPipe();
             }
@@ -513,6 +522,7 @@ namespace Shadowsocks.Controller
             }
             try
             {
+                _startReceivingTime = DateTime.Now;
                 remote.BeginReceive(remoteRecvBuffer, 0, RecvSize, 0, new AsyncCallback(PipeRemoteReceiveCallback), null);
                 connection.BeginReceive(connetionRecvBuffer, 0, RecvSize, 0, new AsyncCallback(PipeConnectionReceiveCallback), null);
             }
@@ -601,13 +611,12 @@ namespace Shadowsocks.Controller
                     }
                     Logging.Debug(remote, bytesToSend, "TCP Relay", "@PipeConnectionReceiveCallback() (upload)");
                     tcprelay.UpdateOutboundCounter(bytesToSend);
+                    _startSendingTime = DateTime.Now;
+                    _bytesToSend = bytesToSend;
                     remote.BeginSend(connetionSendBuffer, 0, bytesToSend, 0, new AsyncCallback(PipeRemoteSendCallback), null);
 
                     IStrategy strategy = controller.GetCurrentStrategy();
-                    if (strategy != null)
-                    {
-                        strategy.UpdateLastWrite(server);
-                    }
+                    strategy?.UpdateLastWrite(server);
                 }
                 else
                 {

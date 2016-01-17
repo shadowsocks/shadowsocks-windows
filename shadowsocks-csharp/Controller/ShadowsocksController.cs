@@ -343,7 +343,7 @@ namespace Shadowsocks.Controller
 
             if (availabilityStatistics == null)
             {
-                availabilityStatistics = new AvailabilityStatistics(_config, StatisticsConfiguration);
+                availabilityStatistics = new AvailabilityStatistics(this);
             }
             availabilityStatistics.UpdateConfiguration(_config, StatisticsConfiguration);
 
@@ -496,6 +496,14 @@ namespace Shadowsocks.Controller
             {
                 Utils.ReleaseMemory(false);
                 Thread.Sleep(30 * 1000);
+            }
+        }
+
+        public void UpdateLatency(Server server, TimeSpan latency)
+        {
+            if (_config.availabilityStatistics)
+            {
+                availabilityStatistics.UpdateLatency((int) latency.TotalMilliseconds);
             }
         }
     }
