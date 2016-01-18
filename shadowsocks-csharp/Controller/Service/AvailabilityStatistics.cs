@@ -85,7 +85,7 @@ namespace Shadowsocks.Controller
         public static async Task<DataList> GetGeolocationAndIsp()
         {
             Logging.Debug("Retrive information of geolocation and isp");
-            const string API = "http://ip-api.com/json";
+            const string API = "http://ip-api.com/json?fields=529"; // get only country, city and isp http://ip-api.com/docs/api:returned_values#field_generator
             const string alternativeAPI = "http://www.telize.com/geoip"; //must be comptible with current API
             var result = await GetInfoFromAPI(API);
             if (result != null) return result;
