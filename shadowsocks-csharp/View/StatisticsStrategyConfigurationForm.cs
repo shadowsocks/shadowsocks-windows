@@ -10,6 +10,7 @@ using Shadowsocks.Model;
 
 namespace Shadowsocks.View
 {
+    using Statistics = Dictionary<string, List<StatisticsRecord>>;
     public partial class StatisticsStrategyConfigurationForm : Form
     {
         private readonly ShadowsocksController _controller;
@@ -86,9 +87,9 @@ namespace Shadowsocks.View
 
             //return directly when no data is usable
             if (_controller.availabilityStatistics?.FilteredStatistics == null) return;
-            List<AvailabilityStatistics.RawStatisticsData> statistics;
+            List<StatisticsRecord> statistics;
             if (!_controller.availabilityStatistics.FilteredStatistics.TryGetValue(serverName, out statistics)) return;
-            IEnumerable<IGrouping<int, AvailabilityStatistics.RawStatisticsData>> dataGroups;
+            IEnumerable<IGrouping<int, StatisticsRecord>> dataGroups;
             if (allMode.Checked)
             {
                 dataGroups = statistics.GroupBy(data => data.Timestamp.DayOfYear);
@@ -105,12 +106,9 @@ namespace Shadowsocks.View
                             orderby dataGroup.Key
                             select new
                             {
-                                Timestamp = dataGroup.First().Timestamp,
-                                Ping = (int)dataGroup.Average(data => data.RoundtripTime),
-                                PackageLoss = (int)
-                                              (dataGroup.Count(data => data.ICMPStatus.Equals(IPStatus.TimedOut.ToString()))
-                                              / (float)dataGroup.Count() * 100)
-                            };
+                                dataGroup.First().Timestamp,
+                                Ping = (int)dataGroup.Average(data => data.AverageResponse),
+                                PackageLoss = dataGroup.Average(data => data.PackageLoss)};
             foreach (var data in finalData)
             {
                 _dataTable.Rows.Add(data.Timestamp, data.PackageLoss, data.Ping);

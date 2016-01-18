@@ -95,5 +95,10 @@ namespace Shadowsocks.Model
                 throw new FormatException();
             }
         }
+
+        public string Identifier()
+        {
+            return server + ':' + server_port;
+        }
     }
 }

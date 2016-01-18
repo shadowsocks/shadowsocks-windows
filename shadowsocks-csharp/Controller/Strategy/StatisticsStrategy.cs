@@ -11,12 +11,14 @@ using Shadowsocks.Model;
 
 namespace Shadowsocks.Controller.Strategy
 {
+    using Statistics = Dictionary<string, List<StatisticsRecord>>;
     class StatisticsStrategy : IStrategy
     {
         private readonly ShadowsocksController _controller;
         private Server _currentServer;
         private readonly Timer _timer;
-        private Dictionary<string, List<AvailabilityStatistics.RawStatisticsData>> _filteredStatistics;
+        private Statistics _filteredStatistics;
+        private AvailabilityStatistics Service => _controller.availabilityStatistics;
         private int ChoiceKeptMilliseconds
             => (int) TimeSpan.FromMinutes(_controller.StatisticsConfiguration.ChoiceKeptMinutes).TotalMilliseconds;
 
@@ -39,7 +41,10 @@ namespace Shadowsocks.Controller.Strategy
 
         private void LoadStatistics()
         {
-            _filteredStatistics = _controller.availabilityStatistics.RawStatistics ?? _filteredStatistics ?? new Dictionary<string, List<AvailabilityStatistics.RawStatisticsData>>();
+            _filteredStatistics =
+                Service.FilteredStatistics ??
+                Service.RawStatistics ??
+                _filteredStatistics;
         }
 
         //return the score by data
@@ -47,28 +52,26 @@ namespace Shadowsocks.Controller.Strategy
         private float GetScore(string serverName)
         {
             var config = _controller.StatisticsConfiguration;
-            List<AvailabilityStatistics.RawStatisticsData> dataList;
-            if (_filteredStatistics == null || !_filteredStatistics.TryGetValue(serverName, out dataList)) return 0;
-            var successTimes = (float) dataList.Count(data => data.ICMPStatus.Equals(IPStatus.Success.ToString()));
-            var timedOutTimes = (float) dataList.Count(data => data.ICMPStatus.Equals(IPStatus.TimedOut.ToString()));
-            var statisticsData = new AvailabilityStatistics.StatisticsData
-            {
-                PackageLoss = timedOutTimes/(successTimes + timedOutTimes)*100,
-                AverageResponse = Convert.ToInt32(dataList.Average(data => data.RoundtripTime)),
-                MinResponse = dataList.Min(data => data.RoundtripTime),
-                MaxResponse = dataList.Max(data => data.RoundtripTime)
-            };
+            List<StatisticsRecord> records;
+            if (_filteredStatistics == null || !_filteredStatistics.TryGetValue(serverName, out records)) return 0;
             float factor;
             float score = 0;
+
+            var averageRecord = new StatisticsRecord(serverName,
+                records.FindAll(record => record.MaxInboundSpeed != null).Select(record => record.MaxInboundSpeed.Value),
+                records.FindAll(record => record.MaxOutboundSpeed != null).Select(record => record.MaxOutboundSpeed.Value),
+                records.FindAll(record => record.AverageLatency != null).Select(record => record.AverageLatency.Value));
+            averageRecord.setResponse(records.Select(record => record.AverageResponse));
+
             if (!config.Calculations.TryGetValue("PackageLoss", out factor)) factor = 0;
-            score += statisticsData.PackageLoss*factor;
+            score += averageRecord.PackageLoss*factor ?? 0;
             if (!config.Calculations.TryGetValue("AverageResponse", out factor)) factor = 0;
-            score += statisticsData.AverageResponse*factor;
+            score += averageRecord.AverageResponse*factor ?? 0;
             if (!config.Calculations.TryGetValue("MinResponse", out factor)) factor = 0;
-            score += statisticsData.MinResponse*factor;
+            score += averageRecord.MinResponse*factor ?? 0;
             if (!config.Calculations.TryGetValue("MaxResponse", out factor)) factor = 0;
-            score += statisticsData.MaxResponse*factor;
-            Logging.Debug($"{serverName}  {JsonConvert.SerializeObject(statisticsData)}");
+            score += averageRecord.MaxResponse*factor ?? 0;
+            Logging.Debug($"{JsonConvert.SerializeObject(averageRecord, Formatting.Indented)}");
             return score;
         }
 

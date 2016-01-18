@@ -195,6 +195,7 @@
     <Compile Include="Model\LogViewerConfig.cs" />
     <Compile Include="Model\Server.cs" />
     <Compile Include="Model\Configuration.cs" />
+    <Compile Include="Model\StatisticsRecord.cs" />
     <Compile Include="Model\StatisticsStrategyConfiguration.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
