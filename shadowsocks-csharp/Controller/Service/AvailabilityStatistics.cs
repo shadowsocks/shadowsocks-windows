@@ -16,7 +16,7 @@ namespace Shadowsocks.Controller
 {
     using Statistics = Dictionary<string, List<StatisticsRecord>>;
 
-    public sealed class AvailabilityStatistics
+    public sealed class AvailabilityStatistics : IDisposable
     {
         public const string DateTimePattern = "yyyy-MM-dd HH:mm:ss";
         private const string StatisticsFilesName = "shadowsocks.availability.json";
@@ -341,6 +341,13 @@ namespace Shadowsocks.Controller
             {
                 Server = server;
             }
+        }
+
+        public void Dispose()
+        {
+            _recorder.Dispose();
+            _writer.Dispose();
+            _speedMonior.Dispose();
         }
     }
 }

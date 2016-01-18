@@ -12,7 +12,8 @@ using Shadowsocks.Model;
 namespace Shadowsocks.Controller.Strategy
 {
     using Statistics = Dictionary<string, List<StatisticsRecord>>;
-    class StatisticsStrategy : IStrategy
+
+    internal class StatisticsStrategy : IStrategy, IDisposable
     {
         private readonly ShadowsocksController _controller;
         private Server _currentServer;
@@ -151,6 +152,11 @@ namespace Shadowsocks.Controller.Strategy
         public void UpdateLatency(Server server, TimeSpan latency)
         {
             //TODO: combine this part of data with ICMP statics
+        }
+
+        public void Dispose()
+        {
+            _timer.Dispose();
         }
     }
 }
