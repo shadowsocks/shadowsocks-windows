@@ -285,8 +285,8 @@ namespace Shadowsocks.Controller
                     {
                         Logging.LogUsefulException(e);
                     }
-                    if (!File.Exists(path)) { 
-                        Console.WriteLine($"statistics file does not exist, try to reload {RetryInterval / 60 / 1000} minutes later");
+                    if (!File.Exists(path)) {
+                        Console.WriteLine($"statistics file does not exist, try to reload {RetryInterval.TotalMinutes} minutes later");
                         _timer.Change(RetryInterval, Interval);
                         return;
                     }
