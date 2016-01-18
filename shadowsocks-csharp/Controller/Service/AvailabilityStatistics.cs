@@ -119,56 +119,6 @@ namespace Shadowsocks.Controller
             Logging.Debug($"{_currentServer.FriendlyName()}: current/max inbound {inboundSpeed}/{_inboundSpeed} KiB/s, current/max outbound {outboundSpeed}/{_outboundSpeed} KiB/s");
         }
 
-        //hardcode
-        //TODO: backup reliable isp&geolocation provider or a local database is required
-        public static async Task<DataList> GetGeolocationAndIsp()
-        {
-            Logging.Debug("Retrive information of geolocation and isp");
-            const string API = "http://ip-api.com/json";
-            const string alternativeAPI = "http://www.telize.com/geoip"; //must be comptible with current API
-            var result = await GetInfoFromAPI(API);
-            if (result != null) return result;
-            result = await GetInfoFromAPI(alternativeAPI);
-            if (result != null) return result;
-            return new DataList
-            {
-                new DataUnit(State.Geolocation, State.Unknown),
-                new DataUnit(State.ISP, State.Unknown)
-            };
-        }
-
-        //TODO: remove geolocation
-        private static async Task<DataList> GetInfoFromAPI(string API)
-        {
-            string jsonString;
-            try
-            {
-                jsonString = await new HttpClient().GetStringAsync(API);
-            }
-            catch (Exception e)
-            {
-                Logging.LogUsefulException(e);
-                return null;
-            }
-            JObject obj;
-            try
-            {
-                obj = JObject.Parse(jsonString);
-            }
-            catch (JsonReaderException)
-            {
-                return null;
-            }
-            string country = (string)obj["country"];
-            string city = (string)obj["city"];
-            string isp = (string)obj["isp"];
-            if (country == null || city == null || isp == null) return null;
-            return new DataList {
-                new DataUnit(State.Geolocation, $"\"{country} {city}\""),
-                new DataUnit(State.ISP, $"\"{isp}\"")
-            };
-        }
-
         private async Task<List<DataList>> ICMPTest(Server server)
         {
             Logging.Debug("Ping " + server.FriendlyName());
@@ -186,11 +136,11 @@ namespace Shadowsocks.Controller
                     {
                         new KeyValuePair<string, string>("Timestamp", timestamp),
                         new KeyValuePair<string, string>("Server", server.FriendlyName()),
+                        new KeyValuePair<string, string>("Status", reply?.Status.ToString()),
+                        new KeyValuePair<string, string>("RoundtripTime", reply?.RoundtripTime.ToString()),
                         new KeyValuePair<string, string>("Latency", GetRecentLatency(server)),
                         new KeyValuePair<string, string>("InboundSpeed", GetRecentInboundSpeed(server)),
-                        new KeyValuePair<string, string>("OutboundSpeed", GetRecentOutboundSpeed(server)),
-                        new KeyValuePair<string, string>("Status", reply?.Status.ToString()),
-                        new KeyValuePair<string, string>("RoundtripTime", reply?.RoundtripTime.ToString())
+                        new KeyValuePair<string, string>("OutboundSpeed", GetRecentOutboundSpeed(server))
                         //new KeyValuePair<string, string>("data", reply.Buffer.ToString()); // The data of reply
                     });
                     Thread.Sleep(Timeout + new Random().Next() % Timeout);
@@ -246,13 +196,12 @@ namespace Shadowsocks.Controller
 
         private async void evaluate()
         {
-            var geolocationAndIsp = GetGeolocationAndIsp();
             foreach (var dataLists in await TaskEx.WhenAll(_servers.Select(ICMPTest)))
             {
                 if (dataLists == null) continue;
                 foreach (var dataList in dataLists.Where(dataList => dataList != null))
                 {
-                    Append(dataList, geolocationAndIsp.Result);
+                    Append(dataList, Enumerable.Empty<DataUnit>());
                 }
             }
         }
@@ -298,19 +247,6 @@ namespace Shadowsocks.Controller
             foreach (IEnumerable<RawStatisticsData> rawData in RawStatistics.Values)
             {
                 var filteredData = rawData;
-                if (_config.ByIsp)
-                {
-                    var current = await GetGeolocationAndIsp();
-                    filteredData =
-                        filteredData.Where(
-                            data =>
-                                data.Geolocation == current[0].Value ||
-                                data.Geolocation == State.Unknown);
-                    filteredData =
-                        filteredData.Where(
-                            data => data.ISP == current[1].Value || data.ISP == State.Unknown);
-                    if (filteredData.LongCount() == 0) return;
-                }
                 if (_config.ByHourOfDay)
                 {
                     var currentHour = DateTime.Now.Hour;
@@ -344,11 +280,7 @@ namespace Shadowsocks.Controller
                                      Timestamp = ParseExactOrUnknown(strings[0]),
                                      ServerName = strings[1],
                                      ICMPStatus = strings[2],
-                                     RoundtripTime = int.Parse(strings[3]),
-                                     Geolocation = 5 > strings.Length ?
-                                     null
-                                     : strings[4],
-                                     ISP = 6 > strings.Length ? null : strings[5]
+                                     RoundtripTime = int.Parse(strings[3])
                                  }
                                  group rawData by rawData.ServerName into server
                                  select new
@@ -372,8 +304,6 @@ namespace Shadowsocks.Controller
         public class State
         {
             public DataList dataList = new DataList();
-            public const string Geolocation = "Geolocation";
-            public const string ISP = "ISP";
             public const string Unknown = "Unknown";
         }
 
@@ -384,8 +314,6 @@ namespace Shadowsocks.Controller
             public string ServerName;
             public string ICMPStatus;
             public int RoundtripTime;
-            public string Geolocation;
-            public string ISP;
         }
 
         public class StatisticsData
