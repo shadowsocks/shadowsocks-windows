@@ -93,6 +93,12 @@ namespace Shadowsocks.Controller
                     byte[] httpData = System.Text.Encoding.UTF8.GetBytes(dataSend);
                     _local.BeginSend(httpData, 0, httpData.Length, 0, new AsyncCallback(StartConnect), null);
                 }
+                else if (err == 500)
+                {
+                    string dataSend = httpProxyState.Http500();
+                    byte[] httpData = System.Text.Encoding.UTF8.GetBytes(dataSend);
+                    _local.BeginSend(httpData, 0, httpData.Length, 0, new AsyncCallback(HttpHandshakeAuthEndSend), null);
+                }
             }
 
             private void HttpHandshakeRecv(IAsyncResult ar)

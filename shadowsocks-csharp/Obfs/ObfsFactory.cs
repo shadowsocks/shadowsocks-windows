@@ -45,6 +45,10 @@ namespace Shadowsocks.Obfs
             {
                 _registeredObfs.Add(method, typeof(AuthSHA1));
             }
+            foreach (string method in AuthSHA1V2.SupportedObfs())
+            {
+                _registeredObfs.Add(method, typeof(AuthSHA1V2));
+            }
         }
 
         public static IObfs GetObfs(string method)

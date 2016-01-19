@@ -42,6 +42,7 @@
             this.MaxSpeed = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Upload = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Download = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.DownloadRaw = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.ErrorPercent = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.ConnectError = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.ConnectTimeout = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -69,6 +70,7 @@
             this.MaxSpeed,
             this.Upload,
             this.Download,
+            this.DownloadRaw,
             this.ErrorPercent,
             this.ConnectError,
             this.ConnectTimeout,
@@ -126,7 +128,6 @@
             this.Server.MinimumWidth = 2;
             this.Server.Name = "Server";
             this.Server.ReadOnly = true;
-            this.Server.Width = 170;
             // 
             // Enable
             // 
@@ -193,6 +194,14 @@
             this.Download.Name = "Download";
             this.Download.ReadOnly = true;
             this.Download.Width = 72;
+            // 
+            // DownloadRaw
+            // 
+            this.DownloadRaw.HeaderText = "DownloadRaw";
+            this.DownloadRaw.MinimumWidth = 2;
+            this.DownloadRaw.Name = "DownloadRaw";
+            this.DownloadRaw.ReadOnly = true;
+            this.DownloadRaw.Width = 72;
             // 
             // ErrorPercent
             // 
@@ -271,6 +280,7 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn MaxSpeed;
         private System.Windows.Forms.DataGridViewTextBoxColumn Upload;
         private System.Windows.Forms.DataGridViewTextBoxColumn Download;
+        private System.Windows.Forms.DataGridViewTextBoxColumn DownloadRaw;
         private System.Windows.Forms.DataGridViewTextBoxColumn ErrorPercent;
         private System.Windows.Forms.DataGridViewTextBoxColumn ConnectError;
         private System.Windows.Forms.DataGridViewTextBoxColumn ConnectTimeout;

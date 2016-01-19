@@ -45,7 +45,7 @@ Down=下移
 
 New server=未配置的服务器
 
-Server=服务器(截图注意对服务器地址打码)
+Server=服务器(截图注意打码)
 Server IP=服务器 IP
 Server Port=服务器端口
 Password=密码
@@ -104,6 +104,7 @@ Avg Speed=下载\n速度
 Max Speed=历史\n最高
 Upload=上传\n流量
 Download=下载\n流量
+DownloadRaw=实际\n下载
 Error=错误
 Timeout=超时
 Empty Response=空连

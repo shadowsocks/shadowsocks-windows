@@ -223,15 +223,19 @@ namespace Shadowsocks.Controller
             }
             Dictionary<string, string> header_dict = ParseHttpHeader(data);
             this.httpPort = 80;
-            if (header_dict.ContainsKey("Host"))
+            if (header_dict["@0"] == "CONNECT")
+            {
+                this.httpHost = ParseHostAndPort(header_dict["@1"], ref this.httpPort);
+            }
+            else if (header_dict.ContainsKey("Host"))
             {
                 this.httpHost = ParseHostAndPort(header_dict["Host"], ref this.httpPort);
             }
             else
             {
-                this.httpHost = ParseHostAndPort(header_dict["@1"], ref this.httpPort);
+                return 500;
             }
-            if (header_dict.ContainsKey("Content-Length"))
+            if (header_dict.ContainsKey("Content-Length") && Convert.ToInt32(header_dict["Content-Length"]) > 0)
             {
                 httpContentLength = Convert.ToInt32(header_dict["Content-Length"]) + 2;
             }
@@ -301,13 +305,13 @@ namespace Shadowsocks.Controller
 
         public string Http200()
         {
-            return "HTTP/1.1 200 Connection Established\r\nConnection: Keep-Alive\r\nProxy-Connection: Keep-Alive\r\n\r\n";
+            return "HTTP/1.1 200 Connection Established\r\n\r\n";
         }
 
         public string Http407()
         {
-            string dataSend = "HTTP/1.1 407 Proxy Authentication Required\r\nProxy-Authenticate: Basic realm=\"RRR\"\r\n\r\n";
-            dataSend += "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN" +
+            string header = "HTTP/1.1 407 Proxy Authentication Required\r\nProxy-Authenticate: Basic realm=\"RRR\"\r\n";
+            string content = "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN" +
                         " \"http://www.w3.org/TR/1999/REC-html401-19991224/loose.dtd\">" +
                         "<HTML>" +
                         "  <HEAD>" +
@@ -315,8 +319,23 @@ namespace Shadowsocks.Controller
                         "    <META HTTP-EQUIV=\"Content-Type\" CONTENT=\"text/html; charset=ISO-8859-1\">" +
                         "  </HEAD>" +
                         "  <BODY><H1>407 Proxy Authentication Required.</H1></BODY>" +
+                        "</HTML>\r\n";
+            return header + "\r\n" + content + "\r\n";
+        }
+
+        public string Http500()
+        {
+            string header = "HTTP/1.1 500 Internal Server Error\r\n";
+            string content = "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN" +
+                        " \"http://www.w3.org/TR/1999/REC-html401-19991224/loose.dtd\">" +
+                        "<HTML>" +
+                        "  <HEAD>" +
+                        "    <TITLE>Error</TITLE>" +
+                        "    <META HTTP-EQUIV=\"Content-Type\" CONTENT=\"text/html; charset=ISO-8859-1\">" +
+                        "  </HEAD>" +
+                        "  <BODY><H1>500 Internal Server Error.</H1></BODY>" +
                         "</HTML>";
-            return dataSend;
+            return header + "\r\n" + content + "\r\n";
         }
     }
 }

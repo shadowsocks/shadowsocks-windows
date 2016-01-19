@@ -1250,9 +1250,14 @@ namespace Shadowsocks.Controller
             {
                 httpProxyState = new HttpPraser();
             }
+            else
+            {
+                command = 1;
+            }
             if (Util.Utils.isMatchSubNet(((IPEndPoint)connection.RemoteEndPoint).Address, "127.0.0.0/8"))
             {
                 httpProxyState.httpAuthUser = "";
+                httpProxyState.httpAuthPass = "";
             }
             else
             {
@@ -1284,6 +1289,12 @@ namespace Shadowsocks.Controller
                 string dataSend = httpProxyState.Http200();
                 byte[] httpData = System.Text.Encoding.UTF8.GetBytes(dataSend);
                 connection.BeginSend(httpData, 0, httpData.Length, 0, new AsyncCallback(StartConnect), null);
+            }
+            else if (err == 500)
+            {
+                string dataSend = httpProxyState.Http500();
+                byte[] httpData = System.Text.Encoding.UTF8.GetBytes(dataSend);
+                connection.BeginSend(httpData, 0, httpData.Length, 0, new AsyncCallback(HttpHandshakeAuthEndSend), null);
             }
         }
 
@@ -2226,6 +2237,7 @@ namespace Shadowsocks.Controller
                         {
                             server.ServerSpeedLog().ResetEmptyTimes();
                         }
+                        server.ServerSpeedLog().AddDownloadRawBytes(bytesToSend);
                         speedTester.AddRecvSize(bytesToSend);
                         connection.BeginSend(remoteSendBuffer, 0, bytesToSend, 0, new AsyncCallback(PipeConnectionSendCallback), null);
                     }
@@ -2259,6 +2271,7 @@ namespace Shadowsocks.Controller
                         {
                             foreach (byte[] buffer in buffer_list)
                             {
+                                server.ServerSpeedLog().AddDownloadRawBytes(buffer.Length);
                                 speedTester.AddRecvSize(buffer.Length);
                                 connectionUDP.BeginSendTo(buffer, 0, buffer.Length, SocketFlags.None, connectionUDPEndPoint, new AsyncCallback(PipeConnectionUDPSendCallback), null);
                             }

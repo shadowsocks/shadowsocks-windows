@@ -376,6 +376,30 @@ namespace Shadowsocks.View
                             SetCellToolTipText(cell, fullVal);
                             SetCellText(cell, valStr);
                         }
+                        else if (columnName == "DownloadRaw")
+                        {
+                            string valStr = FormatBytes(serverSpeedLog.totalDownloadRawBytes);
+                            string fullVal = serverSpeedLog.totalDownloadRawBytes.ToString();
+                            if (cell.ToolTipText != fullVal)
+                            {
+                                if (fullVal == "0")
+                                    SetBackColor(cell, Color.White);
+                                else
+                                {
+                                    SetBackColor(cell, Color.LightGreen);
+                                    cell.Tag = 8;
+                                }
+                            }
+                            else if (cell.Tag != null)
+                            {
+                                cell.Tag = (int)cell.Tag - 1;
+                                if ((int)cell.Tag == 0) SetBackColor(cell, Color.White);
+                                //Color col = cell.Style.BackColor;
+                                //SetBackColor(cell, Color.FromArgb(Math.Min(255, col.R + colAdd), Math.Min(255, col.G + colAdd), Math.Min(255, col.B + colAdd)));
+                            }
+                            SetCellToolTipText(cell, fullVal);
+                            SetCellText(cell, valStr);
+                        }
                         // ErrorConnectTimes
                         else if (columnName == "ConnectError")
                         {
@@ -603,6 +627,7 @@ namespace Shadowsocks.View
                 || e.Column.Name == "MaxSpeed"
                 || e.Column.Name == "Upload"
                 || e.Column.Name == "Download"
+                || e.Column.Name == "DownloadRaw"
                 )
             {
                 String s1 = Convert.ToString(e.CellValue1);
