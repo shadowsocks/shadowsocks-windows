@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using System.Net.NetworkInformation;
 using System.Threading;
 
 using Newtonsoft.Json;
@@ -27,7 +26,7 @@ namespace Shadowsocks.Controller.Strategy
         {
             _controller = controller;
             var servers = controller.GetCurrentConfiguration().configs;
-            var randomIndex = new Random().Next() % servers.Count();
+            var randomIndex = new Random().Next() % servers.Count;
             _currentServer = servers[randomIndex];  //choose a server randomly at first
             _timer = new Timer(ReloadStatisticsAndChooseAServer);
         }
@@ -117,13 +116,9 @@ namespace Shadowsocks.Controller.Strategy
 
         public Server GetAServer(IStrategyCallerType type, IPEndPoint localIPEndPoint)
         {
-            var oldServer = _currentServer;
-            if (oldServer == null)
+            if (_currentServer == null)
             {
                 ChooseNewServer(_controller.GetCurrentConfiguration().configs);
-            }
-            if (oldServer != _currentServer)
-            {
             }
             return _currentServer;  //current server cached for CachedInterval
         }
@@ -141,17 +136,14 @@ namespace Shadowsocks.Controller.Strategy
 
         public void UpdateLastRead(Server server)
         {
-            //TODO: combine this part of data with ICMP statics
         }
 
         public void UpdateLastWrite(Server server)
         {
-            //TODO: combine this part of data with ICMP statics
         }
 
         public void UpdateLatency(Server server, TimeSpan latency)
         {
-            //TODO: combine this part of data with ICMP statics
         }
 
         public void Dispose()

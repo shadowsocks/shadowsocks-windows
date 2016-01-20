@@ -15,7 +15,7 @@ namespace Shadowsocks.View
     {
         private readonly ShadowsocksController _controller;
         private StatisticsStrategyConfiguration _configuration;
-        private DataTable _dataTable = new DataTable();
+        private readonly DataTable _dataTable = new DataTable();
         private List<string> _servers;
 
         public StatisticsStrategyConfigurationForm(ShadowsocksController controller)
@@ -134,6 +134,11 @@ namespace Shadowsocks.View
         private void allMode_CheckedChanged(object sender, EventArgs e)
         {
             loadChartData();
+        }
+
+        private void PingCheckBox_CheckedChanged(object sender, EventArgs e)
+        {
+            repeatTimesNum.ReadOnly = !PingCheckBox.Checked;
         }
     }
 }
