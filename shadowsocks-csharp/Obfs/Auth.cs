@@ -440,7 +440,11 @@ namespace Shadowsocks.Obfs
                 outdata[8] = (byte)(rand_len);
             }
 
-            ulong crc32 = Util.CRC32.CalcCRC32(Server.key, (int)Server.key.Length);
+            byte[] salt = System.Text.Encoding.UTF8.GetBytes("auth_sha1_v2");
+            byte[] crcdata = new byte[salt.Length + Server.key.Length];
+            salt.CopyTo(crcdata, 0);
+            Server.key.CopyTo(crcdata, salt.Length);
+            ulong crc32 = Util.CRC32.CalcCRC32(crcdata, (int)crcdata.Length);
             BitConverter.GetBytes((uint)crc32).CopyTo(outdata, 0);
 
             byte[] key = new byte[Server.iv.Length + Server.key.Length];
