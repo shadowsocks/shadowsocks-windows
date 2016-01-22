@@ -394,13 +394,13 @@ namespace Shadowsocks.Controller
         protected byte[] _firstPacket;
         protected int _firstPacketLength;
         // Size of receive buffer.
-        protected const int RecvSize = 8192;
-        protected const int BufferSize = RecvSize + 256;
+        protected const int RecvSize = 16384;
+        protected const int BufferSize = RecvSize + 1024;
         protected const int AutoSwitchOffErrorTimes = 5;
         // remote receive buffer
-        protected byte[] remoteRecvBuffer = new byte[RecvSize * 4];
+        protected byte[] remoteRecvBuffer = new byte[RecvSize * 2];
         // remote send buffer
-        protected byte[] remoteSendBuffer = new byte[BufferSize * 4];
+        protected byte[] remoteSendBuffer = new byte[BufferSize * 2];
         // remote header send buffer
         protected byte[] remoteHeaderSendBuffer;
         // http proxy
@@ -408,13 +408,13 @@ namespace Shadowsocks.Controller
         public string authPass;
         protected HttpPraser httpProxyState;
         // connection receive buffer
-        protected byte[] connetionRecvBuffer = new byte[RecvSize * 4];
+        protected byte[] connetionRecvBuffer = new byte[RecvSize * 2];
         // connection send buffer
-        protected byte[] connetionSendBuffer = new byte[BufferSize * 4];
+        protected byte[] connetionSendBuffer = new byte[BufferSize * 2];
         // connection send buffer
         protected List<byte[]> connectionSendBufferList = new List<byte[]>();
 
-        protected byte[] remoteUDPRecvBuffer = new byte[RecvSize * 4];
+        protected byte[] remoteUDPRecvBuffer = new byte[RecvSize * 2];
         protected int remoteUDPRecvBufferLength = 0;
 
         protected bool connectionShutdown = false;
