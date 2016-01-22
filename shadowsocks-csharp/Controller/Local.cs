@@ -807,6 +807,16 @@ namespace Shadowsocks.Controller
                             server.ServerSpeedLog().AddTimeoutTimes();
                         }
                     }
+                    else if (TTL > 0)
+                    {
+                        bool success = result.AsyncWaitHandle.WaitOne((int)(TTL * 1000), true);
+                        if (!success)
+                        {
+                            remote.Close();
+                            lastErrCode = 8;
+                            server.ServerSpeedLog().AddTimeoutTimes();
+                        }
+                    }
                 }
             }
         }
@@ -2237,9 +2247,9 @@ namespace Shadowsocks.Controller
                         {
                             server.ServerSpeedLog().ResetEmptyTimes();
                         }
+                        connection.BeginSend(remoteSendBuffer, 0, bytesToSend, 0, new AsyncCallback(PipeConnectionSendCallback), null);
                         server.ServerSpeedLog().AddDownloadRawBytes(bytesToSend);
                         speedTester.AddRecvSize(bytesToSend);
-                        connection.BeginSend(remoteSendBuffer, 0, bytesToSend, 0, new AsyncCallback(PipeConnectionSendCallback), null);
                     }
                     else
                     {
@@ -2478,16 +2488,16 @@ namespace Shadowsocks.Controller
             }
             int obfsSendSize;
             byte[] obfsBuffer = this.obfs.ClientEncode(connetionSendBuffer, bytesToSend, out obfsSendSize);
+            remote.BeginSend(obfsBuffer, 0, obfsSendSize, 0, new AsyncCallback(PipeRemoteSendCallback), null);
             server.ServerSpeedLog().AddUploadBytes(obfsSendSize);
             speedTester.AddUploadSize(obfsSendSize);
-            remote.BeginSend(obfsBuffer, 0, obfsSendSize, 0, new AsyncCallback(PipeRemoteSendCallback), null);
         }
 
         private void RemoteTDPSend(byte[] bytes, int length)
         {
+            remoteTDP.BeginSendTo(bytes, length, new AsyncCallback(PipeRemoteTDPSendCallback), null);
             server.ServerSpeedLog().AddUploadBytes(length);
             speedTester.AddUploadSize(length);
-            remoteTDP.BeginSendTo(bytes, length, new AsyncCallback(PipeRemoteTDPSendCallback), null);
         }
 
         private void RemoteSendto(byte[] bytes, int length)
@@ -2554,9 +2564,9 @@ namespace Shadowsocks.Controller
                 bytesToSend = bytesToEncrypt.Length;
                 Array.Copy(bytesToEncrypt, connetionSendBuffer, bytesToSend);
             }
+            remoteUDP.BeginSendTo(connetionSendBuffer, 0, bytesToSend, 0, remoteUDPEndPoint, new AsyncCallback(PipeRemoteUDPSendCallback), null);
             server.ServerSpeedLog().AddUploadBytes(bytesToSend);
             speedTester.AddUploadSize(bytesToSend);
-            remoteUDP.BeginSendTo(connetionSendBuffer, 0, bytesToSend, 0, remoteUDPEndPoint, new AsyncCallback(PipeRemoteUDPSendCallback), null);
         }
 
         private void PipeConnectionReceiveCallback(IAsyncResult ar)

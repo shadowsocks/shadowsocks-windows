@@ -20,6 +20,7 @@ namespace Shadowsocks.Controller
     public class Logging
     {
         public static string LogFile;
+        protected static string date;
 
         public static bool OpenLogFile()
         {
@@ -30,7 +31,8 @@ namespace Shadowsocks.Controller
                 {
                     Directory.CreateDirectory(curpath);
                 }
-                LogFile = Path.Combine(curpath, "shadowsocks.log");
+                date = DateTime.Now.ToString("yyyy-MM");
+                LogFile = Path.Combine(curpath, "shadowsocks_" + date + ".log");
                 FileStream fs = new FileStream(LogFile, FileMode.Append);
                 StreamWriterWithTimestamp sw = new StreamWriterWithTimestamp(fs);
                 sw.AutoFlush = true;
@@ -64,6 +66,10 @@ namespace Shadowsocks.Controller
 
         public static void LogUsefulException(Exception e)
         {
+            if (DateTime.Now.ToString("yyyy-MM") != date)
+            {
+                OpenLogFile();
+            }
             // just log useful exceptions, not all of them
             if (e is SocketException)
             {
@@ -108,6 +114,10 @@ namespace Shadowsocks.Controller
 
         public static bool LogSocketException(string remarks, string server, Exception e)
         {
+            if (DateTime.Now.ToString("yyyy-MM") != date)
+            {
+                OpenLogFile();
+            }
             // just log useful exceptions, not all of them
             if (e is ObfsException)
             {
