@@ -1,12 +1,17 @@
-﻿using System.IO;
-using Shadowsocks.Model;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Net;
+using System.Net.Sockets;
 using System.Text;
 using System.Threading;
-using System.Net.Sockets;
+
+using Newtonsoft.Json;
+
 using Shadowsocks.Controller.Strategy;
-using System.Net;
+using Shadowsocks.Model;
+using Shadowsocks.Properties;
+using Shadowsocks.Util;
 
 namespace Shadowsocks.Controller
 {
@@ -25,7 +30,12 @@ namespace Shadowsocks.Controller
         private StrategyManager _strategyManager;
         private PolipoRunner polipoRunner;
         private GFWListUpdater gfwListUpdater;
-        private AvailabilityStatistics _availabilityStatics;
+        public AvailabilityStatistics availabilityStatistics { get; private set; }
+        public StatisticsStrategyConfiguration StatisticsConfiguration { get; private set; }
+
+        public long inboundCounter = 0;
+        public long outboundCounter = 0;
+
         private bool stopped = false;
 
         private bool _systemProxyIsDirty = false;
@@ -53,6 +63,7 @@ namespace Shadowsocks.Controller
         public ShadowsocksController()
         {
             _config = Configuration.Load();
+            StatisticsConfiguration = StatisticsStrategyConfiguration.Load();
             _strategyManager = new StrategyManager(this);
             StartReleasingMemory();
         }
@@ -122,7 +133,13 @@ namespace Shadowsocks.Controller
         {
             _config.configs = servers;
             _config.localPort = localPort;
-            SaveConfig(_config);
+            Configuration.Save(_config);
+        }
+
+        public void SaveStrategyConfigurations(StatisticsStrategyConfiguration configuration)
+        {
+            StatisticsConfiguration = configuration;
+            StatisticsStrategyConfiguration.Save(configuration);
         }
 
         public bool AddServerBySSURL(string ssURL)
@@ -236,7 +253,7 @@ namespace Shadowsocks.Controller
         public static string GetQRCode(Server server)
         {
             string parts = server.method + ":" + server.password + "@" + server.server + ":" + server.server_port;
-            string base64 = System.Convert.ToBase64String(Encoding.UTF8.GetBytes(parts));
+            string base64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(parts));
             return "ss://" + base64;
         }
 
@@ -248,14 +265,12 @@ namespace Shadowsocks.Controller
             }
         }
 
-        public void ToggleAvailabilityStatistics(bool enabled)
+        public void UpdateStatisticsConfiguration(bool enabled)
         {
-            if (_availabilityStatics != null)
-            {
-                _availabilityStatics.Set(enabled);
-                _config.availabilityStatistics = enabled;
-                SaveConfig(_config);
-            }
+            if (availabilityStatistics == null) return;
+            availabilityStatistics.UpdateConfiguration(_config, StatisticsConfiguration);
+            _config.availabilityStatistics = enabled;
+            SaveConfig(_config);
         }
 
         public void SavePACUrl(string pacUrl)
@@ -280,10 +295,33 @@ namespace Shadowsocks.Controller
             }
         }
 
+        public void ToggleCheckingUpdate(bool enabled)
+        {
+            _config.autoCheckUpdate = enabled;
+            Configuration.Save(_config);
+        }
+
+        public void SaveLogViewerConfig(LogViewerConfig newConfig)
+        {
+            _config.logViewer = newConfig;
+            Configuration.Save(_config);
+        }
+
+        public void UpdateInboundCounter(long n)
+        {
+            Interlocked.Add(ref inboundCounter, n);
+        }
+
+        public void UpdateOutboundCounter(long n)
+        {
+            Interlocked.Add(ref outboundCounter, n);
+        }
+
         protected void Reload()
         {
             // some logic in configuration updated the config when saving, we need to read it again
             _config = Configuration.Load();
+            StatisticsConfiguration = StatisticsStrategyConfiguration.Load();
 
             if (polipoRunner == null)
             {
@@ -293,6 +331,7 @@ namespace Shadowsocks.Controller
             {
                 _pacServer = new PACServer();
                 _pacServer.PACFileChanged += pacServer_PACFileChanged;
+                _pacServer.UserRuleFileChanged += pacServer_UserRuleFileChanged;
             }
             _pacServer.UpdateConfiguration(_config);
             if (gfwListUpdater == null)
@@ -302,17 +341,16 @@ namespace Shadowsocks.Controller
                 gfwListUpdater.Error += pacServer_PACUpdateError;
             }
 
+            if (availabilityStatistics == null)
+            {
+                availabilityStatistics = new AvailabilityStatistics(_config, StatisticsConfiguration);
+            }
+            availabilityStatistics.UpdateConfiguration(_config, StatisticsConfiguration);
+
             if (_listener != null)
             {
                 _listener.Stop();
             }
-
-            if (_availabilityStatics == null)
-            {
-                _availabilityStatics = new AvailabilityStatistics();
-                _availabilityStatics.UpdateConfiguration(_config);
-            }
-
             // don't put polipoRunner.Start() before pacServer.Stop()
             // or bind will fail when switching bind address from 0.0.0.0 to 127.0.0.1
             // though UseShellExecute is set to true now
@@ -360,7 +398,7 @@ namespace Shadowsocks.Controller
             }
 
             UpdateSystemProxy();
-            Util.Utils.ReleaseMemory(true);
+            Utils.ReleaseMemory(true);
         }
 
         protected void SaveConfig(Configuration newConfig)
@@ -404,6 +442,47 @@ namespace Shadowsocks.Controller
                 UpdatePACFromGFWListError(this, e);
         }
 
+        private void pacServer_UserRuleFileChanged(object sender, EventArgs e)
+        {
+            // TODO: this is a dirty hack. (from code GListUpdater.http_DownloadStringCompleted())
+            if (!File.Exists(Utils.GetTempPath("gfwlist.txt")))
+            {
+                UpdatePACFromGFWList();
+                return;
+            }
+            List<string> lines = GFWListUpdater.ParseResult(File.ReadAllText(Utils.GetTempPath("gfwlist.txt")));
+            if (File.Exists(PACServer.USER_RULE_FILE))
+            {
+                string local = File.ReadAllText(PACServer.USER_RULE_FILE, Encoding.UTF8);
+                string[] rules = local.Split(new char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+                foreach (string rule in rules)
+                {
+                    if (rule.StartsWith("!") || rule.StartsWith("["))
+                        continue;
+                    lines.Add(rule);
+                }
+            }
+            string abpContent;
+            if (File.Exists(PACServer.USER_ABP_FILE))
+            {
+                abpContent = File.ReadAllText(PACServer.USER_ABP_FILE, Encoding.UTF8);
+            }
+            else
+            {
+                abpContent = Utils.UnGzip(Resources.abp_js);
+            }
+            abpContent = abpContent.Replace("__RULES__", JsonConvert.SerializeObject(lines, Formatting.Indented));
+            if (File.Exists(PACServer.PAC_FILE))
+            {
+                string original = File.ReadAllText(PACServer.PAC_FILE, Encoding.UTF8);
+                if (original == abpContent)
+                {
+                    return;
+                }
+            }
+            File.WriteAllText(PACServer.PAC_FILE, abpContent, Encoding.UTF8);
+        }
+
         private void StartReleasingMemory()
         {
             _ramThread = new Thread(new ThreadStart(ReleaseMemory));
@@ -415,7 +494,7 @@ namespace Shadowsocks.Controller
         {
             while (true)
             {
-                Util.Utils.ReleaseMemory(false);
+                Utils.ReleaseMemory(false);
                 Thread.Sleep(30 * 1000);
             }
         }

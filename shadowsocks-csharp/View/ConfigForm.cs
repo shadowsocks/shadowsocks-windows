@@ -48,6 +48,7 @@ namespace Shadowsocks.View
             EncryptionLabel.Text = I18N.GetString("Encryption");
             ProxyPortLabel.Text = I18N.GetString("Proxy Port");
             RemarksLabel.Text = I18N.GetString("Remarks");
+            OneTimeAuth.Text = I18N.GetString("Onetime Authentication (Experimental)");
             ServerGroupBox.Text = I18N.GetString("Server");
             OKButton.Text = I18N.GetString("OK");
             MyCancelButton.Text = I18N.GetString("Cancel");
@@ -78,11 +79,12 @@ namespace Shadowsocks.View
                 }
                 Server server = new Server
                 {
-                    server = IPTextBox.Text,
+                    server = IPTextBox.Text.Trim(),
                     server_port = int.Parse(ServerPortTextBox.Text),
                     password = PasswordTextBox.Text,
                     method = EncryptionSelect.Text,
-                    remarks = RemarksTextBox.Text
+                    remarks = RemarksTextBox.Text,
+                    auth = OneTimeAuth.Checked
                 };
                 int localPort = int.Parse(ProxyPortTextBox.Text);
                 Configuration.CheckServer(server);
@@ -115,6 +117,7 @@ namespace Shadowsocks.View
                 ProxyPortTextBox.Text = _modifiedConfiguration.localPort.ToString();
                 EncryptionSelect.Text = server.method ?? "aes-256-cfb";
                 RemarksTextBox.Text = server.remarks;
+                OneTimeAuth.Checked = server.auth;
             }
         }
 
@@ -146,6 +149,28 @@ namespace Shadowsocks.View
 
         }
 
+        private void ConfigForm_KeyDown(object sender, KeyEventArgs e)
+        {
+            // Sometimes the users may hit enter key by mistake, and the form will close without saving entries.
+
+            if (e.KeyCode == Keys.Enter)
+            {
+                Server server = controller.GetCurrentServer();
+                if (!SaveOldSelectedServer())
+                {
+                    return;
+                }
+                if (_modifiedConfiguration.configs.Count == 0)
+                {
+                    MessageBox.Show(I18N.GetString("Please add at least one server"));
+                    return;
+                }
+                controller.SaveServers(_modifiedConfiguration.configs, _modifiedConfiguration.localPort);
+                controller.SelectServerIndex(_modifiedConfiguration.configs.IndexOf(server));
+            }
+
+        }
+
         private void ServersListBox_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (!ServersListBox.CanSelect)
@@ -163,7 +188,10 @@ namespace Shadowsocks.View
                 ServersListBox.SelectedIndex = _lastSelectedIndex;
                 return;
             }
-            ServersListBox.Items[_lastSelectedIndex] = _modifiedConfiguration.configs[_lastSelectedIndex].FriendlyName();
+            if (_lastSelectedIndex >= 0)
+            {
+                ServersListBox.Items[_lastSelectedIndex] = _modifiedConfiguration.configs[_lastSelectedIndex].FriendlyName();
+            }
             UpdateMoveUpAndDownButton();
             LoadSelectedServer();
             _lastSelectedIndex = ServersListBox.SelectedIndex;
@@ -295,6 +323,19 @@ namespace Shadowsocks.View
             if (ServersListBox.SelectedIndex < ServersListBox.Items.Count - 1)
             {
                 MoveConfigItem(+1);  // +1 means move forward
+            }
+        }
+
+        private void EncryptionSelect_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (EncryptionSelect.Text == "rc4" || EncryptionSelect.Text == "table")
+            {
+                OneTimeAuth.Enabled = false;
+                OneTimeAuth.Checked = false;
+            }
+            else
+            {
+                OneTimeAuth.Enabled = true;
             }
         }
     }

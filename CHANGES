@@ -1,3 +1,9 @@
+2.5.8 2015-09-20
+- Update GFWList url
+
+2.5.7 2015-09-19
+- Fix repeated IV
+
 2.5.6 2015-08-19
 - Add portable mode. Create shadowsocks_portable_mode.txt to use it
 - Support server reorder

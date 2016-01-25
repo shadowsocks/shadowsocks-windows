@@ -1,12 +1,12 @@
-﻿using Shadowsocks.Controller;
-using Shadowsocks.Properties;
-using Shadowsocks.View;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using System.Windows.Forms;
+
+using Shadowsocks.Controller;
+using Shadowsocks.Util;
+using Shadowsocks.View;
 
 namespace Shadowsocks
 {
@@ -18,7 +18,7 @@ namespace Shadowsocks
         [STAThread]
         static void Main()
         {
-            Util.Utils.ReleaseMemory(true);
+            Utils.ReleaseMemory(true);
             using (Mutex mutex = new Mutex(false, "Global\\Shadowsocks_" + Application.StartupPath.GetHashCode()))
             {
                 Application.EnableVisualStyles();
@@ -37,15 +37,19 @@ namespace Shadowsocks
                     return;
                 }
                 Directory.SetCurrentDirectory(Application.StartupPath);
-#if !DEBUG
+#if DEBUG
+                Logging.OpenLogFile();
+
+                // truncate privoxy log file while debugging
+                string privoxyLogFilename = Utils.GetTempPath("privoxy.log");
+                if (File.Exists(privoxyLogFilename))
+                    using (new FileStream(privoxyLogFilename, FileMode.Truncate)) { }
+#else
                 Logging.OpenLogFile();
 #endif
                 ShadowsocksController controller = new ShadowsocksController();
-
                 MenuViewController viewController = new MenuViewController(controller);
-
                 controller.Start();
-
                 Application.Run();
             }
         }
