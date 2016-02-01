@@ -357,7 +357,7 @@ namespace Shadowsocks.Model
             {
                 errorDecodeTimes += 1;
                 errorContinurousTimes += 1;
-                errList.AddLast(3);
+                errList.AddLast(0);
                 if (lastError == 3)
                 {
                 }
@@ -420,6 +420,16 @@ namespace Shadowsocks.Model
             lock (this)
             {
                 transDownloadRaw += bytes;
+            }
+        }
+        public void ResetErrorDecodeTimes()
+        {
+            lock (this)
+            {
+                lastError = 0;
+                errorDecodeTimes = 0;
+                errorEmptyTimes = 0;
+                errorContinurousTimes = 0;
             }
         }
         public void ResetContinurousTimes()
