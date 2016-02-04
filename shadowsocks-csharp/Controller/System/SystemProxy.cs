@@ -102,12 +102,16 @@ namespace Shadowsocks.Controller
                 var connections = registry.GetValueNames();
                 foreach (var each in connections)
                 {
-                    if (!(each.Equals("DefaultConnectionSettings")
-                        || each.Equals("LAN Connection")
-                        || each.Equals("SavedLegacySettings")))
+                    switch (each)
                     {
-                        //set all the connections's proxy as the lan
-                        registry.SetValue(each, defaultValue);
+                        case "DefaultConnectionSettings":
+                        case "LAN Connection":
+                        case "SavedLegacySettings":
+                            continue;
+                        default:
+                            //set all the connections's proxy as the lan
+                            registry.SetValue(each, defaultValue);
+                            continue;
                     }
                 }
                 NotifyIE();
