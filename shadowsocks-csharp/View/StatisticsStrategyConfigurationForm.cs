@@ -108,7 +108,7 @@ namespace Shadowsocks.View
                                 Timestamp = dataGroup.First().Timestamp,
                                 Ping = (int)dataGroup.Average(data => data.RoundtripTime),
                                 PackageLoss = (int)
-                                              (dataGroup.Count(data => data.ICMPStatus.Equals(IPStatus.TimedOut.ToString()))
+                                              (dataGroup.Count(data => data.ICMPStatus == IPStatus.TimedOut.ToString())
                                               / (float)dataGroup.Count() * 100)
                             };
             foreach (var data in finalData)

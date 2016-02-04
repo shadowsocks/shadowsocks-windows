@@ -18,7 +18,7 @@ namespace Shadowsocks.Controller.Strategy
         private readonly Timer _timer;
         private Dictionary<string, List<AvailabilityStatistics.RawStatisticsData>> _filteredStatistics;
         private int ChoiceKeptMilliseconds
-            => (int) TimeSpan.FromMinutes(_controller.StatisticsConfiguration.ChoiceKeptMinutes).TotalMilliseconds;
+            => (int)TimeSpan.FromMinutes(_controller.StatisticsConfiguration.ChoiceKeptMinutes).TotalMilliseconds;
 
         public StatisticsStrategy(ShadowsocksController controller)
         {
@@ -49,11 +49,11 @@ namespace Shadowsocks.Controller.Strategy
             var config = _controller.StatisticsConfiguration;
             List<AvailabilityStatistics.RawStatisticsData> dataList;
             if (_filteredStatistics == null || !_filteredStatistics.TryGetValue(serverName, out dataList)) return 0;
-            var successTimes = (float) dataList.Count(data => data.ICMPStatus.Equals(IPStatus.Success.ToString()));
-            var timedOutTimes = (float) dataList.Count(data => data.ICMPStatus.Equals(IPStatus.TimedOut.ToString()));
+            var successTimes = (float)dataList.Count(data => data.ICMPStatus == IPStatus.Success.ToString());
+            var timedOutTimes = (float)dataList.Count(data => data.ICMPStatus == IPStatus.TimedOut.ToString());
             var statisticsData = new AvailabilityStatistics.StatisticsData
             {
-                PackageLoss = timedOutTimes/(successTimes + timedOutTimes)*100,
+                PackageLoss = timedOutTimes / (successTimes + timedOutTimes) * 100,
                 AverageResponse = Convert.ToInt32(dataList.Average(data => data.RoundtripTime)),
                 MinResponse = dataList.Min(data => data.RoundtripTime),
                 MaxResponse = dataList.Max(data => data.RoundtripTime)
@@ -61,13 +61,13 @@ namespace Shadowsocks.Controller.Strategy
             float factor;
             float score = 0;
             if (!config.Calculations.TryGetValue("PackageLoss", out factor)) factor = 0;
-            score += statisticsData.PackageLoss*factor;
+            score += statisticsData.PackageLoss * factor;
             if (!config.Calculations.TryGetValue("AverageResponse", out factor)) factor = 0;
-            score += statisticsData.AverageResponse*factor;
+            score += statisticsData.AverageResponse * factor;
             if (!config.Calculations.TryGetValue("MinResponse", out factor)) factor = 0;
-            score += statisticsData.MinResponse*factor;
+            score += statisticsData.MinResponse * factor;
             if (!config.Calculations.TryGetValue("MaxResponse", out factor)) factor = 0;
-            score += statisticsData.MaxResponse*factor;
+            score += statisticsData.MaxResponse * factor;
             Logging.Debug($"{serverName}  {JsonConvert.SerializeObject(statisticsData)}");
             return score;
         }
@@ -90,7 +90,7 @@ namespace Shadowsocks.Controller.Strategy
                                   }
                                   ).Aggregate((result1, result2) => result1.score > result2.score ? result1 : result2);
 
-               LogWhenEnabled($"Switch to server: {bestResult.server.FriendlyName()} by statistics: score {bestResult.score}");
+                LogWhenEnabled($"Switch to server: {bestResult.server.FriendlyName()} by statistics: score {bestResult.score}");
                 _currentServer = bestResult.server;
             }
             catch (Exception e)

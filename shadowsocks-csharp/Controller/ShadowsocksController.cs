@@ -457,7 +457,7 @@ namespace Shadowsocks.Controller
                 string[] rules = local.Split(new char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
                 foreach (string rule in rules)
                 {
-                    if (rule.StartsWith("!") || rule.StartsWith("["))
+                    if (rule[0] == '!' || rule[0] == '[')
                         continue;
                     lines.Add(rule);
                 }
