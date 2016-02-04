@@ -514,7 +514,8 @@ namespace ZXing.QrCode.Internal
                               BitArray bits,
                               String encoding)
       {
-        if (mode.Equals(Mode.BYTE))
+         // TODO: check the purpose of this .Equals(obj)
+        if (mode == Mode.BYTE)
             append8BitBytes(content, bits, encoding);
             else
                 throw new WriterException("Invalid mode: " + mode);
