@@ -51,12 +51,12 @@ namespace Shadowsocks.Controller
                 string[] runList = runKey.GetValueNames();
                 foreach (string item in runList)
                 {
-                    if (item == Key)
+                    if (item.Equals(Key, StringComparison.OrdinalIgnoreCase))
                         return true;
-                    else if (item == "Shadowsocks") // Compatibility with older versions
+                    else if (item.Equals("Shadowsocks", StringComparison.OrdinalIgnoreCase)) // Compatibility with older versions
                     {
                         string value = Convert.ToString(runKey.GetValue(item));
-                        if (path.Equals(value, StringComparison.InvariantCultureIgnoreCase))
+                        if (path.Equals(value, StringComparison.OrdinalIgnoreCase))
                         {
                             runKey.DeleteValue(item);
                             runKey.SetValue(Key, path);
@@ -76,7 +76,7 @@ namespace Shadowsocks.Controller
                 if (runKey != null)
                 {
                     try { runKey.Close(); }
-                    catch(Exception e)
+                    catch (Exception e)
                     { Logging.LogUsefulException(e); }
                 }
             }
