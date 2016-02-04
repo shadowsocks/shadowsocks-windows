@@ -129,18 +129,26 @@ namespace Shadowsocks.Controller
             var defConnection = (byte[])registry.GetValue("DefaultConnectionSettings");
             var savedLegacySetting = (byte[])registry.GetValue("SavedLegacySettings");
 
+            const int versionOffset = 4;
+            const int optionsOffset = 8;
+
             if (set)
             {
-                defConnection[8] = (byte)(defConnection[8] | 8);
-                savedLegacySetting[8] = (byte)(savedLegacySetting[8] | 8);
+                defConnection[optionsOffset] = (byte)(defConnection[optionsOffset] | 8);
+                savedLegacySetting[optionsOffset] = (byte)(savedLegacySetting[optionsOffset] | 8);
             }
             else
             {
-                defConnection[8] = (byte)(defConnection[8] & ~8);
-                savedLegacySetting[8] = (byte)(savedLegacySetting[8] & ~8);
+                defConnection[optionsOffset] = (byte)(defConnection[optionsOffset] & ~8);
+                savedLegacySetting[optionsOffset] = (byte)(savedLegacySetting[optionsOffset] & ~8);
             }
-            BitConverter.GetBytes(unchecked(BitConverter.ToUInt32(defConnection, 4) + 1)).CopyTo(defConnection, 4);
-            BitConverter.GetBytes(unchecked(BitConverter.ToUInt32(savedLegacySetting, 4) + 1)).CopyTo(savedLegacySetting, 4);
+
+            BitConverter.GetBytes(
+                unchecked(BitConverter.ToUInt32(defConnection, versionOffset) + 1))
+                .CopyTo(defConnection, versionOffset);
+            BitConverter.GetBytes(
+                unchecked(BitConverter.ToUInt32(savedLegacySetting, versionOffset) + 1))
+                .CopyTo(savedLegacySetting, versionOffset);
 
             registry.SetValue("DefaultConnectionSettings", defConnection);
             registry.SetValue("SavedLegacySettings", savedLegacySetting);
