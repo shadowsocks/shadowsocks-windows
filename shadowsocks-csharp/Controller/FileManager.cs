@@ -10,37 +10,35 @@ namespace Shadowsocks.Controller
         {
             try
             {
-                FileStream _FileStream = new FileStream(fileName, FileMode.Create, FileAccess.Write);
-                _FileStream.Write(content, 0, content.Length);
-                _FileStream.Close();
+                using (var fs = new FileStream(fileName, FileMode.Create, FileAccess.Write))
+                    fs.Write(content, 0, content.Length);
                 return true;
             }
-            catch (Exception _Exception)
+            catch (Exception ex)
             {
                 Console.WriteLine("Exception caught in process: {0}",
-                                  _Exception.ToString());
+                                  ex.ToString());
             }
             return false;
         }
 
         public static void UncompressFile(string fileName, byte[] content)
         {
-            FileStream destinationFile = File.Create(fileName);
-
             // Because the uncompressed size of the file is unknown,
             // we are using an arbitrary buffer size.
             byte[] buffer = new byte[4096];
             int n;
 
-            using (GZipStream input = new GZipStream(new MemoryStream(content),
+            using(var fs = File.Create(fileName))
+            using (var input = new GZipStream(
+                new MemoryStream(content),
                 CompressionMode.Decompress, false))
             {
                 while ((n = input.Read(buffer, 0, buffer.Length)) > 0)
                 {
-                    destinationFile.Write(buffer, 0, n);
+                    fs.Write(buffer, 0, n);
                 }
             }
-            destinationFile.Close();
         }
 
     }
