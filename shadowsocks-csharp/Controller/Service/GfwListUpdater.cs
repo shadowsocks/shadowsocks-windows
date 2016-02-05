@@ -42,7 +42,7 @@ namespace Shadowsocks.Controller
                     string[] rules = local.Split(new char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
                     foreach (string rule in rules)
                     {
-                        if (rule.StartsWith("!") || rule.StartsWith("["))
+                        if (rule[0] == '!' || rule[0] == '[')
                             continue;
                         lines.Add(rule);
                     }
@@ -97,7 +97,7 @@ namespace Shadowsocks.Controller
             List<string> valid_lines = new List<string>(lines.Length);
             foreach (string line in lines)
             {
-                if (line.StartsWith("!") || line.StartsWith("["))
+                if (line[0] == '!' || line[0] == '[')
                     continue;
                 valid_lines.Add(line);
             }
