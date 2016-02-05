@@ -33,8 +33,10 @@
             System.Windows.Forms.DataVisualization.Charting.Legend legend1 = new System.Windows.Forms.DataVisualization.Charting.Legend();
             System.Windows.Forms.DataVisualization.Charting.Series series1 = new System.Windows.Forms.DataVisualization.Charting.Series();
             System.Windows.Forms.DataVisualization.Charting.Series series2 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.Series series3 = new System.Windows.Forms.DataVisualization.Charting.Series();
             this.StatisticsChart = new System.Windows.Forms.DataVisualization.Charting.Chart();
             this.PingCheckBox = new System.Windows.Forms.CheckBox();
+            this.bindingConfiguration = new System.Windows.Forms.BindingSource(this.components);
             this.label2 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
             this.chartModeSelector = new System.Windows.Forms.GroupBox();
@@ -56,8 +58,8 @@
             this.serverSelector = new System.Windows.Forms.ComboBox();
             this.CancelButton = new System.Windows.Forms.Button();
             this.OKButton = new System.Windows.Forms.Button();
-            this.bindingConfiguration = new System.Windows.Forms.BindingSource(this.components);
             ((System.ComponentModel.ISupportInitialize)(this.StatisticsChart)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.bindingConfiguration)).BeginInit();
             this.chartModeSelector.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
@@ -74,7 +76,6 @@
             this.splitContainer3.Panel1.SuspendLayout();
             this.splitContainer3.Panel2.SuspendLayout();
             this.splitContainer3.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.bindingConfiguration)).BeginInit();
             this.SuspendLayout();
             // 
             // StatisticsChart
@@ -108,10 +109,16 @@
             series2.Legend = "ChartLegend";
             series2.Name = "Ping";
             series2.XValueType = System.Windows.Forms.DataVisualization.Charting.ChartValueType.DateTime;
+            series3.ChartArea = "DataArea";
+            series3.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Area;
+            series3.Legend = "ChartLegend";
+            series3.Name = "Speed";
             this.StatisticsChart.Series.Add(series1);
             this.StatisticsChart.Series.Add(series2);
+            this.StatisticsChart.Series.Add(series3);
             this.StatisticsChart.Size = new System.Drawing.Size(1089, 303);
             this.StatisticsChart.TabIndex = 2;
+            this.StatisticsChart.Click += new System.EventHandler(this.StatisticsChart_Click);
             // 
             // PingCheckBox
             // 
@@ -125,6 +132,10 @@
             this.PingCheckBox.Text = "Ping Test";
             this.PingCheckBox.UseVisualStyleBackColor = true;
             this.PingCheckBox.CheckedChanged += new System.EventHandler(this.PingCheckBox_CheckedChanged);
+            // 
+            // bindingConfiguration
+            // 
+            this.bindingConfiguration.DataSource = typeof(Shadowsocks.Model.StatisticsStrategyConfiguration);
             // 
             // label2
             // 
@@ -151,7 +162,7 @@
             this.chartModeSelector.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.chartModeSelector.Controls.Add(this.allMode);
             this.chartModeSelector.Controls.Add(this.dayMode);
-            this.chartModeSelector.Location = new System.Drawing.Point(813, 98);
+            this.chartModeSelector.Location = new System.Drawing.Point(813, 92);
             this.chartModeSelector.Margin = new System.Windows.Forms.Padding(5, 10, 5, 10);
             this.chartModeSelector.Name = "chartModeSelector";
             this.chartModeSelector.Padding = new System.Windows.Forms.Padding(5, 10, 5, 10);
@@ -421,7 +432,7 @@
             // 
             this.serverSelector.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.serverSelector.FormattingEnabled = true;
-            this.serverSelector.Location = new System.Drawing.Point(813, 61);
+            this.serverSelector.Location = new System.Drawing.Point(813, 55);
             this.serverSelector.Name = "serverSelector";
             this.serverSelector.Size = new System.Drawing.Size(260, 31);
             this.serverSelector.TabIndex = 6;
@@ -430,7 +441,7 @@
             // CancelButton
             // 
             this.CancelButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.CancelButton.Location = new System.Drawing.Point(972, 214);
+            this.CancelButton.Location = new System.Drawing.Point(972, 208);
             this.CancelButton.Name = "CancelButton";
             this.CancelButton.Size = new System.Drawing.Size(101, 41);
             this.CancelButton.TabIndex = 5;
@@ -441,17 +452,13 @@
             // OKButton
             // 
             this.OKButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.OKButton.Location = new System.Drawing.Point(864, 214);
+            this.OKButton.Location = new System.Drawing.Point(864, 208);
             this.OKButton.Name = "OKButton";
             this.OKButton.Size = new System.Drawing.Size(101, 41);
             this.OKButton.TabIndex = 4;
             this.OKButton.Text = "OK";
             this.OKButton.UseVisualStyleBackColor = true;
             this.OKButton.Click += new System.EventHandler(this.OKButton_Click);
-            // 
-            // bindingConfiguration
-            // 
-            this.bindingConfiguration.DataSource = typeof(Shadowsocks.Model.StatisticsStrategyConfiguration);
             // 
             // StatisticsStrategyConfigurationForm
             // 
@@ -466,6 +473,7 @@
             this.Name = "StatisticsStrategyConfigurationForm";
             this.Text = "StatisticsStrategyConfigurationForm";
             ((System.ComponentModel.ISupportInitialize)(this.StatisticsChart)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.bindingConfiguration)).EndInit();
             this.chartModeSelector.ResumeLayout(false);
             this.chartModeSelector.PerformLayout();
             this.splitContainer1.Panel1.ResumeLayout(false);
@@ -485,7 +493,6 @@
             this.splitContainer3.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer3)).EndInit();
             this.splitContainer3.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.bindingConfiguration)).EndInit();
             this.ResumeLayout(false);
 
         }

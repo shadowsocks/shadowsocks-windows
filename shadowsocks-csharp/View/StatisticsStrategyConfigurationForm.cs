@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using System.Net.NetworkInformation;
 using System.Windows.Forms;
 
 using Shadowsocks.Controller;
@@ -52,15 +51,22 @@ namespace Shadowsocks.View
             serverSelector.DataSource = _servers;
 
             _dataTable.Columns.Add("Timestamp", typeof(DateTime));
-            _dataTable.Columns.Add("Package Loss", typeof(int));
-            _dataTable.Columns.Add("Ping", typeof(int));
+            _dataTable.Columns.Add("Speed", typeof (int));
+            StatisticsChart.Series["Speed"].XValueMember = "Timestamp";
+            StatisticsChart.Series["Speed"].YValueMembers = "Speed";
 
-            StatisticsChart.Series["Package Loss"].XValueMember = "Timestamp";
-            StatisticsChart.Series["Package Loss"].YValueMembers = "Package Loss";
-            StatisticsChart.Series["Ping"].XValueMember = "Timestamp";
-            StatisticsChart.Series["Ping"].YValueMembers = "Ping";
+            if (_configuration.Ping)
+            {
+                _dataTable.Columns.Add("Package Loss", typeof (int));
+                _dataTable.Columns.Add("Ping", typeof (int));
+                StatisticsChart.Series["Package Loss"].XValueMember = "Timestamp";
+                StatisticsChart.Series["Package Loss"].YValueMembers = "Package Loss";
+                StatisticsChart.Series["Ping"].XValueMember = "Timestamp";
+                StatisticsChart.Series["Ping"].YValueMembers = "Ping";
+            }
+
             StatisticsChart.DataSource = _dataTable;
-            loadChartData();
+            LoadChartData();
             StatisticsChart.DataBind();
         }
 
@@ -80,9 +86,9 @@ namespace Shadowsocks.View
             Close();
         }
 
-        private void loadChartData()
+        private void LoadChartData()
         {
-            string serverName = _servers[serverSelector.SelectedIndex];
+            var serverName = _servers[serverSelector.SelectedIndex];
             _dataTable.Rows.Clear();
 
             //return directly when no data is usable
@@ -118,7 +124,7 @@ namespace Shadowsocks.View
 
         private void serverSelector_SelectedIndexChanged(object sender, EventArgs e)
         {
-            loadChartData();
+            LoadChartData();
         }
 
         private void chartModeSelector_Enter(object sender, EventArgs e)
@@ -128,17 +134,22 @@ namespace Shadowsocks.View
 
         private void dayMode_CheckedChanged(object sender, EventArgs e)
         {
-            loadChartData();
+            LoadChartData();
         }
 
         private void allMode_CheckedChanged(object sender, EventArgs e)
         {
-            loadChartData();
+            LoadChartData();
         }
 
         private void PingCheckBox_CheckedChanged(object sender, EventArgs e)
         {
             repeatTimesNum.ReadOnly = !PingCheckBox.Checked;
+        }
+
+        private void StatisticsChart_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }
