@@ -454,7 +454,6 @@ namespace Shadowsocks.Controller
             if (File.Exists(PACServer.USER_RULE_FILE))
             {
                 string local = File.ReadAllText(PACServer.USER_RULE_FILE, Encoding.UTF8);
-                string[] rules = local.Split(new char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
                 using (var sr = new StringReader(local))
                 {
                     string rule;
