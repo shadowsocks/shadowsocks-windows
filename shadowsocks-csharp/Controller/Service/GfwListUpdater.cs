@@ -30,6 +30,7 @@ namespace Shadowsocks.Controller
             }
         }
 
+        private static readonly IEnumerable<char> IgnoredLineBegins = new[] { '!', '[' };
         private void http_DownloadStringCompleted(object sender, DownloadStringCompletedEventArgs e)
         {
             try
@@ -44,7 +45,7 @@ namespace Shadowsocks.Controller
                         string rule;
                         while ((rule = sr.ReadLine()) != null)
                         {
-                            if (rule == "" || rule[0] == '!' || rule[0] == '[')
+                            if (rule.BeginWithAny(IgnoredLineBegins))
                                 continue;
                             lines.Add(rule);
                         }
@@ -102,7 +103,7 @@ namespace Shadowsocks.Controller
                 string line;
                 while ((line = sr.ReadLine()) != null)
                 {
-                    if (line == "" || line[0] == '!' || line[0] == '[')
+                    if (line.BeginWithAny(IgnoredLineBegins))
                         continue;
                     valid_lines.Add(line);
                 }

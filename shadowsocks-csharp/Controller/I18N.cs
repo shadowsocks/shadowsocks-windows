@@ -21,7 +21,7 @@ namespace Shadowsocks.Controller
                     string line;
                     while ((line = sr.ReadLine()) != null)
                     {
-                        if (line == "" || line[0] == '#')
+                        if (line.BeginWith('#'))
                             continue;
 
                         var pos = line.IndexOf('=');
