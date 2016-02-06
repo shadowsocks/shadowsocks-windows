@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Text;
 
@@ -25,6 +26,17 @@ static partial class StringEx
 
     public static bool IsNullOrWhiteSpace(this string value)
         => string.IsNullOrWhiteSpace(value);
+
+    public static bool IsWhiteSpace(this string value)
+    {
+        foreach(var c in value)
+        {
+            if (char.IsWhiteSpace(c)) continue;
+
+            return false;
+        }
+        return true;
+    }
 
 #if !PCL
     public static string IsInterned(this string value)
@@ -132,6 +144,35 @@ static partial class StringEx
 #endif
 
     #endregion
+
+    #endregion
+
+    #region ToLines
+
+    public static IEnumerable<string> ToLines(this TextReader reader)
+    {
+        string line;
+        while ((line = reader.ReadLine()) != null)
+            yield return line;
+    }
+    public static IEnumerable<string> NonEmptyLines(this TextReader reader)
+    {
+        string line;
+        while ((line = reader.ReadLine()) != null)
+        {
+            if (line == "") continue;
+            yield return line;
+        }
+    }
+    public static IEnumerable<string> NonWhiteSpaceLines(this TextReader reader)
+    {
+        string line;
+        while ((line = reader.ReadLine()) != null)
+        {
+            if (line.IsWhiteSpace()) continue;
+            yield return line;
+        }
+    }
 
     #endregion
 

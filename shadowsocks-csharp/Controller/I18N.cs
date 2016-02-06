@@ -18,10 +18,9 @@ namespace Shadowsocks.Controller
             {
                 using (var sr = new StringReader(Resources.cn))
                 {
-                    string line;
-                    while ((line = sr.ReadLine()) != null)
+                    foreach (var line in sr.NonWhiteSpaceLines())
                     {
-                        if (line.BeginWith('#'))
+                        if (line[0] == '#')
                             continue;
 
                         var pos = line.IndexOf('=');

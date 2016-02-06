@@ -42,8 +42,7 @@ namespace Shadowsocks.Controller
                     string local = File.ReadAllText(PACServer.USER_RULE_FILE, Encoding.UTF8);
                     using (var sr = new StringReader(local))
                     {
-                        string rule;
-                        while ((rule = sr.ReadLine()) != null)
+                        foreach (var rule in sr.NonWhiteSpaceLines())
                         {
                             if (rule.BeginWithAny(IgnoredLineBegins))
                                 continue;
@@ -100,8 +99,7 @@ namespace Shadowsocks.Controller
             List<string> valid_lines = new List<string>();
             using (var sr = new StringReader(content))
             {
-                string line;
-                while ((line = sr.ReadLine()) != null)
+                foreach (var line in sr.NonWhiteSpaceLines())
                 {
                     if (line.BeginWithAny(IgnoredLineBegins))
                         continue;

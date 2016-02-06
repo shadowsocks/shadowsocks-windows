@@ -457,8 +457,7 @@ namespace Shadowsocks.Controller
                 string local = File.ReadAllText(PACServer.USER_RULE_FILE, Encoding.UTF8);
                 using (var sr = new StringReader(local))
                 {
-                    string rule;
-                    while ((rule = sr.ReadLine()) != null)
+                    foreach (var rule in sr.NonWhiteSpaceLines())
                     {
                         if (rule.BeginWithAny(IgnoredLineBegins))
                             continue;
