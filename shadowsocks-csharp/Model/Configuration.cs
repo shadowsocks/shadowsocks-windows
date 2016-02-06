@@ -124,13 +124,13 @@ namespace Shadowsocks.Model
 
         private static void CheckPassword(string password)
         {
-            if (string.IsNullOrEmpty(password))
+            if (password.IsNullOrEmpty())
                 throw new ArgumentException(I18N.GetString("Password can not be blank"));
         }
 
         private static void CheckServer(string server)
         {
-            if (string.IsNullOrEmpty(server))
+            if (server.IsNullOrEmpty())
                 throw new ArgumentException(I18N.GetString("Server IP can not be blank"));
         }
     }
