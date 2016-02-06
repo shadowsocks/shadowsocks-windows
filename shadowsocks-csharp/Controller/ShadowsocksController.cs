@@ -455,11 +455,15 @@ namespace Shadowsocks.Controller
             {
                 string local = File.ReadAllText(PACServer.USER_RULE_FILE, Encoding.UTF8);
                 string[] rules = local.Split(new char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
-                foreach (string rule in rules)
+                using (var sr = new StringReader(local))
                 {
-                    if (rule[0] == '!' || rule[0] == '[')
-                        continue;
-                    lines.Add(rule);
+                    string rule;
+                    while ((rule = sr.ReadLine()) != null)
+                    {
+                        if (rule == "" || rule[0] == '!' || rule[0] == '[')
+                            continue;
+                        lines.Add(rule);
+                    }
                 }
             }
             string abpContent;

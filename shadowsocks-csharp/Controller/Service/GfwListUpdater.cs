@@ -39,12 +39,15 @@ namespace Shadowsocks.Controller
                 if (File.Exists(PACServer.USER_RULE_FILE))
                 {
                     string local = File.ReadAllText(PACServer.USER_RULE_FILE, Encoding.UTF8);
-                    string[] rules = local.Split(new char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
-                    foreach (string rule in rules)
+                    using (var sr = new StringReader(local))
                     {
-                        if (rule[0] == '!' || rule[0] == '[')
-                            continue;
-                        lines.Add(rule);
+                        string rule;
+                        while ((rule = sr.ReadLine()) != null)
+                        {
+                            if (rule == "" || rule[0] == '!' || rule[0] == '[')
+                                continue;
+                            lines.Add(rule);
+                        }
                     }
                 }
                 string abpContent;
@@ -93,13 +96,16 @@ namespace Shadowsocks.Controller
         {
             byte[] bytes = Convert.FromBase64String(response);
             string content = Encoding.ASCII.GetString(bytes);
-            string[] lines = content.Split(new char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
-            List<string> valid_lines = new List<string>(lines.Length);
-            foreach (string line in lines)
+            List<string> valid_lines = new List<string>();
+            using (var sr = new StringReader(content))
             {
-                if (line[0] == '!' || line[0] == '[')
-                    continue;
-                valid_lines.Add(line);
+                string line;
+                while ((line = sr.ReadLine()) != null)
+                {
+                    if (line == "" || line[0] == '!' || line[0] == '[')
+                        continue;
+                    valid_lines.Add(line);
+                }
             }
             return valid_lines;
         }
