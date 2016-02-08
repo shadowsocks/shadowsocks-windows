@@ -60,7 +60,7 @@ namespace Shadowsocks.Controller
                     else
                     {
                         string pacUrl;
-                        if (config.useOnlinePac && !string.IsNullOrEmpty(config.pacUrl))
+                        if (config.useOnlinePac && !config.pacUrl.IsNullOrEmpty())
                             pacUrl = config.pacUrl;
                         else
                             pacUrl = $"http://127.0.0.1:{config.localPort}/pac?t={GetTimestamp(DateTime.Now)}";

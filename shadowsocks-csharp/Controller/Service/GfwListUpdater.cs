@@ -30,6 +30,7 @@ namespace Shadowsocks.Controller
             }
         }
 
+        private static readonly IEnumerable<char> IgnoredLineBegins = new[] { '!', '[' };
         private void http_DownloadStringCompleted(object sender, DownloadStringCompletedEventArgs e)
         {
             try
@@ -41,10 +42,9 @@ namespace Shadowsocks.Controller
                     string local = File.ReadAllText(PACServer.USER_RULE_FILE, Encoding.UTF8);
                     using (var sr = new StringReader(local))
                     {
-                        string rule;
-                        while ((rule = sr.ReadLine()) != null)
+                        foreach (var rule in sr.NonWhiteSpaceLines())
                         {
-                            if (rule == "" || rule[0] == '!' || rule[0] == '[')
+                            if (rule.BeginWithAny(IgnoredLineBegins))
                                 continue;
                             lines.Add(rule);
                         }
@@ -99,10 +99,9 @@ namespace Shadowsocks.Controller
             List<string> valid_lines = new List<string>();
             using (var sr = new StringReader(content))
             {
-                string line;
-                while ((line = sr.ReadLine()) != null)
+                foreach (var line in sr.NonWhiteSpaceLines())
                 {
-                    if (line == "" || line[0] == '!' || line[0] == '[')
+                    if (line.BeginWithAny(IgnoredLineBegins))
                         continue;
                     valid_lines.Add(line);
                 }
