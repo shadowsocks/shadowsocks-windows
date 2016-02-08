@@ -247,7 +247,7 @@ namespace Shadowsocks.Controller
                 {
                     var currentHour = DateTime.Now.Hour;
                     filteredData = filteredData.Where(data =>
-                        data.Timestamp != UnknownDateTime && data.Timestamp.Hour.Equals(currentHour)
+                        data.Timestamp != UnknownDateTime && data.Timestamp.Hour == currentHour
                     );
                     if (filteredData.LongCount() == 0) return;
                 }
