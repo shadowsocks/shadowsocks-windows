@@ -9,6 +9,7 @@ using ZXing.Common;
 using ZXing.QrCode;
 
 using Shadowsocks.Controller;
+using Shadowsocks.Controller.Service;
 using Shadowsocks.Model;
 using Shadowsocks.Properties;
 using Shadowsocks.Util;
@@ -194,6 +195,8 @@ namespace Shadowsocks.View
                 new MenuItem("-"),
                 this.AutoStartupItem = CreateMenuItem("Start on Boot", new EventHandler(this.AutoStartupItem_Click)),
                 this.ShareOverLANItem = CreateMenuItem("Allow Clients from LAN", new EventHandler(this.ShareOverLANItem_Click)),
+                new MenuItem("-"),
+                CreateMenuItem("Test connection speed...", TestConnectionSpeedItem_Click),
                 new MenuItem("-"),
                 CreateMenuItem("Show Logs...", new EventHandler(this.ShowLogItem_Click)),
                 CreateMenuGroup("Updates...", new MenuItem[] {
@@ -487,6 +490,11 @@ namespace Shadowsocks.View
         {
             MenuItem item = (MenuItem)sender;
             controller.SelectStrategy((string)item.Tag);
+        }
+
+        private void TestConnectionSpeedItem_Click(object sender, EventArgs e)
+        {
+            ConnectionSpeedTester.TestConnection(new ConnectionSpeedTester.BackgroundThread(controller));
         }
 
         private void ShowLogItem_Click(object sender, EventArgs e)

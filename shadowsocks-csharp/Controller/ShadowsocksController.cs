@@ -28,7 +28,7 @@ namespace Shadowsocks.Controller
         private PACServer _pacServer;
         private Configuration _config;
         private StrategyManager _strategyManager;
-        private PolipoRunner polipoRunner;
+        internal PolipoRunner polipoRunner;
         private GFWListUpdater gfwListUpdater;
         public AvailabilityStatistics availabilityStatistics { get; private set; }
         public StatisticsStrategyConfiguration StatisticsConfiguration { get; private set; }
