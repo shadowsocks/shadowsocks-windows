@@ -29,11 +29,11 @@ namespace Shadowsocks.Model
 
         public string FriendlyName()
         {
-            if (string.IsNullOrEmpty(server))
+            if (server.IsNullOrEmpty())
             {
                 return I18N.GetString("New server");
             }
-            if (string.IsNullOrEmpty(remarks))
+            if (remarks.IsNullOrEmpty())
             {
                 return server + ":" + server_port;
             }
