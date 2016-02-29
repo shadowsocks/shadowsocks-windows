@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
-
+using System.Windows.Forms.DataVisualization.Charting;
 using Shadowsocks.Controller;
 using Shadowsocks.Model;
 
@@ -50,20 +51,22 @@ namespace Shadowsocks.View
 
             serverSelector.DataSource = _servers;
 
+            var speedSeries = StatisticsChart.Series["Speed"];
+            var packageLossSeries = StatisticsChart.Series["Package Loss"];
+            var pingSeries = StatisticsChart.Series["Ping"];
+
             _dataTable.Columns.Add("Timestamp", typeof(DateTime));
             _dataTable.Columns.Add("Speed", typeof (int));
-            StatisticsChart.Series["Speed"].XValueMember = "Timestamp";
-            StatisticsChart.Series["Speed"].YValueMembers = "Speed";
+            speedSeries.XValueMember = "Timestamp";
+            speedSeries.YValueMembers = "Speed";
 
-            if (_configuration.Ping)
-            {
-                _dataTable.Columns.Add("Package Loss", typeof (int));
-                _dataTable.Columns.Add("Ping", typeof (int));
-                StatisticsChart.Series["Package Loss"].XValueMember = "Timestamp";
-                StatisticsChart.Series["Package Loss"].YValueMembers = "Package Loss";
-                StatisticsChart.Series["Ping"].XValueMember = "Timestamp";
-                StatisticsChart.Series["Ping"].YValueMembers = "Ping";
-            }
+            // might be empty
+            _dataTable.Columns.Add("Package Loss", typeof (int));
+            _dataTable.Columns.Add("Ping", typeof (int));
+            packageLossSeries.XValueMember = "Timestamp";
+            packageLossSeries.YValueMembers = "Package Loss";
+            pingSeries.XValueMember = "Timestamp";
+            pingSeries.YValueMembers = "Ping";
 
             StatisticsChart.DataSource = _dataTable;
             LoadChartData();
@@ -99,8 +102,8 @@ namespace Shadowsocks.View
             if (allMode.Checked)
             {
                 dataGroups = statistics.GroupBy(data => data.Timestamp.DayOfYear);
-                StatisticsChart.ChartAreas["DataArea"].AxisX.LabelStyle.Format = "MM/dd/yyyy";
-                StatisticsChart.ChartAreas["DataArea"].AxisX2.LabelStyle.Format = "MM/dd/yyyy";
+                StatisticsChart.ChartAreas["DataArea"].AxisX.LabelStyle.Format = "g";
+                StatisticsChart.ChartAreas["DataArea"].AxisX2.LabelStyle.Format = "g";
             }
             else
             {
@@ -113,23 +116,20 @@ namespace Shadowsocks.View
                             select new
                             {
                                 dataGroup.First().Timestamp,
-                                Ping = (int)dataGroup.Average(data => data.AverageResponse),
-                                PackageLoss = dataGroup.Average(data => data.PackageLoss)};
+                                Speed = dataGroup.Max(data => data.MaxInboundSpeed) ?? 0,
+                                Ping = (int) (dataGroup.Average(data => data.AverageResponse) ?? 0),
+                                PackageLossPercentage = (dataGroup.Average(data => data.PackageLoss) ?? 0) * 100
+                            };
             foreach (var data in finalData)
             {
-                _dataTable.Rows.Add(data.Timestamp, data.PackageLoss, data.Ping);
+                _dataTable.Rows.Add(data.Timestamp, data.Speed, data.PackageLossPercentage, data.Ping);
             }
             StatisticsChart.DataBind();
         }
 
-        private void serverSelector_SelectedIndexChanged(object sender, EventArgs e)
+        private void serverSelector_SelectionChangeCommitted(object sender, EventArgs e)
         {
             LoadChartData();
-        }
-
-        private void chartModeSelector_Enter(object sender, EventArgs e)
-        {
-
         }
 
         private void dayMode_CheckedChanged(object sender, EventArgs e)
@@ -145,11 +145,6 @@ namespace Shadowsocks.View
         private void PingCheckBox_CheckedChanged(object sender, EventArgs e)
         {
             repeatTimesNum.ReadOnly = !PingCheckBox.Checked;
-        }
-
-        private void StatisticsChart_Click(object sender, EventArgs e)
-        {
-
         }
     }
 }

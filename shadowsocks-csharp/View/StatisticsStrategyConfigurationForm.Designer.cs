@@ -36,7 +36,6 @@
             System.Windows.Forms.DataVisualization.Charting.Series series3 = new System.Windows.Forms.DataVisualization.Charting.Series();
             this.StatisticsChart = new System.Windows.Forms.DataVisualization.Charting.Chart();
             this.PingCheckBox = new System.Windows.Forms.CheckBox();
-            this.bindingConfiguration = new System.Windows.Forms.BindingSource(this.components);
             this.label2 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
             this.chartModeSelector = new System.Windows.Forms.GroupBox();
@@ -58,8 +57,8 @@
             this.serverSelector = new System.Windows.Forms.ComboBox();
             this.CancelButton = new System.Windows.Forms.Button();
             this.OKButton = new System.Windows.Forms.Button();
+            this.bindingConfiguration = new System.Windows.Forms.BindingSource(this.components);
             ((System.ComponentModel.ISupportInitialize)(this.StatisticsChart)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.bindingConfiguration)).BeginInit();
             this.chartModeSelector.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
@@ -76,6 +75,7 @@
             this.splitContainer3.Panel1.SuspendLayout();
             this.splitContainer3.Panel2.SuspendLayout();
             this.splitContainer3.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.bindingConfiguration)).BeginInit();
             this.SuspendLayout();
             // 
             // StatisticsChart
@@ -83,6 +83,7 @@
             this.StatisticsChart.BackColor = System.Drawing.Color.Transparent;
             chartArea1.AxisX.MajorGrid.Enabled = false;
             chartArea1.AxisY.MajorGrid.Enabled = false;
+            chartArea1.AxisY2.Enabled = System.Windows.Forms.DataVisualization.Charting.AxisEnabled.False;
             chartArea1.AxisY2.MajorGrid.Enabled = false;
             chartArea1.BackColor = System.Drawing.Color.Transparent;
             chartArea1.Name = "DataArea";
@@ -96,29 +97,33 @@
             this.StatisticsChart.Name = "StatisticsChart";
             this.StatisticsChart.Palette = System.Windows.Forms.DataVisualization.Charting.ChartColorPalette.Pastel;
             series1.ChartArea = "DataArea";
-            series1.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Bubble;
-            series1.Color = System.Drawing.Color.FromArgb(((int)(((byte)(221)))), ((int)(((byte)(88)))), ((int)(((byte)(0)))));
+            series1.Color = System.Drawing.Color.DarkGray;
             series1.Legend = "ChartLegend";
-            series1.Name = "Package Loss";
-            series1.XValueType = System.Windows.Forms.DataVisualization.Charting.ChartValueType.DateTime;
-            series1.YValuesPerPoint = 2;
-            series2.BorderWidth = 4;
+            series1.Name = "Speed";
+            series1.ToolTip = "Max inbound speed\\n#VAL KiB/s";
             series2.ChartArea = "DataArea";
-            series2.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
-            series2.Color = System.Drawing.Color.FromArgb(((int)(((byte)(155)))), ((int)(((byte)(77)))), ((int)(((byte)(150)))));
+            series2.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Bubble;
+            series2.Color = System.Drawing.Color.Crimson;
+            series2.CustomProperties = "EmptyPointValue=Zero";
             series2.Legend = "ChartLegend";
-            series2.Name = "Ping";
-            series2.XValueType = System.Windows.Forms.DataVisualization.Charting.ChartValueType.DateTime;
+            series2.Name = "Package Loss";
+            series2.ToolTip = "#VAL%";
+            series2.YAxisType = System.Windows.Forms.DataVisualization.Charting.AxisType.Secondary;
+            series2.YValuesPerPoint = 2;
+            series3.BorderWidth = 5;
             series3.ChartArea = "DataArea";
-            series3.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Area;
+            series3.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
+            series3.Color = System.Drawing.Color.DodgerBlue;
             series3.Legend = "ChartLegend";
-            series3.Name = "Speed";
+            series3.MarkerSize = 10;
+            series3.MarkerStyle = System.Windows.Forms.DataVisualization.Charting.MarkerStyle.Circle;
+            series3.Name = "Ping";
+            series3.ToolTip = "#VAL ms";
             this.StatisticsChart.Series.Add(series1);
             this.StatisticsChart.Series.Add(series2);
             this.StatisticsChart.Series.Add(series3);
-            this.StatisticsChart.Size = new System.Drawing.Size(1089, 303);
+            this.StatisticsChart.Size = new System.Drawing.Size(1089, 352);
             this.StatisticsChart.TabIndex = 2;
-            this.StatisticsChart.Click += new System.EventHandler(this.StatisticsChart_Click);
             // 
             // PingCheckBox
             // 
@@ -127,33 +132,29 @@
             this.PingCheckBox.Location = new System.Drawing.Point(13, 54);
             this.PingCheckBox.Margin = new System.Windows.Forms.Padding(5, 10, 5, 10);
             this.PingCheckBox.Name = "PingCheckBox";
-            this.PingCheckBox.Size = new System.Drawing.Size(107, 27);
+            this.PingCheckBox.Size = new System.Drawing.Size(124, 31);
             this.PingCheckBox.TabIndex = 5;
             this.PingCheckBox.Text = "Ping Test";
             this.PingCheckBox.UseVisualStyleBackColor = true;
             this.PingCheckBox.CheckedChanged += new System.EventHandler(this.PingCheckBox_CheckedChanged);
             // 
-            // bindingConfiguration
-            // 
-            this.bindingConfiguration.DataSource = typeof(Shadowsocks.Model.StatisticsStrategyConfiguration);
-            // 
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(9, 267);
+            this.label2.Location = new System.Drawing.Point(9, 206);
             this.label2.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(144, 23);
+            this.label2.Size = new System.Drawing.Size(167, 27);
             this.label2.TabIndex = 8;
             this.label2.Text = "Keep choice for ";
             // 
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(286, 267);
+            this.label3.Location = new System.Drawing.Point(286, 206);
             this.label3.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(75, 23);
+            this.label3.Size = new System.Drawing.Size(87, 27);
             this.label3.TabIndex = 9;
             this.label3.Text = "minutes";
             // 
@@ -162,7 +163,7 @@
             this.chartModeSelector.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.chartModeSelector.Controls.Add(this.allMode);
             this.chartModeSelector.Controls.Add(this.dayMode);
-            this.chartModeSelector.Location = new System.Drawing.Point(813, 92);
+            this.chartModeSelector.Location = new System.Drawing.Point(813, 123);
             this.chartModeSelector.Margin = new System.Windows.Forms.Padding(5, 10, 5, 10);
             this.chartModeSelector.Name = "chartModeSelector";
             this.chartModeSelector.Padding = new System.Windows.Forms.Padding(5, 10, 5, 10);
@@ -170,7 +171,6 @@
             this.chartModeSelector.TabIndex = 3;
             this.chartModeSelector.TabStop = false;
             this.chartModeSelector.Text = "Chart Mode";
-            this.chartModeSelector.Enter += new System.EventHandler(this.chartModeSelector_Enter);
             // 
             // allMode
             // 
@@ -179,7 +179,7 @@
             this.allMode.Location = new System.Drawing.Point(11, 61);
             this.allMode.Margin = new System.Windows.Forms.Padding(5, 10, 5, 10);
             this.allMode.Name = "allMode";
-            this.allMode.Size = new System.Drawing.Size(50, 27);
+            this.allMode.Size = new System.Drawing.Size(58, 31);
             this.allMode.TabIndex = 1;
             this.allMode.TabStop = true;
             this.allMode.Text = "all";
@@ -192,7 +192,7 @@
             this.dayMode.Location = new System.Drawing.Point(11, 29);
             this.dayMode.Margin = new System.Windows.Forms.Padding(5, 10, 5, 10);
             this.dayMode.Name = "dayMode";
-            this.dayMode.Size = new System.Drawing.Size(61, 27);
+            this.dayMode.Size = new System.Drawing.Size(73, 31);
             this.dayMode.TabIndex = 0;
             this.dayMode.Text = "24h";
             this.dayMode.UseVisualStyleBackColor = true;
@@ -219,7 +219,7 @@
             this.splitContainer1.Panel2.Controls.Add(this.chartModeSelector);
             this.splitContainer1.Panel2.Controls.Add(this.StatisticsChart);
             this.splitContainer1.Size = new System.Drawing.Size(1089, 614);
-            this.splitContainer1.SplitterDistance = 301;
+            this.splitContainer1.SplitterDistance = 252;
             this.splitContainer1.SplitterWidth = 10;
             this.splitContainer1.TabIndex = 12;
             // 
@@ -249,7 +249,7 @@
             // splitContainer2.Panel2
             // 
             this.splitContainer2.Panel2.Controls.Add(this.splitContainer3);
-            this.splitContainer2.Size = new System.Drawing.Size(1089, 301);
+            this.splitContainer2.Size = new System.Drawing.Size(1089, 252);
             this.splitContainer2.SplitterDistance = 384;
             this.splitContainer2.SplitterWidth = 5;
             this.splitContainer2.TabIndex = 7;
@@ -260,7 +260,7 @@
             this.label9.Location = new System.Drawing.Point(9, 164);
             this.label9.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
             this.label9.Name = "label9";
-            this.label9.Size = new System.Drawing.Size(139, 23);
+            this.label9.Size = new System.Drawing.Size(162, 27);
             this.label9.TabIndex = 20;
             this.label9.Text = "Collect data per";
             // 
@@ -271,7 +271,7 @@
             this.label8.Location = new System.Drawing.Point(286, 165);
             this.label8.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
             this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(75, 23);
+            this.label8.Size = new System.Drawing.Size(87, 27);
             this.label8.TabIndex = 19;
             this.label8.Text = "minutes";
             // 
@@ -291,12 +291,12 @@
             0,
             0});
             this.dataCollectionMinutesNum.Minimum = new decimal(new int[] {
-            5,
+            1,
             0,
             0,
             0});
             this.dataCollectionMinutesNum.Name = "dataCollectionMinutesNum";
-            this.dataCollectionMinutesNum.Size = new System.Drawing.Size(100, 29);
+            this.dataCollectionMinutesNum.Size = new System.Drawing.Size(100, 34);
             this.dataCollectionMinutesNum.TabIndex = 18;
             this.dataCollectionMinutesNum.Value = new decimal(new int[] {
             10,
@@ -311,7 +311,7 @@
             this.StatisticsEnabledCheckBox.Location = new System.Drawing.Point(13, 12);
             this.StatisticsEnabledCheckBox.Margin = new System.Windows.Forms.Padding(5, 10, 5, 10);
             this.StatisticsEnabledCheckBox.Name = "StatisticsEnabledCheckBox";
-            this.StatisticsEnabledCheckBox.Size = new System.Drawing.Size(163, 27);
+            this.StatisticsEnabledCheckBox.Size = new System.Drawing.Size(189, 31);
             this.StatisticsEnabledCheckBox.TabIndex = 17;
             this.StatisticsEnabledCheckBox.Text = "Enable Statistics";
             this.StatisticsEnabledCheckBox.UseVisualStyleBackColor = true;
@@ -324,7 +324,7 @@
             0,
             0,
             0});
-            this.choiceKeptMinutesNum.Location = new System.Drawing.Point(177, 265);
+            this.choiceKeptMinutesNum.Location = new System.Drawing.Point(177, 204);
             this.choiceKeptMinutesNum.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.choiceKeptMinutesNum.Maximum = new decimal(new int[] {
             120,
@@ -332,12 +332,12 @@
             0,
             0});
             this.choiceKeptMinutesNum.Minimum = new decimal(new int[] {
-            5,
+            1,
             0,
             0,
             0});
             this.choiceKeptMinutesNum.Name = "choiceKeptMinutesNum";
-            this.choiceKeptMinutesNum.Size = new System.Drawing.Size(100, 29);
+            this.choiceKeptMinutesNum.Size = new System.Drawing.Size(100, 34);
             this.choiceKeptMinutesNum.TabIndex = 16;
             this.choiceKeptMinutesNum.Value = new decimal(new int[] {
             10,
@@ -352,7 +352,7 @@
             this.byHourOfDayCheckBox.Location = new System.Drawing.Point(13, 127);
             this.byHourOfDayCheckBox.Margin = new System.Windows.Forms.Padding(5, 10, 5, 10);
             this.byHourOfDayCheckBox.Name = "byHourOfDayCheckBox";
-            this.byHourOfDayCheckBox.Size = new System.Drawing.Size(150, 27);
+            this.byHourOfDayCheckBox.Size = new System.Drawing.Size(180, 31);
             this.byHourOfDayCheckBox.TabIndex = 15;
             this.byHourOfDayCheckBox.Text = "By hour of day";
             this.byHourOfDayCheckBox.UseVisualStyleBackColor = true;
@@ -368,7 +368,7 @@
             0,
             0});
             this.repeatTimesNum.Name = "repeatTimesNum";
-            this.repeatTimesNum.Size = new System.Drawing.Size(99, 29);
+            this.repeatTimesNum.Size = new System.Drawing.Size(99, 34);
             this.repeatTimesNum.TabIndex = 14;
             this.repeatTimesNum.Value = new decimal(new int[] {
             4,
@@ -382,7 +382,7 @@
             this.label6.Font = new System.Drawing.Font("Microsoft YaHei", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label6.Location = new System.Drawing.Point(139, 86);
             this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(172, 23);
+            this.label6.Size = new System.Drawing.Size(201, 27);
             this.label6.TabIndex = 13;
             this.label6.Text = "packages everytime";
             // 
@@ -403,7 +403,7 @@
             // splitContainer3.Panel2
             // 
             this.splitContainer3.Panel2.Controls.Add(this.calculationContainer);
-            this.splitContainer3.Size = new System.Drawing.Size(700, 301);
+            this.splitContainer3.Size = new System.Drawing.Size(700, 252);
             this.splitContainer3.SplitterDistance = 46;
             this.splitContainer3.SplitterWidth = 10;
             this.splitContainer3.TabIndex = 6;
@@ -414,7 +414,7 @@
             this.label1.Location = new System.Drawing.Point(5, 12);
             this.label1.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(225, 23);
+            this.label1.Size = new System.Drawing.Size(262, 27);
             this.label1.TabIndex = 0;
             this.label1.Text = "Design evaluation method";
             // 
@@ -425,23 +425,23 @@
             this.calculationContainer.Location = new System.Drawing.Point(0, 0);
             this.calculationContainer.Margin = new System.Windows.Forms.Padding(5, 10, 5, 10);
             this.calculationContainer.Name = "calculationContainer";
-            this.calculationContainer.Size = new System.Drawing.Size(700, 245);
+            this.calculationContainer.Size = new System.Drawing.Size(700, 196);
             this.calculationContainer.TabIndex = 1;
             // 
             // serverSelector
             // 
             this.serverSelector.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.serverSelector.FormattingEnabled = true;
-            this.serverSelector.Location = new System.Drawing.Point(813, 55);
+            this.serverSelector.Location = new System.Drawing.Point(813, 86);
             this.serverSelector.Name = "serverSelector";
-            this.serverSelector.Size = new System.Drawing.Size(260, 31);
+            this.serverSelector.Size = new System.Drawing.Size(260, 35);
             this.serverSelector.TabIndex = 6;
-            this.serverSelector.SelectedIndexChanged += new System.EventHandler(this.serverSelector_SelectedIndexChanged);
+            this.serverSelector.SelectionChangeCommitted += new System.EventHandler(this.serverSelector_SelectionChangeCommitted);
             // 
             // CancelButton
             // 
             this.CancelButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.CancelButton.Location = new System.Drawing.Point(972, 208);
+            this.CancelButton.Location = new System.Drawing.Point(972, 239);
             this.CancelButton.Name = "CancelButton";
             this.CancelButton.Size = new System.Drawing.Size(101, 41);
             this.CancelButton.TabIndex = 5;
@@ -452,7 +452,7 @@
             // OKButton
             // 
             this.OKButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.OKButton.Location = new System.Drawing.Point(864, 208);
+            this.OKButton.Location = new System.Drawing.Point(864, 239);
             this.OKButton.Name = "OKButton";
             this.OKButton.Size = new System.Drawing.Size(101, 41);
             this.OKButton.TabIndex = 4;
@@ -460,9 +460,13 @@
             this.OKButton.UseVisualStyleBackColor = true;
             this.OKButton.Click += new System.EventHandler(this.OKButton_Click);
             // 
+            // bindingConfiguration
+            // 
+            this.bindingConfiguration.DataSource = typeof(Shadowsocks.Model.StatisticsStrategyConfiguration);
+            // 
             // StatisticsStrategyConfigurationForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(10F, 23F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(12F, 27F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSize = true;
             this.ClientSize = new System.Drawing.Size(1089, 614);
@@ -473,7 +477,6 @@
             this.Name = "StatisticsStrategyConfigurationForm";
             this.Text = "StatisticsStrategyConfigurationForm";
             ((System.ComponentModel.ISupportInitialize)(this.StatisticsChart)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.bindingConfiguration)).EndInit();
             this.chartModeSelector.ResumeLayout(false);
             this.chartModeSelector.PerformLayout();
             this.splitContainer1.Panel1.ResumeLayout(false);
@@ -493,6 +496,7 @@
             this.splitContainer3.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer3)).EndInit();
             this.splitContainer3.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.bindingConfiguration)).EndInit();
             this.ResumeLayout(false);
 
         }

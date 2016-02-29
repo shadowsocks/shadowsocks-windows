@@ -31,6 +31,10 @@ namespace Shadowsocks.Model
         public int? MaxResponse;
         public float? PackageLoss;
 
+        public StatisticsRecord()
+        {
+        }
+
         public StatisticsRecord(string identifier, IEnumerable<int> inboundSpeedRecords, IEnumerable<int> outboundSpeedRecords, IEnumerable<int> latencyRecords)
         {
             Timestamp = DateTime.Now;

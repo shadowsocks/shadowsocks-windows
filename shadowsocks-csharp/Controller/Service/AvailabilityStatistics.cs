@@ -30,7 +30,7 @@ namespace Shadowsocks.Controller
 
         //arguments for ICMP tests
         private int Repeat => Config.RepeatTimesNum;
-        private const int TimeoutMilliseconds = 500;
+        public const int TimeoutMilliseconds = 500;
 
         //records cache for current server in {_monitorInterval} minutes
         private List<int> _latencyRecords;
@@ -134,7 +134,7 @@ namespace Shadowsocks.Controller
                     try
                     {
                         var reply = await ping.SendTaskAsync(IP, TimeoutMilliseconds);
-                        if (!reply.Status.Equals(IPStatus.Success))
+                        if (reply.Status.Equals(IPStatus.Success))
                         {
                             result.RoundtripTime.Add((int?) reply.RoundtripTime);
                         }
@@ -265,7 +265,8 @@ namespace Shadowsocks.Controller
                         //do nothing
                     }
                 }
-                RawStatistics = JsonConvert.DeserializeObject<Statistics>(File.ReadAllText(path)) ?? RawStatistics;
+                var content = File.ReadAllText(path);
+                RawStatistics = JsonConvert.DeserializeObject<Statistics>(content) ?? RawStatistics;
             }
             catch (Exception e)
             {
