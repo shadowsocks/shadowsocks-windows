@@ -260,23 +260,9 @@ namespace Shadowsocks.Controller
                 Logging.Debug($"loading statistics from {path}");
                 if (!File.Exists(path))
                 {
-                    try
+                    using (File.Create(path))
                     {
-                        using (File.Create(path))
-                        {
-                            //do nothing
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        Logging.LogUsefulException(e);
-                    }
-                    if (!File.Exists(path))
-                    {
-                        Console.WriteLine(
-                            $"statistics file does not exist, try to reload {_retryInterval.TotalMinutes} minutes later");
-                        _recorder.Change(_retryInterval, RecordingInterval);
-                        return;
+                        //do nothing
                     }
                 }
                 RawStatistics = JsonConvert.DeserializeObject<Statistics>(File.ReadAllText(path)) ?? RawStatistics;
@@ -284,6 +270,8 @@ namespace Shadowsocks.Controller
             catch (Exception e)
             {
                 Logging.LogUsefulException(e);
+                Console.WriteLine($"failed to load statistics; try to reload {_retryInterval.TotalMinutes} minutes later");
+                _recorder.Change(_retryInterval, RecordingInterval);
             }
         }
 
