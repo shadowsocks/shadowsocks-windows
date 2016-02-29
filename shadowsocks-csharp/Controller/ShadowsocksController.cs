@@ -438,6 +438,7 @@ namespace Shadowsocks.Controller
                 UpdatePACFromGFWListError(this, e);
         }
 
+        private static readonly IEnumerable<char> IgnoredLineBegins = new[] { '!', '[' };
         private void pacServer_UserRuleFileChanged(object sender, EventArgs e)
         {
             // TODO: this is a dirty hack. (from code GListUpdater.http_DownloadStringCompleted())
@@ -450,12 +451,14 @@ namespace Shadowsocks.Controller
             if (File.Exists(PACServer.USER_RULE_FILE))
             {
                 string local = File.ReadAllText(PACServer.USER_RULE_FILE, Encoding.UTF8);
-                string[] rules = local.Split(new char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
-                foreach (string rule in rules)
+                using (var sr = new StringReader(local))
                 {
-                    if (rule.StartsWith("!") || rule.StartsWith("["))
-                        continue;
-                    lines.Add(rule);
+                    foreach (var rule in sr.NonWhiteSpaceLines())
+                    {
+                        if (rule.BeginWithAny(IgnoredLineBegins))
+                            continue;
+                        lines.Add(rule);
+                    }
                 }
             }
             string abpContent;

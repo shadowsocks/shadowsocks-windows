@@ -20,7 +20,7 @@ namespace Shadowsocks.Controller.Strategy
         private Statistics _filteredStatistics;
         private AvailabilityStatistics Service => _controller.availabilityStatistics;
         private int ChoiceKeptMilliseconds
-            => (int) TimeSpan.FromMinutes(_controller.StatisticsConfiguration.ChoiceKeptMinutes).TotalMilliseconds;
+            => (int)TimeSpan.FromMinutes(_controller.StatisticsConfiguration.ChoiceKeptMinutes).TotalMilliseconds;
 
         public StatisticsStrategy(ShadowsocksController controller)
         {
@@ -93,7 +93,7 @@ namespace Shadowsocks.Controller.Strategy
                                   }
                                   ).Aggregate((result1, result2) => result1.score > result2.score ? result1 : result2);
 
-               LogWhenEnabled($"Switch to server: {bestResult.server.FriendlyName()} by statistics: score {bestResult.score}");
+                LogWhenEnabled($"Switch to server: {bestResult.server.FriendlyName()} by statistics: score {bestResult.score}");
                 _currentServer = bestResult.server;
             }
             catch (Exception e)

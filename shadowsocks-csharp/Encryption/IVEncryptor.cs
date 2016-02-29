@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Security.Cryptography;
 using System.Text;
 using System.Net;
@@ -24,7 +25,7 @@ namespace Shadowsocks.Encryption
 
         protected Dictionary<string, int[]> ciphers;
 
-        private static readonly Dictionary<string, byte[]> CachedKeys = new Dictionary<string, byte[]>();
+        private static readonly ConcurrentDictionary<string, byte[]> CachedKeys = new ConcurrentDictionary<string, byte[]>();
         protected byte[] _encryptIV;
         protected byte[] _decryptIV;
         protected bool _decryptIVReceived;
@@ -62,22 +63,14 @@ namespace Shadowsocks.Encryption
             }
             keyLen = ciphers[_method][0];
             ivLen = ciphers[_method][1];
-            if (!CachedKeys.ContainsKey(k))
+            _key = CachedKeys.GetOrAdd(k, (nk) =>
             {
-                lock (CachedKeys)
-                {
-                    if (!CachedKeys.ContainsKey(k))
-                    {
-                        byte[] passbuf = Encoding.UTF8.GetBytes(password);
-                        _key = new byte[32];
-                        byte[] iv = new byte[16];
-                        bytesToKey(passbuf, _key);
-                        CachedKeys[k] = _key;
-                    }
-                }
-            }
-            if (_key == null)
-                _key = CachedKeys[k];
+                byte[] passbuf = Encoding.UTF8.GetBytes(password);
+                byte[] key = new byte[32];
+                byte[] iv = new byte[16];
+                bytesToKey(passbuf, key);
+                return key;
+            });
         }
 
         protected void bytesToKey(byte[] password, byte[] key)
