@@ -99,7 +99,7 @@ namespace Shadowsocks.Controller.Strategy
 
                 if (serversWithStatistics.Length < 2)
                 {
-                    LogWhenEnabled("no enough statistics data for evaluation");
+                    LogWhenEnabled("no enough statistics data or all factors in calculations are 0");
                     return;
                 }
 
