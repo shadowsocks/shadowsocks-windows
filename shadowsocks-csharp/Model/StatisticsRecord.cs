@@ -52,23 +52,26 @@ namespace Shadowsocks.Model
         public StatisticsRecord(string identifier, ICollection<int> inboundSpeedRecords, ICollection<int> outboundSpeedRecords, ICollection<int> latencyRecords)
         {
             ServerIdentifier = identifier;
-            if (inboundSpeedRecords != null && inboundSpeedRecords.Any())
+            var inbound = inboundSpeedRecords?.Where(s => s > 0).ToList();
+            if (inbound != null && inbound.Any())
             {
-                AverageInboundSpeed = (int) inboundSpeedRecords.Average();
-                MinInboundSpeed = inboundSpeedRecords.Min();
-                MaxInboundSpeed = inboundSpeedRecords.Max();
+                AverageInboundSpeed = (int) inbound.Average();
+                MinInboundSpeed = inbound.Min();
+                MaxInboundSpeed = inbound.Max();
             }
-            if (outboundSpeedRecords != null && outboundSpeedRecords.Any())
+            var outbound = outboundSpeedRecords?.Where(s => s > 0).ToList();
+            if (outbound!= null && outbound.Any())
             {
-                AverageOutboundSpeed = (int) outboundSpeedRecords.Average();
-                MinOutboundSpeed = outboundSpeedRecords.Min();
-                MaxOutboundSpeed = outboundSpeedRecords.Max();
+                AverageOutboundSpeed = (int) outbound.Average();
+                MinOutboundSpeed = outbound.Min();
+                MaxOutboundSpeed = outbound.Max();
             }
-            if (latencyRecords != null && latencyRecords.Any())
+            var latency = latencyRecords?.Where(s => s > 0).ToList();
+            if (latency!= null && latency.Any())
             {
-                AverageLatency = (int) latencyRecords.Average();
-                MinLatency = latencyRecords.Min();
-                MaxLatency = latencyRecords.Max();
+                AverageLatency = (int) latency.Average();
+                MinLatency = latency.Min();
+                MaxLatency = latency.Max();
             }
         }
 
