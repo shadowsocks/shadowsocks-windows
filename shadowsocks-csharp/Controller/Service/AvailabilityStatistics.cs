@@ -18,14 +18,12 @@ namespace Shadowsocks.Controller
     public sealed class AvailabilityStatistics : IDisposable
     {
         public const string DateTimePattern = "yyyy-MM-dd HH:mm:ss";
-        public static readonly DateTime UnknownDateTime;
         private const string StatisticsFilesName = "shadowsocks.availability.json";
         public static string AvailabilityStatisticsFile;
         //static constructor to initialize every public static fields before refereced
         static AvailabilityStatistics()
         {
             AvailabilityStatisticsFile = Utils.GetTempPath(StatisticsFilesName);
-            UnknownDateTime = new DateTime(1970, 1, 1);
         }
 
         //arguments for ICMP tests
@@ -230,7 +228,6 @@ namespace Shadowsocks.Controller
         {
             if (Config.ByHourOfDay)
             {
-                if (record.Timestamp == UnknownDateTime) return false;
                 if (!record.Timestamp.Hour.Equals(DateTime.Now.Hour)) return false;
             }
             return true;

@@ -64,14 +64,14 @@ namespace Shadowsocks.Controller.Strategy
             averageRecord.setResponse(records.Select(record => record.AverageResponse));
 
             if (!config.Calculations.TryGetValue("PackageLoss", out factor)) factor = 0;
-            score += averageRecord.PackageLoss*factor ?? 0;
+            score += averageRecord.PackageLoss * factor ?? 0;
             if (!config.Calculations.TryGetValue("AverageResponse", out factor)) factor = 0;
-            score += averageRecord.AverageResponse*factor ?? 0;
+            score += averageRecord.AverageResponse * factor ?? 0;
             if (!config.Calculations.TryGetValue("MinResponse", out factor)) factor = 0;
-            score += averageRecord.MinResponse*factor ?? 0;
+            score += averageRecord.MinResponse * factor ?? 0;
             if (!config.Calculations.TryGetValue("MaxResponse", out factor)) factor = 0;
-            score += averageRecord.MaxResponse*factor ?? 0;
-            Logging.Debug($"{JsonConvert.SerializeObject(averageRecord, Formatting.Indented)}");
+            score += averageRecord.MaxResponse * factor ?? 0;
+            Logging.Debug($"Highest score: {score} {JsonConvert.SerializeObject(averageRecord, Formatting.Indented)}");
             return score;
         }
 

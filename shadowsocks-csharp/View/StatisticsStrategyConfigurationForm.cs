@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Windows.Forms;
+using System.Windows.Forms.DataVisualization.Charting;
 using Shadowsocks.Controller;
 using Shadowsocks.Model;
 
@@ -14,15 +15,22 @@ namespace Shadowsocks.View
         private StatisticsStrategyConfiguration _configuration;
         private readonly DataTable _dataTable = new DataTable();
         private List<string> _servers;
+        private readonly Series _speedSeries;
+        private readonly Series _packageLossSeries;
+        private readonly Series _pingSeries;
 
         public StatisticsStrategyConfigurationForm(ShadowsocksController controller)
         {
             if (controller == null) return;
             InitializeComponent();
+            _speedSeries = StatisticsChart.Series["Speed"];
+            _packageLossSeries = StatisticsChart.Series["Package Loss"];
+            _pingSeries = StatisticsChart.Series["Ping"];
             _controller = controller;
             _controller.ConfigChanged += (sender, args) => LoadConfiguration();
             LoadConfiguration();
             Load += (sender, args) => InitData();
+
         }
 
         private void LoadConfiguration()
@@ -48,22 +56,18 @@ namespace Shadowsocks.View
 
             serverSelector.DataSource = _servers;
 
-            var speedSeries = StatisticsChart.Series["Speed"];
-            var packageLossSeries = StatisticsChart.Series["Package Loss"];
-            var pingSeries = StatisticsChart.Series["Ping"];
-
             _dataTable.Columns.Add("Timestamp", typeof(DateTime));
             _dataTable.Columns.Add("Speed", typeof (int));
-            speedSeries.XValueMember = "Timestamp";
-            speedSeries.YValueMembers = "Speed";
+            _speedSeries.XValueMember = "Timestamp";
+            _speedSeries.YValueMembers = "Speed";
 
             // might be empty
             _dataTable.Columns.Add("Package Loss", typeof (int));
             _dataTable.Columns.Add("Ping", typeof (int));
-            packageLossSeries.XValueMember = "Timestamp";
-            packageLossSeries.YValueMembers = "Package Loss";
-            pingSeries.XValueMember = "Timestamp";
-            pingSeries.YValueMembers = "Ping";
+            _packageLossSeries.XValueMember = "Timestamp";
+            _packageLossSeries.YValueMembers = "Package Loss";
+            _pingSeries.XValueMember = "Timestamp";
+            _pingSeries.YValueMembers = "Ping";
 
             StatisticsChart.DataSource = _dataTable;
             LoadChartData();
@@ -98,12 +102,18 @@ namespace Shadowsocks.View
             IEnumerable<IGrouping<int, StatisticsRecord>> dataGroups;
             if (allMode.Checked)
             {
+                _pingSeries.XValueType = ChartValueType.DateTime;
+                _packageLossSeries.XValueType = ChartValueType.DateTime;
+                _speedSeries.XValueType = ChartValueType.DateTime;
                 dataGroups = statistics.GroupBy(data => data.Timestamp.DayOfYear);
                 StatisticsChart.ChartAreas["DataArea"].AxisX.LabelStyle.Format = "g";
                 StatisticsChart.ChartAreas["DataArea"].AxisX2.LabelStyle.Format = "g";
             }
             else
             {
+                _pingSeries.XValueType = ChartValueType.Time;
+                _packageLossSeries.XValueType = ChartValueType.Time;
+                _speedSeries.XValueType = ChartValueType.Time;
                 dataGroups = statistics.GroupBy(data => data.Timestamp.Hour);
                 StatisticsChart.ChartAreas["DataArea"].AxisX.LabelStyle.Format = "HH:00";
                 StatisticsChart.ChartAreas["DataArea"].AxisX2.LabelStyle.Format = "HH:00";

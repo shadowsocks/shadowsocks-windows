@@ -8,11 +8,10 @@ namespace Shadowsocks.Model
     // Simple processed records for a short period of time
     public class StatisticsRecord
     {
-        public DateTime Timestamp;
+        public DateTime Timestamp { get; set; } = DateTime.Now;
+        public string ServerName { get; set; }
 
-        public string ServerName;
-
-        // these fields ping-only records would be null
+        // in ping-only records, these fields would be null
         public int? AverageLatency;
         public int? MinLatency;
         public int? MaxLatency;
@@ -37,7 +36,6 @@ namespace Shadowsocks.Model
 
         public StatisticsRecord(string identifier, IEnumerable<int> inboundSpeedRecords, IEnumerable<int> outboundSpeedRecords, IEnumerable<int> latencyRecords)
         {
-            Timestamp = DateTime.Now;
             ServerName = identifier;
             if (inboundSpeedRecords != null && inboundSpeedRecords.Any())
             {
@@ -61,7 +59,6 @@ namespace Shadowsocks.Model
 
         public StatisticsRecord(string identifier, IEnumerable<int?> responseRecords)
         {
-            Timestamp = DateTime.Now;
             ServerName = identifier;
             setResponse(responseRecords);
         }
