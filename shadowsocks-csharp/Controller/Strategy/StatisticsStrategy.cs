@@ -49,29 +49,32 @@ namespace Shadowsocks.Controller.Strategy
 
         //return the score by data
         //server with highest score will be choosen
-        private float GetScore(string serverName)
+        private float? GetScore(string identifier, List<StatisticsRecord> records)
         {
             var config = _controller.StatisticsConfiguration;
-            List<StatisticsRecord> records;
-            if (_filteredStatistics == null || !_filteredStatistics.TryGetValue(serverName, out records)) return 0;
-            float factor;
-            float score = 0;
+            float? score = null;
 
-            var averageRecord = new StatisticsRecord(serverName,
-                records.FindAll(record => record.MaxInboundSpeed != null).Select(record => record.MaxInboundSpeed.Value),
-                records.FindAll(record => record.MaxOutboundSpeed != null).Select(record => record.MaxOutboundSpeed.Value),
-                records.FindAll(record => record.AverageLatency != null).Select(record => record.AverageLatency.Value));
-            averageRecord.setResponse(records.Select(record => record.AverageResponse));
+            var averageRecord = new StatisticsRecord(identifier,
+                records.Where(record => record.MaxInboundSpeed != null).Select(record => record.MaxInboundSpeed.Value).ToList(),
+                records.Where(record => record.MaxOutboundSpeed != null).Select(record => record.MaxOutboundSpeed.Value).ToList(),
+                records.Where(record => record.AverageLatency != null).Select(record => record.AverageLatency.Value).ToList());
+            averageRecord.SetResponse(records.Select(record => record.AverageResponse).ToList());
 
-            if (!config.Calculations.TryGetValue("PackageLoss", out factor)) factor = 0;
-            score += averageRecord.PackageLoss * factor ?? 0;
-            if (!config.Calculations.TryGetValue("AverageResponse", out factor)) factor = 0;
-            score += averageRecord.AverageResponse * factor ?? 0;
-            if (!config.Calculations.TryGetValue("MinResponse", out factor)) factor = 0;
-            score += averageRecord.MinResponse * factor ?? 0;
-            if (!config.Calculations.TryGetValue("MaxResponse", out factor)) factor = 0;
-            score += averageRecord.MaxResponse * factor ?? 0;
-            Logging.Debug($"Highest score: {score} {JsonConvert.SerializeObject(averageRecord, Formatting.Indented)}");
+            foreach (var calculation in config.Calculations)
+            {
+                var name = calculation.Key;
+                var field = typeof (StatisticsRecord).GetField(name);
+                dynamic value = field.GetValue(averageRecord);
+                var factor = calculation.Value;
+                if (value == null || factor.Equals(0)) continue;
+                score = score ?? 0;
+                score += value * factor;
+            }
+
+            if (score != null)
+            {
+                Logging.Debug($"Highest score: {score} {JsonConvert.SerializeObject(averageRecord, Formatting.Indented)}");
+            }
             return score;
         }
 
@@ -83,15 +86,25 @@ namespace Shadowsocks.Controller.Strategy
             }
             try
             {
-                var bestResult = (from server in servers
-                                  let name = server.FriendlyName()
-                                  where _filteredStatistics.ContainsKey(name)
-                                  select new
-                                  {
-                                      server,
-                                      score = GetScore(name)
-                                  }
-                                  ).Aggregate((result1, result2) => result1.score > result2.score ? result1 : result2);
+                var serversWithStatistics = (from server in servers
+                    let id = server.Identifier()
+                    where _filteredStatistics.ContainsKey(id)
+                    let score = GetScore(server.Identifier(), _filteredStatistics[server.Identifier()])
+                    where score != null
+                    select new
+                    {
+                        server,
+                        score
+                    }).ToArray();
+
+                if (serversWithStatistics.Length < 2)
+                {
+                    LogWhenEnabled("no enough statistics data for evaluation");
+                    return;
+                }
+
+                var bestResult = serversWithStatistics
+                    .Aggregate((server1, server2) => server1.score > server2.score ? server1 : server2);
 
                 LogWhenEnabled($"Switch to server: {bestResult.server.FriendlyName()} by statistics: score {bestResult.score}");
                 _currentServer = bestResult.server;
@@ -112,7 +125,7 @@ namespace Shadowsocks.Controller.Strategy
 
         public string ID => "com.shadowsocks.strategy.scbs";
 
-        public string Name => I18N.GetString("Choose By Total Package Loss");
+        public string Name => I18N.GetString("Choose by statistics");
 
         public Server GetAServer(IStrategyCallerType type, IPEndPoint localIPEndPoint)
         {

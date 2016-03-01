@@ -36,7 +36,7 @@ namespace Shadowsocks.View
         private void LoadConfiguration()
         {
             var configs = _controller.GetCurrentConfiguration().configs;
-            _servers = configs.Select(server => server.FriendlyName()).ToList();
+            _servers = configs.Select(server => server.Identifier()).ToList();
             _configuration = _controller.StatisticsConfiguration
                              ?? new StatisticsStrategyConfiguration();
             if (_configuration.Calculations == null)
@@ -152,16 +152,6 @@ namespace Shadowsocks.View
         private void PingCheckBox_CheckedChanged(object sender, EventArgs e)
         {
             repeatTimesNum.ReadOnly = !PingCheckBox.Checked;
-        }
-
-        private void bindingConfiguration_CurrentItemChanged(object sender, EventArgs e)
-        {
-            Logging.Info("?");
-        }
-
-        private void bindingConfiguration_BindingComplete(object sender, BindingCompleteEventArgs e)
-        {
-            Logging.Info("?");
         }
     }
 }
