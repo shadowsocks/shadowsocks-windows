@@ -29,11 +29,11 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea1 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.Legend legend1 = new System.Windows.Forms.DataVisualization.Charting.Legend();
-            System.Windows.Forms.DataVisualization.Charting.Series series1 = new System.Windows.Forms.DataVisualization.Charting.Series();
-            System.Windows.Forms.DataVisualization.Charting.Series series2 = new System.Windows.Forms.DataVisualization.Charting.Series();
-            System.Windows.Forms.DataVisualization.Charting.Series series3 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea2 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Legend legend2 = new System.Windows.Forms.DataVisualization.Charting.Legend();
+            System.Windows.Forms.DataVisualization.Charting.Series series4 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.Series series5 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.Series series6 = new System.Windows.Forms.DataVisualization.Charting.Series();
             this.StatisticsChart = new System.Windows.Forms.DataVisualization.Charting.Chart();
             this.PingCheckBox = new System.Windows.Forms.CheckBox();
             this.label2 = new System.Windows.Forms.Label();
@@ -81,47 +81,47 @@
             // StatisticsChart
             // 
             this.StatisticsChart.BackColor = System.Drawing.Color.Transparent;
-            chartArea1.AxisX.MajorGrid.Enabled = false;
-            chartArea1.AxisY.MajorGrid.Enabled = false;
-            chartArea1.AxisY2.Enabled = System.Windows.Forms.DataVisualization.Charting.AxisEnabled.False;
-            chartArea1.AxisY2.MajorGrid.Enabled = false;
-            chartArea1.BackColor = System.Drawing.Color.Transparent;
-            chartArea1.Name = "DataArea";
-            this.StatisticsChart.ChartAreas.Add(chartArea1);
+            chartArea2.AxisX.MajorGrid.Enabled = false;
+            chartArea2.AxisY.MajorGrid.Enabled = false;
+            chartArea2.AxisY2.Enabled = System.Windows.Forms.DataVisualization.Charting.AxisEnabled.False;
+            chartArea2.AxisY2.MajorGrid.Enabled = false;
+            chartArea2.BackColor = System.Drawing.Color.Transparent;
+            chartArea2.Name = "DataArea";
+            this.StatisticsChart.ChartAreas.Add(chartArea2);
             this.StatisticsChart.Dock = System.Windows.Forms.DockStyle.Fill;
-            legend1.BackColor = System.Drawing.Color.Transparent;
-            legend1.Name = "ChartLegend";
-            this.StatisticsChart.Legends.Add(legend1);
+            legend2.BackColor = System.Drawing.Color.Transparent;
+            legend2.Name = "ChartLegend";
+            this.StatisticsChart.Legends.Add(legend2);
             this.StatisticsChart.Location = new System.Drawing.Point(0, 0);
             this.StatisticsChart.Margin = new System.Windows.Forms.Padding(5, 10, 5, 10);
             this.StatisticsChart.Name = "StatisticsChart";
             this.StatisticsChart.Palette = System.Windows.Forms.DataVisualization.Charting.ChartColorPalette.Pastel;
-            series1.ChartArea = "DataArea";
-            series1.Color = System.Drawing.Color.DarkGray;
-            series1.Legend = "ChartLegend";
-            series1.Name = "Speed";
-            series1.ToolTip = "Max inbound speed\\n#VAL KiB/s";
-            series2.ChartArea = "DataArea";
-            series2.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Bubble;
-            series2.Color = System.Drawing.Color.Crimson;
-            series2.CustomProperties = "EmptyPointValue=Zero";
-            series2.Legend = "ChartLegend";
-            series2.Name = "Package Loss";
-            series2.ToolTip = "#VAL%";
-            series2.YAxisType = System.Windows.Forms.DataVisualization.Charting.AxisType.Secondary;
-            series2.YValuesPerPoint = 2;
-            series3.BorderWidth = 5;
-            series3.ChartArea = "DataArea";
-            series3.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
-            series3.Color = System.Drawing.Color.DodgerBlue;
-            series3.Legend = "ChartLegend";
-            series3.MarkerSize = 10;
-            series3.MarkerStyle = System.Windows.Forms.DataVisualization.Charting.MarkerStyle.Circle;
-            series3.Name = "Ping";
-            series3.ToolTip = "#VAL ms";
-            this.StatisticsChart.Series.Add(series1);
-            this.StatisticsChart.Series.Add(series2);
-            this.StatisticsChart.Series.Add(series3);
+            series4.ChartArea = "DataArea";
+            series4.Color = System.Drawing.Color.DarkGray;
+            series4.Legend = "ChartLegend";
+            series4.Name = "Speed";
+            series4.ToolTip = "Max inbound speed\\n#VAL KiB/s";
+            series5.ChartArea = "DataArea";
+            series5.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Bubble;
+            series5.Color = System.Drawing.Color.Crimson;
+            series5.CustomProperties = "EmptyPointValue=Zero";
+            series5.Legend = "ChartLegend";
+            series5.Name = "Package Loss";
+            series5.ToolTip = "#VAL%";
+            series5.YAxisType = System.Windows.Forms.DataVisualization.Charting.AxisType.Secondary;
+            series5.YValuesPerPoint = 2;
+            series6.BorderWidth = 5;
+            series6.ChartArea = "DataArea";
+            series6.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
+            series6.Color = System.Drawing.Color.DodgerBlue;
+            series6.Legend = "ChartLegend";
+            series6.MarkerSize = 10;
+            series6.MarkerStyle = System.Windows.Forms.DataVisualization.Charting.MarkerStyle.Circle;
+            series6.Name = "Ping";
+            series6.ToolTip = "#VAL ms";
+            this.StatisticsChart.Series.Add(series4);
+            this.StatisticsChart.Series.Add(series5);
+            this.StatisticsChart.Series.Add(series6);
             this.StatisticsChart.Size = new System.Drawing.Size(1089, 352);
             this.StatisticsChart.TabIndex = 2;
             // 
@@ -463,6 +463,8 @@
             // bindingConfiguration
             // 
             this.bindingConfiguration.DataSource = typeof(Shadowsocks.Model.StatisticsStrategyConfiguration);
+            this.bindingConfiguration.BindingComplete += new System.Windows.Forms.BindingCompleteEventHandler(this.bindingConfiguration_BindingComplete);
+            this.bindingConfiguration.CurrentItemChanged += new System.EventHandler(this.bindingConfiguration_CurrentItemChanged);
             // 
             // StatisticsStrategyConfigurationForm
             // 

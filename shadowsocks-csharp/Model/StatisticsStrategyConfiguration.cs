@@ -14,12 +14,12 @@ namespace Shadowsocks.Model
     public class StatisticsStrategyConfiguration
     {
         public static readonly string ID = "com.shadowsocks.strategy.statistics";
-        public bool StatisticsEnabled { get; } = true;
-        public bool ByHourOfDay { get; } = true;
+        public bool StatisticsEnabled { get; set; } = true;
+        public bool ByHourOfDay { get; set; } = true;
         public bool Ping { get; set; }
-        public int ChoiceKeptMinutes { get; } = 10;
-        public int DataCollectionMinutes { get; } = 10;
-        public int RepeatTimesNum { get; } = 4;
+        public int ChoiceKeptMinutes { get; set; } = 10;
+        public int DataCollectionMinutes { get; set; } = 10;
+        public int RepeatTimesNum { get; set; } = 4;
 
         private const string ConfigFile = "statistics-config.json";
 

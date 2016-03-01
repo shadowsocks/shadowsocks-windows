@@ -1,16 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
-using System.Windows.Forms.DataVisualization.Charting;
 using Shadowsocks.Controller;
 using Shadowsocks.Model;
 
 namespace Shadowsocks.View
 {
-    using Statistics = Dictionary<string, List<StatisticsRecord>>;
     public partial class StatisticsStrategyConfigurationForm : Form
     {
         private readonly ShadowsocksController _controller;
@@ -145,6 +142,16 @@ namespace Shadowsocks.View
         private void PingCheckBox_CheckedChanged(object sender, EventArgs e)
         {
             repeatTimesNum.ReadOnly = !PingCheckBox.Checked;
+        }
+
+        private void bindingConfiguration_CurrentItemChanged(object sender, EventArgs e)
+        {
+            Logging.Info("?");
+        }
+
+        private void bindingConfiguration_BindingComplete(object sender, BindingCompleteEventArgs e)
+        {
+            Logging.Info("?");
         }
     }
 }
