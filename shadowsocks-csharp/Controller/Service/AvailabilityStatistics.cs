@@ -1,159 +1,157 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Net.Http;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
-
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-
 using Shadowsocks.Model;
 using Shadowsocks.Util;
 
 namespace Shadowsocks.Controller
 {
-    using DataUnit = KeyValuePair<string, string>;
-    using DataList = List<KeyValuePair<string, string>>;
+    using Statistics = Dictionary<string, List<StatisticsRecord>>;
 
-    using Statistics = Dictionary<string, List<AvailabilityStatistics.RawStatisticsData>>;
-
-    public class AvailabilityStatistics
+    public sealed class AvailabilityStatistics : IDisposable
     {
-        public static readonly string DateTimePattern = "yyyy-MM-dd HH:mm:ss";
-        private const string StatisticsFilesName = "shadowsocks.availability.csv";
-        private const string Delimiter = ",";
-        private const int Timeout = 500;
-        private const int DelayBeforeStart = 1000;
-        public Statistics RawStatistics { get; private set; }
-        public Statistics FilteredStatistics { get; private set; }
-        public static readonly DateTime UnknownDateTime = new DateTime(1970, 1, 1);
-        private int Repeat => _config.RepeatTimesNum;
-        private const int RetryInterval = 2 * 60 * 1000; //retry 2 minutes after failed
-        private int Interval => (int)TimeSpan.FromMinutes(_config.DataCollectionMinutes).TotalMilliseconds;
-        private Timer _timer;
-        private State _state;
-        private List<Server> _servers;
-        private StatisticsStrategyConfiguration _config;
-
+        public const string DateTimePattern = "yyyy-MM-dd HH:mm:ss";
+        private const string StatisticsFilesName = "shadowsocks.availability.json";
         public static string AvailabilityStatisticsFile;
-
         //static constructor to initialize every public static fields before refereced
         static AvailabilityStatistics()
         {
             AvailabilityStatisticsFile = Utils.GetTempPath(StatisticsFilesName);
         }
 
-        public AvailabilityStatistics(Configuration config, StatisticsStrategyConfiguration statisticsConfig)
+        //arguments for ICMP tests
+        private int Repeat => Config.RepeatTimesNum;
+        public const int TimeoutMilliseconds = 500;
+
+        //records cache for current server in {_monitorInterval} minutes
+        private readonly ConcurrentDictionary<string, List<int>> _latencyRecords = new ConcurrentDictionary<string, List<int>>();
+        //speed in KiB/s
+        private readonly ConcurrentDictionary<string, long> _inboundCounter = new ConcurrentDictionary<string, long>();
+        private readonly ConcurrentDictionary<string, long> _lastInboundCounter = new ConcurrentDictionary<string, long>();
+        private readonly ConcurrentDictionary<string, List<int>> _inboundSpeedRecords = new ConcurrentDictionary<string, List<int>>();
+        private readonly ConcurrentDictionary<string, long> _outboundCounter = new ConcurrentDictionary<string, long>();
+        private readonly ConcurrentDictionary<string, long> _lastOutboundCounter = new ConcurrentDictionary<string, long>();
+        private readonly ConcurrentDictionary<string, List<int>> _outboundSpeedRecords = new ConcurrentDictionary<string, List<int>>();
+
+        //tasks
+        private readonly TimeSpan _delayBeforeStart = TimeSpan.FromSeconds(1);
+        private readonly TimeSpan _retryInterval = TimeSpan.FromMinutes(2);
+        private Timer _recorder; //analyze and save cached records to RawStatistics and filter records
+        private TimeSpan RecordingInterval => TimeSpan.FromMinutes(Config.DataCollectionMinutes);
+        private Timer _speedMonior;
+        private readonly TimeSpan _monitorInterval = TimeSpan.FromSeconds(1);
+        //private Timer _writer; //write RawStatistics to file
+        //private readonly TimeSpan _writingInterval = TimeSpan.FromMinutes(1);
+
+        private ShadowsocksController _controller;
+        private StatisticsStrategyConfiguration Config => _controller.StatisticsConfiguration;
+
+        // Static Singleton Initialization
+        public static AvailabilityStatistics Instance { get; } = new AvailabilityStatistics();
+        public Statistics RawStatistics { get; private set; }
+        public Statistics FilteredStatistics { get; private set; }
+
+        private AvailabilityStatistics()
         {
-            UpdateConfiguration(config, statisticsConfig);
+            RawStatistics = new Statistics();
         }
 
-        public bool Set(StatisticsStrategyConfiguration config)
+        internal void UpdateConfiguration(ShadowsocksController controller)
         {
-            _config = config;
+            _controller = controller;
+            Reset();
             try
             {
-                if (config.StatisticsEnabled)
+                if (Config.StatisticsEnabled)
                 {
-                    if (_timer?.Change(DelayBeforeStart, Interval) == null)
-                    {
-                        _state = new State();
-                        _timer = new Timer(Run, _state, DelayBeforeStart, Interval);
-                    }
+                    StartTimerWithoutState(ref _recorder, Run, RecordingInterval);
+                    LoadRawStatistics();
+                    StartTimerWithoutState(ref _speedMonior, UpdateSpeed, _monitorInterval);
                 }
                 else
                 {
-                    _timer?.Dispose();
+                    _recorder?.Dispose();
+                    _speedMonior?.Dispose();
                 }
-                return true;
             }
             catch (Exception e)
             {
                 Logging.LogUsefulException(e);
-                return false;
             }
         }
 
-        //hardcode
-        //TODO: backup reliable isp&geolocation provider or a local database is required
-        public static async Task<DataList> GetGeolocationAndIsp()
+        private void StartTimerWithoutState(ref Timer timer, TimerCallback callback, TimeSpan interval)
         {
-            Logging.Debug("Retrive information of geolocation and isp");
-            const string API = "http://ip-api.com/json";
-            const string alternativeAPI = "http://www.telize.com/geoip"; //must be comptible with current API
-            var result = await GetInfoFromAPI(API);
-            if (result != null) return result;
-            result = await GetInfoFromAPI(alternativeAPI);
-            if (result != null) return result;
-            return new DataList
+            if (timer?.Change(_delayBeforeStart, interval) == null)
             {
-                new DataUnit(State.Geolocation, State.Unknown),
-                new DataUnit(State.ISP, State.Unknown)
-            };
+                timer = new Timer(callback, null, _delayBeforeStart, interval);
+            }
         }
 
-        private static async Task<DataList> GetInfoFromAPI(string API)
+        private void UpdateSpeed(object _)
         {
-            string jsonString;
-            try
+            foreach (var kv in _lastInboundCounter)
             {
-                jsonString = await new HttpClient().GetStringAsync(API);
+                var id = kv.Key;
+
+                var lastInbound = kv.Value;
+                var inbound = _inboundCounter[id];
+                var bytes = inbound - lastInbound;
+                _lastInboundCounter[id] = inbound;
+                var inboundSpeed = GetSpeedInKiBPerSecond(bytes, _monitorInterval.TotalSeconds);
+                _inboundSpeedRecords.GetOrAdd(id, new List<int> {inboundSpeed}).Add(inboundSpeed);
+
+                var lastOutbound = _lastOutboundCounter[id];
+                var outbound = _outboundCounter[id];
+                bytes = outbound - lastOutbound;
+                _lastOutboundCounter[id] = outbound;
+                var outboundSpeed = GetSpeedInKiBPerSecond(bytes, _monitorInterval.TotalSeconds);
+                _outboundSpeedRecords.GetOrAdd(id, new List<int> {outboundSpeed}).Add(outboundSpeed);
+
+                Logging.Debug(
+                    $"{id}: current/max inbound {inboundSpeed}/{_inboundSpeedRecords[id].Max()} KiB/s, current/max outbound {outboundSpeed}/{_outboundSpeedRecords[id].Max()} KiB/s");
             }
-            catch (HttpRequestException e)
-            {
-                Logging.LogUsefulException(e);
-                return null;
-            }
-            JObject obj;
-            try
-            {
-                obj = JObject.Parse(jsonString);
-            }
-            catch (JsonReaderException)
-            {
-                return null;
-            }
-            string country = (string)obj["country"];
-            string city = (string)obj["city"];
-            string isp = (string)obj["isp"];
-            if (country == null || city == null || isp == null) return null;
-            return new DataList {
-                new DataUnit(State.Geolocation, $"\"{country} {city}\""),
-                new DataUnit(State.ISP, $"\"{isp}\"")
-            };
         }
 
-        private async Task<List<DataList>> ICMPTest(Server server)
+        private async Task<ICMPResult> ICMPTest(Server server)
         {
             Logging.Debug("Ping " + server.FriendlyName());
             if (server.server == "") return null;
-            var ret = new List<DataList>();
-            try {
-                var IP = Dns.GetHostAddresses(server.server).First(ip => (ip.AddressFamily == AddressFamily.InterNetwork || ip.AddressFamily == AddressFamily.InterNetworkV6));
+            var result = new ICMPResult(server);
+            try
+            {
+                var IP =
+                    Dns.GetHostAddresses(server.server)
+                        .First(
+                            ip =>
+                                ip.AddressFamily == AddressFamily.InterNetwork ||
+                                ip.AddressFamily == AddressFamily.InterNetworkV6);
                 var ping = new Ping();
 
-                foreach (var timestamp in Enumerable.Range(0, Repeat).Select(_ => DateTime.Now.ToString(DateTimePattern)))
+                foreach (var _ in Enumerable.Range(0, Repeat))
                 {
-                    //ICMP echo. we can also set options and special bytes
                     try
                     {
-                        var reply = await ping.SendTaskAsync(IP, Timeout);
-                        ret.Add(new List<KeyValuePair<string, string>>
-                    {
-                        new KeyValuePair<string, string>("Timestamp", timestamp),
-                        new KeyValuePair<string, string>("Server", server.FriendlyName()),
-                        new KeyValuePair<string, string>("Status", reply?.Status.ToString()),
-                        new KeyValuePair<string, string>("RoundtripTime", reply?.RoundtripTime.ToString())
-                        //new KeyValuePair<string, string>("data", reply.Buffer.ToString()); // The data of reply
-                    });
-                        Thread.Sleep(Timeout + new Random().Next() % Timeout);
+                        var reply = await ping.SendTaskAsync(IP, TimeoutMilliseconds);
+                        if (reply.Status.Equals(IPStatus.Success))
+                        {
+                            result.RoundtripTime.Add((int?) reply.RoundtripTime);
+                        }
+                        else
+                        {
+                            result.RoundtripTime.Add(null);
+                        }
+
                         //Do ICMPTest in a random frequency
+                        Thread.Sleep(TimeoutMilliseconds + new Random().Next()%TimeoutMilliseconds);
                     }
                     catch (Exception e)
                     {
@@ -161,52 +159,82 @@ namespace Shadowsocks.Controller
                         Logging.LogUsefulException(e);
                     }
                 }
-            }catch(Exception e)
+            }
+            catch (Exception e)
             {
                 Logging.Error($"An exception occured while eveluating {server.FriendlyName()}");
                 Logging.LogUsefulException(e);
             }
-            return ret;
+            return result;
         }
 
-        private void Run(object obj)
+        private void Reset()
         {
-            LoadRawStatistics();
+            _inboundSpeedRecords.Clear();
+            _outboundSpeedRecords.Clear();
+            _latencyRecords.Clear();
+        }
+
+        private void Run(object _)
+        {
+            UpdateRecords();
+            Save();
+            Reset();
             FilterRawStatistics();
-            evaluate();
         }
 
-        private async void evaluate()
+        private async void UpdateRecords()
         {
-            var geolocationAndIsp = GetGeolocationAndIsp();
-            foreach (var dataLists in await TaskEx.WhenAll(_servers.Select(ICMPTest)))
+            var records = new Dictionary<string, StatisticsRecord>();
+
+            foreach (var server in _controller.GetCurrentConfiguration().configs)
             {
-                if (dataLists == null) continue;
-                foreach (var dataList in dataLists.Where(dataList => dataList != null))
+                var id = server.Identifier();
+                List<int> inboundSpeedRecords = null;
+                List<int> outboundSpeedRecords = null;
+                List<int> latencyRecords = null;
+                _inboundSpeedRecords.TryGetValue(id, out inboundSpeedRecords);
+                _outboundSpeedRecords.TryGetValue(id, out outboundSpeedRecords);
+                _latencyRecords.TryGetValue(id, out latencyRecords);
+                records.Add(id, new StatisticsRecord(id, inboundSpeedRecords, outboundSpeedRecords, latencyRecords));
+            }
+
+            if (Config.Ping)
+            {
+                var icmpResults = await TaskEx.WhenAll(_controller.GetCurrentConfiguration().configs.Select(ICMPTest));
+                foreach (var result in icmpResults.Where(result => result != null))
                 {
-                    await geolocationAndIsp;
-                    Append(dataList, geolocationAndIsp.Result);
+                    records[result.Server.Identifier()].SetResponse(result.RoundtripTime);
                 }
             }
+
+            foreach (var kv in records.Where(kv => !kv.Value.IsEmptyData()))
+            {
+                AppendRecord(kv.Key, kv.Value);
+            }
         }
 
-        private static void Append(DataList dataList, IEnumerable<DataUnit> extra)
+        private void AppendRecord(string serverIdentifier, StatisticsRecord record)
         {
-            var data = dataList.Concat(extra);
-            var dataLine = string.Join(Delimiter, data.Select(kv => kv.Value).ToArray());
-            string[] lines;
-            if (!File.Exists(AvailabilityStatisticsFile))
+            List<StatisticsRecord> records;
+            if (!RawStatistics.TryGetValue(serverIdentifier, out records))
             {
-                var headerLine = string.Join(Delimiter, data.Select(kv => kv.Key).ToArray());
-                lines = new[] { headerLine, dataLine };
+                records = new List<StatisticsRecord>();
             }
-            else
+            records.Add(record);
+            RawStatistics[serverIdentifier] = records;
+        }
+
+        private void Save()
+        {
+            if (RawStatistics.Count == 0)
             {
-                lines = new[] { dataLine };
+                return;
             }
             try
             {
-                File.AppendAllLines(AvailabilityStatisticsFile, lines);
+                var content = JsonConvert.SerializeObject(RawStatistics, Formatting.None);
+                File.WriteAllText(AvailabilityStatisticsFile, content);
             }
             catch (IOException e)
             {
@@ -214,46 +242,28 @@ namespace Shadowsocks.Controller
             }
         }
 
-        internal void UpdateConfiguration(Configuration config, StatisticsStrategyConfiguration statisticsConfig)
+        private bool IsValidRecord(StatisticsRecord record)
         {
-            Set(statisticsConfig);
-            _servers = config.configs;
+            if (Config.ByHourOfDay)
+            {
+                if (!record.Timestamp.Hour.Equals(DateTime.Now.Hour)) return false;
+            }
+            return true;
         }
 
-        private async void FilterRawStatistics()
+        private void FilterRawStatistics()
         {
             if (RawStatistics == null) return;
             if (FilteredStatistics == null)
             {
                 FilteredStatistics = new Statistics();
             }
-            foreach (IEnumerable<RawStatisticsData> rawData in RawStatistics.Values)
+
+            foreach (var serverAndRecords in RawStatistics)
             {
-                var filteredData = rawData;
-                if (_config.ByIsp)
-                {
-                    var current = await GetGeolocationAndIsp();
-                    filteredData =
-                        filteredData.Where(
-                            data =>
-                                data.Geolocation == current[0].Value ||
-                                data.Geolocation == State.Unknown);
-                    filteredData =
-                        filteredData.Where(
-                            data => data.ISP == current[1].Value || data.ISP == State.Unknown);
-                    if (filteredData.LongCount() == 0) return;
-                }
-                if (_config.ByHourOfDay)
-                {
-                    var currentHour = DateTime.Now.Hour;
-                    filteredData = filteredData.Where(data =>
-                        data.Timestamp != UnknownDateTime && data.Timestamp.Hour == currentHour
-                    );
-                    if (filteredData.LongCount() == 0) return;
-                }
-                var dataList = filteredData as List<RawStatisticsData> ?? filteredData.ToList();
-                var serverName = dataList[0].ServerName;
-                FilteredStatistics[serverName] = dataList;
+                var server = serverAndRecords.Key;
+                var filteredRecords = serverAndRecords.Value.FindAll(IsValidRecord);
+                FilteredStatistics[server] = filteredRecords;
             }
         }
 
@@ -265,77 +275,85 @@ namespace Shadowsocks.Controller
                 Logging.Debug($"loading statistics from {path}");
                 if (!File.Exists(path))
                 {
-                    try {
-                        using (FileStream fs = File.Create(path))
-                        {
-                            //do nothing
-                        }
-                    }catch(Exception e)
+                    using (File.Create(path))
                     {
-                        Logging.LogUsefulException(e);
-                    }
-                    if (!File.Exists(path)) { 
-                        Console.WriteLine($"statistics file does not exist, try to reload {RetryInterval / 60 / 1000} minutes later");
-                        _timer.Change(RetryInterval, Interval);
-                        return;
+                        //do nothing
                     }
                 }
-                RawStatistics = (from l in File.ReadAllLines(path).Skip(1)
-                                 let strings = l.Split(new[] { "," }, StringSplitOptions.RemoveEmptyEntries)
-                                 let rawData = new RawStatisticsData
-                                 {
-                                     Timestamp = ParseExactOrUnknown(strings[0]),
-                                     ServerName = strings[1],
-                                     ICMPStatus = strings[2],
-                                     RoundtripTime = int.Parse(strings[3]),
-                                     Geolocation = 5 > strings.Length ?
-                                     null
-                                     : strings[4],
-                                     ISP = 6 > strings.Length ? null : strings[5]
-                                 }
-                                 group rawData by rawData.ServerName into server
-                                 select new
-                                 {
-                                     ServerName = server.Key,
-                                     data = server.ToList()
-                                 }).ToDictionary(server => server.ServerName, server => server.data);
+                var content = File.ReadAllText(path);
+                RawStatistics = JsonConvert.DeserializeObject<Statistics>(content) ?? RawStatistics;
             }
             catch (Exception e)
             {
                 Logging.LogUsefulException(e);
+                Console.WriteLine($"failed to load statistics; try to reload {_retryInterval.TotalMinutes} minutes later");
+                _recorder.Change(_retryInterval, RecordingInterval);
             }
         }
 
-        private DateTime ParseExactOrUnknown(string str)
+        private static int GetSpeedInKiBPerSecond(long bytes, double seconds)
         {
-            DateTime dateTime;
-            return !DateTime.TryParseExact(str, DateTimePattern, null, DateTimeStyles.None, out dateTime) ? UnknownDateTime : dateTime;
+            var result = (int) (bytes/seconds)/1024;
+            return result;
         }
 
-        public class State
+        private class ICMPResult
         {
-            public DataList dataList = new DataList();
-            public const string Geolocation = "Geolocation";
-            public const string ISP = "ISP";
-            public const string Unknown = "Unknown";
+            internal readonly List<int?> RoundtripTime = new List<int?>();
+            internal readonly Server Server;
+
+            internal ICMPResult(Server server)
+            {
+                Server = server;
+            }
         }
 
-        public class RawStatisticsData
+        public void Dispose()
         {
-            public DateTime Timestamp;
-            public string ServerName;
-            public string ICMPStatus;
-            public int RoundtripTime;
-            public string Geolocation;
-            public string ISP;
+            _recorder.Dispose();
+            _speedMonior.Dispose();
         }
 
-        public class StatisticsData
+        public void UpdateLatency(Server server, int latency)
         {
-            public float PackageLoss;
-            public int AverageResponse;
-            public int MinResponse;
-            public int MaxResponse;
+            List<int> records;
+            _latencyRecords.TryGetValue(server.Identifier(), out records);
+            if (records == null)
+            {
+                records = new List<int>();
+            }
+            records.Add(latency);
+            _latencyRecords[server.Identifier()] = records;
+        }
+
+        public void UpdateInboundCounter(Server server, long n)
+        {
+            long count;
+            if (_inboundCounter.TryGetValue(server.Identifier(), out count))
+            {
+                count += n;
+            }
+            else
+            {
+                count = n;
+                _lastInboundCounter[server.Identifier()] = 0;
+            }
+            _inboundCounter[server.Identifier()] = count;
+        }
+
+        public void UpdateOutboundCounter(Server server, long n)
+        {
+            long count;
+            if (_outboundCounter.TryGetValue(server.Identifier(), out count))
+            {
+                count += n;
+            }
+            else
+            {
+                count = n;
+                _lastOutboundCounter[server.Identifier()] = 0;
+            }
+            _outboundCounter[server.Identifier()] = count;
         }
     }
 }

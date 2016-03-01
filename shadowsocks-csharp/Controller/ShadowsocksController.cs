@@ -5,7 +5,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
-
+using System.Threading.Tasks;
 using Newtonsoft.Json;
 
 using Shadowsocks.Controller.Strategy;
@@ -30,7 +30,7 @@ namespace Shadowsocks.Controller
         private StrategyManager _strategyManager;
         private PolipoRunner polipoRunner;
         private GFWListUpdater gfwListUpdater;
-        public AvailabilityStatistics availabilityStatistics { get; private set; }
+        public AvailabilityStatistics availabilityStatistics = AvailabilityStatistics.Instance;
         public StatisticsStrategyConfiguration StatisticsConfiguration { get; private set; }
 
         public long inboundCounter = 0;
@@ -268,7 +268,7 @@ namespace Shadowsocks.Controller
         public void UpdateStatisticsConfiguration(bool enabled)
         {
             if (availabilityStatistics == null) return;
-            availabilityStatistics.UpdateConfiguration(_config, StatisticsConfiguration);
+            availabilityStatistics.UpdateConfiguration(this);
             _config.availabilityStatistics = enabled;
             SaveConfig(_config);
         }
@@ -307,14 +307,30 @@ namespace Shadowsocks.Controller
             Configuration.Save(_config);
         }
 
-        public void UpdateInboundCounter(long n)
+        public void UpdateLatency(Server server, TimeSpan latency)
         {
-            Interlocked.Add(ref inboundCounter, n);
+            if (_config.availabilityStatistics)
+            {
+                new Task(() => availabilityStatistics.UpdateLatency(server, (int) latency.TotalMilliseconds)).Start();
+            }
         }
 
-        public void UpdateOutboundCounter(long n)
+        public void UpdateInboundCounter(Server server, long n)
+        {
+            Interlocked.Add(ref inboundCounter, n);
+            if (_config.availabilityStatistics)
+            {
+                new Task(() => availabilityStatistics.UpdateInboundCounter(server, n)).Start();
+            }
+        }
+
+        public void UpdateOutboundCounter(Server server, long n)
         {
             Interlocked.Add(ref outboundCounter, n);
+            if (_config.availabilityStatistics)
+            {
+                new Task(() => availabilityStatistics.UpdateOutboundCounter(server, n)).Start();
+            }
         }
 
         protected void Reload()
@@ -341,11 +357,7 @@ namespace Shadowsocks.Controller
                 gfwListUpdater.Error += pacServer_PACUpdateError;
             }
 
-            if (availabilityStatistics == null)
-            {
-                availabilityStatistics = new AvailabilityStatistics(_config, StatisticsConfiguration);
-            }
-            availabilityStatistics.UpdateConfiguration(_config, StatisticsConfiguration);
+            availabilityStatistics.UpdateConfiguration(this);
 
             if (_listener != null)
             {
@@ -501,5 +513,6 @@ namespace Shadowsocks.Controller
                 Thread.Sleep(30 * 1000);
             }
         }
+
     }
 }
