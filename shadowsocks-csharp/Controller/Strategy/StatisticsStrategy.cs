@@ -64,7 +64,7 @@ namespace Shadowsocks.Controller.Strategy
             {
                 var name = calculation.Key;
                 var field = typeof (StatisticsRecord).GetField(name);
-                dynamic value = field.GetValue(averageRecord);
+                dynamic value = field?.GetValue(averageRecord);
                 var factor = calculation.Value;
                 if (value == null || factor.Equals(0)) continue;
                 score = score ?? 0;
