@@ -1,3 +1,13 @@
+3.0 2016-03-02
+- Update Privoxy to 3.0.24
+- Replace Choose by Total Packet Loss with Choose by Statistics
+- Support Onetime Authentication
+- Optional checking updates
+- Download updates automatically
+- Improve log viewer
+- Minor fixes
+- Other improvements
+
 2.5.8 2015-09-20
 - Update GFWList url
 
