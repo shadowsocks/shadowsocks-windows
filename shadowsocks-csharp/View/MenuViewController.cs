@@ -260,7 +260,6 @@ namespace Shadowsocks.View
         {
             if (updateChecker.NewVersionFound)
             {
-                Logging.Debug($"New version {updateChecker.LatestVersionNumber} found");
                 ShowBalloonTip(String.Format(I18N.GetString("Shadowsocks {0} Update Found"), updateChecker.LatestVersionNumber), I18N.GetString("Click here to update"), ToolTipIcon.Info, 5000);
             }
             else if (!_isStartupChecking)
