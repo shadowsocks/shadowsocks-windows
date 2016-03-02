@@ -82,16 +82,15 @@ namespace Shadowsocks.View
 
             Configuration config = controller.GetConfigurationCopy();
 
-            if (config.autoCheckUpdate)
-            {
-                _isStartupChecking = true;
-                updateChecker.CheckUpdate(config, 3000);
-            }
-
             if (config.isDefault)
             {
                 _isFirstRun = true;
                 ShowConfigForm();
+            }
+            else if(config.autoCheckUpdate)
+            {
+                _isStartupChecking = true;
+                updateChecker.CheckUpdate(config, 3000);
             }
         }
 
@@ -262,12 +261,10 @@ namespace Shadowsocks.View
             if (updateChecker.NewVersionFound)
             {
                 ShowBalloonTip(String.Format(I18N.GetString("Shadowsocks {0} Update Found"), updateChecker.LatestVersionNumber), I18N.GetString("Click here to update"), ToolTipIcon.Info, 5000);
-                _isFirstRun = false;
             }
             else if (!_isStartupChecking)
             {
                 ShowBalloonTip(I18N.GetString("Shadowsocks"), I18N.GetString("No update is available"), ToolTipIcon.Info, 5000);
-                _isFirstRun = false;
             }
             _isStartupChecking = false;
         }
@@ -389,7 +386,12 @@ namespace Shadowsocks.View
         {
             configForm = null;
             Utils.ReleaseMemory(true);
-            ShowFirstTimeBalloon();
+            if (_isFirstRun)
+            {
+                CheckUpdateForFirstRun();
+                ShowFirstTimeBalloon();
+                _isFirstRun = false;
+            }
         }
 
         private void Config_Click(object sender, EventArgs e)
@@ -404,16 +406,22 @@ namespace Shadowsocks.View
             Application.Exit();
         }
 
+        private void CheckUpdateForFirstRun()
+        {
+            Configuration config = controller.GetConfigurationCopy();
+            if (!config.isDefault)
+            {
+                _isStartupChecking = true;
+                updateChecker.CheckUpdate(config, 3000);
+            }
+        }
+
         private void ShowFirstTimeBalloon()
         {
-            if (_isFirstRun)
-            {
-                _notifyIcon.BalloonTipTitle = I18N.GetString("Shadowsocks is here");
-                _notifyIcon.BalloonTipText = I18N.GetString("You can turn on/off Shadowsocks in the context menu");
-                _notifyIcon.BalloonTipIcon = ToolTipIcon.Info;
-                _notifyIcon.ShowBalloonTip(0);
-                _isFirstRun = false;
-            }
+            _notifyIcon.BalloonTipTitle = I18N.GetString("Shadowsocks is here");
+            _notifyIcon.BalloonTipText = I18N.GetString("You can turn on/off Shadowsocks in the context menu");
+            _notifyIcon.BalloonTipIcon = ToolTipIcon.Info;
+            _notifyIcon.ShowBalloonTip(0);
         }
 
         private void AboutItem_Click(object sender, EventArgs e)
