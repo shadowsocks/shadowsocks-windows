@@ -49,8 +49,13 @@ namespace Shadowsocks.Controller
                 {
                     try
                     {
-                        p.Kill();
-                        p.WaitForExit();
+                        p.CloseMainWindow();
+                        p.WaitForExit(100);
+                        if (!p.HasExited)
+                        {
+                            p.Kill();
+                            p.WaitForExit();
+                        }
                     }
                     catch (Exception e)
                     {

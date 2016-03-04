@@ -196,7 +196,12 @@ namespace Shadowsocks.Controller
                 _inboundSpeedRecords.TryGetValue(id, out inboundSpeedRecords);
                 _outboundSpeedRecords.TryGetValue(id, out outboundSpeedRecords);
                 _latencyRecords.TryGetValue(id, out latencyRecords);
-                records.Add(id, new StatisticsRecord(id, inboundSpeedRecords, outboundSpeedRecords, latencyRecords));
+                StatisticsRecord record = new StatisticsRecord(id, inboundSpeedRecords, outboundSpeedRecords, latencyRecords);
+                /* duplicate server identifier */
+                if (records.ContainsKey(id))
+                    records[id] = record;
+                else
+                    records.Add(id, record);
             }
 
             if (Config.Ping)
