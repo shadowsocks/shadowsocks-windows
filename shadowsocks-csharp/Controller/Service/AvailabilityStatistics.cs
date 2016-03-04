@@ -141,15 +141,14 @@ namespace Shadowsocks.Controller
         private void Run(object _)
         {
             UpdateRecords();
-            Save();
             Reset();
-            FilterRawStatistics();
         }
 
         private void UpdateRecords()
         {
             var records = new Dictionary<string, StatisticsRecord>();
-
+            UpdateRecordsState state = new UpdateRecordsState();
+            state.counter = _controller.GetCurrentConfiguration().configs.Count;
             foreach (var server in _controller.GetCurrentConfiguration().configs)
             {
                 var id = server.Identifier();
@@ -169,44 +168,76 @@ namespace Shadowsocks.Controller
                 {
                     MyPing ping = new MyPing(server, Repeat);
                     ping.Completed += ping_Completed;
-                    ping.Start(record);
+                    ping.Start(new PingState { state = state, record = record });
+                }
+                else if (!record.IsEmptyData())
+                {
+                    AppendRecord(id, record);
                 }
             }
 
-            foreach (var kv in records.Where(kv => !kv.Value.IsEmptyData()))
+            if (!Config.Ping)
             {
-                AppendRecord(kv.Key, kv.Value);
+                Save();
+                FilterRawStatistics();
             }
         }
 
         private void ping_Completed(object sender, MyPing.CompletedEventArgs e)
         {
+            PingState pingState = (PingState)e.UserState;
+            UpdateRecordsState state = pingState.state;
             Server server = e.Server;
-            StatisticsRecord record = (StatisticsRecord)e.UserState;
+            StatisticsRecord record = pingState.record;
             record.SetResponse(e.RoundtripTime);
+            if (!record.IsEmptyData())
+            {
+                AppendRecord(server.Identifier(), record);
+            }
             Logging.Debug($"Ping {server.FriendlyName()} {e.RoundtripTime.Count} times, {(100 - record.PackageLoss * 100)}% packages loss, min {record.MinResponse} ms, max {record.MaxResponse} ms, avg {record.AverageResponse} ms");
+            if (Interlocked.Decrement(ref state.counter) == 0)
+            {
+                Save();
+                FilterRawStatistics();
+            }
         }
 
         private void AppendRecord(string serverIdentifier, StatisticsRecord record)
         {
-            List<StatisticsRecord> records;
-            if (!RawStatistics.TryGetValue(serverIdentifier, out records))
+            try
             {
-                records = new List<StatisticsRecord>();
-                RawStatistics[serverIdentifier] = records;
+                List<StatisticsRecord> records;
+                lock (RawStatistics)
+                {
+                    if (!RawStatistics.TryGetValue(serverIdentifier, out records))
+                    {
+                        records = new List<StatisticsRecord>();
+                        RawStatistics[serverIdentifier] = records;
+                    }
+                }
+                records.Add(record);
             }
-            records.Add(record);
+            catch (Exception e)
+            {
+                Logging.LogUsefulException(e);
+            }
         }
 
         private void Save()
         {
+            Logging.Debug($"save statistics to {AvailabilityStatisticsFile}");
             if (RawStatistics.Count == 0)
             {
                 return;
             }
             try
             {
-                var content = JsonConvert.SerializeObject(RawStatistics, Formatting.None);
+                string content;
+#if DEBUG
+                content = JsonConvert.SerializeObject(RawStatistics, Formatting.Indented);
+#else
+                content = JsonConvert.SerializeObject(RawStatistics, Formatting.None);
+#endif
                 File.WriteAllText(AvailabilityStatisticsFile, content);
             }
             catch (IOException e)
@@ -226,17 +257,25 @@ namespace Shadowsocks.Controller
 
         private void FilterRawStatistics()
         {
-            if (RawStatistics == null) return;
-            if (FilteredStatistics == null)
+            try
             {
-                FilteredStatistics = new Statistics();
-            }
+                Logging.Debug("filter raw statistics");
+                if (RawStatistics == null) return;
+                if (FilteredStatistics == null)
+                {
+                    FilteredStatistics = new Statistics();
+                }
 
-            foreach (var serverAndRecords in RawStatistics)
+                foreach (var serverAndRecords in RawStatistics)
+                {
+                    var server = serverAndRecords.Key;
+                    var filteredRecords = serverAndRecords.Value.FindAll(IsValidRecord);
+                    FilteredStatistics[server] = filteredRecords;
+                }
+            }
+            catch (Exception e)
             {
-                var server = serverAndRecords.Key;
-                var filteredRecords = serverAndRecords.Value.FindAll(IsValidRecord);
-                FilteredStatistics[server] = filteredRecords;
+                Logging.LogUsefulException(e);
             }
         }
 
@@ -304,6 +343,17 @@ namespace Shadowsocks.Controller
             }, (k, v) => (v + n));
         }
 
+        class UpdateRecordsState
+        {
+            public int counter;
+        }
+
+        class PingState
+        {
+            public UpdateRecordsState state;
+            public StatisticsRecord record;
+        }
+
         class MyPing
         {
             //arguments for ICMP tests
@@ -329,7 +379,10 @@ namespace Shadowsocks.Controller
             public void Start(object userstate)
             {
                 if (server.server == "")
+                {
+                    FireCompleted(new Exception("Invalid Server"), userstate);
                     return;
+                }
                 new Task(() => ICMPTest(0, userstate)).Start();
             }
 
@@ -355,6 +408,7 @@ namespace Shadowsocks.Controller
                 {
                     Logging.Error($"An exception occured while eveluating {server.FriendlyName()}");
                     Logging.LogUsefulException(e);
+                    FireCompleted(e, userstate);
                 }
             }
 
@@ -378,6 +432,7 @@ namespace Shadowsocks.Controller
                 {
                     Logging.Error($"An exception occured while eveluating {server.FriendlyName()}");
                     Logging.LogUsefulException(ex);
+                    FireCompleted(ex, e.UserState);
                 }
             }
 
@@ -391,17 +446,24 @@ namespace Shadowsocks.Controller
                 }
                 else
                 {
-                    Completed?.Invoke(this, new CompletedEventArgs
-                    {
-                        Server = server,
-                        RoundtripTime = RoundtripTime,
-                        UserState = userstate
-                    });
+                    FireCompleted(null, userstate);
                 }
+            }
+
+            private void FireCompleted(Exception error, object userstate)
+            {
+                Completed?.Invoke(this, new CompletedEventArgs
+                {
+                    Error = error,
+                    Server = server,
+                    RoundtripTime = RoundtripTime,
+                    UserState = userstate
+                });
             }
 
             public class CompletedEventArgs : EventArgs
             {
+                public Exception Error;
                 public Server Server;
                 public List<int?> RoundtripTime;
                 public object UserState;
