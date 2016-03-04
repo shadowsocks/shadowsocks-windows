@@ -184,6 +184,7 @@ namespace Shadowsocks.Controller
             Server server = ((MyPing)sender).server;
             StatisticsRecord record = (StatisticsRecord)((MyPing)sender).userstate;
             record.SetResponse(e.RoundtripTime);
+            Logging.Debug($"Ping {server.FriendlyName()} {e.RoundtripTime.Count} times, {(100 - record.PackageLoss * 100)}% packages loss, min {record.MinResponse} ms, max {record.MaxResponse} ms, avg {record.AverageResponse} ms");
         }
 
         private void AppendRecord(string serverIdentifier, StatisticsRecord record)
@@ -329,7 +330,6 @@ namespace Shadowsocks.Controller
 
             public void Start()
             {
-                Logging.Debug("Ping " + server.FriendlyName());
                 if (server.server == "")
                     return;
                 new Task(() => ICMPTest(0)).Start();
@@ -339,6 +339,7 @@ namespace Shadowsocks.Controller
             {
                 try
                 {
+                    Logging.Debug($"Ping {server.FriendlyName()}");
                     if (ip == null)
                     {
                         ip = Dns.GetHostAddresses(server.server)
@@ -365,10 +366,12 @@ namespace Shadowsocks.Controller
                 {
                     if (e.Reply.Status == IPStatus.Success)
                     {
+                        Logging.Debug($"Ping {server.FriendlyName()} {e.Reply.RoundtripTime} ms");
                         RoundtripTime.Add((int?)e.Reply.RoundtripTime);
                     }
                     else
                     {
+                        Logging.Debug($"Ping {server.FriendlyName()} timeout");
                         RoundtripTime.Add(null);
                     }
                     TestNext();
