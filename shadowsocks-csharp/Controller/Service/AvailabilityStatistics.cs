@@ -167,9 +167,9 @@ namespace Shadowsocks.Controller
                     records.Add(id, record);
                 if (Config.Ping)
                 {
-                    MyPing ping = new MyPing(server, Repeat, record);
+                    MyPing ping = new MyPing(server, Repeat);
                     ping.Completed += ping_Completed;
-                    ping.Start();
+                    ping.Start(record);
                 }
             }
 
@@ -181,8 +181,8 @@ namespace Shadowsocks.Controller
 
         private void ping_Completed(object sender, MyPing.CompletedEventArgs e)
         {
-            Server server = ((MyPing)sender).server;
-            StatisticsRecord record = (StatisticsRecord)((MyPing)sender).userstate;
+            Server server = e.Server;
+            StatisticsRecord record = (StatisticsRecord)e.UserState;
             record.SetResponse(e.RoundtripTime);
             Logging.Debug($"Ping {server.FriendlyName()} {e.RoundtripTime.Count} times, {(100 - record.PackageLoss * 100)}% packages loss, min {record.MinResponse} ms, max {record.MaxResponse} ms, avg {record.AverageResponse} ms");
         }
@@ -310,32 +310,30 @@ namespace Shadowsocks.Controller
             public const int TimeoutMilliseconds = 500;
 
             public EventHandler<CompletedEventArgs> Completed;
-            public Server server;
-            public object userstate;
+            private Server server;
 
             private int repeat;
             private IPAddress ip;
             private Ping ping;
             private List<int?> RoundtripTime;
 
-            public MyPing(Server server, int repeat, object userstate)
+            public MyPing(Server server, int repeat)
             {
                 this.server = server;
                 this.repeat = repeat;
-                this.userstate = userstate;
                 RoundtripTime = new List<int?>(repeat);
                 ping = new Ping();
                 ping.PingCompleted += Ping_PingCompleted;
             }
 
-            public void Start()
+            public void Start(object userstate)
             {
                 if (server.server == "")
                     return;
-                new Task(() => ICMPTest(0)).Start();
+                new Task(() => ICMPTest(0, userstate)).Start();
             }
 
-            private void ICMPTest(int delay)
+            private void ICMPTest(int delay, object userstate)
             {
                 try
                 {
@@ -351,7 +349,7 @@ namespace Shadowsocks.Controller
                     repeat--;
                     if (delay > 0)
                         Thread.Sleep(delay);
-                    ping.SendAsync(ip, TimeoutMilliseconds, null);
+                    ping.SendAsync(ip, TimeoutMilliseconds, userstate);
                 }
                 catch (Exception e)
                 {
@@ -374,7 +372,7 @@ namespace Shadowsocks.Controller
                         Logging.Debug($"Ping {server.FriendlyName()} timeout");
                         RoundtripTime.Add(null);
                     }
-                    TestNext();
+                    TestNext(e.UserState);
                 }
                 catch (Exception ex)
                 {
@@ -383,26 +381,30 @@ namespace Shadowsocks.Controller
                 }
             }
 
-            private void TestNext()
+            private void TestNext(object userstate)
             {
                 if (repeat > 0)
                 {
                     //Do ICMPTest in a random frequency
                     int delay = TimeoutMilliseconds + new Random().Next() % TimeoutMilliseconds;
-                    new Task(() => ICMPTest(delay)).Start();
+                    new Task(() => ICMPTest(delay, userstate)).Start();
                 }
                 else
                 {
                     Completed?.Invoke(this, new CompletedEventArgs
                     {
-                        RoundtripTime = RoundtripTime
+                        Server = server,
+                        RoundtripTime = RoundtripTime,
+                        UserState = userstate
                     });
                 }
             }
 
             public class CompletedEventArgs : EventArgs
             {
+                public Server Server;
                 public List<int?> RoundtripTime;
+                public object UserState;
             }
         }
 
