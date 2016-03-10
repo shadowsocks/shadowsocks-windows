@@ -144,6 +144,45 @@ namespace Shadowsocks.Controller
         }
     }
 
+    class CallbackStatus
+    {
+        protected int status;
+
+        public CallbackStatus()
+        {
+            status = 0;
+        }
+
+        public void SetIfEqu(int newStatus, int oldStatus)
+        {
+            lock (this)
+            {
+                if (status == oldStatus)
+                {
+                    status = newStatus;
+                }
+            }
+        }
+
+        public int Status
+        {
+            get
+            {
+                lock (this)
+                {
+                    return status;
+                }
+            }
+            set
+            {
+                lock(this)
+                {
+                    status = value;
+                }
+            }
+        }
+    }
+
     class Local : Listener.Service
     {
         private Configuration _config;
@@ -781,7 +820,7 @@ namespace Shadowsocks.Controller
             {
                 speedTester.BeginConnect();
                 remoteTDP.BeginConnect(server.method, server.password, remoteEP, "", 0,
-                    new AsyncCallback(ConnectCallback), null);
+                    new AsyncCallback(ConnectCallback), new CallbackStatus());
             }
             else
             {
@@ -802,15 +841,20 @@ namespace Shadowsocks.Controller
                 {
                     speedTester.BeginConnect();
                     IAsyncResult result = remote.BeginConnect(remoteEP,
-                        new AsyncCallback(ConnectCallback), null);
+                        new AsyncCallback(ConnectCallback), new CallbackStatus());
                     if (reconnectTimesRemain + reconnectTimes > 0)
                     {
                         bool success = result.AsyncWaitHandle.WaitOne((int)(5 * 1000), true);
                         if (!success)
                         {
-                            remote.Close();
-                            lastErrCode = 8;
-                            server.ServerSpeedLog().AddTimeoutTimes();
+                            ((CallbackStatus)result.AsyncState).SetIfEqu(-1, 0);
+                            if (((CallbackStatus)result.AsyncState).Status == -1)
+                            {
+                                lastErrCode = 8;
+                                server.ServerSpeedLog().AddTimeoutTimes();
+                                remote.Close();
+                                Close();
+                            }
                         }
                     }
                     else if (TTL > 0)
@@ -818,9 +862,14 @@ namespace Shadowsocks.Controller
                         bool success = result.AsyncWaitHandle.WaitOne((int)(TTL * 1000), true);
                         if (!success)
                         {
-                            remote.Close();
-                            lastErrCode = 8;
-                            server.ServerSpeedLog().AddTimeoutTimes();
+                            ((CallbackStatus)result.AsyncState).SetIfEqu(-1, 0);
+                            if (((CallbackStatus)result.AsyncState).Status == -1)
+                            {
+                                lastErrCode = 8;
+                                server.ServerSpeedLog().AddTimeoutTimes();
+                                remote.Close();
+                                Close();
+                            }
                         }
                     }
                 }
@@ -829,7 +878,8 @@ namespace Shadowsocks.Controller
 
         private void DnsCallback(IAsyncResult ar)
         {
-            if (closed)
+            ((CallbackStatus)ar.AsyncState).SetIfEqu(1, 0);
+            if (closed || ((CallbackStatus)ar.AsyncState).Status != 1)
             {
                 return;
             }
@@ -1771,7 +1821,18 @@ namespace Shadowsocks.Controller
                     //ipAddress = ipHostInfo.AddressList[0];
                     if (server.DnsBuffer().isExpired(serverURI))
                     {
-                        Dns.BeginGetHostEntry(serverURI, new AsyncCallback(DnsCallback), null);
+                        IAsyncResult result = Dns.BeginGetHostEntry(serverURI, new AsyncCallback(DnsCallback), new CallbackStatus());
+                        bool success = result.AsyncWaitHandle.WaitOne((int)(5 * 1000), true);
+                        if (!success)
+                        {
+                            ((CallbackStatus)result.AsyncState).SetIfEqu(-1, 0);
+                            if (((CallbackStatus)result.AsyncState).Status == -1)
+                            {
+                                lastErrCode = 8;
+                                server.ServerSpeedLog().AddTimeoutTimes();
+                                Close();
+                            }
+                        }
                         return;
                     }
                     else
@@ -1797,12 +1858,14 @@ namespace Shadowsocks.Controller
                     Logging.LogUsefulException(e);
                 this.Close();
             }
-
         }
 
         private void ConnectCallback(IAsyncResult ar)
         {
-            if (closed)
+            if (ar.AsyncState != null)
+                ((CallbackStatus)ar.AsyncState).SetIfEqu(1, 0);
+            if (closed ||
+                ar.AsyncState != null && ((CallbackStatus)ar.AsyncState).Status != 1)
             {
                 return;
             }
