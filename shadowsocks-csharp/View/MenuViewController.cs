@@ -123,19 +123,7 @@ namespace Shadowsocks.View
             Configuration config = controller.GetConfigurationCopy();
             bool enabled = config.enabled;
             bool global = config.global;
-            if (!enabled)
-            {
-                Bitmap iconCopy = new Bitmap(icon);
-                for (int x = 0; x < iconCopy.Width; x++)
-                {
-                    for (int y = 0; y < iconCopy.Height; y++)
-                    {
-                        Color color = icon.GetPixel(x, y);
-                        iconCopy.SetPixel(x, y, Color.FromArgb((byte)(color.A / 1.25), color.R, color.G, color.B));
-                    }
-                }
-                icon = iconCopy;
-            }
+            icon = getTrayIconColorByState(icon, enabled, global);
             _notifyIcon.Icon = Icon.FromHandle(icon.GetHicon());
 
             string serverInfo = null;
@@ -154,6 +142,38 @@ namespace Shadowsocks.View
                     String.Format(I18N.GetString("Running: Port {0}"), config.localPort))  // this feedback is very important because they need to know Shadowsocks is running
                 + "\n" + serverInfo;
             _notifyIcon.Text = text.Substring(0, Math.Min(63, text.Length));
+        }
+
+        private Bitmap getTrayIconColorByState(Bitmap originIcon, bool enabled, bool global)
+        {
+            Bitmap iconCopy = new Bitmap(originIcon);
+            for (int x = 0; x < iconCopy.Width; x++)
+            {
+                for (int y = 0; y < iconCopy.Height; y++)
+                {
+                    Color color = originIcon.GetPixel(x, y);
+                    if (color.A != 0 && color.R > 30)
+                    {
+                        if (!enabled)
+                        {
+                            iconCopy.SetPixel(x, y, Color.FromArgb(color.A, 234, 67, 53));
+                        }
+                        else if (global)
+                        {
+                            iconCopy.SetPixel(x, y, Color.FromArgb(color.A, 52, 168, 83));
+                        }
+                        else
+                        {
+                            iconCopy.SetPixel(x, y, Color.FromArgb(color.A, 251, 188, 5));
+                        }
+                    }
+                    else
+                    {
+                        iconCopy.SetPixel(x, y, Color.FromArgb(color.A, color.R, color.G, color.B));
+                    }
+                }
+            }
+            return iconCopy;
         }
 
         private MenuItem CreateMenuItem(string text, EventHandler click)
