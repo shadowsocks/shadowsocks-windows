@@ -123,7 +123,7 @@ namespace Shadowsocks.View
             Configuration config = controller.GetConfigurationCopy();
             bool enabled = config.enabled;
             bool global = config.global;
-            icon = getTrayIconColorByState(icon, enabled, global);
+            icon = getTrayIconByState(icon, enabled, global);
             _notifyIcon.Icon = Icon.FromHandle(icon.GetHicon());
 
             string serverInfo = null;
@@ -144,7 +144,7 @@ namespace Shadowsocks.View
             _notifyIcon.Text = text.Substring(0, Math.Min(63, text.Length));
         }
 
-        private Bitmap getTrayIconColorByState(Bitmap originIcon, bool enabled, bool global)
+        private Bitmap getTrayIconByState(Bitmap originIcon, bool enabled, bool global)
         {
             Bitmap iconCopy = new Bitmap(originIcon);
             for (int x = 0; x < iconCopy.Width; x++)
