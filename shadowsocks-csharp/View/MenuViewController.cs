@@ -156,15 +156,15 @@ namespace Shadowsocks.View
                     {
                         if (!enabled)
                         {
-                            iconCopy.SetPixel(x, y, Color.FromArgb(color.A, 234, 67, 53));
+                            iconCopy.SetPixel(x, y, Color.FromArgb(color.A, color.R, 0, 0));
                         }
                         else if (global)
                         {
-                            iconCopy.SetPixel(x, y, Color.FromArgb(color.A, 52, 168, 83));
+                            iconCopy.SetPixel(x, y, Color.FromArgb(color.A, 0, color.G, 0));
                         }
                         else
                         {
-                            iconCopy.SetPixel(x, y, Color.FromArgb(color.A, 251, 188, 5));
+                            iconCopy.SetPixel(x, y, Color.FromArgb(color.A, color.R, color.G, 0));
                         }
                     }
                     else
