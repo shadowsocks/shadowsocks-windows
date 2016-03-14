@@ -134,7 +134,34 @@ namespace Shadowsocks.View
             Configuration config = controller.GetConfiguration();
             bool enabled = config.enabled;
             bool global = config.global;
+            bool random = config.random;
+            double mul_a = 1.0, mul_r = 1.0, mul_g = 1.0, mul_b = 1.0;
             if (!enabled)
+            {
+                mul_a = 0.8;
+            }
+            else if (!global)
+            {
+                mul_r = 0.4;
+                mul_g = 1.0;
+                mul_b = 0.4;
+            }
+            if (random)
+            {
+                if (enabled && global)
+                {
+                    mul_r = 0.4;
+                    mul_g = 0.4;
+                    mul_b = 1.0;
+                }
+                else
+                {
+                    mul_r = 0.4;
+                    mul_g = 1.0;
+                    mul_b = 1.0;
+                }
+            }
+
             {
                 Bitmap iconCopy = new Bitmap(icon);
                 for (int x = 0; x < iconCopy.Width; x++)
@@ -142,7 +169,11 @@ namespace Shadowsocks.View
                     for (int y = 0; y < iconCopy.Height; y++)
                     {
                         Color color = icon.GetPixel(x, y);
-                        iconCopy.SetPixel(x, y, Color.FromArgb((byte)(color.A / 1.25), color.R, color.G, color.B));
+                        iconCopy.SetPixel(x, y,
+                            Color.FromArgb((byte)(color.A * mul_a),
+                            ((byte)(color.R * mul_r)),
+                            ((byte)(color.G * mul_g)),
+                            ((byte)(color.B * mul_b))));
                     }
                 }
                 icon = iconCopy;
