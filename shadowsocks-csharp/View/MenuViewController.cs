@@ -156,15 +156,16 @@ namespace Shadowsocks.View
                     {
                         if (!enabled)
                         {
-                            iconCopy.SetPixel(x, y, Color.FromArgb(color.A, color.R, 0, 0));
+                            iconCopy.SetPixel(x, y, Color.FromArgb((byte)(color.A / 1.25), color.R, color.G, color.B));
                         }
                         else if (global)
                         {
-                            iconCopy.SetPixel(x, y, Color.FromArgb(color.A, 0, color.G, 0));
-                        }
-                        else
-                        {
-                            iconCopy.SetPixel(x, y, Color.FromArgb(color.A, color.R, color.G, 0));
+                            Color flyBlue = Color.FromArgb(25, 125, 191);
+                            // Muliply with flyBlue
+                            int red   = color.R * flyBlue.R / 255;
+                            int green = color.G * flyBlue.G / 255; 
+                            int blue  = color.B * flyBlue.B / 255;
+                            iconCopy.SetPixel(x, y, Color.FromArgb(color.A, red, green, blue));
                         }
                     }
                     else
