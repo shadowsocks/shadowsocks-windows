@@ -32,9 +32,14 @@ namespace Shadowsocks.Controller
             timeBeginUpload = DateTime.Now;
         }
 
-        public void BeginDownload()
+        public bool BeginDownload()
         {
-            timeBeginDownload = DateTime.Now;
+            if (timeBeginDownload == new DateTime())
+            {
+                timeBeginDownload = DateTime.Now;
+                return true;
+            }
+            return false;
         }
 
         public void AddDownloadSize(int size)
@@ -61,6 +66,25 @@ namespace Shadowsocks.Controller
             if (sizeDownloadList == null || sizeDownloadList.Count < 2 || (sizeDownloadList[sizeDownloadList.Count - 1].recvTime - sizeDownloadList[0].recvTime).TotalSeconds <= 0.001)
                 return 0;
             return (long)((sizeDownload - sizeDownloadList[0].size) / (sizeDownloadList[sizeDownloadList.Count - 1].recvTime - sizeDownloadList[0].recvTime).TotalSeconds);
+        }
+
+        public int GetActionType()
+        {
+            int type = 0;
+            if (sizeDownload > 1024 * 1024 * 1)
+            {
+                type |= 1;
+            }
+            if (sizeUpload > 1024 * 1024 * 1)
+            {
+                type |= 2;
+            }
+            double time = (DateTime.Now - timeConnectEnd).TotalSeconds;
+            if (time > 5 && (sizeDownload + sizeUpload) / time > 1024 * 16)
+            {
+                type |= 4;
+            }
+            return type;
         }
     }
 }

@@ -2,6 +2,7 @@
 using Shadowsocks.Model;
 using Shadowsocks.Properties;
 using System;
+using System.IO;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
@@ -44,6 +45,7 @@ namespace Shadowsocks.View
         private MenuItem editGFWUserRuleItem;
         private MenuItem editOnlinePACItem;
         private MenuItem SelectRandomItem;
+        private MenuItem httpWhiteListItem;
         private MenuItem UpdateItem;
         private ConfigForm configForm;
         private SettingsForm settingsForm;
@@ -138,28 +140,15 @@ namespace Shadowsocks.View
             double mul_a = 1.0, mul_r = 1.0, mul_g = 1.0, mul_b = 1.0;
             if (!enabled)
             {
-                mul_a = 0.8;
+                mul_g = 0.4;
             }
             else if (!global)
             {
-                mul_r = 0.4;
-                mul_g = 1.0;
                 mul_b = 0.4;
             }
-            if (random)
+            if (!random)
             {
-                if (enabled && global)
-                {
-                    mul_r = 0.4;
-                    mul_g = 0.4;
-                    mul_b = 1.0;
-                }
-                else
-                {
-                    mul_r = 0.4;
-                    mul_g = 1.0;
-                    mul_b = 1.0;
-                }
+                mul_r = 0.4;
             }
 
             {
@@ -231,6 +220,7 @@ namespace Shadowsocks.View
                 //this.AutoStartupItem = CreateMenuItem("Start on Boot", new EventHandler(this.AutoStartupItem_Click)),
                 //this.ShareOverLANItem = CreateMenuItem("Allow Clients from LAN", new EventHandler(this.ShareOverLANItem_Click)),
                 this.SelectRandomItem = CreateMenuItem("Enable balance", new EventHandler(this.SelectRandomItem_Click)),
+                this.httpWhiteListItem = CreateMenuItem("Enable domain white list(http proxy only)", new EventHandler(this.HttpWhiteListItem_Click)),
                 this.UpdateItem = CreateMenuItem("Update available", new EventHandler(this.UpdateItem_Clicked)),
                 new MenuItem("-"),
                 CreateMenuItem("Scan QRCode from Screen...", new EventHandler(this.ScanQRCodeItem_Click)),
@@ -294,14 +284,23 @@ namespace Shadowsocks.View
 
         void controller_UpdatePACFromGFWListError(object sender, System.IO.ErrorEventArgs e)
         {
+            GFWListUpdater updater = (GFWListUpdater)sender;
             ShowBalloonTip(I18N.GetString("Failed to update PAC file"), e.GetException().Message, ToolTipIcon.Error, 5000);
             Logging.LogUsefulException(e.GetException());
         }
 
         void controller_UpdatePACFromGFWListCompleted(object sender, GFWListUpdater.ResultEventArgs e)
         {
-            string result = e.Success ? I18N.GetString("PAC updated") : I18N.GetString("No updates found. Please report to GFWList if you have problems with it.");
+            GFWListUpdater updater = (GFWListUpdater)sender;
+            string result = e.Success ?
+                (updater.update_type <= 1 ? I18N.GetString("PAC updated") : I18N.GetString("Domain white list list updated"))
+                : I18N.GetString("No updates found. Please report to GFWList if you have problems with it.");
             ShowBalloonTip(I18N.GetString("Shadowsocks"), result, ToolTipIcon.Info, 1000);
+
+            if (updater.update_type == 8)
+            {
+                controller.ToggleBypass(httpWhiteListItem.Checked);
+            }
         }
 
         void updateChecker_NewVersionFound(object sender, EventArgs e)
@@ -349,6 +348,7 @@ namespace Shadowsocks.View
             PACModeItem.Checked = !config.global;
             //ShareOverLANItem.Checked = config.shareOverLan;
             SelectRandomItem.Checked = config.random;
+            httpWhiteListItem.Checked = config.bypassWhiteList;
             //AutoStartupItem.Checked = AutoStartup.Check();
             onlinePACItem.Checked = onlinePACItem.Enabled && config.useOnlinePac;
             localPACItem.Checked = !onlinePACItem.Checked;
@@ -542,6 +542,21 @@ namespace Shadowsocks.View
         {
             SelectRandomItem.Checked = !SelectRandomItem.Checked;
             controller.ToggleSelectRandom(SelectRandomItem.Checked);
+        }
+
+        private void HttpWhiteListItem_Click(object sender, EventArgs e)
+        {
+            httpWhiteListItem.Checked = !httpWhiteListItem.Checked;
+            if (httpWhiteListItem.Checked)
+            {
+                string bypass_path = Path.Combine(System.Windows.Forms.Application.StartupPath, PACServer.BYPASS_FILE);
+                if (!File.Exists(bypass_path))
+                {
+                    controller.UpdateBypassListFromDefault();
+                    return;
+                }
+            }
+            controller.ToggleBypass(httpWhiteListItem.Checked);
         }
 
         private void EditPACFileItem_Click(object sender, EventArgs e)

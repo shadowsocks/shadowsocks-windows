@@ -239,12 +239,12 @@ namespace Shadowsocks.Controller
             socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, true);
             Handler handler = new Handler();
 
-            handler.getCurrentServer = delegate (bool usingRandom, bool forceRandom) { return _config.GetCurrentServer(usingRandom, forceRandom); };
+            handler.getCurrentServer = delegate (string targetURI, bool usingRandom, bool forceRandom) { return _config.GetCurrentServer(targetURI, usingRandom, forceRandom); };
             handler.connection = socket;
             handler.reconnectTimesRemain = _config.reconnectTimes;
             handler.forceRandom = _config.random;
 
-            handler.server = _config.GetCurrentServer(true);
+            //handler.server = _config.GetCurrentServer(null, true);
             if (_config.proxyEnable)
             {
                 handler.proxyType = _config.proxyType;
@@ -265,6 +265,7 @@ namespace Shadowsocks.Controller
             {
                 try
                 {
+                    handler.server = _config.GetCurrentServer(null, true);
                     IEncryptor encryptor = EncryptorFactory.GetEncryptor(handler.server.method, handler.server.password);
                     encryptor.Dispose();
                 }
@@ -396,7 +397,7 @@ namespace Shadowsocks.Controller
 
     class Handler
     {
-        public delegate Server GetCurrentServer(bool usingRandom = false, bool forceRandom = false);
+        public delegate Server GetCurrentServer(string targetURI = null, bool usingRandom = false, bool forceRandom = false);
         public delegate bool AuthConnection(Socket connection, string authUser, string authPass);
         public GetCurrentServer getCurrentServer;
         public Server server;
@@ -457,6 +458,7 @@ namespace Shadowsocks.Controller
         protected byte[] connetionSendBuffer = new byte[BufferSize * 2];
         // connection send buffer
         protected List<byte[]> connectionSendBufferList = new List<byte[]>();
+        protected string targetURI;
 
         protected byte[] remoteUDPRecvBuffer = new byte[RecvSize * 2];
         protected int remoteUDPRecvBufferLength = 0;
@@ -500,7 +502,7 @@ namespace Shadowsocks.Controller
             }
             set
             {
-                lock (server)
+                lock (this)
                 {
                     this.state = value;
                 }
@@ -709,16 +711,14 @@ namespace Shadowsocks.Controller
             reconnectTimesRemain--;
             reconnectTimes++;
 
-            if (this.State != ConnectState.HANDSHAKE && this.State != ConnectState.READY)
+            if (this.State != ConnectState.HANDSHAKE && this.State != ConnectState.READY && server != null)
             {
-                lock (server)
+                lock (this)
                 {
                     server.ServerSpeedLog().AddDisconnectTimes();
                     server.GetConnections().DecRef(this.connection);
                 }
             }
-
-            server = this.getCurrentServer(true, forceRandom);
 
             CloseSocket(ref remote);
             CloseSocket(ref remoteUDP);
@@ -745,6 +745,8 @@ namespace Shadowsocks.Controller
                 protocol = null;
             }
 
+            //server = this.getCurrentServer(null, true, forceRandom);
+
             connectionShutdown = false;
             remoteShutdown = false;
 
@@ -762,7 +764,9 @@ namespace Shadowsocks.Controller
             catch (Exception e)
             {
                 LogSocketException(e);
-                if (!Logging.LogSocketException(server.remarks, server.server, e))
+                string remarks = server == null ? "" : server.remarks;
+                string server_url = server == null ? "" : server.server;
+                if (!Logging.LogSocketException(remarks, server_url, e))
                     Logging.LogUsefulException(e);
                 this.Close();
             }
@@ -903,7 +907,9 @@ namespace Shadowsocks.Controller
             catch (Exception e)
             {
                 LogSocketException(e);
-                if (!Logging.LogSocketException(server.remarks, server.server, e))
+                string remarks = server == null ? "" : server.remarks;
+                string server_url = server == null ? "" : server.server;
+                if (!Logging.LogSocketException(remarks, server_url, e))
                     Logging.LogUsefulException(e);
                 this.Close();
             }
@@ -971,22 +977,27 @@ namespace Shadowsocks.Controller
                 }
                 closed = true;
             }
-            if (lastErrCode == 0)
+            if (lastErrCode == 0 && server != null)
             {
                 if (speedTester.sizeRecv == 0 && speedTester.sizeUpload > 0)
                     server.ServerSpeedLog().AddErrorEmptyTimes();
                 else
                     server.ServerSpeedLog().AddNoErrorTimes();
             }
+            //int type = speedTester.GetActionType();
+            //if (type > 0)
+            //{
+            //    Console.WriteLine("Connection to " + targetURI + " type " + type.ToString());
+            //}
             try
             {
                 if (TryReconnect())
                     return;
-                lock (server)
+                lock (this)
                 {
                     if (this.State != ConnectState.END)
                     {
-                        if (this.State != ConnectState.HANDSHAKE && this.State != ConnectState.READY)
+                        if (this.State != ConnectState.HANDSHAKE && this.State != ConnectState.READY && server != null)
                         {
                             server.ServerSpeedLog().AddDisconnectTimes();
                             server.GetConnections().DecRef(this.connection);
@@ -1379,7 +1390,9 @@ namespace Shadowsocks.Controller
             catch (Exception e)
             {
                 LogSocketException(e);
-                if (!Logging.LogSocketException(server.remarks, server.server, e))
+                string remarks = server == null ? "" : server.remarks;
+                string server_url = server == null ? "" : server.server;
+                if (!Logging.LogSocketException(remarks, server_url, e))
                     Logging.LogUsefulException(e);
                 this.Close();
             }
@@ -1409,7 +1422,9 @@ namespace Shadowsocks.Controller
             catch (Exception e)
             {
                 LogSocketException(e);
-                if (!Logging.LogSocketException(server.remarks, server.server, e))
+                string remarks = server == null ? "" : server.remarks;
+                string server_url = server == null ? "" : server.server;
+                if (!Logging.LogSocketException(remarks, server_url, e))
                     Logging.LogUsefulException(e);
                 this.Close();
             }
@@ -1511,7 +1526,9 @@ namespace Shadowsocks.Controller
             catch (Exception e)
             {
                 LogSocketException(e);
-                if (!Logging.LogSocketException(server.remarks, server.server, e))
+                string remarks = server == null ? "" : server.remarks;
+                string server_url = server == null ? "" : server.server;
+                if (!Logging.LogSocketException(remarks, server_url, e))
                     Logging.LogUsefulException(e);
                 this.Close();
             }
@@ -1533,7 +1550,9 @@ namespace Shadowsocks.Controller
             catch (Exception e)
             {
                 LogSocketException(e);
-                if (!Logging.LogSocketException(server.remarks, server.server, e))
+                string remarks = server == null ? "" : server.remarks;
+                string server_url = server == null ? "" : server.server;
+                if (!Logging.LogSocketException(remarks, server_url, e))
                     Logging.LogUsefulException(e);
                 this.Close();
             }
@@ -1570,7 +1589,9 @@ namespace Shadowsocks.Controller
             catch (Exception e)
             {
                 LogSocketException(e);
-                if (!Logging.LogSocketException(server.remarks, server.server, e))
+                string remarks = server == null ? "" : server.remarks;
+                string server_url = server == null ? "" : server.server;
+                if (!Logging.LogSocketException(remarks, server_url, e))
                     Logging.LogUsefulException(e);
                 this.Close();
             }
@@ -1592,13 +1613,15 @@ namespace Shadowsocks.Controller
                 // | 1  |  1  | X'00' |  1   | Variable |    2     |
                 // +----+-----+-------+------+----------+----------+
                 // Recv first 5 bytes, need 2 bytes to know the head length
-                connection.BeginReceive(connetionRecvBuffer, 0, 5, 0,
+                connection.BeginReceive(connetionRecvBuffer, 0, 1024, 0,
                     new AsyncCallback(HandshakeReceive2Callback), null);
             }
             catch (Exception e)
             {
                 LogSocketException(e);
-                if (!Logging.LogSocketException(server.remarks, server.server, e))
+                string remarks = server == null ? "" : server.remarks;
+                string server_url = server == null ? "" : server.server;
+                if (!Logging.LogSocketException(remarks, server_url, e))
                     Logging.LogUsefulException(e);
                 this.Close();
             }
@@ -1716,13 +1739,6 @@ namespace Shadowsocks.Controller
                     }
                     else
                     {
-                        if (socks5RemotePort > 0)
-                        {
-                            if (server.tcp_over_udp)
-                            {
-                                command = 3;
-                            }
-                        }
                         RspSocks5TCPHeader();
                     }
                 }
@@ -1735,7 +1751,9 @@ namespace Shadowsocks.Controller
             catch (Exception e)
             {
                 LogSocketException(e);
-                if (!Logging.LogSocketException(server.remarks, server.server, e))
+                string remarks = server == null ? "" : server.remarks;
+                string server_url = server == null ? "" : server.server;
+                if (!Logging.LogSocketException(remarks, server_url, e))
                     Logging.LogUsefulException(e);
                 this.Close();
             }
@@ -1764,13 +1782,6 @@ namespace Shadowsocks.Controller
                     }
 
                     RspSocks5UDPHeader(bytesRead + 5);
-                    if (socks5RemotePort > 0)
-                    {
-                        if (server.udp_over_tcp)
-                        {
-                            command = 1;
-                        }
-                    }
                 }
                 else
                 {
@@ -1781,7 +1792,9 @@ namespace Shadowsocks.Controller
             catch (Exception e)
             {
                 LogSocketException(e);
-                if (!Logging.LogSocketException(server.remarks, server.server, e))
+                string remarks = server == null ? "" : server.remarks;
+                string server_url = server == null ? "" : server.server;
+                if (!Logging.LogSocketException(remarks, server_url, e))
                     Logging.LogUsefulException(e);
                 this.Close();
             }
@@ -1792,7 +1805,24 @@ namespace Shadowsocks.Controller
             remoteUDP = null;
             remoteTDP = null;
             closed = false;
-            lock (server)
+            if (targetURI == null)
+            {
+                targetURI = GetQueryString();
+            }
+            server = this.getCurrentServer(targetURI, true, forceRandom);
+            if (socks5RemotePort > 0)
+            {
+                if (server.udp_over_tcp)
+                {
+                    command = 1;
+                }
+                else if (server.tcp_over_udp)
+                {
+                    command = 3;
+                }
+            }
+
+            lock (this)
             {
                 server.ServerSpeedLog().AddConnectTimes();
                 if (this.State == ConnectState.HANDSHAKE)
@@ -1854,7 +1884,9 @@ namespace Shadowsocks.Controller
             catch (Exception e)
             {
                 LogSocketException(e);
-                if (!Logging.LogSocketException(server.remarks, server.server, e))
+                string remarks = server == null ? "" : server.remarks;
+                string server_url = server == null ? "" : server.server;
+                if (!Logging.LogSocketException(remarks, server_url, e))
                     Logging.LogUsefulException(e);
                 this.Close();
             }
@@ -1898,7 +1930,7 @@ namespace Shadowsocks.Controller
                     }
                 }
                 speedTester.EndConnect();
-                server.ServerSpeedLog().AddConnectTime((int)(speedTester.timeConnectEnd - speedTester.timeConnectBegin).TotalMilliseconds);
+                //server.ServerSpeedLog().AddConnectTime((int)(speedTester.timeConnectEnd - speedTester.timeConnectBegin).TotalMilliseconds);
 
                 //Console.WriteLine("Socket connected to {0}",
                 //    remote.RemoteEndPoint.ToString());
@@ -1916,7 +1948,9 @@ namespace Shadowsocks.Controller
             catch (Exception e)
             {
                 LogSocketException(e);
-                if (!Logging.LogSocketException(server.remarks, server.server, e))
+                string remarks = server == null ? "" : server.remarks;
+                string server_url = server == null ? "" : server.server;
+                if (!Logging.LogSocketException(remarks, server_url, e))
                     Logging.LogUsefulException(e);
                 this.Close();
             }
@@ -1948,7 +1982,9 @@ namespace Shadowsocks.Controller
             catch (Exception e)
             {
                 LogSocketException(e);
-                if (!Logging.LogSocketException(server.remarks, server.server, e))
+                string remarks = server == null ? "" : server.remarks;
+                string server_url = server == null ? "" : server.server;
+                if (!Logging.LogSocketException(remarks, server_url, e))
                     Logging.LogUsefulException(e);
                 this.Close();
             }
@@ -2133,6 +2169,27 @@ namespace Shadowsocks.Controller
             }
         }
 
+        private string GetQueryString()
+        {
+            if (remoteHeaderSendBuffer[0] == 1)
+            {
+                byte[] addr = new byte[4];
+                Array.Copy(remoteHeaderSendBuffer, 1, addr, 0, 4);
+                IPAddress ipAddress = new IPAddress(addr);
+                return ipAddress.ToString();
+            }
+            if (remoteHeaderSendBuffer[0] == 4)
+            {
+                byte[] addr = new byte[16];
+                Array.Copy(remoteHeaderSendBuffer, 1, addr, 0, 16);
+                IPAddress ipAddress = new IPAddress(addr);
+                return ipAddress.ToString();
+            }
+
+            string url = System.Text.Encoding.UTF8.GetString(remoteHeaderSendBuffer, 2, remoteHeaderSendBuffer[1]);
+            return url;
+        }
+
         // 2 sides connection start
         private void StartPipe()
         {
@@ -2153,6 +2210,8 @@ namespace Shadowsocks.Controller
                 SetObfsPlugin();
 
                 ResetTimeout(TTL);
+
+                speedTester.BeginUpload();
 
                 // remote ready
                 if (connectionUDP == null) // TCP
@@ -2241,7 +2300,9 @@ namespace Shadowsocks.Controller
             catch (Exception e)
             {
                 LogSocketException(e);
-                if (!Logging.LogSocketException(server.remarks, server.server, e))
+                string remarks = server == null ? "" : server.remarks;
+                string server_url = server == null ? "" : server.server;
+                if (!Logging.LogSocketException(remarks, server_url, e))
                     Logging.LogUsefulException(e);
                 this.Close();
             }
@@ -2290,6 +2351,14 @@ namespace Shadowsocks.Controller
                             remoteSendBuffer = this.protocol.ClientPostDecrypt(remoteSendBuffer, bytesToSend, out outlength);
                             bytesToSend = outlength;
                         }
+                    }
+                    if (speedTester.BeginDownload())
+                    {
+                        int pingTime = -1;
+                        if (speedTester.timeBeginDownload != null && speedTester.timeBeginUpload != null)
+                            pingTime = (int)(speedTester.timeBeginDownload - speedTester.timeBeginUpload).TotalMilliseconds;
+                        if (pingTime >= 0)
+                            server.ServerSpeedLog().AddConnectTime(pingTime);
                     }
                     if (bytesToSend == 0)
                     {
@@ -2373,7 +2442,9 @@ namespace Shadowsocks.Controller
             catch (Exception e)
             {
                 LogSocketException(e);
-                if (!Logging.LogSocketException(server.remarks, server.server, e))
+                string remarks = server == null ? "" : server.remarks;
+                string server_url = server == null ? "" : server.server;
+                if (!Logging.LogSocketException(remarks, server_url, e))
                     Logging.LogUsefulException(e);
                 this.Close();
             }
@@ -2422,7 +2493,9 @@ namespace Shadowsocks.Controller
             catch (Exception e)
             {
                 LogSocketException(e);
-                if (!Logging.LogSocketException(server.remarks, server.server, e))
+                string remarks = server == null ? "" : server.remarks;
+                string server_url = server == null ? "" : server.server;
+                if (!Logging.LogSocketException(remarks, server_url, e))
                     Logging.LogUsefulException(e);
                 this.Close();
             }
@@ -2540,7 +2613,9 @@ namespace Shadowsocks.Controller
             catch (Exception e)
             {
                 LogSocketException(e);
-                if (!Logging.LogSocketException(server.remarks, server.server, e))
+                string remarks = server == null ? "" : server.remarks;
+                string server_url = server == null ? "" : server.server;
+                if (!Logging.LogSocketException(remarks, server_url, e))
                     Logging.LogUsefulException(e);
                 this.Close();
             }
@@ -2711,7 +2786,9 @@ namespace Shadowsocks.Controller
             }
             catch (Exception e)
             {
-                if (!Logging.LogSocketException(server.remarks, server.server, e))
+                string remarks = server == null ? "" : server.remarks;
+                string server_url = server == null ? "" : server.server;
+                if (!Logging.LogSocketException(remarks, server_url, e))
                     Logging.LogUsefulException(e);
                 this.Close();
             }
@@ -2759,7 +2836,9 @@ namespace Shadowsocks.Controller
             }
             catch (Exception e)
             {
-                if (!Logging.LogSocketException(server.remarks, server.server, e))
+                string remarks = server == null ? "" : server.remarks;
+                string server_url = server == null ? "" : server.server;
+                if (!Logging.LogSocketException(remarks, server_url, e))
                     Logging.LogUsefulException(e);
                 this.Close();
             }
@@ -2781,7 +2860,9 @@ namespace Shadowsocks.Controller
             catch (Exception e)
             {
                 LogSocketException(e);
-                if (!Logging.LogSocketException(server.remarks, server.server, e))
+                string remarks = server == null ? "" : server.remarks;
+                string server_url = server == null ? "" : server.server;
+                if (!Logging.LogSocketException(remarks, server_url, e))
                     Logging.LogUsefulException(e);
                 this.Close();
             }
@@ -2802,7 +2883,9 @@ namespace Shadowsocks.Controller
             catch (Exception e)
             {
                 LogSocketException(e);
-                if (!Logging.LogSocketException(server.remarks, server.server, e))
+                string remarks = server == null ? "" : server.remarks;
+                string server_url = server == null ? "" : server.server;
+                if (!Logging.LogSocketException(remarks, server_url, e))
                     Logging.LogUsefulException(e);
                 this.Close();
             }
@@ -2823,7 +2906,9 @@ namespace Shadowsocks.Controller
             catch (Exception e)
             {
                 LogSocketException(e);
-                if (!Logging.LogSocketException(server.remarks, server.server, e))
+                string remarks = server == null ? "" : server.remarks;
+                string server_url = server == null ? "" : server.server;
+                if (!Logging.LogSocketException(remarks, server_url, e))
                     Logging.LogUsefulException(e);
                 this.Close();
             }
@@ -2845,7 +2930,9 @@ namespace Shadowsocks.Controller
             catch (Exception e)
             {
                 LogSocketException(e);
-                if (!Logging.LogSocketException(server.remarks, server.server, e))
+                string remarks = server == null ? "" : server.remarks;
+                string server_url = server == null ? "" : server.server;
+                if (!Logging.LogSocketException(remarks, server_url, e))
                     Logging.LogUsefulException(e);
                 this.Close();
             }
@@ -2867,7 +2954,9 @@ namespace Shadowsocks.Controller
             catch (Exception e)
             {
                 LogSocketException(e);
-                if (!Logging.LogSocketException(server.remarks, server.server, e))
+                string remarks = server == null ? "" : server.remarks;
+                string server_url = server == null ? "" : server.server;
+                if (!Logging.LogSocketException(remarks, server_url, e))
                     Logging.LogUsefulException(e);
                 this.Close();
             }

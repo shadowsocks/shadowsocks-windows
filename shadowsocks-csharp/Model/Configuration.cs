@@ -217,6 +217,7 @@ namespace Shadowsocks.Model
         public bool enabled;
         public bool shareOverLan;
         public bool isDefault;
+        public bool bypassWhiteList;
         public int localPort;
         public string pacUrl;
         public bool useOnlinePac;
@@ -237,7 +238,7 @@ namespace Shadowsocks.Model
 
         private static string CONFIG_FILE = "gui-config.json";
 
-        public Server GetCurrentServer(bool usingRandom = false, bool forceRandom = false)
+        public Server GetCurrentServer(string targetURI = null, bool usingRandom = false, bool forceRandom = false)
         {
             lock (serverStrategy)
             {

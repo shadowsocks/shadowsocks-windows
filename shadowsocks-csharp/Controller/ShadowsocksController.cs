@@ -222,6 +222,13 @@ namespace Shadowsocks.Controller
             }
         }
 
+        public void ToggleBypass(bool bypass)
+        {
+            _config.bypassWhiteList = bypass;
+            UpdateSystemProxy();
+            SaveConfig(_config);
+        }
+
         //public void ToggleShareOverLAN(bool enabled)
         //{
         //    _config.shareOverLan = enabled;
@@ -342,6 +349,14 @@ namespace Shadowsocks.Controller
             if (gfwListUpdater != null)
             {
                 gfwListUpdater.UpdatePACFromGFWList(_config, url);
+            }
+        }
+
+        public void UpdateBypassListFromDefault()
+        {
+            if (gfwListUpdater != null)
+            {
+                gfwListUpdater.UpdateBypassListFromDefault(_config);
             }
         }
 
@@ -484,13 +499,13 @@ namespace Shadowsocks.Controller
         private void pacServer_PACUpdateCompleted(object sender, GFWListUpdater.ResultEventArgs e)
         {
             if (UpdatePACFromGFWListCompleted != null)
-                UpdatePACFromGFWListCompleted(this, e);
+                UpdatePACFromGFWListCompleted(sender, e);
         }
 
         private void pacServer_PACUpdateError(object sender, ErrorEventArgs e)
         {
             if (UpdatePACFromGFWListError != null)
-                UpdatePACFromGFWListError(this, e);
+                UpdatePACFromGFWListError(sender, e);
         }
 
         private void StartReleasingMemory()

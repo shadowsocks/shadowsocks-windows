@@ -79,10 +79,10 @@ namespace Shadowsocks.Properties {
         ///Enable balance=服务器负载均衡
         ///Local PAC=使用本地 PAC
         ///Online PAC=使用在线 PAC
-        ///Update Local PAC from LanIPList=更新本地PAC为绕过局域网IP
-        ///Update Local PAC from ChnIPList=更新本地PAC为绕过中国IP
-        ///Update Local PAC from GFWList=更新本地PAC为GFWList
-        ///Edit Local PAC File...=编辑本地 PAC  [字符串的其余部分被截断]&quot;; 的本地化字符串。
+        ///Update Local PAC from Lan IP List=更新本地PAC为绕过局域网IP
+        ///Update Local PAC from Chn White List=更新本地PAC为绕过大陆常见域名列表
+        ///Update Local PAC from Chn IP List=更新本地PAC为绕过大陆IP(foxyproxy慎用)
+        ///Updat [字符串的其余部分被截断]&quot;; 的本地化字符串。
         /// </summary>
         internal static string cn {
             get {
@@ -116,6 +116,8 @@ namespace Shadowsocks.Properties {
         ///activity-animation 0
         ///forward-socks5 / 127.0.0.1:__SOCKS_PORT__ .
         ///hide-console
+        ///__BYPASS_ACTION__
+        ///
         /// 的本地化字符串。
         /// </summary>
         internal static string privoxy_conf {

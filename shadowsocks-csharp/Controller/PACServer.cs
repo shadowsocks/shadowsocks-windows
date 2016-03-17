@@ -16,6 +16,8 @@ namespace Shadowsocks.Controller
     {
         public static string PAC_FILE = "pac.txt";
 
+        public static string BYPASS_FILE = "bypass.action";
+
         public static string USER_RULE_FILE = "user-rule.txt";
 
         public static string USER_ABP_FILE = "abp.txt";

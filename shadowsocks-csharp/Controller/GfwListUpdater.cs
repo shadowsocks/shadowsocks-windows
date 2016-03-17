@@ -16,7 +16,11 @@ namespace Shadowsocks.Controller
 
         private const string GFWLIST_TEMPLATE_URL = "https://raw.githubusercontent.com/breakwa11/gfw_whitelist/master/ss_gfw.pac";
 
+        private const string BYPASS_LIST_URL = "https://raw.githubusercontent.com/breakwa11/gfw_whitelist/master/ss_bypass.action";
+
         private static string PAC_FILE = PACServer.PAC_FILE;
+
+        private static string BYPASS_FILE = PACServer.BYPASS_FILE;
 
         private static string USER_RULE_FILE = PACServer.USER_RULE_FILE;
 
@@ -27,6 +31,8 @@ namespace Shadowsocks.Controller
         private Configuration lastConfig;
 
         private Random random = new Random();
+
+        public int update_type;
 
         public event EventHandler<ResultEventArgs> UpdateCompleted;
 
@@ -101,6 +107,7 @@ namespace Shadowsocks.Controller
                     string original = File.ReadAllText(PAC_FILE, Encoding.UTF8);
                     if (original == abpContent)
                     {
+                        update_type = 0;
                         UpdateCompleted(this, new ResultEventArgs(false));
                         return;
                     }
@@ -108,6 +115,7 @@ namespace Shadowsocks.Controller
                 File.WriteAllText(PAC_FILE, abpContent, Encoding.UTF8);
                 if (UpdateCompleted != null)
                 {
+                    update_type = 0;
                     UpdateCompleted(this, new ResultEventArgs(true));
                 }
             }
@@ -130,6 +138,7 @@ namespace Shadowsocks.Controller
                     string original = File.ReadAllText(PAC_FILE, Encoding.UTF8);
                     if (original == content)
                     {
+                        update_type = 1;
                         UpdateCompleted(this, new ResultEventArgs(false));
                         return;
                     }
@@ -137,6 +146,38 @@ namespace Shadowsocks.Controller
                 File.WriteAllText(PAC_FILE, content, Encoding.UTF8);
                 if (UpdateCompleted != null)
                 {
+                    update_type = 1;
+                    UpdateCompleted(this, new ResultEventArgs(true));
+                }
+            }
+            catch (Exception ex)
+            {
+                if (Error != null)
+                {
+                    Error(this, new ErrorEventArgs(ex));
+                }
+            }
+
+        }
+        private void http_DownloadBypassListCompleted(object sender, DownloadStringCompletedEventArgs e)
+        {
+            try
+            {
+                string content = e.Result;
+                if (File.Exists(BYPASS_FILE))
+                {
+                    string original = File.ReadAllText(BYPASS_FILE, Encoding.UTF8);
+                    if (original == content)
+                    {
+                        update_type = 8;
+                        UpdateCompleted(this, new ResultEventArgs(false));
+                        return;
+                    }
+                }
+                File.WriteAllText(BYPASS_FILE, content, Encoding.UTF8);
+                if (UpdateCompleted != null)
+                {
+                    update_type = 8;
                     UpdateCompleted(this, new ResultEventArgs(true));
                 }
             }
@@ -175,6 +216,14 @@ namespace Shadowsocks.Controller
             http.Proxy = new WebProxy(IPAddress.Loopback.ToString(), config.localPort);
             http.DownloadStringCompleted += http_DownloadPACCompleted;
             http.DownloadStringAsync(new Uri(url + "?rnd=" + random.Next().ToString()));
+        }
+
+        public void UpdateBypassListFromDefault(Configuration config)
+        {
+            WebClient http = new WebClient();
+            http.Proxy = new WebProxy(IPAddress.Loopback.ToString(), config.localPort);
+            http.DownloadStringCompleted += http_DownloadBypassListCompleted;
+            http.DownloadStringAsync(new Uri(BYPASS_LIST_URL + "?rnd=" + random.Next().ToString()));
         }
 
         public List<string> ParseResult(string response)

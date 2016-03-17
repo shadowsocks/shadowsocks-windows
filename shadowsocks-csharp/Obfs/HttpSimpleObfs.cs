@@ -408,7 +408,7 @@ namespace Shadowsocks.Obfs
                 if (datalength > 0)
                 {
                     byte[] data = new byte[datalength];
-                    Array.Copy(encryptdata, 0, data, 0, datalength);
+                    Array.Copy(encryptdata, data, datalength);
                     data_buffer.Add(data);
                 }
                 else
@@ -429,6 +429,10 @@ namespace Shadowsocks.Obfs
                     }
                     foreach (byte[] data in data_buffer)
                     {
+                        while (outdata.Length < outlength + data.Length)
+                        {
+                            Array.Resize(ref outdata, outdata.Length * 2);
+                        }
                         Array.Copy(data, 0, outdata, outlength, data.Length);
                         SentLength += data.Length;
                         outlength += data.Length;

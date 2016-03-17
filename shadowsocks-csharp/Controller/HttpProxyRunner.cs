@@ -17,10 +17,11 @@ namespace Shadowsocks.Controller
         private Process _process;
         private static string runningPath;
         private int _runningPort;
+        private static string _subPath = @"temp";
 
         static HttpProxyRunner()
         {
-            runningPath = Path.Combine(System.Windows.Forms.Application.StartupPath, @"temp"); // Path.GetTempPath();
+            runningPath = Path.Combine(System.Windows.Forms.Application.StartupPath, _subPath);
             if (!Directory.Exists(runningPath))
             {
                 Directory.CreateDirectory(runningPath);
@@ -88,11 +89,24 @@ namespace Shadowsocks.Controller
             {
                 Kill();
                 string polipoConfig = Resources.privoxy_conf;
+                bool bypass = configuration.bypassWhiteList;
                 _runningPort = this.GetFreePort();
                 polipoConfig = polipoConfig.Replace("__SOCKS_PORT__", configuration.localPort.ToString());
                 polipoConfig = polipoConfig.Replace("__POLIPO_BIND_PORT__", _runningPort.ToString());
                 polipoConfig = polipoConfig.Replace("__POLIPO_BIND_IP__", configuration.shareOverLan ? "0.0.0.0" : "127.0.0.1");
+                polipoConfig = polipoConfig.Replace("__BYPASS_ACTION__", "actionsfile " + _subPath + "/bypass.action");
                 FileManager.ByteArrayToFile(runningPath + "/privoxy.conf", System.Text.Encoding.UTF8.GetBytes(polipoConfig));
+
+                string bypassConfig = "{+forward-override{forward .}}\n0.*.*.*/\n10.*.*.*/\n127.*.*.*/\n192.168.*.*/\n172.1[6-9].*.*/\n172.2[0-9].*.*/\n172.3[0-1].*.*/\n169.254.*.*/\n::1/\nfc00::/\nfe80::/\nlocalhost/\n";
+                if (bypass)
+                {
+                    string bypass_path = Path.Combine(System.Windows.Forms.Application.StartupPath, PACServer.BYPASS_FILE);
+                    if (File.Exists(bypass_path))
+                    {
+                        bypassConfig += File.ReadAllText(bypass_path, Encoding.UTF8);
+                    }
+                }
+                FileManager.ByteArrayToFile(runningPath + "/bypass.action", System.Text.Encoding.UTF8.GetBytes(bypassConfig));
 
                 _process = new Process();
                 // Configure the process using the StartInfo properties.
@@ -101,6 +115,7 @@ namespace Shadowsocks.Controller
                 _process.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
                 _process.StartInfo.UseShellExecute = true;
                 _process.StartInfo.CreateNoWindow = true;
+                _process.StartInfo.WorkingDirectory = System.Windows.Forms.Application.StartupPath;
                 //_process.StartInfo.RedirectStandardOutput = true;
                 //_process.StartInfo.RedirectStandardError = true;
                 try
