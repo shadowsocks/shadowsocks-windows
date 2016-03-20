@@ -6,21 +6,23 @@ namespace Shadowsocks.Controller
 {
     class AutoStartup
     {
+        static string Key = "Shadowsocks_" + Application.StartupPath.GetHashCode();
+
         public static bool Set(bool enabled)
         {
+            RegistryKey runKey = null;
             try
             {
                 string path = Application.ExecutablePath;
-                RegistryKey runKey = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Run", true);
+                runKey = Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Run", true);
                 if (enabled)
                 {
-                    runKey.SetValue("Shadowsocks", path);
+                    runKey.SetValue(Key, path);
                 }
                 else
                 {
-                    runKey.DeleteValue("Shadowsocks");
+                    runKey.DeleteValue(Key);
                 }
-                runKey.Close();
                 return true;
             }
             catch (Exception e)
@@ -28,20 +30,39 @@ namespace Shadowsocks.Controller
                 Logging.LogUsefulException(e);
                 return false;
             }
+            finally
+            {
+                if (runKey != null)
+                {
+                    try { runKey.Close(); }
+                    catch (Exception e)
+                    { Logging.LogUsefulException(e); }
+                }
+            }
         }
 
         public static bool Check()
         {
+            RegistryKey runKey = null;
             try
             {
                 string path = Application.ExecutablePath;
-                RegistryKey runKey = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Run");
+                runKey = Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Run", true);
                 string[] runList = runKey.GetValueNames();
-                runKey.Close();
                 foreach (string item in runList)
                 {
-                    if (item.Equals("Shadowsocks"))
+                    if (item.Equals(Key, StringComparison.OrdinalIgnoreCase))
                         return true;
+                    else if (item.Equals("Shadowsocks", StringComparison.OrdinalIgnoreCase)) // Compatibility with older versions
+                    {
+                        string value = Convert.ToString(runKey.GetValue(item));
+                        if (path.Equals(value, StringComparison.OrdinalIgnoreCase))
+                        {
+                            runKey.DeleteValue(item);
+                            runKey.SetValue(Key, path);
+                            return true;
+                        }
+                    }
                 }
                 return false;
             }
@@ -49,6 +70,15 @@ namespace Shadowsocks.Controller
             {
                 Logging.LogUsefulException(e);
                 return false;
+            }
+            finally
+            {
+                if (runKey != null)
+                {
+                    try { runKey.Close(); }
+                    catch (Exception e)
+                    { Logging.LogUsefulException(e); }
+                }
             }
         }
     }

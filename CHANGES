@@ -1,3 +1,20 @@
+3.0 2016-03-02
+- Update Privoxy to 3.0.24
+- Replace Choose by Total Packet Loss with Choose by Statistics
+- Support chacha20-ietf
+- Support Onetime Authentication
+- Optional checking updates
+- Download updates automatically
+- Improve log viewer
+- Minor fixes
+- Other improvements
+
+2.5.8 2015-09-20
+- Update GFWList url
+
+2.5.7 2015-09-19
+- Fix repeated IV
+
 2.5.6 2015-08-19
 - Add portable mode. Create shadowsocks_portable_mode.txt to use it
 - Support server reorder

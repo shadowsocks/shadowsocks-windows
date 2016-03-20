@@ -10,6 +10,7 @@ namespace Shadowsocks.Encryption
     {
         const int CIPHER_SALSA20 = 1;
         const int CIPHER_CHACHA20 = 2;
+        const int CIPHER_CHACHA20_IETF = 3;
 
         const int SODIUM_BLOCK_SIZE = 64;
 
@@ -20,8 +21,8 @@ namespace Shadowsocks.Encryption
         protected ulong _encryptIC;
         protected ulong _decryptIC;
 
-        public SodiumEncryptor(string method, string password)
-            : base(method, password)
+        public SodiumEncryptor(string method, string password, bool onetimeauth, bool isudp)
+            : base(method, password, onetimeauth, isudp)
         {
             InitKey(method, password);
         }
@@ -29,6 +30,7 @@ namespace Shadowsocks.Encryption
         private static Dictionary<string, int[]> _ciphers = new Dictionary<string, int[]> {
                 {"salsa20", new int[]{32, 8, CIPHER_SALSA20, PolarSSL.AES_CTX_SIZE}},
                 {"chacha20", new int[]{32, 8, CIPHER_CHACHA20, PolarSSL.AES_CTX_SIZE}},
+                {"chacha20-ietf", new int[]{32, 12, CIPHER_CHACHA20_IETF, PolarSSL.AES_CTX_SIZE}},
         };
 
         protected override Dictionary<string, int[]> getCiphers()
@@ -74,6 +76,9 @@ namespace Shadowsocks.Encryption
                         break;
                     case CIPHER_CHACHA20:
                         Sodium.crypto_stream_chacha20_xor_ic(sodiumBuf, sodiumBuf, (ulong)(padding + length), iv, ic, _key);
+                        break;
+                    case CIPHER_CHACHA20_IETF:
+                        Sodium.crypto_stream_chacha20_ietf_xor_ic(sodiumBuf, sodiumBuf, (ulong)(padding + length), iv, (uint)ic, _key);
                         break;
                 }
                 Buffer.BlockCopy(sodiumBuf, padding, outbuf, 0, length);

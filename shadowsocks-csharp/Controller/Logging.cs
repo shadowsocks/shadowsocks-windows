@@ -1,23 +1,24 @@
-﻿using Shadowsocks.Util;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.IO;
 using System.Net.Sockets;
-using System.Text;
+using System.Net;
+using System.Diagnostics;
+
+using Shadowsocks.Util;
 
 namespace Shadowsocks.Controller
 {
     public class Logging
     {
-        public static string LogFile;
+        public static string LogFilePath;
 
         public static bool OpenLogFile()
         {
             try
             {
-                string temppath = Utils.GetTempPath();
-                LogFile = Path.Combine(temppath, "shadowsocks.log");
-                FileStream fs = new FileStream(LogFile, FileMode.Append);
+                LogFilePath = Utils.GetTempPath("shadowsocks.log");
+
+                FileStream fs = new FileStream(LogFilePath, FileMode.Append);
                 StreamWriterWithTimestamp sw = new StreamWriterWithTimestamp(fs);
                 sw.AutoFlush = true;
                 Console.SetOut(sw);
@@ -32,12 +33,44 @@ namespace Shadowsocks.Controller
             }
         }
 
+        private static void WriteToLogFile(object o)
+        {
+            Console.WriteLine(o);
+        }
+
+        public static void Error(object o)
+        {
+            WriteToLogFile("[E] " + o);
+        }
+
+        public static void Info(object o)
+        {
+            WriteToLogFile(o);
+        }
+
+        [Conditional("DEBUG")]
         public static void Debug(object o)
         {
+            WriteToLogFile("[D] " + o);
+        }
 
-#if DEBUG
-            Console.WriteLine(o);
-#endif
+        [Conditional("DEBUG")]
+        public static void Debug(EndPoint local, EndPoint remote, int len, string header = null, string tailer = null)
+        {
+            if (header == null && tailer == null)
+                Debug($"{local} => {remote} (size={len})");
+            else if (header == null && tailer != null)
+                Debug($"{local} => {remote} (size={len}), {tailer}");
+            else if (header != null && tailer == null)
+                Debug($"{header}: {local} => {remote} (size={len})");
+            else
+                Debug($"{header}: {local} => {remote} (size={len}), {tailer}");
+        }
+
+        [Conditional("DEBUG")]
+        public static void Debug(Socket sock, int len, string header = null, string tailer = null)
+        {
+            Debug(sock.LocalEndPoint, sock.RemoteEndPoint, len, header, tailer);
         }
 
         public static void LogUsefulException(Exception e)
@@ -57,11 +90,19 @@ namespace Shadowsocks.Controller
                 }
                 else if (se.SocketErrorCode == SocketError.NotConnected)
                 {
-                    // close when not connected
+                    // The application tried to send or receive data, and the System.Net.Sockets.Socket is not connected.
+                }
+                else if (se.SocketErrorCode == SocketError.HostUnreachable)
+                {
+                    // There is no network route to the specified host.
+                }
+                else if (se.SocketErrorCode == SocketError.TimedOut)
+                {
+                    // The connection attempt timed out, or the connected host has failed to respond.
                 }
                 else
                 {
-                    Console.WriteLine(e);
+                    Info(e);
                 }
             }
             else if (e is ObjectDisposedException)
@@ -69,7 +110,7 @@ namespace Shadowsocks.Controller
             }
             else
             {
-                Console.WriteLine(e);
+                Info(e);
             }
         }
     }

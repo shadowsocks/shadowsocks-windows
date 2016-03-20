@@ -1,14 +1,14 @@
-﻿using Shadowsocks.Model;
-using Shadowsocks.Properties;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.IO.Compression;
-using System.Text;
-using System.Net.NetworkInformation;
 using System.Net;
+using System.Net.NetworkInformation;
 using System.Runtime.InteropServices;
+using System.Text;
+
+using Shadowsocks.Model;
+using Shadowsocks.Properties;
 using Shadowsocks.Util;
 
 namespace Shadowsocks.Controller
@@ -16,16 +16,14 @@ namespace Shadowsocks.Controller
     class PolipoRunner
     {
         private Process _process;
-        private static string temppath;
         private int _runningPort;
 
         static PolipoRunner()
         {
-            temppath = Utils.GetTempPath();
             try
             {
-                FileManager.UncompressFile(temppath + "/ss_privoxy.exe", Resources.privoxy_exe);
-                FileManager.UncompressFile(temppath + "/mgwz.dll", Resources.mgwz_dll);
+                FileManager.UncompressFile(Utils.GetTempPath("ss_privoxy.exe"), Resources.privoxy_exe);
+                FileManager.UncompressFile(Utils.GetTempPath("mgwz.dll"), Resources.mgwz_dll);
             }
             catch (IOException e)
             {
@@ -51,12 +49,17 @@ namespace Shadowsocks.Controller
                 {
                     try
                     {
-                        p.Kill();
-                        p.WaitForExit();
+                        p.CloseMainWindow();
+                        p.WaitForExit(100);
+                        if (!p.HasExited)
+                        {
+                            p.Kill();
+                            p.WaitForExit();
+                        }
                     }
                     catch (Exception e)
                     {
-                        Console.WriteLine(e.ToString());
+                        Logging.LogUsefulException(e);
                     }
                 }
                 string polipoConfig = Resources.privoxy_conf;
@@ -64,20 +67,16 @@ namespace Shadowsocks.Controller
                 polipoConfig = polipoConfig.Replace("__SOCKS_PORT__", configuration.localPort.ToString());
                 polipoConfig = polipoConfig.Replace("__POLIPO_BIND_PORT__", _runningPort.ToString());
                 polipoConfig = polipoConfig.Replace("__POLIPO_BIND_IP__", configuration.shareOverLan ? "0.0.0.0" : "127.0.0.1");
-                FileManager.ByteArrayToFile(temppath + "/privoxy.conf", System.Text.Encoding.UTF8.GetBytes(polipoConfig));
+                FileManager.ByteArrayToFile(Utils.GetTempPath("privoxy.conf"), Encoding.UTF8.GetBytes(polipoConfig));
 
-                if (!(temppath.EndsWith("\\") || temppath.EndsWith("/"))) {
-                    temppath = temppath + "\\";
-                }
                 _process = new Process();
                 // Configure the process using the StartInfo properties.
-                _process.StartInfo.FileName = temppath + "ss_privoxy.exe";
-                _process.StartInfo.Arguments = " \"" + temppath + "privoxy.conf\"";
+                _process.StartInfo.FileName = "ss_privoxy.exe";
+                _process.StartInfo.Arguments = "privoxy.conf";
+                _process.StartInfo.WorkingDirectory = Utils.GetTempPath();
                 _process.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
                 _process.StartInfo.UseShellExecute = true;
                 _process.StartInfo.CreateNoWindow = true;
-                //_process.StartInfo.RedirectStandardOutput = true;
-                //_process.StartInfo.RedirectStandardError = true;
                 _process.Start();
             }
             RefreshTrayArea();
@@ -94,7 +93,7 @@ namespace Shadowsocks.Controller
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine(e.ToString());
+                    Logging.LogUsefulException(e);
                 }
                 _process = null;
             }

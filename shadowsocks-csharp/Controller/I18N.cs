@@ -1,11 +1,12 @@
-﻿using Shadowsocks.Properties;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Text;
-using System.Text.RegularExpressions;
+using System.Globalization;
+using System.IO;
 
 namespace Shadowsocks.Controller
 {
+    using Shadowsocks.Properties;
+
     public class I18N
     {
         protected static Dictionary<string, string> Strings;
@@ -13,19 +14,19 @@ namespace Shadowsocks.Controller
         {
             Strings = new Dictionary<string, string>();
 
-            if (System.Globalization.CultureInfo.CurrentCulture.IetfLanguageTag.ToLowerInvariant().StartsWith("zh"))
+            if (CultureInfo.CurrentCulture.IetfLanguageTag.StartsWith("zh", StringComparison.OrdinalIgnoreCase))
             {
-                string[] lines = Regex.Split(Resources.cn, "\r\n|\r|\n");
-                foreach (string line in lines)
+                using (var sr = new StringReader(Resources.cn))
                 {
-                    if (line.StartsWith("#"))
+                    foreach (var line in sr.NonWhiteSpaceLines())
                     {
-                        continue;
-                    }
-                    string[] kv = Regex.Split(line, "=");
-                    if (kv.Length == 2)
-                    {
-                        Strings[kv[0]] = kv[1];
+                        if (line[0] == '#')
+                            continue;
+
+                        var pos = line.IndexOf('=');
+                        if (pos < 1)
+                            continue;
+                        Strings[line.Substring(0, pos)] = line.Substring(pos + 1);
                     }
                 }
             }
