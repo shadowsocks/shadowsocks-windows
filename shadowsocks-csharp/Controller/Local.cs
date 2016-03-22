@@ -856,7 +856,7 @@ namespace Shadowsocks.Controller
                             {
                                 lastErrCode = 8;
                                 server.ServerSpeedLog().AddTimeoutTimes();
-                                remote.Close();
+                                CloseSocket(ref remote);
                                 Close();
                             }
                         }
@@ -871,7 +871,7 @@ namespace Shadowsocks.Controller
                             {
                                 lastErrCode = 8;
                                 server.ServerSpeedLog().AddTimeoutTimes();
-                                remote.Close();
+                                CloseSocket(ref remote);
                                 Close();
                             }
                         }
@@ -953,16 +953,20 @@ namespace Shadowsocks.Controller
 
         private void CloseSocket(ref Socket sock)
         {
-            if (sock != null)
+            lock (this)
             {
-                try
+                if (sock != null)
                 {
-                    sock.Shutdown(SocketShutdown.Both);
-                    sock.Close();
-                }
-                catch (Exception)
-                {
-                    //Logging.LogUsefulException(e);
+                    try
+                    {
+                        sock.Shutdown(SocketShutdown.Both);
+                        sock.Close();
+                        sock = null;
+                    }
+                    catch (Exception)
+                    {
+                        //Logging.LogUsefulException(e);
+                    }
                 }
             }
         }
@@ -1001,17 +1005,17 @@ namespace Shadowsocks.Controller
                         {
                             server.ServerSpeedLog().AddDisconnectTimes();
                             server.GetConnections().DecRef(this.connection);
+                            server.ServerSpeedLog().AddSpeedLog(new TransLog((int)speedTester.GetAvgDownloadSpeed(), DateTime.Now));
                         }
-                        server.ServerSpeedLog().AddSpeedLog(new TransLog((int)speedTester.GetAvgDownloadSpeed(), DateTime.Now));
                         this.State = ConnectState.END;
                     }
                     getCurrentServer = null;
                     ResetTimeout(0);
                 }
-                CloseSocket(ref connection);
-                CloseSocket(ref connectionUDP);
                 CloseSocket(ref remote);
                 CloseSocket(ref remoteUDP);
+                CloseSocket(ref connection);
+                CloseSocket(ref connectionUDP);
                 if (remoteTDP != null)
                 {
                     try
@@ -1612,7 +1616,6 @@ namespace Shadowsocks.Controller
                 // +----+-----+-------+------+----------+----------+
                 // | 1  |  1  | X'00' |  1   | Variable |    2     |
                 // +----+-----+-------+------+----------+----------+
-                // Recv first 5 bytes, need 2 bytes to know the head length
                 connection.BeginReceive(connetionRecvBuffer, 0, 1024, 0,
                     new AsyncCallback(HandshakeReceive2Callback), null);
             }
@@ -1744,7 +1747,8 @@ namespace Shadowsocks.Controller
                 }
                 else
                 {
-                    Console.WriteLine("failed to recv data in HandshakeReceive2Callback");
+                    Console.WriteLine("failed to recv data in HandshakeReceive2Callback " + reconnectTimesRemain.ToString() + "/" + reconnectTimes.ToString());
+                    System.Diagnostics.Debug.WriteLine("failed to recv data in HandshakeReceive2Callback " + reconnectTimesRemain.ToString() + "/" + reconnectTimes.ToString());
                     this.Close();
                 }
             }
@@ -1808,8 +1812,12 @@ namespace Shadowsocks.Controller
             if (targetURI == null)
             {
                 targetURI = GetQueryString();
+                server = this.getCurrentServer(targetURI, true);
             }
-            server = this.getCurrentServer(targetURI, true, forceRandom);
+            else
+            {
+                server = this.getCurrentServer(targetURI, true, forceRandom);
+            }
             if (socks5RemotePort > 0)
             {
                 if (server.udp_over_tcp)
@@ -2171,23 +2179,40 @@ namespace Shadowsocks.Controller
 
         private string GetQueryString()
         {
+            if (remoteHeaderSendBuffer == null)
+                return null;
+
             if (remoteHeaderSendBuffer[0] == 1)
             {
-                byte[] addr = new byte[4];
-                Array.Copy(remoteHeaderSendBuffer, 1, addr, 0, 4);
-                IPAddress ipAddress = new IPAddress(addr);
-                return ipAddress.ToString();
+                if (remoteHeaderSendBuffer.Length > 4)
+                {
+                    byte[] addr = new byte[4];
+                    Array.Copy(remoteHeaderSendBuffer, 1, addr, 0, 4);
+                    IPAddress ipAddress = new IPAddress(addr);
+                    return ipAddress.ToString();
+                }
+                return null;
             }
             if (remoteHeaderSendBuffer[0] == 4)
             {
-                byte[] addr = new byte[16];
-                Array.Copy(remoteHeaderSendBuffer, 1, addr, 0, 16);
-                IPAddress ipAddress = new IPAddress(addr);
-                return ipAddress.ToString();
+                if (remoteHeaderSendBuffer.Length > 16)
+                {
+                    byte[] addr = new byte[16];
+                    Array.Copy(remoteHeaderSendBuffer, 1, addr, 0, 16);
+                    IPAddress ipAddress = new IPAddress(addr);
+                    return ipAddress.ToString();
+                }
+                return null;
             }
-
-            string url = System.Text.Encoding.UTF8.GetString(remoteHeaderSendBuffer, 2, remoteHeaderSendBuffer[1]);
-            return url;
+            if (remoteHeaderSendBuffer[0] == 3 && remoteHeaderSendBuffer.Length > 1)
+            {
+                if (remoteHeaderSendBuffer.Length > remoteHeaderSendBuffer[1] + 1)
+                {
+                    string url = System.Text.Encoding.UTF8.GetString(remoteHeaderSendBuffer, 2, remoteHeaderSendBuffer[1]);
+                    return url;
+                }
+            }
+            return null;
         }
 
         // 2 sides connection start
@@ -2434,7 +2459,8 @@ namespace Shadowsocks.Controller
                 }
                 else
                 {
-                    connection.Shutdown(SocketShutdown.Send);
+                    //if (connection != null)
+                    //    connection.Shutdown(SocketShutdown.Send);
                     connectionShutdown = true;
                     CheckClose();
                 }
@@ -2485,7 +2511,8 @@ namespace Shadowsocks.Controller
                 else
                 {
                     //Console.WriteLine("bytesRead: " + bytesRead.ToString());
-                    connection.Shutdown(SocketShutdown.Send);
+                    if (connection != null)
+                        connection.Shutdown(SocketShutdown.Send);
                     connectionShutdown = true;
                     CheckClose();
                 }
@@ -2605,7 +2632,8 @@ namespace Shadowsocks.Controller
                 }
                 else
                 {
-                    connection.Shutdown(SocketShutdown.Send);
+                    if (connection != null)
+                        connection.Shutdown(SocketShutdown.Send);
                     connectionShutdown = true;
                     CheckClose();
                 }
@@ -2771,14 +2799,17 @@ namespace Shadowsocks.Controller
                 }
                 else
                 {
-                    if (server.tcp_over_udp &&
-                            remoteTDP != null)
+                    if (server.tcp_over_udp)
                     {
-                        remoteTDP.Shutdown();
+                        if (remoteTDP != null)
+                        {
+                            remoteTDP.Shutdown();
+                        }
                     }
                     else
                     {
-                        remote.Shutdown(SocketShutdown.Send);
+                        if (remote != null)
+                            remote.Shutdown(SocketShutdown.Send);
                     }
                     remoteShutdown = true;
                     CheckClose();
@@ -2829,7 +2860,6 @@ namespace Shadowsocks.Controller
                 }
                 else
                 {
-                    remote.Shutdown(SocketShutdown.Send);
                     remoteShutdown = true;
                     CheckClose();
                 }

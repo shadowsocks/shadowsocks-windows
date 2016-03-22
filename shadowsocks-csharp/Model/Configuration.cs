@@ -207,6 +207,23 @@ namespace Shadowsocks.Model
         }
     }
 
+    public class UriVisitTime : IComparable
+    {
+        public DateTime visitTime;
+        public string uri;
+        public int index;
+
+        public int CompareTo(object other)
+        {
+            if (!(other is UriVisitTime))
+                throw new InvalidOperationException("CompareTo: Not a UriVisitTime");
+            if (Equals(other))
+                return 0;
+            return visitTime.CompareTo(((UriVisitTime)other).visitTime);
+        }
+
+    }
+
     [Serializable]
     public class Configuration
     {
@@ -235,6 +252,8 @@ namespace Shadowsocks.Model
         public bool autoban;
         //public bool buildinHttpProxy;
         private ServerSelectStrategy serverStrategy = new ServerSelectStrategy();
+        private Dictionary<string, UriVisitTime> uri2time = new Dictionary<string, UriVisitTime>();
+        private SortedDictionary<UriVisitTime, string> time2uri = new SortedDictionary<UriVisitTime, string>();
 
         private static string CONFIG_FILE = "gui-config.json";
 
@@ -242,16 +261,64 @@ namespace Shadowsocks.Model
         {
             lock (serverStrategy)
             {
+                foreach (KeyValuePair<UriVisitTime, string> p in time2uri)
+                {
+                    if ((DateTime.Now - p.Key.visitTime).TotalSeconds < 60)
+                        break;
+
+                    uri2time.Remove(p.Value);
+                    time2uri.Remove(p.Key);
+                    break;
+                }
+                if (!forceRandom && targetURI != null && uri2time.ContainsKey(targetURI))
+                {
+                    UriVisitTime visit = uri2time[targetURI];
+                    if (visit.index < configs.Count && configs[visit.index].enable)
+                    {
+                        //uri2time.Remove(targetURI);
+                        time2uri.Remove(visit);
+                        visit.visitTime = DateTime.Now;
+                        uri2time[targetURI] = visit;
+                        time2uri[visit] = targetURI;
+                        return configs[visit.index];
+                    }
+                }
                 if (forceRandom)
                 {
                     int index = serverStrategy.Select(configs, this.index, randomAlgorithm, true);
                     if (index == -1) return GetDefaultServer();
+                    if (targetURI != null)
+                    {
+                        UriVisitTime visit = new UriVisitTime();
+                        visit.uri = targetURI;
+                        visit.index = index;
+                        visit.visitTime = DateTime.Now;
+                        if (uri2time.ContainsKey(targetURI))
+                        {
+                            time2uri.Remove(uri2time[targetURI]);
+                        }
+                        uri2time[targetURI] = visit;
+                        time2uri[visit] = targetURI;
+                    }
                     return configs[index];
                 }
                 else if (usingRandom && random)
                 {
                     int index = serverStrategy.Select(configs, this.index, randomAlgorithm);
                     if (index == -1) return GetDefaultServer();
+                    if (targetURI != null)
+                    {
+                        UriVisitTime visit = new UriVisitTime();
+                        visit.uri = targetURI;
+                        visit.index = index;
+                        visit.visitTime = DateTime.Now;
+                        if (uri2time.ContainsKey(targetURI))
+                        {
+                            time2uri.Remove(uri2time[targetURI]);
+                        }
+                        uri2time[targetURI] = visit;
+                        time2uri[visit] = targetURI;
+                    }
                     return configs[index];
                 }
                 else
@@ -274,6 +341,19 @@ namespace Shadowsocks.Model
                             }
                         }
 
+                        if (targetURI != null)
+                        {
+                            UriVisitTime visit = new UriVisitTime();
+                            visit.uri = targetURI;
+                            visit.index = selIndex;
+                            visit.visitTime = DateTime.Now;
+                            if (uri2time.ContainsKey(targetURI))
+                            {
+                                time2uri.Remove(uri2time[targetURI]);
+                            }
+                            uri2time[targetURI] = visit;
+                            time2uri[visit] = targetURI;
+                        }
                         return configs[selIndex];
                     }
                     else
