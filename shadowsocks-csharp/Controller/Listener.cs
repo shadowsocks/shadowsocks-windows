@@ -24,6 +24,7 @@ namespace Shadowsocks.Controller
         string _authPass;
         Socket _socket;
         Socket _socket_v6;
+        bool _stop;
         IList<Service> _services;
         protected System.Timers.Timer timer;
         protected object timerLock = new object();
@@ -31,6 +32,7 @@ namespace Shadowsocks.Controller
         public Listener(IList<Service> services)
         {
             this._services = services;
+            _stop = false;
         }
 
         public IList<Service> GetServices()
@@ -76,6 +78,7 @@ namespace Shadowsocks.Controller
             this._authUser = config.authUser;
             this._authPass = config.authPass;
             this._bypassWhiteList = config.bypassWhiteList;
+            _stop = false;
 
             if (CheckIfPortInUse(_config.localPort))
                 throw new Exception(I18N.GetString("Port already in use"));
@@ -144,6 +147,7 @@ namespace Shadowsocks.Controller
         public void Stop()
         {
             ResetTimeout(0, null);
+            _stop = true;
             if (_socket != null)
             {
                 _socket.Close();
@@ -219,6 +223,8 @@ namespace Shadowsocks.Controller
 
         public void AcceptCallback(IAsyncResult ar)
         {
+            if (_stop) return;
+
             Socket listener = (Socket)ar.AsyncState;
             try
             {

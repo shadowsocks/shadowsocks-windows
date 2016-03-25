@@ -478,6 +478,9 @@ namespace Shadowsocks.Controller
         protected bool remoteUDPIdle;
         protected bool remoteTDPIdle;
 
+        protected IAsyncResult arTCPConnection;
+        protected IAsyncResult arTCPRemote;
+
         protected SpeedTester speedTester = new SpeedTester();
         protected int lastErrCode;
         protected Random random = new Random();
@@ -566,7 +569,7 @@ namespace Shadowsocks.Controller
                     //        }
                     //    }
                     //}
-                    if (remote != null && (State == ConnectState.CONNECTED))
+                    if (remote != null && (State == ConnectState.CONNECTED || State == ConnectState.CONNECTING))
                     {
                         remote.Shutdown(SocketShutdown.Both);
                     }
@@ -706,7 +709,7 @@ namespace Shadowsocks.Controller
 
         public void ReConnect()
         {
-            ResetTimeout(0);
+            ResetTimeout(TTL);
 
             reconnectTimesRemain--;
             reconnectTimes++;
@@ -755,7 +758,13 @@ namespace Shadowsocks.Controller
             speedTester.sizeRecv = 0;
 
             lastErrCode = 0;
-            Thread.Sleep(100);
+            for (int i = 0; i < 3
+                && (
+                (arTCPConnection == null || !arTCPConnection.IsCompleted)
+                || (arTCPRemote == null || !arTCPRemote.IsCompleted)); ++i)
+            {
+                Thread.Sleep(100);
+            }
 
             try
             {
@@ -780,6 +789,7 @@ namespace Shadowsocks.Controller
             {
                 autoSwitchOff = false;
             }
+            ResetTimeout(TTL);
             if (this.State == ConnectState.READY)
             {
                 this.State = ConnectState.HANDSHAKE;
@@ -819,6 +829,7 @@ namespace Shadowsocks.Controller
                     remoteUDP = null;
                 }
             }
+            ResetTimeout(TTL);
 
             if (remoteTDP != null && server.tcp_over_udp && socks5RemotePort == 0)
             {
@@ -846,24 +857,11 @@ namespace Shadowsocks.Controller
                     speedTester.BeginConnect();
                     IAsyncResult result = remote.BeginConnect(remoteEP,
                         new AsyncCallback(ConnectCallback), new CallbackStatus());
-                    if (reconnectTimesRemain + reconnectTimes > 0)
+                    double t = TTL;
+                    if (t <= 0) t = 10;
+                    if (reconnectTimesRemain + reconnectTimes > 0 || TTL > 0)
                     {
-                        bool success = result.AsyncWaitHandle.WaitOne((int)(5 * 1000), true);
-                        if (!success)
-                        {
-                            ((CallbackStatus)result.AsyncState).SetIfEqu(-1, 0);
-                            if (((CallbackStatus)result.AsyncState).Status == -1)
-                            {
-                                lastErrCode = 8;
-                                server.ServerSpeedLog().AddTimeoutTimes();
-                                CloseSocket(ref remote);
-                                Close();
-                            }
-                        }
-                    }
-                    else if (TTL > 0)
-                    {
-                        bool success = result.AsyncWaitHandle.WaitOne((int)(TTL * 1000), true);
+                        bool success = result.AsyncWaitHandle.WaitOne((int)(t * 500), true);
                         if (!success)
                         {
                             ((CallbackStatus)result.AsyncState).SetIfEqu(-1, 0);
@@ -957,11 +955,12 @@ namespace Shadowsocks.Controller
             {
                 if (sock != null)
                 {
+                    Socket s = sock;
+                    sock = null;
                     try
                     {
-                        sock.Shutdown(SocketShutdown.Both);
-                        sock.Close();
-                        sock = null;
+                        s.Shutdown(SocketShutdown.Both);
+                        s.Close();
                     }
                     catch (Exception)
                     {
@@ -1054,6 +1053,14 @@ namespace Shadowsocks.Controller
             {
                 Logging.LogUsefulException(e);
             }
+            for (int i = 0; i < 3
+                && (
+                (arTCPConnection == null || !arTCPConnection.IsCompleted)
+                || (arTCPRemote == null || !arTCPRemote.IsCompleted)); ++i)
+            {
+                Thread.Sleep(500);
+            }
+            ResetTimeout(0);
         }
 
         private bool ConnectHttpProxyServer(string strRemoteHost, int iRemotePort, Socket sProxyServer, int socketErrorCode)
@@ -1747,7 +1754,7 @@ namespace Shadowsocks.Controller
                 }
                 else
                 {
-                    Console.WriteLine("failed to recv data in HandshakeReceive2Callback " + reconnectTimesRemain.ToString() + "/" + reconnectTimes.ToString());
+                    Console.WriteLine("failed to recv data in HandshakeReceive2Callback");
                     System.Diagnostics.Debug.WriteLine("failed to recv data in HandshakeReceive2Callback " + reconnectTimesRemain.ToString() + "/" + reconnectTimes.ToString());
                     this.Close();
                 }
@@ -1809,6 +1816,8 @@ namespace Shadowsocks.Controller
             remoteUDP = null;
             remoteTDP = null;
             closed = false;
+            arTCPConnection = null;
+            arTCPRemote = null;
             if (targetURI == null)
             {
                 targetURI = GetQueryString();
@@ -1829,6 +1838,7 @@ namespace Shadowsocks.Controller
                     command = 3;
                 }
             }
+            ResetTimeout(TTL);
 
             lock (this)
             {
@@ -1860,7 +1870,9 @@ namespace Shadowsocks.Controller
                     if (server.DnsBuffer().isExpired(serverURI))
                     {
                         IAsyncResult result = Dns.BeginGetHostEntry(serverURI, new AsyncCallback(DnsCallback), new CallbackStatus());
-                        bool success = result.AsyncWaitHandle.WaitOne((int)(5 * 1000), true);
+                        double t = TTL;
+                        if (t <= 0) t = 10;
+                        bool success = result.AsyncWaitHandle.WaitOne((int)(t * 500), true);
                         if (!success)
                         {
                             ((CallbackStatus)result.AsyncState).SetIfEqu(-1, 0);
@@ -2003,7 +2015,7 @@ namespace Shadowsocks.Controller
             if (connection != null && connectionTCPIdle)
             {
                 connectionTCPIdle = false;
-                connection.BeginReceive(connetionRecvBuffer, 0, RecvSize, 0,
+                arTCPConnection = connection.BeginReceive(connetionRecvBuffer, 0, RecvSize, 0,
                     new AsyncCallback(PipeConnectionReceiveCallback), null);
             }
         }
@@ -2049,7 +2061,7 @@ namespace Shadowsocks.Controller
             if (remote != null && remoteTCPIdle)
             {
                 remoteTCPIdle = false;
-                remote.BeginReceive(remoteRecvBuffer, 0, RecvSize, 0,
+                arTCPRemote = remote.BeginReceive(remoteRecvBuffer, 0, RecvSize, 0,
                     new AsyncCallback(PipeRemoteReceiveCallback), null);
             }
         }
@@ -2398,6 +2410,8 @@ namespace Shadowsocks.Controller
                     else
                         Logging.LogBin(LogLevel.Debug, "udp remote recv", remoteSendBuffer, bytesToSend);
 
+                    ResetTimeout(TTL);
+
                     if (connectionUDP == null)
                     {
                         if (detector.OnRecv(remoteSendBuffer, bytesToSend) > 0)
@@ -2454,15 +2468,14 @@ namespace Shadowsocks.Controller
                     }
                     server.ServerSpeedLog().AddDownloadBytes(bytesRead);
                     speedTester.AddDownloadSize(bytesRead);
-
-                    ResetTimeout(TTL);
                 }
                 else
                 {
                     //if (connection != null)
                     //    connection.Shutdown(SocketShutdown.Send);
-                    connectionShutdown = true;
-                    CheckClose();
+                    //connectionShutdown = true;
+                    //CheckClose();
+                    Close();
                 }
             }
             catch (Exception e)
@@ -2651,6 +2664,8 @@ namespace Shadowsocks.Controller
 
         private void RemoteSend(byte[] bytes, int length)
         {
+            if (remote == null)
+                return;
             int bytesToSend = 0;
             {
                 Logging.LogBin(LogLevel.Debug, "remote send", bytes, length);
@@ -2667,9 +2682,12 @@ namespace Shadowsocks.Controller
             }
             int obfsSendSize;
             byte[] obfsBuffer = this.obfs.ClientEncode(connetionSendBuffer, bytesToSend, out obfsSendSize);
-            remote.BeginSend(obfsBuffer, 0, obfsSendSize, 0, new AsyncCallback(PipeRemoteSendCallback), null);
-            server.ServerSpeedLog().AddUploadBytes(obfsSendSize);
-            speedTester.AddUploadSize(obfsSendSize);
+            if (remote != null)
+            {
+                remote.BeginSend(obfsBuffer, 0, obfsSendSize, 0, new AsyncCallback(PipeRemoteSendCallback), null);
+                server.ServerSpeedLog().AddUploadBytes(obfsSendSize);
+                speedTester.AddUploadSize(obfsSendSize);
+            }
         }
 
         private void RemoteTDPSend(byte[] bytes, int length)
@@ -2786,6 +2804,8 @@ namespace Shadowsocks.Controller
                     {
                         return;
                     }
+
+                    ResetTimeout(TTL);
                     if (server.tcp_over_udp &&
                             remoteTDP != null)
                     {
@@ -2795,7 +2815,6 @@ namespace Shadowsocks.Controller
                     {
                         RemoteSend(connetionRecvBuffer, bytesRead);
                     }
-                    ResetTimeout(TTL);
                 }
                 else
                 {
