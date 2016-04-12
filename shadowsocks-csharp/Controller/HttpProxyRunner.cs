@@ -93,6 +93,7 @@ namespace Shadowsocks.Controller
                 _runningPort = this.GetFreePort();
                 polipoConfig = polipoConfig.Replace("__SOCKS_PORT__", configuration.localPort.ToString());
                 polipoConfig = polipoConfig.Replace("__POLIPO_BIND_PORT__", _runningPort.ToString());
+                polipoConfig = polipoConfig.Replace("__KEEP_ALIVE_TIMEOUT__", (configuration.TTL * 2).ToString());
                 polipoConfig = polipoConfig.Replace("__POLIPO_BIND_IP__", configuration.shareOverLan ? "0.0.0.0" : "127.0.0.1");
                 polipoConfig = polipoConfig.Replace("__BYPASS_ACTION__", "actionsfile " + _subPath + "/bypass.action");
                 FileManager.ByteArrayToFile(runningPath + "/privoxy.conf", System.Text.Encoding.UTF8.GetBytes(polipoConfig));
@@ -108,24 +109,29 @@ namespace Shadowsocks.Controller
                 }
                 FileManager.ByteArrayToFile(runningPath + "/bypass.action", System.Text.Encoding.UTF8.GetBytes(bypassConfig));
 
-                _process = new Process();
-                // Configure the process using the StartInfo properties.
-                _process.StartInfo.FileName = runningPath + "/ss_privoxy.exe";
-                _process.StartInfo.Arguments = " \"" + runningPath + "/privoxy.conf\"";
-                _process.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
-                _process.StartInfo.UseShellExecute = true;
-                _process.StartInfo.CreateNoWindow = true;
-                _process.StartInfo.WorkingDirectory = System.Windows.Forms.Application.StartupPath;
-                //_process.StartInfo.RedirectStandardOutput = true;
-                //_process.StartInfo.RedirectStandardError = true;
-                try
-                {
-                    _process.Start();
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine(e.ToString());
-                }
+                Restart();
+            }
+        }
+
+        public void Restart()
+        {
+            _process = new Process();
+            // Configure the process using the StartInfo properties.
+            _process.StartInfo.FileName = runningPath + "/ss_privoxy.exe";
+            _process.StartInfo.Arguments = " \"" + runningPath + "/privoxy.conf\"";
+            _process.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
+            _process.StartInfo.UseShellExecute = true;
+            _process.StartInfo.CreateNoWindow = true;
+            _process.StartInfo.WorkingDirectory = System.Windows.Forms.Application.StartupPath;
+            //_process.StartInfo.RedirectStandardOutput = true;
+            //_process.StartInfo.RedirectStandardError = true;
+            try
+            {
+                _process.Start();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.ToString());
             }
         }
 
@@ -142,7 +148,10 @@ namespace Shadowsocks.Controller
                 {
                     Console.WriteLine(e.ToString());
                 }
-                _process = null;
+                finally
+                {
+                    _process = null;
+                }
             }
             RefreshTrayArea();
         }

@@ -232,6 +232,7 @@ namespace Shadowsocks.View
                     CreateMenuItem("Check Update", new EventHandler(this.CheckUpdate_Click)),
                     CreateMenuItem("Show Logs...", new EventHandler(this.ShowLogItem_Click)),
                     CreateMenuItem("About...", new EventHandler(this.AboutItem_Click)),
+                    CreateMenuItem("Donate...", new EventHandler(this.DonateItem_Click)),
                 }),
                 new MenuItem("-"),
                 CreateMenuItem("Quit", new EventHandler(this.Quit_Click))
@@ -492,6 +493,14 @@ namespace Shadowsocks.View
         private void AboutItem_Click(object sender, EventArgs e)
         {
             Process.Start("https://github.com/breakwa11/shadowsocks-rss");
+        }
+
+        private void DonateItem_Click(object sender, EventArgs e)
+        {
+            _notifyIcon.BalloonTipTitle = I18N.GetString("Why donate?");
+            _notifyIcon.BalloonTipText = I18N.GetString("You can not donate!");
+            _notifyIcon.BalloonTipIcon = ToolTipIcon.Info;
+            _notifyIcon.ShowBalloonTip(0);
         }
 
         [DllImport("user32.dll")]

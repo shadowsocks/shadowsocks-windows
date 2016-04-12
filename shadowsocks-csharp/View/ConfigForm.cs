@@ -120,6 +120,7 @@ namespace Shadowsocks.View
                     obfs = ObfsCombo.Text,
                     obfsparam = textObfsParam.Text,
                     remarks = RemarksTextBox.Text,
+                    group = TextGroup.Text,
                     tcp_over_udp = CheckTCPoverUDP.Checked,
                     udp_over_tcp = CheckUDPoverUDP.Checked,
                     protocol = TCPProtocolComboBox.Text,
@@ -209,6 +210,7 @@ namespace Shadowsocks.View
                 ObfsCombo.Text = server.obfs ?? "plain";
                 textObfsParam.Text = server.obfsparam;
                 RemarksTextBox.Text = server.remarks;
+                TextGroup.Text = server.group;
                 CheckTCPoverUDP.Checked = server.tcp_over_udp;
                 CheckUDPoverUDP.Checked = server.udp_over_tcp;
                 CheckObfsUDP.Checked = server.obfs_udp;

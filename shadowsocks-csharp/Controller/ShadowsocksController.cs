@@ -418,6 +418,8 @@ namespace Shadowsocks.Controller
                     {
                         polipoRunner.Stop();
                         polipoRunner.Start(_config);
+
+                        _listener.GetServices()[2] = new HttpPortForwarder(polipoRunner.RunningPort, _config);
                     }
                 }
                 else

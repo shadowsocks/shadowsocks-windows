@@ -28,7 +28,7 @@ namespace Shadowsocks.View
             this.controller = controller;
             this.Icon = Icon.FromHandle(Resources.ssw128.GetHicon());
             InitializeComponent();
-            this.Width = 760;
+            this.Width = 810;
 
             Configuration config = controller.GetCurrentConfiguration();
             if (config.configs.Count < 8)
@@ -255,6 +255,10 @@ namespace Shadowsocks.View
                                 SetBackColor(cell, Color.White);
                             SetCellText(cell, server.FriendlyName());
                         }
+                        if (columnName == "Group")
+                        {
+                            SetCellText(cell, server.group);
+                        }
                         // Enable
                         if (columnName == "Enable")
                         {
@@ -334,7 +338,7 @@ namespace Shadowsocks.View
                             if (cell.ToolTipText != fullVal)
                             {
                                 if (fullVal == "0")
-                                    SetBackColor(cell, Color.White);
+                                    SetBackColor(cell, Color.FromArgb(0xff, 0xf0, 0xf0));
                                 else
                                 {
                                     SetBackColor(cell, Color.LightGreen);
@@ -344,7 +348,7 @@ namespace Shadowsocks.View
                             else if (cell.Tag != null)
                             {
                                 cell.Tag = (int)cell.Tag - 1;
-                                if ((int)cell.Tag == 0) SetBackColor(cell, Color.White);
+                                if ((int)cell.Tag == 0) SetBackColor(cell, Color.FromArgb(0xff, 0xf0, 0xf0));
                                 //Color col = cell.Style.BackColor;
                                 //SetBackColor(cell, Color.FromArgb(Math.Min(255, col.R + colAdd), Math.Min(255, col.G + colAdd), Math.Min(255, col.B + colAdd)));
                             }
@@ -359,7 +363,7 @@ namespace Shadowsocks.View
                             if (cell.ToolTipText != fullVal)
                             {
                                 if (fullVal == "0")
-                                    SetBackColor(cell, Color.White);
+                                    SetBackColor(cell, Color.FromArgb(0xf4, 0xff, 0xf4));
                                 else
                                 {
                                     SetBackColor(cell, Color.LightGreen);
@@ -369,7 +373,7 @@ namespace Shadowsocks.View
                             else if (cell.Tag != null)
                             {
                                 cell.Tag = (int)cell.Tag - 1;
-                                if ((int)cell.Tag == 0) SetBackColor(cell, Color.White);
+                                if ((int)cell.Tag == 0) SetBackColor(cell, Color.FromArgb(0xf4, 0xff, 0xf4));
                                 //Color col = cell.Style.BackColor;
                                 //SetBackColor(cell, Color.FromArgb(Math.Min(255, col.R + colAdd), Math.Min(255, col.G + colAdd), Math.Min(255, col.B + colAdd)));
                             }
@@ -383,7 +387,7 @@ namespace Shadowsocks.View
                             if (cell.ToolTipText != fullVal)
                             {
                                 if (fullVal == "0")
-                                    SetBackColor(cell, Color.White);
+                                    SetBackColor(cell, Color.FromArgb(0xf0, 0xf0, 0xff));
                                 else
                                 {
                                     SetBackColor(cell, Color.LightGreen);
@@ -393,7 +397,7 @@ namespace Shadowsocks.View
                             else if (cell.Tag != null)
                             {
                                 cell.Tag = (int)cell.Tag - 1;
-                                if ((int)cell.Tag == 0) SetBackColor(cell, Color.White);
+                                if ((int)cell.Tag == 0) SetBackColor(cell, Color.FromArgb(0xf0, 0xf0, 0xff));
                                 //Color col = cell.Style.BackColor;
                                 //SetBackColor(cell, Color.FromArgb(Math.Min(255, col.R + colAdd), Math.Min(255, col.G + colAdd), Math.Min(255, col.B + colAdd)));
                             }
@@ -506,6 +510,27 @@ namespace Shadowsocks.View
                     Configuration config = controller.GetCurrentConfiguration();
                     controller.SelectServerIndex(id);
                 }
+                if (ServerDataGrid.Columns[e.ColumnIndex].Name == "Group")
+                {
+                    Configuration config = controller.GetCurrentConfiguration();
+                    Server cur_server = config.configs[id];
+                    string group = cur_server.group;
+                    if (group != null && group.Length > 0)
+                    {
+                        bool enable = !cur_server.enable;
+                        foreach (Server server in config.configs)
+                        {
+                            if (server.group == group)
+                            {
+                                if (server.enable != enable)
+                                {
+                                    server.setEnable(enable);
+                                }
+                            }
+                        }
+                        controller.SelectServerIndex(config.index);
+                    }
+                }
                 if (ServerDataGrid.Columns[e.ColumnIndex].Name == "Enable")
                 {
                     Configuration config = controller.GetCurrentConfiguration();
@@ -597,7 +622,7 @@ namespace Shadowsocks.View
         private void ServerDataGrid_SortCompare(object sender, DataGridViewSortCompareEventArgs e)
         {
             //e.SortResult = 0;
-            if (e.Column.Name == "Server")
+            if (e.Column.Name == "Server" || e.Column.Name == "Group")
             {
                 e.SortResult = System.String.Compare(Convert.ToString(e.CellValue1), Convert.ToString(e.CellValue2));
                 e.Handled = true;

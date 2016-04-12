@@ -33,6 +33,7 @@
             this.timer = new System.Windows.Forms.Timer(this.components);
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.ID = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Group = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Server = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Enable = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.TotalConnect = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -61,6 +62,7 @@
             this.ServerDataGrid.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.ServerDataGrid.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.ID,
+            this.Group,
             this.Server,
             this.Enable,
             this.TotalConnect,
@@ -122,6 +124,13 @@
             this.ID.ReadOnly = true;
             this.ID.Width = 28;
             // 
+            // Group
+            // 
+            this.Group.HeaderText = "Group";
+            this.Group.Name = "Group";
+            this.Group.ReadOnly = true;
+            this.Group.Width = 48;
+            // 
             // Server
             // 
             this.Server.HeaderText = "Server";
@@ -135,6 +144,7 @@
             this.Enable.MinimumWidth = 2;
             this.Enable.Name = "Enable";
             this.Enable.ReadOnly = true;
+            this.Enable.Resizable = System.Windows.Forms.DataGridViewTriState.True;
             this.Enable.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
             this.Enable.Width = 28;
             // 
@@ -271,6 +281,7 @@
         private System.Windows.Forms.Timer timer;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
         private System.Windows.Forms.DataGridViewTextBoxColumn ID;
+        private System.Windows.Forms.DataGridViewTextBoxColumn Group;
         private System.Windows.Forms.DataGridViewTextBoxColumn Server;
         private System.Windows.Forms.DataGridViewTextBoxColumn Enable;
         private System.Windows.Forms.DataGridViewTextBoxColumn TotalConnect;

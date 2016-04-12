@@ -107,6 +107,7 @@ namespace Shadowsocks.Model
         public string obfs;
         public string obfsparam;
         public string remarks_base64;
+        public string group;
         public bool tcp_over_udp;
         public bool udp_over_tcp;
         public string protocol;

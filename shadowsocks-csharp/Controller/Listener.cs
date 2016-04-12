@@ -57,16 +57,21 @@ namespace Shadowsocks.Controller
 
         public bool isConfigChange(Configuration config)
         {
-            if (this._shareOverLAN != config.shareOverLan
-                //|| _buildinHttpProxy != config.buildinHttpProxy
-                || _authUser != config.authUser
-                || _authPass != config.authPass
-                || _bypassWhiteList != config.bypassWhiteList
-                || _socket == null
-                || ((IPEndPoint)_socket.LocalEndPoint).Port != config.localPort)
+            try
             {
-                return true;
+                if (this._shareOverLAN != config.shareOverLan
+                    //|| _buildinHttpProxy != config.buildinHttpProxy
+                    || _authUser != config.authUser
+                    || _authPass != config.authPass
+                    || _bypassWhiteList != config.bypassWhiteList
+                    || _socket == null
+                    || ((IPEndPoint)_socket.LocalEndPoint).Port != config.localPort)
+                {
+                    return true;
+                }
             }
+            catch (Exception)
+            { }
             return false;
         }
 

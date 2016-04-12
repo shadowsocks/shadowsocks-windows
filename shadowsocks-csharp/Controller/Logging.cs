@@ -126,6 +126,10 @@ namespace Shadowsocks.Controller
                     + oe.Message);
                 return true;
             }
+            else if (e is NullReferenceException)
+            {
+                return true;
+            }
             else if (e is ObjectDisposedException)
             {
                 // ignore

@@ -383,6 +383,11 @@ namespace Shadowsocks.Controller
             }
         }
 
+        public bool isConnected()
+        {
+            return state == ConnectState.CONNECTED;
+        }
+
         public AddressFamily AddressFamily
         {
             get
