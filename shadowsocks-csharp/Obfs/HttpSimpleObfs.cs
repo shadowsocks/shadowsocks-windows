@@ -529,4 +529,314 @@ namespace Shadowsocks.Obfs
         {
         }
     }
+
+    class TlsTicketAuthObfs : ObfsBase
+    {
+        public TlsTicketAuthObfs(string method)
+            : base(method)
+        {
+            handshake_status = 0;
+        }
+        private static Dictionary<string, int[]> _obfs = new Dictionary<string, int[]> {
+                {"tls1.2_ticket_auth", new int[]  {0, 1, 1}},
+        };
+
+        private int handshake_status;
+        private List<byte[]> data_sent_buffer = new List<byte[]>();
+        private byte[] data_recv_buffer = new byte[0];
+        protected static RNGCryptoServiceProvider g_random = new RNGCryptoServiceProvider();
+        private Random random = new Random();
+
+        public static List<string> SupportedObfs()
+        {
+            return new List<string>(_obfs.Keys);
+        }
+
+        public override Dictionary<string, int[]> GetObfs()
+        {
+            return _obfs;
+        }
+
+        public override object InitData()
+        {
+            return new TlsAuthData();
+        }
+
+        protected byte[] sni(string url)
+        {
+            if (url == null)
+            {
+                url = "";
+            }
+            byte[] b_url = System.Text.Encoding.UTF8.GetBytes(url);
+            int len = b_url.Length;
+            byte[] ret = new byte[len + 9];
+            Array.Copy(b_url, 0, ret, 9, len);
+            ret[7] = (byte)(len >> 8);
+            ret[8] = (byte)len;
+            len += 3;
+            ret[4] = (byte)(len >> 8);
+            ret[5] = (byte)len;
+            len += 2;
+            ret[2] = (byte)(len >> 8);
+            ret[3] = (byte)len;
+            return ret;
+        }
+
+        protected byte to_val(char c)
+        {
+            if (c > '9')
+            {
+                return (byte)(c - 'a' + 10);
+            }
+            else
+            {
+                return (byte)(c - '0');
+            }
+        }
+
+        protected byte[] to_bin(string str)
+        {
+            byte[] ret = new byte[str.Length / 2];
+            for (int i = 0; i < str.Length; i += 2)
+            {
+                ret[i / 2] = (byte)((to_val(str[i]) << 4) | to_val(str[i + 1]));
+            }
+            return ret;
+        }
+
+        protected void hmac_sha1(byte[] data, int length)
+        {
+            byte[] key = new byte[Server.key.Length + 32];
+            Server.key.CopyTo(key, 0);
+            ((TlsAuthData)this.Server.data).clientID.CopyTo(key, Server.key.Length);
+
+            HMACSHA1 sha1 = new HMACSHA1(key);
+            byte[] sha1data = sha1.ComputeHash(data, 0, length - 10);
+
+            Array.Copy(sha1data, 0, data, length - 10, 10);
+        }
+
+        public void PackAuthData(byte[] outdata)
+        {
+            int outlength = 32;
+            {
+                byte[] randomdata = new byte[18];
+                g_random.GetBytes(randomdata);
+                randomdata.CopyTo(outdata, 4);
+            }
+            TlsAuthData authData = (TlsAuthData)this.Server.data;
+            lock (authData)
+            {
+                if (authData.clientID == null)
+                {
+                    authData.clientID = new byte[32];
+                    g_random.GetBytes(authData.clientID);
+                }
+            }
+            UInt64 utc_time_second = (UInt64)Math.Floor(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1, 0, 0, 0)).TotalSeconds);
+            UInt32 utc_time = (UInt32)(utc_time_second);
+            byte[] time_bytes = BitConverter.GetBytes(utc_time);
+            Array.Reverse(time_bytes);
+            Array.Copy(time_bytes, 0, outdata, 0, 4);
+
+            hmac_sha1(outdata, outlength);
+        }
+
+        public override byte[] ClientEncode(byte[] encryptdata, int datalength, out int outlength)
+        {
+            if (handshake_status == -1)
+            {
+                SentLength += datalength;
+                outlength = datalength;
+                return encryptdata;
+            }
+            byte[] outdata = new byte[datalength + 4096];
+            if (handshake_status == 8)
+            {
+                outdata[0] = 0x17;
+                outdata[1] = 0x3;
+                outdata[2] = 0x3;
+                outdata[3] = (byte)(datalength >> 8);
+                outdata[4] = (byte)(datalength);
+                outlength = datalength + 5;
+                Array.Copy(encryptdata, 0, outdata, 5, datalength);
+            }
+            else if (handshake_status == 1)
+            {
+                outlength = 0;
+                if (datalength > 0)
+                {
+                    byte[] data = new byte[datalength + 5];
+                    data[0] = 0x17;
+                    data[1] = 0x3;
+                    data[2] = 0x3;
+                    data[3] = (byte)(datalength >> 8);
+                    data[4] = (byte)(datalength);
+                    Array.Copy(encryptdata, 0, data, 5, datalength);
+                    data_sent_buffer.Add(data);
+                }
+                else
+                {
+                    {
+                        byte[] hmac_data = new byte[43];
+                        byte[] rnd = new byte[22];
+                        random.NextBytes(rnd);
+
+                        byte[] handshake_finish = System.Text.Encoding.ASCII.GetBytes("\x14\x03\x03\x00\x01\x01" + "\x16\x03\x03\x00\x20");
+                        handshake_finish.CopyTo(hmac_data, 0);
+                        rnd.CopyTo(hmac_data, handshake_finish.Length);
+
+                        hmac_sha1(hmac_data, hmac_data.Length);
+
+                        data_sent_buffer.Insert(0, hmac_data);
+                        SentLength -= hmac_data.Length;
+                    }
+                    foreach (byte[] data in data_sent_buffer)
+                    {
+                        while (outdata.Length < outlength + data.Length)
+                        {
+                            Array.Resize(ref outdata, outdata.Length * 2);
+                        }
+                        Array.Copy(data, 0, outdata, outlength, data.Length);
+                        SentLength += data.Length;
+                        outlength += data.Length;
+                    }
+                    data_sent_buffer.Clear();
+                    handshake_status = 8;
+                }
+            }
+            else
+            {
+                byte[] rnd = new byte[32];
+                PackAuthData(rnd);
+                List<byte> ssl_buf = new List<byte>();
+                List<byte> ext_buf = new List<byte>();
+                string str_buf = "001cc02bc02fcca9cca8cc14cc13c00ac014c009c013009c0035002f000a0100";
+                ssl_buf.AddRange(rnd);
+                ssl_buf.Add(32);
+                ssl_buf.AddRange(((TlsAuthData)this.Server.data).clientID);
+                ssl_buf.AddRange(to_bin(str_buf));
+
+                str_buf = "ff01000100";
+                ext_buf.AddRange(to_bin(str_buf));
+                string host = Server.host;
+                if (Server.param.Length > 0)
+                {
+                    string[] hosts = Server.param.Split(',');
+                    host = hosts[random.Next(hosts.Length)];
+                }
+                if (host != null && host.Length > 0 && host[host.Length - 1] >= '0' && host[host.Length - 1] <= '9')
+                {
+                    host = "";
+                }
+                ext_buf.AddRange(sni(host));
+                string str_buf2 = "00170000002300d0";
+                ext_buf.AddRange(to_bin(str_buf2));
+                byte[] ticket = new byte[208];
+                g_random.GetBytes(ticket);
+                ext_buf.AddRange(ticket);
+                string str_buf3 = "000d0016001406010603050105030401040303010303020102030005000501000000000012000075500000000b00020100000a0006000400170018";
+                str_buf3 += "00150066000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000";
+                ext_buf.AddRange(to_bin(str_buf3));
+                ext_buf.Insert(0, (byte)(ext_buf.Count % 256));
+                ext_buf.Insert(0, (byte)((ext_buf.Count - 1) / 256));
+
+                ssl_buf.AddRange(ext_buf);
+                // client version
+                ssl_buf.Insert(0, (byte)3); // version
+                ssl_buf.Insert(0, (byte)3);
+                // length
+                ssl_buf.Insert(0, (byte)(ssl_buf.Count % 256));
+                ssl_buf.Insert(0, (byte)((ssl_buf.Count - 1) / 256));
+                ssl_buf.Insert(0, (byte)0);
+                ssl_buf.Insert(0, (byte)1); // client hello
+                // length
+                ssl_buf.Insert(0, (byte)(ssl_buf.Count % 256));
+                ssl_buf.Insert(0, (byte)((ssl_buf.Count - 1) / 256));
+                //
+                ssl_buf.Insert(0, (byte)0x1); // version
+                ssl_buf.Insert(0, (byte)0x3);
+                ssl_buf.Insert(0, (byte)0x16);
+                for (int i = 0; i < ssl_buf.Count; ++i)
+                {
+                    outdata[i] = (byte)ssl_buf[i];
+                }
+                outlength = ssl_buf.Count;
+
+                byte[] data = new byte[datalength + 5];
+                data[0] = 0x17;
+                data[1] = 0x3;
+                data[2] = 0x3;
+                data[3] = (byte)(datalength >> 8);
+                data[4] = (byte)(datalength);
+                Array.Copy(encryptdata, 0, data, 5, datalength);
+                data_sent_buffer.Add(data);
+
+                handshake_status = 1;
+            }
+            return outdata;
+        }
+
+        public override byte[] ClientDecode(byte[] encryptdata, int datalength, out int outlength, out bool needsendback)
+        {
+            if (handshake_status == -1)
+            {
+                outlength = datalength;
+                needsendback = false;
+                return encryptdata;
+            }
+            else if (handshake_status == 8)
+            {
+                Array.Resize(ref data_recv_buffer, data_recv_buffer.Length + datalength);
+                Array.Copy(encryptdata, 0, data_recv_buffer, data_recv_buffer.Length - datalength, datalength);
+                needsendback = false;
+                byte[] outdata = new byte[65536];
+                outlength = 0;
+                while (data_recv_buffer.Length > 5)
+                {
+                    if (data_recv_buffer[0] != 0x17)
+                        throw new ObfsException("ClientDecode appdata error");
+                    int len = (data_recv_buffer[3] << 8) + data_recv_buffer[4];
+                    int pack_len = len + 5;
+                    if (pack_len > data_recv_buffer.Length)
+                        break;
+                    Array.Copy(data_recv_buffer, 5, outdata, outlength, len);
+                    outlength += len;
+                    byte[] buffer = new byte[data_recv_buffer.Length - pack_len];
+                    Array.Copy(data_recv_buffer, pack_len, buffer, 0, buffer.Length);
+                    data_recv_buffer = buffer;
+                }
+                return outdata;
+            }
+            else
+            {
+                byte[] outdata = new byte[datalength];
+                if (datalength < 11 + 32 + 1 + 32)
+                {
+                    throw new ObfsException("ClientDecode data error");
+                }
+                else
+                {
+                    byte[] hmacsha1 = new byte[10];
+                    byte[] data = new byte[32];
+                    Array.Copy(encryptdata, 11, data, 0, 22);
+                    hmac_sha1(data, data.Length);
+                    Array.Copy(data, 22, hmacsha1, 0, 10);
+
+                    if (Util.Utils.FindStr(encryptdata, 11 + 32 + 1 + 32, hmacsha1) != 11 + 22)
+                    {
+                        throw new ObfsException("ClientDecode data error: wrong sha1");
+                    }
+                }
+                outlength = 0;
+                needsendback = true;
+                return encryptdata;
+            }
+        }
+
+        public override void Dispose()
+        {
+        }
+    }
 }

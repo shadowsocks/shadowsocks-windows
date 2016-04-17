@@ -55,6 +55,8 @@
             this.labelObfsParam = new System.Windows.Forms.Label();
             this.textObfsParam = new System.Windows.Forms.TextBox();
             this.checkRemarks = new System.Windows.Forms.CheckBox();
+            this.labelGroup = new System.Windows.Forms.Label();
+            this.TextGroup = new System.Windows.Forms.TextBox();
             this.panel2 = new System.Windows.Forms.Panel();
             this.DeleteButton = new System.Windows.Forms.Button();
             this.AddButton = new System.Windows.Forms.Button();
@@ -71,8 +73,6 @@
             this.tableLayoutPanel3 = new System.Windows.Forms.TableLayoutPanel();
             this.MyCancelButton = new System.Windows.Forms.Button();
             this.OKButton = new System.Windows.Forms.Button();
-            this.labelGroup = new System.Windows.Forms.Label();
-            this.TextGroup = new System.Windows.Forms.TextBox();
             this.tableLayoutPanel1.SuspendLayout();
             this.ServerGroupBox.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.PictureQRcode)).BeginInit();
@@ -148,9 +148,9 @@
             this.ObfsCombo.Items.AddRange(new object[] {
             "plain",
             "http_simple",
-            "tls_simple",
             "random_head",
-            "tls1.0_session_auth"});
+            "tls1.0_session_auth",
+            "tls1.2_ticket_auth"});
             this.ObfsCombo.Location = new System.Drawing.Point(92, 146);
             this.ObfsCombo.Name = "ObfsCombo";
             this.ObfsCombo.Size = new System.Drawing.Size(206, 22);
@@ -438,6 +438,28 @@
             this.checkRemarks.UseVisualStyleBackColor = true;
             this.checkRemarks.CheckedChanged += new System.EventHandler(this.checkRemarks_CheckedChanged);
             // 
+            // labelGroup
+            // 
+            this.labelGroup.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.labelGroup.AutoSize = true;
+            this.labelGroup.Location = new System.Drawing.Point(46, 234);
+            this.labelGroup.Name = "labelGroup";
+            this.labelGroup.Size = new System.Drawing.Size(40, 14);
+            this.labelGroup.TabIndex = 33;
+            this.labelGroup.Text = "Group";
+            // 
+            // TextGroup
+            // 
+            this.TextGroup.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.TextGroup.Location = new System.Drawing.Point(92, 230);
+            this.TextGroup.MaxLength = 32;
+            this.TextGroup.Name = "TextGroup";
+            this.TextGroup.Size = new System.Drawing.Size(206, 22);
+            this.TextGroup.TabIndex = 12;
+            this.TextGroup.WordWrap = false;
+            this.TextGroup.Enter += new System.EventHandler(this.TextBox_Enter);
+            this.TextGroup.MouseUp += new System.Windows.Forms.MouseEventHandler(this.TextBox_MouseUp);
+            // 
             // panel2
             // 
             this.panel2.Anchor = System.Windows.Forms.AnchorStyles.Top;
@@ -667,28 +689,6 @@
             this.OKButton.Text = "OK";
             this.OKButton.UseVisualStyleBackColor = true;
             this.OKButton.Click += new System.EventHandler(this.OKButton_Click);
-            // 
-            // labelGroup
-            // 
-            this.labelGroup.Anchor = System.Windows.Forms.AnchorStyles.Right;
-            this.labelGroup.AutoSize = true;
-            this.labelGroup.Location = new System.Drawing.Point(46, 234);
-            this.labelGroup.Name = "labelGroup";
-            this.labelGroup.Size = new System.Drawing.Size(40, 14);
-            this.labelGroup.TabIndex = 33;
-            this.labelGroup.Text = "Group";
-            // 
-            // TextGroup
-            // 
-            this.TextGroup.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.TextGroup.Location = new System.Drawing.Point(92, 230);
-            this.TextGroup.MaxLength = 32;
-            this.TextGroup.Name = "TextGroup";
-            this.TextGroup.Size = new System.Drawing.Size(206, 22);
-            this.TextGroup.TabIndex = 12;
-            this.TextGroup.WordWrap = false;
-            this.TextGroup.Enter += new System.EventHandler(this.TextBox_Enter);
-            this.TextGroup.MouseUp += new System.Windows.Forms.MouseEventHandler(this.TextBox_MouseUp);
             // 
             // ConfigForm
             // 

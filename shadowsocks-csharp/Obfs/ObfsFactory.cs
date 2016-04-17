@@ -25,6 +25,10 @@ namespace Shadowsocks.Obfs
             {
                 _registeredObfs.Add(method, typeof(TlsAuthObfs));
             }
+            foreach (string method in TlsTicketAuthObfs.SupportedObfs())
+            {
+                _registeredObfs.Add(method, typeof(TlsTicketAuthObfs));
+            }
             foreach (string method in VerifySimpleObfs.SupportedObfs())
             {
                 _registeredObfs.Add(method, typeof(VerifySimpleObfs));

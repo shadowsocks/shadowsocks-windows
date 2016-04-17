@@ -2424,10 +2424,10 @@ namespace Shadowsocks.Controller
                     if (bytesRead > 0)
                     {
                         int bytesToSend = 0;
-                        byte[] remoteSendBuffer = new byte[RecvSize];
                         int obfsRecvSize;
                         bool needsendback;
                         byte[] remoteRecvObfsBuffer = obfs.ClientDecode(remoteRecvBuffer, bytesRead, out obfsRecvSize, out needsendback);
+                        byte[] remoteSendBuffer = new byte[remoteRecvObfsBuffer.Length];
                         if (needsendback)
                         {
                             RemoteSend(connetionRecvBuffer, 0);
@@ -2704,7 +2704,7 @@ namespace Shadowsocks.Controller
                         }
                         lock (decryptionLock)
                         {
-                            byte[] decryptBuffer = new byte[RecvSize];
+                            byte[] decryptBuffer = new byte[RecvSize * 2];
                             if (closed)
                             {
                                 return;
