@@ -249,7 +249,9 @@ namespace Shadowsocks.Model
         public string proxyAuthPass;
         public string authUser;
         public string authPass;
-        public bool autoban;
+        public bool autoBan;
+        public bool sameHostForSameTarget;
+
         //public bool buildinHttpProxy;
         private ServerSelectStrategy serverStrategy = new ServerSelectStrategy();
         private Dictionary<string, UriVisitTime> uri2time = new Dictionary<string, UriVisitTime>();
@@ -257,7 +259,7 @@ namespace Shadowsocks.Model
 
         private static string CONFIG_FILE = "gui-config.json";
 
-        public Server GetCurrentServer(string targetURI = null, bool usingRandom = false, bool forceRandom = false)
+        public Server GetCurrentServer(string targetAddr = null, bool usingRandom = false, bool forceRandom = false)
         {
             lock (serverStrategy)
             {
@@ -270,16 +272,16 @@ namespace Shadowsocks.Model
                     time2uri.Remove(p.Key);
                     break;
                 }
-                if (!forceRandom && targetURI != null && uri2time.ContainsKey(targetURI))
+                if (sameHostForSameTarget && !forceRandom && targetAddr != null && uri2time.ContainsKey(targetAddr))
                 {
-                    UriVisitTime visit = uri2time[targetURI];
+                    UriVisitTime visit = uri2time[targetAddr];
                     if (visit.index < configs.Count && configs[visit.index].enable)
                     {
                         //uri2time.Remove(targetURI);
                         time2uri.Remove(visit);
                         visit.visitTime = DateTime.Now;
-                        uri2time[targetURI] = visit;
-                        time2uri[visit] = targetURI;
+                        uri2time[targetAddr] = visit;
+                        time2uri[visit] = targetAddr;
                         return configs[visit.index];
                     }
                 }
@@ -287,18 +289,18 @@ namespace Shadowsocks.Model
                 {
                     int index = serverStrategy.Select(configs, this.index, randomAlgorithm, true);
                     if (index == -1) return GetDefaultServer();
-                    if (targetURI != null)
+                    if (targetAddr != null)
                     {
                         UriVisitTime visit = new UriVisitTime();
-                        visit.uri = targetURI;
+                        visit.uri = targetAddr;
                         visit.index = index;
                         visit.visitTime = DateTime.Now;
-                        if (uri2time.ContainsKey(targetURI))
+                        if (uri2time.ContainsKey(targetAddr))
                         {
-                            time2uri.Remove(uri2time[targetURI]);
+                            time2uri.Remove(uri2time[targetAddr]);
                         }
-                        uri2time[targetURI] = visit;
-                        time2uri[visit] = targetURI;
+                        uri2time[targetAddr] = visit;
+                        time2uri[visit] = targetAddr;
                     }
                     return configs[index];
                 }
@@ -306,18 +308,18 @@ namespace Shadowsocks.Model
                 {
                     int index = serverStrategy.Select(configs, this.index, randomAlgorithm);
                     if (index == -1) return GetDefaultServer();
-                    if (targetURI != null)
+                    if (targetAddr != null)
                     {
                         UriVisitTime visit = new UriVisitTime();
-                        visit.uri = targetURI;
+                        visit.uri = targetAddr;
                         visit.index = index;
                         visit.visitTime = DateTime.Now;
-                        if (uri2time.ContainsKey(targetURI))
+                        if (uri2time.ContainsKey(targetAddr))
                         {
-                            time2uri.Remove(uri2time[targetURI]);
+                            time2uri.Remove(uri2time[targetAddr]);
                         }
-                        uri2time[targetURI] = visit;
-                        time2uri[visit] = targetURI;
+                        uri2time[targetAddr] = visit;
+                        time2uri[visit] = targetAddr;
                     }
                     return configs[index];
                 }
@@ -341,18 +343,18 @@ namespace Shadowsocks.Model
                             }
                         }
 
-                        if (targetURI != null)
+                        if (targetAddr != null)
                         {
                             UriVisitTime visit = new UriVisitTime();
-                            visit.uri = targetURI;
+                            visit.uri = targetAddr;
                             visit.index = selIndex;
                             visit.visitTime = DateTime.Now;
-                            if (uri2time.ContainsKey(targetURI))
+                            if (uri2time.ContainsKey(targetAddr))
                             {
-                                time2uri.Remove(uri2time[targetURI]);
+                                time2uri.Remove(uri2time[targetAddr]);
                             }
-                            uri2time[targetURI] = visit;
-                            time2uri[visit] = targetURI;
+                            uri2time[targetAddr] = visit;
+                            time2uri[visit] = targetAddr;
                         }
                         return configs[selIndex];
                     }

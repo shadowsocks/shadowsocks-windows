@@ -35,7 +35,7 @@ namespace Shadowsocks.Controller
         public event EventHandler EnableStatusChanged;
         public event EventHandler EnableGlobalChanged;
         //public event EventHandler ShareOverLANStatusChanged;
-        public event EventHandler SelectRandomStatusChanged;
+        //public event EventHandler SelectRandomStatusChanged;
         public event EventHandler ShowConfigFormEvent;
 
         // when user clicked Edit PAC, and PAC file has already created
@@ -175,7 +175,7 @@ namespace Shadowsocks.Controller
             _config.proxyPort = config.proxyPort;
             _config.proxyAuthUser = config.proxyAuthUser;
             _config.proxyAuthPass = config.proxyAuthPass;
-            _config.autoban = config.autoban;
+            _config.autoBan = config.autoBan;
             foreach (Server s in missingServers)
             {
                 s.GetConnections().CloseAll();
@@ -243,10 +243,12 @@ namespace Shadowsocks.Controller
         {
             _config.random = enabled;
             SaveConfig(_config);
-            if (SelectRandomStatusChanged != null)
-            {
-                SelectRandomStatusChanged(this, new EventArgs());
-            }
+        }
+
+        public void ToggleSameHostForSameTargetRandom(bool enabled)
+        {
+            _config.sameHostForSameTarget = enabled;
+            SaveConfig(_config);
         }
 
         public void SelectServerIndex(int index)

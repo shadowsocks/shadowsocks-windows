@@ -117,7 +117,7 @@ namespace Shadowsocks.View
                 _modifiedConfiguration.authUser = TextAuthUser.Text;
                 _modifiedConfiguration.authPass = TextAuthPass.Text;
 
-                _modifiedConfiguration.autoban = CheckAutoBan.Checked;
+                _modifiedConfiguration.autoBan = CheckAutoBan.Checked;
 
                 return ret;
             }
@@ -149,7 +149,7 @@ namespace Shadowsocks.View
             TextAuthUser.Text = _modifiedConfiguration.authUser;
             TextAuthPass.Text = _modifiedConfiguration.authPass;
 
-            CheckAutoBan.Checked = _modifiedConfiguration.autoban;
+            CheckAutoBan.Checked = _modifiedConfiguration.autoBan;
         }
 
         private void LoadCurrentConfiguration()

@@ -254,7 +254,7 @@ namespace Shadowsocks.Controller
                 handler.socks5RemotePassword = _config.proxyAuthPass;
             }
             handler.TTL = _config.TTL;
-            handler.autoSwitchOff = _config.autoban;
+            handler.autoSwitchOff = _config.autoBan;
             if (_config.authUser != null && _config.authUser.Length > 0)
             {
                 handler.authConnection = AuthConnection;

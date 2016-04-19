@@ -14,6 +14,7 @@ Global Settings...=选项设置...
 Start on Boot=开机启动
 Allow Clients from LAN=允许来自局域网的连接
 Enable balance=服务器负载均衡
+Same host for same address=优先相同节点连接同一地址
 Enable domain white list(http proxy only)=使用域名白名单(仅http代理)
 Local PAC=使用本地 PAC
 Online PAC=使用在线 PAC

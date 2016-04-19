@@ -20,6 +20,7 @@ namespace Shadowsocks.View
         private List<int> listOrder = new List<int>();
         private int lastRefreshIndex = 0;
         private bool rowChange = false;
+        private int updatePause = 0;
         private ServerSpeedLogShow[] ServerSpeedLogList;
         private Thread workerThread;
 
@@ -488,6 +489,11 @@ namespace Shadowsocks.View
 
         private void timer_Tick(object sender, EventArgs e)
         {
+            if (updatePause > 0)
+            {
+                updatePause -= 1;
+                return;
+            }
             RefreshLog();
             UpdateLog();
         }
@@ -675,6 +681,30 @@ namespace Shadowsocks.View
             {
                 e.Handled = true;
             }
+        }
+
+        private void ServerLogForm_Move(object sender, EventArgs e)
+        {
+            updatePause = 0;
+        }
+
+        protected override void WndProc(ref Message message)
+        {
+            const int WM_SIZING = 532;
+            const int WM_MOVING = 534;
+            switch (message.Msg)
+            {
+                case WM_SIZING:
+                case WM_MOVING:
+                    updatePause = 2;
+                    break;
+            }
+            base.WndProc(ref message);
+        }
+
+        private void ServerLogForm_ResizeEnd(object sender, EventArgs e)
+        {
+            updatePause = 0;
         }
     }
 }

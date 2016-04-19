@@ -45,6 +45,7 @@ namespace Shadowsocks.View
         private MenuItem editGFWUserRuleItem;
         private MenuItem editOnlinePACItem;
         private MenuItem SelectRandomItem;
+        private MenuItem sameHostForSameTargetItem;
         private MenuItem httpWhiteListItem;
         private MenuItem UpdateItem;
         private ConfigForm configForm;
@@ -64,7 +65,7 @@ namespace Shadowsocks.View
             controller.PACFileReadyToOpen += controller_FileReadyToOpen;
             controller.UserRuleFileReadyToOpen += controller_FileReadyToOpen;
             //controller.ShareOverLANStatusChanged += controller_ShareOverLANStatusChanged;
-            controller.SelectRandomStatusChanged += controller_SelectRandomStatusChanged;
+            //controller.SelectRandomStatusChanged += controller_SelectRandomStatusChanged;
             controller.EnableGlobalChanged += controller_EnableGlobalChanged;
             controller.Errored += controller_Errored;
             controller.UpdatePACFromGFWListCompleted += controller_UpdatePACFromGFWListCompleted;
@@ -220,6 +221,7 @@ namespace Shadowsocks.View
                 //this.AutoStartupItem = CreateMenuItem("Start on Boot", new EventHandler(this.AutoStartupItem_Click)),
                 //this.ShareOverLANItem = CreateMenuItem("Allow Clients from LAN", new EventHandler(this.ShareOverLANItem_Click)),
                 this.SelectRandomItem = CreateMenuItem("Enable balance", new EventHandler(this.SelectRandomItem_Click)),
+                this.sameHostForSameTargetItem = CreateMenuItem("Same host for same address", new EventHandler(this.SelectSameHostForSameTargetItem_Click)),
                 this.httpWhiteListItem = CreateMenuItem("Enable domain white list(http proxy only)", new EventHandler(this.HttpWhiteListItem_Click)),
                 this.UpdateItem = CreateMenuItem("Update available", new EventHandler(this.UpdateItem_Clicked)),
                 new MenuItem("-"),
@@ -418,11 +420,17 @@ namespace Shadowsocks.View
             {
                 serverLogForm.Activate();
                 serverLogForm.Update();
+                if (serverLogForm.WindowState == FormWindowState.Minimized)
+                {
+                    serverLogForm.WindowState = FormWindowState.Normal;
+                }
             }
             else
             {
                 serverLogForm = new ServerLogForm(controller);
                 serverLogForm.Show();
+                serverLogForm.Activate();
+                serverLogForm.BringToFront();
                 serverLogForm.FormClosed += serverLogForm_FormClosed;
             }
         }
@@ -551,6 +559,12 @@ namespace Shadowsocks.View
         {
             SelectRandomItem.Checked = !SelectRandomItem.Checked;
             controller.ToggleSelectRandom(SelectRandomItem.Checked);
+        }
+
+        private void SelectSameHostForSameTargetItem_Click(object sender, EventArgs e)
+        {
+            sameHostForSameTargetItem.Checked = !sameHostForSameTargetItem.Checked;
+            controller.ToggleSameHostForSameTargetRandom(sameHostForSameTargetItem.Checked);
         }
 
         private void HttpWhiteListItem_Click(object sender, EventArgs e)
