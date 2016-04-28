@@ -1,8 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.23107.0
-MinimumVisualStudioVersion = 10.0.40219.1
+# Visual Studio Express 2012 for Windows Desktop
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "shadowsocks-csharp", "shadowsocks-csharp\shadowsocks-csharp.csproj", "{8C02D2F7-7CDB-4D55-9F25-CD03EF4AA062}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "test", "test\test.csproj", "{45913187-0685-4903-B250-DCEF0479CD86}"
@@ -10,37 +8,21 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "test", "test\test.csproj", 
 		{8C02D2F7-7CDB-4D55-9F25-CD03EF4AA062} = {8C02D2F7-7CDB-4D55-9F25-CD03EF4AA062}
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ping.ss", "ping.ss.dll\ping.ss.csproj", "{66D73B81-EAE4-4575-86E9-6DAC69DD1D95}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug|Any CPU = Debug|Any CPU
 		Debug|x86 = Debug|x86
-		Release|Any CPU = Release|Any CPU
 		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{8C02D2F7-7CDB-4D55-9F25-CD03EF4AA062}.Debug|Any CPU.ActiveCfg = Debug|x86
 		{8C02D2F7-7CDB-4D55-9F25-CD03EF4AA062}.Debug|x86.ActiveCfg = Debug|x86
 		{8C02D2F7-7CDB-4D55-9F25-CD03EF4AA062}.Debug|x86.Build.0 = Debug|x86
 		{8C02D2F7-7CDB-4D55-9F25-CD03EF4AA062}.Debug|x86.Deploy.0 = Debug|x86
-		{8C02D2F7-7CDB-4D55-9F25-CD03EF4AA062}.Release|Any CPU.ActiveCfg = Release|x86
 		{8C02D2F7-7CDB-4D55-9F25-CD03EF4AA062}.Release|x86.ActiveCfg = Release|x86
 		{8C02D2F7-7CDB-4D55-9F25-CD03EF4AA062}.Release|x86.Build.0 = Release|x86
-		{45913187-0685-4903-B250-DCEF0479CD86}.Debug|Any CPU.ActiveCfg = Debug|x86
 		{45913187-0685-4903-B250-DCEF0479CD86}.Debug|x86.ActiveCfg = Debug|x86
 		{45913187-0685-4903-B250-DCEF0479CD86}.Debug|x86.Build.0 = Debug|x86
-		{45913187-0685-4903-B250-DCEF0479CD86}.Release|Any CPU.ActiveCfg = Release|x86
 		{45913187-0685-4903-B250-DCEF0479CD86}.Release|x86.ActiveCfg = Release|x86
 		{45913187-0685-4903-B250-DCEF0479CD86}.Release|x86.Build.0 = Release|x86
-		{66D73B81-EAE4-4575-86E9-6DAC69DD1D95}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{66D73B81-EAE4-4575-86E9-6DAC69DD1D95}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{66D73B81-EAE4-4575-86E9-6DAC69DD1D95}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{66D73B81-EAE4-4575-86E9-6DAC69DD1D95}.Debug|x86.Build.0 = Debug|Any CPU
-		{66D73B81-EAE4-4575-86E9-6DAC69DD1D95}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{66D73B81-EAE4-4575-86E9-6DAC69DD1D95}.Release|Any CPU.Build.0 = Release|Any CPU
-		{66D73B81-EAE4-4575-86E9-6DAC69DD1D95}.Release|x86.ActiveCfg = Release|Any CPU
-		{66D73B81-EAE4-4575-86E9-6DAC69DD1D95}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

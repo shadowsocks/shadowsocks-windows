@@ -15,9 +15,11 @@ namespace Shadowsocks.Controller
         {
             try
             {
-                LogFile = Path.Combine(Path.GetTempPath(), "shadowsocks.log");
-                var fs = new FileStream(LogFile, FileMode.Append);
-                var sw = new StreamWriterWithTimestamp(fs) {AutoFlush = true};
+                string temppath = Utils.GetTempPath();
+                LogFile = Path.Combine(temppath, "shadowsocks.log");
+                FileStream fs = new FileStream(LogFile, FileMode.Append);
+                StreamWriterWithTimestamp sw = new StreamWriterWithTimestamp(fs);
+                sw.AutoFlush = true;
                 Console.SetOut(sw);
                 Console.SetError(sw);
 

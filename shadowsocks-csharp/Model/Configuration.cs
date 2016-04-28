@@ -168,9 +168,9 @@ namespace Shadowsocks.Model
             // convert string to int
             public override object DeserializeObject(object value, Type type)
             {
-                if (type == typeof(int) && value is string)
+                if (type == typeof(Int32) && value.GetType() == typeof(string))
                 {
-                    return int.Parse(value.ToString());
+                    return Int32.Parse(value.ToString());
                 }
                 return base.DeserializeObject(value, type);
             }
