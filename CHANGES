@@ -1,3 +1,6 @@
+3.1 2016-05-01
+- Disable StatisticsStrategy by default
+
 3.0 2016-03-02
 - Update Privoxy to 3.0.24
 - Replace Choose by Total Packet Loss with Choose by Statistics
