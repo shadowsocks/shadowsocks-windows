@@ -14,7 +14,7 @@ namespace Shadowsocks.Model
     public class StatisticsStrategyConfiguration
     {
         public static readonly string ID = "com.shadowsocks.strategy.statistics";
-        public bool StatisticsEnabled { get; set; } = true;
+        public bool StatisticsEnabled { get; set; } = false;
         public bool ByHourOfDay { get; set; } = true;
         public bool Ping { get; set; }
         public int ChoiceKeptMinutes { get; set; } = 10;
