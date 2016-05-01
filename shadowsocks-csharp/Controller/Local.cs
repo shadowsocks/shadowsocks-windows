@@ -1965,7 +1965,7 @@ namespace Shadowsocks.Controller
                 {
                     remote.EndConnect(ar);
                 }
-                else
+                else //if (remoteTDP != null)
                 {
                     remoteTDP.EndConnect(ar);
                 }
@@ -2166,7 +2166,7 @@ namespace Shadowsocks.Controller
 
         private void SetObfsPlugin()
         {
-                lock (obfsLock)
+            lock (obfsLock)
             {
                 if (server.getProtocolData() == null)
                 {
@@ -2298,6 +2298,15 @@ namespace Shadowsocks.Controller
                         remoteTDP != null)
                     {
                         doRemoteTDPRecv();
+                        if (remoteHeaderSendBuffer != null)
+                        {
+                            detector.OnSend(remoteHeaderSendBuffer, remoteHeaderSendBuffer.Length);
+                            byte[] data = new byte[remoteHeaderSendBuffer.Length];
+                            Array.Copy(remoteHeaderSendBuffer, data, data.Length);
+                            connectionSendBufferList.Add(data);
+                            RemoteTDPSend(remoteHeaderSendBuffer, remoteHeaderSendBuffer.Length);
+                            remoteHeaderSendBuffer = null;
+                        }
                     }
                     else if (connectionSendBufferList != null && connectionSendBufferList.Count > 0)
                     {

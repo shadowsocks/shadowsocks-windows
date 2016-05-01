@@ -16,6 +16,7 @@ namespace Shadowsocks.View
     {
         private ShadowsocksController controller;
         private ContextMenu contextMenu1;
+        private MenuItem topmostItem;
         private MenuItem clearItem;
         private List<int> listOrder = new List<int>();
         private int lastRefreshIndex = 0;
@@ -48,6 +49,7 @@ namespace Shadowsocks.View
             UpdateLog();
 
             this.contextMenu1 = new ContextMenu(new MenuItem[] {
+                this.topmostItem = CreateMenuItem("Always On &Top", new EventHandler(this.topmostItem_Click)),
                 this.clearItem = CreateMenuItem("&Clear", new EventHandler(this.ClearItem_Click)),
             });
             ServerDataGrid.ContextMenu = contextMenu1;
@@ -476,6 +478,12 @@ namespace Shadowsocks.View
             {
                 ServerDataGrid.Sort(ServerDataGrid.SortedColumn, (ListSortDirection)((int)ServerDataGrid.SortOrder - 1));
             }
+        }
+
+        private void topmostItem_Click(object sender, EventArgs e)
+        {
+            topmostItem.Checked = !topmostItem.Checked;
+            this.TopMost = topmostItem.Checked;
         }
 
         private void ClearItem_Click(object sender, EventArgs e)

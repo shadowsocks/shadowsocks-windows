@@ -18,6 +18,7 @@ namespace Shadowsocks.Controller
         private static string runningPath;
         private int _runningPort;
         private static string _subPath = @"temp";
+        private static string _exeName = @"/ssr_privoxy.exe";
 
         static HttpProxyRunner()
         {
@@ -29,7 +30,7 @@ namespace Shadowsocks.Controller
             Kill();
             try
             {
-                FileManager.UncompressFile(runningPath + "/ss_privoxy.exe", Resources.privoxy_exe);
+                FileManager.UncompressFile(runningPath + _exeName, Resources.privoxy_exe);
                 FileManager.UncompressFile(runningPath + "/mgwz.dll", Resources.mgwz_dll);
             }
             catch (IOException e)
@@ -55,7 +56,7 @@ namespace Shadowsocks.Controller
 
         public static void Kill()
         {
-            Process[] existingPolipo = Process.GetProcessesByName("ss_privoxy");
+            Process[] existingPolipo = Process.GetProcessesByName("ssr_privoxy");
             foreach (Process p in existingPolipo)
             {
                 string str;
@@ -67,7 +68,7 @@ namespace Shadowsocks.Controller
                 {
                     continue;
                 }
-                if (str == Path.GetFullPath(runningPath + "/ss_privoxy.exe"))
+                if (str == Path.GetFullPath(runningPath + _exeName))
                 {
                     try
                     {
@@ -94,7 +95,7 @@ namespace Shadowsocks.Controller
                 polipoConfig = polipoConfig.Replace("__SOCKS_PORT__", configuration.localPort.ToString());
                 polipoConfig = polipoConfig.Replace("__POLIPO_BIND_PORT__", _runningPort.ToString());
                 polipoConfig = polipoConfig.Replace("__KEEP_ALIVE_TIMEOUT__", (configuration.TTL * 2).ToString());
-                polipoConfig = polipoConfig.Replace("__POLIPO_BIND_IP__", configuration.shareOverLan ? "0.0.0.0" : "127.0.0.1");
+                polipoConfig = polipoConfig.Replace("__POLIPO_BIND_IP__", "127.0.0.1");
                 polipoConfig = polipoConfig.Replace("__BYPASS_ACTION__", "actionsfile " + _subPath + "/bypass.action");
                 FileManager.ByteArrayToFile(runningPath + "/privoxy.conf", System.Text.Encoding.UTF8.GetBytes(polipoConfig));
 
@@ -117,7 +118,7 @@ namespace Shadowsocks.Controller
         {
             _process = new Process();
             // Configure the process using the StartInfo properties.
-            _process.StartInfo.FileName = runningPath + "/ss_privoxy.exe";
+            _process.StartInfo.FileName = runningPath + _exeName;
             _process.StartInfo.Arguments = " \"" + runningPath + "/privoxy.conf\"";
             _process.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
             _process.StartInfo.UseShellExecute = true;

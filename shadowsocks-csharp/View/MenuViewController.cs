@@ -490,8 +490,8 @@ namespace Shadowsocks.View
         {
             if (_isFirstRun)
             {
-                _notifyIcon.BalloonTipTitle = I18N.GetString("Shadowsocks is here");
-                _notifyIcon.BalloonTipText = I18N.GetString("You can turn on/off Shadowsocks in the context menu");
+                _notifyIcon.BalloonTipTitle = I18N.GetString("ShadowsocksR is here");
+                _notifyIcon.BalloonTipText = I18N.GetString("You can turn on/off ShadowsocksR in the context menu");
                 _notifyIcon.BalloonTipIcon = ToolTipIcon.Info;
                 _notifyIcon.ShowBalloonTip(0);
                 _isFirstRun = false;
