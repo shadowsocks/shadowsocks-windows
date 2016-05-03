@@ -33,8 +33,8 @@ namespace Shadowsocks.Controller
         public AvailabilityStatistics availabilityStatistics = AvailabilityStatistics.Instance;
         public StatisticsStrategyConfiguration StatisticsConfiguration { get; private set; }
 
-        public long inboundCounter = 0;
-        public long outboundCounter = 0;
+        public long InboundCounter { get { return _config.GetCurrentServer().bandwidthIn; } }
+        public long OutboundCounter { get { return _config.GetCurrentServer().bandwidthOut; } }
 
         private bool stopped = false;
 
@@ -317,18 +317,20 @@ namespace Shadowsocks.Controller
             }
         }
 
-        public void UpdateInboundCounter(Server server, long n)
+        public void IncreaseInboundCounter(Server server, long n)
         {
-            Interlocked.Add(ref inboundCounter, n);
+            Interlocked.Add(ref server.bandwidthIn, n);
+
             if (_config.availabilityStatistics)
             {
                 new Task(() => availabilityStatistics.UpdateInboundCounter(server, n)).Start();
             }
         }
 
-        public void UpdateOutboundCounter(Server server, long n)
+        public void IncreaseOutboundCounter(Server server, long n)
         {
-            Interlocked.Add(ref outboundCounter, n);
+            Interlocked.Add(ref server.bandwidthOut, n);
+
             if (_config.availabilityStatistics)
             {
                 new Task(() => availabilityStatistics.UpdateOutboundCounter(server, n)).Start();
@@ -457,6 +459,7 @@ namespace Shadowsocks.Controller
         }
 
         private static readonly IEnumerable<char> IgnoredLineBegins = new[] { '!', '[' };
+
         private void pacServer_UserRuleFileChanged(object sender, EventArgs e)
         {
             // TODO: this is a dirty hack. (from code GListUpdater.http_DownloadStringCompleted())

@@ -61,7 +61,7 @@ Change &Font=设置字体(&F)
 &Wrap Text=自动换行(&W)
 &Top Most=置顶(&T)
 &Show Toolbar=显示工具栏(&S)
-Log Viewer=日志查看器
+Log [DL:{0}, UL:{1}]=日志 [下载:{0}, 上传:{1}]
 
 # QRCode Form
 

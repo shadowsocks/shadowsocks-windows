@@ -21,6 +21,8 @@ namespace Shadowsocks.Model
         public string method;
         public string remarks;
         public bool auth;
+        public long bandwidthIn;
+        public long bandwidthOut;
 
         public override int GetHashCode()
         {
@@ -57,6 +59,8 @@ namespace Shadowsocks.Model
             password = "";
             remarks = "";
             auth = false;
+            bandwidthIn = 0;
+            bandwidthOut = 0;
         }
 
         public Server(string ssURL) : this()

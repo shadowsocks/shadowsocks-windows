@@ -83,6 +83,7 @@ namespace Shadowsocks.Model
             if (config.index == -1 && config.strategy == null)
                 config.index = 0;
             config.isDefault = false;
+
             try
             {
                 using (StreamWriter sw = new StreamWriter(File.Open(CONFIG_FILE, FileMode.Create)))
