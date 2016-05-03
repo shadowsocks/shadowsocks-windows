@@ -84,7 +84,9 @@ namespace Shadowsocks.View
                     password = PasswordTextBox.Text,
                     method = EncryptionSelect.Text,
                     remarks = RemarksTextBox.Text,
-                    auth = OneTimeAuth.Checked
+                    auth = OneTimeAuth.Checked,
+                    bandwidthIn = controller.GetCurrentServer().bandwidthIn,
+                    bandwidthOut = controller.GetCurrentServer().bandwidthOut
                 };
                 int localPort = int.Parse(ProxyPortTextBox.Text);
                 Configuration.CheckServer(server);
