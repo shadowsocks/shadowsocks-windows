@@ -144,11 +144,6 @@ namespace Shadowsocks.View
             LoadSelectedServer();
         }
 
-        private void ConfigForm_Load(object sender, EventArgs e)
-        {
-
-        }
-
         private void ConfigForm_KeyDown(object sender, KeyEventArgs e)
         {
             // Sometimes the users may hit enter key by mistake, and the form will close without saving entries.
