@@ -224,6 +224,7 @@ namespace Shadowsocks.Controller
             {
                 SystemProxy.Update(_config, true);
             }
+            SaveConfig(_config);
         }
 
         public void TouchPACFile()
