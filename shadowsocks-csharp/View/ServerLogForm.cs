@@ -24,6 +24,7 @@ namespace Shadowsocks.View
         private int updatePause = 0;
         private ServerSpeedLogShow[] ServerSpeedLogList;
         private Thread workerThread;
+        private AutoResetEvent workerEvent = new AutoResetEvent(false);
 
         public ServerLogForm(ShadowsocksController controller)
         {
@@ -174,7 +175,7 @@ namespace Shadowsocks.View
                 }
                 ServerSpeedLogList = _ServerSpeedLogList;
 
-                workerThread.Suspend();
+                workerEvent.WaitOne();
             }
         }
         public void UpdateLog()
@@ -186,14 +187,7 @@ namespace Shadowsocks.View
             }
             else
             {
-                try
-                {
-                    workerThread.Resume();
-                }
-                catch
-                {
-
-                }
+                workerEvent.Set();
             }
         }
         public void RefreshLog()
@@ -596,7 +590,11 @@ namespace Shadowsocks.View
             controller.ConfigChanged -= controller_ConfigChanged;
             Thread thread = workerThread;
             workerThread = null;
-            thread.Resume();
+            while (thread.IsAlive)
+            {
+                workerEvent.Set();
+                Thread.Sleep(50);
+            }
         }
 
         private long Str2Long(String str)

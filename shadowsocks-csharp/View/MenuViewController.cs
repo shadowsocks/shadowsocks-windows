@@ -38,12 +38,12 @@ namespace Shadowsocks.View
         private MenuItem ServersItem;
         private MenuItem globalModeItem;
         private MenuItem PACModeItem;
-        private MenuItem localPACItem;
-        private MenuItem onlinePACItem;
+        //private MenuItem localPACItem;
+        //private MenuItem onlinePACItem;
         private MenuItem editLocalPACItem;
         private MenuItem updateFromGFWListItem;
         private MenuItem editGFWUserRuleItem;
-        private MenuItem editOnlinePACItem;
+        //private MenuItem editOnlinePACItem;
         private MenuItem SelectRandomItem;
         private MenuItem sameHostForSameTargetItem;
         private MenuItem httpWhiteListItem;
@@ -198,17 +198,19 @@ namespace Shadowsocks.View
                     this.globalModeItem = CreateMenuItem("Global", new EventHandler(this.GlobalModeItem_Click))
                 }),
                 CreateMenuGroup("PAC ", new MenuItem[] {
-                    this.localPACItem = CreateMenuItem("Local PAC", new EventHandler(this.LocalPACItem_Click)),
-                    this.onlinePACItem = CreateMenuItem("Online PAC", new EventHandler(this.OnlinePACItem_Click)),
-                    new MenuItem("-"),
+                    //this.localPACItem = CreateMenuItem("Local PAC", new EventHandler(this.LocalPACItem_Click)),
+                    //this.onlinePACItem = CreateMenuItem("Online PAC", new EventHandler(this.OnlinePACItem_Click)),
+                    //new MenuItem("-"),
                     this.updateFromGFWListItem = CreateMenuItem("Update Local PAC from Lan IP List", new EventHandler(this.UpdatePACFromLanIPListItem_Click)),
                     this.updateFromGFWListItem = CreateMenuItem("Update Local PAC from Chn White List", new EventHandler(this.UpdatePACFromCNWhiteListItem_Click)),
                     this.updateFromGFWListItem = CreateMenuItem("Update Local PAC from Chn IP List", new EventHandler(this.UpdatePACFromCNIPListItem_Click)),
                     this.updateFromGFWListItem = CreateMenuItem("Update Local PAC from GFWList", new EventHandler(this.UpdatePACFromGFWListItem_Click)),
                     new MenuItem("-"),
+                    this.updateFromGFWListItem = CreateMenuItem("Update Local PAC from Chn Only List", new EventHandler(this.UpdatePACFromCNOnlyListItem_Click)),
+                    new MenuItem("-"),
                     this.editLocalPACItem = CreateMenuItem("Edit Local PAC File...", new EventHandler(this.EditPACFileItem_Click)),
                     this.editGFWUserRuleItem = CreateMenuItem("Edit User Rule for GFWList...", new EventHandler(this.EditUserRuleFileForGFWListItem_Click)),
-                    this.editOnlinePACItem = CreateMenuItem("Edit Online PAC URL...", new EventHandler(this.UpdateOnlinePACURLItem_Click)),
+                    //this.editOnlinePACItem = CreateMenuItem("Edit Online PAC URL...", new EventHandler(this.UpdateOnlinePACURLItem_Click)),
                 }),
                 new MenuItem("-"),
                 this.ServersItem = CreateMenuGroup("Servers", new MenuItem[] {
@@ -353,8 +355,8 @@ namespace Shadowsocks.View
             SelectRandomItem.Checked = config.random;
             httpWhiteListItem.Checked = config.bypassWhiteList;
             //AutoStartupItem.Checked = AutoStartup.Check();
-            onlinePACItem.Checked = onlinePACItem.Enabled && config.useOnlinePac;
-            localPACItem.Checked = !onlinePACItem.Checked;
+            //onlinePACItem.Checked = onlinePACItem.Enabled && config.useOnlinePac;
+            //localPACItem.Checked = !onlinePACItem.Checked;
             UpdatePACItemsEnabledStatus();
         }
 
@@ -594,17 +596,22 @@ namespace Shadowsocks.View
 
         private void UpdatePACFromLanIPListItem_Click(object sender, EventArgs e)
         {
-            controller.UpdatePACFromOnlinePac("https://raw.githubusercontent.com/breakwa11/gfw_whitelist/master/ss_lanip.pac");
+            controller.UpdatePACFromOnlinePac("https://raw.githubusercontent.com/breakwa11/gfw_whitelist/master/ssr/ss_lanip.pac");
         }
 
         private void UpdatePACFromCNWhiteListItem_Click(object sender, EventArgs e)
         {
-            controller.UpdatePACFromOnlinePac("https://raw.githubusercontent.com/breakwa11/gfw_whitelist/master/ss_white.pac");
+            controller.UpdatePACFromOnlinePac("https://raw.githubusercontent.com/breakwa11/gfw_whitelist/master/ssr/ss_white.pac");
+        }
+
+        private void UpdatePACFromCNOnlyListItem_Click(object sender, EventArgs e)
+        {
+            controller.UpdatePACFromOnlinePac("https://raw.githubusercontent.com/breakwa11/gfw_whitelist/master/ssr/ss_r_white.pac");
         }
 
         private void UpdatePACFromCNIPListItem_Click(object sender, EventArgs e)
         {
-            controller.UpdatePACFromOnlinePac("https://raw.githubusercontent.com/breakwa11/gfw_whitelist/master/ss_cnip.pac");
+            controller.UpdatePACFromOnlinePac("https://raw.githubusercontent.com/breakwa11/gfw_whitelist/master/ssr/ss_cnip.pac");
         }
 
         private void EditUserRuleFileForGFWListItem_Click(object sender, EventArgs e)
@@ -772,31 +779,31 @@ namespace Shadowsocks.View
 
         private void LocalPACItem_Click(object sender, EventArgs e)
         {
-            if (!localPACItem.Checked)
-            {
-                localPACItem.Checked = true;
-                onlinePACItem.Checked = false;
-                controller.UseOnlinePAC(false);
-                UpdatePACItemsEnabledStatus();
-            }
+            //if (!localPACItem.Checked)
+            //{
+            //    localPACItem.Checked = true;
+            //    onlinePACItem.Checked = false;
+            //    controller.UseOnlinePAC(false);
+            //    UpdatePACItemsEnabledStatus();
+            //}
         }
 
         private void OnlinePACItem_Click(object sender, EventArgs e)
         {
-            if (!onlinePACItem.Checked)
-            {
-                if (String.IsNullOrEmpty(controller.GetConfiguration().pacUrl))
-                {
-                    UpdateOnlinePACURLItem_Click(sender, e);
-                }
-                if (!String.IsNullOrEmpty(controller.GetConfiguration().pacUrl))
-                {
-                    localPACItem.Checked = false;
-                    onlinePACItem.Checked = true;
-                    controller.UseOnlinePAC(true);
-                }
-                UpdatePACItemsEnabledStatus();
-            }
+            //if (!onlinePACItem.Checked)
+            //{
+            //    if (String.IsNullOrEmpty(controller.GetConfiguration().pacUrl))
+            //    {
+            //        UpdateOnlinePACURLItem_Click(sender, e);
+            //    }
+            //    if (!String.IsNullOrEmpty(controller.GetConfiguration().pacUrl))
+            //    {
+            //        localPACItem.Checked = false;
+            //        onlinePACItem.Checked = true;
+            //        controller.UseOnlinePAC(true);
+            //    }
+            //    UpdatePACItemsEnabledStatus();
+            //}
         }
 
         private void UpdateOnlinePACURLItem_Click(object sender, EventArgs e)
@@ -814,20 +821,20 @@ namespace Shadowsocks.View
 
         private void UpdatePACItemsEnabledStatus()
         {
-            if (this.localPACItem.Checked)
-            {
-                this.editLocalPACItem.Enabled = true;
-                this.updateFromGFWListItem.Enabled = true;
-                this.editGFWUserRuleItem.Enabled = true;
-                this.editOnlinePACItem.Enabled = false;
-            }
-            else
-            {
-                this.editLocalPACItem.Enabled = false;
-                this.updateFromGFWListItem.Enabled = false;
-                this.editGFWUserRuleItem.Enabled = false;
-                this.editOnlinePACItem.Enabled = true;
-            }
+            //if (this.localPACItem.Checked)
+            //{
+            //    this.editLocalPACItem.Enabled = true;
+            //    this.updateFromGFWListItem.Enabled = true;
+            //    this.editGFWUserRuleItem.Enabled = true;
+            //    this.editOnlinePACItem.Enabled = false;
+            //}
+            //else
+            //{
+            //    this.editLocalPACItem.Enabled = false;
+            //    this.updateFromGFWListItem.Enabled = false;
+            //    this.editGFWUserRuleItem.Enabled = false;
+            //    this.editOnlinePACItem.Enabled = true;
+            //}
         }
     }
 }

@@ -16,7 +16,7 @@ namespace Shadowsocks.Controller
 
         private const string GFWLIST_TEMPLATE_URL = "https://raw.githubusercontent.com/breakwa11/gfw_whitelist/master/ss_gfw.pac";
 
-        private const string BYPASS_LIST_URL = "https://raw.githubusercontent.com/breakwa11/gfw_whitelist/master/ss_bypass.action";
+        private const string BYPASS_LIST_URL = "https://raw.githubusercontent.com/breakwa11/gfw_whitelist/master/ssr/ss_bypass.action";
 
         private static string PAC_FILE = PACServer.PAC_FILE;
 

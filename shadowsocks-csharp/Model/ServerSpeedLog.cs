@@ -14,6 +14,18 @@ namespace Shadowsocks.Model
             recvTime = t;
         }
     }
+
+    public class ErrorLog
+    {
+        public int errno;
+        public DateTime time;
+        public ErrorLog(int no)
+        {
+            errno = no;
+            time = DateTime.Now;
+        }
+    }
+
     public class ServerSpeedLogShow
     {
         public long totalConnectTimes;
@@ -50,13 +62,14 @@ namespace Shadowsocks.Model
         private List<int> connectTime = null;
         private int sumConnectTime = 0;
         private List<TransLog> speedLog = null;
-        private LinkedList<int> errList = new LinkedList<int>();
+        private LinkedList<ErrorLog> errList = new LinkedList<ErrorLog>();
 
         public ServerSpeedLogShow Translate()
         {
             ServerSpeedLogShow ret = new ServerSpeedLogShow();
             lock (this)
             {
+                Sweep();
                 ret.avgDownloadBytes = AvgDownloadBytes;
                 ret.avgConnectTime = AvgConnectTime;
                 ret.maxDownloadBytes = maxTransDownload;
@@ -282,11 +295,14 @@ namespace Shadowsocks.Model
                 totalDisconnectTimes += 1;
             }
         }
-        protected void FixErrList()
+        protected void Sweep()
         {
-            while (errList.Count > 100)
+            while (errList.Count > 0)
             {
-                int errCode = errList.First.Value;
+                if ((DateTime.Now - errList.First.Value.time).TotalMinutes < 30 && errList.Count < 100)
+                    break;
+
+                int errCode = errList.First.Value.errno;
                 errList.RemoveFirst();
                 if (errCode == 1)
                 {
@@ -310,9 +326,9 @@ namespace Shadowsocks.Model
         {
             lock (this)
             {
-                errList.AddLast(0);
+                errList.AddLast(new ErrorLog(0));
                 errorEmptyTimes = 0;
-                FixErrList();
+                Sweep();
             }
         }
         public void AddErrorTimes()
@@ -321,7 +337,7 @@ namespace Shadowsocks.Model
             {
                 errorConnectTimes += 1;
                 errorContinurousTimes += 1;
-                errList.AddLast(1);
+                errList.AddLast(new ErrorLog(1));
                 if (lastError == 1)
                 {
                 }
@@ -330,7 +346,7 @@ namespace Shadowsocks.Model
                     lastError = 1;
                     //errorContinurousTimes = 0;
                 }
-                FixErrList();
+                Sweep();
             }
         }
         public void AddTimeoutTimes()
@@ -339,7 +355,7 @@ namespace Shadowsocks.Model
             {
                 errorTimeoutTimes += 1;
                 errorContinurousTimes += 1;
-                errList.AddLast(2);
+                errList.AddLast(new ErrorLog(2));
                 if (lastError == 2)
                 {
                 }
@@ -348,7 +364,7 @@ namespace Shadowsocks.Model
                     lastError = 2;
                     //errorContinurousTimes = 0;
                 }
-                FixErrList();
+                Sweep();
             }
         }
         public void AddErrorDecodeTimes()
@@ -357,7 +373,7 @@ namespace Shadowsocks.Model
             {
                 errorDecodeTimes += 1;
                 errorContinurousTimes += 1;
-                errList.AddLast(0);
+                errList.AddLast(new ErrorLog(0));
                 if (lastError == 3)
                 {
                 }
@@ -366,7 +382,7 @@ namespace Shadowsocks.Model
                     lastError = 3;
                     //errorContinurousTimes = 0;
                 }
-                FixErrList();
+                Sweep();
             }
         }
         public void AddErrorEmptyTimes()
@@ -375,7 +391,7 @@ namespace Shadowsocks.Model
             {
                 errorEmptyTimes += 1;
                 errorContinurousTimes += 1;
-                errList.AddLast(0);
+                errList.AddLast(new ErrorLog(0));
                 if (lastError == 4)
                 {
                 }
@@ -384,7 +400,7 @@ namespace Shadowsocks.Model
                     lastError = 4;
                     //errorContinurousTimes = 0;
                 }
-                FixErrList();
+                Sweep();
             }
         }
         public void AddUploadBytes(long bytes)

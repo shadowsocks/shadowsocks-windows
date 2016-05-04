@@ -114,7 +114,7 @@ namespace Shadowsocks.Model
                 if (serverList.Count == 0)
                 {
                     int i = lastSelectIndex;
-                    if (configs[i].isEnable())
+                    if (i >= 0 && i < configs.Count && configs[i].isEnable())
                         serverList.Add(new ServerIndex(i, configs[i]));
                 }
                 int serverListIndex = -1;
