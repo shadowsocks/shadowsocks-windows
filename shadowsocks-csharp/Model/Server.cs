@@ -102,6 +102,7 @@ namespace Shadowsocks.Model
     {
         public string server;
         public int server_port;
+        public int server_udp_port;
         public string password;
         public string method;
         public string obfs;

@@ -15,6 +15,17 @@ namespace Shadowsocks.Model
         private DateTime lastSelectTime;
         private int lastUserSelectIndex;
 
+        enum SelectAlgorithm
+        {
+            OneByOne,
+            Random,
+            LowLatency,
+            LowException,
+            SelectedFirst,
+            Timer,
+            LowExceptionInGroup,
+        }
+
         private struct ServerIndex
         {
             public int index;
@@ -109,7 +120,15 @@ namespace Shadowsocks.Model
                     if (forceChange && lastSelectIndex == i)
                         continue;
                     if (configs[i].isEnable())
+                    {
+                        if (algorithm == (int)SelectAlgorithm.LowExceptionInGroup
+                            && configs.Count > lastSelectIndex && lastSelectIndex >= 0
+                            && configs[lastSelectIndex].group != configs[i].group)
+                        {
+                            continue;
+                        }
                         serverList.Add(new ServerIndex(i, configs[i]));
+                    }
                 }
                 if (serverList.Count == 0)
                 {
@@ -120,7 +139,7 @@ namespace Shadowsocks.Model
                 int serverListIndex = -1;
                 if (serverList.Count > 0)
                 {
-                    if (algorithm == 0)
+                    if (algorithm == (int)SelectAlgorithm.OneByOne)
                     {
                         lastSelectIndex = (lastSelectIndex + 1) % configs.Count;
                         for (int i = 0; i < configs.Count; ++i)
@@ -136,14 +155,16 @@ namespace Shadowsocks.Model
                             }
                         }
                     }
-                    else if (algorithm == 1)
+                    else if (algorithm == (int)SelectAlgorithm.Random)
                     {
                         serverListIndex = randomGennarator.Next(serverList.Count);
                         serverListIndex = serverList[serverListIndex].index;
                     }
-                    else if (algorithm == 3 || algorithm == 5)
+                    else if (algorithm == (int)SelectAlgorithm.LowException
+                        || algorithm == (int)SelectAlgorithm.Timer
+                        || algorithm == (int)SelectAlgorithm.LowExceptionInGroup)
                     {
-                        if (algorithm == 5)
+                        if (algorithm == (int)SelectAlgorithm.Timer)
                         {
                             if ((DateTime.Now - lastSelectTime).TotalSeconds > 60 * 10)
                             {
@@ -173,7 +194,7 @@ namespace Shadowsocks.Model
                             return serverListIndex;
                         }
                     }
-                    else //if (algorithm == 2 || algorithm == 4)
+                    else //if (algorithm == (int)SelectAlgorithm.LowLatency || algorithm == (int)SelectAlgorithm.SelectedFirst)
                     {
                         List<double> chances = new List<double>();
                         double lastBeginVal = 0;
@@ -183,7 +204,7 @@ namespace Shadowsocks.Model
                             chances.Add(lastBeginVal + chance);
                             lastBeginVal += chance;
                         }
-                        if (algorithm == 4 && randomGennarator.Next(3) == 0 && configs[curIndex].isEnable())
+                        if (algorithm == (int)SelectAlgorithm.SelectedFirst && randomGennarator.Next(3) == 0 && configs[curIndex].isEnable())
                         {
                             lastSelectIndex = curIndex;
                             return curIndex;
@@ -236,8 +257,6 @@ namespace Shadowsocks.Model
         public bool isDefault;
         public bool bypassWhiteList;
         public int localPort;
-        public string pacUrl;
-        public bool useOnlinePac;
         public int reconnectTimes;
         public int randomAlgorithm;
         public int TTL;
@@ -369,6 +388,8 @@ namespace Shadowsocks.Model
         public static void CheckServer(Server server)
         {
             CheckPort(server.server_port);
+            if (server.server_udp_port != 0)
+                CheckPort(server.server_udp_port);
             CheckPassword(server.password);
             CheckServer(server.server);
         }
@@ -516,5 +537,150 @@ namespace Shadowsocks.Model
                 return base.DeserializeObject(value, type);
             }
         }
+    }
+
+    [Serializable]
+    public class ServerTrans
+    {
+        public long totalUploadBytes;
+        public long totalDownloadBytes;
+
+        void AddUpload(long bytes)
+        {
+            //lock (this)
+            {
+                totalUploadBytes += bytes;
+            }
+        }
+        void AddDownload(long bytes)
+        {
+            //lock (this)
+            {
+                totalDownloadBytes += bytes;
+            }
+        }
+    }
+
+    [Serializable]
+    public class ServerTransferTotal
+    {
+        private static string LOG_FILE = "transfer_log.json";
+
+        public Dictionary<String, ServerTrans> servers = new Dictionary<String, ServerTrans>();
+        private int saveCounter;
+        private DateTime saveTime;
+
+        public static ServerTransferTotal Load()
+        {
+            try
+            {
+                string configContent = File.ReadAllText(LOG_FILE);
+                ServerTransferTotal config = SimpleJson.SimpleJson.DeserializeObject<ServerTransferTotal>(configContent, new JsonSerializerStrategy());
+                config.Init();
+                return config;
+            }
+            catch (Exception e)
+            {
+                if (!(e is FileNotFoundException))
+                {
+                    Console.WriteLine(e);
+                }
+                return new ServerTransferTotal();
+            }
+        }
+
+        public void Init()
+        {
+            saveCounter = 256;
+            saveTime = DateTime.Now;
+            if (servers == null)
+                servers = new Dictionary<String, ServerTrans>();
+        }
+
+        public static void Save(ServerTransferTotal config)
+        {
+            try
+            {
+                using (StreamWriter sw = new StreamWriter(File.Open(LOG_FILE, FileMode.Create)))
+                {
+                    string jsonString = SimpleJson.SimpleJson.SerializeObject(config);
+                    sw.Write(jsonString);
+                    sw.Flush();
+                }
+            }
+            catch (IOException e)
+            {
+                Console.Error.WriteLine(e);
+            }
+        }
+
+        public void AddUpload(string server, Int64 size)
+        {
+            lock (servers)
+            {
+                if (!servers.ContainsKey(server))
+                    servers.Add(server, new ServerTrans());
+                servers[server].totalUploadBytes += size;
+            }
+            if (--saveCounter <= 0)
+            {
+                saveCounter = 256;
+                if ((DateTime.Now - saveTime).TotalMinutes > 10 )
+                {
+                    lock (servers)
+                    {
+                        Save(this);
+                        saveTime = DateTime.Now;
+                    }
+                }
+            }
+        }
+        public void AddDownload(string server, Int64 size)
+        {
+            lock (servers)
+            {
+                if (!servers.ContainsKey(server))
+                    servers.Add(server, new ServerTrans());
+                servers[server].totalDownloadBytes += size;
+            }
+            if (--saveCounter <= 0)
+            {
+                saveCounter = 256;
+                if ((DateTime.Now - saveTime).TotalMinutes > 10 )
+                {
+                    lock (servers)
+                    {
+                        Save(this);
+                        saveTime = DateTime.Now;
+                    }
+                }
+            }
+        }
+
+        private class JsonSerializerStrategy : SimpleJson.PocoJsonSerializerStrategy
+        {
+            public override object DeserializeObject(object value, Type type)
+            {
+                if (type == typeof(Int64) && value.GetType() == typeof(string))
+                {
+                    return Int64.Parse(value.ToString());
+                }
+                else if (type == typeof(ServerTransferTotal))
+                {
+                    ServerTransferTotal transfer = new ServerTransferTotal();
+                    foreach (KeyValuePair<string, object> kv in ((IDictionary<string, object>)value))
+                    {
+                        foreach (IDictionary<string, object> kv_sub in (SimpleJson.JsonArray)(kv.Value))
+                        {
+                            transfer.servers.Add((string)kv_sub["Key"], (ServerTrans)base.DeserializeObject(kv_sub["Value"], typeof(ServerTrans)));
+                        }
+                        break;
+                    }
+                    return transfer;
+                }
+                return base.DeserializeObject(value, type);
+            }
+        }
+
     }
 }

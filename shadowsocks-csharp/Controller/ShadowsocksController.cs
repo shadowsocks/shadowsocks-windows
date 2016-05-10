@@ -20,6 +20,7 @@ namespace Shadowsocks.Controller
         private Listener _listener;
         private PACServer _pacServer;
         private Configuration _config;
+        private ServerTransferTotal _transfer;
         private HttpProxyRunner polipoRunner;
         private GFWListUpdater gfwListUpdater;
         private bool stopped = false;
@@ -35,7 +36,6 @@ namespace Shadowsocks.Controller
         public event EventHandler EnableStatusChanged;
         public event EventHandler EnableGlobalChanged;
         //public event EventHandler ShareOverLANStatusChanged;
-        //public event EventHandler SelectRandomStatusChanged;
         public event EventHandler ShowConfigFormEvent;
 
         // when user clicked Edit PAC, and PAC file has already created
@@ -51,6 +51,16 @@ namespace Shadowsocks.Controller
         public ShadowsocksController()
         {
             _config = Configuration.Load();
+            _transfer = ServerTransferTotal.Load();
+
+            foreach (Server server in _config.configs)
+            {
+                if (_transfer.servers.ContainsKey(server.server))
+                {
+                    ServerSpeedLog log = new ServerSpeedLog(_transfer.servers[server.server].totalUploadBytes, _transfer.servers[server.server].totalDownloadBytes);
+                    server.SetServerSpeedLog(log);
+                }
+            }
         }
 
         public void Start()
@@ -93,6 +103,7 @@ namespace Shadowsocks.Controller
                     {
                         if (mergeConfig.configs[i].server == servers[j].server
                             && mergeConfig.configs[i].server_port == servers[j].server_port
+                            && mergeConfig.configs[i].server_udp_port == servers[j].server_udp_port
                             && mergeConfig.configs[i].method == servers[j].method
                             && mergeConfig.configs[i].protocol == servers[j].protocol
                             && mergeConfig.configs[i].obfs == servers[j].obfs
@@ -114,6 +125,7 @@ namespace Shadowsocks.Controller
                 {
                     if (mergeConfig.configs[i].server == servers[j].server
                         && mergeConfig.configs[i].server_port == servers[j].server_port
+                        && mergeConfig.configs[i].server_udp_port == servers[j].server_udp_port
                         && mergeConfig.configs[i].method == servers[j].method
                         && mergeConfig.configs[i].protocol == servers[j].protocol
                         && mergeConfig.configs[i].obfs == servers[j].obfs
@@ -276,6 +288,7 @@ namespace Shadowsocks.Controller
             {
                 SystemProxy.Update(_config, true);
             }
+            ServerTransferTotal.Save(_transfer);
         }
 
         public void TouchPACFile()
@@ -362,28 +375,6 @@ namespace Shadowsocks.Controller
             }
         }
 
-        public void SavePACUrl(string pacUrl)
-        {
-            _config.pacUrl = pacUrl;
-            UpdateSystemProxy();
-            SaveConfig(_config);
-            if (ConfigChanged != null)
-            {
-                ConfigChanged(this, new EventArgs());
-            }
-        }
-
-        public void UseOnlinePAC(bool useOnlinePac)
-        {
-            _config.useOnlinePac = useOnlinePac;
-            UpdateSystemProxy();
-            SaveConfig(_config);
-            if (ConfigChanged != null)
-            {
-                ConfigChanged(this, new EventArgs());
-            }
-        }
-
         protected void Reload()
         {
             // some logic in configuration updated the config when saving, we need to read it again
@@ -414,7 +405,7 @@ namespace Shadowsocks.Controller
             {
                 if (_listener != null && !_listener.isConfigChange(_config))
                 {
-                    Local local = new Local(_config);
+                    Local local = new Local(_config, _transfer);
                     _listener.GetServices()[0] = local;
                     if (polipoRunner.HasExited())
                     {
@@ -435,7 +426,7 @@ namespace Shadowsocks.Controller
                     polipoRunner.Stop();
                     polipoRunner.Start(_config);
 
-                    Local local = new Local(_config);
+                    Local local = new Local(_config, _transfer);
                     List<Listener.Service> services = new List<Listener.Service>();
                     services.Add(local);
                     services.Add(_pacServer);

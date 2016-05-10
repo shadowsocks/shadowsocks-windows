@@ -9,130 +9,6 @@ using Shadowsocks.Model;
 using System.Timers;
 using System.Threading;
 
-/*
-shadowsocks TCP/UDP rand data packet (Server + Client)
-+------+------+----------+----------------+
-| Ver. | size | Rnd DATA | TCP/UDP packet |
-+------+------+----------+----------------+
-|  1   |  1   | Variable |    Variable    |
-+------+------+----------+----------------+
-Ver: always 0x80
-size: Rnd DATA size
-
-shadowsocks TCP/UDP rand data packet 2 (Server + Client)
-+------+----------------+
-| Ver. | TCP/UDP packet |
-+------+----------------+
-|  1   |    Variable    |
-+------+----------------+
-Ver: always 0x81
-
-shadowsocks TCP/UDP rand data packet (Server + Client)
-+------+------+----------+----------------+
-| Ver. | size | Rnd DATA | TCP/UDP packet |
-+------+------+----------+----------------+
-|  1   |  2   | Variable |    Variable    |
-+------+------+----------+----------------+
-Ver: always 0x82
- */
-
-/*
-
-shadowsocks UDP Request Connect (Client)
-+------+-----+-----------+----------+----------+-------+
-| Ver. | Cmd | requestid | local id | Rnd DATA | CRC32 |
-+------+-----+-----------+----------+----------+-------+
-|  1   |  1  |     2     |     4    | Variable |   4   |
-+------+-----+-----------+----------+----------+-------+
-Ver: always 8
-Cmd: 0
-Rnd DATA: size from 2 to 32, fill with 0 is ok
-
-shadowsocks UDP Request Connect Recv (Server) -------------------------- TODO port/ip redir
-+------+-----+-----------+-----+----------+-----------+
-| Ver. | Cmd | requestid |state| Rnd DATA | requestid |
-+------+-----+-----------+-----+----------+-----------+
-|  1   |  1  |     2     |  1  | Variable |     2     |
-+------+-----+-----------+-----+----------+-----------+
-Cmd: 1
-Rnd DATA: size from 0 to 32, the same as below
-state:
- * 0 Reject
- * 1 Connected
- * 2 Connected Remote
- * 3 Error
- * 4 Disconnected
- * 5 Redirect
-Note: client should save the requestid for next communication if state is 1
-
-shadowsocks UDP Request Connect Remote (Client)
-+------+-----+-----------+----------+------+----------+----------+----------+-------+
-| Ver. | Cmd | requestid | local id | ATYP | DST.ADDR | DST.PORT | Rnd DATA | CRC32 |
-+------+-----+-----------+----------+------+----------+----------+----------+-------+
-|  1   |  1  |     2     |     4    |  1   | Variable |    2     | Variable |   4   |
-+------+-----+-----------+----------+------+----------+----------+----------+-------+
-Cmd: 2
-ATYP: 1: IPv4; 4: IPv6; 3: a host name need resolved
-
-shadowsocks UDP Request Connect Remote Recv (Server)
-+------+-----+-----------+-----+----------+-----------+
-| Ver. | Cmd | requestid |state| Rnd DATA | requestid |
-+------+-----+-----------+-----+----------+-----------+
-|  1   |  1  |     2     |  1  | Variable |     2     |
-+------+-----+-----------+-----+----------+-----------+
-Cmd: 3
-
-================== start proxy
-
-Post Data (Server + Client) ------------------------ TODO compress support
-+------+-----+-----------+------------------+-------------------+-----------+----------+---------------+-------------------+
-| Ver. | Cmd | requestid | local id(Client) | recv next pack id |  pack id  |   DATA   | CRC32(Client) | requestid(Server) |
-+------+-----+-----------+------------------+-------------------+-----------+----------+---------------+-------------------+
-|  1   |  1  |     2     |         4        |         4         |     4     | Payload  |       4       |          2        |
-+------+-----+-----------+------------------+-------------------+-----------+----------+---------------+-------------------+
-Cmd: 4
-local id: Server not send the id back
-Note:
- * We should split a big tcp packet (> 1400 bytes) into random size.
- * Otherwise, we should add 0x80 rand header, size is more then 0 and less then 8 for performance reason.
-
-Syn status (Client + Server)
-+------+-----+-----------+------------------+-------------------+-------------+----------+---------------+-------------------+
-| Ver. | Cmd | requestid | local id(Client) | recv next pack id | max send id |   ids    | CRC32(Client) | requestid(Server) |
-+------+-----+-----------+------------------+-------------------+-------------+----------+---------------+-------------------+
-|  1   |  1  |     2     |         4        |         4         |      4      | Variable |       4       |          2        |
-+------+-----+-----------+------------------+-------------------+-------------+----------+---------------+-------------------+
-Cmd: 5
-ids: An array of id which offset of "recv next pack id" include your missing packets, 2 bytes each. Should add an extra byte randomly
-
-
-Post Data (Server + Client)
-+------+-----+-----------+------------------+-------------------+-----------+----------+---------------+-------------------+
-| Ver. | Cmd | requestid | local id(Client) | recv next pack id |  pack id  |   DATA   | CRC32(Client) | requestid(Server) |
-+------+-----+-----------+------------------+-------------------+-----------+----------+---------------+-------------------+
-|  1   |  1  |     2     |         4        |         8         |     8     | Payload  |       4       |          2        |
-+------+-----+-----------+------------------+-------------------+-----------+----------+---------------+-------------------+
-Cmd: 6
-
-Syn status (Client + Server)
-+------+-----+-----------+------------------+-------------------+-------------+----------+---------------+-------------------+
-| Ver. | Cmd | requestid | local id(Client) | recv next pack id | max send id |   ids    | CRC32(Client) | requestid(Server) |
-+------+-----+-----------+------------------+-------------------+-------------+----------+---------------+-------------------+
-|  1   |  1  |     2     |         4        |         8         |      8      | Variable |       4       |          2        |
-+------+-----+-----------+------------------+-------------------+-------------+----------+---------------+-------------------+
-Cmd: 7
-
-
-Disconnect (Server + Client)
-+------+-----+-----------+------------------+----------+---------------+-------------------+
-| Ver. | Cmd | requestid | local id(Client) | Rnd DATA | CRC32(Client) | requestid(Server) |
-+------+-----+-----------+------------------+----------+---------------+-------------------+
-|  1   |  1  |     2     |         4        | Variable |       4       |          2        |
-+------+-----+-----------+------------------+----------+---------------+-------------------+
-Cmd: 8
-
- */
-
 namespace Shadowsocks.Controller
 {
     public class ProtocolException : Exception
@@ -186,10 +62,12 @@ namespace Shadowsocks.Controller
     class Local : Listener.Service
     {
         private Configuration _config;
+        private ServerTransferTotal _transfer;
         private static bool EncryptorLoaded = false;
-        public Local(Configuration config)
+        public Local(Configuration config, ServerTransferTotal transfer)
         {
             this._config = config;
+            this._transfer = transfer;
         }
 
         protected bool Accept(byte[] firstPacket, int length)
@@ -202,18 +80,18 @@ namespace Shadowsocks.Controller
             {
                 return true;
             }
-            if (length > 8
-                && firstPacket[0] == 'C'
-                && firstPacket[1] == 'O'
-                && firstPacket[2] == 'N'
-                && firstPacket[3] == 'N'
-                && firstPacket[4] == 'E'
-                && firstPacket[5] == 'C'
-                && firstPacket[6] == 'T'
-                && firstPacket[7] == ' ')
-            {
-                return true;
-            }
+            //if (length > 8
+            //    && firstPacket[0] == 'C'
+            //    && firstPacket[1] == 'O'
+            //    && firstPacket[2] == 'N'
+            //    && firstPacket[3] == 'N'
+            //    && firstPacket[4] == 'E'
+            //    && firstPacket[5] == 'C'
+            //    && firstPacket[6] == 'T'
+            //    && firstPacket[7] == ' ')
+            //{
+            //    return true;
+            //}
             return false;
         }
 
@@ -243,6 +121,7 @@ namespace Shadowsocks.Controller
             handler.connection = socket;
             handler.reconnectTimesRemain = _config.reconnectTimes;
             handler.forceRandom = _config.random;
+            handler.setServerTransferTotal(_transfer);
 
             //handler.server = _config.GetCurrentServer(null, true);
             if (_config.proxyEnable)
@@ -599,6 +478,11 @@ namespace Shadowsocks.Controller
             return s.server;
         }
 
+        public void setServerTransferTotal(ServerTransferTotal transfer)
+        {
+            speedTester.transfer = transfer;
+        }
+
         public int LogSocketException(Exception e)
         {
             // just log useful exceptions, not all of them
@@ -847,7 +731,16 @@ namespace Shadowsocks.Controller
         {
             IPEndPoint remoteEP = new IPEndPoint(ipAddress, serverPort);
             remoteTCPEndPoint = remoteEP;
-            remoteUDPEndPoint = remoteEP;
+            if (server.server_udp_port == 0)
+            {
+                IPEndPoint _remoteEP = new IPEndPoint(ipAddress, serverPort);
+                remoteUDPEndPoint = remoteEP;
+            }
+            else
+            {
+                IPEndPoint _remoteEP = new IPEndPoint(ipAddress, server.server_udp_port);
+                remoteUDPEndPoint = _remoteEP;
+            }
 
             if (server.tcp_over_udp && connectionUDP == null)
             {
@@ -1863,6 +1756,8 @@ namespace Shadowsocks.Controller
             {
                 server = this.getCurrentServer(targetURI, true, forceRandom);
             }
+            speedTester.server = server.server;
+
             if (socks5RemotePort > 0)
             {
                 if (server.udp_over_tcp)
@@ -2667,7 +2562,7 @@ namespace Shadowsocks.Controller
                 {
                     return false;
                 }
-                if (port != server.server_port)
+                if (port != server.server_port && port != server.server_udp_port)
                 {
                     return false;
                 }
@@ -2819,7 +2714,7 @@ namespace Shadowsocks.Controller
             {
                 IPAddress ipAddress;
                 string serverURI = server.server;
-                int serverPort = server.server_port;
+                int serverPort = server.server_udp_port == 0 ? server.server_port : server.server_udp_port;
                 bool parsed = IPAddress.TryParse(serverURI, out ipAddress);
                 if (!parsed)
                 {

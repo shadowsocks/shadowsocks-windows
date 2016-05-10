@@ -64,6 +64,18 @@ namespace Shadowsocks.Model
         private List<TransLog> speedLog = null;
         private LinkedList<ErrorLog> errList = new LinkedList<ErrorLog>();
 
+        public ServerSpeedLog()
+        {
+
+        }
+
+        public ServerSpeedLog(long upload, long download)
+        {
+            transUpload = upload;
+            transDownload = download;
+            transDownloadRaw = download;
+        }
+
         public ServerSpeedLogShow Translate()
         {
             ServerSpeedLogShow ret = new ServerSpeedLogShow();
@@ -494,4 +506,5 @@ namespace Shadowsocks.Model
             }
         }
     }
+
 }

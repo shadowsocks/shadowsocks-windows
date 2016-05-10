@@ -62,11 +62,12 @@ namespace Shadowsocks.View
 
             IPLabel.Text = I18N.GetString("Server IP");
             ServerPortLabel.Text = I18N.GetString("Server Port");
+            labelUDPPort.Text = I18N.GetString("UDP Port");
             PasswordLabel.Text = I18N.GetString("Password");
             EncryptionLabel.Text = I18N.GetString("Encryption");
             checkRemarks.Text = I18N.GetString("Remarks");
 
-            LabelExpertSetting.Text = I18N.GetString(LabelExpertSetting.Text);
+            checkAdvSetting.Text = I18N.GetString(checkAdvSetting.Text);
             TCPoverUDPLabel.Text = I18N.GetString(TCPoverUDPLabel.Text);
             UDPoverTCPLabel.Text = I18N.GetString(UDPoverTCPLabel.Text);
             TCPProtocolLabel.Text = I18N.GetString(TCPProtocolLabel.Text);
@@ -115,12 +116,13 @@ namespace Shadowsocks.View
                 {
                     server = IPTextBox.Text.Trim(),
                     server_port = int.Parse(ServerPortTextBox.Text),
+                    server_udp_port = int.Parse(textUDPPort.Text),
                     password = PasswordTextBox.Text,
                     method = EncryptionSelect.Text,
                     obfs = ObfsCombo.Text,
                     obfsparam = textObfsParam.Text,
                     remarks = RemarksTextBox.Text,
-                    group = TextGroup.Text,
+                    group = TextGroup.Text.Trim(),
                     tcp_over_udp = CheckTCPoverUDP.Checked,
                     udp_over_tcp = CheckUDPoverUDP.Checked,
                     protocol = TCPProtocolComboBox.Text,
@@ -132,6 +134,7 @@ namespace Shadowsocks.View
                 if (_modifiedConfiguration.configs[_oldSelectedIndex].server != server.server
                     || _modifiedConfiguration.configs[_oldSelectedIndex].server_port != server.server_port
                     || _modifiedConfiguration.configs[_oldSelectedIndex].remarks_base64 != server.remarks_base64
+                    || _modifiedConfiguration.configs[_oldSelectedIndex].group != server.group
                     )
                 {
                     ret = 1; // display changed
@@ -197,6 +200,7 @@ namespace Shadowsocks.View
 
                 IPTextBox.Text = server.server;
                 ServerPortTextBox.Text = server.server_port.ToString();
+                textUDPPort.Text = server.server_udp_port.ToString();
                 PasswordTextBox.Text = server.password;
                 EncryptionSelect.Text = server.method ?? "aes-256-cfb";
                 if (server.protocol == null || server.protocol.Length == 0)
@@ -227,6 +231,11 @@ namespace Shadowsocks.View
                     TextLink.Text = controller.GetSSLinkForServer(server);
                 }
 
+                if (CheckTCPoverUDP.Checked || CheckUDPoverUDP.Checked || server.server_udp_port != 0)
+                {
+                    checkAdvSetting.Checked = true;
+                }
+
                 PasswordLabel.Checked = false;
                 GenQR(TextLink.Text);
                 //IPTextBox.Focus();
@@ -244,14 +253,28 @@ namespace Shadowsocks.View
                 ServersListBox.Items.Clear();
                 foreach (Server server in _modifiedConfiguration.configs)
                 {
-                    ServersListBox.Items.Add(server.FriendlyName());
+                    if (server.group != null && server.group.Length > 0)
+                    {
+                        ServersListBox.Items.Add(server.group + " - " + server.FriendlyName());
+                    }
+                    else
+                    {
+                        ServersListBox.Items.Add("      " + server.FriendlyName());
+                    }
                 }
             }
             else
             {
                 for (int i = 0; i < _modifiedConfiguration.configs.Count; ++i)
                 {
-                    ServersListBox.Items[i] = _modifiedConfiguration.configs[i].FriendlyName();
+                    if (_modifiedConfiguration.configs[i].group != null && _modifiedConfiguration.configs[i].group.Length > 0)
+                    {
+                        ServersListBox.Items[i] = _modifiedConfiguration.configs[i].group + " - " + _modifiedConfiguration.configs[i].FriendlyName();
+                    }
+                    else
+                    {
+                        ServersListBox.Items[i] = "      " + _modifiedConfiguration.configs[i].FriendlyName();
+                    }
                 }
             }
         }
@@ -463,6 +486,28 @@ namespace Shadowsocks.View
         {
             SaveOldSelectedServer();
             LoadSelectedServer();
+        }
+
+        private void checkAdvSetting_CheckedChanged(object sender, EventArgs e)
+        {
+            if (checkAdvSetting.Checked)
+            {
+                labelUDPPort.Visible = true;
+                textUDPPort.Visible = true;
+                TCPoverUDPLabel.Visible = true;
+                CheckTCPoverUDP.Visible = true;
+                UDPoverTCPLabel.Visible = true;
+                CheckUDPoverUDP.Visible = true;
+            }
+            else
+            {
+                labelUDPPort.Visible = false;
+                textUDPPort.Visible = false;
+                TCPoverUDPLabel.Visible = false;
+                CheckTCPoverUDP.Visible = false;
+                UDPoverTCPLabel.Visible = false;
+                CheckUDPoverUDP.Visible = false;
+            }
         }
     }
 }

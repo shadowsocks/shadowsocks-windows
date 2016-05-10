@@ -51,6 +51,7 @@ New server=未配置的服务器
 Server=服务器(截图注意打码)
 Server IP=服务器 IP
 Server Port=服务器端口
+UDP Port=UDP端口
 Password=密码
 Encryption=加密
 Remarks=备注
@@ -78,6 +79,7 @@ LowLatency=低延迟优先
 LowException=低错误优先
 SelectedFirst=选中优先
 Timer=定时切换
+SeletedGroup=所选组切换
 AutoBan=自动禁用出错服务器
 
 Remote proxy=二级（前置）代理

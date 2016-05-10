@@ -31,19 +31,14 @@ namespace Shadowsocks.View
         private bool _isFirstRun;
         private MenuItem enableItem;
         private MenuItem modeItem;
-        //private MenuItem AutoStartupItem;
-        //private MenuItem ShareOverLANItem;
         private MenuItem SeperatorItem;
         private MenuItem ConfigItem;
         private MenuItem ServersItem;
         private MenuItem globalModeItem;
         private MenuItem PACModeItem;
-        //private MenuItem localPACItem;
-        //private MenuItem onlinePACItem;
         private MenuItem editLocalPACItem;
         private MenuItem updateFromGFWListItem;
         private MenuItem editGFWUserRuleItem;
-        //private MenuItem editOnlinePACItem;
         private MenuItem SelectRandomItem;
         private MenuItem sameHostForSameTargetItem;
         private MenuItem httpWhiteListItem;
@@ -65,7 +60,6 @@ namespace Shadowsocks.View
             controller.PACFileReadyToOpen += controller_FileReadyToOpen;
             controller.UserRuleFileReadyToOpen += controller_FileReadyToOpen;
             //controller.ShareOverLANStatusChanged += controller_ShareOverLANStatusChanged;
-            //controller.SelectRandomStatusChanged += controller_SelectRandomStatusChanged;
             controller.EnableGlobalChanged += controller_EnableGlobalChanged;
             controller.Errored += controller_Errored;
             controller.UpdatePACFromGFWListCompleted += controller_UpdatePACFromGFWListCompleted;
@@ -198,9 +192,6 @@ namespace Shadowsocks.View
                     this.globalModeItem = CreateMenuItem("Global", new EventHandler(this.GlobalModeItem_Click))
                 }),
                 CreateMenuGroup("PAC ", new MenuItem[] {
-                    //this.localPACItem = CreateMenuItem("Local PAC", new EventHandler(this.LocalPACItem_Click)),
-                    //this.onlinePACItem = CreateMenuItem("Online PAC", new EventHandler(this.OnlinePACItem_Click)),
-                    //new MenuItem("-"),
                     this.updateFromGFWListItem = CreateMenuItem("Update Local PAC from Lan IP List", new EventHandler(this.UpdatePACFromLanIPListItem_Click)),
                     this.updateFromGFWListItem = CreateMenuItem("Update Local PAC from Chn White List", new EventHandler(this.UpdatePACFromCNWhiteListItem_Click)),
                     this.updateFromGFWListItem = CreateMenuItem("Update Local PAC from Chn IP List", new EventHandler(this.UpdatePACFromCNIPListItem_Click)),
@@ -210,7 +201,6 @@ namespace Shadowsocks.View
                     new MenuItem("-"),
                     this.editLocalPACItem = CreateMenuItem("Edit Local PAC File...", new EventHandler(this.EditPACFileItem_Click)),
                     this.editGFWUserRuleItem = CreateMenuItem("Edit User Rule for GFWList...", new EventHandler(this.EditUserRuleFileForGFWListItem_Click)),
-                    //this.editOnlinePACItem = CreateMenuItem("Edit Online PAC URL...", new EventHandler(this.UpdateOnlinePACURLItem_Click)),
                 }),
                 new MenuItem("-"),
                 this.ServersItem = CreateMenuGroup("Servers", new MenuItem[] {
@@ -219,9 +209,7 @@ namespace Shadowsocks.View
                     CreateMenuItem("Show QRCode...", new EventHandler(this.QRCodeItem_Click)),
                 }),
                 CreateMenuItem("Global Settings...", new EventHandler(this.Setting_Click)),
-                //new MenuItem("-"),
-                //this.AutoStartupItem = CreateMenuItem("Start on Boot", new EventHandler(this.AutoStartupItem_Click)),
-                //this.ShareOverLANItem = CreateMenuItem("Allow Clients from LAN", new EventHandler(this.ShareOverLANItem_Click)),
+                new MenuItem("-"),
                 this.SelectRandomItem = CreateMenuItem("Enable balance", new EventHandler(this.SelectRandomItem_Click)),
                 this.sameHostForSameTargetItem = CreateMenuItem("Same host for same address", new EventHandler(this.SelectSameHostForSameTargetItem_Click)),
                 this.httpWhiteListItem = CreateMenuItem("Enable domain white list(http proxy only)", new EventHandler(this.HttpWhiteListItem_Click)),
@@ -254,16 +242,6 @@ namespace Shadowsocks.View
         {
             enableItem.Checked = controller.GetConfiguration().enabled;
             modeItem.Enabled = enableItem.Checked;
-        }
-
-        //void controller_ShareOverLANStatusChanged(object sender, EventArgs e)
-        //{
-        //    ShareOverLANItem.Checked = controller.GetConfiguration().shareOverLan;
-        //}
-
-        void controller_SelectRandomStatusChanged(object sender, EventArgs e)
-        {
-            SelectRandomItem.Checked = controller.GetConfiguration().random;
         }
 
         void controller_EnableGlobalChanged(object sender, EventArgs e)
@@ -351,13 +329,9 @@ namespace Shadowsocks.View
             modeItem.Enabled = config.enabled;
             globalModeItem.Checked = config.global;
             PACModeItem.Checked = !config.global;
-            //ShareOverLANItem.Checked = config.shareOverLan;
             SelectRandomItem.Checked = config.random;
+            sameHostForSameTargetItem.Checked = config.sameHostForSameTarget;
             httpWhiteListItem.Checked = config.bypassWhiteList;
-            //AutoStartupItem.Checked = AutoStartup.Check();
-            //onlinePACItem.Checked = onlinePACItem.Enabled && config.useOnlinePac;
-            //localPACItem.Checked = !onlinePACItem.Checked;
-            UpdatePACItemsEnabledStatus();
         }
 
         private void UpdateServersMenu()
@@ -550,12 +524,6 @@ namespace Shadowsocks.View
         {
             controller.ToggleGlobal(false);
         }
-
-        //private void ShareOverLANItem_Click(object sender, EventArgs e)
-        //{
-        //    ShareOverLANItem.Checked = !ShareOverLANItem.Checked;
-        //    controller.ToggleShareOverLAN(ShareOverLANItem.Checked);
-        //}
 
         private void SelectRandomItem_Click(object sender, EventArgs e)
         {
@@ -766,75 +734,6 @@ namespace Shadowsocks.View
         void openURLFromQRCode(object sender, FormClosedEventArgs e)
         {
             Process.Start(_urlToOpen);
-        }
-
-        //private void AutoStartupItem_Click(object sender, EventArgs e)
-        //{
-        //    AutoStartupItem.Checked = !AutoStartupItem.Checked;
-        //    if (!AutoStartup.Set(AutoStartupItem.Checked))
-        //    {
-        //        MessageBox.Show(I18N.GetString("Failed to update registry"));
-        //    }
-        //}
-
-        private void LocalPACItem_Click(object sender, EventArgs e)
-        {
-            //if (!localPACItem.Checked)
-            //{
-            //    localPACItem.Checked = true;
-            //    onlinePACItem.Checked = false;
-            //    controller.UseOnlinePAC(false);
-            //    UpdatePACItemsEnabledStatus();
-            //}
-        }
-
-        private void OnlinePACItem_Click(object sender, EventArgs e)
-        {
-            //if (!onlinePACItem.Checked)
-            //{
-            //    if (String.IsNullOrEmpty(controller.GetConfiguration().pacUrl))
-            //    {
-            //        UpdateOnlinePACURLItem_Click(sender, e);
-            //    }
-            //    if (!String.IsNullOrEmpty(controller.GetConfiguration().pacUrl))
-            //    {
-            //        localPACItem.Checked = false;
-            //        onlinePACItem.Checked = true;
-            //        controller.UseOnlinePAC(true);
-            //    }
-            //    UpdatePACItemsEnabledStatus();
-            //}
-        }
-
-        private void UpdateOnlinePACURLItem_Click(object sender, EventArgs e)
-        {
-            string origPacUrl = controller.GetConfiguration().pacUrl;
-            string pacUrl = Microsoft.VisualBasic.Interaction.InputBox(
-                I18N.GetString("Please input PAC Url"),
-                I18N.GetString("Edit Online PAC URL"),
-                origPacUrl, -1, -1);
-            if (!string.IsNullOrEmpty(pacUrl) && pacUrl != origPacUrl)
-            {
-                controller.SavePACUrl(pacUrl);
-            }
-        }
-
-        private void UpdatePACItemsEnabledStatus()
-        {
-            //if (this.localPACItem.Checked)
-            //{
-            //    this.editLocalPACItem.Enabled = true;
-            //    this.updateFromGFWListItem.Enabled = true;
-            //    this.editGFWUserRuleItem.Enabled = true;
-            //    this.editOnlinePACItem.Enabled = false;
-            //}
-            //else
-            //{
-            //    this.editLocalPACItem.Enabled = false;
-            //    this.updateFromGFWListItem.Enabled = false;
-            //    this.editGFWUserRuleItem.Enabled = false;
-            //    this.editOnlinePACItem.Enabled = true;
-            //}
         }
     }
 }

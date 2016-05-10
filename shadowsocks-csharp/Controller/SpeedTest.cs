@@ -16,6 +16,8 @@ namespace Shadowsocks.Controller
         public long sizeDownload = 0;
         public long sizeRecv = 0;
         private List<TransLog> sizeDownloadList = new List<TransLog>();
+        public string server;
+        public ServerTransferTotal transfer;
 
         public void BeginConnect()
         {
@@ -49,6 +51,10 @@ namespace Shadowsocks.Controller
             else
                 sizeDownloadList.Add(new TransLog(size, DateTime.Now));
             sizeDownload += size;
+            if (transfer != null && server != null)
+            {
+                transfer.AddDownload(server, size);
+            }
         }
 
         public void AddRecvSize(int size)
@@ -59,6 +65,10 @@ namespace Shadowsocks.Controller
         public void AddUploadSize(int size)
         {
             sizeUpload += size;
+            if (transfer != null && server != null)
+            {
+                transfer.AddUpload(server, size);
+            }
         }
 
         public long GetAvgDownloadSpeed()

@@ -273,6 +273,22 @@ namespace Shadowsocks.View
                         else if (columnName == "Connecting")
                         {
                             //SetCellText(cell, server.GetConnections().Count);
+                            long connections = serverSpeedLog.totalConnectTimes - serverSpeedLog.totalDisconnectTimes;
+                            Color[] colList = new Color[5] { Color.White, Color.LightGreen, Color.Yellow, Color.Red, Color.Red };
+                            long[] bytesList = new long[5] { 0, 8, 16, 32, 65536 };
+                            for (int i = 1; i < colList.Length; ++i)
+                            {
+                                if (connections < bytesList[i])
+                                {
+                                    SetBackColor(cell,
+                                        ColorMix(colList[i - 1],
+                                            colList[i],
+                                            (double)(connections - bytesList[i - 1]) / (bytesList[i] - bytesList[i - 1])
+                                        )
+                                        );
+                                    break;
+                                }
+                            }
                             SetCellText(cell, serverSpeedLog.totalConnectTimes - serverSpeedLog.totalDisconnectTimes);
                         }
                         // AvgConnectTime
@@ -289,7 +305,7 @@ namespace Shadowsocks.View
                             long avgBytes = serverSpeedLog.avgDownloadBytes;
                             string valStr = FormatBytes(avgBytes);
                             Color[] colList = new Color[6] { Color.White, Color.LightGreen, Color.Yellow, Color.Pink, Color.Red, Color.Red };
-                            long[] bytesList = new long[6] { 0, 1024 * 64, 1024 * 512, 1024 * 1024 * 4, 1024 * 1024 * 16, 1024 * 1024 * 1024 };
+                            long[] bytesList = new long[6] { 0, 1024 * 64, 1024 * 512, 1024 * 1024 * 4, 1024 * 1024 * 16, 1024L * 1024 * 1024 * 1024 };
                             for (int i = 1; i < colList.Length; ++i)
                             {
                                 if (avgBytes < bytesList[i])

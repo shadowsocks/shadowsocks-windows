@@ -140,7 +140,8 @@
             "LowLatency",
             "LowException",
             "SelectedFirst",
-            "Timer"});
+            "Timer",
+            "SeletedGroup"});
             this.RandomComboBox.Location = new System.Drawing.Point(57, 51);
             this.RandomComboBox.Name = "RandomComboBox";
             this.RandomComboBox.Size = new System.Drawing.Size(109, 22);
@@ -551,8 +552,7 @@
             // 
             // SettingsForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
             this.AutoSize = true;
             this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.ClientSize = new System.Drawing.Size(728, 535);
