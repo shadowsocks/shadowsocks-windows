@@ -177,7 +177,7 @@
             this.PasswordTextBox.Size = new System.Drawing.Size(160, 21);
             this.PasswordTextBox.TabIndex = 2;
             this.PasswordTextBox.WordWrap = false;
-	    this.PasswordTextBox.UseSystemPasswordChar = true;
+            this.PasswordTextBox.UseSystemPasswordChar = true;
             // 
             // EncryptionLabel
             // 
