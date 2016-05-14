@@ -174,10 +174,10 @@
             this.PasswordTextBox.Location = new System.Drawing.Point(83, 60);
             this.PasswordTextBox.MaxLength = 256;
             this.PasswordTextBox.Name = "PasswordTextBox";
-            this.PasswordTextBox.PasswordChar = '*';
             this.PasswordTextBox.Size = new System.Drawing.Size(160, 21);
             this.PasswordTextBox.TabIndex = 2;
             this.PasswordTextBox.WordWrap = false;
+	    this.PasswordTextBox.UseSystemPasswordChar = true;
             // 
             // EncryptionLabel
             // 
