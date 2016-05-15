@@ -27,44 +27,38 @@ namespace Shadowsocks.Controller
 
         public bool Handle(byte[] firstPacket, int length, Socket socket, object state)
         {
-            if (socket.ProtocolType != ProtocolType.Tcp)
-            {
+            if (socket.ProtocolType != ProtocolType.Tcp
+                || (length < 2 || firstPacket[0] != 5))
                 return false;
-            }
-            if (length < 2 || firstPacket[0] != 5)
+            else
             {
-                return false;
-            }
-            socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, true);
-            TCPHandler handler = new TCPHandler(this);
-            handler.connection = socket;
-            handler.controller = _controller;
-            handler.tcprelay = this;
+                socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, true);
+                TCPHandler handler = new TCPHandler(this);
+                handler.connection = socket;
+                handler.controller = _controller;
+                handler.tcprelay = this;
 
-            handler.Start(firstPacket, length);
-            IList<TCPHandler> handlersToClose = new List<TCPHandler>();
-            lock (Handlers)
-            {
-                Handlers.Add(handler);
-                DateTime now = DateTime.Now;
-                if (now - _lastSweepTime > TimeSpan.FromSeconds(1))
+                handler.Start(firstPacket, length);
+                IList<TCPHandler> handlersToClose = new List<TCPHandler>();
+                lock (Handlers)
                 {
-                    _lastSweepTime = now;
-                    foreach (TCPHandler handler1 in Handlers)
+                    Handlers.Add(handler);
+                    DateTime now = DateTime.Now;
+                    if (now - _lastSweepTime > TimeSpan.FromSeconds(1))
                     {
-                        if (now - handler1.lastActivity > TimeSpan.FromSeconds(900))
-                        {
-                            handlersToClose.Add(handler1);
-                        }
+                        _lastSweepTime = now;
+                        foreach (TCPHandler handler1 in Handlers)
+                            if (now - handler1.lastActivity > TimeSpan.FromSeconds(900))
+                                handlersToClose.Add(handler1);
                     }
                 }
+                foreach (TCPHandler handler1 in handlersToClose)
+                {
+                    Logging.Debug("Closing timed out TCP connection.");
+                    handler1.Close();
+                }
+                return true;
             }
-            foreach (TCPHandler handler1 in handlersToClose)
-            {
-                Logging.Debug("Closing timed out TCP connection.");
-                handler1.Close();
-            }
-            return true;
         }
 
         public void UpdateInboundCounter(Server server, long n)
@@ -126,16 +120,14 @@ namespace Shadowsocks.Controller
 
         public TCPHandler(TCPRelay tcprelay)
         {
-            this._tcprelay = tcprelay;
+            _tcprelay = tcprelay;
         }
 
         public void CreateRemote()
         {
             Server server = controller.GetAServer(IStrategyCallerType.TCP, (IPEndPoint)connection.RemoteEndPoint);
             if (server == null || server.server == "")
-            {
                 throw new ArgumentException("No server configured");
-            }
             encryptor = EncryptorFactory.GetEncryptor(server.method, server.password, server.auth, false);
             this.server = server;
         }
@@ -151,9 +143,7 @@ namespace Shadowsocks.Controller
         private void CheckClose()
         {
             if (_connectionShutdown && _remoteShutdown)
-            {
                 Close();
-            }
         }
 
         public void Close()
@@ -165,57 +155,43 @@ namespace Shadowsocks.Controller
             lock (this)
             {
                 if (_closed)
-                {
                     return;
-                }
-                _closed = true;
+                else
+                    _closed = true;
             }
-            if (connection != null)
+            try
             {
-                try
-                {
-                    connection.Shutdown(SocketShutdown.Both);
-                    connection.Close();
-                }
-                catch (Exception e)
-                {
-                    Logging.LogUsefulException(e);
-                }
+                connection?.Shutdown(SocketShutdown.Both);
+                connection?.Close();
             }
-            if (remote != null)
+            catch (Exception e)
             {
-                try
-                {
-                    remote.Shutdown(SocketShutdown.Both);
-                    remote.Close();
-                }
-                catch (Exception e)
-                {
-                    Logging.LogUsefulException(e);
-                }
+                Logging.LogUsefulException(e);
+            }
+            try
+            {
+                remote?.Shutdown(SocketShutdown.Both);
+                remote?.Close();
+            }
+            catch (Exception e)
+            {
+                Logging.LogUsefulException(e);
             }
             lock (_encryptionLock)
             {
                 lock (_decryptionLock)
                 {
-                    if (encryptor != null)
-                    {
-                        ((IDisposable)encryptor).Dispose();
-                    }
+                    encryptor?.Dispose();
                 }
             }
         }
 
         private void HandshakeReceive()
         {
-            if (_closed)
-            {
-                return;
-            }
+            if (_closed) return;
             try
             {
                 int bytesRead = _firstPacketLength;
-
                 if (bytesRead > 1)
                 {
                     byte[] response = { 5, 0 };
@@ -228,9 +204,7 @@ namespace Shadowsocks.Controller
                     connection.BeginSend(response, 0, response.Length, 0, new AsyncCallback(HandshakeSendCallback), null);
                 }
                 else
-                {
                     Close();
-                }
             }
             catch (Exception e)
             {
@@ -241,10 +215,7 @@ namespace Shadowsocks.Controller
 
         private void HandshakeSendCallback(IAsyncResult ar)
         {
-            if (_closed)
-            {
-                return;
-            }
+            if (_closed) return;
             try
             {
                 connection.EndSend(ar);
@@ -267,14 +238,10 @@ namespace Shadowsocks.Controller
 
         private void handshakeReceive2Callback(IAsyncResult ar)
         {
-            if (_closed)
-            {
-                return;
-            }
+            if (_closed) return;
             try
             {
                 int bytesRead = connection.EndReceive(ar);
-
                 if (bytesRead >= 3)
                 {
                     _command = _connetionRecvBuffer[1];
@@ -284,9 +251,7 @@ namespace Shadowsocks.Controller
                         connection.BeginSend(response, 0, response.Length, 0, new AsyncCallback(ResponseCallback), null);
                     }
                     else if (_command == 3)
-                    {
                         HandleUDPAssociate();
-                    }
                 }
                 else
                 {
@@ -308,13 +273,14 @@ namespace Shadowsocks.Controller
             int port = endPoint.Port;
             byte[] response = new byte[4 + address.Length + 2];
             response[0] = 5;
-            if (endPoint.AddressFamily == AddressFamily.InterNetwork)
+            switch (endPoint.AddressFamily)
             {
-                response[3] = 1;
-            }
-            else if (endPoint.AddressFamily == AddressFamily.InterNetworkV6)
-            {
-                response[3] = 4;
+                case AddressFamily.InterNetwork:
+                    response[3] = 1;
+                    break;
+                case AddressFamily.InterNetworkV6:
+                    response[3] = 4;
+                    break;
             }
             address.CopyTo(response, 4);
             response[response.Length - 1] = (byte)(port & 0xFF);
@@ -324,10 +290,7 @@ namespace Shadowsocks.Controller
 
         private void ReadAll(IAsyncResult ar)
         {
-            if (_closed)
-            {
-                return;
-            }
+            if (_closed) return;
             try
             {
                 if (ar.AsyncState != null)
@@ -345,9 +308,7 @@ namespace Shadowsocks.Controller
                         connection.BeginReceive(_connetionRecvBuffer, 0, RecvSize, 0, new AsyncCallback(ReadAll), null);
                     }
                     else
-                    {
                         Close();
-                    }
                 }
             }
             catch (Exception e)
@@ -362,10 +323,8 @@ namespace Shadowsocks.Controller
             try
             {
                 connection.EndSend(ar);
-
                 StartConnect();
             }
-
             catch (Exception e)
             {
                 Logging.LogUsefulException(e);
@@ -396,8 +355,7 @@ namespace Shadowsocks.Controller
                 }
                 IPEndPoint remoteEP = new IPEndPoint(ipAddress, server.server_port);
 
-                remote = new Socket(ipAddress.AddressFamily,
-                    SocketType.Stream, ProtocolType.Tcp);
+                remote = new Socket(ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
                 remote.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, true);
 
                 _startConnectTime = DateTime.Now;
@@ -420,16 +378,10 @@ namespace Shadowsocks.Controller
 
         private void connectTimer_Elapsed(object sender, ElapsedEventArgs e)
         {
-            if (_connected)
-            {
-                return;
-            }
+            if (_connected) return;
             Server server = ((ServerTimer)sender).Server;
             IStrategy strategy = controller.GetCurrentStrategy();
-            if (strategy != null)
-            {
-                strategy.SetFailure(server);
-            }
+            strategy?.SetFailure(server);
             Logging.Info($"{server.FriendlyName()} timed out");
             remote.Close();
             RetryConnect();
@@ -444,22 +396,16 @@ namespace Shadowsocks.Controller
                 _retryCount++;
             }
             else
-            {
                 Close();
-            }
         }
 
         private void ConnectCallback(IAsyncResult ar)
         {
-            Server server = null;
-            if (_closed)
-            {
-                return;
-            }
+            if (_closed) return;
             try
             {
                 ServerTimer timer = (ServerTimer)ar.AsyncState;
-                server = timer.Server;
+                Server server = timer.Server;
                 timer.Elapsed -= connectTimer_Elapsed;
                 timer.Enabled = false;
                 timer.Dispose();
@@ -484,10 +430,7 @@ namespace Shadowsocks.Controller
                 if (server != null)
                 {
                     IStrategy strategy = controller.GetCurrentStrategy();
-                    if (strategy != null)
-                    {
-                        strategy.SetFailure(server);
-                    }
+                    strategy?.SetFailure(server);
                 }
                 Logging.LogUsefulException(e);
                 RetryConnect();
@@ -496,10 +439,7 @@ namespace Shadowsocks.Controller
 
         private void StartPipe()
         {
-            if (_closed)
-            {
-                return;
-            }
+            if (_closed) return;
             try
             {
                 _startReceivingTime = DateTime.Now;
@@ -515,10 +455,7 @@ namespace Shadowsocks.Controller
 
         private void PipeRemoteReceiveCallback(IAsyncResult ar)
         {
-            if (_closed)
-            {
-                return;
-            }
+            if (_closed) return;
             try
             {
                 int bytesRead = remote.EndReceive(ar);
@@ -531,32 +468,19 @@ namespace Shadowsocks.Controller
                     int bytesToSend;
                     lock (_decryptionLock)
                     {
-                        if (_closed)
-                        {
-                            return;
-                        }
+                        if (_closed) return;
                         encryptor.Decrypt(_remoteRecvBuffer, bytesRead, _remoteSendBuffer, out bytesToSend);
                     }
                     connection.BeginSend(_remoteSendBuffer, 0, bytesToSend, 0, new AsyncCallback(PipeConnectionSendCallback), null);
 
                     IStrategy strategy = controller.GetCurrentStrategy();
-                    if (strategy != null)
-                    {
-                        strategy.UpdateLastRead(server);
-                    }
+                    strategy?.UpdateLastRead(server);
                 }
                 else
                 {
                     connection.Shutdown(SocketShutdown.Send);
                     _connectionShutdown = true;
                     CheckClose();
-
-                    //if (totalRead == 0)
-                    //{
-                    //    // closed before anything received, reports as failure
-                    //    // disable this feature
-                    //    controller.GetCurrentStrategy().SetFailure(this.server);
-                    //}
                 }
             }
             catch (Exception e)
@@ -568,10 +492,7 @@ namespace Shadowsocks.Controller
 
         private void PipeConnectionReceiveCallback(IAsyncResult ar)
         {
-            if (_closed)
-            {
-                return;
-            }
+            if (_closed) return;
             try
             {
                 int bytesRead = connection.EndReceive(ar);
@@ -604,10 +525,7 @@ namespace Shadowsocks.Controller
                     int bytesToSend;
                     lock (_encryptionLock)
                     {
-                        if (_closed)
-                        {
-                            return;
-                        }
+                        if (_closed) return;
                         encryptor.Encrypt(_connetionRecvBuffer, bytesRead, _connetionSendBuffer, out bytesToSend);
                     }
                     _tcprelay.UpdateOutboundCounter(server, bytesToSend);
@@ -634,10 +552,7 @@ namespace Shadowsocks.Controller
 
         private void PipeRemoteSendCallback(IAsyncResult ar)
         {
-            if (_closed)
-            {
-                return;
-            }
+            if (_closed) return;
             try
             {
                 remote.EndSend(ar);
@@ -652,10 +567,7 @@ namespace Shadowsocks.Controller
 
         private void PipeConnectionSendCallback(IAsyncResult ar)
         {
-            if (_closed)
-            {
-                return;
-            }
+            if (_closed) return;
             try
             {
                 connection.EndSend(ar);
