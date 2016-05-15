@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Timers;
@@ -15,10 +16,7 @@ namespace Shadowsocks.Controller
         private ShadowsocksController _controller;
         private DateTime _lastSweepTime;
 
-        public ISet<TCPHandler> Handlers
-        {
-            get; set;
-        }
+        public ISet<TCPHandler> Handlers { get; set; }
 
         public TCPRelay(ShadowsocksController controller)
         {
@@ -389,10 +387,7 @@ namespace Shadowsocks.Controller
         private class ServerTimer : Timer
         {
             public Server Server;
-
-            public ServerTimer(int p) : base(p)
-            {
-            }
+            public ServerTimer(int p) : base(p) { }
         }
 
         private void StartConnect()
@@ -484,8 +479,6 @@ namespace Shadowsocks.Controller
 
                 connected = true;
 
-                Logging.Debug($"Socket connected to {remote.RemoteEndPoint}");
-
                 var latency = DateTime.Now - _startConnectTime;
                 IStrategy strategy = controller.GetCurrentStrategy();
                 strategy?.UpdateLatency(server, latency);
@@ -554,7 +547,6 @@ namespace Shadowsocks.Controller
                         }
                         encryptor.Decrypt(remoteRecvBuffer, bytesRead, remoteSendBuffer, out bytesToSend);
                     }
-                    Logging.Debug(remote, bytesToSend, "TCP Relay", "@PipeRemoteReceiveCallback() (download)");
                     connection.BeginSend(remoteSendBuffer, 0, bytesToSend, 0, new AsyncCallback(PipeConnectionSendCallback), null);
 
                     IStrategy strategy = controller.GetCurrentStrategy();
@@ -597,6 +589,28 @@ namespace Shadowsocks.Controller
 
                 if (bytesRead > 0)
                 {
+                    int atyp = connetionRecvBuffer[0];
+                    string dst_addr;
+                    int dst_port;
+                    switch (atyp)
+                    {
+                        case 1:  // IPv4 address, 4 bytes
+                            dst_addr = new IPAddress(connetionRecvBuffer.Skip(1).Take(4).ToArray()).ToString();
+                            dst_port = (connetionRecvBuffer[5] << 8) + connetionRecvBuffer[6];
+                            Logging.Debug($"connect to {dst_addr}:{dst_port}");
+                            break;
+                        case 3:  // domain name, length + str
+                            int len = connetionRecvBuffer[1];
+                            dst_addr = System.Text.Encoding.UTF8.GetString(connetionRecvBuffer, 2, len);
+                            dst_port = (connetionRecvBuffer[len + 2] << 8) + connetionRecvBuffer[len + 3];
+                            Logging.Debug($"connect to {dst_addr}:{dst_port}");
+                            break;
+                        case 4:  // IPv6 address, 16 bytes
+                            dst_addr = new IPAddress(connetionRecvBuffer.Skip(1).Take(16).ToArray()).ToString();
+                            dst_port = (connetionRecvBuffer[17] << 8) + connetionRecvBuffer[18];
+                            Logging.Debug($"connect to [{dst_addr}]:{dst_port}");
+                            break;
+                    }
                     int bytesToSend;
                     lock (encryptionLock)
                     {
@@ -606,7 +620,6 @@ namespace Shadowsocks.Controller
                         }
                         encryptor.Encrypt(connetionRecvBuffer, bytesRead, connetionSendBuffer, out bytesToSend);
                     }
-                    Logging.Debug(remote, bytesToSend, "TCP Relay", "@PipeConnectionReceiveCallback() (upload)");
                     tcprelay.UpdateOutboundCounter(server, bytesToSend);
                     _startSendingTime = DateTime.Now;
                     _bytesToSend = bytesToSend;
