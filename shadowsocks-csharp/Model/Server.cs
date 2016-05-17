@@ -234,7 +234,7 @@ namespace Shadowsocks.Model
 
         public Server()
         {
-            this.server = "127.0.0.1";
+            this.server = "server ip or url";
             this.server_port = 8388;
             this.method = "aes-256-cfb";
             this.obfs = "plain";

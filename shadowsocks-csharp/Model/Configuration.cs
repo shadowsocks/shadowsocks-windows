@@ -261,6 +261,7 @@ namespace Shadowsocks.Model
         public int randomAlgorithm;
         public int TTL;
         public bool proxyEnable;
+        public bool pacDirectGoProxy;
         public int proxyType;
         public string proxyHost;
         public int proxyPort;
@@ -307,7 +308,7 @@ namespace Shadowsocks.Model
                 if (forceRandom)
                 {
                     int index = serverStrategy.Select(configs, this.index, randomAlgorithm, true);
-                    if (index == -1) return GetDefaultServer();
+                    if (index == -1) return GetErrorServer();
                     if (targetAddr != null)
                     {
                         UriVisitTime visit = new UriVisitTime();
@@ -326,7 +327,7 @@ namespace Shadowsocks.Model
                 else if (usingRandom && random)
                 {
                     int index = serverStrategy.Select(configs, this.index, randomAlgorithm);
-                    if (index == -1) return GetDefaultServer();
+                    if (index == -1) return GetErrorServer();
                     if (targetAddr != null)
                     {
                         UriVisitTime visit = new UriVisitTime();
@@ -379,7 +380,7 @@ namespace Shadowsocks.Model
                     }
                     else
                     {
-                        return GetDefaultServer();
+                        return GetErrorServer();
                     }
                 }
             }
@@ -491,6 +492,13 @@ namespace Shadowsocks.Model
         public static Server GetDefaultServer()
         {
             return new Server();
+        }
+
+        public static Server GetErrorServer()
+        {
+            Server server = new Server();
+            server.server = "invalid";
+            return server;
         }
 
         private static void Assert(bool condition)

@@ -174,6 +174,15 @@ namespace Shadowsocks.Controller
                     socksType == 4 ? "SOCKS " + setProxy :
                     "PROXY " + setProxy;
 
+                if (_config.pacDirectGoProxy && _config.proxyEnable)
+                {
+                    if (_config.proxyType == 0)
+                        pac = pac.Replace("__DIRECT__", "SOCKS5 " + _config.proxyHost + ":" +  _config.proxyPort.ToString() + ";DIRECT;");
+                    else if (_config.proxyType == 1)
+                        pac = pac.Replace("__DIRECT__", "PROXY " + _config.proxyHost + ":" + _config.proxyPort.ToString() + ";DIRECT;");
+                }
+                else
+                    pac = pac.Replace("__DIRECT__", "DIRECT;");
                 pac = pac.Replace("__PROXY__", proxy + "DIRECT;");
 
                 string text = String.Format(@"HTTP/1.1 200 OK

@@ -50,11 +50,22 @@ namespace Shadowsocks.View
             UpdateLog();
 
             this.contextMenu1 = new ContextMenu(new MenuItem[] {
+                CreateMenuItem("Auto &size", new EventHandler(this.autosizeItem_Click)),
                 this.topmostItem = CreateMenuItem("Always On &Top", new EventHandler(this.topmostItem_Click)),
                 this.clearItem = CreateMenuItem("&Clear", new EventHandler(this.ClearItem_Click)),
             });
             ServerDataGrid.ContextMenu = contextMenu1;
             controller.ConfigChanged += controller_ConfigChanged;
+
+            int width = 0;
+            for (int i = 0; i < ServerDataGrid.Columns.Count; ++i)
+            {
+                if (!ServerDataGrid.Columns[i].Visible)
+                    continue;
+                width += ServerDataGrid.Columns[i].Width;
+            }
+            this.Width = width + SystemInformation.VerticalScrollBarWidth + (this.Width - this.ClientSize.Width) + 1;
+            ServerDataGrid.AutoResizeColumnHeadersHeight();
         }
 
         private MenuItem CreateMenuItem(string text, EventHandler click)
@@ -490,6 +501,37 @@ namespace Shadowsocks.View
             }
         }
 
+        private void autosizeItem_Click(object sender, EventArgs e)
+        {
+            for (int i = 0; i < ServerDataGrid.Columns.Count; ++i)
+            {
+                if (ServerDataGrid.Columns[i].Name == "AvgLatency"
+                    || ServerDataGrid.Columns[i].Name == "AvgSpeed"
+                    || ServerDataGrid.Columns[i].Name == "MaxSpeed"
+                    || ServerDataGrid.Columns[i].Name == "Upload"
+                    || ServerDataGrid.Columns[i].Name == "Download"
+                    || ServerDataGrid.Columns[i].Name == "DownloadRaw"
+                    || ServerDataGrid.Columns[i].Name == "Group"
+                    || ServerDataGrid.Columns[i].Name == "Connecting"
+                    || ServerDataGrid.Columns[i].Name == "ErrorPercent"
+                    || ServerDataGrid.Columns[i].Name == "ConnectError"
+                    || ServerDataGrid.Columns[i].Name == "ConnectTimeout"
+                    || ServerDataGrid.Columns[i].Name == "Continuous"
+                    || ServerDataGrid.Columns[i].Name == "ConnectEmpty"
+                    )
+                    ServerDataGrid.AutoResizeColumn(i, DataGridViewAutoSizeColumnMode.AllCellsExceptHeader);
+            }
+            int width = 0;
+            for (int i = 0; i < ServerDataGrid.Columns.Count; ++i)
+            {
+                if (!ServerDataGrid.Columns[i].Visible)
+                    continue;
+                width += ServerDataGrid.Columns[i].Width;
+            }
+            this.Width = width + SystemInformation.VerticalScrollBarWidth + (this.Width - this.ClientSize.Width) + 1;
+            ServerDataGrid.AutoResizeColumnHeadersHeight();
+        }
+
         private void topmostItem_Click(object sender, EventArgs e)
         {
             topmostItem.Checked = !topmostItem.Checked;
@@ -727,6 +769,19 @@ namespace Shadowsocks.View
         private void ServerLogForm_ResizeEnd(object sender, EventArgs e)
         {
             updatePause = 0;
+        }
+
+        private void ServerDataGrid_ColumnWidthChanged(object sender, DataGridViewColumnEventArgs e)
+        {
+            int width = 0;
+            for (int i = 0; i < ServerDataGrid.Columns.Count; ++i)
+            {
+                if (!ServerDataGrid.Columns[i].Visible)
+                    continue;
+                width += ServerDataGrid.Columns[i].Width;
+            }
+            this.Width = width + SystemInformation.VerticalScrollBarWidth + (this.Width - this.ClientSize.Width) + 1;
+            ServerDataGrid.AutoResizeColumnHeadersHeight();
         }
     }
 }

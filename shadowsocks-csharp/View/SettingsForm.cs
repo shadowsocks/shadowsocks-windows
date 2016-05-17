@@ -54,6 +54,7 @@ namespace Shadowsocks.View
             CheckAutoBan.Text = I18N.GetString("AutoBan");
 
             Socks5ProxyGroup.Text = I18N.GetString(Socks5ProxyGroup.Text);
+            checkBoxPacProxy.Text = I18N.GetString(checkBoxPacProxy.Text);
             CheckSockProxy.Text = I18N.GetString("Proxy On");
             LabelS5Server.Text = I18N.GetString("Server IP");
             LabelS5Port.Text = I18N.GetString("Server Port");
@@ -109,6 +110,7 @@ namespace Shadowsocks.View
                 _modifiedConfiguration.randomAlgorithm = RandomComboBox.SelectedIndex;
                 _modifiedConfiguration.TTL = int.Parse(TTLText.Text);
                 _modifiedConfiguration.proxyEnable = CheckSockProxy.Checked;
+                _modifiedConfiguration.pacDirectGoProxy = checkBoxPacProxy.Checked;
                 _modifiedConfiguration.proxyType = comboProxyType.SelectedIndex;
                 _modifiedConfiguration.proxyHost = TextS5Server.Text;
                 _modifiedConfiguration.proxyPort = int.Parse(TextS5Port.Text);
@@ -141,6 +143,7 @@ namespace Shadowsocks.View
             TTLText.Text = _modifiedConfiguration.TTL.ToString();
 
             CheckSockProxy.Checked = _modifiedConfiguration.proxyEnable;
+            checkBoxPacProxy.Checked = _modifiedConfiguration.pacDirectGoProxy;
             comboProxyType.SelectedIndex = _modifiedConfiguration.proxyType;
             TextS5Server.Text = _modifiedConfiguration.proxyHost;
             TextS5Port.Text = _modifiedConfiguration.proxyPort.ToString();

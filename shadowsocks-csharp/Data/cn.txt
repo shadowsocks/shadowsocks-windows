@@ -66,7 +66,7 @@ UDP over UDP if not checked=不打钩使用原生 UDP
 Recommend checked=保留功能
 Protocol=协议
 Obfs=混淆
-Obfs param=混淆插件参数
+Obfs param=混淆参数
 Link=链接
 Original=原版
 Verify header=校验头部(新TCP协议)
@@ -83,7 +83,8 @@ SeletedGroup=所选组切换
 AutoBan=自动禁用出错服务器
 
 Remote proxy=二级（前置）代理
-Proxy On=开启二级（前置）代理
+Proxy On=开启代理
+PAC "direct" return this proxy=PAC“直连”使用二级代理
 Socks5(support UDP)=Socks5(支持UDP)
 Http tunnel=Http隧道
 TCP Port tunnel=TCP端口转发(需要相关混淆插件)
@@ -100,21 +101,22 @@ Cancel=取消
 
 # ServerLog Form
 ServerLog=服务器记录
+Auto &size=自动调整大小(&S)
 Always On &Top=窗口置顶(&T)
 &Clear=清空(&C)
 Total Connect=总连接
 Enable=开关
 Connecting=连接
 Latency=延迟
-Avg Speed=下载\n速度
-Max Speed=历史\n最高
-Upload=上传\n流量
-Download=下载\n流量
-DownloadRaw=实际\n下载
+Avg Speed=下载速度
+Max Speed=历史最高
+Upload=上传流量
+Download=下载流量
+DownloadRaw=实际下载
 Error=错误
 Timeout=超时
 Empty Response=空连
-Error Percent=出错\n比例
+Error Percent=出错比例
 Continuous=连错
 
 # QRCode Form

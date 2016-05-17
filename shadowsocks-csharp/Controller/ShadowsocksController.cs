@@ -182,6 +182,7 @@ namespace Shadowsocks.Controller
             _config.randomAlgorithm = config.randomAlgorithm;
             _config.TTL = config.TTL;
             _config.proxyEnable = config.proxyEnable;
+            _config.pacDirectGoProxy = config.pacDirectGoProxy;
             _config.proxyType = config.proxyType;
             _config.proxyHost = config.proxyHost;
             _config.proxyPort = config.proxyPort;
