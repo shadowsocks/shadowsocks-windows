@@ -52,6 +52,9 @@ namespace Shadowsocks.View
             MoveUpButton.Text = I18N.GetString("Move &Up");
             MoveDownButton.Text = I18N.GetString("Move D&own");
             PACModeSelect.Text = I18N.GetString("PAC Mode");
+            PACModeSelect.Items.Clear();
+            PACModeSelect.Items.Add(I18N.GetString("Precise"));
+            PACModeSelect.Items.Add(I18N.GetString("Fast (Firefox friendly)"));
         }
 
         private void controller_ConfigChanged(object sender, EventArgs e)
