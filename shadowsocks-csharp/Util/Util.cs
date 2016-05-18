@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Windows.Forms;
 
 using Shadowsocks.Controller;
@@ -123,6 +124,43 @@ namespace Shadowsocks.Util
                 unit = "TiB";
             }
             return $"{f:0.##}{unit}";
+        }
+
+        /// <summary>
+        /// Creates a new file, writes the specified string to the file, and then closes
+        /// the file. If the target file already exists and the content is changed, it
+        /// is overwritten, otherwise not.
+        /// </summary>
+        /// <param name="path"></param>
+        /// <param name="contents"></param>
+        public static void WriteAllText(string path, string contents)
+        {
+            string orig = "";
+            if (File.Exists(path))
+                orig = File.ReadAllText(path);
+            if (orig == contents)
+                return;
+            else
+                File.WriteAllText(path, contents);
+        }
+
+        /// <summary>
+        /// Creates a new file, writes the specified string to the file using the specified
+        /// encoding, and then closes the file. If the target file already exists and the
+        /// content is changed, it is overwritten, otherwise not.
+        /// </summary>
+        /// <param name="path"></param>
+        /// <param name="contents"></param>
+        /// <param name="encoding"></param>
+        public static void WriteAllText(string path, string contents, Encoding encoding)
+        {
+            string orig = "";
+            if (File.Exists(path))
+                orig = File.ReadAllText(path, encoding);
+            if (orig == contents)
+                return;
+            else
+                File.WriteAllText(path, contents, encoding);
         }
 
         [DllImport("kernel32.dll")]

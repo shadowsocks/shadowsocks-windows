@@ -239,7 +239,7 @@ namespace Shadowsocks.Controller
             try
             {
                 var content = JsonConvert.SerializeObject(RawStatistics, Formatting.None);
-                File.WriteAllText(AvailabilityStatisticsFile, content);
+                Utils.WriteAllText(AvailabilityStatisticsFile, content);
             }
             catch (IOException e)
             {

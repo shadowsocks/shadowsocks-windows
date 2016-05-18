@@ -498,7 +498,7 @@ namespace Shadowsocks.View
 
         private void UpdatePACFromGFWListItem_Click(object sender, EventArgs e)
         {
-            controller.UpdatePACFromGFWList();
+            controller.UpdatePACFileFromGFWList();
         }
 
         private void EditUserRuleFileForGFWListItem_Click(object sender, EventArgs e)

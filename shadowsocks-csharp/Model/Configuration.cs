@@ -11,10 +11,8 @@ namespace Shadowsocks.Model
     public class Configuration
     {
         public List<Server> configs;
-
-        // when strategy is set, index is ignored
         public string strategy;
-        public int index;
+        public int index;           // when strategy is set, index is ignored
         public bool global;
         public bool enabled;
         public bool shareOverLan;
@@ -25,8 +23,9 @@ namespace Shadowsocks.Model
         public bool availabilityStatistics;
         public bool autoCheckUpdate;
         public LogViewerConfig logViewer;
+        public GFWListUpdater.PACFileMode pacFileMode;
 
-        private static string CONFIG_FILE = "gui-config.json";
+        private static readonly string _CONFIG_FILE = "gui-config.json";
 
         public Server GetCurrentServer()
         {
@@ -47,11 +46,13 @@ namespace Shadowsocks.Model
         {
             try
             {
-                string configContent = File.ReadAllText(CONFIG_FILE);
+                string configContent = File.ReadAllText(_CONFIG_FILE);
                 Configuration config = JsonConvert.DeserializeObject<Configuration>(configContent);
                 config.isDefault = false;
                 if (config.localPort == 0)
                     config.localPort = 1080;
+                if (config.pacFileMode == 0)
+                    config.pacFileMode = GFWListUpdater.PACFileMode.Fast;
                 if (config.index == -1 && config.strategy == null)
                     config.index = 0;
                 return config;
@@ -66,10 +67,7 @@ namespace Shadowsocks.Model
                     isDefault = true,
                     localPort = 1080,
                     autoCheckUpdate = true,
-                    configs = new List<Server>()
-                    {
-                        GetDefaultServer()
-                    }
+                    configs = new List<Server>() { GetDefaultServer() }
                 };
             }
         }
@@ -85,7 +83,7 @@ namespace Shadowsocks.Model
             config.isDefault = false;
             try
             {
-                using (StreamWriter sw = new StreamWriter(File.Open(CONFIG_FILE, FileMode.Create)))
+                using (StreamWriter sw = new StreamWriter(File.Open(_CONFIG_FILE, FileMode.Create)))
                 {
                     string jsonString = JsonConvert.SerializeObject(config, Formatting.Indented);
                     sw.Write(jsonString);
