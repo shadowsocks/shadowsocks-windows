@@ -4,6 +4,7 @@ using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 
 using Shadowsocks.Model;
 using Shadowsocks.Properties;
@@ -17,8 +18,8 @@ namespace Shadowsocks.Controller
         public static readonly string USER_RULE_FILE = "user-rule.txt";
         public static readonly string USER_ABP_FILE = "abp.txt";
 
-        FileSystemWatcher PACFileWatcher;
-        FileSystemWatcher UserRuleFileWatcher;
+        private FileSystemWatcher _pacFileWatcher;
+        private FileSystemWatcher _userRuleFileWatcher;
         private Configuration _config;
 
         public event EventHandler PACFileChanged;
@@ -26,13 +27,13 @@ namespace Shadowsocks.Controller
 
         public PACServer()
         {
-            this.WatchPacFile();
-            this.WatchUserRuleFile();
+            WatchPacFile();
+            WatchUserRuleFile();
         }
 
         public void UpdateConfiguration(Configuration config)
         {
-            this._config = config;
+            _config = config;
         }
 
         public bool Handle(byte[] firstPacket, int length, Socket socket, object state)
@@ -90,63 +91,43 @@ namespace Shadowsocks.Controller
 
         public string TouchPACFile()
         {
-            if (File.Exists(PAC_FILE))
-            {
-                return PAC_FILE;
-            }
-            else
-            {
+            if (!File.Exists(PAC_FILE))
                 FileManager.UncompressFile(PAC_FILE, Resources.proxy_pac_txt);
-                return PAC_FILE;
-            }
+            return PAC_FILE;
         }
 
         internal string TouchUserRuleFile()
         {
-            if (File.Exists(USER_RULE_FILE))
-            {
-                return USER_RULE_FILE;
-            }
-            else
-            {
-                File.WriteAllText(USER_RULE_FILE, Resources.user_rule);
-                return USER_RULE_FILE;
-            }
+            if (!File.Exists(USER_RULE_FILE))
+                Utils.WriteAllText(USER_RULE_FILE, Resources.user_rule);
+            return USER_RULE_FILE;
         }
 
         private string GetPACContent()
         {
-            if (File.Exists(PAC_FILE))
-            {
-                return File.ReadAllText(PAC_FILE, Encoding.UTF8);
-            }
-            else
-            {
-                return Utils.UnGzip(Resources.proxy_pac_txt);
-            }
+            Thread.Sleep(50);   // TODO: Aviod IO exception. It's a dirty hack, clean it someday later.
+            var result = File.Exists(PAC_FILE)
+                       ? File.ReadAllText(PAC_FILE, Encoding.UTF8)
+                       : Utils.UnGzip(Resources.proxy_pac_txt);
+            return result;
         }
 
         public void SendResponse(byte[] firstPacket, int length, Socket socket, bool useSocks)
         {
             try
             {
-                string pac = GetPACContent();
-
                 IPEndPoint localEndPoint = (IPEndPoint)socket.LocalEndPoint;
-
-                string proxy = GetPACAddress(firstPacket, length, localEndPoint, useSocks);
-
-                pac = pac.Replace("__PROXY__", proxy);
-
-                string text = String.Format(@"HTTP/1.1 200 OK
-Server: Shadowsocks
-Content-Type: application/x-ns-proxy-autoconfig
-Content-Length: {0}
-Connection: Close
-
-", Encoding.UTF8.GetBytes(pac).Length) + pac;
-                byte[] response = Encoding.UTF8.GetBytes(text);
-                socket.BeginSend(response, 0, response.Length, 0, new AsyncCallback(SendCallback), socket);
+                var proxy = GetPACAddress(firstPacket, length, localEndPoint, useSocks);
+                var pacContent = GetPACContent().Replace("__PROXY__", proxy);
+                var responseText = "HTTP/1.1 200 OK" + Environment.NewLine
+                                 + "Server: Shadowsocks" + Environment.NewLine
+                                 + "Content-Type: application/x-ns-proxy-autoconfig" + Environment.NewLine
+                                 + $"Content-Length: {Encoding.UTF8.GetBytes(pacContent).Length}" + Environment.NewLine
+                                 + "Connection: Close" + Environment.NewLine
+                                 + Environment.NewLine
+                                 + pacContent;
+                var responseBytes = Encoding.UTF8.GetBytes(responseText);
+                socket.BeginSend(responseBytes, 0, responseBytes.Length, SocketFlags.None, new AsyncCallback(SendCallback), socket);
                 Utils.ReleaseMemory(true);
             }
             catch (Exception e)
@@ -169,34 +150,28 @@ Connection: Close
 
         private void WatchPacFile()
         {
-            if (PACFileWatcher != null)
-            {
-                PACFileWatcher.Dispose();
-            }
-            PACFileWatcher = new FileSystemWatcher(Directory.GetCurrentDirectory());
-            PACFileWatcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.DirectoryName;
-            PACFileWatcher.Filter = PAC_FILE;
-            PACFileWatcher.Changed += PACFileWatcher_Changed;
-            PACFileWatcher.Created += PACFileWatcher_Changed;
-            PACFileWatcher.Deleted += PACFileWatcher_Changed;
-            PACFileWatcher.Renamed += PACFileWatcher_Changed;
-            PACFileWatcher.EnableRaisingEvents = true;
+            _pacFileWatcher?.Dispose();
+            _pacFileWatcher = new FileSystemWatcher(Directory.GetCurrentDirectory());
+            _pacFileWatcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.DirectoryName;
+            _pacFileWatcher.Filter = PAC_FILE;
+            _pacFileWatcher.Changed += PACFileWatcher_Changed;
+            _pacFileWatcher.Created += PACFileWatcher_Changed;
+            _pacFileWatcher.Deleted += PACFileWatcher_Changed;
+            _pacFileWatcher.Renamed += PACFileWatcher_Changed;
+            _pacFileWatcher.EnableRaisingEvents = true;
         }
 
         private void WatchUserRuleFile()
         {
-            if (UserRuleFileWatcher != null)
-            {
-                UserRuleFileWatcher.Dispose();
-            }
-            UserRuleFileWatcher = new FileSystemWatcher(Directory.GetCurrentDirectory());
-            UserRuleFileWatcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.DirectoryName;
-            UserRuleFileWatcher.Filter = USER_RULE_FILE;
-            UserRuleFileWatcher.Changed += UserRuleFileWatcher_Changed;
-            UserRuleFileWatcher.Created += UserRuleFileWatcher_Changed;
-            UserRuleFileWatcher.Deleted += UserRuleFileWatcher_Changed;
-            UserRuleFileWatcher.Renamed += UserRuleFileWatcher_Changed;
-            UserRuleFileWatcher.EnableRaisingEvents = true;
+            _userRuleFileWatcher?.Dispose();
+            _userRuleFileWatcher = new FileSystemWatcher(Directory.GetCurrentDirectory());
+            _userRuleFileWatcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.DirectoryName;
+            _userRuleFileWatcher.Filter = USER_RULE_FILE;
+            _userRuleFileWatcher.Changed += UserRuleFileWatcher_Changed;
+            _userRuleFileWatcher.Created += UserRuleFileWatcher_Changed;
+            _userRuleFileWatcher.Deleted += UserRuleFileWatcher_Changed;
+            _userRuleFileWatcher.Renamed += UserRuleFileWatcher_Changed;
+            _userRuleFileWatcher.EnableRaisingEvents = true;
         }
 
         #region FileSystemWatcher.OnChanged()
@@ -214,7 +189,7 @@ Connection: Close
             {
                 if (PACFileChanged != null)
                 {
-                    Logging.Info($"Detected: PAC file '{e.Name}' was {e.ChangeType.ToString().ToLower()}.");
+                    Logging.Info($"Detected: PAC file '{e.Name}' was {e.ChangeType.ToString().ToLower()}. Reload PAC server.");
                     PACFileChanged(this, new EventArgs());
                 }
 
@@ -233,7 +208,7 @@ Connection: Close
             {
                 if (UserRuleFileChanged != null)
                 {
-                    Logging.Info($"Detected: User Rule file '{e.Name}' was {e.ChangeType.ToString().ToLower()}.");
+                    Logging.Info($"Detected: User Rule file '{e.Name}' was {e.ChangeType.ToString().ToLower()}. Reload PAC server.");
                     UserRuleFileChanged(this, new EventArgs());
                 }
                 // lastly we update the last write time in the hashtable

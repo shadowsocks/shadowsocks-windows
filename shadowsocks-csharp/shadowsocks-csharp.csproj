@@ -272,7 +272,9 @@
     <None Include="app.manifest">
       <SubType>Designer</SubType>
     </None>
-    <None Include="Data\abp.js.gz" />
+    <None Include="Data\builtin-rule.txt.gz" />
+    <None Include="Data\pacfile.tpl.abp.js.gz" />
+    <None Include="Data\pacfile.tpl.fastmode.js.gz" />
     <None Include="Data\libsscrypto.dll.gz" />
     <None Include="Data\mgwz.dll.gz" />
     <None Include="Data\privoxy.exe.gz" />

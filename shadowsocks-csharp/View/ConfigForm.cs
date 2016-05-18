@@ -1,11 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.Drawing;
-using System.Text;
 using System.Windows.Forms;
-using System.Diagnostics;
-using Microsoft.Win32;
+
 using Shadowsocks.Controller;
 using Shadowsocks.Model;
 using Shadowsocks.Properties;
@@ -14,7 +10,7 @@ namespace Shadowsocks.View
 {
     public partial class ConfigForm : Form
     {
-        private ShadowsocksController controller;
+        private ShadowsocksController _controller;
 
         // this is a copy of configuration that we are working on
         private Configuration _modifiedConfiguration;
@@ -22,17 +18,17 @@ namespace Shadowsocks.View
 
         public ConfigForm(ShadowsocksController controller)
         {
-            this.Font = System.Drawing.SystemFonts.MessageBoxFont;
+            Font = SystemFonts.MessageBoxFont;
             InitializeComponent();
 
             // a dirty hack
-            this.ServersListBox.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.PerformLayout();
+            ServersListBox.Dock = DockStyle.Fill;
+            PerformLayout();
 
             UpdateTexts();
-            this.Icon = Icon.FromHandle(Resources.ssw128.GetHicon());
+            Icon = Icon.FromHandle(Resources.ssw128.GetHicon());
 
-            this.controller = controller;
+            _controller = controller;
             controller.ConfigChanged += controller_ConfigChanged;
 
             LoadCurrentConfiguration();
@@ -40,6 +36,7 @@ namespace Shadowsocks.View
 
         private void UpdateTexts()
         {
+            Text = I18N.GetString("Edit Servers");
             AddButton.Text = I18N.GetString("&Add");
             DeleteButton.Text = I18N.GetString("&Delete");
             IPLabel.Text = I18N.GetString("Server IP");
@@ -54,7 +51,10 @@ namespace Shadowsocks.View
             MyCancelButton.Text = I18N.GetString("Cancel");
             MoveUpButton.Text = I18N.GetString("Move &Up");
             MoveDownButton.Text = I18N.GetString("Move D&own");
-            this.Text = I18N.GetString("Edit Servers");
+            PACModeSelect.Text = I18N.GetString("PAC Mode");
+            PACModeSelect.Items.Clear();
+            PACModeSelect.Items.Add(I18N.GetString("Precise"));
+            PACModeSelect.Items.Add(I18N.GetString("Fast (Firefox friendly)"));
         }
 
         private void controller_ConfigChanged(object sender, EventArgs e)
@@ -64,8 +64,8 @@ namespace Shadowsocks.View
 
         private void ShowWindow()
         {
-            this.Opacity = 1;
-            this.Show();
+            Opacity = 1;
+            Show();
             IPTextBox.Focus();
         }
 
@@ -121,18 +121,19 @@ namespace Shadowsocks.View
             }
         }
 
-        private void LoadConfiguration(Configuration configuration)
+        private void LoadConfiguration(Configuration config)
         {
             ServersListBox.Items.Clear();
             foreach (Server server in _modifiedConfiguration.configs)
             {
                 ServersListBox.Items.Add(server.FriendlyName());
             }
+            PACModeSelect.SelectedIndex = (int)config.pacFileMode - 1;  // pacFileMode starts from 1
         }
 
         private void LoadCurrentConfiguration()
         {
-            _modifiedConfiguration = controller.GetConfigurationCopy();
+            _modifiedConfiguration = _controller.GetConfigurationCopy();
             LoadConfiguration(_modifiedConfiguration);
             _lastSelectedIndex = _modifiedConfiguration.index;
             if (_lastSelectedIndex < 0)
@@ -144,18 +145,13 @@ namespace Shadowsocks.View
             LoadSelectedServer();
         }
 
-        private void ConfigForm_Load(object sender, EventArgs e)
-        {
-
-        }
-
         private void ConfigForm_KeyDown(object sender, KeyEventArgs e)
         {
             // Sometimes the users may hit enter key by mistake, and the form will close without saving entries.
 
             if (e.KeyCode == Keys.Enter)
             {
-                Server server = controller.GetCurrentServer();
+                Server server = _controller.GetCurrentServer();
                 if (!SaveOldSelectedServer())
                 {
                     return;
@@ -165,10 +161,9 @@ namespace Shadowsocks.View
                     MessageBox.Show(I18N.GetString("Please add at least one server"));
                     return;
                 }
-                controller.SaveServers(_modifiedConfiguration.configs, _modifiedConfiguration.localPort);
-                controller.SelectServerIndex(_modifiedConfiguration.configs.IndexOf(server));
+                _controller.SaveServers(_modifiedConfiguration.configs, _modifiedConfiguration.localPort);
+                _controller.SelectServerIndex(_modifiedConfiguration.configs.IndexOf(server));
             }
-
         }
 
         private void ServersListBox_SelectedIndexChanged(object sender, EventArgs e)
@@ -230,7 +225,7 @@ namespace Shadowsocks.View
 
         private void OKButton_Click(object sender, EventArgs e)
         {
-            Server server = controller.GetCurrentServer();
+            Server server = _controller.GetCurrentServer();
             if (!SaveOldSelectedServer())
             {
                 return;
@@ -240,14 +235,15 @@ namespace Shadowsocks.View
                 MessageBox.Show(I18N.GetString("Please add at least one server"));
                 return;
             }
-            controller.SaveServers(_modifiedConfiguration.configs, _modifiedConfiguration.localPort);
-            controller.SelectServerIndex(_modifiedConfiguration.configs.IndexOf(server));
-            this.Close();
+            _controller.SavePACMode((GFWListUpdater.PACFileMode)(PACModeSelect.SelectedIndex + 1));  // enum PACFileMode starts from 1
+            _controller.SaveServers(_modifiedConfiguration.configs, _modifiedConfiguration.localPort);
+            _controller.SelectServerIndex(_modifiedConfiguration.configs.IndexOf(server));
+            Close();
         }
 
         private void CancelButton_Click(object sender, EventArgs e)
         {
-            this.Close();
+            Close();
         }
 
         private void ConfigForm_Shown(object sender, EventArgs e)
@@ -257,7 +253,7 @@ namespace Shadowsocks.View
 
         private void ConfigForm_FormClosed(object sender, FormClosedEventArgs e)
         {
-            controller.ConfigChanged -= controller_ConfigChanged;
+            _controller.ConfigChanged -= controller_ConfigChanged;
         }
 
         private void MoveConfigItem(int step)

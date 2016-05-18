@@ -7,6 +7,7 @@ using System.Reflection;
 using Newtonsoft.Json;
 
 using Shadowsocks.Controller;
+using Shadowsocks.Util;
 
 namespace Shadowsocks.Model
 {
@@ -49,7 +50,7 @@ namespace Shadowsocks.Model
             try
             {
                 var content = JsonConvert.SerializeObject(configuration, Formatting.Indented);
-                File.WriteAllText(ConfigFile, content);
+                Utils.WriteAllText(ConfigFile, content);
             }
             catch (Exception e)
             {

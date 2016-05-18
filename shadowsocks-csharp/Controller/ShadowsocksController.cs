@@ -6,7 +6,6 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
 
 using Shadowsocks.Controller.Strategy;
 using Shadowsocks.Model;
@@ -23,22 +22,19 @@ namespace Shadowsocks.Controller
         // interacts with low level logic
 
         private Thread _ramThread;
-
         private Listener _listener;
         private PACServer _pacServer;
         private Configuration _config;
         private StrategyManager _strategyManager;
-        private PolipoRunner polipoRunner;
-        private GFWListUpdater gfwListUpdater;
+        private PolipoRunner _polipoRunner;
+        private GFWListUpdater _gfwListUpdater;
+        private bool _stopped = false;
+        private bool _systemProxyIsDirty = false;
+
         public AvailabilityStatistics availabilityStatistics = AvailabilityStatistics.Instance;
         public StatisticsStrategyConfiguration StatisticsConfiguration { get; private set; }
-
         public long inboundCounter = 0;
         public long outboundCounter = 0;
-
-        private bool stopped = false;
-
-        private bool _systemProxyIsDirty = false;
 
         public class PathEventArgs : EventArgs
         {
@@ -55,9 +51,7 @@ namespace Shadowsocks.Controller
         public event EventHandler<PathEventArgs> UserRuleFileReadyToOpen;
 
         public event EventHandler<GFWListUpdater.ResultEventArgs> UpdatePACFromGFWListCompleted;
-
         public event ErrorEventHandler UpdatePACFromGFWListError;
-
         public event ErrorEventHandler Errored;
 
         public ShadowsocksController()
@@ -75,10 +69,7 @@ namespace Shadowsocks.Controller
 
         protected void ReportError(Exception e)
         {
-            if (Errored != null)
-            {
-                Errored(this, new ErrorEventArgs(e));
-            }
+            Errored?.Invoke(this, new ErrorEventArgs(e));
         }
 
         public Server GetCurrentServer()
@@ -107,7 +98,7 @@ namespace Shadowsocks.Controller
         {
             foreach (var strategy in _strategyManager.GetStrategies())
             {
-                if (strategy.ID == this._config.strategy)
+                if (strategy.ID == _config.strategy)
                 {
                     return strategy;
                 }
@@ -119,13 +110,9 @@ namespace Shadowsocks.Controller
         {
             IStrategy strategy = GetCurrentStrategy();
             if (strategy != null)
-            {
                 return strategy.GetAServer(type, localIPEndPoint);
-            }
             if (_config.index < 0)
-            {
                 _config.index = 0;
-            }
             return GetCurrentServer();
         }
 
@@ -164,10 +151,7 @@ namespace Shadowsocks.Controller
             _config.enabled = enabled;
             UpdateSystemProxy();
             SaveConfig(_config);
-            if (EnableStatusChanged != null)
-            {
-                EnableStatusChanged(this, new EventArgs());
-            }
+            EnableStatusChanged?.Invoke(this, new EventArgs());
         }
 
         public void ToggleGlobal(bool global)
@@ -175,20 +159,14 @@ namespace Shadowsocks.Controller
             _config.global = global;
             UpdateSystemProxy();
             SaveConfig(_config);
-            if (EnableGlobalChanged != null)
-            {
-                EnableGlobalChanged(this, new EventArgs());
-            }
+            EnableGlobalChanged?.Invoke(this, new EventArgs());
         }
 
         public void ToggleShareOverLAN(bool enabled)
         {
             _config.shareOverLan = enabled;
             SaveConfig(_config);
-            if (ShareOverLANStatusChanged != null)
-            {
-                ShareOverLANStatusChanged(this, new EventArgs());
-            }
+            ShareOverLANStatusChanged?.Invoke(this, new EventArgs());
         }
 
         public void SelectServerIndex(int index)
@@ -207,41 +185,26 @@ namespace Shadowsocks.Controller
 
         public void Stop()
         {
-            if (stopped)
+            if (!_stopped)
             {
-                return;
-            }
-            stopped = true;
-            if (_listener != null)
-            {
-                _listener.Stop();
-            }
-            if (polipoRunner != null)
-            {
-                polipoRunner.Stop();
-            }
-            if (_config.enabled)
-            {
-                SystemProxy.Update(_config, true);
+                _stopped = true;
+                _listener?.Stop();
+                _polipoRunner?.Stop();
+                if (_config.enabled)
+                    SystemProxy.Update(_config, true);
             }
         }
 
         public void TouchPACFile()
         {
             string pacFilename = _pacServer.TouchPACFile();
-            if (PACFileReadyToOpen != null)
-            {
-                PACFileReadyToOpen(this, new PathEventArgs() { Path = pacFilename });
-            }
+            PACFileReadyToOpen?.Invoke(this, new PathEventArgs() { Path = pacFilename });
         }
 
         public void TouchUserRuleFile()
         {
             string userRuleFilename = _pacServer.TouchUserRuleFile();
-            if (UserRuleFileReadyToOpen != null)
-            {
-                UserRuleFileReadyToOpen(this, new PathEventArgs() { Path = userRuleFilename });
-            }
+            UserRuleFileReadyToOpen?.Invoke(this, new PathEventArgs() { Path = userRuleFilename });
         }
 
         public string GetQRCodeForCurrentServer()
@@ -259,12 +222,15 @@ namespace Shadowsocks.Controller
             return "ss://" + base64;
         }
 
-        public void UpdatePACFromGFWList()
+        public void UpdatePACFileFromGFWList()
         {
-            if (gfwListUpdater != null)
-            {
-                gfwListUpdater.UpdatePACFromGFWList(_config);
-            }
+            _gfwListUpdater?.UpdatePACFromGFWList(_config);
+        }
+
+        public void UpdatePACFile(GFWListUpdater.PACFileMode pacFileMode)
+        {
+            var gfwlistBase64Text = File.ReadAllText(Utils.GetTempPath("gfwlist.txt"));
+            _gfwListUpdater?.PACFileHandler(gfwlistBase64Text, pacFileMode);
         }
 
         public void UpdateStatisticsConfiguration(bool enabled)
@@ -277,12 +243,23 @@ namespace Shadowsocks.Controller
 
         public void SavePACUrl(string pacUrl)
         {
-            _config.pacUrl = pacUrl;
-            UpdateSystemProxy();
-            SaveConfig(_config);
-            if (ConfigChanged != null)
+            if (pacUrl != _config.pacUrl)
             {
-                ConfigChanged(this, new EventArgs());
+                _config.pacUrl = pacUrl;
+                UpdateSystemProxy();
+                SaveConfig(_config);
+                ConfigChanged?.Invoke(this, new EventArgs());
+            }
+        }
+
+        public void SavePACMode(GFWListUpdater.PACFileMode pacFileMode)
+        {
+            if (pacFileMode != _config.pacFileMode)
+            {
+                _config.pacFileMode = pacFileMode;
+                SaveConfig(_config);
+                UpdatePACFile(pacFileMode);
+                ConfigChanged?.Invoke(this, new EventArgs());
             }
         }
 
@@ -291,10 +268,7 @@ namespace Shadowsocks.Controller
             _config.useOnlinePac = useOnlinePac;
             UpdateSystemProxy();
             SaveConfig(_config);
-            if (ConfigChanged != null)
-            {
-                ConfigChanged(this, new EventArgs());
-            }
+            ConfigChanged?.Invoke(this, new EventArgs());
         }
 
         public void ToggleCheckingUpdate(bool enabled)
@@ -312,27 +286,21 @@ namespace Shadowsocks.Controller
         public void UpdateLatency(Server server, TimeSpan latency)
         {
             if (_config.availabilityStatistics)
-            {
-                new Task(() => availabilityStatistics.UpdateLatency(server, (int) latency.TotalMilliseconds)).Start();
-            }
+                new Task(() => availabilityStatistics.UpdateLatency(server, (int)latency.TotalMilliseconds)).Start();
         }
 
         public void UpdateInboundCounter(Server server, long n)
         {
             Interlocked.Add(ref inboundCounter, n);
             if (_config.availabilityStatistics)
-            {
                 new Task(() => availabilityStatistics.UpdateInboundCounter(server, n)).Start();
-            }
         }
 
         public void UpdateOutboundCounter(Server server, long n)
         {
             Interlocked.Add(ref outboundCounter, n);
             if (_config.availabilityStatistics)
-            {
                 new Task(() => availabilityStatistics.UpdateOutboundCounter(server, n)).Start();
-            }
         }
 
         protected void Reload()
@@ -341,9 +309,9 @@ namespace Shadowsocks.Controller
             _config = Configuration.Load();
             StatisticsConfiguration = StatisticsStrategyConfiguration.Load();
 
-            if (polipoRunner == null)
+            if (_polipoRunner == null)
             {
-                polipoRunner = new PolipoRunner();
+                _polipoRunner = new PolipoRunner();
             }
             if (_pacServer == null)
             {
@@ -352,33 +320,24 @@ namespace Shadowsocks.Controller
                 _pacServer.UserRuleFileChanged += pacServer_UserRuleFileChanged;
             }
             _pacServer.UpdateConfiguration(_config);
-            if (gfwListUpdater == null)
+            if (_gfwListUpdater == null)
             {
-                gfwListUpdater = new GFWListUpdater();
-                gfwListUpdater.UpdateCompleted += pacServer_PACUpdateCompleted;
-                gfwListUpdater.Error += pacServer_PACUpdateError;
+                _gfwListUpdater = new GFWListUpdater();
+                _gfwListUpdater.OnUpdateCompleted += pacServer_PACUpdateCompleted;
+                _gfwListUpdater.OnError += pacServer_PACUpdateError;
             }
-
             availabilityStatistics.UpdateConfiguration(this);
-
-            if (_listener != null)
-            {
-                _listener.Stop();
-            }
+            _listener?.Stop();
             // don't put polipoRunner.Start() before pacServer.Stop()
             // or bind will fail when switching bind address from 0.0.0.0 to 127.0.0.1
             // though UseShellExecute is set to true now
             // http://stackoverflow.com/questions/10235093/socket-doesnt-close-after-application-exits-if-a-launched-process-is-open
-            polipoRunner.Stop();
+            _polipoRunner.Stop();
             try
             {
                 var strategy = GetCurrentStrategy();
-                if (strategy != null)
-                {
-                    strategy.ReloadServers();
-                }
-
-                polipoRunner.Start(_config);
+                strategy?.ReloadServers();
+                _polipoRunner.Start(_config);
 
                 TCPRelay tcpRelay = new TCPRelay(this);
                 UDPRelay udpRelay = new UDPRelay(this);
@@ -386,7 +345,7 @@ namespace Shadowsocks.Controller
                 services.Add(tcpRelay);
                 services.Add(udpRelay);
                 services.Add(_pacServer);
-                services.Add(new PortForwarder(polipoRunner.RunningPort));
+                services.Add(new PortForwarder(_polipoRunner.RunningPort));
                 _listener = new Listener(services);
                 _listener.Start(_config);
             }
@@ -405,12 +364,7 @@ namespace Shadowsocks.Controller
                 Logging.LogUsefulException(e);
                 ReportError(e);
             }
-
-            if (ConfigChanged != null)
-            {
-                ConfigChanged(this, new EventArgs());
-            }
-
+            ConfigChanged?.Invoke(this, new EventArgs());
             UpdateSystemProxy();
             Utils.ReleaseMemory(true);
         }
@@ -446,58 +400,23 @@ namespace Shadowsocks.Controller
 
         private void pacServer_PACUpdateCompleted(object sender, GFWListUpdater.ResultEventArgs e)
         {
-            if (UpdatePACFromGFWListCompleted != null)
-                UpdatePACFromGFWListCompleted(this, e);
+            UpdatePACFromGFWListCompleted?.Invoke(this, e);
         }
 
         private void pacServer_PACUpdateError(object sender, ErrorEventArgs e)
         {
-            if (UpdatePACFromGFWListError != null)
-                UpdatePACFromGFWListError(this, e);
+            UpdatePACFromGFWListError?.Invoke(this, e);
         }
 
-        private static readonly IEnumerable<char> IgnoredLineBegins = new[] { '!', '[' };
         private void pacServer_UserRuleFileChanged(object sender, EventArgs e)
         {
-            // TODO: this is a dirty hack. (from code GListUpdater.http_DownloadStringCompleted())
-            if (!File.Exists(Utils.GetTempPath("gfwlist.txt")))
+            if (File.Exists(Utils.GetTempPath("gfwlist.txt")))
             {
-                UpdatePACFromGFWList();
-                return;
-            }
-            List<string> lines = GFWListUpdater.ParseResult(File.ReadAllText(Utils.GetTempPath("gfwlist.txt")));
-            if (File.Exists(PACServer.USER_RULE_FILE))
-            {
-                string local = File.ReadAllText(PACServer.USER_RULE_FILE, Encoding.UTF8);
-                using (var sr = new StringReader(local))
-                {
-                    foreach (var rule in sr.NonWhiteSpaceLines())
-                    {
-                        if (rule.BeginWithAny(IgnoredLineBegins))
-                            continue;
-                        lines.Add(rule);
-                    }
-                }
-            }
-            string abpContent;
-            if (File.Exists(PACServer.USER_ABP_FILE))
-            {
-                abpContent = File.ReadAllText(PACServer.USER_ABP_FILE, Encoding.UTF8);
+                var gfwlistBase64Text = File.ReadAllText(Utils.GetTempPath("gfwlist.txt"));
+                _gfwListUpdater.PACFileHandler(gfwlistBase64Text, _config.pacFileMode);
             }
             else
-            {
-                abpContent = Utils.UnGzip(Resources.abp_js);
-            }
-            abpContent = abpContent.Replace("__RULES__", JsonConvert.SerializeObject(lines, Formatting.Indented));
-            if (File.Exists(PACServer.PAC_FILE))
-            {
-                string original = File.ReadAllText(PACServer.PAC_FILE, Encoding.UTF8);
-                if (original == abpContent)
-                {
-                    return;
-                }
-            }
-            File.WriteAllText(PACServer.PAC_FILE, abpContent, Encoding.UTF8);
+                UpdatePACFileFromGFWList();
         }
 
         private void StartReleasingMemory()
@@ -515,6 +434,5 @@ namespace Shadowsocks.Controller
                 Thread.Sleep(30 * 1000);
             }
         }
-
     }
 }
