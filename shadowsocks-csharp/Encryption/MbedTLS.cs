@@ -36,30 +36,12 @@ namespace Shadowsocks.Encryption
 
         public static byte[] MD5(byte[] input)
         {
-            IntPtr ctx = Marshal.AllocHGlobal(MD5_CTX_SIZE);
             byte[] output = new byte[16];
-            MbedTLS.md5_init(ctx);
-            MbedTLS.md5_starts(ctx);
-            MbedTLS.md5_update(ctx, input, (uint)input.Length);
-            MbedTLS.md5_finish(ctx, output);
-            MbedTLS.md5_free(ctx);
-            Marshal.FreeHGlobal(ctx);
+            MbedTLS.md5(input, (uint)input.Length, output);
             return output;
         }
 
         [DllImport(DLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        public extern static void md5_init(IntPtr ctx);
-
-        [DllImport(DLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        public extern static void md5_free(IntPtr ctx);
-
-        [DllImport(DLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        public extern static void md5_starts(IntPtr ctx);
-
-        [DllImport(DLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        public extern static void md5_update(IntPtr ctx, byte[] input, uint ilen);
-
-        [DllImport(DLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        public extern static void md5_finish(IntPtr ctx, byte[] output);
+        public extern static void md5(byte[] input, uint ilen, byte[] output);
     }
 }
