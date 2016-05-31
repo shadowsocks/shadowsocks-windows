@@ -17,6 +17,7 @@ namespace Shadowsocks.Obfs
         private static Dictionary<string, int[]> _obfs = new Dictionary<string, int[]> {
                 {"tls_simple", new int[]  {0, 1, 0}}, //modify original protocol, wrap protocol, obfs param
                 {"http_simple", new int[] {0, 1, 1}},
+                {"http_post", new int[] {0, 1, 1}},
                 {"random_head", new int[] {0, 1, 0}},
         };
         private static string[] _request_path = new string[]
@@ -70,6 +71,17 @@ namespace Shadowsocks.Obfs
             for (int i = 0; i < datalength; ++i)
             {
                 ret += "%" + encryptdata[i].ToString("x2");
+            }
+            return ret;
+        }
+
+        private string boundary()
+        {
+            string set = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+            string ret = "";
+            for (int i = 0; i < 32; ++i)
+            {
+                ret += set[random.Next(set.Length)];
             }
             return ret;
         }
@@ -164,7 +176,7 @@ namespace Shadowsocks.Obfs
                         data_buffer.Add(data);
                     }
                 }
-                else if (Method == "http_simple")
+                else if (Method == "http_simple" || Method == "http_post")
                 {
                     int headsize = Server.iv.Length + Server.head_len;
                     if (datalength - headsize > 64)
@@ -192,7 +204,7 @@ namespace Shadowsocks.Obfs
                         host = hosts[random.Next(hosts.Length)];
                     }
                     string http_buf =
-                        "GET /" + _request_path[request_path_index] + data2urlencode(headdata, headdata.Length) + _request_path[request_path_index + 1] + " HTTP/1.1\r\n"
+                        (Method == "http_post" ? "POST /" : "GET /") + _request_path[request_path_index] + data2urlencode(headdata, headdata.Length) + _request_path[request_path_index + 1] + " HTTP/1.1\r\n"
                         + "Host: " + host + (Server.port == 80 ? "" : ":" + Server.port.ToString()) + "\r\n";
                     if (custom_head.Length > 0)
                     {
@@ -205,6 +217,7 @@ namespace Shadowsocks.Obfs
                         + "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\r\n"
                         + "Accept-Language: en-US,en;q=0.8\r\n"
                         + "Accept-Encoding: gzip, deflate\r\n"
+                        + (Method == "http_post" ? "Content-Type: multipart/form-data; boundary=" + boundary() + "\r\n" : "")
                         + "DNT: 1\r\n"
                         + "Connection: keep-alive\r\n"
                         + "\r\n";

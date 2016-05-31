@@ -118,6 +118,7 @@ namespace Shadowsocks.Controller
             Handler handler = new Handler();
 
             handler.getCurrentServer = delegate (string targetURI, bool usingRandom, bool forceRandom) { return _config.GetCurrentServer(targetURI, usingRandom, forceRandom); };
+            handler.keepCurrentServer = delegate (string targetURI) { _config.KeepCurrentServer(targetURI); };
             handler.connection = socket;
             handler.reconnectTimesRemain = _config.reconnectTimes;
             handler.forceRandom = _config.random;
@@ -277,8 +278,10 @@ namespace Shadowsocks.Controller
     class Handler
     {
         public delegate Server GetCurrentServer(string targetURI = null, bool usingRandom = false, bool forceRandom = false);
+        public delegate void KeepCurrentServer(string targetURI);
         public delegate bool AuthConnection(Socket connection, string authUser, string authPass);
         public GetCurrentServer getCurrentServer;
+        public KeepCurrentServer keepCurrentServer;
         public Server server;
         public Double TTL = 0; // Second
         // Connection socket
@@ -338,6 +341,7 @@ namespace Shadowsocks.Controller
         // connection send buffer
         protected List<byte[]> connectionSendBufferList = new List<byte[]>();
         protected string targetURI;
+        protected DateTime lastKeepTime;
 
         protected byte[] remoteUDPRecvBuffer = new byte[RecvSize * 2];
         protected int remoteUDPRecvBufferLength = 0;
@@ -933,6 +937,7 @@ namespace Shadowsocks.Controller
                         server.ServerSpeedLog().AddNoErrorTimes();
                 }
             }
+            keepCurrentServer(targetURI);
             //int type = speedTester.GetActionType();
             //if (type > 0)
             //{
@@ -1071,7 +1076,7 @@ namespace Shadowsocks.Controller
             //构造Socks5代理服务器第一连接头(无用户名密码)
             byte[] bySock5Send = new Byte[10];
             bySock5Send[0] = 5;
-            bySock5Send[1] = 1;
+            bySock5Send[1] = 2;
             bySock5Send[2] = 0;
             bySock5Send[3] = 2;
 
@@ -1196,7 +1201,7 @@ namespace Shadowsocks.Controller
                 sProxyServer.Send(dataSock5Send.ToArray(), dataSock5Send.Count, SocketFlags.None);
                 iRecCount = sProxyServer.Receive(bySock5Receive, bySock5Receive.Length, SocketFlags.None);
 
-                if (bySock5Receive[0] != 5 || bySock5Receive[1] != 0)
+                if (iRecCount < 2 || bySock5Receive[0] != 5 || bySock5Receive[1] != 0)
                 {
                     throw new SocketException(socketErrorCode);
                     //throw new Exception("第二次连接Socks5代理返回数据出错。");
@@ -2613,7 +2618,7 @@ namespace Shadowsocks.Controller
                             {
                                 return;
                             }
-                            encryptorUDP.Reset();
+                            encryptorUDP.ResetDecrypt();
                             encryptorUDP.Decrypt(remoteRecvBuffer, bytesRead, decryptBuffer, out bytesToSend);
                             decryptBuffer = TDPHandler.ParseUDPHeader(decryptBuffer, ref bytesToSend);
                             AddRemoteUDPRecvBufferHeader(decryptBuffer, ref bytesToSend);
@@ -2703,7 +2708,7 @@ namespace Shadowsocks.Controller
                 {
                     return;
                 }
-                encryptorUDP.Reset();
+                encryptorUDP.ResetEncrypt();
                 this.protocol.SetServerInfoIV(encryptorUDP.getIV());
                 int obfsSendSize;
                 byte[] obfsBuffer = this.protocol.ClientUdpPreEncrypt(bytesToEncrypt, length, out obfsSendSize);
@@ -2923,6 +2928,11 @@ namespace Shadowsocks.Controller
                 remote.EndSend(ar);
                 doConnectionTCPRecv();
                 doConnectionUDPRecv();
+                if (lastKeepTime == null || (DateTime.Now - lastKeepTime).TotalSeconds > 5)
+                {
+                    keepCurrentServer(targetURI);
+                    lastKeepTime = DateTime.Now;
+                }
             }
             catch (Exception e)
             {

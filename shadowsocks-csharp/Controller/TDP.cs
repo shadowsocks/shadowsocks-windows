@@ -578,7 +578,7 @@ namespace Shadowsocks.Controller
                         return;
                     }
                     sendBuffer = new byte[BufferSize];
-                    encryptor.Reset();
+                    encryptor.ResetEncrypt();
                     encryptor.Encrypt(bytesToEncrypt, length, sendBuffer, out bytesToSend);
                 }
                 sendBuffer = CreateProxyWrapper(sendBuffer, ref bytesToSend);
@@ -714,7 +714,7 @@ namespace Shadowsocks.Controller
                                 {
                                     return;
                                 }
-                                decryptor.Reset();
+                                decryptor.ResetDecrypt();
                                 decryptor.Decrypt(recvBuffer, bytesRead, decryptBuffer, out bytesRecv);
                                 decryptBuffer = ParseUDPHeader(decryptBuffer, ref bytesRecv);
                             }
@@ -762,6 +762,7 @@ namespace Shadowsocks.Controller
 
         private void HandleReceive(byte[] buffer)
         {
+            System.Diagnostics.Debug.Write("HandleReceive BEG\r\n");
             if (buffer[0] == 8)
             {
                 if ((Command)buffer[1] == Command.CMD_DISCONNECT)
@@ -788,6 +789,7 @@ namespace Shadowsocks.Controller
                         {
                             requestid = ((uint)buffer[2] << 8) + buffer[3];
                             this.State = ConnectState.CONNECTINGREMOTE;
+                            System.Diagnostics.Debug.Write("HandleReceive CONNECTINGREMOTE\r\n");
                             if (!CallbackSendInvoke())
                             {
                                 throw new SocketException((int)SocketError.ConnectionAborted);
@@ -813,6 +815,7 @@ namespace Shadowsocks.Controller
                             if (reqid == requestid)
                             {
                                 this.State = ConnectState.CONNECTED;
+                                System.Diagnostics.Debug.Write("HandleReceive CONNECTED\r\n");
                                 {
                                     for (uint id = 1; id < id_to_sendBuffer.sendEndID; ++id)
                                     {
@@ -839,6 +842,7 @@ namespace Shadowsocks.Controller
                     {
                         if ((Command)buffer[1] == Command.CMD_POST)
                         {
+                            System.Diagnostics.Debug.Write("HandleReceive CMD_POST\r\n");
                             int beg_index = 4 + 8;
                             uint recv_id = ((uint)buffer[4] << 24) + ((uint)buffer[5] << 16) + ((uint)buffer[6] << 8) + buffer[7];
                             uint pack_id = ((uint)buffer[8] << 24) + ((uint)buffer[9] << 16) + ((uint)buffer[10] << 8) + buffer[11];
@@ -868,6 +872,7 @@ namespace Shadowsocks.Controller
                         }
                         else if ((Command)buffer[1] == Command.CMD_SYN_STATUS)
                         {
+                            System.Diagnostics.Debug.Write("HandleReceive CMD_SYN_STATUS\r\n");
                             int beg_index = 4 + 8;
                             uint recv_id = ((uint)buffer[4] << 24) + ((uint)buffer[5] << 16) + ((uint)buffer[6] << 8) + buffer[7];
                             uint send_id = ((uint)buffer[8] << 24) + ((uint)buffer[9] << 16) + ((uint)buffer[10] << 8) + buffer[11];

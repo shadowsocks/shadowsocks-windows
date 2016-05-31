@@ -153,6 +153,7 @@
             this.ObfsCombo.Items.AddRange(new object[] {
             "plain",
             "http_simple",
+            "http_post",
             "random_head",
             "tls1.0_session_auth",
             "tls1.2_ticket_auth"});

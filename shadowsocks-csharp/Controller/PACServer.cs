@@ -186,7 +186,7 @@ namespace Shadowsocks.Controller
                 pac = pac.Replace("__PROXY__", proxy + "DIRECT;");
 
                 string text = String.Format(@"HTTP/1.1 200 OK
-Server: Shadowsocks
+Server: ShadowsocksR
 Content-Type: application/x-ns-proxy-autoconfig
 Content-Length: {0}
 Connection: Close

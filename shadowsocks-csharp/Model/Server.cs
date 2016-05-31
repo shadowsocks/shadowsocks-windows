@@ -8,6 +8,7 @@ using Shadowsocks.Controller;
 using System.Text.RegularExpressions;
 using System.Net;
 using System.Net.Sockets;
+using Shadowsocks.Encryption;
 
 namespace Shadowsocks.Model
 {
@@ -112,7 +113,7 @@ namespace Shadowsocks.Model
         public bool tcp_over_udp;
         public bool udp_over_tcp;
         public string protocol;
-        public bool obfs_udp;
+        //public bool obfs_udp;
         public bool enable;
         public string id;
 
@@ -225,7 +226,7 @@ namespace Shadowsocks.Model
             ret.remarks_base64 = (string)remarks_base64.Clone();
             ret.enable = enable;
             ret.udp_over_tcp = udp_over_tcp;
-            ret.obfs_udp = obfs_udp;
+            //ret.obfs_udp = obfs_udp;
             ret.id = id;
             ret.protocoldata = protocoldata;
             ret.obfsdata = obfsdata;
@@ -243,7 +244,7 @@ namespace Shadowsocks.Model
             this.remarks_base64 = "";
             this.udp_over_tcp = false;
             this.protocol = "origin";
-            this.obfs_udp = false;
+            //this.obfs_udp = false;
             this.enable = true;
             byte[] id = new byte[16];
             Util.Utils.RandBytes(id, id.Length);
@@ -311,39 +312,54 @@ namespace Shadowsocks.Model
                 this.server = afterAt.Substring(0, indexLastColon);
 
                 string beforeAt = data.Substring(0, indexLastAt);
-                string[] parts = beforeAt.Split(new[] { ':' });
-                this.method = parts[parts.Length - 2];
-                this.password = parts[parts.Length - 1];
-                if (parts.Length >= 4)
+                this.method = "";
+                for (bool next = true; next;)
                 {
-                    this.protocol = parts[parts.Length - 3];
-                    this.obfs = parts[parts.Length - 4];
-                    if (param.Length > 0)
+                    string[] parts = beforeAt.Split(new[] { ':' }, 2);
+                    if (parts.Length > 1)
                     {
-                        this.obfsparam = Encoding.UTF8.GetString(System.Convert.FromBase64String(param.Replace('-', '+').Replace('_', '/')));
-                    }
-                }
-                else if (parts.Length >= 3)
-                {
-                    string part = parts[parts.Length - 3];
-                    try
-                    {
-                        Obfs.ObfsBase obfs = (Obfs.ObfsBase)Obfs.ObfsFactory.GetObfs(part);
-                        int[] properties = obfs.GetObfs()[part];
-                        if (properties[0] > 0)
+                        try
                         {
-                            this.protocol = part;
+                            Obfs.ObfsBase obfs = (Obfs.ObfsBase)Obfs.ObfsFactory.GetObfs(parts[0]);
+                            if (obfs.GetObfs().ContainsKey(parts[0]))
+                            {
+                                int[] p = obfs.GetObfs()[parts[0]];
+                                if (p[0] == 1)
+                                {
+                                    this.protocol = parts[0];
+                                }
+                                if (p[1] == 1)
+                                {
+                                    this.obfs = parts[0];
+                                }
+                            }
+                            else
+                            {
+                                next = false;
+                            }
                         }
-                        else
+                        catch
                         {
-                            this.obfs = part;
+                            try
+                            {
+                                IEncryptor encryptor = EncryptorFactory.GetEncryptor(parts[0], "m");
+                                encryptor.Dispose();
+                                this.method = parts[0];
+                                beforeAt = parts[1];
+                            }
+                            catch
+                            {
+                            }
+                            break;
                         }
+                        beforeAt = parts[1];
                     }
-                    catch
-                    {
-
-                    }
+                    else
+                        break;
                 }
+                if (this.method.Length == 0)
+                    throw new FormatException();
+                this.password = beforeAt;
             }
             catch (IndexOutOfRangeException)
             {

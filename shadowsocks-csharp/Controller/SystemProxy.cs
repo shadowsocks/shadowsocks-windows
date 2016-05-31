@@ -224,6 +224,14 @@ namespace Shadowsocks.Controller
                         true);
                 byte[] defConnection = (byte[])registry.GetValue("DefaultConnectionSettings");
                 byte[] savedLegacySetting = (byte[])registry.GetValue("SavedLegacySettings");
+                if (defConnection == null)
+                {
+                    defConnection = new byte[32];
+                    defConnection[0] = 0x46;
+                    defConnection[4] = 0xcc;
+                    defConnection[5] = 0xe;
+                    defConnection[8] = 0x1;
+                }
                 if (set)
                 {
                     defConnection[8] = Convert.ToByte(defConnection[8] & 8);

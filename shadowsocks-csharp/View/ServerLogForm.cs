@@ -769,6 +769,16 @@ namespace Shadowsocks.View
         private void ServerLogForm_ResizeEnd(object sender, EventArgs e)
         {
             updatePause = 0;
+
+            int width = 0;
+            for (int i = 0; i < ServerDataGrid.Columns.Count; ++i)
+            {
+                if (!ServerDataGrid.Columns[i].Visible)
+                    continue;
+                width += ServerDataGrid.Columns[i].Width;
+            }
+            width += SystemInformation.VerticalScrollBarWidth + (this.Width - this.ClientSize.Width) + 1;
+            ServerDataGrid.Columns[2].Width += this.Width - width;
         }
 
         private void ServerDataGrid_ColumnWidthChanged(object sender, DataGridViewColumnEventArgs e)

@@ -271,6 +271,7 @@ namespace Shadowsocks.Model
         public string authPass;
         public bool autoBan;
         public bool sameHostForSameTarget;
+        public int keepVisitTime;
 
         //public bool buildinHttpProxy;
         private ServerSelectStrategy serverStrategy = new ServerSelectStrategy();
@@ -279,13 +280,36 @@ namespace Shadowsocks.Model
 
         private static string CONFIG_FILE = "gui-config.json";
 
+        public bool KeepCurrentServer(string targetAddr)
+        {
+            if (sameHostForSameTarget && targetAddr != null)
+            {
+                lock (serverStrategy)
+                {
+                    if (uri2time.ContainsKey(targetAddr))
+                    {
+                        UriVisitTime visit = uri2time[targetAddr];
+                        if (visit.index < configs.Count && configs[visit.index].enable)
+                        {
+                            time2uri.Remove(visit);
+                            visit.visitTime = DateTime.Now;
+                            uri2time[targetAddr] = visit;
+                            time2uri[visit] = targetAddr;
+                            return true;
+                        }
+                    }
+                }
+            }
+            return false;
+        }
+
         public Server GetCurrentServer(string targetAddr = null, bool usingRandom = false, bool forceRandom = false)
         {
             lock (serverStrategy)
             {
                 foreach (KeyValuePair<UriVisitTime, string> p in time2uri)
                 {
-                    if ((DateTime.Now - p.Key.visitTime).TotalSeconds < 60)
+                    if ((DateTime.Now - p.Key.visitTime).TotalSeconds < keepVisitTime)
                         break;
 
                     uri2time.Remove(p.Value);
@@ -309,19 +333,19 @@ namespace Shadowsocks.Model
                 {
                     int index = serverStrategy.Select(configs, this.index, randomAlgorithm, true);
                     if (index == -1) return GetErrorServer();
-                    if (targetAddr != null)
-                    {
-                        UriVisitTime visit = new UriVisitTime();
-                        visit.uri = targetAddr;
-                        visit.index = index;
-                        visit.visitTime = DateTime.Now;
-                        if (uri2time.ContainsKey(targetAddr))
-                        {
-                            time2uri.Remove(uri2time[targetAddr]);
-                        }
-                        uri2time[targetAddr] = visit;
-                        time2uri[visit] = targetAddr;
-                    }
+                    //if (targetAddr != null)
+                    //{
+                    //    UriVisitTime visit = new UriVisitTime();
+                    //    visit.uri = targetAddr;
+                    //    visit.index = index;
+                    //    visit.visitTime = DateTime.Now;
+                    //    if (uri2time.ContainsKey(targetAddr))
+                    //    {
+                    //        time2uri.Remove(uri2time[targetAddr]);
+                    //    }
+                    //    uri2time[targetAddr] = visit;
+                    //    time2uri[visit] = targetAddr;
+                    //}
                     return configs[index];
                 }
                 else if (usingRandom && random)
@@ -395,6 +419,19 @@ namespace Shadowsocks.Model
             CheckServer(server.server);
         }
 
+        public Configuration()
+        {
+            index = 0;
+            isDefault = true;
+            localPort = 1080;
+            reconnectTimes = 3;
+            keepVisitTime = 180;
+            configs = new List<Server>()
+            {
+                GetDefaultServer()
+            };
+        }
+
         public static Configuration Load()
         {
             try
@@ -405,6 +442,10 @@ namespace Shadowsocks.Model
                 if (config.localPort == 0)
                 {
                     config.localPort = 1080;
+                }
+                if (config.keepVisitTime == 0)
+                {
+                    config.keepVisitTime = 180;
                 }
                 // revert base64 encode for version 3.5.4
                 {
@@ -455,6 +496,7 @@ namespace Shadowsocks.Model
                     isDefault = true,
                     localPort = 1080,
                     reconnectTimes = 3,
+                    keepVisitTime = 180,
                     configs = new List<Server>()
                     {
                         GetDefaultServer()
@@ -574,7 +616,7 @@ namespace Shadowsocks.Model
     {
         private static string LOG_FILE = "transfer_log.json";
 
-        public Dictionary<String, ServerTrans> servers = new Dictionary<String, ServerTrans>();
+        public Dictionary<string, object> servers = new Dictionary<string, object>();
         private int saveCounter;
         private DateTime saveTime;
 
@@ -583,7 +625,8 @@ namespace Shadowsocks.Model
             try
             {
                 string configContent = File.ReadAllText(LOG_FILE);
-                ServerTransferTotal config = SimpleJson.SimpleJson.DeserializeObject<ServerTransferTotal>(configContent, new JsonSerializerStrategy());
+                ServerTransferTotal config = new ServerTransferTotal();
+                config.servers = SimpleJson.SimpleJson.DeserializeObject<Dictionary<string, object>>(configContent, new JsonSerializerStrategy());
                 config.Init();
                 return config;
             }
@@ -602,7 +645,7 @@ namespace Shadowsocks.Model
             saveCounter = 256;
             saveTime = DateTime.Now;
             if (servers == null)
-                servers = new Dictionary<String, ServerTrans>();
+                servers = new Dictionary<string, object>();
         }
 
         public static void Save(ServerTransferTotal config)
@@ -611,7 +654,7 @@ namespace Shadowsocks.Model
             {
                 using (StreamWriter sw = new StreamWriter(File.Open(LOG_FILE, FileMode.Create)))
                 {
-                    string jsonString = SimpleJson.SimpleJson.SerializeObject(config);
+                    string jsonString = SimpleJson.SimpleJson.SerializeObject(config.servers);
                     sw.Write(jsonString);
                     sw.Flush();
                 }
@@ -628,7 +671,7 @@ namespace Shadowsocks.Model
             {
                 if (!servers.ContainsKey(server))
                     servers.Add(server, new ServerTrans());
-                servers[server].totalUploadBytes += size;
+                ((ServerTrans)servers[server]).totalUploadBytes += size;
             }
             if (--saveCounter <= 0)
             {
@@ -649,7 +692,7 @@ namespace Shadowsocks.Model
             {
                 if (!servers.ContainsKey(server))
                     servers.Add(server, new ServerTrans());
-                servers[server].totalDownloadBytes += size;
+                ((ServerTrans)servers[server]).totalDownloadBytes += size;
             }
             if (--saveCounter <= 0)
             {
@@ -672,6 +715,10 @@ namespace Shadowsocks.Model
                 if (type == typeof(Int64) && value.GetType() == typeof(string))
                 {
                     return Int64.Parse(value.ToString());
+                }
+                else if (type == typeof(object))
+                {
+                    return base.DeserializeObject(value, typeof(ServerTrans));
                 }
                 else if (type == typeof(ServerTransferTotal))
                 {

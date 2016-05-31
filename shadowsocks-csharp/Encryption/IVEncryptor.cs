@@ -15,7 +15,7 @@ namespace Shadowsocks.Encryption
         private static readonly Dictionary<string, byte[]> CachedKeys = new Dictionary<string, byte[]>();
         protected byte[] _encryptIV;
         protected byte[] _decryptIV;
-        protected bool _decryptIVReceived;
+        protected int _decryptIVReceived;
         protected bool _encryptIVSent;
         protected int _encryptIVOffset = 0;
         protected int _decryptIVOffset = 0;
@@ -154,16 +154,44 @@ namespace Shadowsocks.Encryption
 
         public override void Decrypt(byte[] buf, int length, byte[] outbuf, out int outlength)
         {
-            if (!_decryptIVReceived)
+            if (_decryptIVReceived < ivLen)
             {
-                _decryptIVReceived = true;
-                initCipher(buf, false);
-                outlength = length - ivLen;
-                lock (tempbuf)
+                int start_pos = ivLen;
+                if (_decryptIVReceived + length < ivLen)
                 {
-                    // C# could be multi-threaded
-                    Buffer.BlockCopy(buf, ivLen, tempbuf, 0, length - ivLen);
-                    cipherUpdate(false, length - ivLen, tempbuf, outbuf);
+                    if (_decryptIV == null)
+                    {
+                        _decryptIV = new byte[ivLen];
+                    }
+                    Buffer.BlockCopy(buf, 0, _decryptIV, _decryptIVReceived, length);
+                    outlength = 0;
+                    _decryptIVReceived += length;
+                }
+                else if (_decryptIVReceived == 0)
+                {
+                    initCipher(buf, false);
+                    outlength = length - ivLen;
+                    _decryptIVReceived = ivLen;
+                }
+                else
+                {
+                    start_pos = ivLen - _decryptIVReceived;
+                    byte[] temp_buf = new byte[ivLen];
+                    Buffer.BlockCopy(_decryptIV, 0, temp_buf, 0, _decryptIVReceived);
+                    Buffer.BlockCopy(buf, 0, temp_buf, _decryptIVReceived, start_pos);
+                    initCipher(temp_buf, false);
+                    outlength = length - start_pos;
+                    _decryptIVReceived = ivLen;
+                }
+
+                if (outlength > 0)
+                {
+                    lock (tempbuf)
+                    {
+                        // C# could be multi-threaded
+                        Buffer.BlockCopy(buf, start_pos, tempbuf, 0, outlength);
+                        cipherUpdate(false, outlength, tempbuf, outbuf);
+                    }
                 }
             }
             else
@@ -173,13 +201,17 @@ namespace Shadowsocks.Encryption
             }
         }
 
-        public override void Reset()
+        public override void ResetEncrypt()
         {
             _encryptIVSent = false;
-            _decryptIVReceived = false;
             _encryptIVOffset = 0; // SSL
-            _decryptIVOffset = 0; // SSL
             randBytes(_iv, ivLen);
+        }
+
+        public override void ResetDecrypt()
+        {
+            _decryptIVReceived = 0;
+            _decryptIVOffset = 0; // SSL
         }
 
     }

@@ -57,7 +57,7 @@ namespace Shadowsocks.Controller
             {
                 if (_transfer.servers.ContainsKey(server.server))
                 {
-                    ServerSpeedLog log = new ServerSpeedLog(_transfer.servers[server.server].totalUploadBytes, _transfer.servers[server.server].totalDownloadBytes);
+                    ServerSpeedLog log = new ServerSpeedLog(((ServerTrans)_transfer.servers[server.server]).totalUploadBytes, ((ServerTrans)_transfer.servers[server.server]).totalDownloadBytes);
                     server.SetServerSpeedLog(log);
                 }
             }
@@ -413,7 +413,7 @@ namespace Shadowsocks.Controller
                         polipoRunner.Stop();
                         polipoRunner.Start(_config);
 
-                        _listener.GetServices()[2] = new HttpPortForwarder(polipoRunner.RunningPort, _config);
+                        _listener.GetServices()[3] = new HttpPortForwarder(polipoRunner.RunningPort, _config);
                     }
                 }
                 else
@@ -431,6 +431,7 @@ namespace Shadowsocks.Controller
                     List<Listener.Service> services = new List<Listener.Service>();
                     services.Add(local);
                     services.Add(_pacServer);
+                    services.Add(new APIServer(this, _config));
                     services.Add(new HttpPortForwarder(polipoRunner.RunningPort, _config));
                     _listener = new Listener(services);
                     _listener.Start(_config);

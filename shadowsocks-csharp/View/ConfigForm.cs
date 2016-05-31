@@ -126,7 +126,7 @@ namespace Shadowsocks.View
                     tcp_over_udp = CheckTCPoverUDP.Checked,
                     udp_over_tcp = CheckUDPoverUDP.Checked,
                     protocol = TCPProtocolComboBox.Text,
-                    obfs_udp = CheckObfsUDP.Checked,
+                    //obfs_udp = CheckObfsUDP.Checked,
                     id = _SelectedID
                 };
                 Configuration.CheckServer(server);
@@ -217,7 +217,7 @@ namespace Shadowsocks.View
                 TextGroup.Text = server.group;
                 CheckTCPoverUDP.Checked = server.tcp_over_udp;
                 CheckUDPoverUDP.Checked = server.udp_over_tcp;
-                CheckObfsUDP.Checked = server.obfs_udp;
+                //CheckObfsUDP.Checked = server.obfs_udp;
                 _SelectedID = server.id;
 
                 ServerGroupBox.Visible = true;
@@ -494,8 +494,8 @@ namespace Shadowsocks.View
             {
                 labelUDPPort.Visible = true;
                 textUDPPort.Visible = true;
-                TCPoverUDPLabel.Visible = true;
-                CheckTCPoverUDP.Visible = true;
+                //TCPoverUDPLabel.Visible = true;
+                //CheckTCPoverUDP.Visible = true;
                 UDPoverTCPLabel.Visible = true;
                 CheckUDPoverUDP.Visible = true;
             }
@@ -503,8 +503,8 @@ namespace Shadowsocks.View
             {
                 labelUDPPort.Visible = false;
                 textUDPPort.Visible = false;
-                TCPoverUDPLabel.Visible = false;
-                CheckTCPoverUDP.Visible = false;
+                //TCPoverUDPLabel.Visible = false;
+                //CheckTCPoverUDP.Visible = false;
                 UDPoverTCPLabel.Visible = false;
                 CheckUDPoverUDP.Visible = false;
             }

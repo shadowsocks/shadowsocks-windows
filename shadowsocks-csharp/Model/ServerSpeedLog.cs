@@ -26,6 +26,7 @@ namespace Shadowsocks.Model
         }
     }
 
+    [Serializable]
     public class ServerSpeedLogShow
     {
         public long totalConnectTimes;
