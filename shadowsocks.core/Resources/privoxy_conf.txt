@@ -1,0 +1,5 @@
+listen-address __POLIPO_BIND_IP__:__POLIPO_BIND_PORT__
+show-on-task-bar 0
+activity-animation 0
+forward-socks5 / 127.0.0.1:__SOCKS_PORT__ .
+hide-console
