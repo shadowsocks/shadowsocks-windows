@@ -291,6 +291,8 @@
     <Content Include="FodyWeavers.xml">
       <SubType>Designer</SubType>
     </Content>
+    <Content Include="Resources\ssIn24.png" />
+    <Content Include="Resources\ssOut24.png" />
     <Content Include="shadowsocks.ico" />
   </ItemGroup>
   <ItemGroup>
