@@ -42,7 +42,7 @@ namespace Shadowsocks.View
         {
             AddButton.Text = I18N.GetString("&Add");
             DeleteButton.Text = I18N.GetString("&Delete");
-            IPLabel.Text = I18N.GetString("Server IP");
+            IPLabel.Text = I18N.GetString("Server Addr");
             ServerPortLabel.Text = I18N.GetString("Server Port");
             PasswordLabel.Text = I18N.GetString("Password");
             EncryptionLabel.Text = I18N.GetString("Encryption");
