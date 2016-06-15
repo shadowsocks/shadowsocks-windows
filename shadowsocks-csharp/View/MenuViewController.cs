@@ -27,7 +27,7 @@ namespace Shadowsocks.View
 
         private NotifyIcon _notifyIcon;
         private Bitmap icon_baseBitmap;
-        private Icon icon_in, icon_out, icon_both, targetIcon;
+        private Icon icon_base, icon_in, icon_out, icon_both, targetIcon;
         private ContextMenu contextMenu1;
 
         private bool _isFirstRun;
@@ -105,8 +105,8 @@ namespace Shadowsocks.View
 
             Icon newIcon;
 
-            bool hasInbound = controller.traffic.Last.inboundIncreasement > 10;
-            bool hasOutbound = controller.traffic.Last.outboundIncreasement > 10;
+            bool hasInbound = controller.traffic.Last.inboundIncreasement > 0;
+            bool hasOutbound = controller.traffic.Last.outboundIncreasement > 0;
 
             if (hasInbound && hasOutbound)
                 newIcon = icon_both;
@@ -115,10 +115,13 @@ namespace Shadowsocks.View
             else if (hasOutbound)
                 newIcon = icon_out;
             else
-                newIcon = this.targetIcon;
+                newIcon = icon_base;
 
             if (newIcon != this.targetIcon)
-             _notifyIcon.Icon = newIcon;
+            {
+                this.targetIcon = newIcon;
+                _notifyIcon.Icon = newIcon;
+            }
         }
 
         void controller_Errored(object sender, System.IO.ErrorEventArgs e)
@@ -151,7 +154,9 @@ namespace Shadowsocks.View
             bool enabled = config.enabled;
             bool global = config.global;
             icon_baseBitmap = getTrayIconByState(icon_baseBitmap, enabled, global);
-            targetIcon = Icon.FromHandle(icon_baseBitmap.GetHicon());
+
+            icon_base = Icon.FromHandle(icon_baseBitmap.GetHicon());
+            targetIcon = icon_base;
             icon_in = Icon.FromHandle(AddBitmapOverlay(icon_baseBitmap, Resources.ssIn24).GetHicon());
             icon_out = Icon.FromHandle(AddBitmapOverlay(icon_baseBitmap, Resources.ssOut24).GetHicon());
             icon_both = Icon.FromHandle(AddBitmapOverlay(icon_baseBitmap, Resources.ssIn24, Resources.ssOut24).GetHicon());
