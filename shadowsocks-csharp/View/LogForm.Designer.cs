@@ -244,23 +244,17 @@
             this.splitContainer1.SplitterDistance = 74;
             this.splitContainer1.TabIndex = 3;
             // 
-            // chart1
+            // trafficChart
             // 
             chartArea1.AxisX.LabelStyle.Enabled = false;
             chartArea1.AxisX.MajorGrid.Interval = 5D;
             chartArea1.AxisX.MajorGrid.LineColor = System.Drawing.Color.LightGray;
             chartArea1.AxisX.MajorTickMark.Enabled = false;
-            chartArea1.AxisX.MaximumAutoSize = 100F;
-            chartArea1.AxisX2.MaximumAutoSize = 100F;
+            chartArea1.AxisY.IntervalAutoMode = System.Windows.Forms.DataVisualization.Charting.IntervalAutoMode.VariableCount;
             chartArea1.AxisY.IsMarginVisible = false;
-            chartArea1.AxisY.LabelAutoFitMaxFontSize = 8;
-            chartArea1.AxisY.LabelAutoFitMinFontSize = 5;
             chartArea1.AxisY.MajorGrid.LineColor = System.Drawing.Color.LightGray;
             chartArea1.AxisY.MajorTickMark.Enabled = false;
-            chartArea1.AxisY.MaximumAutoSize = 100F;
-            chartArea1.AxisY.Minimum = 0D;
             chartArea1.AxisY2.MajorGrid.LineColor = System.Drawing.Color.LightGray;
-            chartArea1.AxisY2.MaximumAutoSize = 100F;
             chartArea1.AxisY2.Minimum = 0D;
             chartArea1.Name = "ChartArea1";
             this.trafficChart.ChartAreas.Add(chartArea1);
@@ -268,7 +262,7 @@
             legend1.Name = "Legend1";
             this.trafficChart.Legends.Add(legend1);
             this.trafficChart.Location = new System.Drawing.Point(0, 0);
-            this.trafficChart.Name = "chart1";
+            this.trafficChart.Name = "trafficChart";
             this.trafficChart.Palette = System.Windows.Forms.DataVisualization.Charting.ChartColorPalette.None;
             series1.ChartArea = "ChartArea1";
             series1.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;

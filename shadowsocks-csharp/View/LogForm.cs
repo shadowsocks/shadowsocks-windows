@@ -48,8 +48,8 @@ namespace Shadowsocks.View
 
         private void controller_TrafficChanged(object sender, EventArgs e)
         {
-            var inboundPoints = new List<float>();
-            var outboundPoints = new List<float>();
+            var inboundPoints = new List<long>();
+            var outboundPoints = new List<long>();
 
             foreach (var trafficPerSecond in controller.traffic)
             {

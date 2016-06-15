@@ -541,7 +541,10 @@ namespace Shadowsocks.Controller
         private void StartTrafficStatistics(int queueMaxSize)
         {
             traffic = new QueueLast<TrafficPerSecond>();
-            traffic.Enqueue(new TrafficPerSecond());
+            for (int i = 0; i < queueMaxSize; i++)
+            {
+                traffic.Enqueue(new TrafficPerSecond());
+            }
             _trafficThread = new Thread(new ThreadStart(() => TrafficStatistics(queueMaxSize)));
             _trafficThread.IsBackground = true;
             _trafficThread.Start();
