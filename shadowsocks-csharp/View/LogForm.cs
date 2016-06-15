@@ -2,6 +2,7 @@
 using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
+using System.Collections.Generic;
 
 using Shadowsocks.Controller;
 using Shadowsocks.Properties;
@@ -30,7 +31,8 @@ namespace Shadowsocks.View
             {
                 config = new LogViewerConfig();
             }
-            else {
+            else
+            {
                 topMostTrigger = config.topMost;
                 wrapTextTrigger = config.wrapText;
                 toolbarTrigger = config.toolbarShown;
@@ -39,7 +41,30 @@ namespace Shadowsocks.View
                 LogMessageTextBox.Font = config.GetFont();
             }
 
+            controller.TrafficChanged += controller_TrafficChanged;
+
             UpdateTexts();
+        }
+
+        private void controller_TrafficChanged(object sender, EventArgs e)
+        {
+            var inboundPoints = new List<float>();
+            var outboundPoints = new List<float>();
+
+            foreach (var trafficPerSecond in controller.traffic)
+            {
+                inboundPoints.Add(trafficPerSecond.inboundIncreasement);
+                outboundPoints.Add(trafficPerSecond.outboundIncreasement);
+            }
+
+            if (trafficChart.InvokeRequired)
+            {
+                trafficChart.Invoke(new Action(() =>
+                {
+                    trafficChart.Series["Inbound"].Points.DataBindY(inboundPoints);
+                    trafficChart.Series["Outbound"].Points.DataBindY(outboundPoints);
+                }));
+            }
         }
 
         private void UpdateTexts()
@@ -144,6 +169,7 @@ namespace Shadowsocks.View
         private void LogForm_FormClosing(object sender, FormClosingEventArgs e)
         {
             timer.Stop();
+            controller.TrafficChanged -= controller_TrafficChanged;
             LogViewerConfig config = controller.GetConfigurationCopy().logViewer;
             if (config == null)
                 config = new LogViewerConfig();
