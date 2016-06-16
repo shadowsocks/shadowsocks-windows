@@ -22,8 +22,8 @@ namespace Shadowsocks.View
         ShadowsocksController controller;
 
         #region chart
-        List<long> inboundPoints = new List<long>();
-        List<long> outboundPoints = new List<long>();
+        List<float> inboundPoints = new List<float>();
+        List<float> outboundPoints = new List<float>();
         long maxSpeed = 0;
         Tuple<float, string, long> bandwidthScale = new Tuple<float, string, long>(0, "B", 1);
         TextAnnotation inboundAnnotation = new TextAnnotation();
@@ -70,7 +70,7 @@ namespace Shadowsocks.View
 
             bandwidthScale = Utils.GetBandwidthScale(maxSpeed);
 
-            //rescale the original data points, since it is List<long>, .ForEach does not work
+            //rescale the original data points, since it is List<float>, .ForEach does not work
             inboundPoints = inboundPoints.Select(p => p / bandwidthScale.Item3).ToList();
             outboundPoints = outboundPoints.Select(p => p / bandwidthScale.Item3).ToList();
 
