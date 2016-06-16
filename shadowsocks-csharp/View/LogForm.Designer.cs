@@ -251,7 +251,8 @@
             chartArea1.AxisX.MajorGrid.LineColor = System.Drawing.Color.LightGray;
             chartArea1.AxisX.MajorTickMark.Enabled = false;
             chartArea1.AxisY.IntervalAutoMode = System.Windows.Forms.DataVisualization.Charting.IntervalAutoMode.VariableCount;
-            chartArea1.AxisY.IsMarginVisible = false;
+            chartArea1.AxisY.LabelAutoFitMaxFontSize = 8;
+            chartArea1.AxisY.LabelStyle.Interval = 0D;
             chartArea1.AxisY.MajorGrid.LineColor = System.Drawing.Color.LightGray;
             chartArea1.AxisY.MajorTickMark.Enabled = false;
             chartArea1.AxisY2.MajorGrid.LineColor = System.Drawing.Color.LightGray;
@@ -259,6 +260,7 @@
             chartArea1.Name = "ChartArea1";
             this.trafficChart.ChartAreas.Add(chartArea1);
             this.trafficChart.Dock = System.Windows.Forms.DockStyle.Fill;
+            legend1.MaximumAutoSize = 25F;
             legend1.Name = "Legend1";
             this.trafficChart.Legends.Add(legend1);
             this.trafficChart.Location = new System.Drawing.Point(0, 0);

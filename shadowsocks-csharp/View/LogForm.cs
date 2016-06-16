@@ -2,7 +2,9 @@
 using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
+using System.Windows.Forms.DataVisualization.Charting;
 using System.Collections.Generic;
+using System.Linq;
 
 using Shadowsocks.Controller;
 using Shadowsocks.Properties;
@@ -18,6 +20,15 @@ namespace Shadowsocks.View
         Timer timer;
         const int BACK_OFFSET = 65536;
         ShadowsocksController controller;
+
+        #region chart
+        List<long> inboundPoints = new List<long>();
+        List<long> outboundPoints = new List<long>();
+        long maxSpeed = 0;
+        Tuple<float, string, long> bandwidthScale = new Tuple<float, string, long>(0, "B", 1);
+        TextAnnotation inboundAnnotation = new TextAnnotation();
+        TextAnnotation outboundAnnotation = new TextAnnotation();
+        #endregion
 
         public LogForm(ShadowsocksController controller, string filename)
         {
@@ -48,14 +59,20 @@ namespace Shadowsocks.View
 
         private void controller_TrafficChanged(object sender, EventArgs e)
         {
-            var inboundPoints = new List<long>();
-            var outboundPoints = new List<long>();
-
+            inboundPoints.Clear();
+            outboundPoints.Clear();
             foreach (var trafficPerSecond in controller.traffic)
             {
                 inboundPoints.Add(trafficPerSecond.inboundIncreasement);
                 outboundPoints.Add(trafficPerSecond.outboundIncreasement);
+                maxSpeed = Math.Max(maxSpeed, Math.Max(trafficPerSecond.inboundIncreasement, trafficPerSecond.outboundIncreasement));
             }
+
+            bandwidthScale = Utils.GetBandwidthScale(maxSpeed);
+
+            //rescale the original data points, since it is List<long>, .ForEach does not work
+            inboundPoints = inboundPoints.Select(p => p / bandwidthScale.Item3).ToList();
+            outboundPoints = outboundPoints.Select(p => p / bandwidthScale.Item3).ToList();
 
             if (trafficChart.InvokeRequired)
             {
@@ -63,6 +80,14 @@ namespace Shadowsocks.View
                 {
                     trafficChart.Series["Inbound"].Points.DataBindY(inboundPoints);
                     trafficChart.Series["Outbound"].Points.DataBindY(outboundPoints);
+                    trafficChart.ChartAreas[0].AxisY.LabelStyle.Format = "{0:0.##} " + bandwidthScale.Item2;
+                    inboundAnnotation.AnchorDataPoint = trafficChart.Series["Inbound"].Points.Last();
+                    inboundAnnotation.Text = Utils.FormatBandwidth(controller.traffic.Last.inboundIncreasement);
+                    outboundAnnotation.AnchorDataPoint = trafficChart.Series["Outbound"].Points.Last();
+                    outboundAnnotation.Text = Utils.FormatBandwidth(controller.traffic.Last.outboundIncreasement);
+                    trafficChart.Annotations.Clear();
+                    trafficChart.Annotations.Add(inboundAnnotation);
+                    trafficChart.Annotations.Add(outboundAnnotation);
                 }));
             }
         }
