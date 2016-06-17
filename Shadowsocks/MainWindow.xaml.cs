@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using Shadowsocks.Models;
 
 namespace Shadowsocks
 {
@@ -27,7 +28,11 @@ namespace Shadowsocks
 
         private void button_Click(object sender, RoutedEventArgs e)
         {
-
+            var config = Configuration.Load();
+            var controller = new Controller(config);
+            controller.Start();
+            MessageBox.Show("started! u can open browser and test.");
+            controller.Stop();
         }
     }
 }

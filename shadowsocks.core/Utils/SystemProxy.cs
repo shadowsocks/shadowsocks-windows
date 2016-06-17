@@ -26,7 +26,7 @@ namespace Shadowsocks
             _refreshReturn = InternetSetOption(IntPtr.Zero, INTERNET_OPTION_REFRESH, IntPtr.Zero, 0);
         }
 
-        public static void Update(Configuration config, bool forceDisable)
+        public static void Update(IConfig config, bool forceDisable)
         {
             bool global = config.global;
             bool enabled = config.enabled;
@@ -44,7 +44,7 @@ namespace Shadowsocks
                     if (global)
                     {
                         registry.SetValue("ProxyEnable", 1);
-                        registry.SetValue("ProxyServer", "127.0.0.1:" + config.localPort.ToString());
+                        registry.SetValue("ProxyServer", "127.0.0.1:" + config.localPort);
                         registry.SetValue("AutoConfigURL", "");
                     }
                     else
@@ -53,7 +53,7 @@ namespace Shadowsocks
                         if (config.useOnlinePac && !string.IsNullOrEmpty(config.pacUrl))
                             pacUrl = config.pacUrl;
                         else
-                            pacUrl = "http://127.0.0.1:" + config.localPort.ToString() + "/pac?t=" + GetTimestamp(DateTime.Now);
+                            pacUrl = "http://127.0.0.1:" + config.localPort + "/pac?t=" + GetTimestamp(DateTime.Now);
                         registry.SetValue("ProxyEnable", 0);
                         var readProxyServer = registry.GetValue("ProxyServer");
                         registry.SetValue("ProxyServer", "");
@@ -99,7 +99,7 @@ namespace Shadowsocks
                         registry.SetValue(each, defaultValue);
                     }
                 }
-                SystemProxy.NotifyIE();
+                NotifyIE();
             }
             catch (IOException e)
             {
@@ -107,7 +107,7 @@ namespace Shadowsocks
             }
         }
 
-        private static String GetTimestamp(DateTime value)
+        private static string GetTimestamp(DateTime value)
         {
             return value.ToString("yyyyMMddHHmmssffff");
         }

@@ -6,14 +6,19 @@ using System.IO.Compression;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
+using Shadowsocks.Models;
+using SimpleJson.Reflection;
 
 namespace Shadowsocks
 {
     public static class Utils
     {
         public static string TempPath { get; }
+        private static readonly DateTime PD = new DateTime(1970, 1, 1, 0, 0, 0, 0, System.DateTimeKind.Utc);
+
         static Utils()
         {
             if (File.Exists(Path.Combine(Environment.CurrentDirectory, "shadowsocks_portable_mode.txt")))
@@ -161,9 +166,91 @@ namespace Shadowsocks
                 yield return line;
             }
         }
+
         public static bool BeginWithAny(this string s, IEnumerable<char> chars)
         {
             return !string.IsNullOrEmpty(s) && chars.Contains(s[0]);
+        }
+
+        private class JsonSerializerStrategy : SimpleJson.PocoJsonSerializerStrategy
+        {
+            // convert string to int
+            public override object DeserializeObject(object value, Type type)
+            {
+                if (type == typeof(int) && value is string)
+                {
+                    return int.Parse(value.ToString());
+                }
+                
+                return base.DeserializeObject(value, type);
+            }
+        }
+
+        public static string SerializeToJsonString(object obj)
+        {
+            return SimpleJson.SimpleJson.SerializeObject(obj, new JsonSerializerStrategy());
+        }
+
+        public static T DeSerializeJsonObject<T>(string jsonString)
+        {
+            return SimpleJson.SimpleJson.DeserializeObject<T>(jsonString, new JsonSerializerStrategy());
+        }
+
+        public static double ToUnixTimestamp(this DateTime dateTime)
+        {
+            return (TimeZoneInfo.ConvertTimeToUtc(dateTime) - PD).TotalSeconds;
+        }
+
+        public static T LoadConfig<T>(string path,Encoding encoding = null) where T : IConfig
+        {
+            return DeSerializeJsonObject<T>(File.ReadAllText(path, encoding??Encoding.UTF8));
+        }
+
+        public static void SaveConfig(this IConfig cfg,string path, Encoding encoding = null)
+        {
+            File.WriteAllText(path, SerializeToJsonString(cfg), encoding ?? Encoding.UTF8);
+        }
+
+        public static Server GetCurrentServer(this IConfig cfg)
+        {
+            if (cfg.servers.Any(c=>c.Identifier == cfg.currentServer)) return cfg.servers.FirstOrDefault(c=>c.Identifier == cfg.currentServer);
+            if (cfg.servers.Count > 0) return cfg.servers.First();
+            return null;
+        }
+
+        public static string GetSSUrl(this Server server)
+        {
+            string parts = server.method + ":" + server.password + "@" + server.server + ":" + server.server_port;
+            string base64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(parts));
+            return "ss://" + base64;
+        }
+
+        public static System.Drawing.Bitmap GetQRCode(this Server server, int height = 1024)//i dont know why 1024, i just so f***ing like this number.
+        {
+            string parts = server.method + ":" + server.password + "@" + server.server + ":" + server.server_port;
+            string base64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(parts));
+            var code = ZXing.QrCode.Internal.Encoder.encode(base64, ZXing.QrCode.Internal.ErrorCorrectionLevel.M);
+            var m = code.Matrix;
+            int blockSize = Math.Max(height / m.Height, 1);
+            var drawArea = new System.Drawing.Bitmap((m.Width * blockSize), (m.Height * blockSize));
+            using (var g = System.Drawing.Graphics.FromImage(drawArea))
+            {
+                g.Clear(System.Drawing.Color.White);
+                using (var b = new System.Drawing.SolidBrush(System.Drawing.Color.Black))
+                {
+                    for (int row = 0; row < m.Width; row++)
+                    {
+                        for (int col = 0; col < m.Height; col++)
+                        {
+                            if (m[row, col] != 0)
+                            {
+                                g.FillRectangle(b, blockSize * row, blockSize * col, blockSize, blockSize);
+                            }
+                        }
+                    }
+                }
+            }
+            return drawArea;
         }
     }
 
@@ -176,7 +263,7 @@ namespace Shadowsocks
         {
             try
             {
-                LogFilePath = Utils.GetTempPath("shadowsocks.log");
+                LogFilePath = Utils.GetTempPath("shadowsocks_mod.log");
 
                 FileStream fs = new FileStream(LogFilePath, FileMode.Append);
                 StreamWriterWithTimestamp sw = new StreamWriterWithTimestamp(fs) { AutoFlush = true };
@@ -185,7 +272,7 @@ namespace Shadowsocks
 
 #if DEBUG
                 // truncate privoxy log file while debugging
-                string privoxyLogFilename = Utils.GetTempPath("privoxy.log");
+                string privoxyLogFilename = Utils.GetTempPath("privoxy_ssmod.log");
                 if (File.Exists(privoxyLogFilename))
                     using (new FileStream(privoxyLogFilename, FileMode.Truncate)) { }
 #endif

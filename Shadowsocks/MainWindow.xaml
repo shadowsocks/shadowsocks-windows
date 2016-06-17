@@ -6,5 +6,7 @@
         xmlns:local="clr-namespace:Shadowsocks"
         mc:Ignorable="d"
         Title="MainWindow" Height="350" Width="525">
-    <Grid/>
+    <Grid>
+        <Button x:Name="button" Content="Button" HorizontalAlignment="Left" Height="23" Margin="65,140,0,0" VerticalAlignment="Top" Width="75" Click="button_Click"/>
+    </Grid>
 </Window>

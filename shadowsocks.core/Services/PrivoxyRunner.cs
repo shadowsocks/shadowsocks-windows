@@ -32,9 +32,10 @@ namespace Shadowsocks.Services
 
         public int RunningPort => _runningPort;
 
-        public void Start(Configuration configuration)
+        public void Start(IConfig configuration)
         {
             Server server = configuration.GetCurrentServer();
+            if(server == null)throw new Exception("Server not exist");
             if (_process == null)
             {
                 Process[] existingPolipo = Process.GetProcessesByName("ss_privoxy");

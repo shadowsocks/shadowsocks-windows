@@ -13,28 +13,36 @@ namespace Shadowsocks
 {
     public class Controller
     {
+        #region Fields
         private Listener _listener;
-        private PACServer _pacServer;
-        private PrivoxyRunner _privoxyRunner;
+        private readonly PACServer _pacServer;
+        private readonly PrivoxyRunner _privoxyRunner;
 
-        public long inboundCounter = 0;
-        public long outboundCounter = 0;
+        private bool stopped;
 
-        private bool stopped = false;
+        private bool _systemProxyIsDirty;
 
-        private bool _systemProxyIsDirty = false;
-
-        #region ReleaseMemory
         private System.Threading.Timer _tmrReleaseMemory;
-        private void StartReleasingMemory(int period = 30)
-        {
-            _tmrReleaseMemory = new System.Threading.Timer(ReleaseMemory, null, 0, period * 1000);
-        }
 
-        private void ReleaseMemory(object sender)
-        {
-            Utils.ReleaseMemory(false);
-        }
+        private bool _analysis;
+        private readonly Dictionary<Server,long> inboundCounter = new Dictionary<Server, long>();
+        private readonly Dictionary<Server, long> outboundCounter = new Dictionary<Server, long>();
+        private readonly Dictionary<Server, List<TimeSpan>> latencyCounter = new Dictionary<Server, List<TimeSpan>>();
+        #endregion
+
+        #region Properties
+        private readonly IConfig _config;
+        //dirty hack temporary, shake it baby!
+        public Server[] servers => _config.servers.ToArray();
+        public string currentServer { get { return _config.currentServer; } set { _config.currentServer = value; ReportConfigChange(); } }
+        public bool global { get { return _config.global; } set { _config.global = value; UpdateSystemProxy(); ReportConfigChange(); EnableGlobalChanged?.Invoke(this, new EventArgs()); } }
+        public bool enabled { get { return _config.enabled; } set { _config.enabled = value; UpdateSystemProxy(); ReportConfigChange(); EnableStatusChanged?.Invoke(this, new EventArgs()); } }
+        public bool shareOverLan { get { return _config.shareOverLan; } set { _config.shareOverLan = value; ReportConfigChange(); ShareOverLANStatusChanged?.Invoke(this, new EventArgs()); } }
+        public bool isDefault { get { return _config.isDefault; } set { _config.isDefault = value; ReportConfigChange(); } }
+        public int localPort { get { return _config.localPort; } set { _config.localPort = value; ReportConfigChange(); } }
+        public string pacUrl { get { return _config.pacUrl; } set { _config.pacUrl = value; ReportConfigChange(); } }
+        public bool useOnlinePac { get { return _config.useOnlinePac; } set { _config.useOnlinePac = value; ReportConfigChange(); } }
+        public int releaseMemoryPeriod { get { return _config.releaseMemoryPeriod; } set { _config.releaseMemoryPeriod = value; StartReleasingMemory(); ReportConfigChange(false); } }
         #endregion
 
         #region Events
@@ -55,38 +63,100 @@ namespace Shadowsocks
         public event ErrorEventHandler Errored;
         #endregion
 
-        #region Body
-        private Configuration _config;
+        #region EventInvoker
+        protected void ReportError(Exception e)
+        {
+            Errored?.Invoke(this, new ErrorEventArgs(e));
+        }
+        protected void ReportConfigChange(bool needRefresh = true)
+        {
+            _config.Save();
+            if(needRefresh)Refresh();
+            ConfigChanged?.Invoke(this, new EventArgs());
+        }
+        private void pacServer_PACFileChanged(object sender, EventArgs e)
+        {
+            UpdateSystemProxy();
+        }
+        #endregion
 
-        public Controller()
+        #region Analysis
+
+        public void StartAnalysis()
         {
-            _config = Configuration.Load();
-            StartReleasingMemory();
+            _analysis = true;
         }
-        public void Start()
+
+        public void EndAnalysis(out Dictionary<Server, long> InboundCounter, out Dictionary<Server, long> OutboundCounter, out Dictionary<Server, List<TimeSpan>> LatencyCounter)
         {
-            Reload();
+            _analysis = false;
+            InboundCounter = inboundCounter;
+            OutboundCounter = outboundCounter;
+            LatencyCounter = latencyCounter;
+            inboundCounter.Clear();
+            outboundCounter.Clear();
+            latencyCounter.Clear();
         }
-        public void Stop()
+
+        public void UpdateLatency(Server server, TimeSpan latency)
         {
-            if (stopped)
+            if (_analysis)
             {
-                return;
+                try
+                {
+                    if (!latencyCounter.ContainsKey(server)) latencyCounter.Add(server, new List<TimeSpan>());
+                    latencyCounter[server].Add(latency);
+                }
+                catch (Exception ex)
+                {
+                    Logging.LogUsefulException(ex);
+                    //HEHE
+                }
             }
-            stopped = true;
-            _listener?.Stop();
-            _privoxyRunner?.Stop();
-            if (_config.enabled)
+
+        }
+
+        public void UpdateInboundCounter(Server server, long n)
+        {
+            if (_analysis)
             {
-                SystemProxy.Update(_config, true);
+                try
+                {
+                    if (!inboundCounter.ContainsKey(server)) inboundCounter.Add(server, 0);
+                    inboundCounter[server] += n;
+                }
+                catch (Exception ex)
+                {
+                    Logging.LogUsefulException(ex);
+                    //HEHE
+                }
             }
         }
 
-        protected void Reload()
+        public void UpdateOutboundCounter(Server server, long n)
         {
-            // some logic in configuration updated the config when saving, we need to read it again
-            _config = Configuration.Load();
+            if (_analysis)
+            {
+                try
+                {
+                    if (!outboundCounter.ContainsKey(server)) latencyCounter.Add(server, new List<TimeSpan>());
+                    outboundCounter[server] += n;
+                }
+                catch (Exception ex)
+                {
+                    Logging.LogUsefulException(ex);
+                    //HEHE
+                }
+            }
+        }
+        #endregion
 
+        #region Ctor
+        public Controller(IConfig config)
+        {
+            if(config==null)throw new ArgumentNullException(nameof(config));
+            _config = config;
+            
             if (_privoxyRunner == null)
             {
                 _privoxyRunner = new PrivoxyRunner();
@@ -97,202 +167,15 @@ namespace Shadowsocks
                 _pacServer.PACFileChanged += pacServer_PACFileChanged;
                 _pacServer.UserRuleFileChanged += pacServer_UserRuleFileChanged;
             }
-            _pacServer.UpdateConfiguration(_config);
 
-            _listener?.Stop();
-
-            // don't put polipoRunner.Start() before pacServer.Stop()
-            // or bind will fail when switching bind address from 0.0.0.0 to 127.0.0.1
-            // though UseShellExecute is set to true now
-            // http://stackoverflow.com/questions/10235093/socket-doesnt-close-after-application-exits-if-a-launched-process-is-open
-            _privoxyRunner.Stop();
-            try
-            {
-                _privoxyRunner.Start(_config);
-
-                TCPRelay tcpRelay = new TCPRelay(this);
-                UDPRelay udpRelay = new UDPRelay(this);
-                List<Listener.Service> services = new List<Listener.Service> {tcpRelay, udpRelay, _pacServer, new PortForwarder(_privoxyRunner.RunningPort)};
-                _listener = new Listener(services);
-                _listener.Start(_config);
-            }
-            catch (Exception e)
-            {
-                // translate Microsoft language into human language
-                // i.e. An attempt was made to access a socket in a way forbidden by its access permissions => Port already in use
-                if (e is SocketException)
-                {
-                    SocketException se = (SocketException)e;
-                    if (se.SocketErrorCode == SocketError.AccessDenied)
-                    {
-                        e = new Exception("Port already in use", e);
-                    }
-                }
-                Logging.LogUsefulException(e);
-                ReportError(e);
-            }
-
-            ConfigChanged?.Invoke(this, new EventArgs());
-
-            UpdateSystemProxy();
-            Utils.ReleaseMemory(true);
+            StartReleasingMemory();
         }
+        #endregion
 
-        protected void ReportError(Exception e)
+        #region PrivateMethods
+        private void ReleaseMemory(object sender)
         {
-            Errored?.Invoke(this, new ErrorEventArgs(e));
-        }
-
-        public Server GetCurrentServer()
-        {
-            return _config.GetCurrentServer();
-        }
-
-        // always return copy
-        public Configuration GetConfigurationCopy()
-        {
-            return Configuration.Load();
-        }
-
-        // always return current instance
-        public Configuration GetCurrentConfiguration()
-        {
-            return _config;
-        }
-
-        public void SaveServers(List<Server> servers, int localPort)
-        {
-            _config.configs = servers;
-            _config.localPort = localPort;
-            Configuration.Save(_config);
-        }
-
-        public bool AddServerBySSURL(string ssURL)
-        {
-            try
-            {
-                var server = new Server(ssURL);
-                _config.configs.Add(server);
-                _config.index = _config.configs.Count - 1;
-                SaveConfig(_config);
-                return true;
-            }
-            catch (Exception e)
-            {
-                Logging.LogUsefulException(e);
-                return false;
-            }
-        }
-
-        public void ToggleEnable(bool enabled)
-        {
-            _config.enabled = enabled;
-            UpdateSystemProxy();
-            SaveConfig(_config);
-            EnableStatusChanged?.Invoke(this, new EventArgs());
-        }
-
-        public void ToggleGlobal(bool global)
-        {
-            _config.global = global;
-            UpdateSystemProxy();
-            SaveConfig(_config);
-            EnableGlobalChanged?.Invoke(this, new EventArgs());
-        }
-
-        public void ToggleShareOverLAN(bool enabled)
-        {
-            _config.shareOverLan = enabled;
-            SaveConfig(_config);
-            ShareOverLANStatusChanged?.Invoke(this, new EventArgs());
-        }
-
-        public void SelectServerIndex(int index)
-        {
-            _config.index = index;
-            SaveConfig(_config);
-        }
-
-
-        public void TouchPACFile()
-        {
-            string pacFilename = _pacServer.TouchPACFile();
-            PACFileReadyToOpen?.Invoke(this, new PathEventArgs() { Path = pacFilename });
-        }
-
-        public void TouchUserRuleFile()
-        {
-            string userRuleFilename = _pacServer.TouchUserRuleFile();
-            UserRuleFileReadyToOpen?.Invoke(this, new PathEventArgs() { Path = userRuleFilename });
-        }
-
-        public string GetSSUrlForCurrentServer()
-        {
-            Server server = GetCurrentServer();
-            return GetSSUrl(server);
-        }
-
-        public static string GetSSUrl(Server server)
-        {
-            string parts = server.method + ":" + server.password + "@" + server.server + ":" + server.server_port;
-            string base64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(parts));
-            return "ss://" + base64;
-        }
-
-        public Bitmap GetQRCodeForCurrentServer(int height = 1024)
-        {
-            Server server = GetCurrentServer();
-            return GetQRCode(server,height);
-        }
-
-        public static Bitmap GetQRCode(Server server,int height)
-        {
-            string parts = server.method + ":" + server.password + "@" + server.server + ":" + server.server_port;
-            string base64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(parts));
-            var code = ZXing.QrCode.Internal.Encoder.encode(base64, ZXing.QrCode.Internal.ErrorCorrectionLevel.M);
-            var m = code.Matrix;
-            int blockSize = Math.Max(height / m.Height, 1);
-            Bitmap drawArea = new Bitmap((m.Width * blockSize), (m.Height * blockSize));
-            using (Graphics g = Graphics.FromImage(drawArea))
-            {
-                g.Clear(Color.White);
-                using (Brush b = new SolidBrush(Color.Black))
-                {
-                    for (int row = 0; row < m.Width; row++)
-                    {
-                        for (int col = 0; col < m.Height; col++)
-                        {
-                            if (m[row, col] != 0)
-                            {
-                                g.FillRectangle(b, blockSize * row, blockSize * col, blockSize, blockSize);
-                            }
-                        }
-                    }
-                }
-            }
-            return drawArea;
-        }
-
-        public void SavePACUrl(string pacUrl)
-        {
-            _config.pacUrl = pacUrl;
-            UpdateSystemProxy();
-            SaveConfig(_config);
-            ConfigChanged?.Invoke(this, new EventArgs());
-        }
-
-        public void UseOnlinePAC(bool useOnlinePac)
-        {
-            _config.useOnlinePac = useOnlinePac;
-            UpdateSystemProxy();
-            SaveConfig(_config);
-            ConfigChanged?.Invoke(this, new EventArgs());
-        }
-
-        protected void SaveConfig(Configuration newConfig)
-        {
-            Configuration.Save(newConfig);
-            Reload();
+            Utils.ReleaseMemory(false);
         }
 
         private void UpdateSystemProxy()
@@ -312,25 +195,88 @@ namespace Shadowsocks
                 }
             }
         }
-
-        private void pacServer_PACFileChanged(object sender, EventArgs e)
+        private void StartReleasingMemory()
         {
+            _tmrReleaseMemory?.Dispose();
+            _tmrReleaseMemory = new System.Threading.Timer(ReleaseMemory, null, 0, (_config.releaseMemoryPeriod < 1 ? 30 : _config.releaseMemoryPeriod) * 1000);
+        }
+
+        private void Refresh()
+        {
+            _pacServer.UpdateConfiguration(_config);
+            try
+            {
+                _privoxyRunner.Start(_config);
+
+                TCPRelay tcpRelay = new TCPRelay(this);
+                UDPRelay udpRelay = new UDPRelay(this);
+                List<Listener.Service> services = new List<Listener.Service> { tcpRelay, udpRelay, _pacServer, new PortForwarder(_privoxyRunner.RunningPort) };
+                _listener = new Listener(services);
+                _listener.Start(_config);
+            }
+            catch (Exception e)
+            {
+                // translate Microsoft language into human language
+                // i.e. An attempt was made to access a socket in a way forbidden by its access permissions => Port already in use
+                var exception = e as SocketException;
+                SocketException se = exception;
+                if (se?.SocketErrorCode == SocketError.AccessDenied)
+                {
+                    var xe = new Exception("Port already in use", e);
+                    Logging.LogUsefulException(xe);
+                }
+                ReportError(e);
+            }
+            _config.Save();
+            ConfigChanged?.Invoke(this, new EventArgs());
             UpdateSystemProxy();
+            Utils.ReleaseMemory(true);
+        }
+        #endregion
+
+        #region PublicMethods
+        public void Start()
+        {
+            _config.Save();
+            Refresh();
+        }
+        public void Stop()
+        {
+            if (stopped)
+            {
+                return;
+            }
+            stopped = true;
+            _listener?.Stop();
+            _privoxyRunner?.Stop();
+            if (_config.enabled)
+            {
+                SystemProxy.Update(_config, true);
+            }
         }
 
-        public void UpdateLatency(Server server, TimeSpan latency)
+        public Server GetCurrentServer()
         {
-            //TODO
+            return _config.GetCurrentServer();
         }
 
-        public void UpdateInboundCounter(Server server, long n)
+        public void SelectServer(string serverIdentity)
         {
-            //TODO
+            if(_config.servers.All(c => c.Identifier != serverIdentity))throw new Exception("Server not found");
+            _config.currentServer = serverIdentity;
+            Refresh();
         }
 
-        public void UpdateOutboundCounter(Server server, long n)
+        public void TouchPACFile()
         {
-            //TODO
+            string pacFilename = _pacServer.TouchPACFile();
+            PACFileReadyToOpen?.Invoke(this, new PathEventArgs() { Path = pacFilename });
+        }
+
+        public void TouchUserRuleFile()
+        {
+            string userRuleFilename = _pacServer.TouchUserRuleFile();
+            UserRuleFileReadyToOpen?.Invoke(this, new PathEventArgs() { Path = userRuleFilename });
         }
         #endregion
 
@@ -347,11 +293,12 @@ namespace Shadowsocks
         private static readonly IEnumerable<char> IgnoredLineBegins = new[] { '!', '[' };
         private const string GFWLIST_URL = "https://raw.githubusercontent.com/gfwlist/gfwlist/master/gfwlist.txt";
 
-        public async Task UpdateGFWListAsync()
+        public async Task UpdateGFWListAsync(System.Net.IWebProxy proxy = null)
         {
-            var http = new System.Net.WebClient { Proxy = new System.Net.WebProxy(System.Net.IPAddress.Loopback.ToString(), _config.localPort) };
+            var http = new System.Net.WebClient {Proxy = proxy ?? new System.Net.WebProxy(System.Net.IPAddress.Loopback.ToString(), _config.localPort)};
             PushGFWList(await http.DownloadStringTaskAsync(new Uri(GFWLIST_URL)).ConfigureAwait(false));
         }
+
         private void PushGFWList(string content)
         {
             File.WriteAllText(Utils.GetTempPath("gfwlist.txt"), content, Encoding.UTF8);

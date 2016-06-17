@@ -19,7 +19,7 @@ namespace Shadowsocks.Services
 
         FileSystemWatcher PACFileWatcher;
         FileSystemWatcher UserRuleFileWatcher;
-        private Configuration _config;
+        private IConfig _config;
 
         public event EventHandler PACFileChanged;
         public event EventHandler UserRuleFileChanged;
@@ -30,7 +30,7 @@ namespace Shadowsocks.Services
             this.WatchUserRuleFile();
         }
 
-        public void UpdateConfiguration(Configuration config)
+        public void UpdateConfiguration(IConfig config)
         {
             this._config = config;
         }

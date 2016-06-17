@@ -50,6 +50,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Dynamic;
 #endif
 using System.Globalization;
+using System.Linq;
 using System.Reflection;
 #if SIMPLE_JSON_REFLECTIONEMIT
 using System.Reflection.Emit;
@@ -467,6 +468,10 @@ namespace SimpleJson
     }
 
     #endregion
+
+    public class IgnoreAttribute : Attribute
+    {
+    }
 }
 
 namespace SimpleJson
@@ -1233,6 +1238,7 @@ namespace SimpleJson
             foreach (PropertyInfo info in type.GetProperties(BindingFlags.Instance | BindingFlags.Public))
             {
 #endif
+                if(Attribute.GetCustomAttributes(info).Any(c=>c is IgnoreAttribute))continue;
                 memberMaps.Add(info.Name, new CacheResolver.MemberMap(info));
             }
 #if NETFX_CORE
@@ -1242,6 +1248,7 @@ namespace SimpleJson
             foreach (FieldInfo info in type.GetFields(BindingFlags.Public | BindingFlags.Instance))
             {
 #endif
+                if (Attribute.GetCustomAttributes(info).Any(c => c is IgnoreAttribute)) continue;
                 memberMaps.Add(info.Name, new CacheResolver.MemberMap(info));
             }
         }

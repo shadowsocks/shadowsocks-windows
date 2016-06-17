@@ -9,36 +9,58 @@ namespace Shadowsocks.Models
     [Serializable]
     public class Server
     {
-        public string server;
-        public int server_port;
-        public string password;
-        public string method;
-        public string remarks;
-        public bool auth;
+        public string server { get; set; }
+        public int server_port { get; set; }
+        public string password { get; set; }
+        public string method { get; set; }
+        public string remarks { get; set; }
+        public bool auth { get; set; }
 
         public override int GetHashCode()
         {
             return server.GetHashCode() ^ server_port;
         }
 
-        public override bool Equals(object obj)
+        [SimpleJson.Ignore]
+        public string HashString => GetHashCode().ToString();
+        [SimpleJson.Ignore]
+        public string Identifier => server + ':' + server_port;
+        [SimpleJson.Ignore]
+        public string FriendlyName
         {
-            Server o2 = (Server)obj;
-            return server == o2.server && server_port == o2.server_port;
+            get
+            {
+                if (string.IsNullOrEmpty(server))
+                {
+                    return "New server";
+                }
+                if (string.IsNullOrEmpty(remarks))
+                {
+                    return server + ":" + server_port;
+                }
+                return remarks + " (" + server + ":" + server_port + ")";
+            }
         }
 
-        public string FriendlyName()
+
+        public override bool Equals(object obj)
         {
-            if (string.IsNullOrEmpty(server))
-            {
-                return "New server";
-            }
-            if (string.IsNullOrEmpty(remarks))
-            {
-                return server + ":" + server_port;
-            }
-            return remarks + " (" + server + ":" + server_port + ")";
+            Server o2 = obj as Server;
+            return server == o2?.server && server_port == o2?.server_port;
         }
+
+        //public string FriendlyName()
+        //{
+        //    if (string.IsNullOrEmpty(server))
+        //    {
+        //        return "New server";
+        //    }
+        //    if (string.IsNullOrEmpty(remarks))
+        //    {
+        //        return server + ":" + server_port;
+        //    }
+        //    return remarks + " (" + server + ":" + server_port + ")";
+        //}
 
         public Server()
         {
@@ -126,11 +148,6 @@ namespace Shadowsocks.Models
                 //whaaaaaat?
             }
             return svcs.Count == 0 ? null : svcs.ToArray();
-        }
-
-        public string Identifier()
-        {
-            return server + ':' + server_port;
         }
     }
 }

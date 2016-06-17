@@ -3,11 +3,12 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Shadowsocks.Models
 {
     [Serializable]
-    public class Configuration
+    public class OfficialConfig
     {
         public List<Server> configs;
 
@@ -20,7 +21,7 @@ namespace Shadowsocks.Models
         public string pacUrl;
         public bool useOnlinePac;
 
-        private const string CONFIG_FILE = "gui-config.json";
+        public const string CONFIG_FILE = "gui-config.json";
 
         public Server GetCurrentServer()
         {
@@ -37,12 +38,12 @@ namespace Shadowsocks.Models
             CheckServer(server.server);
         }
 
-        public static Configuration Load()
+        public static OfficialConfig Load()
         {
             try
             {
                 string configContent = File.ReadAllText(CONFIG_FILE);
-                Configuration config = SimpleJson.SimpleJson.DeserializeObject<Configuration>(configContent, new JsonSerializerStrategy());
+                OfficialConfig config = Utils.DeSerializeJsonObject<OfficialConfig>(configContent);
                 config.isDefault = false;
                 if (config.localPort == 0)
                     config.localPort = 1080;
@@ -54,7 +55,7 @@ namespace Shadowsocks.Models
             {
                 if (!(e is FileNotFoundException))
                     Logging.LogUsefulException(e);
-                return new Configuration
+                return new OfficialConfig
                 {
                     index = 0,
                     isDefault = true,
@@ -67,7 +68,7 @@ namespace Shadowsocks.Models
             }
         }
 
-        public static void Save(Configuration config)
+        public static void Save(OfficialConfig config)
         {
             if (config.index >= config.configs.Count)
                 config.index = config.configs.Count - 1;
@@ -78,12 +79,7 @@ namespace Shadowsocks.Models
             config.isDefault = false;
             try
             {
-                using (StreamWriter sw = new StreamWriter(File.Open(CONFIG_FILE, FileMode.Create)))
-                {
-                    string jsonString = SimpleJson.SimpleJson.SerializeObject(config);
-                    sw.Write(jsonString);
-                    sw.Flush();
-                }
+                File.WriteAllText(CONFIG_FILE,Utils.SerializeToJsonString(config));
             }
             catch (IOException e)
             {
@@ -125,19 +121,6 @@ namespace Shadowsocks.Models
         {
             if (string.IsNullOrEmpty(server))
                 throw new ArgumentException("Server IP can not be blank");
-        }
-
-        private class JsonSerializerStrategy : SimpleJson.PocoJsonSerializerStrategy
-        {
-            // convert string to int
-            public override object DeserializeObject(object value, Type type)
-            {
-                if (type == typeof(int) && value is string)
-                {
-                    return int.Parse(value.ToString());
-                }
-                return base.DeserializeObject(value, type);
-            }
         }
     }
 }

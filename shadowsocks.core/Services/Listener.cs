@@ -22,7 +22,7 @@ namespace Shadowsocks.Services
             public EndPoint remoteEndPoint = new IPEndPoint(IPAddress.Any, 0);
         }
 
-        Configuration _config;
+        IConfig _config;
         bool _shareOverLAN;
         Socket _tcpSocket;
         Socket _udpSocket;
@@ -48,7 +48,7 @@ namespace Shadowsocks.Services
             return false;
         }
 
-        public void Start(Configuration config)
+        public void Start(IConfig config)
         {
             this._config = config;
             this._shareOverLAN = config.shareOverLan;

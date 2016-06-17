@@ -441,7 +441,7 @@ namespace Shadowsocks.Services
             }
             Server server = ((ServerTimer)sender).Server;
 
-            Logging.Info($"{server.FriendlyName()} timed out");
+            Logging.Info($"{server.FriendlyName} timed out");
             remote.Close();
             RetryConnect();
         }
