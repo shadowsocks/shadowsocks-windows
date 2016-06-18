@@ -12,7 +12,6 @@ namespace Shadowsocks.Models
         bool global { get; set; }
         bool enabled { get; set; }
         bool shareOverLan { get; set; }
-        bool isDefault { get; set; }
         int localPort { get; set; }
         string pacUrl { get; set; }
         bool useOnlinePac { get; set; }

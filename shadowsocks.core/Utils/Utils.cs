@@ -17,6 +17,7 @@ namespace Shadowsocks
     public static class Utils
     {
         public static string TempPath { get; }
+
         private static readonly DateTime PD = new DateTime(1970, 1, 1, 0, 0, 0, 0, System.DateTimeKind.Utc);
 
         static Utils()
@@ -215,7 +216,7 @@ namespace Shadowsocks
         {
             if (cfg.servers.Any(c=>c.Identifier == cfg.currentServer)) return cfg.servers.FirstOrDefault(c=>c.Identifier == cfg.currentServer);
             if (cfg.servers.Count > 0) return cfg.servers.First();
-            return null;
+            throw new Exception("Server not found");
         }
 
         public static string GetSSUrl(this Server server)

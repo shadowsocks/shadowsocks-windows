@@ -15,7 +15,6 @@ namespace Shadowsocks.Models
         public bool global { get; set; }
         public bool enabled { get; set; }
         public bool shareOverLan { get; set; }
-        public bool isDefault { get; set; }
         public int localPort { get; set; }
         public string pacUrl { get; set; }
         public bool useOnlinePac { get; set; }
@@ -68,7 +67,6 @@ namespace Shadowsocks.Models
                         global = oconfig.global,
                         enabled = oconfig.enabled,
                         shareOverLan = oconfig.shareOverLan,
-                        isDefault = oconfig.isDefault,
                         localPort = oconfig.localPort,
                         pacUrl = oconfig.pacUrl,
                         useOnlinePac = oconfig.useOnlinePac,
@@ -83,7 +81,7 @@ namespace Shadowsocks.Models
                     ret.AddServer(oconfig.configs);
                 }
             }
-            return ret ?? new Configuration();
+            return ret;
         }
 
         public void Save()

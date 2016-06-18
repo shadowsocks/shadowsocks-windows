@@ -11,7 +11,7 @@ using Shadowsocks.Services;
 
 namespace Shadowsocks
 {
-    public class Controller
+    public class Controller:IController
     {
         #region Fields
         private Listener _listener;
@@ -19,8 +19,9 @@ namespace Shadowsocks
         private readonly PrivoxyRunner _privoxyRunner;
 
         private bool stopped;
+        private readonly Server _defaultServer = new Server();
 
-        private bool _systemProxyIsDirty;
+        private bool _systemProxyIsBusy;
 
         private System.Threading.Timer _tmrReleaseMemory;
 
@@ -31,53 +32,34 @@ namespace Shadowsocks
         #endregion
 
         #region Properties
-        private readonly IConfig _config;
-        //dirty hack temporary, shake it baby!
+        private IConfig _config;
+        //shake it baby!
         public Server[] servers => _config.servers.ToArray();
-        public string currentServer { get { return _config.currentServer; } set { _config.currentServer = value; ReportConfigChange(); } }
-        public bool global { get { return _config.global; } set { _config.global = value; UpdateSystemProxy(); ReportConfigChange(); EnableGlobalChanged?.Invoke(this, new EventArgs()); } }
-        public bool enabled { get { return _config.enabled; } set { _config.enabled = value; UpdateSystemProxy(); ReportConfigChange(); EnableStatusChanged?.Invoke(this, new EventArgs()); } }
-        public bool shareOverLan { get { return _config.shareOverLan; } set { _config.shareOverLan = value; ReportConfigChange(); ShareOverLANStatusChanged?.Invoke(this, new EventArgs()); } }
-        public bool isDefault { get { return _config.isDefault; } set { _config.isDefault = value; ReportConfigChange(); } }
-        public int localPort { get { return _config.localPort; } set { _config.localPort = value; ReportConfigChange(); } }
-        public string pacUrl { get { return _config.pacUrl; } set { _config.pacUrl = value; ReportConfigChange(); } }
-        public bool useOnlinePac { get { return _config.useOnlinePac; } set { _config.useOnlinePac = value; ReportConfigChange(); } }
-        public int releaseMemoryPeriod { get { return _config.releaseMemoryPeriod; } set { _config.releaseMemoryPeriod = value; StartReleasingMemory(); ReportConfigChange(false); } }
+        public string currentServer => _config.currentServer;
+        public bool global => _config.global;
+        public bool enabled => _config.enabled;
+        public bool shareOverLan => _config.shareOverLan;
+        public int localPort => _config.localPort;
+        public string pacUrl => _config.pacUrl;
+        public bool useOnlinePac => _config.useOnlinePac;
+        public int releaseMemoryPeriod => _config.releaseMemoryPeriod;
         #endregion
 
         #region Events
-        public class PathEventArgs : EventArgs
-        {
-            public string Path;
-        }
-
-        public event EventHandler ConfigChanged;
-        public event EventHandler EnableStatusChanged;
-        public event EventHandler EnableGlobalChanged;
-        public event EventHandler ShareOverLANStatusChanged;
-
-        // when user clicked Edit PAC, and PAC file has already created
-        public event EventHandler<PathEventArgs> PACFileReadyToOpen;
-        public event EventHandler<PathEventArgs> UserRuleFileReadyToOpen;
-
-        public event ErrorEventHandler Errored;
-        #endregion
-
-        #region EventInvoker
-        protected void ReportError(Exception e)
-        {
-            Errored?.Invoke(this, new ErrorEventArgs(e));
-        }
-        protected void ReportConfigChange(bool needRefresh = true)
-        {
-            _config.Save();
-            if(needRefresh)Refresh();
-            ConfigChanged?.Invoke(this, new EventArgs());
-        }
         private void pacServer_PACFileChanged(object sender, EventArgs e)
         {
             UpdateSystemProxy();
         }
+        private async void pacServer_UserRuleFileChanged(object sender, EventArgs e)
+        {
+            if (!File.Exists(Utils.GetTempPath("gfwlist.txt")))
+            {
+                await UpdateGFWListAsync().ConfigureAwait(false);
+                return;
+            }
+            PushGFWList(File.ReadAllText(Utils.GetTempPath("gfwlist.txt")));
+        }
+        public event ErrorEventHandler Errored;
         #endregion
 
         #region Analysis
@@ -183,16 +165,14 @@ namespace Shadowsocks
             if (_config.enabled)
             {
                 SystemProxy.Update(_config, false);
-                _systemProxyIsDirty = true;
+                _systemProxyIsBusy = true;
             }
             else
             {
                 // only switch it off if we have switched it on
-                if (_systemProxyIsDirty)
-                {
-                    SystemProxy.Update(_config, false);
-                    _systemProxyIsDirty = false;
-                }
+                if (!_systemProxyIsBusy) return;
+                SystemProxy.Update(_config, false);
+                _systemProxyIsBusy = false;
             }
         }
         private void StartReleasingMemory()
@@ -201,98 +181,180 @@ namespace Shadowsocks
             _tmrReleaseMemory = new System.Threading.Timer(ReleaseMemory, null, 0, (_config.releaseMemoryPeriod < 1 ? 30 : _config.releaseMemoryPeriod) * 1000);
         }
 
-        private void Refresh()
+        protected Task ReloadAsync()
         {
-            _pacServer.UpdateConfiguration(_config);
-            try
+            return Task.Run(() =>
             {
-                _privoxyRunner.Start(_config);
-
-                TCPRelay tcpRelay = new TCPRelay(this);
-                UDPRelay udpRelay = new UDPRelay(this);
-                List<Listener.Service> services = new List<Listener.Service> { tcpRelay, udpRelay, _pacServer, new PortForwarder(_privoxyRunner.RunningPort) };
-                _listener = new Listener(services);
-                _listener.Start(_config);
-            }
-            catch (Exception e)
-            {
-                // translate Microsoft language into human language
-                // i.e. An attempt was made to access a socket in a way forbidden by its access permissions => Port already in use
-                var exception = e as SocketException;
-                SocketException se = exception;
-                if (se?.SocketErrorCode == SocketError.AccessDenied)
+                _pacServer.UpdateConfiguration(_config);
+                _listener?.Stop();
+                // don't put polipoRunner.Start() before pacServer.Stop()
+                // or bind will fail when switching bind address from 0.0.0.0 to 127.0.0.1
+                // though UseShellExecute is set to true now
+                // http://stackoverflow.com/questions/10235093/socket-doesnt-close-after-application-exits-if-a-launched-process-is-open
+                _privoxyRunner.Stop();
+                try
                 {
-                    var xe = new Exception("Port already in use", e);
-                    Logging.LogUsefulException(xe);
+                    _privoxyRunner.Start(_config);
+                    var tcpRelay = new TCPRelay(this);
+                    var udpRelay = new UDPRelay(this);
+                    var services = new List<Listener.Service> {tcpRelay, udpRelay, _pacServer, new PortForwarder(_privoxyRunner.RunningPort)};
+                    _listener = new Listener(services);
+                    _listener.Start(_config);
                 }
-                ReportError(e);
-            }
-            _config.Save();
-            ConfigChanged?.Invoke(this, new EventArgs());
-            UpdateSystemProxy();
-            Utils.ReleaseMemory(true);
+                catch (Exception e)
+                {
+                    // translate Microsoft language into human language
+                    // i.e. An attempt was made to access a socket in a way forbidden by its access permissions => Port already in use
+                    if (e is SocketException)
+                    {
+                        SocketException se = (SocketException)e;
+                        if (se.SocketErrorCode == SocketError.AccessDenied)
+                        {
+                            e = new Exception("Port already in use", e);
+                        }
+                    }
+                    Logging.LogUsefulException(e);
+                    Errored?.Invoke(this, new ErrorEventArgs(e));
+                }
+                UpdateSystemProxy();
+                Utils.ReleaseMemory(true);
+            });
         }
         #endregion
 
         #region PublicMethods
-        public void Start()
-        {
-            _config.Save();
-            Refresh();
-        }
-        public void Stop()
-        {
-            if (stopped)
-            {
-                return;
-            }
-            stopped = true;
-            _listener?.Stop();
-            _privoxyRunner?.Stop();
-            if (_config.enabled)
-            {
-                SystemProxy.Update(_config, true);
-            }
-        }
-
         public Server GetCurrentServer()
         {
             return _config.GetCurrentServer();
         }
 
-        public void SelectServer(string serverIdentity)
+        public async Task StartAsync()
         {
-            if(_config.servers.All(c => c.Identifier != serverIdentity))throw new Exception("Server not found");
+            if(_config.GetCurrentServer().Equals(_defaultServer))
+                throw new Exception("Please add some server!");
+            await ReloadAsync().ConfigureAwait(false);
+        }
+
+        public Task StopAsync()
+        {
+            return Task.Run(() =>
+            {
+                if (stopped)
+                {
+                    return;
+                }
+                stopped = true;
+                _listener?.Stop();
+                _privoxyRunner?.Stop();
+                if (_config.enabled)
+                {
+                    SystemProxy.Update(_config, true);
+                }
+            });
+        }
+
+        public async Task ApplyConfigAsync(IConfig newConfig)
+        {
+            _config = newConfig;
+            await ReloadAsync().ConfigureAwait(false);
+        }
+
+        public Task SaveServerAsync(IEnumerable<Server> svc)
+        {
+            return Task.Run(() =>
+            {
+                _config.servers = svc.ToList();
+                _config.Save();
+            });
+        }
+
+        public async Task SelectServerAsync(string serverIdentity)
+        {
+            if (_config.servers.All(c => c.Identifier != serverIdentity)) throw new Exception("Server not found");
             _config.currentServer = serverIdentity;
-            Refresh();
+            await ReloadAsync().ConfigureAwait(false);
         }
 
-        public void TouchPACFile()
+        public async Task SelectServerAsync(Server server)
         {
-            string pacFilename = _pacServer.TouchPACFile();
-            PACFileReadyToOpen?.Invoke(this, new PathEventArgs() { Path = pacFilename });
+            _config.currentServer = server.Identifier;
+            await ReloadAsync().ConfigureAwait(false);
         }
 
-        public void TouchUserRuleFile()
+        public async Task ToggleEnableAsync(bool isEnabled)
         {
-            string userRuleFilename = _pacServer.TouchUserRuleFile();
-            UserRuleFileReadyToOpen?.Invoke(this, new PathEventArgs() { Path = userRuleFilename });
+            _config.enabled = isEnabled;
+            UpdateSystemProxy();
+            _config.Save();
+            await ReloadAsync().ConfigureAwait(false);
+        }
+
+        public async Task ToggleGlobalAsync(bool isGlobal)
+        {
+            _config.global = global;
+            UpdateSystemProxy();
+            _config.Save();
+            await ReloadAsync().ConfigureAwait(false);
+        }
+
+        public async Task ToggleShareOverLANAsync(bool isEnabled)
+        {
+            _config.shareOverLan = enabled;
+            _config.Save();
+            await ReloadAsync().ConfigureAwait(false);
+        }
+
+        public async Task SavePACUrlAsync(string Url)
+        {
+            _config.pacUrl = Url;
+            UpdateSystemProxy();
+            _config.Save();
+            await ReloadAsync().ConfigureAwait(false);
+        }
+
+        public async Task UseOnlinePACAsync(bool isUseOnlinePac)
+        {
+            _config.useOnlinePac = isUseOnlinePac;
+            UpdateSystemProxy();
+            _config.Save();
+            await ReloadAsync().ConfigureAwait(false);
+        }
+
+        public async Task ChangeLocalPortAsync(int newPort)
+        {
+            _config.localPort = newPort;
+            UpdateSystemProxy();
+            _config.Save();
+            await ReloadAsync().ConfigureAwait(false);
+        }
+
+        public void ChangeReleaseMemoryPeriod(int newPeriodTime)
+        {
+            _config.releaseMemoryPeriod = newPeriodTime;
+            _config.Save();
+            StartReleasingMemory();
+        }
+
+
+        public Task<string> TouchPACFileAsync()
+        {
+            return Task.Run(() => _pacServer.TouchPACFile());
+        }
+
+        public Task<string> TouchUserRuleFileAsync()
+        {
+            return Task.Run(() => _pacServer.TouchUserRuleFile());
+        }
+
+        public bool AddUserRule(string line)
+        {
+            return _pacServer.AddLine(line);
         }
         #endregion
 
         #region GFWList
-        private async void pacServer_UserRuleFileChanged(object sender, EventArgs e)
-        {
-            if (!File.Exists(Utils.GetTempPath("gfwlist.txt")))
-            {
-                await UpdateGFWListAsync().ConfigureAwait(false);
-                return;
-            }
-            PushGFWList(File.ReadAllText(Utils.GetTempPath("gfwlist.txt")));
-        }
         private static readonly IEnumerable<char> IgnoredLineBegins = new[] { '!', '[' };
         private const string GFWLIST_URL = "https://raw.githubusercontent.com/gfwlist/gfwlist/master/gfwlist.txt";
-
         public async Task UpdateGFWListAsync(System.Net.IWebProxy proxy = null)
         {
             var http = new System.Net.WebClient {Proxy = proxy ?? new System.Net.WebProxy(System.Net.IPAddress.Loopback.ToString(), _config.localPort)};

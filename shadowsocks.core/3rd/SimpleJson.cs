@@ -469,9 +469,11 @@ namespace SimpleJson
 
     #endregion
 
+    #region Attribute
     public class IgnoreAttribute : Attribute
     {
     }
+    #endregion
 }
 
 namespace SimpleJson

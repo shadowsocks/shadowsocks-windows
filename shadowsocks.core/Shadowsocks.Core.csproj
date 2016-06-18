@@ -127,6 +127,7 @@
     <Compile Include="Encryption\PolarSSLEncryptor.cs" />
     <Compile Include="Encryption\SodiumEncryptor.cs" />
     <Compile Include="Encryption\TableEncryptor.cs" />
+    <Compile Include="IController.cs" />
     <Compile Include="Models\IConfig.cs" />
     <Compile Include="Models\OfficialConfig.cs" />
     <Compile Include="Models\Server.cs" />
