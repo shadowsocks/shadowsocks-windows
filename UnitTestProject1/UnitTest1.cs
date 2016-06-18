@@ -14,7 +14,6 @@ namespace UnitTestProject1
         [TestMethod]
         public void TestMD5()
         {
-            tmr.Start();
             for (int len = 1; len < 100; len++)
             {
                 System.Security.Cryptography.MD5 md5 = System.Security.Cryptography.MD5.Create();
@@ -23,10 +22,10 @@ namespace UnitTestProject1
                 random.NextBytes(bytes);
                 string md5str = Convert.ToBase64String(md5.ComputeHash(bytes));
                 string md5str2 = Convert.ToBase64String(MessageDigest.MD5(bytes));
+                string md5str3 = Convert.ToBase64String(Encryption.MbedTLS.MD5(bytes));
                 Assert.IsTrue(md5str == md5str2);
+                Assert.IsTrue(md5str == md5str3);
             }
-            tmr.Stop();
-            Console.WriteLine($"{tmr.Duration} Elapsed");
 
             tmr.Start();
             for (int len = 1; len < 1000; len++)
@@ -38,7 +37,7 @@ namespace UnitTestProject1
                 string md5str = Convert.ToBase64String(md5.ComputeHash(bytes));
             }
             tmr.Stop();
-            Console.WriteLine($"{tmr.Duration} Elapsed");
+            Console.WriteLine($".NET Framework: {tmr.Duration} Elapsed");
 
             tmr.Start();
             for (int len = 1; len < 1000; len++)
@@ -49,7 +48,18 @@ namespace UnitTestProject1
                 string md5str = Convert.ToBase64String(MessageDigest.MD5(bytes));
             }
             tmr.Stop();
-            Console.WriteLine($"{tmr.Duration} Elapsed");
+            Console.WriteLine($"Wrapper: {tmr.Duration} Elapsed");
+
+            tmr.Start();
+            for (int len = 1; len < 1000; len++)
+            {
+                byte[] bytes = new byte[len];
+                var random = new Random();
+                random.NextBytes(bytes);
+                string md5str = Convert.ToBase64String(Encryption.MbedTLS.MD5(bytes));
+            }
+            tmr.Stop();
+            Console.WriteLine($"Native: {tmr.Duration} Elapsed");
         }
 
         private void RunEncryptionRound(IEncryptor encryptor, IEncryptor decryptor)
@@ -84,16 +94,48 @@ namespace UnitTestProject1
             }
         }
 
+        private void RunEncryptionRoundNative(Encryption.IEncryptor encryptor, Encryption.IEncryptor decryptor)
+        {
+            byte[] plain = new byte[16384];
+            byte[] cipher = new byte[plain.Length + 16 + Encryption.IVEncryptor.ONETIMEAUTH_BYTES + Encryption.IVEncryptor.AUTH_BYTES];
+            byte[] plain2 = new byte[plain.Length + 16];
+            int outLen = 0;
+            int outLen2 = 0;
+            var random = new Random();
+            random.NextBytes(plain);
+            encryptor.Encrypt(plain, plain.Length, cipher, out outLen);
+            decryptor.Decrypt(cipher, outLen, plain2, out outLen2);
+            Assert.AreEqual(plain.Length, outLen2);
+            for (int j = 0; j < plain.Length; j++)
+            {
+                Assert.AreEqual(plain[j], plain2[j]);
+            }
+            encryptor.Encrypt(plain, 1000, cipher, out outLen);
+            decryptor.Decrypt(cipher, outLen, plain2, out outLen2);
+            Assert.AreEqual(1000, outLen2);
+            for (int j = 0; j < outLen2; j++)
+            {
+                Assert.AreEqual(plain[j], plain2[j]);
+            }
+            encryptor.Encrypt(plain, 12333, cipher, out outLen);
+            decryptor.Decrypt(cipher, outLen, plain2, out outLen2);
+            Assert.AreEqual(12333, outLen2);
+            for (int j = 0; j < outLen2; j++)
+            {
+                Assert.AreEqual(plain[j], plain2[j]);
+            }
+        }
+
         private static bool encryptionFailed = false;
         private static object locker = new object();
 
         [TestMethod]
         public void TestPolarSSLEncryption()
         {
+            List<Thread> threads = new List<Thread>();
             tmr.Start();
             // run it once before the multi-threading test to initialize global tables
             RunSinglePolarSSLEncryptionThread();
-            List<Thread> threads = new List<Thread>();
             for (int i = 0; i < 10; i++)
             {
                 Thread t = new Thread(RunSinglePolarSSLEncryptionThread);
@@ -104,9 +146,46 @@ namespace UnitTestProject1
             {
                 t.Join();
             }
-            Assert.IsFalse(encryptionFailed);
             tmr.Stop();
-            Console.WriteLine($"{tmr.Duration} Elapsed");
+            Assert.IsFalse(encryptionFailed);
+            Console.WriteLine($"Wrapper: {tmr.Duration} Elapsed");
+
+            threads.Clear();
+            tmr.Start();
+            RunSinglePolarSSLEncryptionNativeThread();
+            for (int i = 0; i < 10; i++)
+            {
+                Thread t = new Thread(RunSinglePolarSSLEncryptionNativeThread);
+                threads.Add(t);
+                t.Start();
+            }
+            foreach (Thread t in threads)
+            {
+                t.Join();
+            }
+            tmr.Stop();
+            Assert.IsFalse(encryptionFailed);
+            Console.WriteLine($"Native: {tmr.Duration} Elapsed");
+        }
+
+        private void RunSinglePolarSSLEncryptionNativeThread()
+        {
+            try
+            {
+                for (int i = 0; i < 100; i++)
+                {
+                    Encryption.IEncryptor encryptor;
+                    Encryption.IEncryptor decryptor;
+                    encryptor = new Encryption.PolarSSLEncryptor("aes-256-cfb", "barfoo!", false, false);
+                    decryptor = new Encryption.PolarSSLEncryptor("aes-256-cfb", "barfoo!", false, false);
+                    RunEncryptionRoundNative(encryptor, decryptor);
+                }
+            }
+            catch
+            {
+                encryptionFailed = true;
+                throw;
+            }
         }
 
         private void RunSinglePolarSSLEncryptionThread()
@@ -132,10 +211,10 @@ namespace UnitTestProject1
         [TestMethod]
         public void TestRC4Encryption()
         {
+            List<Thread> threads = new List<Thread>(); 
             tmr.Start();
             // run it once before the multi-threading test to initialize global tables
             RunSingleRC4EncryptionThread();
-            List<Thread> threads = new List<Thread>();
             for (int i = 0; i < 10; i++)
             {
                 var t = new Thread(RunSingleRC4EncryptionThread);
@@ -146,9 +225,27 @@ namespace UnitTestProject1
             {
                 t.Join();
             }
-            Assert.IsFalse(encryptionFailed);
             tmr.Stop();
-            Console.WriteLine($"{tmr.Duration} Elapsed");
+            Assert.IsFalse(encryptionFailed);
+            Console.WriteLine($"Wrapper: {tmr.Duration} Elapsed");
+
+            threads.Clear();
+            tmr.Start();
+            // run it once before the multi-threading test to initialize global tables
+            RunSingleRC4EncryptionNativeThread();
+            for (int i = 0; i < 10; i++)
+            {
+                var t = new Thread(RunSingleRC4EncryptionNativeThread);
+                threads.Add(t);
+                t.Start();
+            }
+            foreach (Thread t in threads)
+            {
+                t.Join();
+            }
+            tmr.Stop();
+            Assert.IsFalse(encryptionFailed);
+            Console.WriteLine($"Native: {tmr.Duration} Elapsed");
         }
 
         private void RunSingleRC4EncryptionThread()
@@ -172,13 +269,34 @@ namespace UnitTestProject1
             }
         }
 
+        private void RunSingleRC4EncryptionNativeThread()
+        {
+            try
+            {
+                for (int i = 0; i < 100; i++)
+                {
+                    var random = new Random();
+                    Encryption.IEncryptor encryptor;
+                    Encryption.IEncryptor decryptor;
+                    encryptor = new Encryption.PolarSSLEncryptor("rc4-md5", "barfoo!", false, false);
+                    decryptor = new Encryption.PolarSSLEncryptor("rc4-md5", "barfoo!", false, false);
+                    RunEncryptionRoundNative(encryptor, decryptor);
+                }
+            }
+            catch
+            {
+                encryptionFailed = true;
+                throw;
+            }
+        }
+
         [TestMethod]
         public void TestSodiumEncryption()
         {
+            List<Thread> threads = new List<Thread>();
             tmr.Start();
             // run it once before the multi-threading test to initialize global tables
             RunSingleSodiumEncryptionThread();
-            List<Thread> threads = new List<Thread>();
             for (int i = 0; i < 10; i++)
             {
                 Thread t = new Thread(RunSingleSodiumEncryptionThread);
@@ -191,7 +309,25 @@ namespace UnitTestProject1
             }
             Assert.IsFalse(encryptionFailed);
             tmr.Stop();
-            Console.WriteLine($"{tmr.Duration} Elapsed");
+            Console.WriteLine($"Wrapper: {tmr.Duration} Elapsed");
+
+            threads.Clear();
+            tmr.Start();
+            // run it once before the multi-threading test to initialize global tables
+            RunSingleSodiumEncryptionNativeThread();
+            for (int i = 0; i < 10; i++)
+            {
+                Thread t = new Thread(RunSingleSodiumEncryptionNativeThread);
+                threads.Add(t);
+                t.Start();
+            }
+            foreach (Thread t in threads)
+            {
+                t.Join();
+            }
+            Assert.IsFalse(encryptionFailed);
+            tmr.Stop();
+            Console.WriteLine($"Native: {tmr.Duration} Elapsed");
         }
 
         private void RunSingleSodiumEncryptionThread()
@@ -232,7 +368,46 @@ namespace UnitTestProject1
                 encryptionFailed = true;
                 throw;
             }
+        }
 
+        private void RunSingleSodiumEncryptionNativeThread()
+        {
+
+            try
+            {
+                for (int i = 0; i < 50; i++)
+                {
+                    var random = new Random();
+                    Encryption.IEncryptor encryptor;
+                    Encryption.IEncryptor decryptor;
+                    encryptor = new Encryption.SodiumEncryptor("salsa20", "barfoo!", false, false);
+                    decryptor = new Encryption.SodiumEncryptor("salsa20", "barfoo!", false, false);
+                    RunEncryptionRoundNative(encryptor, decryptor);
+                }
+                for (int i = 0; i < 50; i++)
+                {
+                    var random = new Random();
+                    Encryption.IEncryptor encryptor;
+                    Encryption.IEncryptor decryptor;
+                    encryptor = new Encryption.SodiumEncryptor("chacha20", "barfoo!", false, false);
+                    decryptor = new Encryption.SodiumEncryptor("chacha20", "barfoo!", false, false);
+                    RunEncryptionRoundNative(encryptor, decryptor);
+                }
+                for (int i = 0; i < 50; i++)
+                {
+                    var random = new Random();
+                    Encryption.IEncryptor encryptor;
+                    Encryption.IEncryptor decryptor;
+                    encryptor = new Encryption.SodiumEncryptor("chacha20-ietf", "barfoo!", false, false);
+                    decryptor = new Encryption.SodiumEncryptor("chacha20-ietf", "barfoo!", false, false);
+                    RunEncryptionRoundNative(encryptor, decryptor);
+                }
+            }
+            catch
+            {
+                encryptionFailed = true;
+                throw;
+            }
         }
     }
 }

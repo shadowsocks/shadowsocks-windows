@@ -1,0 +1,54 @@
+ImageRuntimeVersion: v4.0.30319
+Assembly libsscryptoWrapper, Version=1.0.0.1, Culture=neutral, PublicKeyToken=7664764699dac8d2: 
+	hash=SHA1, flags=PublicKey
+Assembly mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089: 
+	hash=None, flags=None
+Assembly System.Data, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089: 
+	hash=None, flags=None
+Assembly System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089: 
+	hash=None, flags=None
+Assembly System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089: 
+	hash=None, flags=None
+Class LibSSCrypto.MbedTLS: AutoLayout, AnsiClass, Class, Public, BeforeFieldInit
+    Void .ctor(): PrivateScope, Public, HideBySig, SpecialName, RTSpecialName
+  Fields:
+    Int32 MD5_CTX_SIZE = 88 : Public, Static, Literal, HasDefault
+  Methods:
+    md5_init(IntPtr): PrivateScope, Public, Static, HideBySig
+    md5_free(IntPtr): PrivateScope, Public, Static, HideBySig
+    md5_starts(IntPtr): PrivateScope, Public, Static, HideBySig
+    md5_update(IntPtr, Byte[], UInt32): PrivateScope, Public, Static, HideBySig
+    md5_finish(IntPtr, Byte[]): PrivateScope, Public, Static, HideBySig
+    MD5(Byte[]): PrivateScope, Public, Static, HideBySig
+Class LibSSCrypto.PolarSSL: AutoLayout, AnsiClass, Class, Public, BeforeFieldInit
+    Void .ctor(): PrivateScope, Public, HideBySig, SpecialName, RTSpecialName
+  Fields:
+    Int32 AES_CTX_SIZE = 280 : Public, Static, Literal, HasDefault
+    Int32 AES_ENCRYPT = 1 : Public, Static, Literal, HasDefault
+    Int32 AES_DECRYPT = 0 : Public, Static, Literal, HasDefault
+    Int32 ARC4_CTX_SIZE = 264 : Public, Static, Literal, HasDefault
+  Methods:
+    aes_init(IntPtr): PrivateScope, Public, Static, HideBySig
+    aes_free(IntPtr): PrivateScope, Public, Static, HideBySig
+    aes_setkey_enc(IntPtr, Byte[], Int32): PrivateScope, Public, Static, HideBySig
+    aes_crypt_cfb128(IntPtr, Int32, Int32, UInt32*, Byte[], Byte[], Byte[]): PrivateScope, Public, Static, HideBySig
+    aes_crypt_cfb128(IntPtr, Int32, Int32, UInt32, Byte[], Byte[], Byte[]): PrivateScope, Public, Static, HideBySig
+    arc4_init(IntPtr): PrivateScope, Public, Static, HideBySig
+    arc4_free(IntPtr): PrivateScope, Public, Static, HideBySig
+    arc4_setup(IntPtr, Byte[], Int32): PrivateScope, Public, Static, HideBySig
+    arc4_crypt(IntPtr, Int32, Byte[], Byte[]): PrivateScope, Public, Static, HideBySig
+Class LibSSCrypto.Sodium: AutoLayout, AnsiClass, Class, Public, BeforeFieldInit
+    Void .ctor(): PrivateScope, Public, HideBySig, SpecialName, RTSpecialName
+  Methods:
+    crypto_stream_salsa20_xoric(Byte[], Byte[], UInt64, Byte[], UInt64, Byte[]): PrivateScope, Public, Static, HideBySig
+    crypto_stream_chacha20_xoric(Byte[], Byte[], UInt64, Byte[], UInt64, Byte[]): PrivateScope, Public, Static, HideBySig
+    crypto_stream_chacha20_ietf_xoric(Byte[], Byte[], UInt64, Byte[], UInt32, Byte[]): PrivateScope, Public, Static, HideBySig
+    ss_sha1_hmac_ex(Byte[], UInt32, Byte[], Int32, UInt32, Byte[]): PrivateScope, Public, Static, HideBySig
+Class LibSSCrypto.MessageDigest: AutoLayout, AnsiClass, Class, Public, Abstract, Sealed, BeforeFieldInit
+  Methods:
+    MD5(String): PrivateScope, Public, Static, HideBySig
+    MD5(Byte[]): PrivateScope, Public, Static, HideBySig
+    MD5(String, Encoding): PrivateScope, Public, Static, HideBySig
+    HMAC_MD5(Byte[], UInt32, Byte[], Int32, UInt32): PrivateScope, Public, Static, HideBySig
+    HMAC_SHA1(Byte[], UInt32, Byte[], Int32, UInt32): PrivateScope, Public, Static, HideBySig
+    GetRandom(UInt32): PrivateScope, Public, Static, HideBySig

@@ -53,6 +53,9 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="libsscryptoWrapper">
+      <HintPath>..\libs\libsscryptoWrapper.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
@@ -141,12 +144,6 @@
     <Compile Include="Services\UDPRelay.cs" />
     <Compile Include="Utils\SystemProxy.cs" />
     <Compile Include="Utils\Utils.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\libsscrypto\libsscrypto.vcxproj">
-      <Project>{f39636b8-ace0-4408-b3cc-92ad200235a9}</Project>
-      <Name>libsscrypto</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Properties\Resources.resx">

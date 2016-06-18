@@ -1,8 +1,0 @@
-[submodule "3rd/libsodium"]
-	path = 3rd/libsodium
-	url = git@github.com:jedisct1/libsodium.git
-	ignore = dirty
-[submodule "3rd/mbedtls"]
-	path = 3rd/mbedtls
-	url = git@github.com:ARMmbed/mbedtls.git
-	ignore = dirty
