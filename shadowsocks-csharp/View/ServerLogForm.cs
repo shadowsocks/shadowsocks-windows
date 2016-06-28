@@ -22,6 +22,7 @@ namespace Shadowsocks.View
         private int lastRefreshIndex = 0;
         private bool rowChange = false;
         private int updatePause = 0;
+        private int pendingUpdate = 0;
         private ServerSpeedLogShow[] ServerSpeedLogList;
         private Thread workerThread;
         private AutoResetEvent workerEvent = new AutoResetEvent(false);
@@ -52,6 +53,8 @@ namespace Shadowsocks.View
             this.contextMenu1 = new ContextMenu(new MenuItem[] {
                 CreateMenuItem("Auto &size", new EventHandler(this.autosizeItem_Click)),
                 this.topmostItem = CreateMenuItem("Always On &Top", new EventHandler(this.topmostItem_Click)),
+                new MenuItem("-"),
+                CreateMenuItem("Clear &MaxSpeed", new EventHandler(this.ClearMaxSpeed_Click)),
                 this.clearItem = CreateMenuItem("&Clear", new EventHandler(this.ClearItem_Click)),
             });
             ServerDataGrid.ContextMenu = contextMenu1;
@@ -283,8 +286,12 @@ namespace Shadowsocks.View
                         // TotalConnecting
                         else if (columnName == "Connecting")
                         {
-                            //SetCellText(cell, server.GetConnections().Count);
                             long connections = serverSpeedLog.totalConnectTimes - serverSpeedLog.totalDisconnectTimes;
+                            //long ref_connections = server.GetConnections().Count;
+                            //if (ref_connections < connections)
+                            //{
+                            //    connections = ref_connections;
+                            //}
                             Color[] colList = new Color[5] { Color.White, Color.LightGreen, Color.Yellow, Color.Red, Color.Red };
                             long[] bytesList = new long[5] { 0, 8, 16, 32, 65536 };
                             for (int i = 1; i < colList.Length; ++i)
@@ -538,6 +545,15 @@ namespace Shadowsocks.View
             this.TopMost = topmostItem.Checked;
         }
 
+        private void ClearMaxSpeed_Click(object sender, EventArgs e)
+        {
+            Configuration config = controller.GetCurrentConfiguration();
+            foreach (Server server in config.configs)
+            {
+                server.ServerSpeedLog().ClearMaxSpeed();
+            }
+        }
+
         private void ClearItem_Click(object sender, EventArgs e)
         {
             Configuration config = controller.GetCurrentConfiguration();
@@ -554,6 +570,14 @@ namespace Shadowsocks.View
                 updatePause -= 1;
                 return;
             }
+            if (this.WindowState == FormWindowState.Minimized)
+            {
+                if (++pendingUpdate < 40)
+                {
+                    return;
+                }
+            }
+            pendingUpdate = 0;
             RefreshLog();
             UpdateLog();
         }
@@ -622,6 +646,11 @@ namespace Shadowsocks.View
                     Configuration config = controller.GetCurrentConfiguration();
                     Server server = config.configs[id];
                     server.GetConnections().CloseAll();
+                }
+                if (ServerDataGrid.Columns[e.ColumnIndex].Name == "MaxSpeed")
+                {
+                    Configuration config = controller.GetCurrentConfiguration();
+                    config.configs[id].ServerSpeedLog().ClearMaxSpeed();
                 }
                 if (ServerDataGrid.Columns[e.ColumnIndex].Name == "ErrorPercent")
                 {

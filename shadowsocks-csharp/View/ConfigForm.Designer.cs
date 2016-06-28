@@ -38,7 +38,6 @@
             this.PasswordTextBox = new System.Windows.Forms.TextBox();
             this.EncryptionLabel = new System.Windows.Forms.Label();
             this.EncryptionSelect = new System.Windows.Forms.ComboBox();
-            this.LabelLink = new System.Windows.Forms.Label();
             this.TextLink = new System.Windows.Forms.TextBox();
             this.RemarksTextBox = new System.Windows.Forms.TextBox();
             this.ObfsUDPLabel = new System.Windows.Forms.Label();
@@ -53,12 +52,12 @@
             this.TCPProtocolComboBox = new System.Windows.Forms.ComboBox();
             this.labelObfsParam = new System.Windows.Forms.Label();
             this.textObfsParam = new System.Windows.Forms.TextBox();
-            this.checkRemarks = new System.Windows.Forms.CheckBox();
             this.labelGroup = new System.Windows.Forms.Label();
             this.TextGroup = new System.Windows.Forms.TextBox();
             this.checkAdvSetting = new System.Windows.Forms.CheckBox();
             this.labelUDPPort = new System.Windows.Forms.Label();
             this.textUDPPort = new System.Windows.Forms.TextBox();
+            this.checkSSRLink = new System.Windows.Forms.CheckBox();
             this.panel2 = new System.Windows.Forms.Panel();
             this.DeleteButton = new System.Windows.Forms.Button();
             this.AddButton = new System.Windows.Forms.Button();
@@ -75,6 +74,7 @@
             this.tableLayoutPanel3 = new System.Windows.Forms.TableLayoutPanel();
             this.MyCancelButton = new System.Windows.Forms.Button();
             this.OKButton = new System.Windows.Forms.Button();
+            this.labelRemarks = new System.Windows.Forms.Label();
             this.tableLayoutPanel1.SuspendLayout();
             this.ServerGroupBox.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.PictureQRcode)).BeginInit();
@@ -101,7 +101,6 @@
             this.tableLayoutPanel1.Controls.Add(this.PasswordTextBox, 1, 2);
             this.tableLayoutPanel1.Controls.Add(this.EncryptionLabel, 0, 3);
             this.tableLayoutPanel1.Controls.Add(this.EncryptionSelect, 1, 3);
-            this.tableLayoutPanel1.Controls.Add(this.LabelLink, 0, 9);
             this.tableLayoutPanel1.Controls.Add(this.TextLink, 1, 9);
             this.tableLayoutPanel1.Controls.Add(this.RemarksTextBox, 1, 7);
             this.tableLayoutPanel1.Controls.Add(this.ObfsUDPLabel, 0, 14);
@@ -116,12 +115,13 @@
             this.tableLayoutPanel1.Controls.Add(this.TCPProtocolComboBox, 1, 4);
             this.tableLayoutPanel1.Controls.Add(this.labelObfsParam, 0, 6);
             this.tableLayoutPanel1.Controls.Add(this.textObfsParam, 1, 6);
-            this.tableLayoutPanel1.Controls.Add(this.checkRemarks, 0, 7);
             this.tableLayoutPanel1.Controls.Add(this.labelGroup, 0, 8);
             this.tableLayoutPanel1.Controls.Add(this.TextGroup, 1, 8);
             this.tableLayoutPanel1.Controls.Add(this.checkAdvSetting, 0, 10);
             this.tableLayoutPanel1.Controls.Add(this.labelUDPPort, 0, 11);
             this.tableLayoutPanel1.Controls.Add(this.textUDPPort, 1, 11);
+            this.tableLayoutPanel1.Controls.Add(this.checkSSRLink, 0, 9);
+            this.tableLayoutPanel1.Controls.Add(this.labelRemarks, 0, 7);
             this.tableLayoutPanel1.Location = new System.Drawing.Point(8, 32);
             this.tableLayoutPanel1.Margin = new System.Windows.Forms.Padding(0);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
@@ -219,9 +219,9 @@
             this.PasswordTextBox.Location = new System.Drawing.Point(100, 60);
             this.PasswordTextBox.MaxLength = 256;
             this.PasswordTextBox.Name = "PasswordTextBox";
-            this.PasswordTextBox.PasswordChar = '●';
             this.PasswordTextBox.Size = new System.Drawing.Size(215, 21);
             this.PasswordTextBox.TabIndex = 2;
+            this.PasswordTextBox.UseSystemPasswordChar = true;
             this.PasswordTextBox.WordWrap = false;
             // 
             // EncryptionLabel
@@ -241,28 +241,10 @@
             this.EncryptionSelect.FormattingEnabled = true;
             this.EncryptionSelect.ImeMode = System.Windows.Forms.ImeMode.NoControl;
             this.EncryptionSelect.ItemHeight = 15;
-            this.EncryptionSelect.Items.AddRange(new object[] {
-            "rc4-md5",
-            "aes-128-cfb",
-            "aes-192-cfb",
-            "aes-256-cfb",
-            "salsa20",
-            "chacha20",
-            "chacha20-ietf"});
             this.EncryptionSelect.Location = new System.Drawing.Point(100, 87);
             this.EncryptionSelect.Name = "EncryptionSelect";
             this.EncryptionSelect.Size = new System.Drawing.Size(215, 23);
             this.EncryptionSelect.TabIndex = 3;
-            // 
-            // LabelLink
-            // 
-            this.LabelLink.Anchor = System.Windows.Forms.AnchorStyles.Right;
-            this.LabelLink.AutoSize = true;
-            this.LabelLink.Location = new System.Drawing.Point(64, 258);
-            this.LabelLink.Name = "LabelLink";
-            this.LabelLink.Size = new System.Drawing.Size(30, 15);
-            this.LabelLink.TabIndex = 11;
-            this.LabelLink.Text = "Link";
             // 
             // TextLink
             // 
@@ -425,18 +407,6 @@
             this.textObfsParam.Size = new System.Drawing.Size(215, 21);
             this.textObfsParam.TabIndex = 35;
             // 
-            // checkRemarks
-            // 
-            this.checkRemarks.Anchor = System.Windows.Forms.AnchorStyles.Right;
-            this.checkRemarks.AutoSize = true;
-            this.checkRemarks.Location = new System.Drawing.Point(17, 202);
-            this.checkRemarks.Name = "checkRemarks";
-            this.checkRemarks.Size = new System.Drawing.Size(77, 19);
-            this.checkRemarks.TabIndex = 36;
-            this.checkRemarks.Text = "Remarks";
-            this.checkRemarks.UseVisualStyleBackColor = true;
-            this.checkRemarks.CheckedChanged += new System.EventHandler(this.checkRemarks_CheckedChanged);
-            // 
             // labelGroup
             // 
             this.labelGroup.Anchor = System.Windows.Forms.AnchorStyles.Right;
@@ -490,6 +460,19 @@
             this.textUDPPort.TabIndex = 1;
             this.textUDPPort.Visible = false;
             this.textUDPPort.WordWrap = false;
+            // 
+            // checkSSRLink
+            // 
+            this.checkSSRLink.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.checkSSRLink.AutoSize = true;
+            this.checkSSRLink.Checked = true;
+            this.checkSSRLink.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.checkSSRLink.Location = new System.Drawing.Point(17, 256);
+            this.checkSSRLink.Name = "checkSSRLink";
+            this.checkSSRLink.Size = new System.Drawing.Size(77, 19);
+            this.checkSSRLink.TabIndex = 38;
+            this.checkSSRLink.Text = "SSR Link";
+            this.checkSSRLink.UseVisualStyleBackColor = true;
             // 
             // panel2
             // 
@@ -723,6 +706,16 @@
             this.OKButton.UseVisualStyleBackColor = true;
             this.OKButton.Click += new System.EventHandler(this.OKButton_Click);
             // 
+            // labelRemarks
+            // 
+            this.labelRemarks.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.labelRemarks.AutoSize = true;
+            this.labelRemarks.Location = new System.Drawing.Point(36, 204);
+            this.labelRemarks.Name = "labelRemarks";
+            this.labelRemarks.Size = new System.Drawing.Size(58, 15);
+            this.labelRemarks.TabIndex = 39;
+            this.labelRemarks.Text = "Remarks";
+            // 
             // ConfigForm
             // 
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
@@ -784,7 +777,6 @@
         private System.Windows.Forms.Label UDPoverTCPLabel;
         private System.Windows.Forms.Label TCPProtocolLabel;
         private System.Windows.Forms.Label ObfsUDPLabel;
-        private System.Windows.Forms.Label LabelLink;
         private System.Windows.Forms.TextBox TextLink;
         private System.Windows.Forms.CheckBox CheckUDPoverUDP;
         private System.Windows.Forms.CheckBox CheckObfsUDP;
@@ -803,12 +795,13 @@
         private System.Windows.Forms.Label labelObfs;
         private System.Windows.Forms.Label labelObfsParam;
         private System.Windows.Forms.TextBox textObfsParam;
-        private System.Windows.Forms.CheckBox checkRemarks;
         private System.Windows.Forms.Label labelGroup;
         private System.Windows.Forms.TextBox TextGroup;
         private System.Windows.Forms.CheckBox checkAdvSetting;
         private System.Windows.Forms.Label labelUDPPort;
         private System.Windows.Forms.TextBox textUDPPort;
+        private System.Windows.Forms.CheckBox checkSSRLink;
+        private System.Windows.Forms.Label labelRemarks;
     }
 }
 

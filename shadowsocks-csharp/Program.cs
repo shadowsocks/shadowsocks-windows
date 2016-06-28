@@ -1,12 +1,14 @@
 ﻿using Shadowsocks.Controller;
 using Shadowsocks.Properties;
-using Shadowsocks.View;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using System.Windows.Forms;
+#if !_CONSOLE
+using Shadowsocks.View;
+#endif
 
 namespace Shadowsocks
 {
@@ -18,6 +20,7 @@ namespace Shadowsocks
         [STAThread]
         static void Main(string[] args)
         {
+#if !_CONSOLE
             using (Mutex mutex = new Mutex(false, "Global\\ShadowsocksR_" + Application.StartupPath.GetHashCode()))
             {
                 Application.EnableVisualStyles();
@@ -30,20 +33,28 @@ namespace Shadowsocks
                         I18N.GetString("ShadowsocksR is already running."));
                     return;
                 }
+#endif
                 Directory.SetCurrentDirectory(Application.StartupPath);
 //#if !DEBUG
                 Logging.OpenLogFile();
 //#endif
                 ShadowsocksController controller = new ShadowsocksController();
 
+#if !_CONSOLE
                 MenuViewController viewController = new MenuViewController(controller);
+#endif
 
                 controller.Start();
 
+#if !_CONSOLE
                 Util.Utils.ReleaseMemory();
 
                 Application.Run();
             }
+#else
+            Console.ReadLine();
+            controller.Stop();
+#endif
         }
     }
 }

@@ -18,12 +18,16 @@ namespace Shadowsocks.Controller
         private Thread _ramThread;
 
         private Listener _listener;
+        private List<Listener> _port_map_listener;
         private PACServer _pacServer;
         private Configuration _config;
         private ServerTransferTotal _transfer;
+#if !_CONSOLE
         private HttpProxyRunner polipoRunner;
+#endif
         private GFWListUpdater gfwListUpdater;
         private bool stopped = false;
+        private bool firstRun = true;
 
         private bool _systemProxyIsDirty = false;
 
@@ -108,7 +112,6 @@ namespace Shadowsocks.Controller
                             && mergeConfig.configs[i].protocol == servers[j].protocol
                             && mergeConfig.configs[i].obfs == servers[j].obfs
                             && mergeConfig.configs[i].password == servers[j].password
-                            && mergeConfig.configs[i].tcp_over_udp == servers[j].tcp_over_udp
                             && mergeConfig.configs[i].udp_over_tcp == servers[j].udp_over_tcp
                             )
                         {
@@ -130,7 +133,6 @@ namespace Shadowsocks.Controller
                         && mergeConfig.configs[i].protocol == servers[j].protocol
                         && mergeConfig.configs[i].obfs == servers[j].obfs
                         && mergeConfig.configs[i].password == servers[j].password
-                        && mergeConfig.configs[i].tcp_over_udp == servers[j].tcp_over_udp
                         && mergeConfig.configs[i].udp_over_tcp == servers[j].udp_over_tcp
                         )
                     {
@@ -167,18 +169,29 @@ namespace Shadowsocks.Controller
             }
         }
 
+        public bool SaveServersConfig(string config)
+        {
+            Configuration new_cfg = _config.Load(config);
+            if (new_cfg != null)
+            {
+                SaveServersConfig(new_cfg);
+                return true;
+            }
+            return false;
+        }
+
         public void SaveServersConfig(Configuration config)
         {
             List<Server> missingServers = MergeConfiguration(_config, config.configs);
             _config.configs = config.configs;
             _config.index = config.index;
-            //_config.buildinHttpProxy = config.buildinHttpProxy;
+            _config.random = config.random;
+            _config.global = config.global;
+            _config.enabled = config.enabled;
             _config.shareOverLan = config.shareOverLan;
-            _config.authUser = config.authUser;
-            _config.authPass = config.authPass;
+            _config.bypassWhiteList = config.bypassWhiteList;
             _config.localPort = config.localPort;
             _config.reconnectTimes = config.reconnectTimes;
-            _config.random = config.random;
             _config.randomAlgorithm = config.randomAlgorithm;
             _config.TTL = config.TTL;
             _config.proxyEnable = config.proxyEnable;
@@ -188,7 +201,11 @@ namespace Shadowsocks.Controller
             _config.proxyPort = config.proxyPort;
             _config.proxyAuthUser = config.proxyAuthUser;
             _config.proxyAuthPass = config.proxyAuthPass;
+            _config.authUser = config.authUser;
+            _config.authPass = config.authPass;
             _config.autoBan = config.autoBan;
+            _config.sameHostForSameTarget = config.sameHostForSameTarget;
+            _config.keepVisitTime = config.keepVisitTime;
             foreach (Server s in missingServers)
             {
                 s.GetConnections().CloseAll();
@@ -277,10 +294,20 @@ namespace Shadowsocks.Controller
                 return;
             }
             stopped = true;
+
+            if (_port_map_listener != null)
+            {
+                foreach (Listener l in _port_map_listener)
+                {
+                    l.Stop();
+                }
+                _port_map_listener = null;
+            }
             if (_listener != null)
             {
                 _listener.Stop();
             }
+#if !_CONSOLE
             if (polipoRunner != null)
             {
                 polipoRunner.Stop();
@@ -289,6 +316,7 @@ namespace Shadowsocks.Controller
             {
                 SystemProxy.Update(_config, true);
             }
+#endif
             ServerTransferTotal.Save(_transfer);
         }
 
@@ -313,14 +341,14 @@ namespace Shadowsocks.Controller
         protected string GetObfsPartOfSSLink(Server server)
         {
             string parts = "";
-            if (server.protocol.Length > 0 && server.protocol != "origin")
-            {
-                parts = server.protocol + ":" + parts;
-            }
-            if (server.obfs.Length > 0 && server.obfs != "plain")
-            {
-                parts = server.obfs + ":" + parts;
-            }
+            //if (server.protocol.Length > 0 && server.protocol != "origin")
+            //{
+            //    parts = server.protocol + ":" + parts;
+            //}
+            //if (server.obfs.Length > 0 && server.obfs != "plain")
+            //{
+            //    parts = server.obfs + ":" + parts;
+            //}
             parts = parts + server.method + ":" + server.password + "@" + server.server + ":" + server.server_port;
             if (server.obfs.Length > 0 && server.obfs != "plain" && server.obfsparam.Length > 0)
             {
@@ -333,22 +361,46 @@ namespace Shadowsocks.Controller
         {
             Server server = GetCurrentServer();
             string parts = GetObfsPartOfSSLink(server);
-            string base64 = System.Convert.ToBase64String(Encoding.UTF8.GetBytes(parts)).Replace('+', '-').Replace('/', '_');
+            string base64 = Util.Utils.EncodeUrlSafeBase64(parts);
             return "ss://" + base64;
         }
 
         public string GetSSLinkForServer(Server server)
         {
             string parts = GetObfsPartOfSSLink(server);
-            string base64 = System.Convert.ToBase64String(Encoding.UTF8.GetBytes(parts)).Replace('+', '-').Replace('/', '_');
+            string base64 = Util.Utils.EncodeUrlSafeBase64(parts);
             return "ss://" + base64;
+        }
+
+        public string GetSSRRemarksLinkForServer(Server server)
+        {
+            string main_part = server.server + ":" + server.server_port + ":" + server.protocol + ":" + server.method + ":" + server.obfs + ":" + Util.Utils.EncodeUrlSafeBase64(server.password);
+            string param_str = "obfsparam=" + Util.Utils.EncodeUrlSafeBase64(server.obfsparam);
+            if (server.remarks.Length > 0)
+            {
+                param_str += "&remarks=" + Util.Utils.EncodeUrlSafeBase64(server.remarks);
+            }
+            if (server.group != null && server.group.Length > 0)
+            {
+                param_str += "&group=" + Util.Utils.EncodeUrlSafeBase64(server.group);
+            }
+            if (server.udp_over_tcp)
+            {
+                param_str += "&uot=" + "1";
+            }
+            if (server.server_udp_port > 0)
+            {
+                param_str += "&udpport=" + server.server_udp_port.ToString();
+            }
+            string base64 = Util.Utils.EncodeUrlSafeBase64(main_part + "/?" + param_str);
+            return "ssr://" + base64;
         }
 
         public string GetSSRemarksLinkForServer(Server server)
         {
             string remarks = server.remarks_base64;
             string parts = GetObfsPartOfSSLink(server) + "#" + remarks;
-            string base64 = System.Convert.ToBase64String(Encoding.UTF8.GetBytes(parts)).Replace('+', '-').Replace('/', '_');
+            string base64 = Util.Utils.EncodeUrlSafeBase64(parts);
             return "ss://" + base64;
         }
 
@@ -378,13 +430,24 @@ namespace Shadowsocks.Controller
 
         protected void Reload()
         {
+            if (_port_map_listener != null)
+            {
+                foreach (Listener l in _port_map_listener)
+                {
+                    l.Stop();
+                }
+                _port_map_listener = null;
+            }
             // some logic in configuration updated the config when saving, we need to read it again
             _config = MergeGetConfiguration(_config);
+            _config.FlushPortMapCache();
 
+#if !_CONSOLE
             if (polipoRunner == null)
             {
                 polipoRunner = new HttpProxyRunner();
             }
+#endif
             if (_pacServer == null)
             {
                 _pacServer = new PACServer();
@@ -402,55 +465,111 @@ namespace Shadowsocks.Controller
             // or bind will fail when switching bind address from 0.0.0.0 to 127.0.0.1
             // though UseShellExecute is set to true now
             // http://stackoverflow.com/questions/10235093/socket-doesnt-close-after-application-exits-if-a-launched-process-is-open
-            try
+            bool _firstRun = firstRun;
+            for (int i = 1; i <= 5; ++i)
             {
-                if (_listener != null && !_listener.isConfigChange(_config))
+                firstRun = false;
+                if (i == 5)
+                    _firstRun = false;
+                try
                 {
-                    Local local = new Local(_config, _transfer);
-                    _listener.GetServices()[0] = local;
-                    if (polipoRunner.HasExited())
+                    if (_listener != null && !_listener.isConfigChange(_config))
                     {
+                        Local local = new Local(_config, _transfer);
+                        _listener.GetServices()[0] = local;
+#if !_CONSOLE
+                        if (polipoRunner.HasExited())
+                        {
+                            polipoRunner.Stop();
+                            polipoRunner.Start(_config);
+
+                            _listener.GetServices()[3] = new HttpPortForwarder(polipoRunner.RunningPort, _config);
+                        }
+#endif
+                    }
+                    else
+                    {
+                        if (_listener != null)
+                        {
+                            _listener.Stop();
+                            _listener = null;
+                        }
+
+#if !_CONSOLE
                         polipoRunner.Stop();
                         polipoRunner.Start(_config);
+#endif
 
-                        _listener.GetServices()[3] = new HttpPortForwarder(polipoRunner.RunningPort, _config);
+                        Local local = new Local(_config, _transfer);
+                        List<Listener.Service> services = new List<Listener.Service>();
+                        services.Add(local);
+                        services.Add(_pacServer);
+                        services.Add(new APIServer(this, _config));
+#if !_CONSOLE
+                        services.Add(new HttpPortForwarder(polipoRunner.RunningPort, _config));
+#endif
+                        _listener = new Listener(services);
+                        _listener.Start(_config, 0);
                     }
+                    break;
                 }
-                else
+                catch (Exception e)
                 {
+                    // translate Microsoft language into human language
+                    // i.e. An attempt was made to access a socket in a way forbidden by its access permissions => Port already in use
+                    if (e is SocketException)
+                    {
+                        SocketException se = (SocketException)e;
+                        if (se.SocketErrorCode == SocketError.AccessDenied)
+                        {
+                            e = new Exception(I18N.GetString("Port already in use") + string.Format(" {0}", _config.localPort), e);
+                        }
+                    }
+                    Logging.LogUsefulException(e);
+                    if (!_firstRun)
+                    {
+                        ReportError(e);
+                        break;
+                    }
+                    else
+                    {
+                        Thread.Sleep(1000 * i * i);
+                    }
                     if (_listener != null)
                     {
                         _listener.Stop();
                         _listener = null;
                     }
+                }
+            }
 
-                    polipoRunner.Stop();
-                    polipoRunner.Start(_config);
-
+            _port_map_listener = new List<Listener>();
+            foreach (KeyValuePair<int, PortMapConfigCache> pair in _config.GetPortMapCache())
+            {
+                try
+                {
                     Local local = new Local(_config, _transfer);
                     List<Listener.Service> services = new List<Listener.Service>();
                     services.Add(local);
-                    services.Add(_pacServer);
-                    services.Add(new APIServer(this, _config));
-                    services.Add(new HttpPortForwarder(polipoRunner.RunningPort, _config));
-                    _listener = new Listener(services);
-                    _listener.Start(_config);
+                    Listener listener = new Listener(services);
+                    listener.Start(_config, pair.Key);
+                    _port_map_listener.Add(listener);
                 }
-            }
-            catch (Exception e)
-            {
-                // translate Microsoft language into human language
-                // i.e. An attempt was made to access a socket in a way forbidden by its access permissions => Port already in use
-                if (e is SocketException)
+                catch (Exception e)
                 {
-                    SocketException se = (SocketException)e;
-                    if (se.SocketErrorCode == SocketError.AccessDenied)
+                    // translate Microsoft language into human language
+                    // i.e. An attempt was made to access a socket in a way forbidden by its access permissions => Port already in use
+                    if (e is SocketException)
                     {
-                        e = new Exception(I18N.GetString("Port already in use"), e);
+                        SocketException se = (SocketException)e;
+                        if (se.SocketErrorCode == SocketError.AccessDenied)
+                        {
+                            e = new Exception(I18N.GetString("Port already in use") + string.Format(" {0}", pair.Key), e);
+                        }
                     }
+                    Logging.LogUsefulException(e);
+                    ReportError(e);
                 }
-                Logging.LogUsefulException(e);
-                ReportError(e);
             }
 
             if (ConfigChanged != null)
@@ -472,6 +591,7 @@ namespace Shadowsocks.Controller
 
         private void UpdateSystemProxy()
         {
+#if !_CONSOLE
             if (_config.enabled)
             {
                 SystemProxy.Update(_config, false);
@@ -486,6 +606,7 @@ namespace Shadowsocks.Controller
                     _systemProxyIsDirty = false;
                 }
             }
+#endif
         }
 
         private void pacServer_PACFileChanged(object sender, EventArgs e)

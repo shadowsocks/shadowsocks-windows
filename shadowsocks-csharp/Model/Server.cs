@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Text;
 using System.IO;
 using System.Diagnostics;
+#if !_CONSOLE
 using SimpleJson;
+#endif
 using Shadowsocks.Controller;
 using System.Text.RegularExpressions;
 using System.Net;
@@ -110,10 +112,8 @@ namespace Shadowsocks.Model
         public string obfsparam;
         public string remarks_base64;
         public string group;
-        public bool tcp_over_udp;
         public bool udp_over_tcp;
         public string protocol;
-        //public bool obfs_udp;
         public bool enable;
         public string id;
 
@@ -174,13 +174,13 @@ namespace Shadowsocks.Model
                 catch (FormatException)
                 {
                     remarks = remarks_base64;
-                    remarks_base64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(remarks_base64)).Replace('+', '-').Replace('/', '_');
+                    remarks_base64 = Util.Utils.EncodeUrlSafeBase64(remarks_base64);
                     return remarks;
                 }
             }
             set
             {
-                remarks_base64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(value)).Replace('+', '-').Replace('/', '_');
+                remarks_base64 = Util.Utils.EncodeUrlSafeBase64(value);
             }
         }
         public string FriendlyName()
@@ -226,7 +226,6 @@ namespace Shadowsocks.Model
             ret.remarks_base64 = (string)remarks_base64.Clone();
             ret.enable = enable;
             ret.udp_over_tcp = udp_over_tcp;
-            //ret.obfs_udp = obfs_udp;
             ret.id = id;
             ret.protocoldata = protocoldata;
             ret.obfsdata = obfsdata;
@@ -244,41 +243,132 @@ namespace Shadowsocks.Model
             this.remarks_base64 = "";
             this.udp_over_tcp = false;
             this.protocol = "origin";
-            //this.obfs_udp = false;
             this.enable = true;
             byte[] id = new byte[16];
             Util.Utils.RandBytes(id, id.Length);
-            this.id = BitConverter.ToString(id);
+            this.id = BitConverter.ToString(id).Replace("-", "");
         }
 
         public Server(string ssURL) : this()
         {
-            string[] r1 = Regex.Split(ssURL, "ss://", RegexOptions.IgnoreCase);
-            string base64 = r1[1].ToString();
-            byte[] bytes = null;
-            string data = "";
-            if (base64.LastIndexOf('@') > 0)
+            if (ssURL.StartsWith("ss://"))
             {
-                data = base64;
+                ServerFromSS(ssURL);
+            }
+            else if (ssURL.StartsWith("ssr://"))
+            {
+                ServerFromSSR(ssURL);
+            }
+        }
+
+        public static string DecodeBase64(string val)
+        {
+            if (val.LastIndexOf(':') > 0)
+            {
+                return val;
             }
             else
             {
-                for (var i = 0; i < 3; i++)
+                return Util.Utils.DecodeBase64(val);
+            }
+        }
+
+        public static string DecodeUrlSafeBase64(string val)
+        {
+            if (val.LastIndexOf(':') > 0)
+            {
+                return val;
+            }
+            else
+            {
+                return Util.Utils.DecodeUrlSafeBase64(val);
+            }
+        }
+
+        public void ServerFromSSR(string ssrURL)
+        {
+            // ssr://host:port:protocol:method:obfs:base64pass/?obfsparam=base64&remarks=base64&group=base64&udpport=0&uot=1
+            string[] r1 = Regex.Split(ssrURL, "ssr://", RegexOptions.IgnoreCase);
+            string base64 = r1[1].ToString();
+            string data = DecodeUrlSafeBase64(base64);
+            string param_str = "";
+            Dictionary<string, string> params_dict = new Dictionary<string, string>();
+
+            if (data.Length == 0)
+            {
+                throw new FormatException();
+            }
+            int param_start_pos = data.IndexOf("?");
+            if (param_start_pos > 0)
+            {
+                param_str = data.Substring(param_start_pos + 1);
+                data = data.Substring(0, param_start_pos);
+
+                string[] obfs_params = param_str.Split('&');
+                foreach (string p in obfs_params)
                 {
-                    try
+                    if (p.IndexOf('=') > 0)
                     {
-                        bytes = System.Convert.FromBase64String(base64);
+                        int index = p.IndexOf('=');
+                        string key, val;
+                        key = p.Substring(0, index);
+                        val = p.Substring(index + 1);
+                        if (key == "obfsparam" || key == "remarks" || key == "group")
+                        {
+                            string new_val = DecodeUrlSafeBase64(val);
+                            val = new_val;
+                        }
+                        params_dict[key] = val;
                     }
-                    catch (FormatException)
-                    {
-                        base64 += "=";
-                    }
-                }
-                if (bytes != null)
-                {
-                    data = Encoding.UTF8.GetString(bytes);
                 }
             }
+            if (data.IndexOf("/") >= 0)
+            {
+                data = data.Substring(0, data.LastIndexOf("/"));
+            }
+
+            string[] main_info = data.Split(new char[] { ':' }, StringSplitOptions.None);
+            if (main_info.Length != 6)
+            {
+                throw new FormatException();
+            }
+            this.server = main_info[0];
+            this.server_port = int.Parse(main_info[1]);
+            this.protocol = main_info[2].Length == 0 ? "origin" : main_info[2];
+            this.protocol.Replace("_compatible", "");
+            this.method = main_info[3];
+            this.obfs = main_info[4].Length == 0 ? "plain" : main_info[4];
+            this.obfs.Replace("_compatible", "");
+            this.password = DecodeUrlSafeBase64(main_info[5]);
+
+            if (params_dict.ContainsKey("obfsparam"))
+            {
+                this.obfsparam = params_dict["obfsparam"];
+            }
+            if (params_dict.ContainsKey("remarks"))
+            {
+                this.remarks = params_dict["remarks"];
+            }
+            if (params_dict.ContainsKey("group"))
+            {
+                this.group = params_dict["group"];
+            }
+            if (params_dict.ContainsKey("uot"))
+            {
+                this.udp_over_tcp = int.Parse(params_dict["uot"]) != 0;
+            }
+            if (params_dict.ContainsKey("udpport"))
+            {
+                this.server_udp_port = int.Parse(params_dict["udpport"]);
+            }
+        }
+
+        public void ServerFromSS(string ssURL)
+        {
+            // ss://obfs:protocol:method:passwd@host:port/#remarks
+            string[] r1 = Regex.Split(ssURL, "ss://", RegexOptions.IgnoreCase);
+            string base64 = r1[1].ToString();
+            string data = DecodeBase64(base64);
             if (data.Length == 0)
             {
                 throw new FormatException();
@@ -305,6 +395,35 @@ namespace Shadowsocks.Model
                     }
                     data = data.Substring(0, remarkIndexLastAt);
                 }
+                //int paramIndexLastAt = param.IndexOf('?', indexLastAt);
+                //Dictionary<string, string> params_dict = new Dictionary<string, string>();
+                //if (paramIndexLastAt >= 0)
+                //{
+                //    string[] obfs_params = param.Substring(paramIndexLastAt + 1).Split('&');
+                //    foreach (string p in obfs_params)
+                //    {
+                //        if (p.IndexOf('=') > 0)
+                //        {
+                //            int index = p.IndexOf('=');
+                //            string key, val;
+                //            key = p.Substring(0, index);
+                //            val = p.Substring(index + 1);
+                //            try
+                //            {
+                //                byte[] b64_bytes = System.Convert.FromBase64String(val);
+                //                if (b64_bytes != null)
+                //                {
+                //                    val = Encoding.UTF8.GetString(b64_bytes);
+                //                }
+                //            }
+                //            catch (FormatException)
+                //            {
+                //                continue;
+                //            }
+                //            params_dict[key] = val;
+                //        }
+                //    }
+                //}
 
                 string afterAt = data.Substring(indexLastAt + 1);
                 int indexLastColon = afterAt.LastIndexOf(':');
@@ -360,6 +479,10 @@ namespace Shadowsocks.Model
                 if (this.method.Length == 0)
                     throw new FormatException();
                 this.password = beforeAt;
+                //if (params_dict.ContainsKey("obfs"))
+                //{
+                //    this.obfsparam = params_dict["obfs"];
+                //}
             }
             catch (IndexOutOfRangeException)
             {

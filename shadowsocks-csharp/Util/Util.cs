@@ -5,8 +5,10 @@ using System.IO;
 using System.IO.Compression;
 using System.Net;
 using System.Net.Sockets;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
+using System.Text;
 
 namespace Shadowsocks.Util
 {
@@ -14,6 +16,7 @@ namespace Shadowsocks.Util
     {
         public static void ReleaseMemory()
         {
+#if !_CONSOLE
             // release any unused pages
             // making the numbers look good in task manager
             // this is totally nonsense in programming
@@ -24,6 +27,7 @@ namespace Shadowsocks.Util
             GC.WaitForPendingFinalizers();
             SetProcessWorkingSetSize(Process.GetCurrentProcess().Handle,
                 (UIntPtr)0xFFFFFFFF, (UIntPtr)0xFFFFFFFF);
+#endif
         }
 
         public static string UnGzip(byte[] buf)
@@ -146,9 +150,115 @@ namespace Shadowsocks.Util
             return true;
         }
 
+        public static string urlDecode(string str)
+        {
+            string ret = "";
+            for (int i = 0; i < str.Length; ++i)
+            {
+                if (str[i] == '%' && i < str.Length - 2)
+                {
+                    string s = str.Substring(i + 1, 2).ToLower();
+                    int val = 0;
+                    char c1 = s[0];
+                    char c2 = s[1];
+                    val += (c1 < 'a') ? c1 - '0' : 10 + (c1 - 'a');
+                    val *= 16;
+                    val += (c2 < 'a') ? c2 - '0' : 10 + (c2 - 'a');
+
+                    ret += (char)val;
+                    i += 2;
+                }
+                else if (str[i] == '+')
+                {
+                    ret += ' ';
+                }
+                else
+                {
+                    ret += str[i];
+                }
+            }
+            return ret;
+        }
+
+        public static string DecodeBase64(string val)
+        {
+            byte[] bytes = null;
+            string data = "";
+            data = val;
+            for (var i = 0; i < 3; i++)
+            {
+                try
+                {
+                    bytes = System.Convert.FromBase64String(val);
+                }
+                catch (FormatException)
+                {
+                    val += "=";
+                }
+            }
+            if (bytes != null)
+            {
+                data = Encoding.UTF8.GetString(bytes);
+            }
+            return data;
+        }
+
+        public static string EncodeUrlSafeBase64(string val)
+        {
+            return System.Convert.ToBase64String(Encoding.UTF8.GetBytes(val)).Replace('+', '-').Replace('/', '_');
+        }
+
+        public static string DecodeUrlSafeBase64(string val)
+        {
+            byte[] bytes = null;
+            string data = "";
+            data = val;
+            for (var i = 0; i < 3; i++)
+            {
+                try
+                {
+                    bytes = System.Convert.FromBase64String(val.Replace('-', '+').Replace('_', '/'));
+                }
+                catch (FormatException)
+                {
+                    val += "=";
+                }
+            }
+            if (bytes != null)
+            {
+                data = Encoding.UTF8.GetString(bytes);
+            }
+            return data;
+        }
+
+        public static class LoadResourceDll
+        {
+            static Dictionary<string, Assembly> Dlls = new Dictionary<string, Assembly>();
+            static Dictionary<string, object> Assemblies = new Dictionary<string, object>();
+
+            static Assembly AssemblyResolve(object sender, ResolveEventArgs args)
+            {
+                //程序集
+                Assembly ass;
+                //获取加载失败的程序集的全名
+                var assName = new AssemblyName(args.Name).FullName;
+                //判断Dlls集合中是否有已加载的同名程序集
+                if (Dlls.TryGetValue(assName, out ass) && ass != null)
+                {
+                    Dlls[assName] = null;//如果有则置空并返回
+                    return ass;
+                }
+                else
+                {
+                    throw new DllNotFoundException(assName);//否则抛出加载失败的异常
+                }
+            }
+        }
+#if !_CONSOLE
         [DllImport("kernel32.dll")]
         [return: MarshalAs(UnmanagedType.Bool)]
         private static extern bool SetProcessWorkingSetSize(IntPtr process,
             UIntPtr minimumWorkingSetSize, UIntPtr maximumWorkingSetSize);
+#endif
     }
 }

@@ -20,7 +20,7 @@ namespace Shadowsocks.Encryption
         protected byte[] GetPasswordHash()
         {
             byte[] inputBytes = Encoding.UTF8.GetBytes(Password);
-            byte[] hash = MbedTLS.MD5(inputBytes);
+            byte[] hash = MbedTLS.MbedTLSMD5(inputBytes);
             return hash;
         }
 

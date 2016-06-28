@@ -716,7 +716,7 @@ namespace Shadowsocks.Obfs
                     string[] hosts = Server.param.Split(',');
                     host = hosts[random.Next(hosts.Length)];
                 }
-                if (host != null && host.Length > 0 && host[host.Length - 1] >= '0' && host[host.Length - 1] <= '9')
+                if (host != null && host.Length > 0 && host[host.Length - 1] >= '0' && host[host.Length - 1] <= '9' && Server.param.Length == 0)
                 {
                     host = "";
                 }

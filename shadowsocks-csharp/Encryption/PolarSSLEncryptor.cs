@@ -23,11 +23,11 @@ namespace Shadowsocks.Encryption
         }
 
         private static Dictionary<string, int[]> _ciphers = new Dictionary<string, int[]> {
+                //{"rc4", new int[]{16, 0, CIPHER_RC4, PolarSSL.ARC4_CTX_SIZE}},
+                {"rc4-md5", new int[]{16, 16, CIPHER_RC4, PolarSSL.ARC4_CTX_SIZE}},
                 {"aes-128-cfb", new int[]{16, 16, CIPHER_AES, PolarSSL.AES_CTX_SIZE}},
                 {"aes-192-cfb", new int[]{24, 16, CIPHER_AES, PolarSSL.AES_CTX_SIZE}},
                 {"aes-256-cfb", new int[]{32, 16, CIPHER_AES, PolarSSL.AES_CTX_SIZE}},
-                {"rc4", new int[]{16, 0, CIPHER_RC4, PolarSSL.ARC4_CTX_SIZE}},
-                {"rc4-md5", new int[]{16, 16, CIPHER_RC4, PolarSSL.ARC4_CTX_SIZE}},
         };
 
         public static List<string> SupportedCiphers()
@@ -76,7 +76,7 @@ namespace Shadowsocks.Encryption
                 realkey = new byte[keyLen];
                 Array.Copy(_key, 0, temp, 0, keyLen);
                 Array.Copy(iv, 0, temp, keyLen, ivLen);
-                realkey = MbedTLS.MD5(temp);
+                realkey = MbedTLS.MbedTLSMD5(temp);
             }
             else
             {

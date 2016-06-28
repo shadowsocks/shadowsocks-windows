@@ -18,11 +18,14 @@ namespace Shadowsocks.Controller
         private static string runningPath;
         private int _runningPort;
         private static string _subPath = @"temp";
+        private static string _exeNameNoExt = @"/ssr_privoxy";
         private static string _exeName = @"/ssr_privoxy.exe";
 
         static HttpProxyRunner()
         {
             runningPath = Path.Combine(System.Windows.Forms.Application.StartupPath, _subPath);
+            _exeNameNoExt = System.IO.Path.GetFileNameWithoutExtension(System.Windows.Forms.Application.ExecutablePath);
+            _exeName = @"/" + _exeNameNoExt + @".exe";
             if (!Directory.Exists(runningPath))
             {
                 Directory.CreateDirectory(runningPath);
@@ -56,7 +59,7 @@ namespace Shadowsocks.Controller
 
         public static void Kill()
         {
-            Process[] existingPolipo = Process.GetProcessesByName("ssr_privoxy");
+            Process[] existingPolipo = Process.GetProcessesByName(_exeNameNoExt);
             foreach (Process p in existingPolipo)
             {
                 string str;

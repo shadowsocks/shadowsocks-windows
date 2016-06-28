@@ -246,6 +246,25 @@ namespace Shadowsocks.Model
     }
 
     [Serializable]
+    public class PortMapConfig
+    {
+        public static int MemberCount = 4;
+
+        public bool enable;
+        public string id;
+        public string server_addr;
+        public int server_port;
+    }
+
+    public class PortMapConfigCache
+    {
+        public string id;
+        public Server server;
+        public string server_addr;
+        public int server_port;
+    }
+
+    [Serializable]
     public class Configuration
     {
         public List<Server> configs;
@@ -272,11 +291,14 @@ namespace Shadowsocks.Model
         public bool autoBan;
         public bool sameHostForSameTarget;
         public int keepVisitTime;
+        public Dictionary<string, string> token = new Dictionary<string, string>();
+        public Dictionary<string, object> portMap = new Dictionary<string, object>();
 
         //public bool buildinHttpProxy;
         private ServerSelectStrategy serverStrategy = new ServerSelectStrategy();
         private Dictionary<string, UriVisitTime> uri2time = new Dictionary<string, UriVisitTime>();
         private SortedDictionary<UriVisitTime, string> time2uri = new SortedDictionary<UriVisitTime, string>();
+        private Dictionary<int, PortMapConfigCache> portMapCache = new Dictionary<int, PortMapConfigCache>();
 
         private static string CONFIG_FILE = "gui-config.json";
 
@@ -410,6 +432,43 @@ namespace Shadowsocks.Model
             }
         }
 
+        public void FlushPortMapCache()
+        {
+            portMapCache = new Dictionary<int, PortMapConfigCache>();
+            Dictionary<string, Server> id2server = new Dictionary<string, Server>();
+            foreach (Server s in configs)
+            {
+                id2server[s.id] = s;
+            }
+            foreach (KeyValuePair<string, object> pair in portMap)
+            {
+                int key = 0;
+                PortMapConfig pm = (PortMapConfig)pair.Value;
+                if (!pm.enable)
+                    continue;
+                if (!id2server.ContainsKey(pm.id))
+                    continue;
+                try
+                {
+                    key = int.Parse(pair.Key);
+                }
+                catch (FormatException)
+                {
+                    continue;
+                }
+                portMapCache[key] = new PortMapConfigCache();
+                portMapCache[key].id = pm.id;
+                portMapCache[key].server = id2server[pm.id];
+                portMapCache[key].server_addr = pm.server_addr;
+                portMapCache[key].server_port = pm.server_port;
+            }
+        }
+
+        public Dictionary<int, PortMapConfigCache> GetPortMapCache()
+        {
+            return portMapCache;
+        }
+
         public static void CheckServer(Server server)
         {
             CheckPort(server.server_port);
@@ -447,7 +506,14 @@ namespace Shadowsocks.Model
                 {
                     config.keepVisitTime = 180;
                 }
-                // revert base64 encode for version 3.5.4
+                if (config.portMap == null)
+                {
+                    config.portMap = new Dictionary<string, object>();
+                }
+                if (config.token == null)
+                {
+                    config.token = new Dictionary<string, string>();
+                }
                 {
                     int base64_encode = 0;
                     foreach (var server in config.configs)
@@ -500,7 +566,8 @@ namespace Shadowsocks.Model
                     configs = new List<Server>()
                     {
                         GetDefaultServer()
-                    }
+                    },
+                    portMap = new Dictionary<string, object>()
                 };
             }
         }
@@ -529,6 +596,20 @@ namespace Shadowsocks.Model
             {
                 Console.Error.WriteLine(e);
             }
+        }
+
+        public Configuration Load(string config_str)
+        {
+            try
+            {
+                Configuration config = SimpleJson.SimpleJson.DeserializeObject<Configuration>(config_str, new JsonSerializerStrategy());
+                config.isDefault = false;
+                return config;
+            }
+            catch
+            {
+            }
+            return null;
         }
 
         public static Server GetDefaultServer()
@@ -583,6 +664,10 @@ namespace Shadowsocks.Model
                 if (type == typeof(Int32) && value.GetType() == typeof(string))
                 {
                     return Int32.Parse(value.ToString());
+                }
+                else if (type == typeof(object) && value.GetType() == typeof(SimpleJson.JsonObject) && ((SimpleJson.JsonObject)value).Count == PortMapConfig.MemberCount)
+                {
+                    return base.DeserializeObject(value, typeof(PortMapConfig));
                 }
                 return base.DeserializeObject(value, type);
             }
@@ -719,19 +804,6 @@ namespace Shadowsocks.Model
                 else if (type == typeof(object))
                 {
                     return base.DeserializeObject(value, typeof(ServerTrans));
-                }
-                else if (type == typeof(ServerTransferTotal))
-                {
-                    ServerTransferTotal transfer = new ServerTransferTotal();
-                    foreach (KeyValuePair<string, object> kv in ((IDictionary<string, object>)value))
-                    {
-                        foreach (IDictionary<string, object> kv_sub in (SimpleJson.JsonArray)(kv.Value))
-                        {
-                            transfer.servers.Add((string)kv_sub["Key"], (ServerTrans)base.DeserializeObject(kv_sub["Value"], typeof(ServerTrans)));
-                        }
-                        break;
-                    }
-                    return transfer;
                 }
                 return base.DeserializeObject(value, type);
             }

@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Security.Cryptography;
 
 namespace Shadowsocks.Encryption
 {
@@ -28,7 +29,9 @@ namespace Shadowsocks.Encryption
             {
                 Console.WriteLine(e.ToString());
             }
+#if !_CONSOLE
             LoadLibrary(dllPath);
+#endif
         }
 
         [DllImport("Kernel32.dll")]
@@ -36,8 +39,12 @@ namespace Shadowsocks.Encryption
 
         public const int MD5_CTX_SIZE = 88;
 
-        public static byte[] MD5(byte[] input)
+        public static byte[] MbedTLSMD5(byte[] input)
         {
+#if _CONSOLE
+            MD5 md5 = MD5.Create();
+            return md5.ComputeHash(input);
+#else
             IntPtr ctx = Marshal.AllocHGlobal(MD5_CTX_SIZE);
             byte[] output = new byte[16];
             MbedTLS.md5_init(ctx);
@@ -47,6 +54,7 @@ namespace Shadowsocks.Encryption
             MbedTLS.md5_free(ctx);
             Marshal.FreeHGlobal(ctx);
             return output;
+#endif
         }
 
         [DllImport(DLLNAME, CallingConvention = CallingConvention.Cdecl)]

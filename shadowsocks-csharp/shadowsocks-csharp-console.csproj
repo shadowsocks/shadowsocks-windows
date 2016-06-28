@@ -5,12 +5,12 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>9.0.21022</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{0F2A0C8A-6C06-485B-AA13-AEEC19CA9637}</ProjectGuid>
-    <OutputType>WinExe</OutputType>
+    <ProjectGuid>{DC8929F9-CAC8-4286-8CFE-6A70EF0EF835}</ProjectGuid>
+    <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Shadowsocks</RootNamespace>
     <AssemblyName>ShadowsocksR</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <StartupObject>
     </StartupObject>
@@ -40,8 +40,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
     <DebugSymbols>true</DebugSymbols>
-    <OutputPath>bin\Net4.0x86\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG</DefineConstants>
+    <OutputPath>bin\x86console\Debug\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;_CONSOLE</DefineConstants>
     <DebugType>full</DebugType>
     <PlatformTarget>x86</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
@@ -49,8 +49,8 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
-    <OutputPath>bin\Net4.0x86\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
+    <OutputPath>bin\x86console\Release\</OutputPath>
+    <DefineConstants>TRACE;_CONSOLE</DefineConstants>
     <Optimize>true</Optimize>
     <DebugType>pdbonly</DebugType>
     <PlatformTarget>x86</PlatformTarget>
@@ -71,66 +71,11 @@
     <Reference Include="System.XML" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="3rd\zxing\BarcodeFormat.cs" />
-    <Compile Include="3rd\zxing\BaseLuminanceSource.cs" />
-    <Compile Include="3rd\zxing\Binarizer.cs" />
-    <Compile Include="3rd\zxing\BinaryBitmap.cs" />
-    <Compile Include="3rd\zxing\BitmapLuminanceSource.cs" />
-    <Compile Include="3rd\zxing\common\BitArray.cs" />
-    <Compile Include="3rd\zxing\common\BitMatrix.cs" />
-    <Compile Include="3rd\zxing\common\BitSource.cs" />
-    <Compile Include="3rd\zxing\common\DecoderResult.cs" />
-    <Compile Include="3rd\zxing\common\DefaultGridSampler.cs" />
-    <Compile Include="3rd\zxing\common\DetectorResult.cs" />
-    <Compile Include="3rd\zxing\common\detector\MathUtils.cs" />
-    <Compile Include="3rd\zxing\common\GlobalHistogramBinarizer.cs" />
-    <Compile Include="3rd\zxing\common\GridSampler.cs" />
-    <Compile Include="3rd\zxing\common\HybridBinarizer.cs" />
-    <Compile Include="3rd\zxing\common\PerspectiveTransform.cs" />
-    <Compile Include="3rd\zxing\common\reedsolomon\GenericGF.cs" />
-    <Compile Include="3rd\zxing\common\reedsolomon\GenericGFPoly.cs" />
-    <Compile Include="3rd\zxing\common\reedsolomon\ReedSolomonDecoder.cs" />
-    <Compile Include="3rd\zxing\common\reedsolomon\ReedSolomonEncoder.cs" />
-    <Compile Include="3rd\zxing\common\StringUtils.cs" />
-    <Compile Include="3rd\zxing\DecodeHintType.cs" />
-    <Compile Include="3rd\zxing\EncodeHintType.cs" />
-    <Compile Include="3rd\zxing\LuminanceSource.cs" />
-    <Compile Include="3rd\zxing\qrcode\decoder\BitMatrixParser.cs" />
-    <Compile Include="3rd\zxing\qrcode\decoder\DataBlock.cs" />
-    <Compile Include="3rd\zxing\qrcode\decoder\DataMask.cs" />
-    <Compile Include="3rd\zxing\qrcode\decoder\DecodedBitStreamParser.cs" />
-    <Compile Include="3rd\zxing\qrcode\decoder\Decoder.cs" />
-    <Compile Include="3rd\zxing\qrcode\decoder\ErrorCorrectionLevel.cs" />
-    <Compile Include="3rd\zxing\qrcode\decoder\FormatInformation.cs" />
-    <Compile Include="3rd\zxing\qrcode\decoder\Mode.cs" />
-    <Compile Include="3rd\zxing\qrcode\decoder\QRCodeDecoderMetaData.cs" />
-    <Compile Include="3rd\zxing\qrcode\decoder\Version.cs" />
-    <Compile Include="3rd\zxing\qrcode\detector\AlignmentPattern.cs" />
-    <Compile Include="3rd\zxing\qrcode\detector\AlignmentPatternFinder.cs" />
-    <Compile Include="3rd\zxing\qrcode\detector\Detector.cs" />
-    <Compile Include="3rd\zxing\qrcode\detector\FinderPattern.cs" />
-    <Compile Include="3rd\zxing\qrcode\detector\FinderPatternFinder.cs" />
-    <Compile Include="3rd\zxing\qrcode\detector\FinderPatternInfo.cs" />
-    <Compile Include="3rd\zxing\qrcode\encoder\BlockPair.cs" />
-    <Compile Include="3rd\zxing\qrcode\encoder\ByteMatrix.cs" />
-    <Compile Include="3rd\zxing\qrcode\encoder\Encoder.cs" />
-    <Compile Include="3rd\zxing\qrcode\encoder\MaskUtil.cs" />
-    <Compile Include="3rd\zxing\qrcode\encoder\MatrixUtil.cs" />
-    <Compile Include="3rd\zxing\qrcode\encoder\QRCode.cs" />
     <Compile Include="3rd\SimpleJson.cs" />
-    <Compile Include="3rd\zxing\qrcode\QRCodeReader.cs" />
-    <Compile Include="3rd\zxing\Result.cs" />
-    <Compile Include="3rd\zxing\ResultMetadataType.cs" />
-    <Compile Include="3rd\zxing\ResultPoint.cs" />
-    <Compile Include="3rd\zxing\ResultPointCallback.cs" />
-    <Compile Include="3rd\zxing\WriterException.cs" />
     <Compile Include="Controller\APIServer.cs" />
-    <Compile Include="Controller\AutoStartup.cs" />
     <Compile Include="Controller\FileManager.cs" />
     <Compile Include="Controller\GFWListUpdater.cs" />
-    <Compile Include="Controller\HttpPortForwarder.cs" />
     <Compile Include="Controller\HttpProxy.cs" />
-    <Compile Include="Controller\HttpProxyRunner.cs" />
     <Compile Include="Controller\I18N.cs" />
     <Compile Include="Controller\Listener.cs" />
     <Compile Include="Controller\Logging.cs" />
@@ -166,56 +111,14 @@
     </Compile>
     <Compile Include="Util\CRC.cs" />
     <Compile Include="Util\Util.cs" />
-    <Compile Include="View\ConfigForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="View\ConfigForm.Designer.cs">
-      <DependentUpon>ConfigForm.cs</DependentUpon>
-    </Compile>
     <Compile Include="Controller\Local.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Controller\ShadowsocksController.cs" />
-    <Compile Include="Controller\SystemProxy.cs" />
-    <Compile Include="View\MenuViewController.cs" />
-    <Compile Include="View\QRCodeForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="View\QRCodeForm.Designer.cs">
-      <DependentUpon>QRCodeForm.cs</DependentUpon>
-    </Compile>
-    <Compile Include="View\QRCodeSplashForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="View\ServerLogForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="View\ServerLogForm.Designer.cs">
-      <DependentUpon>ServerLogForm.cs</DependentUpon>
-    </Compile>
-    <Compile Include="View\SettingsForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="View\SettingsForm.Designer.cs">
-      <DependentUpon>SettingsForm.cs</DependentUpon>
-    </Compile>
-    <EmbeddedResource Include="View\ConfigForm.resx">
-      <DependentUpon>ConfigForm.cs</DependentUpon>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <SubType>Designer</SubType>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-    <EmbeddedResource Include="View\QRCodeForm.resx">
-      <DependentUpon>QRCodeForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="View\ServerLogForm.resx">
-      <DependentUpon>ServerLogForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="View\SettingsForm.resx">
-      <DependentUpon>SettingsForm.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="app.config" />
     <None Include="app.manifest">
@@ -226,6 +129,7 @@
     <None Include="Data\privoxy.exe.gz" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Data\proxy.pac.txt.gz" />
     <None Include="Properties\DataSources\Shadowsocks.View.ConfigForm.datasource" />
     <None Include="Resources\ss20.png" />
     <None Include="Resources\ss16.png" />

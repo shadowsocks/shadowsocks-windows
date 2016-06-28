@@ -77,12 +77,12 @@ namespace Shadowsocks.Properties {
         ///Start on Boot=开机启动
         ///Allow Clients from LAN=允许来自局域网的连接
         ///Enable balance=服务器负载均衡
+        ///Same host for same address=优先相同节点连接同一地址
+        ///Enable domain white list(http proxy only)=使用域名白名单(仅http代理)
         ///Local PAC=使用本地 PAC
         ///Online PAC=使用在线 PAC
-        ///Update Local PAC from Lan IP List=更新本地PAC为绕过局域网IP
-        ///Update Local PAC from Chn White List=更新本地PAC为绕过大陆常见域名列表
-        ///Update Local PAC from Chn IP List=更新本地PAC为绕过大陆IP(foxyproxy慎用)
-        ///Updat [字符串的其余部分被截断]&quot;; 的本地化字符串。
+        ///Update Local PAC from Lan IP List=更新PAC为绕过局域网IP
+        ///Update Local PAC from Chn  [字符串的其余部分被截断]&quot;; 的本地化字符串。
         /// </summary>
         internal static string cn {
             get {
@@ -116,6 +116,7 @@ namespace Shadowsocks.Properties {
         ///activity-animation 0
         ///forward-socks5 / 127.0.0.1:__SOCKS_PORT__ .
         ///hide-console
+        ///keep-alive-timeout __KEEP_ALIVE_TIMEOUT__
         ///__BYPASS_ACTION__
         ///
         /// 的本地化字符串。

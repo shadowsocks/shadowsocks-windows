@@ -135,11 +135,12 @@
     <Compile Include="Controller\Logging.cs" />
     <Compile Include="Controller\PortForwarder.cs" />
     <Compile Include="Controller\SpeedTest.cs" />
-    <Compile Include="Controller\TDP.cs" />
     <Compile Include="Controller\UpdateChecker.cs" />
     <Compile Include="Encryption\EncryptorBase.cs" />
     <Compile Include="Encryption\EncryptorFactory.cs" />
     <Compile Include="Encryption\IVEncryptor.cs" />
+    <Compile Include="Encryption\Libcrypto.cs" />
+    <Compile Include="Encryption\LibcryptoEncryptor.cs" />
     <Compile Include="Encryption\MbedTLS.cs" />
     <Compile Include="Encryption\PolarSSL.cs" />
     <Compile Include="Encryption\PolarSSLEncryptor.cs" />
@@ -233,6 +234,7 @@
     <None Include="Resources\ssw128.png" />
     <Content Include="Data\cn.txt" />
     <None Include="Data\privoxy_conf.txt" />
+    <None Include="Data\libsscrypto.dll" />
     <Content Include="Data\user-rule.txt" />
     <Content Include="shadowsocks.ico" />
   </ItemGroup>

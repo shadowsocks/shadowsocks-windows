@@ -46,7 +46,8 @@ namespace Shadowsocks.Obfs
         {
             int rand_len = random.Next(16) + 1;
             outlength = rand_len + datalength + 6;
-            Array.Copy(data, 0, outdata, rand_len + 2, datalength);
+            if (datalength > 0)
+                Array.Copy(data, 0, outdata, rand_len + 2, datalength);
             outdata[0] = (byte)(outlength >> 8);
             outdata[1] = (byte)(outlength);
             outdata[2] = (byte)(rand_len);
@@ -209,7 +210,8 @@ namespace Shadowsocks.Obfs
         {
             int rand_len = random.Next(16) + 1;
             outlength = rand_len + datalength + 6;
-            Array.Copy(data, 0, outdata, rand_len + 2, datalength);
+            if (datalength > 0)
+                Array.Copy(data, 0, outdata, rand_len + 2, datalength);
             outdata[0] = (byte)(outlength >> 8);
             outdata[1] = (byte)(outlength);
             outdata[2] = (byte)(rand_len);
@@ -386,7 +388,8 @@ namespace Shadowsocks.Obfs
         {
             int rand_len = datalength >= 1300 ? 1 : datalength > 400 ? random.Next(128) + 1 : random.Next(1024) + 3;
             outlength = rand_len + datalength + 6;
-            Array.Copy(data, 0, outdata, rand_len + 2, datalength);
+            if (datalength > 0)
+                Array.Copy(data, 0, outdata, rand_len + 2, datalength);
             outdata[0] = (byte)(outlength >> 8);
             outdata[1] = (byte)(outlength);
             if (rand_len < 128)
@@ -464,6 +467,7 @@ namespace Shadowsocks.Obfs
             byte[] data = plaindata;
             outlength = 0;
             const int unit_len = 8100;
+            int ogn_datalength = datalength;
             if (!has_sent_header)
             {
                 int headsize = GetHeadSize(plaindata, 30);
@@ -493,9 +497,11 @@ namespace Shadowsocks.Obfs
                 Array.Copy(data, unit_len, newdata, 0, newdata.Length);
                 data = newdata;
             }
-            if (datalength > 0)
+            if (datalength > 0 || ogn_datalength == -1)
             {
                 int outlen;
+                if (ogn_datalength == -1)
+                    datalength = 0;
                 PackData(data, datalength, packdata, out outlen);
                 if (outdata.Length < outlength + outlen)
                     Array.Resize(ref outdata, (outlength + outlen) * 2);

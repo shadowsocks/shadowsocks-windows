@@ -75,7 +75,7 @@ namespace Shadowsocks.Controller
             return false;
         }
 
-        public void Start(Configuration config)
+        public void Start(Configuration config, int port)
         {
             this._config = config;
             this._shareOverLAN = config.shareOverLan;
@@ -85,7 +85,8 @@ namespace Shadowsocks.Controller
             this._bypassWhiteList = config.bypassWhiteList;
             _stop = false;
 
-            if (CheckIfPortInUse(_config.localPort))
+            int localPort = port == 0 ? _config.localPort : port;
+            if (CheckIfPortInUse(localPort))
                 throw new Exception(I18N.GetString("Port already in use"));
 
             try
@@ -111,24 +112,39 @@ namespace Shadowsocks.Controller
                 IPEndPoint localEndPointV6 = null;
                 if (_shareOverLAN)
                 {
-                    localEndPoint = new IPEndPoint(IPAddress.Any, _config.localPort);
-                    localEndPointV6 = new IPEndPoint(IPAddress.IPv6Any, _config.localPort);
+                    localEndPoint = new IPEndPoint(IPAddress.Any, localPort);
+                    localEndPointV6 = new IPEndPoint(IPAddress.IPv6Any, localPort);
                 }
                 else
                 {
-                    localEndPoint = new IPEndPoint(IPAddress.Loopback, _config.localPort);
-                    localEndPointV6 = new IPEndPoint(IPAddress.IPv6Loopback, _config.localPort);
+                    localEndPoint = new IPEndPoint(IPAddress.Loopback, localPort);
+                    localEndPointV6 = new IPEndPoint(IPAddress.IPv6Loopback, localPort);
                 }
 
                 // Bind the socket to the local endpoint and listen for incoming connections.
-                _socket.Bind(localEndPoint);
-                _socket.Listen(1024);
                 if (_socket_v6 != null)
                 {
                     _socket_v6.Bind(localEndPointV6);
                     _socket_v6.Listen(1024);
                 }
-
+                try
+                {
+                    _socket.Bind(localEndPoint);
+                    _socket.Listen(1024);
+                }
+                catch (SocketException e)
+                {
+                    if (_socket_v6 == null)
+                    {
+                        throw e;
+                    }
+                    else
+                    {
+                        _socket.Close();
+                        _socket = _socket_v6;
+                        _socket_v6 = null;
+                    }
+                }
 
                 // Start an asynchronous socket to listen for connections.
                 Console.WriteLine("ShadowsocksR started");
@@ -248,8 +264,26 @@ namespace Shadowsocks.Controller
                         buf
                     };
 
-                    conn.BeginReceive(buf, 0, buf.Length, 0,
-                        new AsyncCallback(ReceiveCallback), state);
+                    int local_port = ((IPEndPoint)conn.LocalEndPoint).Port;
+                    if (!_config.GetPortMapCache().ContainsKey(local_port))
+                    {
+                        conn.BeginReceive(buf, 0, buf.Length, 0,
+                            new AsyncCallback(ReceiveCallback), state);
+                    }
+                    else
+                    {
+                        foreach (Service service in _services)
+                        {
+                            if (service.Handle(buf, 0, conn))
+                            {
+                                return;
+                            }
+                        }
+                        // no service found for this
+                        // shouldn't happen
+                        conn.Shutdown(SocketShutdown.Both);
+                        conn.Close();
+                    }
                 }
             }
             catch (ObjectDisposedException)

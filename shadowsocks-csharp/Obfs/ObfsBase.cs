@@ -16,6 +16,11 @@ namespace Shadowsocks.Obfs
 
         public abstract Dictionary<string, int[]> GetObfs();
 
+        public string Name()
+        {
+            return Method;
+        }
+
         public virtual byte[] ClientPreEncrypt(byte[] plaindata, int datalength, out int outlength)
         {
             outlength = datalength;

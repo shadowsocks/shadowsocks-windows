@@ -206,7 +206,7 @@ namespace Shadowsocks.View
                 this.ServersItem = CreateMenuGroup("Servers", new MenuItem[] {
                     this.SeperatorItem = new MenuItem("-"),
                     this.ConfigItem = CreateMenuItem("Edit Servers...", new EventHandler(this.Config_Click)),
-                    CreateMenuItem("Show QRCode...", new EventHandler(this.QRCodeItem_Click)),
+                    //CreateMenuItem("Show QRCode...", new EventHandler(this.QRCodeItem_Click)),
                 }),
                 CreateMenuItem("Global Settings...", new EventHandler(this.Setting_Click)),
                 new MenuItem("-"),

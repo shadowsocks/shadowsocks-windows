@@ -74,7 +74,6 @@ namespace Shadowsocks.Model
         {
             transUpload = upload;
             transDownload = download;
-            transDownloadRaw = download;
         }
 
         public ServerSpeedLogShow Translate()
@@ -270,6 +269,13 @@ namespace Shadowsocks.Model
                 errList.Clear();
                 lastError = 0;
                 errorContinurousTimes = 0;
+            }
+        }
+        public void ClearMaxSpeed()
+        {
+            lock (this)
+            {
+                maxTransDownload = 0;
             }
         }
         public void Clear()

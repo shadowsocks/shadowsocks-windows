@@ -10,6 +10,7 @@ using Shadowsocks.Controller;
 using Shadowsocks.Model;
 using Shadowsocks.Properties;
 using ZXing.QrCode.Internal;
+using Shadowsocks.Encryption;
 
 namespace Shadowsocks.View
 {
@@ -40,6 +41,10 @@ namespace Shadowsocks.View
             if (updateChecker.LatestVersionURL == null)
                 LinkUpdate.Visible = false;
 
+            foreach (string name in EncryptorFactory.GetEncryptor())
+            {
+                EncryptionSelect.Items.Add(name);
+            }
             UpdateTexts();
             controller.ConfigChanged += controller_ConfigChanged;
 
@@ -65,7 +70,7 @@ namespace Shadowsocks.View
             labelUDPPort.Text = I18N.GetString("UDP Port");
             PasswordLabel.Text = I18N.GetString("Password");
             EncryptionLabel.Text = I18N.GetString("Encryption");
-            checkRemarks.Text = I18N.GetString("Remarks");
+            labelRemarks.Text = I18N.GetString("Remarks");
 
             checkAdvSetting.Text = I18N.GetString(checkAdvSetting.Text);
             TCPoverUDPLabel.Text = I18N.GetString(TCPoverUDPLabel.Text);
@@ -78,7 +83,7 @@ namespace Shadowsocks.View
             CheckTCPoverUDP.Text = I18N.GetString(CheckTCPoverUDP.Text);
             CheckUDPoverUDP.Text = I18N.GetString(CheckUDPoverUDP.Text);
             CheckObfsUDP.Text = I18N.GetString(CheckObfsUDP.Text);
-            LabelLink.Text = I18N.GetString(LabelLink.Text);
+            checkSSRLink.Text = I18N.GetString(checkSSRLink.Text);
             for (int i = 0; i < TCPProtocolComboBox.Items.Count; ++i)
             {
                 TCPProtocolComboBox.Items[i] = I18N.GetString(TCPProtocolComboBox.Items[i].ToString());
@@ -123,7 +128,6 @@ namespace Shadowsocks.View
                     obfsparam = textObfsParam.Text,
                     remarks = RemarksTextBox.Text,
                     group = TextGroup.Text.Trim(),
-                    tcp_over_udp = CheckTCPoverUDP.Checked,
                     udp_over_tcp = CheckUDPoverUDP.Checked,
                     protocol = TCPProtocolComboBox.Text,
                     //obfs_udp = CheckObfsUDP.Checked,
@@ -215,16 +219,15 @@ namespace Shadowsocks.View
                 textObfsParam.Text = server.obfsparam;
                 RemarksTextBox.Text = server.remarks;
                 TextGroup.Text = server.group;
-                CheckTCPoverUDP.Checked = server.tcp_over_udp;
                 CheckUDPoverUDP.Checked = server.udp_over_tcp;
                 //CheckObfsUDP.Checked = server.obfs_udp;
                 _SelectedID = server.id;
 
                 ServerGroupBox.Visible = true;
 
-                if (checkRemarks.Checked)
+                if (checkSSRLink.Checked)
                 {
-                    TextLink.Text = controller.GetSSRemarksLinkForServer(server);
+                    TextLink.Text = controller.GetSSRRemarksLinkForServer(server);
                 }
                 else
                 {
@@ -453,11 +456,11 @@ namespace Shadowsocks.View
         {
             if (PasswordLabel.Checked)
             {
-                PasswordTextBox.PasswordChar = '\0';
+                PasswordTextBox.UseSystemPasswordChar = false;
             }
             else
             {
-                PasswordTextBox.PasswordChar = '●';
+                PasswordTextBox.UseSystemPasswordChar = true;
             }
         }
 

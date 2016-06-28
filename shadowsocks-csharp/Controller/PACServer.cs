@@ -77,23 +77,28 @@ namespace Shadowsocks.Controller
                             string url = line.Substring(line.IndexOf(" ") + 1);
                             url = url.Substring(0, url.IndexOf(" "));
                             pathMatch = true;
-                            int ip_pos = url.IndexOf("ip=");
-                            if (ip_pos > 0)
+                            int port_pos = url.IndexOf("port=");
+                            if (port_pos > 0)
                             {
-                                int port_pos = url.IndexOf("port=");
-                                if (port_pos > 0)
+                                string port = url.Substring(port_pos + 5);
+                                if (port.IndexOf("&") >= 0)
+                                {
+                                    port = port.Substring(0, port.IndexOf("&"));
+                                }
+
+                                int ip_pos = url.IndexOf("ip=");
+                                if (ip_pos > 0)
                                 {
                                     proxy = url.Substring(ip_pos + 3);
-                                    string port = url.Substring(port_pos + 5);
                                     if (proxy.IndexOf("&") >= 0)
                                     {
                                         proxy = proxy.Substring(0, proxy.IndexOf("&"));
                                     }
-                                    if (port.IndexOf("&") >= 0)
-                                    {
-                                        port = port.Substring(0, port.IndexOf("&"));
-                                    }
                                     proxy += ":" + port + ";";
+                                }
+                                else
+                                {
+                                    proxy = "127.0.0.1:" + port + ";";
                                 }
                             }
 
