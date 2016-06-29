@@ -41,7 +41,7 @@ namespace Shadowsocks.Controller
                 return false;
             }
             socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, true);
-            TCPHandler handler = new TCPHandler(this);
+            TCPHandler handler = new TCPHandler(this, _config);
             handler.connection = socket;
             handler.controller = _controller;
             handler.relay = this;
@@ -98,6 +98,7 @@ namespace Shadowsocks.Controller
         public Socket connection;
         public ShadowsocksController controller;
         public TCPRelay relay;
+        public Configuration config;
 
         public DateTime lastActivity;
 
@@ -140,9 +141,10 @@ namespace Shadowsocks.Controller
         private int _bytesToSend;
         private TCPRelay tcprelay;  // TODO: tcprelay ?= relay
 
-        public TCPHandler(TCPRelay tcprelay)
+        public TCPHandler(TCPRelay tcprelay, Configuration config)
         {
             this.tcprelay = tcprelay;
+            this.config = config;
         }
 
         public void CreateRemote()
@@ -423,21 +425,40 @@ namespace Shadowsocks.Controller
                     IPHostEntry ipHostInfo = Dns.GetHostEntry(server.server);
                     ipAddress = ipHostInfo.AddressList[0];
                 }
-                IPEndPoint remoteEP = new IPEndPoint(ipAddress, server.server_port);
+                IPEndPoint destEP = new IPEndPoint(ipAddress, server.server_port);
 
-                remote = new DirectConnect();
+                // Setting up proxy
+                IPEndPoint proxyEP;
+                if (config.useProxy)
+                {
+                    parsed = IPAddress.TryParse(config.proxyServer, out ipAddress);
+                    if (!parsed)
+                    {
+                        IPHostEntry ipHostInfo = Dns.GetHostEntry(config.proxyServer);
+                        ipAddress = ipHostInfo.AddressList[0];
+                    }
+
+                    remote = new Socks5Proxy();
+                    proxyEP = new IPEndPoint(ipAddress, config.proxyPort);
+                }
+                else
+                {
+                    remote = new DirectConnect();
+                    proxyEP = destEP;
+                }
+
 
                 ProxyTimer proxyTimer = new ProxyTimer(3000);
                 proxyTimer.AutoReset = false;
                 proxyTimer.Elapsed += proxyConnectTimer_Elapsed;
                 proxyTimer.Enabled = true;
-                proxyTimer.DestEndPoint = remoteEP;
+                proxyTimer.DestEndPoint = destEP;
                 proxyTimer.Server = server;
 
                 proxyConnected = false;
 
                 // Connect to the proxy server.
-                remote.BeginConnectProxy(remoteEP, new AsyncCallback(ProxyConnectCallback), proxyTimer);
+                remote.BeginConnectProxy(proxyEP, new AsyncCallback(ProxyConnectCallback), proxyTimer);
             }
             catch (Exception e)
             {
