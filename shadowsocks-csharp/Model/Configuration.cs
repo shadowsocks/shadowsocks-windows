@@ -25,6 +25,9 @@ namespace Shadowsocks.Model
         public bool availabilityStatistics;
         public bool autoCheckUpdate;
         public LogViewerConfig logViewer;
+        public bool useProxy;
+        public string proxyServer;
+        public int proxyPort;
 
         private static string CONFIG_FILE = "gui-config.json";
 
@@ -128,7 +131,7 @@ namespace Shadowsocks.Model
                 throw new ArgumentException(I18N.GetString("Password can not be blank"));
         }
 
-        private static void CheckServer(string server)
+        public static void CheckServer(string server)
         {
             if (server.IsNullOrEmpty())
                 throw new ArgumentException(I18N.GetString("Server IP can not be blank"));

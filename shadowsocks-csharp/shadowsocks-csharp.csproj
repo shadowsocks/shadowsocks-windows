@@ -232,6 +232,12 @@
       <DependentUpon>LogForm.cs</DependentUpon>
     </Compile>
     <Compile Include="View\MenuViewController.cs" />
+    <Compile Include="View\ProxyForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="View\ProxyForm.Designer.cs">
+      <DependentUpon>ProxyForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="View\QRCodeForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -261,6 +267,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="View\LogForm.resx">
       <DependentUpon>LogForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="View\ProxyForm.resx">
+      <DependentUpon>ProxyForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="View\QRCodeForm.resx">
       <DependentUpon>QRCodeForm.cs</DependentUpon>

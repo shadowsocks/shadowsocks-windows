@@ -191,6 +191,20 @@ namespace Shadowsocks.Controller
             }
         }
 
+        public void DisableProxy()
+        {
+            _config.useProxy = false;
+            SaveConfig(_config);
+        }
+
+        public void EnableProxy(string proxy, int port)
+        {
+            _config.useProxy = true;
+            _config.proxyServer = proxy;
+            _config.proxyPort = port;
+            SaveConfig(_config);
+        }
+
         public void SelectServerIndex(int index)
         {
             _config.index = index;

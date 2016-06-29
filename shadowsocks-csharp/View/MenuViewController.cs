@@ -45,7 +45,9 @@ namespace Shadowsocks.View
         private MenuItem editGFWUserRuleItem;
         private MenuItem editOnlinePACItem;
         private MenuItem autoCheckUpdatesToggleItem;
+        private MenuItem proxyItem;
         private ConfigForm configForm;
+        private ProxyForm proxyForm;
         private List<LogForm> logForms = new List<LogForm>();
         private bool logFormsVisible = false;
         private string _urlToOpen;
@@ -211,6 +213,7 @@ namespace Shadowsocks.View
                     this.editGFWUserRuleItem = CreateMenuItem("Edit User Rule for GFWList...", new EventHandler(this.EditUserRuleFileForGFWListItem_Click)),
                     this.editOnlinePACItem = CreateMenuItem("Edit Online PAC URL...", new EventHandler(this.UpdateOnlinePACURLItem_Click)),
                 }),
+                this.proxyItem = CreateMenuItem("Proxy...", new EventHandler(this.proxyItem_Click)),
                 new MenuItem("-"),
                 this.AutoStartupItem = CreateMenuItem("Start on Boot", new EventHandler(this.AutoStartupItem_Click)),
                 this.ShareOverLANItem = CreateMenuItem("Allow Clients from LAN", new EventHandler(this.ShareOverLANItem_Click)),
@@ -377,6 +380,20 @@ namespace Shadowsocks.View
             }
         }
 
+        private void ShowProxyForm()
+        {
+            if (proxyForm != null)
+            {
+                proxyForm.Activate();
+            }
+            else
+            {
+                proxyForm = new ProxyForm(controller);
+                proxyForm.Show();
+                proxyForm.FormClosed += proxyForm_FormClosed;
+            }
+        }
+
         private void ShowLogForms()
         {
             if (logForms.Count == 0)
@@ -413,6 +430,12 @@ namespace Shadowsocks.View
                 ShowFirstTimeBalloon();
                 _isFirstRun = false;
             }
+        }
+
+        void proxyForm_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            proxyForm = null;
+            Utils.ReleaseMemory(true);
         }
 
         private void Config_Click(object sender, EventArgs e)
@@ -720,6 +743,11 @@ namespace Shadowsocks.View
         private void checkUpdatesItem_Click(object sender, EventArgs e)
         {
             updateChecker.CheckUpdate(controller.GetConfigurationCopy());
+        }
+
+        private void proxyItem_Click(object sender, EventArgs e)
+        {
+            ShowProxyForm();
         }
     }
 }
