@@ -394,7 +394,7 @@ namespace Shadowsocks.Controller
 
                 polipoRunner.Start(_config);
 
-                TCPRelay tcpRelay = new TCPRelay(this);
+                TCPRelay tcpRelay = new TCPRelay(this, _config);
                 UDPRelay udpRelay = new UDPRelay(this);
                 List<Listener.Service> services = new List<Listener.Service>();
                 services.Add(tcpRelay);

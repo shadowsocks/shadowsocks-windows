@@ -7,6 +7,7 @@ using System.Timers;
 using Shadowsocks.Controller.Strategy;
 using Shadowsocks.Encryption;
 using Shadowsocks.Model;
+using Shadowsocks.Proxy;
 
 namespace Shadowsocks.Controller
 {
@@ -14,15 +15,17 @@ namespace Shadowsocks.Controller
     {
         private ShadowsocksController _controller;
         private DateTime _lastSweepTime;
+        private Configuration _config;
 
         public ISet<TCPHandler> Handlers
         {
             get; set;
         }
 
-        public TCPRelay(ShadowsocksController controller)
+        public TCPRelay(ShadowsocksController controller, Configuration conf)
         {
             _controller = controller;
+            _config = conf;
             Handlers = new HashSet<TCPHandler>();
             _lastSweepTime = DateTime.Now;
         }
@@ -91,7 +94,7 @@ namespace Shadowsocks.Controller
         public IEncryptor encryptor;
         public Server server;
         // Client  socket.
-        public Socket remote;
+        public IProxy remote;
         public Socket connection;
         public ShadowsocksController controller;
         public TCPRelay relay;
@@ -100,7 +103,8 @@ namespace Shadowsocks.Controller
 
         private const int maxRetry = 4;
         private int retryCount = 0;
-        private bool connected;
+        private bool proxyConnected;
+        private bool destConnected;
 
         private byte command;
         private byte[] _firstPacket;
@@ -345,7 +349,7 @@ namespace Shadowsocks.Controller
                 if (ar.AsyncState != null)
                 {
                     connection.EndSend(ar);
-                    Logging.Debug(remote, RecvSize, "TCP Relay");
+                    Logging.Debug(remote.LocalEndPoint, remote.DestEndPoint, RecvSize, "TCP Relay");
                     connection.BeginReceive(connetionRecvBuffer, 0, RecvSize, 0, new AsyncCallback(ReadAll), null);
                 }
                 else
@@ -353,7 +357,7 @@ namespace Shadowsocks.Controller
                     int bytesRead = connection.EndReceive(ar);
                     if (bytesRead > 0)
                     {
-                        Logging.Debug(remote, RecvSize, "TCP Relay");
+                        Logging.Debug(remote.LocalEndPoint, remote.DestEndPoint, RecvSize, "TCP Relay");
                         connection.BeginReceive(connetionRecvBuffer, 0, RecvSize, 0, new AsyncCallback(ReadAll), null);
                     }
                     else
@@ -386,6 +390,16 @@ namespace Shadowsocks.Controller
         }
 
         // inner class
+        private class ProxyTimer : Timer
+        {
+            public EndPoint DestEndPoint;
+            public Server Server;
+
+            public ProxyTimer(int p) : base(p)
+            {
+            }
+        }
+
         private class ServerTimer : Timer
         {
             public Server Server;
@@ -411,20 +425,19 @@ namespace Shadowsocks.Controller
                 }
                 IPEndPoint remoteEP = new IPEndPoint(ipAddress, server.server_port);
 
-                remote = new Socket(ipAddress.AddressFamily,
-                    SocketType.Stream, ProtocolType.Tcp);
-                remote.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, true);
+                remote = new DirectConnect();
 
-                _startConnectTime = DateTime.Now;
-                ServerTimer connectTimer = new ServerTimer(3000);
-                connectTimer.AutoReset = false;
-                connectTimer.Elapsed += connectTimer_Elapsed;
-                connectTimer.Enabled = true;
-                connectTimer.Server = server;
+                ProxyTimer proxyTimer = new ProxyTimer(3000);
+                proxyTimer.AutoReset = false;
+                proxyTimer.Elapsed += proxyConnectTimer_Elapsed;
+                proxyTimer.Enabled = true;
+                proxyTimer.DestEndPoint = remoteEP;
+                proxyTimer.Server = server;
 
-                connected = false;
-                // Connect to the remote endpoint.
-                remote.BeginConnect(remoteEP, new AsyncCallback(ConnectCallback), connectTimer);
+                proxyConnected = false;
+
+                // Connect to the proxy server.
+                remote.BeginConnectProxy(remoteEP, new AsyncCallback(ProxyConnectCallback), proxyTimer);
             }
             catch (Exception e)
             {
@@ -433,9 +446,67 @@ namespace Shadowsocks.Controller
             }
         }
 
-        private void connectTimer_Elapsed(object sender, ElapsedEventArgs e)
+        private void proxyConnectTimer_Elapsed(object sender, ElapsedEventArgs e)
         {
-            if (connected)
+            if (proxyConnected || destConnected)
+            {
+                return;
+            }
+            var ep = ((ProxyTimer)sender).DestEndPoint;
+
+            Logging.Info($"Proxy {ep} timed out");
+            remote.Close();
+            RetryConnect();
+        }
+
+        private void ProxyConnectCallback(IAsyncResult ar)
+        {
+            Server server = null;
+            if (closed)
+            {
+                return;
+            }
+            try
+            {
+                ProxyTimer timer = (ProxyTimer)ar.AsyncState;
+                var destEP = timer.DestEndPoint;
+                server = timer.Server;
+                timer.Elapsed -= proxyConnectTimer_Elapsed;
+                timer.Enabled = false;
+                timer.Dispose();
+
+                // Complete the connection.
+                remote.EndConnectProxy(ar);
+
+                proxyConnected = true;
+
+                Logging.Debug($"Socket connected to proxy {remote.ProxyEndPoint}");
+
+
+                _startConnectTime = DateTime.Now;
+                ServerTimer connectTimer = new ServerTimer(3000);
+                connectTimer.AutoReset = false;
+                connectTimer.Elapsed += destConnectTimer_Elapsed;
+                connectTimer.Enabled = true;
+                connectTimer.Server = server;
+
+                destConnected = false;
+                // Connect to the remote endpoint.
+                remote.BeginConnectDest(destEP, new AsyncCallback(ConnectCallback), connectTimer);
+            }
+            catch (ArgumentException)
+            {
+            }
+            catch (Exception e)
+            {
+                Logging.LogUsefulException(e);
+                RetryConnect();
+            }
+        }
+
+        private void destConnectTimer_Elapsed(object sender, ElapsedEventArgs e)
+        {
+            if (destConnected)
             {
                 return;
             }
@@ -475,16 +546,16 @@ namespace Shadowsocks.Controller
             {
                 ServerTimer timer = (ServerTimer)ar.AsyncState;
                 server = timer.Server;
-                timer.Elapsed -= connectTimer_Elapsed;
+                timer.Elapsed -= destConnectTimer_Elapsed;
                 timer.Enabled = false;
                 timer.Dispose();
 
                 // Complete the connection.
-                remote.EndConnect(ar);
+                remote.EndConnectDest(ar);
 
-                connected = true;
+                destConnected = true;
 
-                Logging.Debug($"Socket connected to {remote.RemoteEndPoint}");
+                Logging.Debug($"Socket connected to {remote.DestEndPoint}");
 
                 var latency = DateTime.Now - _startConnectTime;
                 IStrategy strategy = controller.GetCurrentStrategy();
@@ -554,7 +625,7 @@ namespace Shadowsocks.Controller
                         }
                         encryptor.Decrypt(remoteRecvBuffer, bytesRead, remoteSendBuffer, out bytesToSend);
                     }
-                    Logging.Debug(remote, bytesToSend, "TCP Relay", "@PipeRemoteReceiveCallback() (download)");
+                    Logging.Debug(remote.LocalEndPoint, remote.DestEndPoint, bytesToSend, "TCP Relay", "@PipeRemoteReceiveCallback() (download)");
                     connection.BeginSend(remoteSendBuffer, 0, bytesToSend, 0, new AsyncCallback(PipeConnectionSendCallback), null);
 
                     IStrategy strategy = controller.GetCurrentStrategy();
@@ -606,7 +677,7 @@ namespace Shadowsocks.Controller
                         }
                         encryptor.Encrypt(connetionRecvBuffer, bytesRead, connetionSendBuffer, out bytesToSend);
                     }
-                    Logging.Debug(remote, bytesToSend, "TCP Relay", "@PipeConnectionReceiveCallback() (upload)");
+                    Logging.Debug(remote.LocalEndPoint, remote.DestEndPoint, bytesToSend, "TCP Relay", "@PipeConnectionReceiveCallback() (upload)");
                     tcprelay.UpdateOutboundCounter(server, bytesToSend);
                     _startSendingTime = DateTime.Now;
                     _bytesToSend = bytesToSend;
