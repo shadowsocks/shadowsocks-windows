@@ -207,6 +207,7 @@
     <Compile Include="Controller\Strategy\BalancingStrategy.cs" />
     <Compile Include="Controller\Strategy\StrategyManager.cs" />
     <Compile Include="Controller\Strategy\IStrategy.cs" />
+    <Compile Include="Proxy\Socks5Proxy.cs" />
     <Compile Include="StringEx.cs" />
     <Compile Include="Util\Util.cs" />
     <Compile Include="View\ConfigForm.cs">

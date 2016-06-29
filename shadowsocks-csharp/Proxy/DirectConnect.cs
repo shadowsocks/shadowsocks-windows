@@ -29,15 +29,13 @@ namespace Shadowsocks.Proxy
         public EndPoint DestEndPoint { get; private set; }
 
 
-        public IAsyncResult BeginConnectProxy(EndPoint remoteEP, AsyncCallback callback, object state)
+        public void BeginConnectProxy(EndPoint remoteEP, AsyncCallback callback, object state)
         {
             // do nothing
             ProxyEndPoint = remoteEP;
 
             var r = new FakeAsyncResult(state);
             callback?.Invoke(r);
-
-            return r;
         }
 
         public void EndConnectProxy(IAsyncResult asyncResult)
@@ -45,7 +43,7 @@ namespace Shadowsocks.Proxy
             // do nothing
         }
 
-        public IAsyncResult BeginConnectDest(EndPoint remoteEP, AsyncCallback callback, object state)
+        public void BeginConnectDest(EndPoint remoteEP, AsyncCallback callback, object state)
         {
             if (_remote == null)
             {
@@ -55,7 +53,7 @@ namespace Shadowsocks.Proxy
 
             DestEndPoint = remoteEP;
 
-            return _remote.BeginConnect(remoteEP, callback, state);
+            _remote.BeginConnect(remoteEP, callback, state);
         }
 
         public void EndConnectDest(IAsyncResult asyncResult)
@@ -63,10 +61,10 @@ namespace Shadowsocks.Proxy
             _remote.EndConnect(asyncResult);
         }
 
-        public IAsyncResult BeginSend(byte[] buffer, int offset, int size, SocketFlags socketFlags, AsyncCallback callback,
+        public void BeginSend(byte[] buffer, int offset, int size, SocketFlags socketFlags, AsyncCallback callback,
             object state)
         {
-            return _remote.BeginSend(buffer, offset, size, socketFlags, callback, state);
+            _remote.BeginSend(buffer, offset, size, socketFlags, callback, state);
         }
 
         public int EndSend(IAsyncResult asyncResult)
@@ -74,10 +72,10 @@ namespace Shadowsocks.Proxy
             return _remote.EndSend(asyncResult);
         }
 
-        public IAsyncResult BeginReceive(byte[] buffer, int offset, int size, SocketFlags socketFlags, AsyncCallback callback,
+        public void BeginReceive(byte[] buffer, int offset, int size, SocketFlags socketFlags, AsyncCallback callback,
             object state)
         {
-            return _remote.BeginReceive(buffer, offset, size, socketFlags, callback, state);
+            _remote.BeginReceive(buffer, offset, size, socketFlags, callback, state);
         }
 
         public int EndReceive(IAsyncResult asyncResult)

@@ -13,20 +13,20 @@ namespace Shadowsocks.Proxy
 
         EndPoint DestEndPoint { get; }
 
-        IAsyncResult BeginConnectProxy(EndPoint remoteEP, AsyncCallback callback, object state);
+        void BeginConnectProxy(EndPoint remoteEP, AsyncCallback callback, object state);
 
         void EndConnectProxy(IAsyncResult asyncResult);
 
-        IAsyncResult BeginConnectDest(EndPoint remoteEP, AsyncCallback callback, object state);
+        void BeginConnectDest(EndPoint remoteEP, AsyncCallback callback, object state);
 
         void EndConnectDest(IAsyncResult asyncResult);
 
-        IAsyncResult BeginSend(byte[] buffer, int offset, int size, SocketFlags socketFlags, AsyncCallback callback,
+        void BeginSend(byte[] buffer, int offset, int size, SocketFlags socketFlags, AsyncCallback callback,
             object state);
 
         int EndSend(IAsyncResult asyncResult);
 
-        IAsyncResult BeginReceive(byte[] buffer, int offset, int size, SocketFlags socketFlags, AsyncCallback callback,
+        void BeginReceive(byte[] buffer, int offset, int size, SocketFlags socketFlags, AsyncCallback callback,
             object state);
 
         int EndReceive(IAsyncResult asyncResult);
