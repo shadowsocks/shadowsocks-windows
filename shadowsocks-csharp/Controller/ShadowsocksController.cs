@@ -23,6 +23,7 @@ namespace Shadowsocks.Controller
         // interacts with low level logic
 
         private Thread _ramThread;
+        private Thread _trafficThread;
 
         private Listener _listener;
         private PACServer _pacServer;
@@ -35,6 +36,7 @@ namespace Shadowsocks.Controller
 
         public long inboundCounter = 0;
         public long outboundCounter = 0;
+        public QueueLast<TrafficPerSecond> traffic;
 
         private bool stopped = false;
 
@@ -45,10 +47,29 @@ namespace Shadowsocks.Controller
             public string Path;
         }
 
+        public class QueueLast<T> : Queue<T>
+        {
+            public T Last { get; private set; }
+            public new void Enqueue(T item)
+            {
+                Last = item;
+                base.Enqueue(item);
+            }
+        }
+
+        public class TrafficPerSecond
+        {
+            public long inboundCounter;
+            public long outboundCounter;
+            public long inboundIncreasement;
+            public long outboundIncreasement;
+        }
+
         public event EventHandler ConfigChanged;
         public event EventHandler EnableStatusChanged;
         public event EventHandler EnableGlobalChanged;
         public event EventHandler ShareOverLANStatusChanged;
+        public event EventHandler TrafficChanged;
 
         // when user clicked Edit PAC, and PAC file has already created
         public event EventHandler<PathEventArgs> PACFileReadyToOpen;
@@ -66,6 +87,7 @@ namespace Shadowsocks.Controller
             StatisticsConfiguration = StatisticsStrategyConfiguration.Load();
             _strategyManager = new StrategyManager(this);
             StartReleasingMemory();
+            StartTrafficStatistics(60);
         }
 
         public void Start()
@@ -313,7 +335,7 @@ namespace Shadowsocks.Controller
         {
             if (_config.availabilityStatistics)
             {
-                new Task(() => availabilityStatistics.UpdateLatency(server, (int) latency.TotalMilliseconds)).Start();
+                new Task(() => availabilityStatistics.UpdateLatency(server, (int)latency.TotalMilliseconds)).Start();
             }
         }
 
@@ -513,6 +535,42 @@ namespace Shadowsocks.Controller
             {
                 Utils.ReleaseMemory(false);
                 Thread.Sleep(30 * 1000);
+            }
+        }
+
+        private void StartTrafficStatistics(int queueMaxSize)
+        {
+            traffic = new QueueLast<TrafficPerSecond>();
+            for (int i = 0; i < queueMaxSize; i++)
+            {
+                traffic.Enqueue(new TrafficPerSecond());
+            }
+            _trafficThread = new Thread(new ThreadStart(() => TrafficStatistics(queueMaxSize)));
+            _trafficThread.IsBackground = true;
+            _trafficThread.Start();
+        }
+
+        private void TrafficStatistics(int queueMaxSize)
+        {
+            while (true)
+            {
+                TrafficPerSecond previous = traffic.Last;
+                TrafficPerSecond current = new TrafficPerSecond();
+                current.inboundCounter = inboundCounter;
+                current.outboundCounter = outboundCounter;
+                current.inboundIncreasement = inboundCounter - previous.inboundCounter;
+                current.outboundIncreasement = outboundCounter - previous.outboundCounter;
+
+                traffic.Enqueue(current);
+                if (traffic.Count > queueMaxSize)
+                    traffic.Dequeue();
+
+                if (TrafficChanged != null)
+                {
+                    TrafficChanged(this, new EventArgs());
+                }
+
+                Thread.Sleep(1000);
             }
         }
 

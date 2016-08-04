@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.Windows.Forms;
 
 using ZXing;
@@ -25,6 +26,8 @@ namespace Shadowsocks.View
         private UpdateChecker updateChecker;
 
         private NotifyIcon _notifyIcon;
+        private Bitmap icon_baseBitmap;
+        private Icon icon_base, icon_in, icon_out, icon_both, targetIcon;
         private ContextMenu contextMenu1;
 
         private bool _isFirstRun;
@@ -74,6 +77,7 @@ namespace Shadowsocks.View
             _notifyIcon.MouseClick += notifyIcon1_Click;
             _notifyIcon.MouseDoubleClick += notifyIcon1_DoubleClick;
             _notifyIcon.BalloonTipClosed += _notifyIcon_BalloonTipClosed;
+            controller.TrafficChanged += controller_TrafficChanged;
 
             this.updateChecker = new UpdateChecker();
             updateChecker.CheckUpdateCompleted += updateChecker_CheckUpdateCompleted;
@@ -94,6 +98,32 @@ namespace Shadowsocks.View
             }
         }
 
+        private void controller_TrafficChanged(object sender, EventArgs e)
+        {
+            if (icon_baseBitmap == null)
+                return;
+
+            Icon newIcon;
+
+            bool hasInbound = controller.traffic.Last.inboundIncreasement > 0;
+            bool hasOutbound = controller.traffic.Last.outboundIncreasement > 0;
+
+            if (hasInbound && hasOutbound)
+                newIcon = icon_both;
+            else if (hasInbound)
+                newIcon = icon_in;
+            else if (hasOutbound)
+                newIcon = icon_out;
+            else
+                newIcon = icon_base;
+
+            if (newIcon != this.targetIcon)
+            {
+                this.targetIcon = newIcon;
+                _notifyIcon.Icon = newIcon;
+            }
+        }
+
         void controller_Errored(object sender, System.IO.ErrorEventArgs e)
         {
             MessageBox.Show(e.GetException().ToString(), String.Format(I18N.GetString("Shadowsocks Error: {0}"), e.GetException().Message));
@@ -105,26 +135,32 @@ namespace Shadowsocks.View
             Graphics graphics = Graphics.FromHwnd(IntPtr.Zero);
             dpi = (int)graphics.DpiX;
             graphics.Dispose();
-            Bitmap icon = null;
+            icon_baseBitmap = null;
             if (dpi < 97)
             {
                 // dpi = 96;
-                icon = Resources.ss16;
+                icon_baseBitmap = Resources.ss16;
             }
             else if (dpi < 121)
             {
                 // dpi = 120;
-                icon = Resources.ss20;
+                icon_baseBitmap = Resources.ss20;
             }
             else
             {
-                icon = Resources.ss24;
+                icon_baseBitmap = Resources.ss24;
             }
             Configuration config = controller.GetConfigurationCopy();
             bool enabled = config.enabled;
             bool global = config.global;
-            icon = getTrayIconByState(icon, enabled, global);
-            _notifyIcon.Icon = Icon.FromHandle(icon.GetHicon());
+            icon_baseBitmap = getTrayIconByState(icon_baseBitmap, enabled, global);
+
+            icon_base = Icon.FromHandle(icon_baseBitmap.GetHicon());
+            targetIcon = icon_base;
+            icon_in = Icon.FromHandle(AddBitmapOverlay(icon_baseBitmap, Resources.ssIn24).GetHicon());
+            icon_out = Icon.FromHandle(AddBitmapOverlay(icon_baseBitmap, Resources.ssOut24).GetHicon());
+            icon_both = Icon.FromHandle(AddBitmapOverlay(icon_baseBitmap, Resources.ssIn24, Resources.ssOut24).GetHicon());
+            _notifyIcon.Icon = targetIcon;
 
             string serverInfo = null;
             if (controller.GetCurrentStrategy() != null)
@@ -175,6 +211,19 @@ namespace Shadowsocks.View
                 }
             }
             return iconCopy;
+        }
+
+        private Bitmap AddBitmapOverlay(Bitmap original, params Bitmap[] overlays)
+        {
+            Bitmap bitmap = new Bitmap(original.Width, original.Height, PixelFormat.Format64bppArgb);
+            Graphics canvas = Graphics.FromImage(bitmap);
+            canvas.DrawImage(original, new Point(0, 0));
+            foreach (Bitmap overlay in overlays)
+            {
+                canvas.DrawImage(new Bitmap(overlay, original.Size), new Point(0, 0));
+            }
+            canvas.Save();
+            return bitmap;
         }
 
         private MenuItem CreateMenuItem(string text, EventHandler click)
