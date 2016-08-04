@@ -42,15 +42,22 @@ namespace Shadowsocks.Controller
 
         private bool CheckIfPortInUse(int port)
         {
-            IPGlobalProperties ipProperties = IPGlobalProperties.GetIPGlobalProperties();
-            IPEndPoint[] ipEndPoints = ipProperties.GetActiveTcpListeners();
-
-            foreach (IPEndPoint endPoint in ipEndPoints)
+            try
             {
-                if (endPoint.Port == port)
+                IPGlobalProperties ipProperties = IPGlobalProperties.GetIPGlobalProperties();
+                IPEndPoint[] ipEndPoints = ipProperties.GetActiveTcpListeners();
+
+                foreach (IPEndPoint endPoint in ipEndPoints)
                 {
-                    return true;
+                    if (endPoint.Port == port)
+                    {
+                        return true;
+                    }
                 }
+            }
+            catch
+            {
+
             }
             return false;
         }

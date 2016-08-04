@@ -58,6 +58,7 @@
             this.labelUDPPort = new System.Windows.Forms.Label();
             this.textUDPPort = new System.Windows.Forms.TextBox();
             this.checkSSRLink = new System.Windows.Forms.CheckBox();
+            this.labelRemarks = new System.Windows.Forms.Label();
             this.panel2 = new System.Windows.Forms.Panel();
             this.DeleteButton = new System.Windows.Forms.Button();
             this.AddButton = new System.Windows.Forms.Button();
@@ -74,7 +75,6 @@
             this.tableLayoutPanel3 = new System.Windows.Forms.TableLayoutPanel();
             this.MyCancelButton = new System.Windows.Forms.Button();
             this.OKButton = new System.Windows.Forms.Button();
-            this.labelRemarks = new System.Windows.Forms.Label();
             this.tableLayoutPanel1.SuspendLayout();
             this.ServerGroupBox.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.PictureQRcode)).BeginInit();
@@ -473,6 +473,17 @@
             this.checkSSRLink.TabIndex = 38;
             this.checkSSRLink.Text = "SSR Link";
             this.checkSSRLink.UseVisualStyleBackColor = true;
+            this.checkSSRLink.CheckedChanged += new System.EventHandler(this.checkSSRLink_CheckedChanged);
+            // 
+            // labelRemarks
+            // 
+            this.labelRemarks.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.labelRemarks.AutoSize = true;
+            this.labelRemarks.Location = new System.Drawing.Point(36, 204);
+            this.labelRemarks.Name = "labelRemarks";
+            this.labelRemarks.Size = new System.Drawing.Size(58, 15);
+            this.labelRemarks.TabIndex = 39;
+            this.labelRemarks.Text = "Remarks";
             // 
             // panel2
             // 
@@ -705,16 +716,6 @@
             this.OKButton.Text = "OK";
             this.OKButton.UseVisualStyleBackColor = true;
             this.OKButton.Click += new System.EventHandler(this.OKButton_Click);
-            // 
-            // labelRemarks
-            // 
-            this.labelRemarks.Anchor = System.Windows.Forms.AnchorStyles.Right;
-            this.labelRemarks.AutoSize = true;
-            this.labelRemarks.Location = new System.Drawing.Point(36, 204);
-            this.labelRemarks.Name = "labelRemarks";
-            this.labelRemarks.Size = new System.Drawing.Size(58, 15);
-            this.labelRemarks.TabIndex = 39;
-            this.labelRemarks.Text = "Remarks";
             // 
             // ConfigForm
             // 

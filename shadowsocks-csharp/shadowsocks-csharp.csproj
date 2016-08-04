@@ -71,6 +71,15 @@
     <Reference Include="System.XML" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="3rd\opendns\DnsQuery.cs" />
+    <Compile Include="3rd\opendns\DnsResponse.cs" />
+    <Compile Include="3rd\opendns\Enum.cs" />
+    <Compile Include="3rd\opendns\RR\Address.cs" />
+    <Compile Include="3rd\opendns\RR\MX.cs" />
+    <Compile Include="3rd\opendns\RR\ResourceRecord.cs" />
+    <Compile Include="3rd\opendns\RR\ResourceRecordCollection.cs" />
+    <Compile Include="3rd\opendns\RR\SOA.cs" />
+    <Compile Include="3rd\SimpleJson.cs" />
     <Compile Include="3rd\zxing\BarcodeFormat.cs" />
     <Compile Include="3rd\zxing\BaseLuminanceSource.cs" />
     <Compile Include="3rd\zxing\Binarizer.cs" />
@@ -117,7 +126,6 @@
     <Compile Include="3rd\zxing\qrcode\encoder\MaskUtil.cs" />
     <Compile Include="3rd\zxing\qrcode\encoder\MatrixUtil.cs" />
     <Compile Include="3rd\zxing\qrcode\encoder\QRCode.cs" />
-    <Compile Include="3rd\SimpleJson.cs" />
     <Compile Include="3rd\zxing\qrcode\QRCodeReader.cs" />
     <Compile Include="3rd\zxing\Result.cs" />
     <Compile Include="3rd\zxing\ResultMetadataType.cs" />
@@ -270,6 +278,7 @@
       <Install>true</Install>
     </BootstrapperPackage>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

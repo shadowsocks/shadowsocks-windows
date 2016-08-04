@@ -194,6 +194,7 @@ namespace Shadowsocks.Controller
             _config.reconnectTimes = config.reconnectTimes;
             _config.randomAlgorithm = config.randomAlgorithm;
             _config.TTL = config.TTL;
+            _config.dns_server = config.dns_server;
             _config.proxyEnable = config.proxyEnable;
             _config.pacDirectGoProxy = config.pacDirectGoProxy;
             _config.proxyType = config.proxyType;
@@ -201,6 +202,7 @@ namespace Shadowsocks.Controller
             _config.proxyPort = config.proxyPort;
             _config.proxyAuthUser = config.proxyAuthUser;
             _config.proxyAuthPass = config.proxyAuthPass;
+            _config.proxyUserAgent = config.proxyUserAgent;
             _config.authUser = config.authUser;
             _config.authPass = config.authPass;
             _config.autoBan = config.autoBan;
@@ -219,7 +221,6 @@ namespace Shadowsocks.Controller
             {
                 var server = new Server(ssURL);
                 _config.configs.Add(server);
-                _config.index = _config.configs.Count - 1;
                 SaveConfig(_config);
                 return true;
             }
@@ -361,20 +362,20 @@ namespace Shadowsocks.Controller
         {
             Server server = GetCurrentServer();
             string parts = GetObfsPartOfSSLink(server);
-            string base64 = Util.Utils.EncodeUrlSafeBase64(parts);
+            string base64 = Util.Utils.EncodeUrlSafeBase64(parts).Replace("=", "");
             return "ss://" + base64;
         }
 
         public string GetSSLinkForServer(Server server)
         {
             string parts = GetObfsPartOfSSLink(server);
-            string base64 = Util.Utils.EncodeUrlSafeBase64(parts);
+            string base64 = Util.Utils.EncodeUrlSafeBase64(parts).Replace("=", "");
             return "ss://" + base64;
         }
 
         public string GetSSRRemarksLinkForServer(Server server)
         {
-            string main_part = server.server + ":" + server.server_port + ":" + server.protocol + ":" + server.method + ":" + server.obfs + ":" + Util.Utils.EncodeUrlSafeBase64(server.password);
+            string main_part = server.server + ":" + server.server_port + ":" + server.protocol + ":" + server.method + ":" + server.obfs + ":" + Util.Utils.EncodeUrlSafeBase64(server.password).Replace("=", "");
             string param_str = "obfsparam=" + Util.Utils.EncodeUrlSafeBase64(server.obfsparam);
             if (server.remarks.Length > 0)
             {
@@ -392,16 +393,8 @@ namespace Shadowsocks.Controller
             {
                 param_str += "&udpport=" + server.server_udp_port.ToString();
             }
-            string base64 = Util.Utils.EncodeUrlSafeBase64(main_part + "/?" + param_str);
+            string base64 = Util.Utils.EncodeUrlSafeBase64(main_part + "/?" + param_str).Replace("=", "");
             return "ssr://" + base64;
-        }
-
-        public string GetSSRemarksLinkForServer(Server server)
-        {
-            string remarks = server.remarks_base64;
-            string parts = GetObfsPartOfSSLink(server) + "#" + remarks;
-            string base64 = Util.Utils.EncodeUrlSafeBase64(parts);
-            return "ss://" + base64;
         }
 
         public void UpdatePACFromGFWList()

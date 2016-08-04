@@ -32,7 +32,7 @@ namespace Shadowsocks.Encryption
                 {"salsa20", new int[]{32, 8, CIPHER_SALSA20}},
                 {"chacha20", new int[]{32, 8, CIPHER_CHACHA20}},
                 {"chacha20-ietf", new int[]{32, 12, CIPHER_CHACHA20_IETF}},
-    };
+        };
 
         protected override Dictionary<string, int[]> getCiphers()
         {

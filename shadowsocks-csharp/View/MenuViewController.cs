@@ -81,7 +81,7 @@ namespace Shadowsocks.View
             if (controller.GetConfiguration().isDefault)
             {
                 _isFirstRun = true;
-                ShowConfigForm();
+                ShowConfigForm(false);
             }
 
             timerDelayCheckUpdate = new System.Timers.Timer(1000 * 10.0);
@@ -358,7 +358,7 @@ namespace Shadowsocks.View
             }
         }
 
-        private void ShowConfigForm()
+        private void ShowConfigForm(bool addNode)
         {
             if (configForm != null)
             {
@@ -366,7 +366,7 @@ namespace Shadowsocks.View
             }
             else
             {
-                configForm = new ConfigForm(controller, updateChecker);
+                configForm = new ConfigForm(controller, updateChecker, addNode ? -1 : -2);
                 configForm.Show();
                 configForm.Activate();
                 configForm.BringToFront();
@@ -431,7 +431,7 @@ namespace Shadowsocks.View
 
         private void Config_Click(object sender, EventArgs e)
         {
-            ShowConfigForm();
+            ShowConfigForm(false);
         }
 
         private void Setting_Click(object sender, EventArgs e)
@@ -501,7 +501,7 @@ namespace Shadowsocks.View
                 }
                 else
                 {
-                    ShowConfigForm();
+                    ShowConfigForm(false);
                 }
             }
             else if (e.Button == MouseButtons.Middle)
@@ -630,7 +630,7 @@ namespace Shadowsocks.View
                 {
                     controller.AddServerBySSURL(url);
                 }
-                ShowConfigForm();
+                ShowConfigForm(true);
             }
         }
 
@@ -728,7 +728,7 @@ namespace Shadowsocks.View
 
         void splash_FormClosed(object sender, FormClosedEventArgs e)
         {
-            ShowConfigForm();
+            ShowConfigForm(true);
         }
 
         void openURLFromQRCode(object sender, FormClosedEventArgs e)

@@ -26,7 +26,7 @@ namespace Shadowsocks.Encryption
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine(e.ToString());
+                    //Console.WriteLine(e.ToString());
                 }
                 try
                 {
@@ -35,7 +35,7 @@ namespace Shadowsocks.Encryption
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine(e.ToString());
+                    //Console.WriteLine(e.ToString());
                 }
                 string runningPath = Path.Combine(System.Windows.Forms.Application.StartupPath, @"temp"); // Path.GetTempPath();
                 if (!Directory.Exists(runningPath))
@@ -53,7 +53,7 @@ namespace Shadowsocks.Encryption
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine(e.ToString());
+                    //Console.WriteLine(e.ToString());
                 }
             }
             finally
@@ -89,11 +89,25 @@ namespace Shadowsocks.Encryption
             }
         }
 
+        public static bool is_cipher(string cipher_name)
+        {
+            string real_cipher_name = cipher_name;
+            if (cipher_name.StartsWith("rc4-md5"))
+            {
+                real_cipher_name = "rc4";
+            }
+            IntPtr ctx = IntPtr.Zero;
+            byte[] cipher_name_buf = Encoding.ASCII.GetBytes(real_cipher_name);
+            Array.Resize(ref cipher_name_buf, cipher_name_buf.Length + 1);
+            IntPtr cipher = EVP_get_cipherbyname(cipher_name_buf);
+            return cipher != IntPtr.Zero;
+        }
+
         public static IntPtr init(string cipher_name, byte[] key, byte[] iv, int op)
         {
             IntPtr ctx = IntPtr.Zero;
             string real_cipher_name = cipher_name;
-            if (cipher_name == "rc4-md5")
+            if (cipher_name.StartsWith("rc4-md5"))
             {
                 real_cipher_name = "rc4";
             }

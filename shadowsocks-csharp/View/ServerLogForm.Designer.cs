@@ -39,10 +39,12 @@
             this.TotalConnect = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Connecting = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.AvgLatency = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.AvgSpeed = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.MaxSpeed = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Upload = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.AvgDownSpeed = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.MaxDownSpeed = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.AvgUpSpeed = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.MaxUpSpeed = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Download = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Upload = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.DownloadRaw = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.ErrorPercent = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.ConnectError = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -68,10 +70,12 @@
             this.TotalConnect,
             this.Connecting,
             this.AvgLatency,
-            this.AvgSpeed,
-            this.MaxSpeed,
-            this.Upload,
+            this.AvgDownSpeed,
+            this.MaxDownSpeed,
+            this.AvgUpSpeed,
+            this.MaxUpSpeed,
             this.Download,
+            this.Upload,
             this.DownloadRaw,
             this.ErrorPercent,
             this.ConnectError,
@@ -174,29 +178,37 @@
             this.AvgLatency.ReadOnly = true;
             this.AvgLatency.Width = 48;
             // 
-            // AvgSpeed
+            // AvgDownSpeed
             // 
-            this.AvgSpeed.HeaderText = "Avg Speed";
-            this.AvgSpeed.MinimumWidth = 2;
-            this.AvgSpeed.Name = "AvgSpeed";
-            this.AvgSpeed.ReadOnly = true;
-            this.AvgSpeed.Width = 72;
+            this.AvgDownSpeed.HeaderText = "Avg DownSpeed";
+            this.AvgDownSpeed.MinimumWidth = 2;
+            this.AvgDownSpeed.Name = "AvgDownSpeed";
+            this.AvgDownSpeed.ReadOnly = true;
+            this.AvgDownSpeed.Width = 72;
             // 
-            // MaxSpeed
+            // MaxDownSpeed
             // 
-            this.MaxSpeed.HeaderText = "Max Speed";
-            this.MaxSpeed.MinimumWidth = 2;
-            this.MaxSpeed.Name = "MaxSpeed";
-            this.MaxSpeed.ReadOnly = true;
-            this.MaxSpeed.Width = 72;
+            this.MaxDownSpeed.HeaderText = "Max DownSpeed";
+            this.MaxDownSpeed.MinimumWidth = 2;
+            this.MaxDownSpeed.Name = "MaxDownSpeed";
+            this.MaxDownSpeed.ReadOnly = true;
+            this.MaxDownSpeed.Width = 2;
             // 
-            // Upload
+            // AvgUpSpeed
             // 
-            this.Upload.HeaderText = "Upload";
-            this.Upload.MinimumWidth = 2;
-            this.Upload.Name = "Upload";
-            this.Upload.ReadOnly = true;
-            this.Upload.Width = 72;
+            this.AvgUpSpeed.HeaderText = "Avg UpSpeed";
+            this.AvgUpSpeed.MinimumWidth = 2;
+            this.AvgUpSpeed.Name = "AvgUpSpeed";
+            this.AvgUpSpeed.ReadOnly = true;
+            this.AvgUpSpeed.Width = 72;
+            // 
+            // MaxUpSpeed
+            // 
+            this.MaxUpSpeed.HeaderText = "Max UpSpeed";
+            this.MaxUpSpeed.MinimumWidth = 2;
+            this.MaxUpSpeed.Name = "MaxUpSpeed";
+            this.MaxUpSpeed.ReadOnly = true;
+            this.MaxUpSpeed.Width = 2;
             // 
             // Download
             // 
@@ -206,13 +218,21 @@
             this.Download.ReadOnly = true;
             this.Download.Width = 72;
             // 
+            // Upload
+            // 
+            this.Upload.HeaderText = "Upload";
+            this.Upload.MinimumWidth = 2;
+            this.Upload.Name = "Upload";
+            this.Upload.ReadOnly = true;
+            this.Upload.Width = 72;
+            // 
             // DownloadRaw
             // 
             this.DownloadRaw.HeaderText = "DownloadRaw";
             this.DownloadRaw.MinimumWidth = 2;
             this.DownloadRaw.Name = "DownloadRaw";
             this.DownloadRaw.ReadOnly = true;
-            this.DownloadRaw.Width = 72;
+            this.DownloadRaw.Width = 2;
             // 
             // ErrorPercent
             // 
@@ -221,6 +241,7 @@
             this.ErrorPercent.Name = "ErrorPercent";
             this.ErrorPercent.ReadOnly = true;
             this.ErrorPercent.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            this.ErrorPercent.Visible = false;
             this.ErrorPercent.Width = 48;
             // 
             // ConnectError
@@ -290,10 +311,12 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn TotalConnect;
         private System.Windows.Forms.DataGridViewTextBoxColumn Connecting;
         private System.Windows.Forms.DataGridViewTextBoxColumn AvgLatency;
-        private System.Windows.Forms.DataGridViewTextBoxColumn AvgSpeed;
-        private System.Windows.Forms.DataGridViewTextBoxColumn MaxSpeed;
-        private System.Windows.Forms.DataGridViewTextBoxColumn Upload;
+        private System.Windows.Forms.DataGridViewTextBoxColumn AvgDownSpeed;
+        private System.Windows.Forms.DataGridViewTextBoxColumn MaxDownSpeed;
+        private System.Windows.Forms.DataGridViewTextBoxColumn AvgUpSpeed;
+        private System.Windows.Forms.DataGridViewTextBoxColumn MaxUpSpeed;
         private System.Windows.Forms.DataGridViewTextBoxColumn Download;
+        private System.Windows.Forms.DataGridViewTextBoxColumn Upload;
         private System.Windows.Forms.DataGridViewTextBoxColumn DownloadRaw;
         private System.Windows.Forms.DataGridViewTextBoxColumn ErrorPercent;
         private System.Windows.Forms.DataGridViewTextBoxColumn ConnectError;

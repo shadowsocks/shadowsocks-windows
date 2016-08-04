@@ -293,7 +293,7 @@ namespace Shadowsocks.View
                             //    connections = ref_connections;
                             //}
                             Color[] colList = new Color[5] { Color.White, Color.LightGreen, Color.Yellow, Color.Red, Color.Red };
-                            long[] bytesList = new long[5] { 0, 8, 16, 32, 65536 };
+                            long[] bytesList = new long[5] { 0, 16, 32, 64, 65536 };
                             for (int i = 1; i < colList.Length; ++i)
                             {
                                 if (connections < bytesList[i])
@@ -317,8 +317,8 @@ namespace Shadowsocks.View
                             else
                                 SetCellText(cell, "-");
                         }
-                        // AvgSpeed
-                        else if (columnName == "AvgSpeed")
+                        // AvgDownSpeed
+                        else if (columnName == "AvgDownSpeed")
                         {
                             long avgBytes = serverSpeedLog.avgDownloadBytes;
                             string valStr = FormatBytes(avgBytes);
@@ -339,10 +339,54 @@ namespace Shadowsocks.View
                             }
                             SetCellText(cell, valStr);
                         }
-                        // MaxSpeed
-                        else if (columnName == "MaxSpeed")
+                        // MaxDownSpeed
+                        else if (columnName == "MaxDownSpeed")
                         {
                             long maxBytes = serverSpeedLog.maxDownloadBytes;
+                            string valStr = FormatBytes(maxBytes);
+                            Color[] colList = new Color[6] { Color.White, Color.LightGreen, Color.Yellow, Color.Pink, Color.Red, Color.Red };
+                            long[] bytesList = new long[6] { 0, 1024 * 64, 1024 * 512, 1024 * 1024 * 4, 1024 * 1024 * 16, 1024 * 1024 * 1024 };
+                            for (int i = 1; i < colList.Length; ++i)
+                            {
+                                if (maxBytes < bytesList[i])
+                                {
+                                    SetBackColor(cell,
+                                        ColorMix(colList[i - 1],
+                                            colList[i],
+                                            (double)(maxBytes - bytesList[i - 1]) / (bytesList[i] - bytesList[i - 1])
+                                        )
+                                        );
+                                    break;
+                                }
+                            }
+                            SetCellText(cell, valStr);
+                        }
+                        // AvgUpSpeed
+                        else if (columnName == "AvgUpSpeed")
+                        {
+                            long avgBytes = serverSpeedLog.avgUploadBytes;
+                            string valStr = FormatBytes(avgBytes);
+                            Color[] colList = new Color[6] { Color.White, Color.LightGreen, Color.Yellow, Color.Pink, Color.Red, Color.Red };
+                            long[] bytesList = new long[6] { 0, 1024 * 64, 1024 * 512, 1024 * 1024 * 4, 1024 * 1024 * 16, 1024L * 1024 * 1024 * 1024 };
+                            for (int i = 1; i < colList.Length; ++i)
+                            {
+                                if (avgBytes < bytesList[i])
+                                {
+                                    SetBackColor(cell,
+                                        ColorMix(colList[i - 1],
+                                            colList[i],
+                                            (double)(avgBytes - bytesList[i - 1]) / (bytesList[i] - bytesList[i - 1])
+                                        )
+                                        );
+                                    break;
+                                }
+                            }
+                            SetCellText(cell, valStr);
+                        }
+                        // MaxUpSpeed
+                        else if (columnName == "MaxUpSpeed")
+                        {
+                            long maxBytes = serverSpeedLog.maxUploadBytes;
                             string valStr = FormatBytes(maxBytes);
                             Color[] colList = new Color[6] { Color.White, Color.LightGreen, Color.Yellow, Color.Pink, Color.Red, Color.Red };
                             long[] bytesList = new long[6] { 0, 1024 * 64, 1024 * 512, 1024 * 1024 * 4, 1024 * 1024 * 16, 1024 * 1024 * 1024 };
@@ -369,7 +413,7 @@ namespace Shadowsocks.View
                             if (cell.ToolTipText != fullVal)
                             {
                                 if (fullVal == "0")
-                                    SetBackColor(cell, Color.FromArgb(0xff, 0xf0, 0xf0));
+                                    SetBackColor(cell, Color.FromArgb(0xf4, 0xff, 0xf4));
                                 else
                                 {
                                     SetBackColor(cell, Color.LightGreen);
@@ -379,7 +423,7 @@ namespace Shadowsocks.View
                             else if (cell.Tag != null)
                             {
                                 cell.Tag = (int)cell.Tag - 1;
-                                if ((int)cell.Tag == 0) SetBackColor(cell, Color.FromArgb(0xff, 0xf0, 0xf0));
+                                if ((int)cell.Tag == 0) SetBackColor(cell, Color.FromArgb(0xf4, 0xff, 0xf4));
                                 //Color col = cell.Style.BackColor;
                                 //SetBackColor(cell, Color.FromArgb(Math.Min(255, col.R + colAdd), Math.Min(255, col.G + colAdd), Math.Min(255, col.B + colAdd)));
                             }
@@ -394,7 +438,7 @@ namespace Shadowsocks.View
                             if (cell.ToolTipText != fullVal)
                             {
                                 if (fullVal == "0")
-                                    SetBackColor(cell, Color.FromArgb(0xf4, 0xff, 0xf4));
+                                    SetBackColor(cell, Color.FromArgb(0xff, 0xf0, 0xf0));
                                 else
                                 {
                                     SetBackColor(cell, Color.LightGreen);
@@ -404,7 +448,7 @@ namespace Shadowsocks.View
                             else if (cell.Tag != null)
                             {
                                 cell.Tag = (int)cell.Tag - 1;
-                                if ((int)cell.Tag == 0) SetBackColor(cell, Color.FromArgb(0xf4, 0xff, 0xf4));
+                                if ((int)cell.Tag == 0) SetBackColor(cell, Color.FromArgb(0xff, 0xf0, 0xf0));
                                 //Color col = cell.Style.BackColor;
                                 //SetBackColor(cell, Color.FromArgb(Math.Min(255, col.R + colAdd), Math.Min(255, col.G + colAdd), Math.Min(255, col.B + colAdd)));
                             }
@@ -513,8 +557,10 @@ namespace Shadowsocks.View
             for (int i = 0; i < ServerDataGrid.Columns.Count; ++i)
             {
                 if (ServerDataGrid.Columns[i].Name == "AvgLatency"
-                    || ServerDataGrid.Columns[i].Name == "AvgSpeed"
-                    || ServerDataGrid.Columns[i].Name == "MaxSpeed"
+                    || ServerDataGrid.Columns[i].Name == "AvgDownSpeed"
+                    || ServerDataGrid.Columns[i].Name == "MaxDownSpeed"
+                    || ServerDataGrid.Columns[i].Name == "AvgUpSpeed"
+                    || ServerDataGrid.Columns[i].Name == "MaxUpSpeed"
                     || ServerDataGrid.Columns[i].Name == "Upload"
                     || ServerDataGrid.Columns[i].Name == "Download"
                     || ServerDataGrid.Columns[i].Name == "DownloadRaw"
@@ -647,12 +693,12 @@ namespace Shadowsocks.View
                     Server server = config.configs[id];
                     server.GetConnections().CloseAll();
                 }
-                if (ServerDataGrid.Columns[e.ColumnIndex].Name == "MaxSpeed")
+                if (ServerDataGrid.Columns[e.ColumnIndex].Name == "MaxDownSpeed" || ServerDataGrid.Columns[e.ColumnIndex].Name == "MaxUpSpeed")
                 {
                     Configuration config = controller.GetCurrentConfiguration();
                     config.configs[id].ServerSpeedLog().ClearMaxSpeed();
                 }
-                if (ServerDataGrid.Columns[e.ColumnIndex].Name == "ErrorPercent")
+                if (ServerDataGrid.Columns[e.ColumnIndex].Name == "Upload" || ServerDataGrid.Columns[e.ColumnIndex].Name == "Download")
                 {
                     Configuration config = controller.GetCurrentConfiguration();
                     config.configs[id].ServerSpeedLog().Clear();
@@ -747,8 +793,10 @@ namespace Shadowsocks.View
                 e.SortResult = v1 == v2 ? 0 : v1 < v2 ? -1 : 1;
             }
             else if (e.Column.Name == "AvgLatency"
-                || e.Column.Name == "AvgSpeed"
-                || e.Column.Name == "MaxSpeed"
+                || e.Column.Name == "AvgDownSpeed"
+                || e.Column.Name == "MaxDownSpeed"
+                || e.Column.Name == "AvgUpSpeed"
+                || e.Column.Name == "MaxUpSpeed"
                 || e.Column.Name == "Upload"
                 || e.Column.Name == "Download"
                 || e.Column.Name == "DownloadRaw"

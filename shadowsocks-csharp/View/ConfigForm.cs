@@ -26,7 +26,7 @@ namespace Shadowsocks.View
 
         private string _SelectedID = null;
 
-        public ConfigForm(ShadowsocksController controller, UpdateChecker updateChecker)
+        public ConfigForm(ShadowsocksController controller, UpdateChecker updateChecker, int focusIndex)
         {
             this.Font = System.Drawing.SystemFonts.MessageBoxFont;
             InitializeComponent();
@@ -51,6 +51,10 @@ namespace Shadowsocks.View
             LoadCurrentConfiguration();
             if (_modifiedConfiguration.index >= 0 && _modifiedConfiguration.index < _modifiedConfiguration.configs.Count)
                 _oldSelectedID = _modifiedConfiguration.configs[_modifiedConfiguration.index].id;
+            if (focusIndex == -1)
+                focusIndex = _modifiedConfiguration.configs.Count - 1;
+            if (focusIndex >= 0 && focusIndex < _modifiedConfiguration.configs.Count)
+                SetServerListSelectedIndex(focusIndex);
         }
 
         private void UpdateTexts()
@@ -485,7 +489,7 @@ namespace Shadowsocks.View
             }
         }
 
-        private void checkRemarks_CheckedChanged(object sender, EventArgs e)
+        private void checkSSRLink_CheckedChanged(object sender, EventArgs e)
         {
             SaveOldSelectedServer();
             LoadSelectedServer();

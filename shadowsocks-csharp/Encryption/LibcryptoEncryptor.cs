@@ -22,21 +22,44 @@ namespace Shadowsocks.Encryption
             InitKey(method, password);
         }
 
+        public static void InitAviable()
+        {
+            List<string> remove_ciphers = new List<string>();
+            foreach (string cipher in _ciphers.Keys)
+            {
+                if (!Libcrypto.is_cipher(cipher))
+                {
+                    remove_ciphers.Add(cipher);
+                }
+            }
+            foreach (string cipher in remove_ciphers)
+            {
+                _ciphers.Remove(cipher);
+            }
+        }
+
         private static Dictionary<string, int[]> _ciphers = new Dictionary<string, int[]> {
-                //{"rc4", new int[]{16, 0, CIPHER_RC4}},
-                {"rc4-md5", new int[]{16, 16, CIPHER_RC4}},
                 {"aes-128-cfb", new int[]{16, 16, CIPHER_AES}},
                 {"aes-192-cfb", new int[]{24, 16, CIPHER_AES}},
                 {"aes-256-cfb", new int[]{32, 16, CIPHER_AES}},
-                {"aes-128-ofb", new int[]{16, 16, CIPHER_AES}},
-                {"aes-192-ofb", new int[]{24, 16, CIPHER_AES}},
-                {"aes-256-ofb", new int[]{32, 16, CIPHER_AES}},
+                {"aes-128-ctr", new int[]{16, 16, CIPHER_AES}},
+                {"aes-192-ctr", new int[]{24, 16, CIPHER_AES}},
+                {"aes-256-ctr", new int[]{32, 16, CIPHER_AES}},
                 {"camellia-128-cfb", new int[]{16, 16, CIPHER_CAMELLIA}},
                 {"camellia-192-cfb", new int[]{24, 16, CIPHER_CAMELLIA}},
                 {"camellia-256-cfb", new int[]{32, 16, CIPHER_CAMELLIA}},
+                //{"camellia-128-ofb", new int[]{16, 16, CIPHER_CAMELLIA}},
+                //{"camellia-192-ofb", new int[]{24, 16, CIPHER_CAMELLIA}},
+                //{"camellia-256-ofb", new int[]{32, 16, CIPHER_CAMELLIA}},
                 {"bf-cfb", new int[]{16, 8, CIPHER_OTHER_CFB}},
                 {"cast5-cfb", new int[]{16, 8, CIPHER_OTHER_CFB}},
+                {"des-cfb", new int[]{8, 8, CIPHER_OTHER_CFB}}, // weak
+                {"des-ede3-cfb", new int[]{24, 8, CIPHER_OTHER_CFB}},
                 {"idea-cfb", new int[]{16, 8, CIPHER_OTHER_CFB}},
+                {"rc2-cfb", new int[]{16, 8, CIPHER_OTHER_CFB}},
+                //{"rc4", new int[]{16, 0, CIPHER_RC4}}, // weak
+                {"rc4-md5", new int[]{16, 16, CIPHER_RC4}}, // weak
+                {"rc4-md5-6", new int[]{16, 6, CIPHER_RC4}}, // weak
                 {"seed-cfb", new int[]{16, 16, CIPHER_OTHER_CFB}},
         };
 
@@ -61,7 +84,7 @@ namespace Shadowsocks.Encryption
 
             IntPtr ctx;
             byte[] realkey;
-            if (_method == "rc4-md5")
+            if (_method.StartsWith("rc4-md5"))
             {
                 byte[] temp = new byte[keyLen + ivLen];
                 realkey = new byte[keyLen];

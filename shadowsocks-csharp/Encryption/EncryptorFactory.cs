@@ -17,6 +17,7 @@ namespace Shadowsocks.Encryption
             _registeredEncryptorNames = new List<string>();
             if (LibcryptoEncryptor.isSupport())
             {
+                LibcryptoEncryptor.InitAviable();
                 foreach (string method in LibcryptoEncryptor.SupportedCiphers())
                 {
                     _registeredEncryptorNames.Add(method);

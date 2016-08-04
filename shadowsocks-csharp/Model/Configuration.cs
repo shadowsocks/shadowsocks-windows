@@ -286,11 +286,13 @@ namespace Shadowsocks.Model
         public int proxyPort;
         public string proxyAuthUser;
         public string proxyAuthPass;
+        public string proxyUserAgent;
         public string authUser;
         public string authPass;
         public bool autoBan;
         public bool sameHostForSameTarget;
         public int keepVisitTime;
+        public string dns_server;
         public Dictionary<string, string> token = new Dictionary<string, string>();
         public Dictionary<string, object> portMap = new Dictionary<string, object>();
 

@@ -8,6 +8,7 @@ using Shadowsocks.Obfs;
 using Shadowsocks.Model;
 using System.Timers;
 using System.Threading;
+using OpenDNS;
 
 namespace Shadowsocks.Controller
 {
@@ -133,6 +134,7 @@ namespace Shadowsocks.Controller
                 handler.socks5RemotePort = _config.proxyPort;
                 handler.socks5RemoteUsername = _config.proxyAuthUser;
                 handler.socks5RemotePassword = _config.proxyAuthPass;
+                handler.proxyUserAgent = _config.proxyUserAgent;
             }
             handler.TTL = _config.TTL;
             handler.autoSwitchOff = _config.autoBan;
@@ -141,6 +143,10 @@ namespace Shadowsocks.Controller
                 handler.authConnection = AuthConnection;
                 handler.authUser = _config.authUser ?? "";
                 handler.authPass = _config.authPass ?? "";
+            }
+            if (_config.dns_server != null && _config.dns_server.Length > 0)
+            {
+                handler.dns_servers = _config.dns_server;
             }
             if (!EncryptorLoaded)
             {
@@ -308,6 +314,8 @@ namespace Shadowsocks.Controller
         public Server select_server;
         public Double TTL = 0; // Second
         public int try_keep_alive = 0;
+        public string dns_servers;
+        public bool fouce_local_dns_query = false;
         // Connection socket
         public Socket connection;
         public Socket connectionUDP;
@@ -318,6 +326,7 @@ namespace Shadowsocks.Controller
         public int socks5RemotePort = 0;
         public string socks5RemoteUsername;
         public string socks5RemotePassword;
+        public string proxyUserAgent;
         public AuthConnection authConnection;
         // auto ban
         public bool autoSwitchOff = true;
@@ -337,6 +346,7 @@ namespace Shadowsocks.Controller
         protected Socket remoteUDP;
         protected IPEndPoint remoteTCPEndPoint;
         protected IPEndPoint remoteUDPEndPoint;
+        protected DnsQuery dns;
         // Connect command
         public byte command;
         // Init data
@@ -362,7 +372,7 @@ namespace Shadowsocks.Controller
         protected byte[] connetionSendBuffer = new byte[BufferSize * 2];
         // connection send buffer
         protected List<byte[]> connectionSendBufferList = new List<byte[]>();
-        protected string targetURI;
+        protected string targetHost;
         protected DateTime lastKeepTime;
 
         protected byte[] remoteUDPRecvBuffer = new byte[RecvSize * 2];
@@ -685,7 +695,7 @@ namespace Shadowsocks.Controller
                 handler.reconnectTimesRemain = reconnectTimesRemain - 1;
                 handler.reconnectTimes = reconnectTimes + 1;
                 handler.forceRandom = forceRandom;
-                handler.targetURI = targetURI;
+                handler.targetHost = targetHost;
                 handler.command = command;
 
                 handler.speedTester.transfer = speedTester.transfer;
@@ -830,6 +840,15 @@ namespace Shadowsocks.Controller
                 remote = new Socket(ipAddress.AddressFamily,
                     SocketType.Stream, ProtocolType.Tcp);
                 remote.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, true);
+                int size = sizeof(UInt32);
+                UInt32 on = 1;
+                UInt32 keepAliveInterval = 1000 * 60;
+                UInt32 retryInterval = 1000 * 5;
+                byte[] inArray = new byte[size * 3];
+                Array.Copy(BitConverter.GetBytes(on), 0, inArray, 0, size);
+                Array.Copy(BitConverter.GetBytes(keepAliveInterval), 0, inArray, size, size);
+                Array.Copy(BitConverter.GetBytes(retryInterval), 0, inArray, size * 2, size);
+                remote.IOControl(IOControlCode.KeepAliveValues, inArray, null);
             }
 
             if (connectionUDP != null && !server.udp_over_tcp)
@@ -889,7 +908,7 @@ namespace Shadowsocks.Controller
         private void DnsCallback(IAsyncResult ar)
         {
             ((CallbackStatus)ar.AsyncState).SetIfEqu(1, 0);
-            if (closed || ((CallbackStatus)ar.AsyncState).Status != 1)
+            if (((CallbackStatus)ar.AsyncState).Status != 1)
             {
                 return;
             }
@@ -1067,7 +1086,7 @@ namespace Shadowsocks.Controller
                 else
                     server.ServerSpeedLog().AddNoErrorTimes();
             }
-            keepCurrentServer(targetURI);
+            keepCurrentServer(targetHost);
             //int type = speedTester.GetActionType();
             //if (type > 0)
             //{
@@ -1086,7 +1105,6 @@ namespace Shadowsocks.Controller
                         {
                             server.ServerSpeedLog().AddDisconnectTimes();
                             server.GetConnections().DecRef(this.connection);
-                            server.ServerSpeedLog().AddSpeedLog(new TransLog((int)speedTester.GetAvgDownloadSpeed(), DateTime.Now));
                         }
                         this.State = ConnectState.END;
                     }
@@ -1135,7 +1153,7 @@ namespace Shadowsocks.Controller
         private bool ConnectHttpProxyServer(string strRemoteHost, int iRemotePort, Socket sProxyServer, int socketErrorCode)
         {
             IPAddress ipAdd;
-            bool ForceRemoteDnsResolve = false;
+            bool ForceRemoteDnsResolve = true;
             bool parsed = IPAddress.TryParse(strRemoteHost, out ipAdd);
             if (!parsed && !ForceRemoteDnsResolve)
             {
@@ -1163,8 +1181,10 @@ namespace Shadowsocks.Controller
             string host = (strRemoteHost.IndexOf(':') >= 0 ? "[" + strRemoteHost + "]" : strRemoteHost) + ":" + iRemotePort.ToString();
             string authstr = System.Convert.ToBase64String(Encoding.UTF8.GetBytes(socks5RemoteUsername + ":" + socks5RemotePassword));
             string cmd = "CONNECT " + host + " HTTP/1.0\r\n"
-                + "Host: " + host + "\r\n"
-                + "Proxy-Connection: Keep-Alive\r\n";
+                + "Host: " + host + "\r\n";
+            if (proxyUserAgent != null && proxyUserAgent.Length > 0)
+                cmd += "User-Agent: " + proxyUserAgent + "\r\n";
+            cmd += "Proxy-Connection: Keep-Alive\r\n";
             if (socks5RemoteUsername.Length > 0)
                 cmd += "Proxy-Authorization: Basic " + authstr + "\r\n";
             cmd += "\r\n";
@@ -1175,7 +1195,8 @@ namespace Shadowsocks.Controller
             if (iRecCount > 13)
             {
                 string data = System.Text.Encoding.UTF8.GetString(byReceive, 0, iRecCount);
-                if (data.StartsWith("HTTP/1.1 200") || data.StartsWith("HTTP/1.0 200"))
+                string[] data_part = data.Split(' ');
+                if (data_part.Length > 1 && data_part[1] == "200")
                 {
                     return true;
                 }
@@ -1856,23 +1877,71 @@ namespace Shadowsocks.Controller
                 this.Close();
             }
         }
+
+        private IPAddress QueryDns(string host, string dns_servers)
+        {
+            IPAddress ipAddress;
+            bool parsed = IPAddress.TryParse(targetHost, out ipAddress);
+            if (!parsed)
+            {
+                if (server.DnsBuffer().isExpired(targetHost))
+                {
+                    if (dns_servers != null)
+                    {
+                        string[] dns_server = dns_servers.Split(',');
+                        dns = new DnsQuery(targetHost, Types.A);
+                        dns.RecursionDesired = true;
+                        foreach (string server in dns_server)
+                        {
+                            dns.Servers.Add(server);
+                        }
+                        if (dns.Send())
+                        {
+                            int count = dns.Response.Answers.Count;
+                            if (count > 0)
+                            {
+                                for (int i = 0; i < count; ++i)
+                                {
+                                    if (((ResourceRecord)dns.Response.Answers[i]).Type != Types.A)
+                                        continue;
+                                    return ((OpenDNS.Address)dns.Response.Answers[i]).IP;
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        try
+                        {
+                            IPHostEntry ipHostInfo = Dns.GetHostEntry(targetHost);
+                            return ipHostInfo.AddressList[0];
+                        }
+                        catch
+                        {
+
+                        }
+                    }
+                }
+            }
+            return ipAddress;
+        }
+
         private void Connect()
         {
             remote = null;
             remoteUDP = null;
-            closed = false;
             arTCPConnection = null;
             arTCPRemote = null;
             if (select_server == null)
             {
-                if (targetURI == null)
+                if (targetHost == null)
                 {
-                    targetURI = GetQueryString();
-                    server = this.getCurrentServer(targetURI, true);
+                    targetHost = GetQueryString();
+                    server = this.getCurrentServer(targetHost, true);
                 }
                 else
                 {
-                    server = this.getCurrentServer(targetURI, true, forceRandom);
+                    server = this.getCurrentServer(targetHost, true, forceRandom);
                 }
             }
             else
@@ -1889,6 +1958,16 @@ namespace Shadowsocks.Controller
                 }
             }
             ResetTimeout(TTL);
+            if (fouce_local_dns_query && targetHost != null)
+            {
+                IPAddress ipAddress = QueryDns(targetHost, dns_servers);
+                if (ipAddress != null)
+                {
+                    server.DnsBuffer().UpdateDns(targetHost, ipAddress);
+                    targetHost = ipAddress.ToString();
+                    ResetTimeout(TTL);
+                }
+            }
 
             lock (this)
             {
@@ -1926,22 +2005,47 @@ namespace Shadowsocks.Controller
                     //ipAddress = ipHostInfo.AddressList[0];
                     if (server.DnsBuffer().isExpired(serverURI))
                     {
-                        IAsyncResult result = Dns.BeginGetHostEntry(serverURI, new AsyncCallback(DnsCallback), new CallbackStatus());
-                        double t = TTL;
-                        if (t <= 0) t = 20;
-                        else if (t <= 5) t = 5;
-                        bool success = result.AsyncWaitHandle.WaitOne((int)(t * 250), true);
-                        if (!success)
+                        bool dns_ok = false;
+                        if (!dns_ok)
                         {
-                            ((CallbackStatus)result.AsyncState).SetIfEqu(-1, 0);
-                            if (((CallbackStatus)result.AsyncState).Status == -1)
+                            ipAddress = QueryDns(targetHost, dns_servers);
+                            if (ipAddress != null)
                             {
-                                lastErrCode = 8;
-                                server.ServerSpeedLog().AddTimeoutTimes();
-                                Close();
+                                server.DnsBuffer().UpdateDns(serverURI, ipAddress);
+                                dns_ok = true;
                             }
                         }
-                        return;
+                        //if (!dns_ok)
+                        //{
+                        //    IAsyncResult result = Dns.BeginGetHostEntry(serverURI, new AsyncCallback(DnsCallback), new CallbackStatus());
+                        //    double t = TTL;
+                        //    if (t <= 0) t = 20;
+                        //    else if (t <= 5) t = 5;
+                        //    bool success = result.AsyncWaitHandle.WaitOne((int)(t * 250), true);
+                        //    if (!success)
+                        //    {
+                        //        ((CallbackStatus)result.AsyncState).SetIfEqu(-1, 0);
+                        //        if (((CallbackStatus)result.AsyncState).Status == -1)
+                        //        {
+                        //            lastErrCode = 8;
+                        //            server.ServerSpeedLog().AddTimeoutTimes();
+                        //            Close();
+                        //            return;
+                        //        }
+                        //    }
+                        //    else
+                        //    {
+                        //        dns_ok = true;
+                        //        return;
+                        //    }
+                        //}
+                        if (!dns_ok)
+                        {
+                            lastErrCode = 8;
+                            server.ServerSpeedLog().AddTimeoutTimes();
+                            Close();
+                            return;
+                        }
                     }
                     else
                     {
@@ -1974,8 +2078,7 @@ namespace Shadowsocks.Controller
         {
             if (ar != null && ar.AsyncState != null)
                 ((CallbackStatus)ar.AsyncState).SetIfEqu(1, 0);
-            if (closed ||
-                ar != null && ar.AsyncState != null && ((CallbackStatus)ar.AsyncState).Status != 1)
+            if (ar != null && ar.AsyncState != null && ((CallbackStatus)ar.AsyncState).Status != 1)
             {
                 return;
             }
@@ -2174,18 +2277,7 @@ namespace Shadowsocks.Controller
                     server.setObfsData(obfs.InitData());
                 }
             }
-            int mss = 1440;
-            if (remote != null)
-            {
-                try
-                {
-                    //mss = (int)remote.GetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.IpTimeToLive /* == TCP_MAXSEG */);
-                }
-                catch (Exception e)
-                {
-                    //Console.WriteLine(e);
-                }
-            }
+            int mss = 1460;
             int head_len;
             if (connectionSendBufferList != null && connectionSendBufferList.Count > 0)
             {
@@ -2268,10 +2360,6 @@ namespace Shadowsocks.Controller
         // 2 sides connection start
         private void StartPipe()
         {
-            if (closed)
-            {
-                return;
-            }
             try
             {
                 // set mark
@@ -2279,6 +2367,7 @@ namespace Shadowsocks.Controller
                 connectionUDPIdle = true;
                 remoteTCPIdle = true;
                 remoteUDPIdle = true;
+                closed = false;
 
                 remoteUDPRecvBufferLength = 0;
                 SetObfsPlugin();
@@ -2934,7 +3023,7 @@ namespace Shadowsocks.Controller
                 doConnectionUDPRecv();
                 if (lastKeepTime == null || (DateTime.Now - lastKeepTime).TotalSeconds > 5)
                 {
-                    if (keepCurrentServer != null) keepCurrentServer(targetURI);
+                    if (keepCurrentServer != null) keepCurrentServer(targetHost);
                     lastKeepTime = DateTime.Now;
                 }
             }

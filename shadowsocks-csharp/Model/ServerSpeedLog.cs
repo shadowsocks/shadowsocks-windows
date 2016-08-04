@@ -44,6 +44,8 @@ namespace Shadowsocks.Model
         public long avgConnectTime;
         public long avgDownloadBytes;
         public long maxDownloadBytes;
+        public long avgUploadBytes;
+        public long maxUploadBytes;
     }
     public class ServerSpeedLog
     {
@@ -58,12 +60,16 @@ namespace Shadowsocks.Model
         private long transUpload = 0;
         private long transDownload = 0;
         private long transDownloadRaw = 0;
-        private List<TransLog> transLog = null;
+        private List<TransLog> downTransLog = null;
+        private List<TransLog> upTransLog = null;
         private long maxTransDownload = 0;
+        private long maxTransUpload = 0;
         private List<int> connectTime = null;
         private int sumConnectTime = 0;
-        private List<TransLog> speedLog = null;
+        //private List<TransLog> speedLog = null;
         private LinkedList<ErrorLog> errList = new LinkedList<ErrorLog>();
+
+        private const int avgTime = 2;
 
         public ServerSpeedLog()
         {
@@ -83,8 +89,10 @@ namespace Shadowsocks.Model
             {
                 Sweep();
                 ret.avgDownloadBytes = AvgDownloadBytes;
+                ret.avgUploadBytes = AvgUploadBytes;
                 ret.avgConnectTime = AvgConnectTime;
                 ret.maxDownloadBytes = maxTransDownload;
+                ret.maxUploadBytes = maxTransUpload;
                 ret.totalConnectTimes = totalConnectTimes;
                 ret.totalDisconnectTimes = totalDisconnectTimes;
                 ret.errorConnectTimes = errorConnectTimes;
@@ -167,20 +175,19 @@ namespace Shadowsocks.Model
                 List<TransLog> transLog;
                 lock (this)
                 {
-                    if (this.transLog == null)
+                    if (this.downTransLog == null)
                         return 0;
                     transLog = new List<TransLog>();
-                    for (int i = 1; i < this.transLog.Count; ++i)
+                    for (int i = 1; i < this.downTransLog.Count; ++i)
                     {
-                        transLog.Add(this.transLog[i]);
+                        transLog.Add(this.downTransLog[i]);
                     }
                 }
                 {
                     long totalBytes = 0;
                     double totalTime = 0;
-                    if (transLog.Count > 0 && DateTime.Now > transLog[transLog.Count - 1].recvTime.AddSeconds(10))
+                    if (transLog.Count > 0 && DateTime.Now > transLog[transLog.Count - 1].recvTime.AddSeconds(avgTime))
                     {
-                        transLog.Clear();
                         return 0;
                     }
                     for (int i = 1; i < transLog.Count; ++i)
@@ -195,15 +202,12 @@ namespace Shadowsocks.Model
                         for (iEnd = 0; iEnd < transLog.Count; ++iEnd)
                         {
                             sumBytes += transLog[iEnd].size;
-                            while (iBeg + 10 <= iEnd // 10 packet
-                                && (transLog[iEnd].recvTime - transLog[iBeg].recvTime).TotalSeconds > 5)
+                            while (iBeg + 100 <= iEnd // 100 packet
+                                && (transLog[iEnd].recvTime - transLog[iBeg].recvTime).TotalSeconds > 1)
                             {
-                                //if ((transLog[iBeg + 1].recvTime - transLog[iBeg].recvTime).TotalMilliseconds > 20)
-                                {
-                                    long speed = (long)((sumBytes - transLog[iBeg].size) / (transLog[iEnd].recvTime - transLog[iBeg].recvTime).TotalSeconds);
-                                    if (speed > maxTransDownload)
-                                        maxTransDownload = speed;
-                                }
+                                long speed = (long)((sumBytes - transLog[iBeg].size) / (transLog[iEnd].recvTime - transLog[iBeg].recvTime).TotalSeconds);
+                                if (speed > maxTransDownload)
+                                    maxTransDownload = speed;
                                 sumBytes -= transLog[iBeg].size;
                                 iBeg++;
                             }
@@ -211,11 +215,70 @@ namespace Shadowsocks.Model
                     }
                     if (transLog.Count > 1)
                         totalTime = (transLog[transLog.Count - 1].recvTime - transLog[0].recvTime).TotalSeconds;
-                    if (totalTime > 1)
+                    if (totalTime > 0.1)
                     {
                         long ret = (long)(totalBytes / totalTime);
                         if (ret > maxTransDownload)
                             maxTransDownload = ret;
+                        return ret;
+                    }
+                    else
+                        return 0;
+                }
+            }
+        }
+        public long AvgUploadBytes
+        {
+            get
+            {
+                List<TransLog> transLog;
+                lock (this)
+                {
+                    if (this.upTransLog == null)
+                        return 0;
+                    transLog = new List<TransLog>();
+                    for (int i = 1; i < this.upTransLog.Count; ++i)
+                    {
+                        transLog.Add(this.upTransLog[i]);
+                    }
+                }
+                {
+                    long totalBytes = 0;
+                    double totalTime = 0;
+                    if (transLog.Count > 0 && DateTime.Now > transLog[transLog.Count - 1].recvTime.AddSeconds(avgTime))
+                    {
+                        return 0;
+                    }
+                    for (int i = 1; i < transLog.Count; ++i)
+                    {
+                        totalBytes += transLog[i].size;
+                    }
+
+                    {
+                        long sumBytes = 0;
+                        int iBeg = 0;
+                        int iEnd = 0;
+                        for (iEnd = 0; iEnd < transLog.Count; ++iEnd)
+                        {
+                            sumBytes += transLog[iEnd].size;
+                            while (iBeg + 100 <= iEnd // 100 packet
+                                && (transLog[iEnd].recvTime - transLog[iBeg].recvTime).TotalSeconds > 1)
+                            {
+                                long speed = (long)((sumBytes - transLog[iBeg].size) / (transLog[iEnd].recvTime - transLog[iBeg].recvTime).TotalSeconds);
+                                if (speed > maxTransUpload)
+                                    maxTransUpload = speed;
+                                sumBytes -= transLog[iBeg].size;
+                                iBeg++;
+                            }
+                        }
+                    }
+                    if (transLog.Count > 1)
+                        totalTime = (transLog[transLog.Count - 1].recvTime - transLog[0].recvTime).TotalSeconds;
+                    if (totalTime > 0.1)
+                    {
+                        long ret = (long)(totalBytes / totalTime);
+                        if (ret > maxTransUpload)
+                            maxTransUpload = ret;
                         return ret;
                     }
                     else
@@ -276,6 +339,7 @@ namespace Shadowsocks.Model
             lock (this)
             {
                 maxTransDownload = 0;
+                maxTransUpload = 0;
             }
         }
         public void Clear()
@@ -298,6 +362,7 @@ namespace Shadowsocks.Model
                 transDownload = 0;
                 transDownloadRaw = 0;
                 maxTransDownload = 0;
+                maxTransUpload = 0;
             }
         }
         public void AddConnectTimes()
@@ -325,19 +390,19 @@ namespace Shadowsocks.Model
                 errList.RemoveFirst();
                 if (errCode == 1)
                 {
-                    errorConnectTimes -= 1;
+                    if (errorConnectTimes > 0) errorConnectTimes -= 1;
                 }
                 else if (errCode == 2)
                 {
-                    errorTimeoutTimes -= 1;
+                    if (errorTimeoutTimes > 0) errorTimeoutTimes -= 1;
                 }
                 else if (errCode == 3)
                 {
-                    errorDecodeTimes -= 1;
+                    if (errorDecodeTimes > 0) errorDecodeTimes -= 1;
                 }
                 else if (errCode == 4)
                 {
-                    errorEmptyTimes -= 1;
+                    if (errorEmptyTimes > 0) errorEmptyTimes -= 1;
                 }
             }
         }
@@ -392,7 +457,7 @@ namespace Shadowsocks.Model
             {
                 errorDecodeTimes += 1;
                 errorContinurousTimes += 1;
-                errList.AddLast(new ErrorLog(0));
+                errList.AddLast(new ErrorLog(3));
                 if (lastError == 3)
                 {
                 }
@@ -427,15 +492,9 @@ namespace Shadowsocks.Model
             lock (this)
             {
                 transUpload += bytes;
-            }
-        }
-        public void AddDownloadBytes(long bytes)
-        {
-            lock (this)
-            {
-                transDownload += bytes;
-                if (transLog == null)
-                    transLog = new List<TransLog>();
+                if (upTransLog == null)
+                    upTransLog = new List<TransLog>();
+                List<TransLog> transLog = upTransLog;
                 if (transLog.Count > 0 && (DateTime.Now - transLog[transLog.Count - 1].recvTime).TotalMilliseconds < 100)
                 {
                     transLog[transLog.Count - 1].size += (int)bytes;
@@ -443,7 +502,29 @@ namespace Shadowsocks.Model
                 else
                 {
                     transLog.Add(new TransLog((int)bytes, DateTime.Now));
-                    while (transLog.Count > 0 && DateTime.Now > transLog[0].recvTime.AddSeconds(10))
+                    while (transLog.Count > 0 && DateTime.Now > transLog[0].recvTime.AddSeconds(avgTime))
+                    {
+                        transLog.RemoveAt(0);
+                    }
+                }
+            }
+        }
+        public void AddDownloadBytes(long bytes)
+        {
+            lock (this)
+            {
+                transDownload += bytes;
+                if (downTransLog == null)
+                    downTransLog = new List<TransLog>();
+                List<TransLog> transLog = downTransLog;
+                if (transLog.Count > 0 && (DateTime.Now - transLog[transLog.Count - 1].recvTime).TotalMilliseconds < 100)
+                {
+                    transLog[transLog.Count - 1].size += (int)bytes;
+                }
+                else
+                {
+                    transLog.Add(new TransLog((int)bytes, DateTime.Now));
+                    while (transLog.Count > 0 && DateTime.Now > transLog[0].recvTime.AddSeconds(avgTime))
                     {
                         transLog.RemoveAt(0);
                     }
@@ -495,20 +576,6 @@ namespace Shadowsocks.Model
                 {
                     sumConnectTime -= connectTime[0];
                     connectTime.RemoveAt(0);
-                }
-            }
-        }
-        public void AddSpeedLog(TransLog speed)
-        {
-            lock (this)
-            {
-                if (speedLog == null)
-                    speedLog = new List<TransLog>();
-                if (speed.size > 0)
-                    speedLog.Add(speed);
-                while (speedLog.Count > 20)
-                {
-                    speedLog.RemoveAt(0);
                 }
             }
         }
