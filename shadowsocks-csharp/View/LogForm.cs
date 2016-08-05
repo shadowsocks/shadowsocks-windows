@@ -74,21 +74,29 @@ namespace Shadowsocks.View
             inboundPoints = inboundPoints.Select(p => p / bandwidthScale.Item3).ToList();
             outboundPoints = outboundPoints.Select(p => p / bandwidthScale.Item3).ToList();
 
-            if (trafficChart.InvokeRequired)
+            try
             {
-                trafficChart.Invoke(new Action(() =>
+                if (trafficChart.InvokeRequired)
                 {
-                    trafficChart.Series["Inbound"].Points.DataBindY(inboundPoints);
-                    trafficChart.Series["Outbound"].Points.DataBindY(outboundPoints);
-                    trafficChart.ChartAreas[0].AxisY.LabelStyle.Format = "{0:0.##} " + bandwidthScale.Item2;
-                    inboundAnnotation.AnchorDataPoint = trafficChart.Series["Inbound"].Points.Last();
-                    inboundAnnotation.Text = Utils.FormatBandwidth(controller.traffic.Last.inboundIncreasement);
-                    outboundAnnotation.AnchorDataPoint = trafficChart.Series["Outbound"].Points.Last();
-                    outboundAnnotation.Text = Utils.FormatBandwidth(controller.traffic.Last.outboundIncreasement);
-                    trafficChart.Annotations.Clear();
-                    trafficChart.Annotations.Add(inboundAnnotation);
-                    trafficChart.Annotations.Add(outboundAnnotation);
-                }));
+                    trafficChart.Invoke(new Action(() =>
+                    {
+                        trafficChart.Series["Inbound"].Points.DataBindY(inboundPoints);
+                        trafficChart.Series["Outbound"].Points.DataBindY(outboundPoints);
+                        trafficChart.ChartAreas[0].AxisY.LabelStyle.Format = "{0:0.##} " + bandwidthScale.Item2;
+                        inboundAnnotation.AnchorDataPoint = trafficChart.Series["Inbound"].Points.Last();
+                        inboundAnnotation.Text = Utils.FormatBandwidth(controller.traffic.Last.inboundIncreasement);
+                        outboundAnnotation.AnchorDataPoint = trafficChart.Series["Outbound"].Points.Last();
+                        outboundAnnotation.Text = Utils.FormatBandwidth(controller.traffic.Last.outboundIncreasement);
+                        trafficChart.Annotations.Clear();
+                        trafficChart.Annotations.Add(inboundAnnotation);
+                        trafficChart.Annotations.Add(outboundAnnotation);
+                    }));
+                }
+            }
+            catch (ObjectDisposedException ex)
+            {
+                // suppress the thread race error:
+                // when closing the form but the Invoked Action is still working and cause 'Chart is Disposed' exception
             }
         }
 
