@@ -107,65 +107,28 @@ namespace Shadowsocks.Controller
                 var bytes = inbound - lastInbound;
                 _lastInboundCounter[id] = inbound;
                 var inboundSpeed = GetSpeedInKiBPerSecond(bytes, _monitorInterval.TotalSeconds);
-                _inboundSpeedRecords.GetOrAdd(id, new List<int> {inboundSpeed}).Add(inboundSpeed);
+                _inboundSpeedRecords.GetOrAdd(id, (k) =>
+                {
+                    List<int> records = new List<int>();
+                    records.Add(inboundSpeed);
+                    return records;
+                });
 
                 var lastOutbound = _lastOutboundCounter[id];
                 var outbound = _outboundCounter[id];
                 bytes = outbound - lastOutbound;
                 _lastOutboundCounter[id] = outbound;
                 var outboundSpeed = GetSpeedInKiBPerSecond(bytes, _monitorInterval.TotalSeconds);
-                _outboundSpeedRecords.GetOrAdd(id, new List<int> {outboundSpeed}).Add(outboundSpeed);
+                _outboundSpeedRecords.GetOrAdd(id, (k) =>
+                {
+                    List<int> records = new List<int>();
+                    records.Add(outboundSpeed);
+                    return records;
+                });
 
                 Logging.Debug(
                     $"{id}: current/max inbound {inboundSpeed}/{_inboundSpeedRecords[id].Max()} KiB/s, current/max outbound {outboundSpeed}/{_outboundSpeedRecords[id].Max()} KiB/s");
             }
-        }
-
-        private async Task<ICMPResult> ICMPTest(Server server)
-        {
-            Logging.Debug("Ping " + server.FriendlyName());
-            if (server.server == "") return null;
-            var result = new ICMPResult(server);
-            try
-            {
-                var IP =
-                    Dns.GetHostAddresses(server.server)
-                        .First(
-                            ip =>
-                                ip.AddressFamily == AddressFamily.InterNetwork ||
-                                ip.AddressFamily == AddressFamily.InterNetworkV6);
-                var ping = new Ping();
-
-                foreach (var _ in Enumerable.Range(0, Repeat))
-                {
-                    try
-                    {
-                        var reply = await ping.SendTaskAsync(IP, TimeoutMilliseconds);
-                        if (reply.Status.Equals(IPStatus.Success))
-                        {
-                            result.RoundtripTime.Add((int?) reply.RoundtripTime);
-                        }
-                        else
-                        {
-                            result.RoundtripTime.Add(null);
-                        }
-
-                        //Do ICMPTest in a random frequency
-                        Thread.Sleep(TimeoutMilliseconds + new Random().Next()%TimeoutMilliseconds);
-                    }
-                    catch (Exception e)
-                    {
-                        Logging.Error($"An exception occured while eveluating {server.FriendlyName()}");
-                        Logging.LogUsefulException(e);
-                    }
-                }
-            }
-            catch (Exception e)
-            {
-                Logging.Error($"An exception occured while eveluating {server.FriendlyName()}");
-                Logging.LogUsefulException(e);
-            }
-            return result;
         }
 
         private void Reset()
@@ -178,15 +141,14 @@ namespace Shadowsocks.Controller
         private void Run(object _)
         {
             UpdateRecords();
-            Save();
             Reset();
-            FilterRawStatistics();
         }
 
-        private async void UpdateRecords()
+        private void UpdateRecords()
         {
             var records = new Dictionary<string, StatisticsRecord>();
-
+            UpdateRecordsState state = new UpdateRecordsState();
+            state.counter = _controller.GetCurrentConfiguration().configs.Count;
             foreach (var server in _controller.GetCurrentConfiguration().configs)
             {
                 var id = server.Identifier();
@@ -202,43 +164,80 @@ namespace Shadowsocks.Controller
                     records[id] = record;
                 else
                     records.Add(id, record);
-            }
-
-            if (Config.Ping)
-            {
-                var icmpResults = await TaskEx.WhenAll(_controller.GetCurrentConfiguration().configs.Select(ICMPTest));
-                foreach (var result in icmpResults.Where(result => result != null))
+                if (Config.Ping)
                 {
-                    records[result.Server.Identifier()].SetResponse(result.RoundtripTime);
+                    MyPing ping = new MyPing(server, Repeat);
+                    ping.Completed += ping_Completed;
+                    ping.Start(new PingState { state = state, record = record });
+                }
+                else if (!record.IsEmptyData())
+                {
+                    AppendRecord(id, record);
                 }
             }
 
-            foreach (var kv in records.Where(kv => !kv.Value.IsEmptyData()))
+            if (!Config.Ping)
             {
-                AppendRecord(kv.Key, kv.Value);
+                Save();
+                FilterRawStatistics();
+            }
+        }
+
+        private void ping_Completed(object sender, MyPing.CompletedEventArgs e)
+        {
+            PingState pingState = (PingState)e.UserState;
+            UpdateRecordsState state = pingState.state;
+            Server server = e.Server;
+            StatisticsRecord record = pingState.record;
+            record.SetResponse(e.RoundtripTime);
+            if (!record.IsEmptyData())
+            {
+                AppendRecord(server.Identifier(), record);
+            }
+            Logging.Debug($"Ping {server.FriendlyName()} {e.RoundtripTime.Count} times, {(100 - record.PackageLoss * 100)}% packages loss, min {record.MinResponse} ms, max {record.MaxResponse} ms, avg {record.AverageResponse} ms");
+            if (Interlocked.Decrement(ref state.counter) == 0)
+            {
+                Save();
+                FilterRawStatistics();
             }
         }
 
         private void AppendRecord(string serverIdentifier, StatisticsRecord record)
         {
-            List<StatisticsRecord> records;
-            if (!RawStatistics.TryGetValue(serverIdentifier, out records))
+            try
             {
-                records = new List<StatisticsRecord>();
+                List<StatisticsRecord> records;
+                lock (RawStatistics)
+                {
+                    if (!RawStatistics.TryGetValue(serverIdentifier, out records))
+                    {
+                        records = new List<StatisticsRecord>();
+                        RawStatistics[serverIdentifier] = records;
+                    }
+                }
+                records.Add(record);
             }
-            records.Add(record);
-            RawStatistics[serverIdentifier] = records;
+            catch (Exception e)
+            {
+                Logging.LogUsefulException(e);
+            }
         }
 
         private void Save()
         {
+            Logging.Debug($"save statistics to {AvailabilityStatisticsFile}");
             if (RawStatistics.Count == 0)
             {
                 return;
             }
             try
             {
-                var content = JsonConvert.SerializeObject(RawStatistics, Formatting.None);
+                string content;
+#if DEBUG
+                content = JsonConvert.SerializeObject(RawStatistics, Formatting.Indented);
+#else
+                content = JsonConvert.SerializeObject(RawStatistics, Formatting.None);
+#endif
                 File.WriteAllText(AvailabilityStatisticsFile, content);
             }
             catch (IOException e)
@@ -258,17 +257,25 @@ namespace Shadowsocks.Controller
 
         private void FilterRawStatistics()
         {
-            if (RawStatistics == null) return;
-            if (FilteredStatistics == null)
+            try
             {
-                FilteredStatistics = new Statistics();
-            }
+                Logging.Debug("filter raw statistics");
+                if (RawStatistics == null) return;
+                if (FilteredStatistics == null)
+                {
+                    FilteredStatistics = new Statistics();
+                }
 
-            foreach (var serverAndRecords in RawStatistics)
+                foreach (var serverAndRecords in RawStatistics)
+                {
+                    var server = serverAndRecords.Key;
+                    var filteredRecords = serverAndRecords.Value.FindAll(IsValidRecord);
+                    FilteredStatistics[server] = filteredRecords;
+                }
+            }
+            catch (Exception e)
             {
-                var server = serverAndRecords.Key;
-                var filteredRecords = serverAndRecords.Value.FindAll(IsValidRecord);
-                FilteredStatistics[server] = filteredRecords;
+                Logging.LogUsefulException(e);
             }
         }
 
@@ -298,19 +305,8 @@ namespace Shadowsocks.Controller
 
         private static int GetSpeedInKiBPerSecond(long bytes, double seconds)
         {
-            var result = (int) (bytes/seconds)/1024;
+            var result = (int)(bytes / seconds) / 1024;
             return result;
-        }
-
-        private class ICMPResult
-        {
-            internal readonly List<int?> RoundtripTime = new List<int?>();
-            internal readonly Server Server;
-
-            internal ICMPResult(Server server)
-            {
-                Server = server;
-            }
         }
 
         public void Dispose()
@@ -321,44 +317,158 @@ namespace Shadowsocks.Controller
 
         public void UpdateLatency(Server server, int latency)
         {
-            List<int> records;
-            _latencyRecords.TryGetValue(server.Identifier(), out records);
-            if (records == null)
+            _latencyRecords.GetOrAdd(server.Identifier(), (k) =>
             {
-                records = new List<int>();
-            }
-            records.Add(latency);
-            _latencyRecords[server.Identifier()] = records;
+                List<int> records = new List<int>();
+                records.Add(latency);
+                return records;
+            });
         }
 
         public void UpdateInboundCounter(Server server, long n)
         {
-            long count;
-            if (_inboundCounter.TryGetValue(server.Identifier(), out count))
+            _inboundCounter.AddOrUpdate(server.Identifier(), (k) =>
             {
-                count += n;
-            }
-            else
-            {
-                count = n;
-                _lastInboundCounter[server.Identifier()] = 0;
-            }
-            _inboundCounter[server.Identifier()] = count;
+                _lastInboundCounter.GetOrAdd(server.Identifier(), 0);
+                return n;
+            }, (k, v) => (v + n));
         }
 
         public void UpdateOutboundCounter(Server server, long n)
         {
-            long count;
-            if (_outboundCounter.TryGetValue(server.Identifier(), out count))
+            _outboundCounter.AddOrUpdate(server.Identifier(), (k) =>
             {
-                count += n;
-            }
-            else
-            {
-                count = n;
-                _lastOutboundCounter[server.Identifier()] = 0;
-            }
-            _outboundCounter[server.Identifier()] = count;
+                _lastOutboundCounter.GetOrAdd(server.Identifier(), 0);
+                return n;
+            }, (k, v) => (v + n));
         }
+
+        class UpdateRecordsState
+        {
+            public int counter;
+        }
+
+        class PingState
+        {
+            public UpdateRecordsState state;
+            public StatisticsRecord record;
+        }
+
+        class MyPing
+        {
+            //arguments for ICMP tests
+            public const int TimeoutMilliseconds = 500;
+
+            public EventHandler<CompletedEventArgs> Completed;
+            private Server server;
+
+            private int repeat;
+            private IPAddress ip;
+            private Ping ping;
+            private List<int?> RoundtripTime;
+
+            public MyPing(Server server, int repeat)
+            {
+                this.server = server;
+                this.repeat = repeat;
+                RoundtripTime = new List<int?>(repeat);
+                ping = new Ping();
+                ping.PingCompleted += Ping_PingCompleted;
+            }
+
+            public void Start(object userstate)
+            {
+                if (server.server == "")
+                {
+                    FireCompleted(new Exception("Invalid Server"), userstate);
+                    return;
+                }
+                new Task(() => ICMPTest(0, userstate)).Start();
+            }
+
+            private void ICMPTest(int delay, object userstate)
+            {
+                try
+                {
+                    Logging.Debug($"Ping {server.FriendlyName()}");
+                    if (ip == null)
+                    {
+                        ip = Dns.GetHostAddresses(server.server)
+                                .First(
+                                    ip =>
+                                        ip.AddressFamily == AddressFamily.InterNetwork ||
+                                        ip.AddressFamily == AddressFamily.InterNetworkV6);
+                    }
+                    repeat--;
+                    if (delay > 0)
+                        Thread.Sleep(delay);
+                    ping.SendAsync(ip, TimeoutMilliseconds, userstate);
+                }
+                catch (Exception e)
+                {
+                    Logging.Error($"An exception occured while eveluating {server.FriendlyName()}");
+                    Logging.LogUsefulException(e);
+                    FireCompleted(e, userstate);
+                }
+            }
+
+            private void Ping_PingCompleted(object sender, PingCompletedEventArgs e)
+            {
+                try
+                {
+                    if (e.Reply.Status == IPStatus.Success)
+                    {
+                        Logging.Debug($"Ping {server.FriendlyName()} {e.Reply.RoundtripTime} ms");
+                        RoundtripTime.Add((int?)e.Reply.RoundtripTime);
+                    }
+                    else
+                    {
+                        Logging.Debug($"Ping {server.FriendlyName()} timeout");
+                        RoundtripTime.Add(null);
+                    }
+                    TestNext(e.UserState);
+                }
+                catch (Exception ex)
+                {
+                    Logging.Error($"An exception occured while eveluating {server.FriendlyName()}");
+                    Logging.LogUsefulException(ex);
+                    FireCompleted(ex, e.UserState);
+                }
+            }
+
+            private void TestNext(object userstate)
+            {
+                if (repeat > 0)
+                {
+                    //Do ICMPTest in a random frequency
+                    int delay = TimeoutMilliseconds + new Random().Next() % TimeoutMilliseconds;
+                    new Task(() => ICMPTest(delay, userstate)).Start();
+                }
+                else
+                {
+                    FireCompleted(null, userstate);
+                }
+            }
+
+            private void FireCompleted(Exception error, object userstate)
+            {
+                Completed?.Invoke(this, new CompletedEventArgs
+                {
+                    Error = error,
+                    Server = server,
+                    RoundtripTime = RoundtripTime,
+                    UserState = userstate
+                });
+            }
+
+            public class CompletedEventArgs : EventArgs
+            {
+                public Exception Error;
+                public Server Server;
+                public List<int?> RoundtripTime;
+                public object UserState;
+            }
+        }
+
     }
 }
