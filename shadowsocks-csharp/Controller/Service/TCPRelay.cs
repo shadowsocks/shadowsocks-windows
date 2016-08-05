@@ -30,34 +30,32 @@ namespace Shadowsocks.Controller
             if (socket.ProtocolType != ProtocolType.Tcp
                 || (length < 2 || firstPacket[0] != 5))
                 return false;
-            else
+            socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, true);
+            TCPHandler handler = new TCPHandler(this);
+            handler.connection = socket;
+            handler.controller = _controller;
+            handler.tcprelay = this;
+
+            handler.Start(firstPacket, length);
+            IList<TCPHandler> handlersToClose = new List<TCPHandler>();
+            lock (Handlers)
             {
-                socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, true);
-                TCPHandler handler = new TCPHandler(this);
-                handler.connection = socket;
-                handler.controller = _controller;
-                handler.tcprelay = this;
-                handler.Start(firstPacket, length);
-                IList<TCPHandler> handlersToClose = new List<TCPHandler>();
-                lock (Handlers)
+                Handlers.Add(handler);
+                DateTime now = DateTime.Now;
+                if (now - _lastSweepTime > TimeSpan.FromSeconds(1))
                 {
-                    Handlers.Add(handler);
-                    DateTime now = DateTime.Now;
-                    if (now - _lastSweepTime > TimeSpan.FromSeconds(1))
-                    {
-                        _lastSweepTime = now;
-                        foreach (TCPHandler handler1 in Handlers)
-                            if (now - handler1.lastActivity > TimeSpan.FromSeconds(900))
-                                handlersToClose.Add(handler1);
-                    }
+                    _lastSweepTime = now;
+                    foreach (TCPHandler handler1 in Handlers)
+                        if (now - handler1.lastActivity > TimeSpan.FromSeconds(900))
+                            handlersToClose.Add(handler1);
                 }
-                foreach (TCPHandler handler1 in handlersToClose)
-                {
-                    Logging.Debug("Closing timed out TCP connection.");
-                    handler1.Close();
-                }
-                return true;
             }
+            foreach (TCPHandler handler1 in handlersToClose)
+            {
+                Logging.Debug("Closing timed out TCP connection.");
+                handler1.Close();
+            }
+            return true;
         }
 
         public void UpdateInboundCounter(Server server, long n)
@@ -79,9 +77,9 @@ namespace Shadowsocks.Controller
     class TCPHandler
     {
         // Size of receive buffer.
-        static public readonly int RecvSize = 8192;
-        static public readonly int RecvReserveSize = IVEncryptor.ONETIMEAUTH_BYTES + IVEncryptor.AUTH_BYTES; // reserve for one-time auth
-        static public readonly int BufferSize = RecvSize + RecvReserveSize + 32;
+        public static readonly int RecvSize = 8192;
+        public static readonly int RecvReserveSize = IVEncryptor.ONETIMEAUTH_BYTES + IVEncryptor.AUTH_BYTES; // reserve for one-time auth
+        public static readonly int BufferSize = RecvSize + RecvReserveSize + 32;
 
         // public Encryptor encryptor;
         public IEncryptor encryptor;
@@ -97,20 +95,26 @@ namespace Shadowsocks.Controller
         private const int _maxRetry = 4;
         private int _retryCount = 0;
         private bool _connected;
+
         private byte _command;
         private byte[] _firstPacket;
         private int _firstPacketLength;
+
         private int _totalRead = 0;
         private int _totalWrite = 0;
+
         private byte[] _remoteRecvBuffer = new byte[BufferSize];
         private byte[] _remoteSendBuffer = new byte[BufferSize];
         private byte[] _connetionRecvBuffer = new byte[BufferSize];
         private byte[] _connetionSendBuffer = new byte[BufferSize];
+
         private bool _connectionShutdown = false;
         private bool _remoteShutdown = false;
         private bool _closed = false;
+
         private object _encryptionLock = new object();
         private object _decryptionLock = new object();
+
         private DateTime _startConnectTime;
         private DateTime _startReceivingTime;
         private DateTime _startSendingTime;
@@ -151,12 +155,9 @@ namespace Shadowsocks.Controller
             {
                 tcprelay.Handlers.Remove(this);
             }
-            lock (this)
-            {
-                if (_closed)
-                    return;
-                else
-                    _closed = true;
+            lock (this) {
+                if (_closed) return;
+                _closed = true;
             }
             try
             {
@@ -504,6 +505,7 @@ namespace Shadowsocks.Controller
                         case 1:  // IPv4 address, 4 bytes
                             dst_addr = new IPAddress(_connetionRecvBuffer.Skip(1).Take(4).ToArray()).ToString();
                             dst_port = (_connetionRecvBuffer[5] << 8) + _connetionRecvBuffer[6];
+                            // Note by wongsyrone: this will be stripped out in Release version
                             Logging.Debug($"connect to {dst_addr}:{dst_port}");
                             break;
                         case 3:  // domain name, length + str
