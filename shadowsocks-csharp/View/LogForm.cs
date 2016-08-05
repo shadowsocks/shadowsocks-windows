@@ -108,6 +108,9 @@ namespace Shadowsocks.View
             TopMostMenuItem.Text = I18N.GetString("&Top Most");
             ShowToolbarMenuItem.Text = I18N.GetString("&Show Toolbar");
             Text = I18N.GetString("Log Viewer");
+            // traffic chart
+            trafficChart.Series["Inbound"].LegendText = I18N.GetString("Inbound");
+            trafficChart.Series["Outbound"].LegendText = I18N.GetString("Outbound");
         }
 
         private void Timer_Tick(object sender, EventArgs e)
