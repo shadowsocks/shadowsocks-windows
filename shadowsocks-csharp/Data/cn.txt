@@ -62,6 +62,8 @@ Change &Font=设置字体(&F)
 &Top Most=置顶(&T)
 &Show Toolbar=显示工具栏(&S)
 Log Viewer=日志查看器
+Inbound=入站
+Outbound=出站
 
 # QRCode Form
 
