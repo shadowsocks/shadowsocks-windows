@@ -311,29 +311,52 @@ namespace OpenDNS
             {
                 case Types.A:
                     //Get IP Address Blocks
-                    byte[] bs = new byte[] { (byte)(data[position++] & byte.MaxValue), (byte)(data[position++] & byte.MaxValue), (byte)(data[position++] & byte.MaxValue), (byte)(data[position++] & byte.MaxValue) };
-                    string ResourceAddress = String.Concat(new object[] { bs[0], ".", bs[1], ".", bs[2], ".", bs[3] });
+                    {
+                        byte[] bs = new byte[] { (byte)(data[position++] & byte.MaxValue), (byte)(data[position++] & byte.MaxValue), (byte)(data[position++] & byte.MaxValue), (byte)(data[position++] & byte.MaxValue) };
+                        string ResourceAddress = String.Concat(new object[] { bs[0], ".", bs[1], ".", bs[2], ".", bs[3] });
 
-                    OpenDNS.Address rrA = new Address(ResourceName, ResourceType, ResourceClass, TTL_Seconds, ResourceAddress);
-                    Container.Add(rrA);
-                    break;
+                        OpenDNS.Address rrA = new Address(ResourceName, ResourceType, ResourceClass, TTL_Seconds, ResourceAddress);
+                        Container.Add(rrA);
+                        break;
+                    }
+                case Types.AAAA:
+                    {
+                        //Get IP Address Blocks
+                        ushort[] bs = new ushort[8];
+                        for (int j = 0; j < 8; ++j) bs[j] = (ushort)(((byte)(data[position + j * 2] & byte.MaxValue) << 8) | (byte)(data[position + j * 2 + 1] & byte.MaxValue));
+                        position += 16;
+                        string ResourceAddress = String.Concat(new object[] {
+                            Convert.ToString(bs[0], 16), ":",
+                            Convert.ToString(bs[1], 16), ":",
+                            Convert.ToString(bs[2], 16), ":",
+                            Convert.ToString(bs[3], 16), ":",
+                            Convert.ToString(bs[4], 16), ":",
+                            Convert.ToString(bs[5], 16), ":",
+                            Convert.ToString(bs[6], 16), ":",
+                            Convert.ToString(bs[7], 16)});
+
+                        OpenDNS.Address rrA = new Address(ResourceName, ResourceType, ResourceClass, TTL_Seconds, ResourceAddress);
+                        Container.Add(rrA);
+                        break;
+                    }
                 case Types.SOA:
-                    //Extract Text Fields
-                    string Server = GetName();
-                    string Email = GetName();
+                    {
+                        //Extract Text Fields
+                        string Server = GetName();
+                        string Email = GetName();
 
-                    //32 bit fields
-                    long Serial = (data[position++] & byte.MaxValue) << 24 | (data[position++] & byte.MaxValue) << 16 | (data[position++] & byte.MaxValue) << 8 | data[position++] & byte.MaxValue;
-                    long Refresh = (data[position++] & byte.MaxValue) << 24 | (data[position++] & byte.MaxValue) << 16 | (data[position++] & byte.MaxValue) << 8 | data[position++] & byte.MaxValue;
-                    long Retry = (data[position++] & byte.MaxValue) << 24 | (data[position++] & byte.MaxValue) << 16 | (data[position++] & byte.MaxValue) << 8 | data[position++] & byte.MaxValue;
-                    long Expire = (data[position++] & byte.MaxValue) << 24 | (data[position++] & byte.MaxValue) << 16 | (data[position++] & byte.MaxValue) << 8 | data[position++] & byte.MaxValue;
-                    long Minimum = (data[position++] & byte.MaxValue) << 24 | (data[position++] & byte.MaxValue) << 16 | (data[position++] & byte.MaxValue) << 8 | data[position++] & byte.MaxValue;
+                        //32 bit fields
+                        long Serial = (data[position++] & byte.MaxValue) << 24 | (data[position++] & byte.MaxValue) << 16 | (data[position++] & byte.MaxValue) << 8 | data[position++] & byte.MaxValue;
+                        long Refresh = (data[position++] & byte.MaxValue) << 24 | (data[position++] & byte.MaxValue) << 16 | (data[position++] & byte.MaxValue) << 8 | data[position++] & byte.MaxValue;
+                        long Retry = (data[position++] & byte.MaxValue) << 24 | (data[position++] & byte.MaxValue) << 16 | (data[position++] & byte.MaxValue) << 8 | data[position++] & byte.MaxValue;
+                        long Expire = (data[position++] & byte.MaxValue) << 24 | (data[position++] & byte.MaxValue) << 16 | (data[position++] & byte.MaxValue) << 8 | data[position++] & byte.MaxValue;
+                        long Minimum = (data[position++] & byte.MaxValue) << 24 | (data[position++] & byte.MaxValue) << 16 | (data[position++] & byte.MaxValue) << 8 | data[position++] & byte.MaxValue;
 
-                    OpenDNS.SOA rrSOA = new SOA(ResourceName, ResourceType, ResourceClass, TTL_Seconds, Server, Email, Serial, Refresh, Retry, Expire, Minimum);
-                    Container.Add(rrSOA);
+                        OpenDNS.SOA rrSOA = new SOA(ResourceName, ResourceType, ResourceClass, TTL_Seconds, Server, Email, Serial, Refresh, Retry, Expire, Minimum);
+                        Container.Add(rrSOA);
 
-                    break;
-
+                        break;
+                    }
                 case Types.CNAME:
                 case Types.MINFO:
                 case Types.NS:

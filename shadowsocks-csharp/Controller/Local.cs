@@ -1881,39 +1881,46 @@ namespace Shadowsocks.Controller
         private IPAddress QueryDns(string host, string dns_servers)
         {
             IPAddress ipAddress;
-            bool parsed = IPAddress.TryParse(targetHost, out ipAddress);
+            bool parsed = IPAddress.TryParse(host, out ipAddress);
             if (!parsed)
             {
-                if (server.DnsBuffer().isExpired(targetHost))
+                if (server.DnsBuffer().isExpired(host))
                 {
                     if (dns_servers != null)
                     {
+                        OpenDNS.Types[] types;
+                        if (false)
+                            types = new Types[] { Types.AAAA, Types.A };
+                        else
+                            types = new Types[] { Types.A, Types.AAAA };
                         string[] dns_server = dns_servers.Split(',');
-                        dns = new DnsQuery(targetHost, Types.A);
-                        dns.RecursionDesired = true;
-                        foreach (string server in dns_server)
+                        for (int query_i = 0; query_i < types.Length; ++query_i)
                         {
-                            dns.Servers.Add(server);
-                        }
-                        if (dns.Send())
-                        {
-                            int count = dns.Response.Answers.Count;
-                            if (count > 0)
+                            dns = new DnsQuery(host, types[query_i]);
+                            dns.RecursionDesired = true;
+                            foreach (string server in dns_server)
                             {
-                                for (int i = 0; i < count; ++i)
+                                dns.Servers.Add(server);
+                            }
+                            if (dns.Send())
+                            {
+                                int count = dns.Response.Answers.Count;
+                                if (count > 0)
                                 {
-                                    if (((ResourceRecord)dns.Response.Answers[i]).Type != Types.A)
-                                        continue;
-                                    return ((OpenDNS.Address)dns.Response.Answers[i]).IP;
+                                    for (int i = 0; i < count; ++i)
+                                    {
+                                        if (((ResourceRecord)dns.Response.Answers[i]).Type != types[query_i])
+                                            continue;
+                                        return ((OpenDNS.Address)dns.Response.Answers[i]).IP;
+                                    }
                                 }
                             }
                         }
                     }
-                    else
                     {
                         try
                         {
-                            IPHostEntry ipHostInfo = Dns.GetHostEntry(targetHost);
+                            IPHostEntry ipHostInfo = Dns.GetHostEntry(host);
                             return ipHostInfo.AddressList[0];
                         }
                         catch
@@ -2008,7 +2015,7 @@ namespace Shadowsocks.Controller
                         bool dns_ok = false;
                         if (!dns_ok)
                         {
-                            ipAddress = QueryDns(targetHost, dns_servers);
+                            ipAddress = QueryDns(serverURI, dns_servers);
                             if (ipAddress != null)
                             {
                                 server.DnsBuffer().UpdateDns(serverURI, ipAddress);

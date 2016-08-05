@@ -556,23 +556,31 @@ namespace Shadowsocks.View
         {
             for (int i = 0; i < ServerDataGrid.Columns.Count; ++i)
             {
-                if (ServerDataGrid.Columns[i].Name == "AvgLatency"
-                    || ServerDataGrid.Columns[i].Name == "AvgDownSpeed"
-                    || ServerDataGrid.Columns[i].Name == "MaxDownSpeed"
-                    || ServerDataGrid.Columns[i].Name == "AvgUpSpeed"
-                    || ServerDataGrid.Columns[i].Name == "MaxUpSpeed"
-                    || ServerDataGrid.Columns[i].Name == "Upload"
-                    || ServerDataGrid.Columns[i].Name == "Download"
-                    || ServerDataGrid.Columns[i].Name == "DownloadRaw"
-                    || ServerDataGrid.Columns[i].Name == "Group"
-                    || ServerDataGrid.Columns[i].Name == "Connecting"
-                    || ServerDataGrid.Columns[i].Name == "ErrorPercent"
-                    || ServerDataGrid.Columns[i].Name == "ConnectError"
-                    || ServerDataGrid.Columns[i].Name == "ConnectTimeout"
-                    || ServerDataGrid.Columns[i].Name == "Continuous"
-                    || ServerDataGrid.Columns[i].Name == "ConnectEmpty"
+                string name = ServerDataGrid.Columns[i].Name;
+                if (name == "AvgLatency"
+                    || name == "AvgDownSpeed"
+                    || name == "MaxDownSpeed"
+                    || name == "AvgUpSpeed"
+                    || name == "MaxUpSpeed"
+                    || name == "Upload"
+                    || name == "Download"
+                    || name == "DownloadRaw"
+                    || name == "Group"
+                    || name == "Connecting"
+                    || name == "ErrorPercent"
+                    || name == "ConnectError"
+                    || name == "ConnectTimeout"
+                    || name == "Continuous"
+                    || name == "ConnectEmpty"
                     )
+                {
+                    int last_min_w = ServerDataGrid.Columns[i].MinimumWidth;
+                    if (name == "AvgLatency")
+                        ServerDataGrid.Columns[i].MinimumWidth = 36;
+                    else if ( name == "AvgDownSpeed" || name == "AvgUpSpeed")
+                        ServerDataGrid.Columns[i].MinimumWidth = 60;
                     ServerDataGrid.AutoResizeColumn(i, DataGridViewAutoSizeColumnMode.AllCellsExceptHeader);
+                }
             }
             int width = 0;
             for (int i = 0; i < ServerDataGrid.Columns.Count; ++i)

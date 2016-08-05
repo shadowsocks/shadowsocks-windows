@@ -582,7 +582,7 @@
             // DNSText
             // 
             this.DNSText.Location = new System.Drawing.Point(78, 6);
-            this.DNSText.MaxLength = 10;
+            this.DNSText.MaxLength = 0;
             this.DNSText.Name = "DNSText";
             this.DNSText.Size = new System.Drawing.Size(109, 21);
             this.DNSText.TabIndex = 4;
