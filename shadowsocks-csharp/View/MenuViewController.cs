@@ -48,6 +48,7 @@ namespace Shadowsocks.View
         private MenuItem editGFWUserRuleItem;
         private MenuItem editOnlinePACItem;
         private MenuItem autoCheckUpdatesToggleItem;
+        private MenuItem VerboseLoggingToggleItem;
         private ConfigForm configForm;
         private List<LogForm> logForms = new List<LogForm>();
         private bool logFormsVisible = false;
@@ -64,6 +65,7 @@ namespace Shadowsocks.View
             controller.PACFileReadyToOpen += controller_FileReadyToOpen;
             controller.UserRuleFileReadyToOpen += controller_FileReadyToOpen;
             controller.ShareOverLANStatusChanged += controller_ShareOverLANStatusChanged;
+            controller.VerboseLoggingStatusChanged += controller_VerboseLoggingStatusChanged;
             controller.EnableGlobalChanged += controller_EnableGlobalChanged;
             controller.Errored += controller_Errored;
             controller.UpdatePACFromGFWListCompleted += controller_UpdatePACFromGFWListCompleted;
@@ -265,6 +267,7 @@ namespace Shadowsocks.View
                 this.ShareOverLANItem = CreateMenuItem("Allow Clients from LAN", new EventHandler(this.ShareOverLANItem_Click)),
                 new MenuItem("-"),
                 CreateMenuItem("Show Logs...", new EventHandler(this.ShowLogItem_Click)),
+                this.VerboseLoggingToggleItem = CreateMenuItem( "Verbose Logging", new EventHandler(this.VerboseLoggingToggleItem_Click) ),
                 CreateMenuGroup("Updates...", new MenuItem[] {
                     CreateMenuItem("Check for Updates...", new EventHandler(this.checkUpdatesItem_Click)),
                     new MenuItem("-"),
@@ -291,6 +294,10 @@ namespace Shadowsocks.View
         void controller_ShareOverLANStatusChanged(object sender, EventArgs e)
         {
             ShareOverLANItem.Checked = controller.GetConfigurationCopy().shareOverLan;
+        }
+
+        void controller_VerboseLoggingStatusChanged(object sender, EventArgs e) {
+            VerboseLoggingToggleItem.Checked = controller.GetConfigurationCopy().isVerboseLogging;
         }
 
         void controller_EnableGlobalChanged(object sender, EventArgs e)
@@ -369,6 +376,7 @@ namespace Shadowsocks.View
             globalModeItem.Checked = config.global;
             PACModeItem.Checked = !config.global;
             ShareOverLANItem.Checked = config.shareOverLan;
+            VerboseLoggingToggleItem.Checked = config.isVerboseLogging;
             AutoStartupItem.Checked = AutoStartup.Check();
             onlinePACItem.Checked = onlinePACItem.Enabled && config.useOnlinePac;
             localPACItem.Checked = !onlinePACItem.Checked;
@@ -574,6 +582,11 @@ namespace Shadowsocks.View
             f.FormClosed += logForm_FormClosed;
 
             logForms.Add(f);
+        }
+
+        private void VerboseLoggingToggleItem_Click( object sender, EventArgs e ) {
+            VerboseLoggingToggleItem.Checked = ! VerboseLoggingToggleItem.Checked;
+            controller.ToggleVerboseLogging( VerboseLoggingToggleItem.Checked );
         }
 
         private void StatisticsConfigItem_Click(object sender, EventArgs e)

@@ -76,7 +76,8 @@ namespace Shadowsocks.Util
                 //
                 // just kidding
                 SetProcessWorkingSetSize(Process.GetCurrentProcess().Handle,
-                    (UIntPtr)0xFFFFFFFF, (UIntPtr)0xFFFFFFFF);
+                                         (UIntPtr)0xFFFFFFFF,
+                                         (UIntPtr)0xFFFFFFFF);
             }
         }
 
@@ -87,7 +88,8 @@ namespace Shadowsocks.Util
             using (MemoryStream sb = new MemoryStream())
             {
                 using (GZipStream input = new GZipStream(new MemoryStream(buf),
-                    CompressionMode.Decompress, false))
+                                                         CompressionMode.Decompress,
+                                                         false))
                 {
                     while ((n = input.Read(buffer, 0, buffer.Length)) > 0)
                     {
