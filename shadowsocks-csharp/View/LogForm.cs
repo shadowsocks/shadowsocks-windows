@@ -93,7 +93,7 @@ namespace Shadowsocks.View
                     }));
                 }
             }
-            catch (ObjectDisposedException ex)
+            catch (ObjectDisposedException)
             {
                 // suppress the thread race error:
                 // when closing the form but the Invoked Action is still working and cause 'Chart is Disposed' exception
