@@ -23,6 +23,7 @@ Show QRCode...=显示二维码...
 Scan QRCode from Screen...=扫描屏幕上的二维码...
 Availability Statistics=统计可用性
 Show Logs...=显示日志...
+Verbose Logging=详细记录日志
 Updates...=更新...
 Check for Updates...=检查更新
 Check for Updates at Startup=启动时检查更新
@@ -70,6 +71,8 @@ Change &Font=设置字体(&F)
 &Top Most=置顶(&T)
 &Show Toolbar=显示工具栏(&S)
 Log Viewer=日志查看器
+Inbound=入站
+Outbound=出站
 
 # QRCode Form
 
@@ -109,3 +112,5 @@ Failed to decode QRCode=无法解析二维码
 Failed to update registry=无法修改注册表
 System Proxy On: =系统代理已启用：
 Running: Port {0}=正在运行：端口 {0}
+Unexpect error, shadowsocks will be exit. Please report to=非预期错误，Shadowsocks将退出。请提交此错误到
+ 

@@ -21,6 +21,7 @@ namespace Shadowsocks
             Utils.ReleaseMemory(true);
             using (Mutex mutex = new Mutex(false, "Global\\Shadowsocks_" + Application.StartupPath.GetHashCode()))
             {
+                AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
 
@@ -51,6 +52,20 @@ namespace Shadowsocks
                 MenuViewController viewController = new MenuViewController(controller);
                 controller.Start();
                 Application.Run();
+            }
+        }
+
+        private static int exited = 0;
+        private static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
+        {
+            if (Interlocked.Increment(ref exited) == 1)
+            {
+                Logging.Error(e.ExceptionObject?.ToString());
+                MessageBox.Show(I18N.GetString("Unexpect error, shadowsocks will be exit. Please report to") +
+                    " https://github.com/shadowsocks/shadowsocks-windows/issues " +
+                    Environment.NewLine + (e.ExceptionObject?.ToString()),
+                    "Shadowsocks Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Application.Exit();
             }
         }
     }

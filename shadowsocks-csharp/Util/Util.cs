@@ -76,7 +76,8 @@ namespace Shadowsocks.Util
                 //
                 // just kidding
                 SetProcessWorkingSetSize(Process.GetCurrentProcess().Handle,
-                    (UIntPtr)0xFFFFFFFF, (UIntPtr)0xFFFFFFFF);
+                                         (UIntPtr)0xFFFFFFFF,
+                                         (UIntPtr)0xFFFFFFFF);
             }
         }
 
@@ -87,7 +88,8 @@ namespace Shadowsocks.Util
             using (MemoryStream sb = new MemoryStream())
             {
                 using (GZipStream input = new GZipStream(new MemoryStream(buf),
-                    CompressionMode.Decompress, false))
+                                                         CompressionMode.Decompress,
+                                                         false))
                 {
                     while ((n = input.Read(buffer, 0, buffer.Length)) > 0)
                     {
@@ -100,29 +102,49 @@ namespace Shadowsocks.Util
 
         public static string FormatBandwidth(long n)
         {
+            var result = GetBandwidthScale(n);
+            return $"{result.Item1:0.##}{result.Item2}";
+        }
+
+        /// <summary>
+        /// Return scaled bandwidth
+        /// </summary>
+        /// <param name="n">Raw bandwidth</param>
+        /// <returns>
+        /// Item1: float, bandwidth with suitable scale (eg. 56)
+        /// Item2: string, scale unit name (eg. KiB)
+        /// Item3: long, scale unit (eg. 1024)
+        /// </returns>
+        public static Tuple<float, string, long> GetBandwidthScale(long n)
+        {
+            long scale = 1;
             float f = n;
             string unit = "B";
             if (f > 1024)
             {
                 f = f / 1024;
+                scale <<= 10;
                 unit = "KiB";
             }
             if (f > 1024)
             {
                 f = f / 1024;
+                scale <<= 10;
                 unit = "MiB";
             }
             if (f > 1024)
             {
                 f = f / 1024;
+                scale <<= 10;
                 unit = "GiB";
             }
             if (f > 1024)
             {
                 f = f / 1024;
+                scale <<= 10;
                 unit = "TiB";
             }
-            return $"{f:0.##}{unit}";
+            return new Tuple<float, string, long>(f, unit, scale);
         }
 
         [DllImport("kernel32.dll")]

@@ -47,20 +47,7 @@ namespace Shadowsocks.Controller
                 Process[] existingPolipo = Process.GetProcessesByName("ss_privoxy");
                 foreach (Process p in existingPolipo)
                 {
-                    try
-                    {
-                        p.CloseMainWindow();
-                        p.WaitForExit(100);
-                        if (!p.HasExited)
-                        {
-                            p.Kill();
-                            p.WaitForExit();
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        Logging.LogUsefulException(e);
-                    }
+                    KillProcess(p);
                 }
                 string polipoConfig = Resources.privoxy_conf;
                 _runningPort = this.GetFreePort();
@@ -86,18 +73,28 @@ namespace Shadowsocks.Controller
         {
             if (_process != null)
             {
-                try
-                {
-                    _process.Kill();
-                    _process.WaitForExit();
-                }
-                catch (Exception e)
-                {
-                    Logging.LogUsefulException(e);
-                }
+                KillProcess(_process);
                 _process = null;
             }
             RefreshTrayArea();
+        }
+
+        private static void KillProcess(Process p)
+        {
+            try
+            {
+                p.CloseMainWindow();
+                p.WaitForExit(100);
+                if (!p.HasExited)
+                {
+                    p.Kill();
+                    p.WaitForExit();
+                }
+            }
+            catch (Exception e)
+            {
+                Logging.LogUsefulException(e);
+            }
         }
 
         private int GetFreePort()
