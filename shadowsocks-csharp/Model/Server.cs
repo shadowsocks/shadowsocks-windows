@@ -1,4 +1,6 @@
 using System;
+using System.Net;
+using System.Net.Sockets;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -39,14 +41,25 @@ namespace Shadowsocks.Model
             {
                 return I18N.GetString("New server");
             }
-            if (remarks.IsNullOrEmpty())
-            {
-                return server + ":" + server_port;
+            IPAddress addr;
+            IPAddress.TryParse( server, out addr );
+            if ( remarks.IsNullOrEmpty() ) {
+                switch ( addr.AddressFamily ) {
+                    case AddressFamily.InterNetwork:
+                        return $"{server}:{server_port}";
+                    case AddressFamily.InterNetworkV6:
+                        return $"[{server}]:{server_port}";
+                }
+            } else {
+                switch ( addr.AddressFamily ) {
+                    case AddressFamily.InterNetwork:
+                        return $"{remarks} ({server}:{server_port})";
+                    case AddressFamily.InterNetworkV6:
+                        return $"{remarks} ([{server}]:{server_port})";
+                }
             }
-            else
-            {
-                return remarks + " (" + server + ":" + server_port + ")";
-            }
+            // This should not happen, user should check the input instead of blaming
+            return null;
         }
 
         public Server()
