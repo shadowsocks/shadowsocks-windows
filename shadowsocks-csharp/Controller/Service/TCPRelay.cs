@@ -15,12 +15,14 @@ namespace Shadowsocks.Controller
     {
         private ShadowsocksController _controller;
         private DateTime _lastSweepTime;
+        private Configuration _config;
 
         public ISet<TCPHandler> Handlers { get; set; }
 
-        public TCPRelay(ShadowsocksController controller)
+        public TCPRelay(ShadowsocksController controller, Configuration conf)
         {
             _controller = controller;
+            _config = conf;
             Handlers = new HashSet<TCPHandler>();
             _lastSweepTime = DateTime.Now;
         }
@@ -31,7 +33,7 @@ namespace Shadowsocks.Controller
                 || (length < 2 || firstPacket[0] != 5))
                 return false;
             socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, true);
-            TCPHandler handler = new TCPHandler(this);
+            TCPHandler handler = new TCPHandler(this, _config);
             handler.connection = socket;
             handler.controller = _controller;
             handler.tcprelay = this;
@@ -120,10 +122,12 @@ namespace Shadowsocks.Controller
         private DateTime _startSendingTime;
         private int _bytesToSend;
         private TCPRelay _tcprelay;  // TODO: is _tcprelay equals tcprelay declared above?
+        private Configuration _config;
 
-        public TCPHandler(TCPRelay tcprelay)
+        public TCPHandler(TCPRelay tcprelay, Configuration config)
         {
             _tcprelay = tcprelay;
+            _config = config;
         }
 
         public void CreateRemote()
@@ -505,7 +509,7 @@ namespace Shadowsocks.Controller
                         case 1:  // IPv4 address, 4 bytes
                             dst_addr = new IPAddress(_connetionRecvBuffer.Skip(1).Take(4).ToArray()).ToString();
                             dst_port = (_connetionRecvBuffer[5] << 8) + _connetionRecvBuffer[6];
-                            if ( controller.GetCurrentConfiguration().isVerboseLogging ) {
+                            if ( _config.isVerboseLogging ) {
                                 Logging.Info( $"connect to {dst_addr}:{dst_port}" );
                             }
                             break;
@@ -513,14 +517,14 @@ namespace Shadowsocks.Controller
                             int len = _connetionRecvBuffer[1];
                             dst_addr = System.Text.Encoding.UTF8.GetString(_connetionRecvBuffer, 2, len);
                             dst_port = (_connetionRecvBuffer[len + 2] << 8) + _connetionRecvBuffer[len + 3];
-                            if ( controller.GetCurrentConfiguration().isVerboseLogging ) {
+                            if ( _config.isVerboseLogging ) {
                                 Logging.Info( $"connect to {dst_addr}:{dst_port}" );
                             }
                             break;
                         case 4:  // IPv6 address, 16 bytes
                             dst_addr = new IPAddress(_connetionRecvBuffer.Skip(1).Take(16).ToArray()).ToString();
                             dst_port = (_connetionRecvBuffer[17] << 8) + _connetionRecvBuffer[18];
-                            if ( controller.GetCurrentConfiguration().isVerboseLogging ) {
+                            if ( _config.isVerboseLogging ) {
                                 Logging.Info( $"connect to [{dst_addr}]:{dst_port}" );
                             }
                             break;
