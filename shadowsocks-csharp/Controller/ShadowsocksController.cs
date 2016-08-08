@@ -68,6 +68,7 @@ namespace Shadowsocks.Controller
         public event EventHandler EnableStatusChanged;
         public event EventHandler EnableGlobalChanged;
         public event EventHandler ShareOverLANStatusChanged;
+        public event EventHandler VerboseLoggingStatusChanged;
         public event EventHandler TrafficChanged;
 
         // when user clicked Edit PAC, and PAC file has already created
@@ -209,6 +210,15 @@ namespace Shadowsocks.Controller
             if (ShareOverLANStatusChanged != null)
             {
                 ShareOverLANStatusChanged(this, new EventArgs());
+            }
+        }
+
+        public void ToggleVerboseLogging(bool enabled)
+        {
+            _config.isVerboseLogging = enabled;
+            SaveConfig(_config);
+            if ( VerboseLoggingStatusChanged != null ) {
+                VerboseLoggingStatusChanged(this, new EventArgs());
             }
         }
 

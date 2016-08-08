@@ -505,19 +505,24 @@ namespace Shadowsocks.Controller
                         case 1:  // IPv4 address, 4 bytes
                             dst_addr = new IPAddress(_connetionRecvBuffer.Skip(1).Take(4).ToArray()).ToString();
                             dst_port = (_connetionRecvBuffer[5] << 8) + _connetionRecvBuffer[6];
-                            // Note by wongsyrone: this will be stripped out in Release version
-                            Logging.Debug($"connect to {dst_addr}:{dst_port}");
+                            if ( controller.GetCurrentConfiguration().isVerboseLogging ) {
+                                Logging.Info( $"connect to {dst_addr}:{dst_port}" );
+                            }
                             break;
                         case 3:  // domain name, length + str
                             int len = _connetionRecvBuffer[1];
                             dst_addr = System.Text.Encoding.UTF8.GetString(_connetionRecvBuffer, 2, len);
                             dst_port = (_connetionRecvBuffer[len + 2] << 8) + _connetionRecvBuffer[len + 3];
-                            Logging.Debug($"connect to {dst_addr}:{dst_port}");
+                            if ( controller.GetCurrentConfiguration().isVerboseLogging ) {
+                                Logging.Info( $"connect to {dst_addr}:{dst_port}" );
+                            }
                             break;
                         case 4:  // IPv6 address, 16 bytes
                             dst_addr = new IPAddress(_connetionRecvBuffer.Skip(1).Take(16).ToArray()).ToString();
                             dst_port = (_connetionRecvBuffer[17] << 8) + _connetionRecvBuffer[18];
-                            Logging.Debug($"connect to [{dst_addr}]:{dst_port}");
+                            if ( controller.GetCurrentConfiguration().isVerboseLogging ) {
+                                Logging.Info( $"connect to [{dst_addr}]:{dst_port}" );
+                            }
                             break;
                     }
                     int bytesToSend;
