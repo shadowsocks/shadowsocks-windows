@@ -22,6 +22,8 @@ namespace Shadowsocks.View
         private int lastRefreshIndex = 0;
         private bool rowChange = false;
         private int updatePause = 0;
+        private int updateTick = 0;
+        private int updateSize = 0;
         private int pendingUpdate = 0;
         private ServerSpeedLogShow[] ServerSpeedLogList;
         private Thread workerThread;
@@ -462,7 +464,7 @@ namespace Shadowsocks.View
                             if (cell.ToolTipText != fullVal)
                             {
                                 if (fullVal == "0")
-                                    SetBackColor(cell, Color.FromArgb(0xf0, 0xf0, 0xff));
+                                    SetBackColor(cell, Color.FromArgb(0xff, 0x80, 0x80));
                                 else
                                 {
                                     SetBackColor(cell, Color.LightGreen);
@@ -552,7 +554,7 @@ namespace Shadowsocks.View
             }
         }
 
-        private void autosizeItem_Click(object sender, EventArgs e)
+        private void autosizeColumns()
         {
             for (int i = 0; i < ServerDataGrid.Columns.Count; ++i)
             {
@@ -574,12 +576,19 @@ namespace Shadowsocks.View
                     || name == "ConnectEmpty"
                     )
                 {
-                    int last_min_w = ServerDataGrid.Columns[i].MinimumWidth;
-                    if (name == "AvgLatency")
-                        ServerDataGrid.Columns[i].MinimumWidth = 36;
-                    else if ( name == "AvgDownSpeed" || name == "AvgUpSpeed")
-                        ServerDataGrid.Columns[i].MinimumWidth = 60;
+                    if (ServerDataGrid.Columns[i].Width <= 2)
+                        continue;
                     ServerDataGrid.AutoResizeColumn(i, DataGridViewAutoSizeColumnMode.AllCellsExceptHeader);
+                    if (name == "AvgLatency"
+                        || name == "Connecting"
+                        || name == "AvgDownSpeed"
+                        || name == "MaxDownSpeed"
+                        || name == "AvgUpSpeed"
+                        || name == "MaxUpSpeed"
+                        )
+                    {
+                        ServerDataGrid.Columns[i].MinimumWidth = ServerDataGrid.Columns[i].Width;
+                    }
                 }
             }
             int width = 0;
@@ -591,6 +600,11 @@ namespace Shadowsocks.View
             }
             this.Width = width + SystemInformation.VerticalScrollBarWidth + (this.Width - this.ClientSize.Width) + 1;
             ServerDataGrid.AutoResizeColumnHeadersHeight();
+        }
+
+        private void autosizeItem_Click(object sender, EventArgs e)
+        {
+            autosizeColumns();
         }
 
         private void topmostItem_Click(object sender, EventArgs e)
@@ -631,9 +645,19 @@ namespace Shadowsocks.View
                     return;
                 }
             }
+            else
+            {
+                ++updateTick;
+            }
             pendingUpdate = 0;
             RefreshLog();
             UpdateLog();
+            if (updateSize > 1) --updateSize;
+            if (updateTick == 2 || updateSize == 1)
+            {
+                updateSize = 0;
+                //autosizeColumns();
+            }
         }
 
         private void ServerDataGrid_MouseUp(object sender, MouseEventArgs e)
@@ -840,6 +864,7 @@ namespace Shadowsocks.View
         protected override void WndProc(ref Message message)
         {
             const int WM_SIZING = 532;
+            const int WM_SIZE = 533;
             const int WM_MOVING = 534;
             switch (message.Msg)
             {
@@ -877,6 +902,14 @@ namespace Shadowsocks.View
             }
             this.Width = width + SystemInformation.VerticalScrollBarWidth + (this.Width - this.ClientSize.Width) + 1;
             ServerDataGrid.AutoResizeColumnHeadersHeight();
+        }
+
+        private void ServerLogForm_Activated(object sender, EventArgs e)
+        {
+            //if (updateTick > 0)
+            //{
+            //    updateSize = 4;
+            //}
         }
     }
 }

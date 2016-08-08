@@ -305,6 +305,8 @@ namespace Shadowsocks.Controller
 
     class Handler
     {
+        private delegate IPHostEntry GetHostEntryHandler(string ip);
+
         public delegate Server GetCurrentServer(string targetURI = null, bool usingRandom = false, bool forceRandom = false);
         public delegate void KeepCurrentServer(string targetURI);
         public delegate bool AuthConnection(Socket connection, string authUser, string authPass);
@@ -897,6 +899,16 @@ namespace Shadowsocks.Controller
                         {
                             lastErrCode = 8;
                             server.ServerSpeedLog().AddTimeoutTimes();
+                            CloseSocket(ref remote);
+                            Close();
+                        }
+                    }
+                    else
+                    {
+                        if (((CallbackStatus)result.AsyncState).Status == -1)
+                        {
+                            lastErrCode = 1;
+                            server.ServerSpeedLog().AddErrorTimes();
                             CloseSocket(ref remote);
                             Close();
                         }
@@ -1920,8 +1932,19 @@ namespace Shadowsocks.Controller
                     {
                         try
                         {
-                            IPHostEntry ipHostInfo = Dns.GetHostEntry(host);
-                            return ipHostInfo.AddressList[0];
+                            GetHostEntryHandler callback = new GetHostEntryHandler(Dns.GetHostEntry);
+                            IAsyncResult result = callback.BeginInvoke(host, null, null);
+                            if (result.AsyncWaitHandle.WaitOne(5, false))
+                            {
+                                foreach(IPAddress ad in callback.EndInvoke(result).AddressList)
+                                {
+                                    return ad;
+                                    //if (ad.AddressFamily == AddressFamily.InterNetwork)
+                                    //{
+                                    //    return ad;
+                                    //}
+                                }
+                            }
                         }
                         catch
                         {
@@ -2087,12 +2110,14 @@ namespace Shadowsocks.Controller
                 ((CallbackStatus)ar.AsyncState).SetIfEqu(1, 0);
             if (ar != null && ar.AsyncState != null && ((CallbackStatus)ar.AsyncState).Status != 1)
             {
+                lastErrCode = 1;
+                server.ServerSpeedLog().AddErrorTimes();
                 return;
             }
             try
             {
                 // Complete the connection.
-                if (socks5RemotePort != 0)
+                //if (socks5RemotePort != 0)
                 {
                     remote.EndConnect(ar);
                 }

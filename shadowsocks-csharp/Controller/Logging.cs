@@ -20,6 +20,8 @@ namespace Shadowsocks.Controller
     public class Logging
     {
         public static string LogFile;
+        public static string LogFilePath;
+        public static string LogFileName;
         protected static string date;
 
         public static bool OpenLogFile()
@@ -27,12 +29,14 @@ namespace Shadowsocks.Controller
             try
             {
                 string curpath = Path.Combine(System.Windows.Forms.Application.StartupPath, @"temp");// Path.GetFullPath(".");//Path.GetTempPath();
+                LogFilePath = curpath;
                 if (!Directory.Exists(curpath))
                 {
                     Directory.CreateDirectory(curpath);
                 }
                 date = DateTime.Now.ToString("yyyy-MM");
-                LogFile = Path.Combine(curpath, "shadowsocks_" + date + ".log");
+                LogFileName = "shadowsocks_" + date + ".log";
+                LogFile = Path.Combine(curpath, LogFileName);
                 FileStream fs = new FileStream(LogFile, FileMode.Append);
                 StreamWriterWithTimestamp sw = new StreamWriterWithTimestamp(fs);
                 sw.AutoFlush = true;

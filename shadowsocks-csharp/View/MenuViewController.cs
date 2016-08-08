@@ -600,11 +600,28 @@ namespace Shadowsocks.View
 
         private void ShowLogItem_Click(object sender, EventArgs e)
         {
-            string argument = Logging.LogFile;
-
-            System.Diagnostics.Process.Start("notepad.exe", argument);
+            try
+            {
+                System.Diagnostics.Process.Start("explorer.exe", Logging.LogFile);
+                return;
+            }
+            catch
+            {
+            }
+            try
+            {
+                string argument = "/n" + ",/select," + Logging.LogFile;
+                System.Diagnostics.Process.Start("explorer.exe", argument);
+                return;
+            }
+            catch
+            {
+                _notifyIcon.BalloonTipTitle = "Show log failed";
+                _notifyIcon.BalloonTipText = "try open the 'temp' directory by yourself";
+                _notifyIcon.BalloonTipIcon = ToolTipIcon.Error;
+                _notifyIcon.ShowBalloonTip(0);
+            }
         }
-
         private void ShowServerLogItem_Click(object sender, EventArgs e)
         {
             ShowServerLogForm();

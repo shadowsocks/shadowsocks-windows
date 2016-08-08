@@ -146,7 +146,7 @@
             // Enable
             // 
             this.Enable.HeaderText = "Enable";
-            this.Enable.MinimumWidth = 2;
+            this.Enable.MinimumWidth = 8;
             this.Enable.Name = "Enable";
             this.Enable.ReadOnly = true;
             this.Enable.Resizable = System.Windows.Forms.DataGridViewTriState.True;
@@ -165,7 +165,7 @@
             // Connecting
             // 
             this.Connecting.HeaderText = "Connecting";
-            this.Connecting.MinimumWidth = 2;
+            this.Connecting.MinimumWidth = 16;
             this.Connecting.Name = "Connecting";
             this.Connecting.ReadOnly = true;
             this.Connecting.Width = 28;
@@ -173,7 +173,7 @@
             // AvgLatency
             // 
             this.AvgLatency.HeaderText = "Latency";
-            this.AvgLatency.MinimumWidth = 2;
+            this.AvgLatency.MinimumWidth = 36;
             this.AvgLatency.Name = "AvgLatency";
             this.AvgLatency.ReadOnly = true;
             this.AvgLatency.Width = 48;
@@ -181,10 +181,10 @@
             // AvgDownSpeed
             // 
             this.AvgDownSpeed.HeaderText = "Avg DownSpeed";
-            this.AvgDownSpeed.MinimumWidth = 2;
+            this.AvgDownSpeed.MinimumWidth = 60;
             this.AvgDownSpeed.Name = "AvgDownSpeed";
             this.AvgDownSpeed.ReadOnly = true;
-            this.AvgDownSpeed.Width = 72;
+            this.AvgDownSpeed.Width = 60;
             // 
             // MaxDownSpeed
             // 
@@ -192,15 +192,15 @@
             this.MaxDownSpeed.MinimumWidth = 2;
             this.MaxDownSpeed.Name = "MaxDownSpeed";
             this.MaxDownSpeed.ReadOnly = true;
-            this.MaxDownSpeed.Width = 2;
+            this.MaxDownSpeed.Width = 60;
             // 
             // AvgUpSpeed
             // 
             this.AvgUpSpeed.HeaderText = "Avg UpSpeed";
-            this.AvgUpSpeed.MinimumWidth = 2;
+            this.AvgUpSpeed.MinimumWidth = 60;
             this.AvgUpSpeed.Name = "AvgUpSpeed";
             this.AvgUpSpeed.ReadOnly = true;
-            this.AvgUpSpeed.Width = 72;
+            this.AvgUpSpeed.Width = 60;
             // 
             // MaxUpSpeed
             // 
@@ -208,7 +208,7 @@
             this.MaxUpSpeed.MinimumWidth = 2;
             this.MaxUpSpeed.Name = "MaxUpSpeed";
             this.MaxUpSpeed.ReadOnly = true;
-            this.MaxUpSpeed.Width = 2;
+            this.MaxUpSpeed.Width = 60;
             // 
             // Download
             // 
@@ -232,7 +232,7 @@
             this.DownloadRaw.MinimumWidth = 2;
             this.DownloadRaw.Name = "DownloadRaw";
             this.DownloadRaw.ReadOnly = true;
-            this.DownloadRaw.Width = 2;
+            this.DownloadRaw.Width = 60;
             // 
             // ErrorPercent
             // 
@@ -290,6 +290,7 @@
             this.Name = "ServerLogForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "ServerLog";
+            this.Activated += new System.EventHandler(this.ServerLogForm_Activated);
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.ServerLogForm_FormClosed);
             this.ResizeEnd += new System.EventHandler(this.ServerLogForm_ResizeEnd);
             this.Move += new System.EventHandler(this.ServerLogForm_Move);
