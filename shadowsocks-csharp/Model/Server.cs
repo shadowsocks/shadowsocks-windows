@@ -42,7 +42,9 @@ namespace Shadowsocks.Model
                 return I18N.GetString("New server");
             }
             IPAddress addr;
-            IPAddress.TryParse( server, out addr );
+            if ( !IPAddress.TryParse( server, out addr ) ) {
+                Logging.Error( "Invalid server IP Address" );
+            }
             if ( remarks.IsNullOrEmpty() ) {
                 switch ( addr.AddressFamily ) {
                     case AddressFamily.InterNetwork:
@@ -58,7 +60,7 @@ namespace Shadowsocks.Model
                         return $"{remarks} ([{server}]:{server_port})";
                 }
             }
-            // This should not happen, user should check the input instead of blaming
+            // If reached here, boom.
             return null;
         }
 
