@@ -519,7 +519,7 @@ namespace Shadowsocks.Controller
 
                 if (_config.isVerboseLogging)
                 {
-                    Logging.Info($"Socket connected to ss server {remote.DestEndPoint}");
+                    Logging.Info($"Socket connected to ss server: {server.FriendlyName()}");
                 }
 
                 var latency = DateTime.Now - _startConnectTime;
