@@ -1,6 +1,4 @@
 using System;
-using System.Net;
-using System.Net.Sockets;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -41,27 +39,24 @@ namespace Shadowsocks.Model
             {
                 return I18N.GetString("New server");
             }
-            IPAddress addr;
-            if ( !IPAddress.TryParse( server, out addr ) ) {
-                Logging.Error( "Invalid server IP Address" );
+            string serverStr;
+            // CheckHostName() won't do a real DNS lookup
+            var hostType = Uri.CheckHostName( server );
+            if ( hostType == UriHostNameType.Unknown ) {
+                throw new FormatException("Invalid Server Address.");
             }
-            if ( remarks.IsNullOrEmpty() ) {
-                switch ( addr.AddressFamily ) {
-                    case AddressFamily.InterNetwork:
-                        return $"{server}:{server_port}";
-                    case AddressFamily.InterNetworkV6:
-                        return $"[{server}]:{server_port}";
-                }
-            } else {
-                switch ( addr.AddressFamily ) {
-                    case AddressFamily.InterNetwork:
-                        return $"{remarks} ({server}:{server_port})";
-                    case AddressFamily.InterNetworkV6:
-                        return $"{remarks} ([{server}]:{server_port})";
-                }
+            switch ( hostType ) {
+                case UriHostNameType.IPv6:
+                    serverStr = $"[{server}]:{server_port}";
+                    break;
+                default:
+                    // IPv4 and domain name
+                    serverStr = $"{server}:{server_port}";
+                    break;
             }
-            // If reached here, boom.
-            return null;
+            return remarks.IsNullOrEmpty()
+                ? serverStr
+                : $"{remarks} ({serverStr})";
         }
 
         public Server()
