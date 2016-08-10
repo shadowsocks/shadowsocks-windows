@@ -76,7 +76,7 @@ namespace Shadowsocks.View
 
             try
             {
-                if (trafficChart.InvokeRequired)
+                if (trafficChart.InvokeRequired && trafficChart.IsHandleCreated)
                 {
                     trafficChart.Invoke(new Action(() =>
                     {
