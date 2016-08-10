@@ -1,11 +1,10 @@
 ﻿using System.Windows.Forms;
 using Microsoft.Win32;
 using System;
-using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using System.Text;
 using System.IO;
 using Shadowsocks.Model;
+using Shadowsocks.Util;
 
 namespace Shadowsocks.Controller
 {
@@ -44,81 +43,86 @@ namespace Shadowsocks.Controller
             {
                 enabled = false;
             }
-
-            try
-            {
-                var registry = Registry.CurrentUser
-                    .OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Internet Settings", true);
-                if (enabled)
-                {
-                    if (global)
-                    {
-                        registry.SetValue("ProxyEnable", 1);
-                        registry.SetValue("ProxyServer", "127.0.0.1:" + config.localPort.ToString());
-                        registry.SetValue("AutoConfigURL", "");
-                    }
-                    else
-                    {
+            RegistryKey registry = null;
+            try {
+                registry = Utils.OpenUserRegKey( @"Software\Microsoft\Windows\CurrentVersion\Internet Settings", true );
+                if ( registry == null ) {
+                    Logging.Error( @"Cannot find HKCU\Software\Microsoft\Windows\CurrentVersion\Internet Settings" );
+                    return;
+                }
+                if ( enabled ) {
+                    if ( global ) {
+                        registry.SetValue( "ProxyEnable", 1 );
+                        registry.SetValue( "ProxyServer", "127.0.0.1:" + config.localPort.ToString() );
+                        registry.SetValue( "AutoConfigURL", "" );
+                    } else {
                         string pacUrl;
-                        if (config.useOnlinePac && !config.pacUrl.IsNullOrEmpty())
+                        if ( config.useOnlinePac && ! config.pacUrl.IsNullOrEmpty() )
                             pacUrl = config.pacUrl;
                         else
-                            pacUrl = $"http://127.0.0.1:{config.localPort}/pac?t={GetTimestamp(DateTime.Now)}";
-                        registry.SetValue("ProxyEnable", 0);
-                        var readProxyServer = registry.GetValue("ProxyServer");
-                        registry.SetValue("ProxyServer", "");
-                        registry.SetValue("AutoConfigURL", pacUrl);
+                            pacUrl = $"http://127.0.0.1:{config.localPort}/pac?t={GetTimestamp( DateTime.Now )}";
+                        registry.SetValue( "ProxyEnable", 0 );
+                        var readProxyServer = registry.GetValue( "ProxyServer" );
+                        registry.SetValue( "ProxyServer", "" );
+                        registry.SetValue( "AutoConfigURL", pacUrl );
                     }
-                }
-                else
-                {
-                    registry.SetValue("ProxyEnable", 0);
-                    registry.SetValue("ProxyServer", "");
-                    registry.SetValue("AutoConfigURL", "");
+                } else {
+                    registry.SetValue( "ProxyEnable", 0 );
+                    registry.SetValue( "ProxyServer", "" );
+                    registry.SetValue( "AutoConfigURL", "" );
                 }
 
                 //Set AutoDetectProxy
-                IEAutoDetectProxy(!enabled);
+                IEAutoDetectProxy( ! enabled );
 
                 NotifyIE();
                 //Must Notify IE first, or the connections do not chanage
                 CopyProxySettingFromLan();
-            }
-            catch (Exception e)
-            {
-                Logging.LogUsefulException(e);
+            } catch ( Exception e ) {
+                Logging.LogUsefulException( e );
                 // TODO this should be moved into views
-                MessageBox.Show(I18N.GetString("Failed to update registry"));
+                MessageBox.Show( I18N.GetString( "Failed to update registry" ) );
+            } finally {
+                if ( registry != null ) {
+                    try { registry.Close(); }
+                    catch (Exception e)
+                    { Logging.LogUsefulException(e); }
+                }
             }
         }
 
         private static void CopyProxySettingFromLan()
         {
-            var registry = Registry.CurrentUser
-                .OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Internet Settings\Connections", true);
-            var defaultValue = registry.GetValue("DefaultConnectionSettings");
-            try
-            {
+            RegistryKey registry = null;
+            try {
+                registry = Utils.OpenUserRegKey( @"Software\Microsoft\Windows\CurrentVersion\Internet Settings\Connections", true );
+                if ( registry == null ) {
+                    Logging.Error( @"Cannot find HKCU\Software\Microsoft\Windows\CurrentVersion\Internet Settings" );
+                    return;
+                }
+                var defaultValue = registry.GetValue( "DefaultConnectionSettings" );
                 var connections = registry.GetValueNames();
-                foreach (var each in connections)
-                {
-                    switch (each.ToUpperInvariant())
-                    {
+                foreach ( var each in connections ) {
+                    switch ( each.ToUpperInvariant() ) {
                         case "DEFAULTCONNECTIONSETTINGS":
                         case "LAN CONNECTION":
                         case "SAVEDLEGACYSETTINGS":
                             continue;
                         default:
                             //set all the connections's proxy as the lan
-                            registry.SetValue(each, defaultValue);
+                            registry.SetValue( each, defaultValue );
                             continue;
                     }
                 }
                 NotifyIE();
-            }
-            catch (IOException e)
-            {
-                Logging.LogUsefulException(e);
+            } catch ( IOException e ) {
+                Logging.LogUsefulException( e );
+            } finally {
+                if ( registry != null ) {
+                    try { registry.Close(); }
+                    catch (Exception e)
+                    { Logging.LogUsefulException(e); }
+                }
             }
         }
 
@@ -128,34 +132,44 @@ namespace Shadowsocks.Controller
         /// <param name="set">Provide 'true' if you want to check the 'Automatically detect Proxy' check box. To uncheck, pass 'false'</param>
         private static void IEAutoDetectProxy(bool set)
         {
-            var registry = Registry.CurrentUser
-                .OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Internet Settings\Connections", true);
-            var defConnection = (byte[])registry.GetValue("DefaultConnectionSettings");
-            var savedLegacySetting = (byte[])registry.GetValue("SavedLegacySettings");
+            RegistryKey registry = null;
+            try {
+                registry = Utils.OpenUserRegKey( @"Software\Microsoft\Windows\CurrentVersion\Internet Settings\Connections", true );
+                if ( registry == null ) {
+                    Logging.Error( @"Cannot find HKCU\Software\Microsoft\Windows\CurrentVersion\Internet Settings" );
+                    return;
+                }
+                var defConnection = ( byte[] ) registry.GetValue( "DefaultConnectionSettings" );
+                var savedLegacySetting = ( byte[] ) registry.GetValue( "SavedLegacySettings" );
 
-            const int versionOffset = 4;
-            const int optionsOffset = 8;
+                const int versionOffset = 4;
+                const int optionsOffset = 8;
 
-            if (set)
-            {
-                defConnection[optionsOffset] = (byte)(defConnection[optionsOffset] | 8);
-                savedLegacySetting[optionsOffset] = (byte)(savedLegacySetting[optionsOffset] | 8);
+                if ( set ) {
+                    defConnection[ optionsOffset ] = ( byte ) ( defConnection[ optionsOffset ] | 8 );
+                    savedLegacySetting[ optionsOffset ] = ( byte ) ( savedLegacySetting[ optionsOffset ] | 8 );
+                } else {
+                    defConnection[ optionsOffset ] = ( byte ) ( defConnection[ optionsOffset ] & ~8 );
+                    savedLegacySetting[ optionsOffset ] = ( byte ) ( savedLegacySetting[ optionsOffset ] & ~8 );
+                }
+
+                BitConverter.GetBytes(unchecked( BitConverter.ToUInt32( defConnection, versionOffset ) + 1 ) )
+                            .CopyTo( defConnection, versionOffset );
+                BitConverter.GetBytes(unchecked( BitConverter.ToUInt32( savedLegacySetting, versionOffset ) + 1 ) )
+                            .CopyTo( savedLegacySetting, versionOffset );
+
+                registry.SetValue( "DefaultConnectionSettings", defConnection );
+                registry.SetValue( "SavedLegacySettings", savedLegacySetting );
+            } catch ( Exception e ) {
+                Logging.LogUsefulException( e );
+            } finally {
+                if (registry != null)
+                {
+                    try { registry.Close(); }
+                    catch (Exception e)
+                    { Logging.LogUsefulException(e); }
+                }
             }
-            else
-            {
-                defConnection[optionsOffset] = (byte)(defConnection[optionsOffset] & ~8);
-                savedLegacySetting[optionsOffset] = (byte)(savedLegacySetting[optionsOffset] & ~8);
-            }
-
-            BitConverter.GetBytes(
-                unchecked(BitConverter.ToUInt32(defConnection, versionOffset) + 1))
-                .CopyTo(defConnection, versionOffset);
-            BitConverter.GetBytes(
-                unchecked(BitConverter.ToUInt32(savedLegacySetting, versionOffset) + 1))
-                .CopyTo(savedLegacySetting, versionOffset);
-
-            registry.SetValue("DefaultConnectionSettings", defConnection);
-            registry.SetValue("SavedLegacySettings", savedLegacySetting);
         }
     }
 }

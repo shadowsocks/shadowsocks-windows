@@ -4,7 +4,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
-
+using Microsoft.Win32;
 using Shadowsocks.Controller;
 
 namespace Shadowsocks.Util
@@ -145,6 +145,21 @@ namespace Shadowsocks.Util
                 unit = "TiB";
             }
             return new Tuple<float, string, long>(f, unit, scale);
+        }
+
+        public static RegistryKey OpenUserRegKey( string name, bool writable ) {
+            // we are building x86 binary for both x86 and x64, which will
+            // cause problem when opening registry key
+            // detect operating system instead of CPU
+            if ( Environment.Is64BitOperatingSystem ) {
+                RegistryKey userKey = RegistryKey.OpenBaseKey( RegistryHive.CurrentUser, RegistryView.Registry64 );
+                userKey = userKey.OpenSubKey( name, writable );
+                return userKey;
+            } else {
+                RegistryKey userKey = RegistryKey.OpenBaseKey( RegistryHive.CurrentUser, RegistryView.Registry32 );
+                userKey = userKey.OpenSubKey( name, writable );
+                return userKey;
+            }
         }
 
         [DllImport("kernel32.dll")]
