@@ -24,20 +24,23 @@ namespace Shadowsocks.Controller
 
         public static void UncompressFile(string fileName, byte[] content)
         {
-            // Because the uncompressed size of the file is unknown,
-            // we are using an arbitrary buffer size.
-            byte[] buffer = new byte[4096];
-            int n;
+            try {
+                // Because the uncompressed size of the file is unknown,
+                // we are using an arbitrary buffer size.
+                byte[] buffer = new byte[4096];
+                int n;
 
-            using(var fs = File.Create(fileName))
-            using (var input = new GZipStream(
-                new MemoryStream(content),
-                CompressionMode.Decompress, false))
-            {
-                while ((n = input.Read(buffer, 0, buffer.Length)) > 0)
-                {
-                    fs.Write(buffer, 0, n);
-                }
+                using(var fs = File.Create(fileName))
+                using (var input = new GZipStream(new MemoryStream(content),
+                        CompressionMode.Decompress, false))
+                    {
+                        while ((n = input.Read(buffer, 0, buffer.Length)) > 0)
+                        {
+                            fs.Write(buffer, 0, n);
+                        }
+                    }
+            } catch ( Exception e ) {
+                Logging.LogUsefulException( e );
             }
         }
 

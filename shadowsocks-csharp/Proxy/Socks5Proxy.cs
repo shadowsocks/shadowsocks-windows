@@ -115,7 +115,7 @@ namespace Shadowsocks.Proxy
 
             DestEndPoint = remoteEP;
 
-            _remote.BeginSend(request, 0, request.Length, 0, Socks5RequestSendCallback, st);
+            _remote?.BeginSend(request, 0, request.Length, 0, Socks5RequestSendCallback, st);
 
         }
 
@@ -132,7 +132,7 @@ namespace Shadowsocks.Proxy
         public void BeginSend(byte[] buffer, int offset, int size, SocketFlags socketFlags, AsyncCallback callback,
             object state)
         {
-            _remote.BeginSend(buffer, offset, size, socketFlags, callback, state);
+            _remote?.BeginSend(buffer, offset, size, socketFlags, callback, state);
         }
 
         public int EndSend(IAsyncResult asyncResult)
@@ -143,7 +143,7 @@ namespace Shadowsocks.Proxy
         public void BeginReceive(byte[] buffer, int offset, int size, SocketFlags socketFlags, AsyncCallback callback,
             object state)
         {
-            _remote.BeginReceive(buffer, offset, size, socketFlags, callback, state);
+            _remote?.BeginReceive(buffer, offset, size, socketFlags, callback, state);
         }
 
         public int EndReceive(IAsyncResult asyncResult)

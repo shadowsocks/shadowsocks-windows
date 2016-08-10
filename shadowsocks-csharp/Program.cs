@@ -61,7 +61,7 @@ namespace Shadowsocks
             if (Interlocked.Increment(ref exited) == 1)
             {
                 Logging.Error(e.ExceptionObject?.ToString());
-                MessageBox.Show(I18N.GetString("Unexpect error, shadowsocks will be exit. Please report to") +
+                MessageBox.Show(I18N.GetString("Unexpected error, shadowsocks will exit. Please report to") +
                     " https://github.com/shadowsocks/shadowsocks-windows/issues " +
                     Environment.NewLine + (e.ExceptionObject?.ToString()),
                     "Shadowsocks Error", MessageBoxButtons.OK, MessageBoxIcon.Error);

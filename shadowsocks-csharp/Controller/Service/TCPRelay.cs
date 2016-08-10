@@ -207,7 +207,7 @@ namespace Shadowsocks.Controller
                         response = new byte[] { 0, 91 };
                         Logging.Error("socks 5 protocol error");
                     }
-                    connection.BeginSend(response, 0, response.Length, SocketFlags.None, new AsyncCallback(HandshakeSendCallback), null);
+                    connection?.BeginSend(response, 0, response.Length, SocketFlags.None, new AsyncCallback(HandshakeSendCallback), null);
                 }
                 else
                     Close();
@@ -328,7 +328,7 @@ namespace Shadowsocks.Controller
         {
             try
             {
-                connection.EndSend(ar);
+                connection?.EndSend(ar);
                 StartConnect();
             }
             catch (Exception e)
@@ -420,7 +420,7 @@ namespace Shadowsocks.Controller
             var ep = ((ProxyTimer)sender).DestEndPoint;
 
             Logging.Info($"Proxy {ep} timed out");
-            remote.Close();
+            remote?.Close();
             RetryConnect();
         }
 
@@ -485,7 +485,7 @@ namespace Shadowsocks.Controller
             IStrategy strategy = controller.GetCurrentStrategy();
             strategy?.SetFailure(server);
             Logging.Info($"{server.FriendlyName()} timed out");
-            remote.Close();
+            remote?.Close();
             RetryConnect();
         }
 
@@ -513,7 +513,7 @@ namespace Shadowsocks.Controller
                 timer.Dispose();
 
                 // Complete the connection.
-                remote.EndConnectDest(ar);
+                remote?.EndConnectDest(ar);
                 
                 _destConnected = true;
 
@@ -550,8 +550,8 @@ namespace Shadowsocks.Controller
             try
             {
                 _startReceivingTime = DateTime.Now;
-                remote.BeginReceive(_remoteRecvBuffer, 0, RecvSize, SocketFlags.None, new AsyncCallback(PipeRemoteReceiveCallback), null);
-                connection.BeginReceive(_connetionRecvBuffer, 0, RecvSize, SocketFlags.None, new AsyncCallback(PipeConnectionReceiveCallback), null);
+                remote?.BeginReceive(_remoteRecvBuffer, 0, RecvSize, SocketFlags.None, new AsyncCallback(PipeRemoteReceiveCallback), null);
+                connection?.BeginReceive(_connetionRecvBuffer, 0, RecvSize, SocketFlags.None, new AsyncCallback(PipeConnectionReceiveCallback), null);
             }
             catch (Exception e)
             {
@@ -565,6 +565,7 @@ namespace Shadowsocks.Controller
             if (_closed) return;
             try
             {
+                if ( remote == null ) return;
                 int bytesRead = remote.EndReceive(ar);
                 _totalRead += bytesRead;
                 _tcprelay.UpdateInboundCounter(server, bytesRead);
@@ -600,6 +601,7 @@ namespace Shadowsocks.Controller
             if (_closed) return;
             try
             {
+                if(connection == null) return;
                 int bytesRead = connection.EndReceive(ar);
                 _totalWrite += bytesRead;
                 if (bytesRead > 0)
@@ -664,8 +666,8 @@ namespace Shadowsocks.Controller
             if (_closed) return;
             try
             {
-                remote.EndSend(ar);
-                connection.BeginReceive(_connetionRecvBuffer, 0, RecvSize, SocketFlags.None, new AsyncCallback(PipeConnectionReceiveCallback), null);
+                remote?.EndSend(ar);
+                connection?.BeginReceive(_connetionRecvBuffer, 0, RecvSize, SocketFlags.None, new AsyncCallback(PipeConnectionReceiveCallback), null);
             }
             catch (Exception e)
             {
@@ -679,8 +681,8 @@ namespace Shadowsocks.Controller
             if (_closed) return;
             try
             {
-                connection.EndSend(ar);
-                remote.BeginReceive(_remoteRecvBuffer, 0, RecvSize, SocketFlags.None, new AsyncCallback(PipeRemoteReceiveCallback), null);
+                connection?.EndSend(ar);
+                remote?.BeginReceive(_remoteRecvBuffer, 0, RecvSize, SocketFlags.None, new AsyncCallback(PipeRemoteReceiveCallback), null);
             }
             catch (Exception e)
             {

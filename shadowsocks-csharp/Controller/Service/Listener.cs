@@ -63,14 +63,9 @@ namespace Shadowsocks.Controller
                 _tcpSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
                 _udpSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
                 IPEndPoint localEndPoint = null;
-                if (_shareOverLAN)
-                {
-                    localEndPoint = new IPEndPoint(IPAddress.Any, _config.localPort);
-                }
-                else
-                {
-                    localEndPoint = new IPEndPoint(IPAddress.Loopback, _config.localPort);
-                }
+                localEndPoint = _shareOverLAN
+                    ? new IPEndPoint(IPAddress.Any, _config.localPort)
+                    : new IPEndPoint(IPAddress.Loopback, _config.localPort);
 
                 // Bind the socket to the local endpoint and listen for incoming connections.
                 _tcpSocket.Bind(localEndPoint);
