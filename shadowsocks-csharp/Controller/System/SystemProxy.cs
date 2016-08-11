@@ -97,7 +97,7 @@ namespace Shadowsocks.Controller
             try {
                 registry = Utils.OpenUserRegKey( @"Software\Microsoft\Windows\CurrentVersion\Internet Settings\Connections", true );
                 if ( registry == null ) {
-                    Logging.Error( @"Cannot find HKCU\Software\Microsoft\Windows\CurrentVersion\Internet Settings" );
+                    Logging.Error( @"Cannot find HKCU\Software\Microsoft\Windows\CurrentVersion\Internet Settings\Connections" );
                     return;
                 }
                 var defaultValue = registry.GetValue( "DefaultConnectionSettings" );
@@ -136,7 +136,7 @@ namespace Shadowsocks.Controller
             try {
                 registry = Utils.OpenUserRegKey( @"Software\Microsoft\Windows\CurrentVersion\Internet Settings\Connections", true );
                 if ( registry == null ) {
-                    Logging.Error( @"Cannot find HKCU\Software\Microsoft\Windows\CurrentVersion\Internet Settings" );
+                    Logging.Error( @"Cannot find HKCU\Software\Microsoft\Windows\CurrentVersion\Internet Settings\Connections" );
                     return;
                 }
                 var defConnection = ( byte[] ) registry.GetValue( "DefaultConnectionSettings" );
