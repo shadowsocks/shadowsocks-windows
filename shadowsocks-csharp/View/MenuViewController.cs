@@ -405,6 +405,10 @@ namespace Shadowsocks.View
                 items.Add(i, item);
                 i++;
             }
+
+            // user want a seperator item between strategy and servers menugroup
+            items.Add( i++, new MenuItem("-") );
+
             int strategyCount = i;
             Configuration configuration = controller.GetConfigurationCopy();
             foreach (var server in configuration.configs)
