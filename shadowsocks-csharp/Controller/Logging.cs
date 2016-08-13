@@ -12,14 +12,17 @@ namespace Shadowsocks.Controller
     {
         public static string LogFilePath;
 
+        private static FileStream fs;
+        private static StreamWriterWithTimestamp sw;
+
         public static bool OpenLogFile()
         {
             try
             {
                 LogFilePath = Utils.GetTempPath("shadowsocks.log");
 
-                FileStream fs = new FileStream(LogFilePath, FileMode.Append);
-                StreamWriterWithTimestamp sw = new StreamWriterWithTimestamp(fs);
+                fs = new FileStream(LogFilePath, FileMode.Append);
+                sw = new StreamWriterWithTimestamp(fs);
                 sw.AutoFlush = true;
                 Console.SetOut(sw);
                 Console.SetError(sw);
@@ -35,7 +38,10 @@ namespace Shadowsocks.Controller
 
         private static void WriteToLogFile(object o)
         {
-            Console.WriteLine(o);
+            try {
+                Console.WriteLine(o);
+            } catch(ObjectDisposedException) {
+            }
         }
 
         public static void Error(object o)
@@ -46,6 +52,15 @@ namespace Shadowsocks.Controller
         public static void Info(object o)
         {
             WriteToLogFile(o);
+        }
+
+        public static void clear() {
+            sw.Close();
+            sw.Dispose();
+            fs.Close();
+            fs.Dispose();
+            File.Delete(LogFilePath);
+            OpenLogFile();
         }
 
         [Conditional("DEBUG")]
