@@ -1,3 +1,12 @@
+3.2 2016-08-13
+- Add AES-CTR, blowfish and camellia ciphers support, including aes-256-ctr, aes-192-ctr, aes-128-ctr, bf-cfb, camellia-128-cfb, camellia-192-cfb and camellia-256-cfb.
+- Support one-time authentication in ss urls for sharing
+- Support traffic chart and traffic icon
+- Add proxy support
+- Add verbose logging
+- Improve LogForm
+- Bug fixes and improvements
+
 3.1 2016-05-01
 - Disable StatisticsStrategy by default
 
