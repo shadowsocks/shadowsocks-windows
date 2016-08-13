@@ -12,12 +12,6 @@ namespace Shadowsocks.Encryption
     {
         const string DLLNAME = "libsscrypto";
 
-        // TODO: use sizeof() to get real size instead of hard-coding it
-        public const int ARC4_CTX_SIZE = 264;
-        public const int AES_CTX_SIZE = 8 + 4 * 68;
-        public const int BLOWFISH_CTX_SIZE = AES_CTX_SIZE;
-        public const int CAMELLIA_CTX_SIZE = AES_CTX_SIZE;
-
         public const int MBEDTLS_ENCRYPT = 1;
         public const int MBEDTLS_DECRYPT = 0;
 
@@ -78,5 +72,8 @@ namespace Shadowsocks.Encryption
 
         [DllImport(DLLNAME, CallingConvention = CallingConvention.Cdecl)]
         public static extern void cipher_set_operation_ex(IntPtr ctx, int operation);
+
+        [DllImport(DLLNAME, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int cipher_get_size_ex();
     }
 }

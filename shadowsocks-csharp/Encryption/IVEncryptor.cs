@@ -65,8 +65,8 @@ namespace Shadowsocks.Encryption
             {
                 throw new Exception("method not found");
             }
-            keyLen = ciphers[_method][_cipherMbedName][0];
-            ivLen = ciphers[_method][_cipherMbedName][1];
+            keyLen = _cipherInfo[0];
+            ivLen = _cipherInfo[1];
             _key = CachedKeys.GetOrAdd(k, (nk) =>
             {
                 byte[] passbuf = Encoding.UTF8.GetBytes(password);

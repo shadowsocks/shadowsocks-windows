@@ -28,9 +28,9 @@ namespace Shadowsocks.Encryption
         }
 
         private static Dictionary<string, Dictionary<string, int[]>> _ciphers = new Dictionary<string, Dictionary<string, int[]>> {
-            { "salsa20", new Dictionary<string, int[]> { { "salsa20", new int[] { 32, 8, CIPHER_SALSA20, MbedTLS.AES_CTX_SIZE } } } },
-            { "chacha20", new Dictionary<string, int[]> { { "chacha20", new int[] { 32, 8, CIPHER_CHACHA20, MbedTLS.AES_CTX_SIZE } } } },
-            { "chacha20-ietf", new Dictionary<string, int[]> { { "chacha20-ietf", new int[] { 32, 12, CIPHER_CHACHA20_IETF, MbedTLS.AES_CTX_SIZE } } } }
+            { "salsa20", new Dictionary<string, int[]> { { "salsa20", new int[] { 32, 8, CIPHER_SALSA20 } } } },
+            { "chacha20", new Dictionary<string, int[]> { { "chacha20", new int[] { 32, 8, CIPHER_CHACHA20 } } } },
+            { "chacha20-ietf", new Dictionary<string, int[]> { { "chacha20-ietf", new int[] { 32, 12, CIPHER_CHACHA20_IETF } } } }
         };
 
         protected override Dictionary<string, Dictionary<string, int[]>> getCiphers()
