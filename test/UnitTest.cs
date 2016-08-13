@@ -73,14 +73,14 @@ namespace test
         private static object locker = new object();
 
         [TestMethod]
-        public void TestPolarSSLEncryption()
+        public void TestMbedTLSEncryption()
         {
             // run it once before the multi-threading test to initialize global tables
-            RunSinglePolarSSLEncryptionThread();
+            RunSingleMbedTLSEncryptionThread();
             List<Thread> threads = new List<Thread>();
             for (int i = 0; i < 10; i++)
             {
-                Thread t = new Thread(new ThreadStart(RunSinglePolarSSLEncryptionThread));
+                Thread t = new Thread(new ThreadStart(RunSingleMbedTLSEncryptionThread));
                 threads.Add(t);
                 t.Start();
             }
@@ -91,7 +91,7 @@ namespace test
             Assert.IsFalse(encryptionFailed);
         }
 
-        private void RunSinglePolarSSLEncryptionThread()
+        private void RunSingleMbedTLSEncryptionThread()
         {
             try
             {
@@ -99,8 +99,8 @@ namespace test
                 {
                     IEncryptor encryptor;
                     IEncryptor decryptor;
-                    encryptor = new PolarSSLEncryptor("aes-256-cfb", "barfoo!", false, false);
-                    decryptor = new PolarSSLEncryptor("aes-256-cfb", "barfoo!", false, false);
+                    encryptor = new MbedTLSEncryptor("aes-256-cfb", "barfoo!", false, false);
+                    decryptor = new MbedTLSEncryptor("aes-256-cfb", "barfoo!", false, false);
                     RunEncryptionRound(encryptor, decryptor);
                 }
             }
@@ -139,8 +139,8 @@ namespace test
                     var random = new Random();
                     IEncryptor encryptor;
                     IEncryptor decryptor;
-                    encryptor = new PolarSSLEncryptor("rc4-md5", "barfoo!", false, false);
-                    decryptor = new PolarSSLEncryptor("rc4-md5", "barfoo!", false, false);
+                    encryptor = new MbedTLSEncryptor("rc4-md5", "barfoo!", false, false);
+                    decryptor = new MbedTLSEncryptor("rc4-md5", "barfoo!", false, false);
                     RunEncryptionRound(encryptor, decryptor);
                 }
             }
