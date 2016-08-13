@@ -19,6 +19,7 @@ namespace Shadowsocks.Model
         public int height;
         public int top;
         public int left;
+        public bool maximized;
 
         public LogViewerConfig()
         {
@@ -33,6 +34,7 @@ namespace Shadowsocks.Model
             height = 400;
             left = GetBestLeft();
             top = GetBestTop();
+            maximized = true;
         }
 
         // Use GetBestTop() and GetBestLeft() to ensure the log viwer form can be always display IN screen. 

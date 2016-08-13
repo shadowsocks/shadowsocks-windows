@@ -149,25 +149,25 @@ namespace Shadowsocks.View
 
         private void UpdateContent()
         {
-            using (StreamReader reader = new StreamReader(new FileStream(filename,
-                     FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
-            {
-                reader.BaseStream.Seek(lastOffset, SeekOrigin.Begin);
+            try {
+                using(StreamReader reader = new StreamReader(new FileStream(filename,
+                         FileMode.Open, FileAccess.Read, FileShare.ReadWrite))) {
+                    reader.BaseStream.Seek(lastOffset, SeekOrigin.Begin);
 
-                string line = "";
-                bool changed = false;
-                while ((line = reader.ReadLine()) != null)
-                {
-                    changed = true;
-                    LogMessageTextBox.AppendText(line + Environment.NewLine);
+                    string line = "";
+                    bool changed = false;
+                    while((line = reader.ReadLine()) != null) {
+                        changed = true;
+                        LogMessageTextBox.AppendText(line + Environment.NewLine);
+                    }
+
+                    if(changed) {
+                        LogMessageTextBox.ScrollToCaret();
+                    }
+
+                    lastOffset = reader.BaseStream.Position;
                 }
-
-                if (changed)
-                {
-                    LogMessageTextBox.ScrollToCaret();
-                }
-
-                lastOffset = reader.BaseStream.Position;
+            } catch(FileNotFoundException) {
             }
 
             this.Text = I18N.GetString("Log Viewer") +
@@ -190,6 +190,9 @@ namespace Shadowsocks.View
             Width = config.width;
             Top = config.GetBestTop();
             Left = config.GetBestLeft();
+            if(config.maximized) {
+                WindowState = FormWindowState.Maximized;
+            }
 
             topMostTriggerLock = true;
             TopMost = TopMostMenuItem.Checked = TopMostCheckBox.Checked = topMostTrigger;
@@ -215,10 +218,12 @@ namespace Shadowsocks.View
             config.SetFont(LogMessageTextBox.Font);
             config.SetBackgroundColor(LogMessageTextBox.BackColor);
             config.SetTextColor(LogMessageTextBox.ForeColor);
-            config.top = Top;
-            config.left = Left;
-            config.height = Height;
-            config.width = Width;
+            if(!(config.maximized = WindowState == FormWindowState.Maximized)) {
+                config.top = Top;
+                config.left = Left;
+                config.height = Height;
+                config.width = Width;
+            }
             controller.SaveLogViewerConfig(config);
         }
 
@@ -242,6 +247,8 @@ namespace Shadowsocks.View
         #region Clean up the content in LogMessageTextBox.
         private void DoCleanLogs()
         {
+            Logging.clear();
+            lastOffset = 0;
             LogMessageTextBox.Clear();
         }
 
