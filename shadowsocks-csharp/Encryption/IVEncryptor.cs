@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Concurrent;
+using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Net;
@@ -23,17 +24,18 @@ namespace Shadowsocks.Encryption
 
         protected static byte[] tempbuf = new byte[MAX_INPUT_SIZE];
 
-        protected Dictionary<string, int[]> ciphers;
+        protected Dictionary<string, Dictionary<string, int[]>> ciphers;
+        protected Dictionary<string, int[]> ciphersDetail;
 
         private static readonly ConcurrentDictionary<string, byte[]> CachedKeys = new ConcurrentDictionary<string, byte[]>();
         protected byte[] _encryptIV;
         protected byte[] _decryptIV;
         protected bool _decryptIVReceived;
         protected bool _encryptIVSent;
-        protected int _encryptIVOffset = 0;
-        protected int _decryptIVOffset = 0;
         protected string _method;
         protected int _cipher;
+        // cipher name in MbedTLS, useless when using LibSodium
+        protected string _cipherMbedName;
         protected int[] _cipherInfo;
         protected byte[] _key;
         protected int keyLen;
@@ -47,7 +49,7 @@ namespace Shadowsocks.Encryption
             InitKey(method, password);
         }
 
-        protected abstract Dictionary<string, int[]> getCiphers();
+        protected abstract Dictionary<string, Dictionary<string, int[]>> getCiphers();
 
         protected void InitKey(string method, string password)
         {
@@ -55,14 +57,16 @@ namespace Shadowsocks.Encryption
             _method = method;
             string k = method + ":" + password;
             ciphers = getCiphers();
-            _cipherInfo = ciphers[_method];
+            ciphersDetail = ciphers[_method];
+            _cipherMbedName = ciphersDetail.Keys.FirstOrDefault();
+            _cipherInfo = ciphers[_method][_cipherMbedName];
             _cipher = _cipherInfo[2];
             if (_cipher == 0)
             {
                 throw new Exception("method not found");
             }
-            keyLen = ciphers[_method][0];
-            ivLen = ciphers[_method][1];
+            keyLen = _cipherInfo[0];
+            ivLen = _cipherInfo[1];
             _key = CachedKeys.GetOrAdd(k, (nk) =>
             {
                 byte[] passbuf = Encoding.UTF8.GetBytes(password);
