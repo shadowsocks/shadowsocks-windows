@@ -190,6 +190,9 @@ namespace Shadowsocks.View
             Width = config.width;
             Top = config.GetBestTop();
             Left = config.GetBestLeft();
+            if(config.maximized) {
+                WindowState = FormWindowState.Maximized;
+            }
 
             topMostTriggerLock = true;
             TopMost = TopMostMenuItem.Checked = TopMostCheckBox.Checked = topMostTrigger;
@@ -215,10 +218,12 @@ namespace Shadowsocks.View
             config.SetFont(LogMessageTextBox.Font);
             config.SetBackgroundColor(LogMessageTextBox.BackColor);
             config.SetTextColor(LogMessageTextBox.ForeColor);
-            config.top = Top;
-            config.left = Left;
-            config.height = Height;
-            config.width = Width;
+            if(!(config.maximized = WindowState == FormWindowState.Maximized)) {
+                config.top = Top;
+                config.left = Left;
+                config.height = Height;
+                config.width = Width;
+            }
             controller.SaveLogViewerConfig(config);
         }
 
