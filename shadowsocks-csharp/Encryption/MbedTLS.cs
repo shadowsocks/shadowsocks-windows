@@ -51,7 +51,7 @@ namespace Shadowsocks.Encryption
         [DllImport(DLLNAME, CallingConvention = CallingConvention.Cdecl)]
         public static extern int cipher_setup(IntPtr ctx, IntPtr cipher_info);
 
-        // check operation
+        // XXX: Check operation before using it
         [DllImport(DLLNAME, CallingConvention = CallingConvention.Cdecl)]
         public static extern int cipher_setkey(IntPtr ctx, byte[] key, int key_bitlen, int operation);
 
@@ -69,9 +69,6 @@ namespace Shadowsocks.Encryption
 
         [DllImport(DLLNAME, CallingConvention = CallingConvention.Cdecl)]
         public static extern void md5(byte[] input, uint ilen, byte[] output);
-
-        [DllImport(DLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void cipher_set_operation_ex(IntPtr ctx, int operation);
 
         [DllImport(DLLNAME, CallingConvention = CallingConvention.Cdecl)]
         public static extern int cipher_get_size_ex();

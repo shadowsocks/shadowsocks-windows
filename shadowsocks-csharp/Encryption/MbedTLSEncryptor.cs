@@ -76,8 +76,17 @@ namespace Shadowsocks.Encryption
             MbedTLS.cipher_init(ctx);
             if (MbedTLS.cipher_setup( ctx, MbedTLS.cipher_info_from_string( _cipherMbedName ) ) != 0 )
                 throw new Exception();
-            // MbedTLS takes key length by bit
-            // cipher_setkey() will set the correct key schedule
+            /*
+             * MbedTLS takes key length by bit
+             * cipher_setkey() will set the correct key schedule
+             * and operation
+             *
+             *  MBEDTLS_AES_{EN,DE}CRYPT
+             *  == MBEDTLS_BLOWFISH_{EN,DE}CRYPT
+             *  == MBEDTLS_CAMELLIA_{EN,DE}CRYPT
+             *  == MBEDTLS_{EN,DE}CRYPT
+             *  
+             */
             if (MbedTLS.cipher_setkey(ctx, realkey, keyLen * 8, isCipher ? MbedTLS.MBEDTLS_ENCRYPT : MbedTLS.MBEDTLS_DECRYPT) != 0 )
                 throw new Exception();
             if (MbedTLS.cipher_set_iv(ctx, iv, ivLen) != 0)
@@ -101,23 +110,6 @@ namespace Shadowsocks.Encryption
             else
             {
                 ctx = _decryptCtx;
-            }
-
-            if (_cipher == CIPHER_AES
-                 || _cipher == CIPHER_BLOWFISH
-                 || _cipher == CIPHER_CAMELLIA)
-            {
-                /*
-                 * operation workaround
-                 *
-                 *  MBEDTLS_AES_{EN,DE}CRYPT
-                 *  == MBEDTLS_BLOWFISH_{EN,DE}CRYPT
-                 *  == MBEDTLS_CAMELLIA_{EN,DE}CRYPT
-                 *  == MBEDTLS_{EN,DE}CRYPT
-                 *  setter code in C:
-                 *      ctx->operation = operation;
-                 */
-                MbedTLS.cipher_set_operation_ex(ctx, isCipher ? MbedTLS.MBEDTLS_ENCRYPT : MbedTLS.MBEDTLS_DECRYPT);
             }
             if (MbedTLS.cipher_update(ctx, buf, length, outbuf, ref length) != 0 )
                 throw new Exception();

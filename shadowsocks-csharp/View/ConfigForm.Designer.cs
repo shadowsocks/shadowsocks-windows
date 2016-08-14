@@ -211,7 +211,7 @@
             "bf-cfb",
             "camellia-128-cfb",
             "camellia-192-cfb",
-            "camellia-256-cfb",});
+            "camellia-256-cfb"});
             this.EncryptionSelect.Location = new System.Drawing.Point(83, 87);
             this.EncryptionSelect.Name = "EncryptionSelect";
             this.EncryptionSelect.Size = new System.Drawing.Size(160, 20);
