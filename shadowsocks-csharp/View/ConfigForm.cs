@@ -175,29 +175,42 @@ namespace Shadowsocks.View
 
         private void GenQR(string ssconfig)
         {
-            string qrText = ssconfig;
-            QRCode code = ZXing.QrCode.Internal.Encoder.encode(qrText, ErrorCorrectionLevel.M);
-            ByteMatrix m = code.Matrix;
-            int blockSize = Math.Max(260 / m.Height, 1);
-            Bitmap drawArea = new Bitmap((m.Width * blockSize), (m.Height * blockSize));
-            using (Graphics g = Graphics.FromImage(drawArea))
+            if (TextLink.Focused)
             {
-                g.Clear(Color.White);
-                using (Brush b = new SolidBrush(Color.Black))
+                string qrText = ssconfig;
+                QRCode code = ZXing.QrCode.Internal.Encoder.encode(qrText, ErrorCorrectionLevel.M);
+                ByteMatrix m = code.Matrix;
+                int blockSize = Math.Max(260 / m.Height, 1);
+                Bitmap drawArea = new Bitmap((m.Width * blockSize), (m.Height * blockSize));
+                using (Graphics g = Graphics.FromImage(drawArea))
                 {
-                    for (int row = 0; row < m.Width; row++)
+                    g.Clear(Color.White);
+                    using (Brush b = new SolidBrush(Color.Black))
                     {
-                        for (int col = 0; col < m.Height; col++)
+                        for (int row = 0; row < m.Width; row++)
                         {
-                            if (m[row, col] != 0)
+                            for (int col = 0; col < m.Height; col++)
                             {
-                                g.FillRectangle(b, blockSize * row, blockSize * col, blockSize, blockSize);
+                                if (m[row, col] != 0)
+                                {
+                                    g.FillRectangle(b, blockSize * row, blockSize * col, blockSize, blockSize);
+                                }
                             }
                         }
                     }
                 }
+                PictureQRcode.Image = drawArea;
             }
-            PictureQRcode.Image = drawArea;
+            else
+            {
+                Bitmap drawArea = new Bitmap(300, 300);
+                using (Graphics g = Graphics.FromImage(drawArea))
+                {
+                    g.Clear(Color.White);
+                    g.DrawString("Click the 'Link' text box", new Font("Arial", 18), new SolidBrush(Color.Black), new RectangleF(0, 0, 300, 300));
+                }
+                PictureQRcode.Image = drawArea;
+            }
         }
 
         private void LoadSelectedServer()

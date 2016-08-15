@@ -180,7 +180,7 @@
             // 
             // AvgDownSpeed
             // 
-            this.AvgDownSpeed.HeaderText = "Avg DownSpeed";
+            this.AvgDownSpeed.HeaderText = "Avg DSpeed";
             this.AvgDownSpeed.MinimumWidth = 60;
             this.AvgDownSpeed.Name = "AvgDownSpeed";
             this.AvgDownSpeed.ReadOnly = true;
@@ -188,7 +188,7 @@
             // 
             // MaxDownSpeed
             // 
-            this.MaxDownSpeed.HeaderText = "Max DownSpeed";
+            this.MaxDownSpeed.HeaderText = "Max DSpeed";
             this.MaxDownSpeed.MinimumWidth = 2;
             this.MaxDownSpeed.Name = "MaxDownSpeed";
             this.MaxDownSpeed.ReadOnly = true;
@@ -212,7 +212,7 @@
             // 
             // Download
             // 
-            this.Download.HeaderText = "Download";
+            this.Download.HeaderText = "Dload";
             this.Download.MinimumWidth = 2;
             this.Download.Name = "Download";
             this.Download.ReadOnly = true;
@@ -228,7 +228,7 @@
             // 
             // DownloadRaw
             // 
-            this.DownloadRaw.HeaderText = "DownloadRaw";
+            this.DownloadRaw.HeaderText = "DloadRaw";
             this.DownloadRaw.MinimumWidth = 2;
             this.DownloadRaw.Name = "DownloadRaw";
             this.DownloadRaw.ReadOnly = true;

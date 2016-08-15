@@ -108,23 +108,31 @@ namespace Shadowsocks.View
             const long P = T * 1024L;
             const long E = P * 1024L;
 
-            if (bytes >= E * 2)
+            if (bytes >= P * 990)
                 return (bytes / (double)E).ToString("F5") + "E";
-            if (bytes >= P * 2)
+            if (bytes >= T * 990)
                 return (bytes / (double)P).ToString("F5") + "P";
-            if (bytes >= T * 2)
+            if (bytes >= G * 990)
                 return (bytes / (double)T).ToString("F5") + "T";
-            if (bytes >= G * 2)
+            if (bytes >= M * 990)
             {
                 return (bytes / (double)G).ToString("F4") + "G";
             }
+            if (bytes >= M * 100)
+            {
+                return (bytes / (double)M).ToString("F1") + "M";
+            }
+            if (bytes >= M * 10)
+            {
+                return (bytes / (double)M).ToString("F2") + "M";
+            }
             if (bytes >= K * 990)
             {
-                return (bytes / (double)M).ToString("F4") + "M";
+                return (bytes / (double)M).ToString("F3") + "M";
             }
             if (bytes > K * 2)
             {
-                return (bytes / (double)K).ToString("F3") + "K";
+                return (bytes / (double)K).ToString("F1") + "K";
             }
             return bytes.ToString();
         }

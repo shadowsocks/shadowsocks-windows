@@ -8,10 +8,12 @@ namespace Shadowsocks.Model
     {
         public int size;
         public DateTime recvTime;
+        public DateTime endTime;
         public TransLog(int s, DateTime t)
         {
             size = s;
             recvTime = t;
+            endTime = t;
         }
     }
 
@@ -202,10 +204,10 @@ namespace Shadowsocks.Model
                         for (iEnd = 0; iEnd < transLog.Count; ++iEnd)
                         {
                             sumBytes += transLog[iEnd].size;
-                            while (iBeg + 100 <= iEnd // 100 packet
-                                && (transLog[iEnd].recvTime - transLog[iBeg].recvTime).TotalSeconds > 1)
+                            while (iBeg + 10 <= iEnd
+                                && (transLog[iEnd].endTime - transLog[iBeg].recvTime).TotalSeconds > 1)
                             {
-                                long speed = (long)((sumBytes - transLog[iBeg].size) / (transLog[iEnd].recvTime - transLog[iBeg].recvTime).TotalSeconds);
+                                long speed = (long)((sumBytes - transLog[iBeg].size) / (transLog[iEnd].endTime - transLog[iBeg].recvTime).TotalSeconds);
                                 if (speed > maxTransDownload)
                                     maxTransDownload = speed;
                                 sumBytes -= transLog[iBeg].size;
@@ -214,7 +216,7 @@ namespace Shadowsocks.Model
                         }
                     }
                     if (transLog.Count > 1)
-                        totalTime = (transLog[transLog.Count - 1].recvTime - transLog[0].recvTime).TotalSeconds;
+                        totalTime = (transLog[transLog.Count - 1].endTime - transLog[0].recvTime).TotalSeconds;
                     if (totalTime > 0.1)
                     {
                         long ret = (long)(totalBytes / totalTime);
@@ -261,10 +263,10 @@ namespace Shadowsocks.Model
                         for (iEnd = 0; iEnd < transLog.Count; ++iEnd)
                         {
                             sumBytes += transLog[iEnd].size;
-                            while (iBeg + 100 <= iEnd // 100 packet
-                                && (transLog[iEnd].recvTime - transLog[iBeg].recvTime).TotalSeconds > 1)
+                            while (iBeg + 10 <= iEnd
+                                && (transLog[iEnd].endTime - transLog[iBeg].recvTime).TotalSeconds > 1)
                             {
-                                long speed = (long)((sumBytes - transLog[iBeg].size) / (transLog[iEnd].recvTime - transLog[iBeg].recvTime).TotalSeconds);
+                                long speed = (long)((sumBytes - transLog[iBeg].size) / (transLog[iEnd].endTime - transLog[iBeg].recvTime).TotalSeconds);
                                 if (speed > maxTransUpload)
                                     maxTransUpload = speed;
                                 sumBytes -= transLog[iBeg].size;
@@ -273,7 +275,7 @@ namespace Shadowsocks.Model
                         }
                     }
                     if (transLog.Count > 1)
-                        totalTime = (transLog[transLog.Count - 1].recvTime - transLog[0].recvTime).TotalSeconds;
+                        totalTime = (transLog[transLog.Count - 1].endTime - transLog[0].recvTime).TotalSeconds;
                     if (totalTime > 0.1)
                     {
                         long ret = (long)(totalBytes / totalTime);
@@ -489,20 +491,35 @@ namespace Shadowsocks.Model
         }
         public void AddUploadBytes(long bytes)
         {
+            DateTime now = DateTime.Now;
             lock (this)
             {
                 transUpload += bytes;
                 if (upTransLog == null)
                     upTransLog = new List<TransLog>();
                 List<TransLog> transLog = upTransLog;
-                if (transLog.Count > 0 && (DateTime.Now - transLog[transLog.Count - 1].recvTime).TotalMilliseconds < 100)
+                if (transLog.Count > 0 && (now - transLog[transLog.Count - 1].recvTime).TotalMilliseconds < 100)
                 {
                     transLog[transLog.Count - 1].size += (int)bytes;
+                    transLog[transLog.Count - 1].endTime = now;
                 }
                 else
                 {
-                    transLog.Add(new TransLog((int)bytes, DateTime.Now));
-                    while (transLog.Count > 0 && DateTime.Now > transLog[0].recvTime.AddSeconds(avgTime))
+                    if (transLog.Count > 0)
+                    {
+                        int i = transLog.Count - 1;
+                        for (; i >= 0; --i)
+                        {
+                            if (transLog[i].recvTime > now && i > 0)
+                                continue;
+                            transLog.Insert(i + 1, new TransLog((int)bytes, now));
+                            break;
+                        }
+                        if (i == -1) transLog.Insert(0, new TransLog((int)bytes, now));
+                    }
+                    else
+                        transLog.Add(new TransLog((int)bytes, now));
+                    while (transLog.Count > 0 && now > transLog[0].recvTime.AddSeconds(avgTime))
                     {
                         transLog.RemoveAt(0);
                     }
@@ -511,20 +528,35 @@ namespace Shadowsocks.Model
         }
         public void AddDownloadBytes(long bytes)
         {
+            DateTime now = DateTime.Now;
             lock (this)
             {
                 transDownload += bytes;
                 if (downTransLog == null)
                     downTransLog = new List<TransLog>();
                 List<TransLog> transLog = downTransLog;
-                if (transLog.Count > 0 && (DateTime.Now - transLog[transLog.Count - 1].recvTime).TotalMilliseconds < 100)
+                if (transLog.Count > 0 && (now - transLog[transLog.Count - 1].recvTime).TotalMilliseconds < 100)
                 {
                     transLog[transLog.Count - 1].size += (int)bytes;
+                    transLog[transLog.Count - 1].endTime = now;
                 }
                 else
                 {
-                    transLog.Add(new TransLog((int)bytes, DateTime.Now));
-                    while (transLog.Count > 0 && DateTime.Now > transLog[0].recvTime.AddSeconds(avgTime))
+                    if (transLog.Count > 0)
+                    {
+                        int i = transLog.Count - 1;
+                        for (; i >= 0; --i)
+                        {
+                            if (transLog[i].recvTime > now && i > 0)
+                                continue;
+                            transLog.Insert(i + 1, new TransLog((int)bytes, now));
+                            break;
+                        }
+                        if (i == -1) transLog.Insert(0, new TransLog((int)bytes, now));
+                    }
+                    else
+                        transLog.Add(new TransLog((int)bytes, now));
+                    while (transLog.Count > 0 && now > transLog[0].recvTime.AddSeconds(avgTime))
                     {
                         transLog.RemoveAt(0);
                     }

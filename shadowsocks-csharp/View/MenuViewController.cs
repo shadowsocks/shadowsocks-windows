@@ -642,7 +642,7 @@ namespace Shadowsocks.View
             IDataObject iData = Clipboard.GetDataObject();
             if (iData.GetDataPresent(DataFormats.Text))
             {
-                string[] urls = ((string)iData.GetData(DataFormats.Text)).Split(new string[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
+                string[] urls = ((string)iData.GetData(DataFormats.Text)).Split(new string[] { "\r", "\n", "\t", " " }, StringSplitOptions.RemoveEmptyEntries);
                 foreach (string url in urls)
                 {
                     controller.AddServerBySSURL(url);

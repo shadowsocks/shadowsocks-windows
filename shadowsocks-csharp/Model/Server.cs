@@ -328,6 +328,21 @@ namespace Shadowsocks.Model
             }
 
             string[] main_info = data.Split(new char[] { ':' }, StringSplitOptions.None);
+            if (main_info.Length > 6)
+            {
+                string[] main_info_ = new string[6];
+                main_info_[5] = main_info[main_info.Length - 1];
+                main_info_[4] = main_info[main_info.Length - 2];
+                main_info_[3] = main_info[main_info.Length - 3];
+                main_info_[2] = main_info[main_info.Length - 4];
+                main_info_[1] = main_info[main_info.Length - 5];
+                main_info_[0] = main_info[main_info.Length - 6];
+                for (int i = main_info.Length - 7; i >= 0; --i)
+                {
+                    main_info_[0] = main_info[i] + ":" + main_info_[0];
+                }
+                main_info = main_info_;
+            }
             if (main_info.Length != 6)
             {
                 throw new FormatException();

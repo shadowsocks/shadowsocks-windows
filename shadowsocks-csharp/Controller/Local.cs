@@ -897,8 +897,11 @@ namespace Shadowsocks.Controller
                         ((CallbackStatus)result.AsyncState).SetIfEqu(-1, 0);
                         if (((CallbackStatus)result.AsyncState).Status == -1)
                         {
-                            lastErrCode = 8;
-                            server.ServerSpeedLog().AddTimeoutTimes();
+                            if (lastErrCode == 0)
+                            {
+                                lastErrCode = 8;
+                                server.ServerSpeedLog().AddTimeoutTimes();
+                            }
                             CloseSocket(ref remote);
                             Close();
                         }
@@ -907,48 +910,16 @@ namespace Shadowsocks.Controller
                     {
                         if (((CallbackStatus)result.AsyncState).Status == -1)
                         {
-                            lastErrCode = 1;
-                            server.ServerSpeedLog().AddErrorTimes();
+                            if (lastErrCode == 0)
+                            {
+                                lastErrCode = 1;
+                                server.ServerSpeedLog().AddErrorTimes();
+                            }
                             CloseSocket(ref remote);
                             Close();
                         }
                     }
                 }
-            }
-        }
-
-        private void DnsCallback(IAsyncResult ar)
-        {
-            ((CallbackStatus)ar.AsyncState).SetIfEqu(1, 0);
-            if (((CallbackStatus)ar.AsyncState).Status != 1)
-            {
-                return;
-            }
-            try
-            {
-                IPAddress ipAddress;
-                IPHostEntry ipHostInfo = Dns.EndGetHostEntry(ar);
-                ipAddress = ipHostInfo.AddressList[0];
-                int serverPort = server.server_port;
-                if (socks5RemotePort > 0)
-                {
-                    server.DnsBuffer().UpdateDns(socks5RemoteHost, ipAddress);
-                    serverPort = socks5RemotePort;
-                }
-                else
-                {
-                    server.DnsBuffer().UpdateDns(server.server, ipAddress);
-                }
-                BeginConnect(ipAddress, serverPort);
-            }
-            catch (Exception e)
-            {
-                LogSocketException(e);
-                string remarks;
-                string server_url = getServerUrl(out remarks);
-                if (!Logging.LogSocketException(remarks, server_url, e))
-                    Logging.LogUsefulException(e);
-                this.Close();
             }
         }
 
@@ -2110,8 +2081,11 @@ namespace Shadowsocks.Controller
                 ((CallbackStatus)ar.AsyncState).SetIfEqu(1, 0);
             if (ar != null && ar.AsyncState != null && ((CallbackStatus)ar.AsyncState).Status != 1)
             {
-                lastErrCode = 1;
-                server.ServerSpeedLog().AddErrorTimes();
+                if (lastErrCode == 0)
+                {
+                    lastErrCode = 1;
+                    server.ServerSpeedLog().AddErrorTimes();
+                }
                 return;
             }
             try

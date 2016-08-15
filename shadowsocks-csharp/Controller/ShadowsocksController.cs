@@ -376,14 +376,14 @@ namespace Shadowsocks.Controller
         public string GetSSRRemarksLinkForServer(Server server)
         {
             string main_part = server.server + ":" + server.server_port + ":" + server.protocol + ":" + server.method + ":" + server.obfs + ":" + Util.Utils.EncodeUrlSafeBase64(server.password).Replace("=", "");
-            string param_str = "obfsparam=" + Util.Utils.EncodeUrlSafeBase64(server.obfsparam);
+            string param_str = "obfsparam=" + Util.Utils.EncodeUrlSafeBase64(server.obfsparam).Replace("=", "");
             if (server.remarks.Length > 0)
             {
-                param_str += "&remarks=" + Util.Utils.EncodeUrlSafeBase64(server.remarks);
+                param_str += "&remarks=" + Util.Utils.EncodeUrlSafeBase64(server.remarks).Replace("=", "");
             }
             if (server.group != null && server.group.Length > 0)
             {
-                param_str += "&group=" + Util.Utils.EncodeUrlSafeBase64(server.group);
+                param_str += "&group=" + Util.Utils.EncodeUrlSafeBase64(server.group).Replace("=", "");
             }
             if (server.udp_over_tcp)
             {

@@ -155,7 +155,6 @@
             "http_simple",
             "http_post",
             "random_head",
-            "tls1.0_session_auth",
             "tls1.2_ticket_auth"});
             this.ObfsCombo.Location = new System.Drawing.Point(100, 145);
             this.ObfsCombo.Name = "ObfsCombo";
@@ -381,7 +380,6 @@
             "verify_simple",
             "verify_deflate",
             "verify_sha1",
-            "auth_simple",
             "auth_sha1",
             "auth_sha1_v2"});
             this.TCPProtocolComboBox.Location = new System.Drawing.Point(100, 116);
