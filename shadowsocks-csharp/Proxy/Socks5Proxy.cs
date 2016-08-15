@@ -76,46 +76,55 @@ namespace Shadowsocks.Proxy
 
         public void BeginConnectDest(string host, int port, AsyncCallback callback, object state)
         {
-            // TODO resolving by proxy
-            IPAddress ipAddress;
-            bool parsed = IPAddress.TryParse(host, out ipAddress);
-            if (!parsed)
-            {
-                IPHostEntry ipHostInfo = Dns.GetHostEntry(host);
-                ipAddress = ipHostInfo.AddressList[0];
-            }
-            IPEndPoint ep = new IPEndPoint(ipAddress, port);
-
             DestHost = host;
             DestPort = port;
 
             byte[] request = null;
             byte atyp = 0;
-            switch (ep.AddressFamily)
+            
+            IPAddress ipAddress;
+            bool parsed = IPAddress.TryParse(host, out ipAddress);
+            if (parsed)
             {
-                case AddressFamily.InterNetwork:
-                    request = new byte[4 + 4 + 2];
-                    atyp = 1;
-                    break;
-                case AddressFamily.InterNetworkV6:
-                    request = new byte[4 + 16 + 2];
-                    atyp = 4;
-                    break;
+                IPEndPoint ep = new IPEndPoint(ipAddress, port);
+                switch (ep.AddressFamily)
+                {
+                    case AddressFamily.InterNetwork:
+                        request = new byte[4 + 4 + 2];
+                        atyp = 1; // IP V4 address
+                        break;
+                    case AddressFamily.InterNetworkV6:
+                        request = new byte[4 + 16 + 2];
+                        atyp = 4; // IP V6 address
+                        break;
+                    default:
+                        throw new Exception(I18N.GetString("Proxy request faild"));
+                }
+
+                var addr = ep.Address.GetAddressBytes();
+                Array.Copy(addr, 0, request, 4, request.Length - 4 - 2);
             }
-            if (request == null)
+            else
             {
-                throw new Exception(I18N.GetString("Proxy request faild"));
+                // maybe is a domain name, we will leave it to server
+                // need ValidateTcpPort? porttest > 1 && porttest < 65535?
+
+                atyp = 3; // DOMAINNAME
+                var enc = Encoding.UTF8;
+                var hostByteCount = enc.GetByteCount(host);
+                
+                request = new byte[4 + 1/*length byte*/ + hostByteCount + 2];
+                request[4] = (byte)hostByteCount;
+                enc.GetBytes(host, 0, host.Length, request, 5);
             }
 
-            // 构造request包
-            var addr = ep.Address.GetAddressBytes();
+            // 构造request包剩余部分
             request[0] = 5;
             request[1] = 1;
             request[2] = 0;
             request[3] = atyp;
-            Array.Copy(addr, 0, request, 4, request.Length - 4 - 2);
-            request[request.Length - 2] = (byte) ((ep.Port >> 8) & 0xff);
-            request[request.Length - 1] = (byte) (ep.Port & 0xff);
+            request[request.Length - 2] = (byte) ((port >> 8) & 0xff);
+            request[request.Length - 1] = (byte) (port & 0xff);
 
             var st = new Socks5State();
             st.Callback = callback;
