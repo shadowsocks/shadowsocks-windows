@@ -47,7 +47,8 @@ namespace Shadowsocks.Proxy
 
         public EndPoint LocalEndPoint => _remote.LocalEndPoint;
         public EndPoint ProxyEndPoint { get; private set; }
-        public EndPoint DestEndPoint { get; private set; }
+        public string DestHost { get; private set; }
+        public int DestPort { get; private set; }
 
         public void BeginConnectProxy(EndPoint remoteEP, AsyncCallback callback, object state)
         {
@@ -73,13 +74,20 @@ namespace Shadowsocks.Proxy
             }
         }
 
-        public void BeginConnectDest(EndPoint remoteEP, AsyncCallback callback, object state)
+        public void BeginConnectDest(string host, int port, AsyncCallback callback, object state)
         {
-            var ep = remoteEP as IPEndPoint;
-            if (ep == null)
+            // TODO resolving by proxy
+            IPAddress ipAddress;
+            bool parsed = IPAddress.TryParse(host, out ipAddress);
+            if (!parsed)
             {
-                throw new Exception(I18N.GetString("Proxy request faild"));
+                IPHostEntry ipHostInfo = Dns.GetHostEntry(host);
+                ipAddress = ipHostInfo.AddressList[0];
             }
+            IPEndPoint ep = new IPEndPoint(ipAddress, port);
+
+            DestHost = host;
+            DestPort = port;
 
             byte[] request = null;
             byte atyp = 0;
@@ -112,8 +120,6 @@ namespace Shadowsocks.Proxy
             var st = new Socks5State();
             st.Callback = callback;
             st.AsyncState = state;
-
-            DestEndPoint = remoteEP;
 
             _remote?.BeginSend(request, 0, request.Length, 0, Socks5RequestSendCallback, st);
 

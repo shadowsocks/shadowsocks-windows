@@ -20,19 +20,28 @@ namespace Shadowsocks.Proxy
             public bool CompletedSynchronously { get; } = true;
         }
 
+        private class FakeEndPoint : EndPoint
+        {
+            public override AddressFamily AddressFamily { get; } = AddressFamily.Unspecified;
+
+            public override string ToString()
+            {
+                return "null proxy";
+            }
+        }
+
         private Socket _remote;
 
         public EndPoint LocalEndPoint => _remote.LocalEndPoint;
 
-        public EndPoint ProxyEndPoint { get; private set; }
-
-        public EndPoint DestEndPoint { get; private set; }
+        public EndPoint ProxyEndPoint { get; } = new FakeEndPoint();
+        public string DestHost { get; private set; }
+        public int DestPort { get; private set; }
 
 
         public void BeginConnectProxy(EndPoint remoteEP, AsyncCallback callback, object state)
         {
             // do nothing
-            ProxyEndPoint = remoteEP;
 
             var r = new FakeAsyncResult(state);
             callback?.Invoke(r);
@@ -43,16 +52,26 @@ namespace Shadowsocks.Proxy
             // do nothing
         }
 
-        public void BeginConnectDest(EndPoint remoteEP, AsyncCallback callback, object state)
+        public void BeginConnectDest(string host, int port, AsyncCallback callback, object state)
         {
+            // TODO async resolving
+            IPAddress ipAddress;
+            bool parsed = IPAddress.TryParse(host, out ipAddress);
+            if (!parsed)
+            {
+                IPHostEntry ipHostInfo = Dns.GetHostEntry(host);
+                ipAddress = ipHostInfo.AddressList[0];
+            }
+            IPEndPoint remoteEP = new IPEndPoint(ipAddress, port);
+
+            DestHost = host;
+            DestPort = port;
+
             if (_remote == null)
             {
                 _remote = new Socket(remoteEP.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
                 _remote.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, true);
             }
-
-            DestEndPoint = remoteEP;
-
             _remote.BeginConnect(remoteEP, callback, state);
         }
 
