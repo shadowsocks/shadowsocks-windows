@@ -6,6 +6,7 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using Shadowsocks.Controller;
+using Shadowsocks.Util;
 
 namespace Shadowsocks.Proxy
 {
@@ -51,7 +52,7 @@ namespace Shadowsocks.Proxy
 
         public void BeginConnectProxy(EndPoint remoteEP, AsyncCallback callback, object state)
         {
-            _remote = new Socket(remoteEP.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+            _remote = SocketUtil.CreateSocket(remoteEP);
             _remote.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, true);
 
             var st = new Socks5State();

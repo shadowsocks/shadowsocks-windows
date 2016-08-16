@@ -7,6 +7,7 @@ using System.Runtime.CompilerServices;
 using Shadowsocks.Controller.Strategy;
 using Shadowsocks.Encryption;
 using Shadowsocks.Model;
+using Shadowsocks.Util;
 
 namespace Shadowsocks.Controller
 {
@@ -56,7 +57,7 @@ namespace Shadowsocks.Controller
             private byte[] _buffer = new byte[1500];
 
             private IPEndPoint _localEndPoint;
-            private IPEndPoint _remoteEndPoint;
+            private EndPoint _remoteEndPoint;
 
             public UDPHandler(Socket local, Server server, IPEndPoint localEndPoint)
             {
@@ -64,16 +65,8 @@ namespace Shadowsocks.Controller
                 _server = server;
                 _localEndPoint = localEndPoint;
 
-                // TODO async resolving
-                IPAddress ipAddress;
-                bool parsed = IPAddress.TryParse(server.server, out ipAddress);
-                if (!parsed)
-                {
-                    IPHostEntry ipHostInfo = Dns.GetHostEntry(server.server);
-                    ipAddress = ipHostInfo.AddressList[0];
-                }
-                _remoteEndPoint = new IPEndPoint(ipAddress, server.server_port);
-                _remote = new Socket(_remoteEndPoint.AddressFamily, SocketType.Dgram, ProtocolType.Udp);
+                _remoteEndPoint = SocketUtil.GetEndPoint(server.server, server.server_port);
+                _remote = SocketUtil.CreateSocket(_remoteEndPoint, ProtocolType.Udp);
             }
 
             public void Send(byte[] data, int length)

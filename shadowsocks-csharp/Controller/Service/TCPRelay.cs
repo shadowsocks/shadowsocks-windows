@@ -9,6 +9,7 @@ using Shadowsocks.Controller.Strategy;
 using Shadowsocks.Encryption;
 using Shadowsocks.Model;
 using Shadowsocks.Proxy;
+using Shadowsocks.Util;
 
 namespace Shadowsocks.Controller
 {
@@ -363,24 +364,11 @@ namespace Shadowsocks.Controller
                 CreateRemote();
 
                 // Setting up proxy
-                IPEndPoint proxyEP;
+                EndPoint proxyEP;
                 if (_config.useProxy)
                 {
-                    IPAddress ipAddress;
-                    bool parsed = IPAddress.TryParse(_config.proxyServer, out ipAddress);
-                    if (!parsed)
-                    {
-                        /*
-                         * TODO really necessary to resolve a proxy's address? Maybe from local hosts?
-                         * also we may simplify it by using dual-mode socket with 
-                         * the approach described in DirectConnect.BeginConnectDest
-                         */
-                        IPHostEntry ipHostInfo = Dns.GetHostEntry(_config.proxyServer);
-                        ipAddress = ipHostInfo.AddressList[0];
-                    }
-
                     remote = new Socks5Proxy();
-                    proxyEP = new IPEndPoint(ipAddress, _config.proxyPort);
+                    proxyEP = SocketUtil.GetEndPoint(_config.proxyServer, _config.proxyPort);
                 }
                 else
                 {
@@ -395,7 +383,7 @@ namespace Shadowsocks.Controller
                 proxyTimer.Enabled = true;
 
                 proxyTimer.Proxy = remote;
-                proxyTimer.DestEndPoint = ProxyUtils.GetEndPoint(server.server, server.server_port);
+                proxyTimer.DestEndPoint = SocketUtil.GetEndPoint(server.server, server.server_port);
                 proxyTimer.Server = server;
 
                 _proxyConnected = false;

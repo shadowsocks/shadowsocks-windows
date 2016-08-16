@@ -35,20 +35,4 @@ namespace Shadowsocks.Proxy
 
         void Close();
     }
-
-    public static class ProxyUtils
-    {
-        public static EndPoint GetEndPoint(string host, int port)
-        {
-            IPAddress ipAddress;
-            bool parsed = IPAddress.TryParse(host, out ipAddress);
-            if (parsed)
-            {
-                return new IPEndPoint(ipAddress, port);
-            }
-
-            // maybe is a domain name
-            return new DnsEndPoint(host, port);
-        }
-    }
 }
