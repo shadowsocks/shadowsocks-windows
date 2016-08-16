@@ -302,8 +302,7 @@ namespace Shadowsocks.Controller
                 if (ar.AsyncState != null)
                 {
                     connection.EndSend(ar);
-                    // TODO: need fix
-                    //Logging.Debug(remote.LocalEndPoint, remote.DestEndPoint, RecvSize, "TCP Relay");
+                    Logging.Debug(remote.LocalEndPoint, remote.DestEndPoint, RecvSize, "TCP Relay");
                     connection.BeginReceive(_connetionRecvBuffer, 0, RecvSize, SocketFlags.None, new AsyncCallback(ReadAll), null);
                 }
                 else
@@ -311,8 +310,7 @@ namespace Shadowsocks.Controller
                     int bytesRead = connection.EndReceive(ar);
                     if (bytesRead > 0)
                     {
-                        // TODO: need fix
-                        //Logging.Debug(remote.LocalEndPoint, remote.DestEndPoint, RecvSize, "TCP Relay");
+                        Logging.Debug(remote.LocalEndPoint, remote.DestEndPoint, RecvSize, "TCP Relay");
                         connection.BeginReceive(_connetionRecvBuffer, 0, RecvSize, SocketFlags.None, new AsyncCallback(ReadAll), null);
                     }
                     else
@@ -344,8 +342,7 @@ namespace Shadowsocks.Controller
         private class ProxyTimer : Timer
         {
             public IProxy Proxy;
-            public string DestHost;
-            public int DestPort;
+            public EndPoint DestEndPoint;
             public Server Server;
 
             public ProxyTimer(int p) : base(p)
@@ -373,7 +370,11 @@ namespace Shadowsocks.Controller
                     bool parsed = IPAddress.TryParse(_config.proxyServer, out ipAddress);
                     if (!parsed)
                     {
-                        // TODO really necessary to resolve a proxy's address? Maybe from local hosts?
+                        /*
+                         * TODO really necessary to resolve a proxy's address? Maybe from local hosts?
+                         * also we may simplify it by using dual-mode socket with 
+                         * the approach described in DirectConnect.BeginConnectDest
+                         */
                         IPHostEntry ipHostInfo = Dns.GetHostEntry(_config.proxyServer);
                         ipAddress = ipHostInfo.AddressList[0];
                     }
@@ -394,8 +395,7 @@ namespace Shadowsocks.Controller
                 proxyTimer.Enabled = true;
 
                 proxyTimer.Proxy = remote;
-                proxyTimer.DestHost = server.server;
-                proxyTimer.DestPort = server.server_port;
+                proxyTimer.DestEndPoint = ProxyUtils.GetEndPoint(server.server, server.server_port);
                 proxyTimer.Server = server;
 
                 _proxyConnected = false;
@@ -433,8 +433,7 @@ namespace Shadowsocks.Controller
             try
             {
                 ProxyTimer timer = (ProxyTimer)ar.AsyncState;
-                var destHost = timer.DestHost;
-                var destPort = timer.DestPort;
+                var destEndPoint = timer.DestEndPoint;
                 server = timer.Server;
                 timer.Elapsed -= proxyConnectTimer_Elapsed;
                 timer.Enabled = false;
@@ -462,7 +461,7 @@ namespace Shadowsocks.Controller
                 
                 _destConnected = false;
                 // Connect to the remote endpoint.
-                remote.BeginConnectDest(destHost, destPort, new AsyncCallback(ConnectCallback), connectTimer);
+                remote.BeginConnectDest(destEndPoint, new AsyncCallback(ConnectCallback), connectTimer);
             }
             catch (ArgumentException)
             {

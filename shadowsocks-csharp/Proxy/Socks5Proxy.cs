@@ -47,8 +47,7 @@ namespace Shadowsocks.Proxy
 
         public EndPoint LocalEndPoint => _remote.LocalEndPoint;
         public EndPoint ProxyEndPoint { get; private set; }
-        public string DestHost { get; private set; }
-        public int DestPort { get; private set; }
+        public EndPoint DestEndPoint { get; private set; }
 
         public void BeginConnectProxy(EndPoint remoteEP, AsyncCallback callback, object state)
         {
@@ -74,20 +73,32 @@ namespace Shadowsocks.Proxy
             }
         }
 
-        public void BeginConnectDest(string host, int port, AsyncCallback callback, object state)
+        public void BeginConnectDest(EndPoint destEndPoint, AsyncCallback callback, object state)
         {
-            DestHost = host;
-            DestPort = port;
+            DestEndPoint = destEndPoint;
 
             byte[] request = null;
             byte atyp = 0;
-            
-            IPAddress ipAddress;
-            bool parsed = IPAddress.TryParse(host, out ipAddress);
-            if (parsed)
+            int port;
+
+            var dep = destEndPoint as DnsEndPoint;
+            if (dep != null)
             {
-                IPEndPoint ep = new IPEndPoint(ipAddress, port);
-                switch (ep.AddressFamily)
+                // is a domain name, we will leave it to server
+
+                atyp = 3; // DOMAINNAME
+                var enc = Encoding.UTF8;
+                var hostByteCount = enc.GetByteCount(dep.Host);
+
+                request = new byte[4 + 1/*length byte*/ + hostByteCount + 2];
+                request[4] = (byte)hostByteCount;
+                enc.GetBytes(dep.Host, 0, dep.Host.Length, request, 5);
+
+                port = dep.Port;
+            }
+            else
+            {
+                switch (DestEndPoint.AddressFamily)
                 {
                     case AddressFamily.InterNetwork:
                         request = new byte[4 + 4 + 2];
@@ -100,22 +111,9 @@ namespace Shadowsocks.Proxy
                     default:
                         throw new Exception(I18N.GetString("Proxy request failed"));
                 }
-
-                var addr = ep.Address.GetAddressBytes();
+                port = ((IPEndPoint) DestEndPoint).Port;
+                var addr = ((IPEndPoint)DestEndPoint).Address.GetAddressBytes();
                 Array.Copy(addr, 0, request, 4, request.Length - 4 - 2);
-            }
-            else
-            {
-                // maybe is a domain name, we will leave it to server
-                // need ValidateTcpPort? porttest > 1 && porttest < 65535?
-
-                atyp = 3; // DOMAINNAME
-                var enc = Encoding.UTF8;
-                var hostByteCount = enc.GetByteCount(host);
-                
-                request = new byte[4 + 1/*length byte*/ + hostByteCount + 2];
-                request[4] = (byte)hostByteCount;
-                enc.GetBytes(host, 0, host.Length, request, 5);
             }
 
             // 构造request包剩余部分
@@ -131,7 +129,6 @@ namespace Shadowsocks.Proxy
             st.AsyncState = state;
 
             _remote?.BeginSend(request, 0, request.Length, 0, Socks5RequestSendCallback, st);
-
         }
 
         public void EndConnectDest(IAsyncResult asyncResult)

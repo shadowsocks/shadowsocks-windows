@@ -35,9 +35,7 @@ namespace Shadowsocks.Proxy
         public EndPoint LocalEndPoint => _remote.LocalEndPoint;
 
         public EndPoint ProxyEndPoint { get; } = new FakeEndPoint();
-        public string DestHost { get; private set; }
-        public int DestPort { get; private set; }
-
+        public EndPoint DestEndPoint { get; private set; }
 
         public void BeginConnectProxy(EndPoint remoteEP, AsyncCallback callback, object state)
         {
@@ -52,27 +50,41 @@ namespace Shadowsocks.Proxy
             // do nothing
         }
 
-        public void BeginConnectDest(string host, int port, AsyncCallback callback, object state)
+        public void BeginConnectDest(EndPoint destEndPoint, AsyncCallback callback, object state)
         {
-            // TODO async resolving
-            IPAddress ipAddress;
-            bool parsed = IPAddress.TryParse(host, out ipAddress);
-            if (!parsed)
-            {
-                IPHostEntry ipHostInfo = Dns.GetHostEntry(host);
-                ipAddress = ipHostInfo.AddressList[0];
-            }
-            IPEndPoint remoteEP = new IPEndPoint(ipAddress, port);
+            EndPoint realEndPoint = DestEndPoint = destEndPoint;
 
-            DestHost = host;
-            DestPort = port;
+            /*
+             * On windows vista or later, dual-mode socket is supported, so that
+             * we don't need to resolve a DnsEndPoint manually.
+             * We could just create a dual-mode socket and pass the DnsEndPoint
+             * directly to it's BeginConnect and the system will handle it correctlly
+             * so that we won't worry about async resolving any more.
+             * 
+             * see: https://blogs.msdn.microsoft.com/webdev/2013/01/08/dual-mode-sockets-never-create-an-ipv4-socket-again/
+             * 
+             * But it seems that we can't use this feature because DnsEndPoint
+             * doesn't have a specific AddressFamily before it has been
+             * resolved (we don't know whether it's ipv4 or ipv6) and we don't have
+             * a dual-mode socket to use on windows xp :(
+             */
+            var dep = realEndPoint as DnsEndPoint;
+            if (dep != null)
+            {
+                // need to resolve manually
+                // TODO async resolving
+                IPHostEntry ipHostInfo = Dns.GetHostEntry(dep.Host);
+                IPAddress ipAddress = ipHostInfo.AddressList[0];
+
+                realEndPoint = new IPEndPoint(ipAddress, dep.Port);
+            }
 
             if (_remote == null)
             {
-                _remote = new Socket(remoteEP.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+                _remote = new Socket(realEndPoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
                 _remote.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, true);
             }
-            _remote.BeginConnect(remoteEP, callback, state);
+            _remote.BeginConnect(realEndPoint, callback, state);
         }
 
         public void EndConnectDest(IAsyncResult asyncResult)
