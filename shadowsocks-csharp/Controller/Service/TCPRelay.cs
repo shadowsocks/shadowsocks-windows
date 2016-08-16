@@ -303,7 +303,6 @@ namespace Shadowsocks.Controller
                 if (ar.AsyncState != null)
                 {
                     connection.EndSend(ar);
-                    Logging.Debug(remote.LocalEndPoint, remote.DestEndPoint, RecvSize, "TCP Relay");
                     connection.BeginReceive(_connetionRecvBuffer, 0, RecvSize, SocketFlags.None, new AsyncCallback(ReadAll), null);
                 }
                 else
@@ -311,7 +310,6 @@ namespace Shadowsocks.Controller
                     int bytesRead = connection.EndReceive(ar);
                     if (bytesRead > 0)
                     {
-                        Logging.Debug(remote.LocalEndPoint, remote.DestEndPoint, RecvSize, "TCP Relay");
                         connection.BeginReceive(_connetionRecvBuffer, 0, RecvSize, SocketFlags.None, new AsyncCallback(ReadAll), null);
                     }
                     else
