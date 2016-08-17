@@ -157,6 +157,10 @@ namespace Shadowsocks.Util
             return userKey;
         }
 
+        public static bool IsWinVistaOrHigher() {
+            return Environment.OSVersion.Version.Major > 5;
+        }
+
         [DllImport("kernel32.dll")]
         [return: MarshalAs(UnmanagedType.Bool)]
         private static extern bool SetProcessWorkingSetSize(IntPtr process,
