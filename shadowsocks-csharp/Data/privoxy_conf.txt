@@ -1,8 +1,9 @@
-﻿listen-address __POLIPO_BIND_IP__:__POLIPO_BIND_PORT__
+﻿listen-address __PRIVOXY_BIND_IP__:__PRIVOXY_BIND_PORT__
 show-on-task-bar 0
 activity-animation 0
 forward-socks5 / 127.0.0.1:__SOCKS_PORT__ .
 hide-console
 keep-alive-timeout __KEEP_ALIVE_TIMEOUT__
+connection-sharing __CONNECTION_SHARING__
 __BYPASS_ACTION__
 

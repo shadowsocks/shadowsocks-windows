@@ -19,15 +19,15 @@ namespace Shadowsocks.Encryption
         {
             try
             {
-                try
-                {
-                    dlopen("libcrypto.so", 2);
-                    return;
-                }
-                catch (Exception e)
-                {
-                    //Console.WriteLine(e.ToString());
-                }
+                //try
+                //{
+                //    dlopen("libcrypto.so", 2);
+                //    return;
+                //}
+                //catch (Exception e)
+                //{
+                //    //Console.WriteLine(e.ToString());
+                //}
                 try
                 {
                     LoadLibrary("libcrypto.dll");
@@ -150,8 +150,8 @@ namespace Shadowsocks.Encryption
         [DllImport("Kernel32.dll")]
         private static extern IntPtr LoadLibrary(string path);
 
-        [DllImport("libdl.so")]
-        private static extern IntPtr dlopen(String fileName, int flags);
+        //[DllImport("libdl.so")]
+        //private static extern IntPtr dlopen(String fileName, int flags);
 
         [DllImport(DLLNAME, CallingConvention = CallingConvention.Cdecl)]
         public static extern void OpenSSL_add_all_ciphers();

@@ -842,6 +842,7 @@ namespace Shadowsocks.Controller
                 remote = new Socket(ipAddress.AddressFamily,
                     SocketType.Stream, ProtocolType.Tcp);
                 remote.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, true);
+                //remote.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.KeepAlive, true);
                 int size = sizeof(UInt32);
                 UInt32 on = 1;
                 UInt32 keepAliveInterval = 1000 * 60;
@@ -2432,6 +2433,7 @@ namespace Shadowsocks.Controller
                         RemoteSend(remoteHeaderSendBuffer, remoteHeaderSendBuffer.Length);
                         remoteHeaderSendBuffer = null;
                     }
+                    remote.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, false);
                 }
                 else // UDP
                 {

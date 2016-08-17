@@ -108,6 +108,7 @@ namespace Shadowsocks.Controller
                     try
                     {
                         _socket_v6 = new Socket(AddressFamily.InterNetworkV6, SocketType.Stream, ProtocolType.Tcp);
+                        _socket_v6.SetSocketOption(SocketOptionLevel.IPv6, (SocketOptionName)27, false);
                         _socket_v6.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
                     }
                     catch
@@ -136,6 +137,7 @@ namespace Shadowsocks.Controller
                 }
                 try
                 {
+                    //throw new SocketException();
                     _socket.Bind(localEndPoint);
                     _socket.Listen(1024);
                 }
