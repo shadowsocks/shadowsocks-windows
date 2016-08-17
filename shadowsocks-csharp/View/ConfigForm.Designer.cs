@@ -176,8 +176,8 @@
             this.PasswordTextBox.Name = "PasswordTextBox";
             this.PasswordTextBox.Size = new System.Drawing.Size(160, 21);
             this.PasswordTextBox.TabIndex = 2;
-            this.PasswordTextBox.WordWrap = false;
             this.PasswordTextBox.UseSystemPasswordChar = true;
+            this.PasswordTextBox.WordWrap = false;
             // 
             // EncryptionLabel
             // 
@@ -216,7 +216,6 @@
             this.EncryptionSelect.Name = "EncryptionSelect";
             this.EncryptionSelect.Size = new System.Drawing.Size(160, 20);
             this.EncryptionSelect.TabIndex = 3;
-            this.EncryptionSelect.SelectedIndexChanged += new System.EventHandler(this.EncryptionSelect_SelectedIndexChanged);
             // 
             // OneTimeAuth
             // 
@@ -480,6 +479,7 @@
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.ConfigForm_FormClosed);
             this.Load += new System.EventHandler(this.ConfigForm_Load);
             this.Shown += new System.EventHandler(this.ConfigForm_Shown);
+            this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.ConfigForm_KeyDown);
             this.tableLayoutPanel1.ResumeLayout(false);
             this.tableLayoutPanel1.PerformLayout();
             this.ServerGroupBox.ResumeLayout(false);

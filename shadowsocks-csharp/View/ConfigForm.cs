@@ -325,18 +325,5 @@ namespace Shadowsocks.View
                 MoveConfigItem(+1);  // +1 means move forward
             }
         }
-
-        private void EncryptionSelect_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            if (EncryptionSelect.Text == "rc4" || EncryptionSelect.Text == "table")
-            {
-                OneTimeAuth.Enabled = false;
-                OneTimeAuth.Checked = false;
-            }
-            else
-            {
-                OneTimeAuth.Enabled = true;
-            }
-        }
     }
 }
