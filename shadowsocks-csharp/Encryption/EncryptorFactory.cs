@@ -1,7 +1,7 @@
-﻿
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
+
 namespace Shadowsocks.Encryption
 {
     public static class EncryptorFactory

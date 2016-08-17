@@ -52,6 +52,7 @@ namespace Shadowsocks.Util
 
             if (endPoint is DnsEndPoint)
             {
+                // use dual-mode socket
                 var socket = new Socket(AddressFamily.InterNetworkV6, socketType, protocolType);
                 socket.SetSocketOption(SocketOptionLevel.IPv6, (SocketOptionName)27, false);
 
