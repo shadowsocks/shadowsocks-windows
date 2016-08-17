@@ -2,6 +2,7 @@
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
+using Shadowsocks.Util;
 
 namespace Shadowsocks.Proxy
 {
@@ -20,19 +21,26 @@ namespace Shadowsocks.Proxy
             public bool CompletedSynchronously { get; } = true;
         }
 
+        private class FakeEndPoint : EndPoint
+        {
+            public override AddressFamily AddressFamily { get; } = AddressFamily.Unspecified;
+
+            public override string ToString()
+            {
+                return "null proxy";
+            }
+        }
+
         private Socket _remote;
 
         public EndPoint LocalEndPoint => _remote.LocalEndPoint;
 
-        public EndPoint ProxyEndPoint { get; private set; }
-
+        public EndPoint ProxyEndPoint { get; } = new FakeEndPoint();
         public EndPoint DestEndPoint { get; private set; }
-
 
         public void BeginConnectProxy(EndPoint remoteEP, AsyncCallback callback, object state)
         {
             // do nothing
-            ProxyEndPoint = remoteEP;
 
             var r = new FakeAsyncResult(state);
             callback?.Invoke(r);
@@ -43,17 +51,16 @@ namespace Shadowsocks.Proxy
             // do nothing
         }
 
-        public void BeginConnectDest(EndPoint remoteEP, AsyncCallback callback, object state)
+        public void BeginConnectDest(EndPoint destEndPoint, AsyncCallback callback, object state)
         {
+            DestEndPoint = destEndPoint;
+
             if (_remote == null)
             {
-                _remote = new Socket(remoteEP.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+                _remote = SocketUtil.CreateSocket(destEndPoint);
                 _remote.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, true);
             }
-
-            DestEndPoint = remoteEP;
-
-            _remote.BeginConnect(remoteEP, callback, state);
+            _remote.BeginConnect(destEndPoint, callback, state);
         }
 
         public void EndConnectDest(IAsyncResult asyncResult)

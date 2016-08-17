@@ -9,6 +9,7 @@ using Shadowsocks.Controller.Strategy;
 using Shadowsocks.Encryption;
 using Shadowsocks.Model;
 using Shadowsocks.Proxy;
+using Shadowsocks.Util;
 
 namespace Shadowsocks.Controller
 {
@@ -302,7 +303,6 @@ namespace Shadowsocks.Controller
                 if (ar.AsyncState != null)
                 {
                     connection.EndSend(ar);
-                    Logging.Debug(remote.LocalEndPoint, remote.DestEndPoint, RecvSize, "TCP Relay");
                     connection.BeginReceive(_connetionRecvBuffer, 0, RecvSize, SocketFlags.None, new AsyncCallback(ReadAll), null);
                 }
                 else
@@ -310,7 +310,6 @@ namespace Shadowsocks.Controller
                     int bytesRead = connection.EndReceive(ar);
                     if (bytesRead > 0)
                     {
-                        Logging.Debug(remote.LocalEndPoint, remote.DestEndPoint, RecvSize, "TCP Relay");
                         connection.BeginReceive(_connetionRecvBuffer, 0, RecvSize, SocketFlags.None, new AsyncCallback(ReadAll), null);
                     }
                     else
@@ -341,6 +340,7 @@ namespace Shadowsocks.Controller
         // inner class
         private class ProxyTimer : Timer
         {
+            public IProxy Proxy;
             public EndPoint DestEndPoint;
             public Server Server;
 
@@ -361,34 +361,17 @@ namespace Shadowsocks.Controller
             {
                 CreateRemote();
 
-                // TODO async resolving
-                IPAddress ipAddress;
-                bool parsed = IPAddress.TryParse(server.server, out ipAddress);
-                if (!parsed)
-                {
-                    IPHostEntry ipHostInfo = Dns.GetHostEntry(server.server);
-                    ipAddress = ipHostInfo.AddressList[0];
-                }
-                IPEndPoint destEP = new IPEndPoint(ipAddress, server.server_port);
-
                 // Setting up proxy
-                IPEndPoint proxyEP;
+                EndPoint proxyEP;
                 if (_config.useProxy)
                 {
-                    parsed = IPAddress.TryParse(_config.proxyServer, out ipAddress);
-                    if (!parsed)
-                    {
-                        IPHostEntry ipHostInfo = Dns.GetHostEntry(_config.proxyServer);
-                        ipAddress = ipHostInfo.AddressList[0];
-                    }
-
                     remote = new Socks5Proxy();
-                    proxyEP = new IPEndPoint(ipAddress, _config.proxyPort);
+                    proxyEP = SocketUtil.GetEndPoint(_config.proxyServer, _config.proxyPort);
                 }
                 else
                 {
                     remote = new DirectConnect();
-                    proxyEP = destEP;
+                    proxyEP = null;
                 }
 
 
@@ -396,7 +379,9 @@ namespace Shadowsocks.Controller
                 proxyTimer.AutoReset = false;
                 proxyTimer.Elapsed += proxyConnectTimer_Elapsed;
                 proxyTimer.Enabled = true;
-                proxyTimer.DestEndPoint = destEP;
+
+                proxyTimer.Proxy = remote;
+                proxyTimer.DestEndPoint = SocketUtil.GetEndPoint(server.server, server.server_port);
                 proxyTimer.Server = server;
 
                 _proxyConnected = false;
@@ -417,9 +402,9 @@ namespace Shadowsocks.Controller
             {
                 return;
             }
-            var ep = ((ProxyTimer)sender).DestEndPoint;
+            var proxy = ((ProxyTimer)sender).Proxy;
 
-            Logging.Info($"Proxy {ep} timed out");
+            Logging.Info($"Proxy {proxy.ProxyEndPoint} timed out");
             remote?.Close();
             RetryConnect();
         }
@@ -434,7 +419,7 @@ namespace Shadowsocks.Controller
             try
             {
                 ProxyTimer timer = (ProxyTimer)ar.AsyncState;
-                var destEP = timer.DestEndPoint;
+                var destEndPoint = timer.DestEndPoint;
                 server = timer.Server;
                 timer.Elapsed -= proxyConnectTimer_Elapsed;
                 timer.Enabled = false;
@@ -462,7 +447,7 @@ namespace Shadowsocks.Controller
                 
                 _destConnected = false;
                 // Connect to the remote endpoint.
-                remote.BeginConnectDest(destEP, new AsyncCallback(ConnectCallback), connectTimer);
+                remote.BeginConnectDest(destEndPoint, new AsyncCallback(ConnectCallback), connectTimer);
             }
             catch (ArgumentException)
             {

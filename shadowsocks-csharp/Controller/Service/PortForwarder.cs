@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Net;
 using System.Net.Sockets;
+using Shadowsocks.Util;
 
 namespace Shadowsocks.Controller
 {
@@ -45,14 +46,9 @@ namespace Shadowsocks.Controller
                 this._local = socket;
                 try
                 {
-                    // TODO async resolving
-                    IPAddress ipAddress;
-                    bool parsed = IPAddress.TryParse("127.0.0.1", out ipAddress);
-                    IPEndPoint remoteEP = new IPEndPoint(ipAddress, targetPort);
+                    EndPoint remoteEP = SocketUtil.GetEndPoint("localhost", targetPort);
 
-
-                    _remote = new Socket(ipAddress.AddressFamily,
-                        SocketType.Stream, ProtocolType.Tcp);
+                    _remote = SocketUtil.CreateSocket(remoteEP);
                     _remote.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, true);
 
                     // Connect to the remote endpoint.

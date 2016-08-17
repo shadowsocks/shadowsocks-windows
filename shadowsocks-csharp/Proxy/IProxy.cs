@@ -17,7 +17,7 @@ namespace Shadowsocks.Proxy
 
         void EndConnectProxy(IAsyncResult asyncResult);
 
-        void BeginConnectDest(EndPoint remoteEP, AsyncCallback callback, object state);
+        void BeginConnectDest(EndPoint destEndPoint, AsyncCallback callback, object state);
 
         void EndConnectDest(IAsyncResult asyncResult);
 

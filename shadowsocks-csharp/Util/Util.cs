@@ -151,10 +151,14 @@ namespace Shadowsocks.Util
             // we are building x86 binary for both x86 and x64, which will
             // cause problem when opening registry key
             // detect operating system instead of CPU
-            RegistryKey userKey = RegistryKey.OpenBaseKey( RegistryHive.CurrentUser,
-                Environment.Is64BitOperatingSystem ? RegistryView.Registry64 : RegistryView.Registry32 );
-            userKey = userKey.OpenSubKey( name, writable );
+            RegistryKey userKey = RegistryKey.OpenRemoteBaseKey( RegistryHive.CurrentUser, "",
+                Environment.Is64BitOperatingSystem ? RegistryView.Registry64 : RegistryView.Registry32 )
+                .OpenSubKey( name, writable );
             return userKey;
+        }
+
+        public static bool IsWinVistaOrHigher() {
+            return Environment.OSVersion.Version.Major > 5;
         }
 
         [DllImport("kernel32.dll")]

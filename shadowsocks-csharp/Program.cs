@@ -18,6 +18,14 @@ namespace Shadowsocks
         [STAThread]
         static void Main()
         {
+            // Check OS since we are using dual-mode socket
+            if (!Utils.IsWinVistaOrHigher())
+            {
+                MessageBox.Show(I18N.GetString("Unsupported operating system, use Windows Vista at least."),
+                "Shadowsocks Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
             Utils.ReleaseMemory(true);
             using (Mutex mutex = new Mutex(false, "Global\\Shadowsocks_" + Application.StartupPath.GetHashCode()))
             {
