@@ -10,11 +10,13 @@ using System.Text;
 using Shadowsocks.Model;
 using Shadowsocks.Properties;
 using Shadowsocks.Util;
+using Shadowsocks.Util.JobManagement;
 
 namespace Shadowsocks.Controller
 {
     class PolipoRunner
     {
+        private static Job PolipoJob;
         private Process _process;
         private int _runningPort;
 
@@ -22,6 +24,8 @@ namespace Shadowsocks.Controller
         {
             try
             {
+                PolipoJob = new Job();
+
                 FileManager.UncompressFile(Utils.GetTempPath("ss_privoxy.exe"), Resources.privoxy_exe);
                 FileManager.UncompressFile(Utils.GetTempPath("mgwz.dll"), Resources.mgwz_dll);
             }
@@ -65,6 +69,12 @@ namespace Shadowsocks.Controller
                 _process.StartInfo.UseShellExecute = true;
                 _process.StartInfo.CreateNoWindow = true;
                 _process.Start();
+
+                /*
+                 * Add this process to job obj associated with this ss process, so that
+                 * when ss exit unexpectedly, this process will be forced killed by system.
+                 */
+                PolipoJob.AddProcess(_process.Handle);
             }
             RefreshTrayArea();
         }
