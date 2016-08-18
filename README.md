@@ -54,9 +54,6 @@ If you want to manage multiple servers using other tools like SwitchyOmega,
 you can start multiple Shadowsocks instances. To avoid configuration conflicts,
 copy Shadowsocks to a new directory and choose a different local port.
 
-Also, make sure to use `SOCKS5` proxy in SwitchyOmega, since we have only
-one HTTP proxy instance.
-
 #### Server Configuration
 
 Please visit [Servers] for more information.

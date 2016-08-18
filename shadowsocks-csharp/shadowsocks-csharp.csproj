@@ -76,6 +76,7 @@
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Management" />
     <Reference Include="System.Net" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Windows.Forms.DataVisualization" />
@@ -176,6 +177,8 @@
     <Compile Include="Controller\Strategy\IStrategy.cs" />
     <Compile Include="Proxy\Socks5Proxy.cs" />
     <Compile Include="StringEx.cs" />
+    <Compile Include="Util\ProcessManagement\Job.cs" />
+    <Compile Include="Util\ProcessManagement\ThreadUtil.cs" />
     <Compile Include="Util\SocketUtil.cs" />
     <Compile Include="Util\Util.cs" />
     <Compile Include="View\ConfigForm.cs">
