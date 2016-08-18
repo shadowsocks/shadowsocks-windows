@@ -1,21 +1,25 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Runtime.InteropServices;
 using System.Text;
-
+using System.Windows.Forms;
 using Shadowsocks.Model;
 using Shadowsocks.Properties;
 using Shadowsocks.Util;
-using Shadowsocks.Util.JobManagement;
+using Shadowsocks.Util.ProcessManagement;
 
 namespace Shadowsocks.Controller
 {
     class PolipoRunner
     {
+        private static int Uid;
+        private static string UniqueConfigFile;
         private static Job PolipoJob;
         private Process _process;
         private int _runningPort;
@@ -24,6 +28,8 @@ namespace Shadowsocks.Controller
         {
             try
             {
+                Uid = Application.StartupPath.GetHashCode(); // Currently we use ss's StartupPath to identify different polipo instance.
+                UniqueConfigFile = $"privoxy_{Uid}.conf";
                 PolipoJob = new Job();
 
                 FileManager.UncompressFile(Utils.GetTempPath("ss_privoxy.exe"), Resources.privoxy_exe);
@@ -49,7 +55,7 @@ namespace Shadowsocks.Controller
             if (_process == null)
             {
                 Process[] existingPolipo = Process.GetProcessesByName("ss_privoxy");
-                foreach (Process p in existingPolipo)
+                foreach (Process p in existingPolipo.Where(IsChildProcess))
                 {
                     KillProcess(p);
                 }
@@ -58,12 +64,12 @@ namespace Shadowsocks.Controller
                 polipoConfig = polipoConfig.Replace("__SOCKS_PORT__", configuration.localPort.ToString());
                 polipoConfig = polipoConfig.Replace("__POLIPO_BIND_PORT__", _runningPort.ToString());
                 polipoConfig = polipoConfig.Replace("__POLIPO_BIND_IP__", configuration.shareOverLan ? "0.0.0.0" : "127.0.0.1");
-                FileManager.ByteArrayToFile(Utils.GetTempPath("privoxy.conf"), Encoding.UTF8.GetBytes(polipoConfig));
+                FileManager.ByteArrayToFile(Utils.GetTempPath(UniqueConfigFile), Encoding.UTF8.GetBytes(polipoConfig));
 
                 _process = new Process();
                 // Configure the process using the StartInfo properties.
                 _process.StartInfo.FileName = "ss_privoxy.exe";
-                _process.StartInfo.Arguments = "privoxy.conf";
+                _process.StartInfo.Arguments = UniqueConfigFile;
                 _process.StartInfo.WorkingDirectory = Utils.GetTempPath();
                 _process.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
                 _process.StartInfo.UseShellExecute = true;
@@ -104,6 +110,45 @@ namespace Shadowsocks.Controller
             catch (Exception e)
             {
                 Logging.LogUsefulException(e);
+            }
+        }
+
+        /*
+         * We won't like to kill other ss instances' ss_privoxy.exe.
+         * This function will check whether the given process is created
+         * by this process by checking the module path or command line.
+         * 
+         * Since it's required to put ss in different dirs to run muti instances,
+         * different instance will create their unique "privoxy_UID.conf" where
+         * UID is hash of ss's location.
+         */
+        private static bool IsChildProcess(Process process)
+        {
+            if (Utils.IsPortableMode())
+            {
+                /*
+                 * Under PortableMode, we could identify it by the path of ss_privoxy.exe.
+                 */
+                string path = process.MainModule.FileName;
+                return Utils.GetTempPath("ss_privoxy.exe").Equals(path);
+            }
+            else
+            {
+                try
+                {
+                    var cmd = process.GetCommandLine();
+
+                    return cmd.Contains(UniqueConfigFile);
+                }
+                catch (Win32Exception ex)
+                {
+                    if ((uint) ex.ErrorCode != 0x80004005)
+                    {
+                        throw;
+                    }
+                }
+
+                return false;
             }
         }
 

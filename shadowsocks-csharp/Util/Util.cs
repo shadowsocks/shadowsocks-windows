@@ -11,14 +11,25 @@ namespace Shadowsocks.Util
 {
     public class Utils
     {
+        private static bool? _portableMode;
         private static string TempPath = null;
+
+        public static bool IsPortableMode()
+        {
+            if (!_portableMode.HasValue)
+            {
+                _portableMode = File.Exists(Path.Combine(Application.StartupPath, "shadowsocks_portable_mode.txt"));
+            }
+
+            return _portableMode.Value;
+        }
 
         // return path to store temporary files
         public static string GetTempPath()
         {
             if (TempPath == null)
             {
-                if (File.Exists(Path.Combine(Application.StartupPath, "shadowsocks_portable_mode.txt")))
+                if (IsPortableMode())
                     try
                     {
                         Directory.CreateDirectory(Path.Combine(Application.StartupPath, "temp"));

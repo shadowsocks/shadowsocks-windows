@@ -3,7 +3,7 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using Shadowsocks.Controller;
 
-namespace Shadowsocks.Util.JobManagement
+namespace Shadowsocks.Util.ProcessManagement
 {
     /*
      * See:
