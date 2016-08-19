@@ -122,11 +122,12 @@
             this.tableLayoutPanel1.Controls.Add(this.textUDPPort, 1, 11);
             this.tableLayoutPanel1.Controls.Add(this.checkSSRLink, 0, 9);
             this.tableLayoutPanel1.Controls.Add(this.labelRemarks, 0, 7);
+            this.tableLayoutPanel1.Controls.Add(this.tableLayoutPanel3, 1, 15);
             this.tableLayoutPanel1.Location = new System.Drawing.Point(8, 32);
             this.tableLayoutPanel1.Margin = new System.Windows.Forms.Padding(0);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
             this.tableLayoutPanel1.Padding = new System.Windows.Forms.Padding(3);
-            this.tableLayoutPanel1.RowCount = 15;
+            this.tableLayoutPanel1.RowCount = 16;
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
@@ -142,7 +143,8 @@
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(321, 409);
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(321, 451);
             this.tableLayoutPanel1.TabIndex = 0;
             // 
             // ObfsCombo
@@ -195,6 +197,7 @@
             // IPTextBox
             // 
             this.IPTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.IPTextBox.ImeMode = System.Windows.Forms.ImeMode.Off;
             this.IPTextBox.Location = new System.Drawing.Point(100, 6);
             this.IPTextBox.MaxLength = 512;
             this.IPTextBox.Name = "IPTextBox";
@@ -205,6 +208,7 @@
             // ServerPortTextBox
             // 
             this.ServerPortTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.ServerPortTextBox.ImeMode = System.Windows.Forms.ImeMode.Off;
             this.ServerPortTextBox.Location = new System.Drawing.Point(100, 33);
             this.ServerPortTextBox.MaxLength = 10;
             this.ServerPortTextBox.Name = "ServerPortTextBox";
@@ -215,6 +219,7 @@
             // PasswordTextBox
             // 
             this.PasswordTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.PasswordTextBox.ImeMode = System.Windows.Forms.ImeMode.Off;
             this.PasswordTextBox.Location = new System.Drawing.Point(100, 60);
             this.PasswordTextBox.MaxLength = 256;
             this.PasswordTextBox.Name = "PasswordTextBox";
@@ -248,6 +253,7 @@
             // TextLink
             // 
             this.TextLink.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.TextLink.ImeMode = System.Windows.Forms.ImeMode.Off;
             this.TextLink.Location = new System.Drawing.Point(100, 255);
             this.TextLink.MaxLength = 32;
             this.TextLink.Name = "TextLink";
@@ -400,6 +406,7 @@
             // textObfsParam
             // 
             this.textObfsParam.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.textObfsParam.ImeMode = System.Windows.Forms.ImeMode.Off;
             this.textObfsParam.Location = new System.Drawing.Point(100, 174);
             this.textObfsParam.Name = "textObfsParam";
             this.textObfsParam.Size = new System.Drawing.Size(215, 21);
@@ -451,6 +458,7 @@
             // textUDPPort
             // 
             this.textUDPPort.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.textUDPPort.ImeMode = System.Windows.Forms.ImeMode.Off;
             this.textUDPPort.Location = new System.Drawing.Point(100, 307);
             this.textUDPPort.MaxLength = 10;
             this.textUDPPort.Name = "textUDPPort";
@@ -525,7 +533,7 @@
             this.ServerGroupBox.Location = new System.Drawing.Point(268, 0);
             this.ServerGroupBox.Margin = new System.Windows.Forms.Padding(12, 0, 0, 0);
             this.ServerGroupBox.Name = "ServerGroupBox";
-            this.ServerGroupBox.Size = new System.Drawing.Size(332, 458);
+            this.ServerGroupBox.Size = new System.Drawing.Size(332, 500);
             this.ServerGroupBox.TabIndex = 6;
             this.ServerGroupBox.TabStop = false;
             this.ServerGroupBox.Text = "Server";
@@ -534,7 +542,7 @@
             // 
             this.PictureQRcode.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.PictureQRcode.BackColor = System.Drawing.SystemColors.Control;
-            this.PictureQRcode.Location = new System.Drawing.Point(4, 105);
+            this.PictureQRcode.Location = new System.Drawing.Point(4, 147);
             this.PictureQRcode.Margin = new System.Windows.Forms.Padding(4);
             this.PictureQRcode.Name = "PictureQRcode";
             this.PictureQRcode.Size = new System.Drawing.Size(260, 200);
@@ -551,7 +559,7 @@
             this.ServersListBox.Location = new System.Drawing.Point(0, 0);
             this.ServersListBox.Margin = new System.Windows.Forms.Padding(0);
             this.ServersListBox.Name = "ServersListBox";
-            this.ServersListBox.Size = new System.Drawing.Size(250, 280);
+            this.ServersListBox.Size = new System.Drawing.Size(250, 320);
             this.ServersListBox.TabIndex = 5;
             this.ServersListBox.SelectedIndexChanged += new System.EventHandler(this.ServersListBox_SelectedIndexChanged);
             // 
@@ -572,7 +580,7 @@
             this.tableLayoutPanel2.RowCount = 2;
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel2.Size = new System.Drawing.Size(883, 458);
+            this.tableLayoutPanel2.Size = new System.Drawing.Size(883, 500);
             this.tableLayoutPanel2.TabIndex = 7;
             // 
             // tableLayoutPanel7
@@ -591,14 +599,14 @@
             this.tableLayoutPanel7.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel7.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel7.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel7.Size = new System.Drawing.Size(250, 452);
+            this.tableLayoutPanel7.Size = new System.Drawing.Size(250, 494);
             this.tableLayoutPanel7.TabIndex = 16;
             // 
             // LinkUpdate
             // 
             this.LinkUpdate.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.LinkUpdate.AutoSize = true;
-            this.LinkUpdate.Location = new System.Drawing.Point(61, 395);
+            this.LinkUpdate.Location = new System.Drawing.Point(61, 436);
             this.LinkUpdate.Margin = new System.Windows.Forms.Padding(5);
             this.LinkUpdate.Name = "LinkUpdate";
             this.LinkUpdate.Size = new System.Drawing.Size(127, 15);
@@ -619,7 +627,7 @@
             this.tableLayoutPanel4.Controls.Add(this.DeleteButton, 1, 0);
             this.tableLayoutPanel4.Controls.Add(this.AddButton, 0, 0);
             this.tableLayoutPanel4.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.tableLayoutPanel4.Location = new System.Drawing.Point(0, 285);
+            this.tableLayoutPanel4.Location = new System.Drawing.Point(0, 325);
             this.tableLayoutPanel4.Margin = new System.Windows.Forms.Padding(0, 5, 0, 0);
             this.tableLayoutPanel4.Name = "tableLayoutPanel4";
             this.tableLayoutPanel4.RowCount = 2;
@@ -656,7 +664,6 @@
             this.tableLayoutPanel5.AutoSize = true;
             this.tableLayoutPanel5.ColumnCount = 1;
             this.tableLayoutPanel5.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
-            this.tableLayoutPanel5.Controls.Add(this.tableLayoutPanel3, 0, 1);
             this.tableLayoutPanel5.Controls.Add(this.PictureQRcode, 0, 0);
             this.tableLayoutPanel5.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel5.Location = new System.Drawing.Point(612, 3);
@@ -665,12 +672,12 @@
             this.tableLayoutPanel5.RowCount = 2;
             this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel5.Size = new System.Drawing.Size(268, 452);
+            this.tableLayoutPanel5.Size = new System.Drawing.Size(268, 494);
             this.tableLayoutPanel5.TabIndex = 17;
             // 
             // tableLayoutPanel3
             // 
-            this.tableLayoutPanel3.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
+            this.tableLayoutPanel3.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.tableLayoutPanel3.AutoSize = true;
             this.tableLayoutPanel3.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.tableLayoutPanel3.ColumnCount = 2;
@@ -679,7 +686,7 @@
             this.tableLayoutPanel3.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 20F));
             this.tableLayoutPanel3.Controls.Add(this.MyCancelButton, 1, 0);
             this.tableLayoutPanel3.Controls.Add(this.OKButton, 0, 0);
-            this.tableLayoutPanel3.Location = new System.Drawing.Point(56, 413);
+            this.tableLayoutPanel3.Location = new System.Drawing.Point(100, 409);
             this.tableLayoutPanel3.Margin = new System.Windows.Forms.Padding(3, 3, 0, 3);
             this.tableLayoutPanel3.Name = "tableLayoutPanel3";
             this.tableLayoutPanel3.RowCount = 1;
@@ -721,7 +728,7 @@
             this.AutoSize = true;
             this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.BackColor = System.Drawing.SystemColors.Control;
-            this.ClientSize = new System.Drawing.Size(906, 512);
+            this.ClientSize = new System.Drawing.Size(906, 544);
             this.Controls.Add(this.tableLayoutPanel2);
             this.Controls.Add(this.panel2);
             this.Font = new System.Drawing.Font("Arial", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));

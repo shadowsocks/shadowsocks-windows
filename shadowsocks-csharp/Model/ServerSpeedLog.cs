@@ -71,7 +71,7 @@ namespace Shadowsocks.Model
         //private List<TransLog> speedLog = null;
         private LinkedList<ErrorLog> errList = new LinkedList<ErrorLog>();
 
-        private const int avgTime = 2;
+        private const int avgTime = 3;
 
         public ServerSpeedLog()
         {
@@ -205,7 +205,7 @@ namespace Shadowsocks.Model
                         {
                             sumBytes += transLog[iEnd].size;
                             while (iBeg + 10 <= iEnd
-                                && (transLog[iEnd].endTime - transLog[iBeg].recvTime).TotalSeconds > 1)
+                                && (transLog[iEnd].endTime - transLog[iBeg].recvTime).TotalSeconds > 2)
                             {
                                 long speed = (long)((sumBytes - transLog[iBeg].size) / (transLog[iEnd].endTime - transLog[iBeg].recvTime).TotalSeconds);
                                 if (speed > maxTransDownload)
@@ -217,11 +217,11 @@ namespace Shadowsocks.Model
                     }
                     if (transLog.Count > 1)
                         totalTime = (transLog[transLog.Count - 1].endTime - transLog[0].recvTime).TotalSeconds;
-                    if (totalTime > 0.1)
+                    if (totalTime > 0.2)
                     {
                         long ret = (long)(totalBytes / totalTime);
-                        if (ret > maxTransDownload)
-                            maxTransDownload = ret;
+                        //if (ret > maxTransDownload)
+                        //    maxTransDownload = ret;
                         return ret;
                     }
                     else
@@ -264,7 +264,7 @@ namespace Shadowsocks.Model
                         {
                             sumBytes += transLog[iEnd].size;
                             while (iBeg + 10 <= iEnd
-                                && (transLog[iEnd].endTime - transLog[iBeg].recvTime).TotalSeconds > 1)
+                                && (transLog[iEnd].endTime - transLog[iBeg].recvTime).TotalSeconds > 2)
                             {
                                 long speed = (long)((sumBytes - transLog[iBeg].size) / (transLog[iEnd].endTime - transLog[iBeg].recvTime).TotalSeconds);
                                 if (speed > maxTransUpload)
@@ -276,11 +276,11 @@ namespace Shadowsocks.Model
                     }
                     if (transLog.Count > 1)
                         totalTime = (transLog[transLog.Count - 1].endTime - transLog[0].recvTime).TotalSeconds;
-                    if (totalTime > 0.1)
+                    if (totalTime > 0.2)
                     {
                         long ret = (long)(totalBytes / totalTime);
-                        if (ret > maxTransUpload)
-                            maxTransUpload = ret;
+                        //if (ret > maxTransUpload)
+                        //    maxTransUpload = ret;
                         return ret;
                     }
                     else

@@ -69,18 +69,18 @@ namespace Shadowsocks.View
             UpButton.Text = I18N.GetString("Up");
             DownButton.Text = I18N.GetString("Down");
 
-            IPLabel.Text = I18N.GetString("Server IP");
-            ServerPortLabel.Text = I18N.GetString("Server Port");
+            IPLabel.Text = "**" + I18N.GetString("Server IP");
+            ServerPortLabel.Text = "**" + I18N.GetString("Server Port");
             labelUDPPort.Text = I18N.GetString("UDP Port");
-            PasswordLabel.Text = I18N.GetString("Password");
-            EncryptionLabel.Text = I18N.GetString("Encryption");
+            PasswordLabel.Text = "**" + I18N.GetString("Password");
+            EncryptionLabel.Text = "**" + I18N.GetString("Encryption");
+            TCPProtocolLabel.Text = "**" + I18N.GetString(TCPProtocolLabel.Text);
+            labelObfs.Text = "**" + I18N.GetString(labelObfs.Text);
             labelRemarks.Text = I18N.GetString("Remarks");
 
             checkAdvSetting.Text = I18N.GetString(checkAdvSetting.Text);
             TCPoverUDPLabel.Text = I18N.GetString(TCPoverUDPLabel.Text);
             UDPoverTCPLabel.Text = I18N.GetString(UDPoverTCPLabel.Text);
-            TCPProtocolLabel.Text = I18N.GetString(TCPProtocolLabel.Text);
-            labelObfs.Text = I18N.GetString(labelObfs.Text);
             labelObfsParam.Text = I18N.GetString(labelObfsParam.Text);
             ObfsUDPLabel.Text = I18N.GetString(ObfsUDPLabel.Text);
             LabelNote.Text = I18N.GetString(LabelNote.Text);
@@ -200,9 +200,11 @@ namespace Shadowsocks.View
                     }
                 }
                 PictureQRcode.Image = drawArea;
+                PictureQRcode.Visible = true;
             }
             else
             {
+                PictureQRcode.Visible = false;
                 Bitmap drawArea = new Bitmap(300, 300);
                 using (Graphics g = Graphics.FromImage(drawArea))
                 {

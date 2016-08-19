@@ -248,6 +248,7 @@
             // 
             // TextS5Pass
             // 
+            this.TextS5Pass.ImeMode = System.Windows.Forms.ImeMode.Off;
             this.TextS5Pass.Location = new System.Drawing.Point(83, 138);
             this.TextS5Pass.Name = "TextS5Pass";
             this.TextS5Pass.Size = new System.Drawing.Size(236, 21);
@@ -265,6 +266,7 @@
             // 
             // TextS5User
             // 
+            this.TextS5User.ImeMode = System.Windows.Forms.ImeMode.Off;
             this.TextS5User.Location = new System.Drawing.Point(83, 111);
             this.TextS5User.Name = "TextS5User";
             this.TextS5User.Size = new System.Drawing.Size(236, 21);
@@ -282,6 +284,7 @@
             // 
             // TextS5Port
             // 
+            this.TextS5Port.ImeMode = System.Windows.Forms.ImeMode.Off;
             this.TextS5Port.Location = new System.Drawing.Point(83, 84);
             this.TextS5Port.Name = "TextS5Port";
             this.TextS5Port.Size = new System.Drawing.Size(236, 21);
@@ -289,6 +292,7 @@
             // 
             // TextS5Server
             // 
+            this.TextS5Server.ImeMode = System.Windows.Forms.ImeMode.Off;
             this.TextS5Server.Location = new System.Drawing.Point(83, 57);
             this.TextS5Server.Name = "TextS5Server";
             this.TextS5Server.Size = new System.Drawing.Size(236, 21);
@@ -339,6 +343,7 @@
             // 
             // TextUserAgent
             // 
+            this.TextUserAgent.ImeMode = System.Windows.Forms.ImeMode.Off;
             this.TextUserAgent.Location = new System.Drawing.Point(83, 165);
             this.TextUserAgent.Name = "TextUserAgent";
             this.TextUserAgent.Size = new System.Drawing.Size(236, 21);
@@ -381,6 +386,7 @@
             // 
             // TextAuthPass
             // 
+            this.TextAuthPass.ImeMode = System.Windows.Forms.ImeMode.Off;
             this.TextAuthPass.Location = new System.Drawing.Point(75, 82);
             this.TextAuthPass.Name = "TextAuthPass";
             this.TextAuthPass.Size = new System.Drawing.Size(236, 21);
@@ -398,6 +404,7 @@
             // 
             // TextAuthUser
             // 
+            this.TextAuthUser.ImeMode = System.Windows.Forms.ImeMode.Off;
             this.TextAuthUser.Location = new System.Drawing.Point(75, 55);
             this.TextAuthUser.Name = "TextAuthUser";
             this.TextAuthUser.Size = new System.Drawing.Size(236, 21);
@@ -425,6 +432,7 @@
             // 
             // ProxyPortTextBox
             // 
+            this.ProxyPortTextBox.ImeMode = System.Windows.Forms.ImeMode.Off;
             this.ProxyPortTextBox.Location = new System.Drawing.Point(75, 28);
             this.ProxyPortTextBox.MaxLength = 10;
             this.ProxyPortTextBox.Name = "ProxyPortTextBox";
@@ -543,6 +551,7 @@
             // 
             // ReconnectText
             // 
+            this.ReconnectText.ImeMode = System.Windows.Forms.ImeMode.Off;
             this.ReconnectText.Location = new System.Drawing.Point(78, 33);
             this.ReconnectText.MaxLength = 10;
             this.ReconnectText.Name = "ReconnectText";
@@ -562,6 +571,7 @@
             // 
             // TTLText
             // 
+            this.TTLText.ImeMode = System.Windows.Forms.ImeMode.Off;
             this.TTLText.Location = new System.Drawing.Point(78, 60);
             this.TTLText.MaxLength = 10;
             this.TTLText.Name = "TTLText";
@@ -581,6 +591,7 @@
             // 
             // DNSText
             // 
+            this.DNSText.ImeMode = System.Windows.Forms.ImeMode.Off;
             this.DNSText.Location = new System.Drawing.Point(78, 6);
             this.DNSText.MaxLength = 0;
             this.DNSText.Name = "DNSText";

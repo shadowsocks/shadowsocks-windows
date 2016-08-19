@@ -222,7 +222,7 @@ namespace Shadowsocks.Obfs
 
         public void PackData(byte[] data, int datalength, byte[] outdata, out int outlength)
         {
-            int rand_len = datalength >= 1300 ? 1 : datalength > 400 ? random.Next(128) + 1 : random.Next(1024) + 3;
+            int rand_len = (datalength >= 1300 ? 0 : (datalength > 400 ? random.Next(128) : random.Next(1024))) + 1;
             outlength = rand_len + datalength + 6;
             if (datalength > 0)
                 Array.Copy(data, 0, outdata, rand_len + 2, datalength);
@@ -244,7 +244,7 @@ namespace Shadowsocks.Obfs
 
         public void PackAuthData(byte[] data, int datalength, byte[] outdata, out int outlength)
         {
-            int rand_len = datalength > 1300 ? 1 : datalength > 400 ? random.Next(128) + 1 : random.Next(1024) + 3;
+            int rand_len = (datalength > 400 ? random.Next(128) : random.Next(1024)) + 1;
             int data_offset = rand_len + 4 + 2;
             outlength = data_offset + datalength + 12 + 10;
             AuthData authData = (AuthData)this.Server.data;

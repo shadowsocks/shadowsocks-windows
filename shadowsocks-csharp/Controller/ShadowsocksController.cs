@@ -341,20 +341,7 @@ namespace Shadowsocks.Controller
 
         protected string GetObfsPartOfSSLink(Server server)
         {
-            string parts = "";
-            //if (server.protocol.Length > 0 && server.protocol != "origin")
-            //{
-            //    parts = server.protocol + ":" + parts;
-            //}
-            //if (server.obfs.Length > 0 && server.obfs != "plain")
-            //{
-            //    parts = server.obfs + ":" + parts;
-            //}
-            parts = parts + server.method + ":" + server.password + "@" + server.server + ":" + server.server_port;
-            if (server.obfs.Length > 0 && server.obfs != "plain" && server.obfsparam.Length > 0)
-            {
-                parts += "/" + System.Convert.ToBase64String(Encoding.UTF8.GetBytes(server.obfsparam)).Replace('+', '-').Replace('/', '_');
-            }
+            string parts = server.method + ":" + server.password + "@" + server.server + ":" + server.server_port;
             return parts;
         }
 
@@ -461,9 +448,7 @@ namespace Shadowsocks.Controller
             bool _firstRun = firstRun;
             for (int i = 1; i <= 5; ++i)
             {
-                firstRun = false;
-                if (i == 5)
-                    _firstRun = false;
+                _firstRun = false;
                 try
                 {
                     if (_listener != null && !_listener.isConfigChange(_config))
