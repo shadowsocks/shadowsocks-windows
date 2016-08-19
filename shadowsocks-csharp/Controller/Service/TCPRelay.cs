@@ -536,7 +536,8 @@ namespace Shadowsocks.Controller
             {
                 _startReceivingTime = DateTime.Now;
                 remote?.BeginReceive(_remoteRecvBuffer, 0, RecvSize, SocketFlags.None, new AsyncCallback(PipeRemoteReceiveCallback), null);
-                connection?.BeginReceive(_connetionRecvBuffer, 0, RecvSize, SocketFlags.None, new AsyncCallback(PipeConnectionReceiveCallback), null);
+                connection?.BeginReceive(_connetionRecvBuffer, 0, RecvSize, SocketFlags.None, new AsyncCallback(PipeConnectionReceiveCallback), 
+                    true /* to tell the callback this is the first time reading packet, and we haven't found the header yet. */);
             }
             catch (Exception e)
             {
@@ -591,34 +592,43 @@ namespace Shadowsocks.Controller
                 _totalWrite += bytesRead;
                 if (bytesRead > 0)
                 {
-                    int atyp = _connetionRecvBuffer[0];
-                    string dst_addr;
-                    int dst_port;
-                    switch (atyp)
+                    /*
+                     * Only the first packet contains the socks5 header, it doesn't make sense to parse every packets. 
+                     * Also it's unnecessary to parse these data if we turn off the VerboseLogging.
+                     */
+                    object needToFindHeader = null;
+                    if (ar.AsyncState != null && _config.isVerboseLogging)
                     {
-                        case 1:  // IPv4 address, 4 bytes
-                            dst_addr = new IPAddress(_connetionRecvBuffer.Skip(1).Take(4).ToArray()).ToString();
-                            dst_port = (_connetionRecvBuffer[5] << 8) + _connetionRecvBuffer[6];
-                            if ( _config.isVerboseLogging ) {
-                                Logging.Info( $"connect to {dst_addr}:{dst_port}" );
-                            }
-                            break;
-                        case 3:  // domain name, length + str
-                            int len = _connetionRecvBuffer[1];
-                            dst_addr = System.Text.Encoding.UTF8.GetString(_connetionRecvBuffer, 2, len);
-                            dst_port = (_connetionRecvBuffer[len + 2] << 8) + _connetionRecvBuffer[len + 3];
-                            if ( _config.isVerboseLogging ) {
-                                Logging.Info( $"connect to {dst_addr}:{dst_port}" );
-                            }
-                            break;
-                        case 4:  // IPv6 address, 16 bytes
-                            dst_addr = new IPAddress(_connetionRecvBuffer.Skip(1).Take(16).ToArray()).ToString();
-                            dst_port = (_connetionRecvBuffer[17] << 8) + _connetionRecvBuffer[18];
-                            if ( _config.isVerboseLogging ) {
-                                Logging.Info( $"connect to [{dst_addr}]:{dst_port}" );
-                            }
-                            break;
+                        int atyp = _connetionRecvBuffer[0];
+                        string dst_addr;
+                        int dst_port;
+                        switch (atyp)
+                        {
+                            case 1: // IPv4 address, 4 bytes
+                                dst_addr = new IPAddress(_connetionRecvBuffer.Skip(1).Take(4).ToArray()).ToString();
+                                dst_port = (_connetionRecvBuffer[5] << 8) + _connetionRecvBuffer[6];
+
+                                Logging.Info($"connect to {dst_addr}:{dst_port}");
+                                break;
+                            case 3: // domain name, length + str
+                                int len = _connetionRecvBuffer[1];
+                                dst_addr = System.Text.Encoding.UTF8.GetString(_connetionRecvBuffer, 2, len);
+                                dst_port = (_connetionRecvBuffer[len + 2] << 8) + _connetionRecvBuffer[len + 3];
+
+                                Logging.Info($"connect to {dst_addr}:{dst_port}");
+                                break;
+                            case 4: // IPv6 address, 16 bytes
+                                dst_addr = new IPAddress(_connetionRecvBuffer.Skip(1).Take(16).ToArray()).ToString();
+                                dst_port = (_connetionRecvBuffer[17] << 8) + _connetionRecvBuffer[18];
+
+                                Logging.Info($"connect to [{dst_addr}]:{dst_port}");
+                                break;
+                            default:
+                                needToFindHeader = true; // Still not found, try next packet.
+                                break;
+                        }
                     }
+
                     int bytesToSend;
                     lock (_encryptionLock)
                     {
@@ -628,7 +638,7 @@ namespace Shadowsocks.Controller
                     _tcprelay.UpdateOutboundCounter(server, bytesToSend);
                     _startSendingTime = DateTime.Now;
                     _bytesToSend = bytesToSend;
-                    remote.BeginSend(_connetionSendBuffer, 0, bytesToSend, SocketFlags.None, new AsyncCallback(PipeRemoteSendCallback), null);
+                    remote.BeginSend(_connetionSendBuffer, 0, bytesToSend, SocketFlags.None, new AsyncCallback(PipeRemoteSendCallback), needToFindHeader);
                     IStrategy strategy = controller.GetCurrentStrategy();
                     strategy?.UpdateLastWrite(server);
                 }
@@ -652,7 +662,7 @@ namespace Shadowsocks.Controller
             try
             {
                 remote?.EndSend(ar);
-                connection?.BeginReceive(_connetionRecvBuffer, 0, RecvSize, SocketFlags.None, new AsyncCallback(PipeConnectionReceiveCallback), null);
+                connection?.BeginReceive(_connetionRecvBuffer, 0, RecvSize, SocketFlags.None, new AsyncCallback(PipeConnectionReceiveCallback), ar.AsyncState);
             }
             catch (Exception e)
             {
