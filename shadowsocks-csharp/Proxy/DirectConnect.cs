@@ -55,17 +55,12 @@ namespace Shadowsocks.Proxy
         {
             DestEndPoint = destEndPoint;
 
-            if (_remote == null)
-            {
-                _remote = SocketUtil.CreateSocket(destEndPoint);
-                _remote.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, true);
-            }
-            _remote.BeginConnect(destEndPoint, callback, state);
+            SocketUtil.BeginConnectTcp(destEndPoint, callback, state);
         }
 
         public void EndConnectDest(IAsyncResult asyncResult)
         {
-            _remote?.EndConnect(asyncResult);
+            _remote = SocketUtil.EndConnectTcp(asyncResult);
         }
 
         public void BeginSend(byte[] buffer, int offset, int size, SocketFlags socketFlags, AsyncCallback callback,

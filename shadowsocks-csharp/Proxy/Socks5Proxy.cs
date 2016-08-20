@@ -52,16 +52,13 @@ namespace Shadowsocks.Proxy
 
         public void BeginConnectProxy(EndPoint remoteEP, AsyncCallback callback, object state)
         {
-            _remote = SocketUtil.CreateSocket(remoteEP);
-            _remote.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, true);
-
             var st = new Socks5State();
             st.Callback = callback;
             st.AsyncState = state;
 
             ProxyEndPoint = remoteEP;
 
-            _remote.BeginConnect(remoteEP, ConnectCallback, st);
+            SocketUtil.BeginConnectTcp(remoteEP, ConnectCallback, st);
         }
 
         public void EndConnectProxy(IAsyncResult asyncResult)
@@ -180,7 +177,7 @@ namespace Shadowsocks.Proxy
             var state = (Socks5State) ar.AsyncState;
             try
             {
-                _remote.EndConnect(ar);
+                _remote = SocketUtil.EndConnectTcp(ar);
 
                 byte[] handshake = {5, 1, 0};
                 _remote.BeginSend(handshake, 0, handshake.Length, 0, Socks5HandshakeSendCallback, state);

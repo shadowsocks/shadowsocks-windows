@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Net;
 using System.Net.Sockets;
+using System.Threading;
 
 namespace Shadowsocks.Util
 {
@@ -35,33 +36,68 @@ namespace Shadowsocks.Util
             return new DnsEndPoint2(host, port);
         }
 
-        public static Socket CreateSocket(EndPoint endPoint, ProtocolType protocolType = ProtocolType.Tcp)
+        private class TcpUserToken : IAsyncResult
         {
-            SocketType socketType;
-            switch (protocolType)
+            public AsyncCallback Callback { get; }
+            public SocketAsyncEventArgs Args { get; }
+
+            public TcpUserToken(AsyncCallback callback, object state, SocketAsyncEventArgs args)
             {
-                case ProtocolType.Tcp:
-                    socketType = SocketType.Stream;
-                    break;
-                case ProtocolType.Udp:
-                    socketType = SocketType.Dgram;
-                    break;
-                default:
-                    throw new NotSupportedException("Protocol " + protocolType + " doesn't supported!");
+                Callback = callback;
+                AsyncState = state;
+                Args = args;
             }
 
-            if (endPoint is DnsEndPoint)
-            {
-                // use dual-mode socket
-                var socket = new Socket(AddressFamily.InterNetworkV6, socketType, protocolType);
-                socket.SetSocketOption(SocketOptionLevel.IPv6, (SocketOptionName)27, false);
+            public bool IsCompleted { get; } = true;
+            public WaitHandle AsyncWaitHandle { get; } = null;
+            public object AsyncState { get; }
+            public bool CompletedSynchronously { get; } = true;
+        }
 
-                return socket;
-            }
-            else
+        private static void OnTcpConnectCompleted(object sender, SocketAsyncEventArgs args)
+        {
+            TcpUserToken token = (TcpUserToken) args.UserToken;
+
+            token.Callback(token);
+        }
+
+        public static void BeginConnectTcp(EndPoint endPoint, AsyncCallback callback, object state)
+        {
+            var arg = new SocketAsyncEventArgs();
+            arg.RemoteEndPoint = endPoint;
+            arg.Completed += OnTcpConnectCompleted;
+            arg.UserToken = new TcpUserToken(callback, state, arg);
+
+
+            Socket.ConnectAsync(SocketType.Stream, ProtocolType.Tcp, arg);
+        }
+
+        public static Socket EndConnectTcp(IAsyncResult asyncResult)
+        {
+            var tut = asyncResult as TcpUserToken;
+            if (tut == null)
             {
-                return new Socket(endPoint.AddressFamily, socketType, protocolType);
+                throw new ArgumentException("Invalid asyncResult.", nameof(asyncResult));
             }
+
+            var arg = tut.Args;
+
+            if (arg.SocketError != SocketError.Success)
+            {
+                if (arg.ConnectByNameError != null)
+                {
+                    throw arg.ConnectByNameError;
+                }
+
+                var ex = new SocketException((int)arg.SocketError);
+                throw ex;
+            }
+
+            var so = tut.Args.ConnectSocket;
+
+            so.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, true);
+
+            return so;
         }
     }
 }
