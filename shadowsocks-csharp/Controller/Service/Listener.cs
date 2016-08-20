@@ -116,8 +116,9 @@ namespace Shadowsocks.Controller
             catch (ObjectDisposedException)
             {
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Logging.LogUsefulException(ex);
             }
             finally
             {
