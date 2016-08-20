@@ -122,6 +122,7 @@ namespace Shadowsocks.Controller
          * different instance will create their unique "privoxy_UID.conf" where
          * UID is hash of ss's location.
          */
+
         private static bool IsChildProcess(Process process)
         {
             if (Utils.IsPortableMode())
@@ -129,8 +130,21 @@ namespace Shadowsocks.Controller
                 /*
                  * Under PortableMode, we could identify it by the path of ss_privoxy.exe.
                  */
-                string path = process.MainModule.FileName;
-                return Utils.GetTempPath("ss_privoxy.exe").Equals(path);
+                try
+                {
+                    /*
+                     * Sometimes Process.GetProcessesByName will return some processes that
+                     * are already dead, and that will cause exceptions here.
+                     * We could simply ignore those exceptions.
+                     */
+                    string path = process.MainModule.FileName;
+                    return Utils.GetTempPath("ss_privoxy.exe").Equals(path);
+                }
+                catch (Exception ex)
+                {
+                    Logging.LogUsefulException(ex);
+                    return false;
+                }
             }
             else
             {
