@@ -118,7 +118,7 @@ namespace Shadowsocks.Controller
             }
             catch (Exception ex)
             {
-                Logging.LogUsefulException(ex);
+                Logging.Debug(ex);
             }
             finally
             {
