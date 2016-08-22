@@ -48,12 +48,8 @@ namespace Shadowsocks.Controller
                 {
                     EndPoint remoteEP = SocketUtil.GetEndPoint("localhost", targetPort);
 
-                    _remote = SocketUtil.CreateSocket(remoteEP);
-                    _remote.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, true);
-
                     // Connect to the remote endpoint.
-                    _remote.BeginConnect(remoteEP,
-                        new AsyncCallback(ConnectCallback), null);
+                    SocketUtil.BeginConnectTcp(remoteEP, ConnectCallback, null);
                 }
                 catch (Exception e)
                 {
@@ -70,7 +66,7 @@ namespace Shadowsocks.Controller
                 }
                 try
                 {
-                    _remote.EndConnect(ar);
+                    _remote = SocketUtil.EndConnectTcp(ar);
                     HandshakeReceive();
                 }
                 catch (Exception e)
