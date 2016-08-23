@@ -872,7 +872,7 @@ namespace Shadowsocks.View
         protected override void WndProc(ref Message message)
         {
             const int WM_SIZING = 532;
-            const int WM_SIZE = 533;
+            //const int WM_SIZE = 533;
             const int WM_MOVING = 534;
             switch (message.Msg)
             {

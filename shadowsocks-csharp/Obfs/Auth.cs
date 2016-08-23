@@ -44,7 +44,7 @@ namespace Shadowsocks.Obfs
 
         public void PackData(byte[] data, int datalength, byte[] outdata, out int outlength)
         {
-            int rand_len = random.Next(16) + 1;
+            int rand_len = datalength > 1300 ? 1 : random.Next(64) + 1;
             outlength = rand_len + datalength + 6;
             if (datalength > 0)
                 Array.Copy(data, 0, outdata, rand_len + 2, datalength);

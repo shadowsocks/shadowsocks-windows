@@ -111,12 +111,13 @@ namespace Shadowsocks.Properties {
         }
         
         /// <summary>
-        ///   查找类似 listen-address __POLIPO_BIND_IP__:__POLIPO_BIND_PORT__
+        ///   查找类似 listen-address __PRIVOXY_BIND_IP__:__PRIVOXY_BIND_PORT__
         ///show-on-task-bar 0
         ///activity-animation 0
         ///forward-socks5 / 127.0.0.1:__SOCKS_PORT__ .
         ///hide-console
         ///keep-alive-timeout __KEEP_ALIVE_TIMEOUT__
+        ///connection-sharing __CONNECTION_SHARING__
         ///__BYPASS_ACTION__
         ///
         /// 的本地化字符串。
@@ -195,6 +196,36 @@ namespace Shadowsocks.Properties {
         internal static string user_rule {
             get {
                 return ResourceManager.GetString("user_rule", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 # translation for Simplified Chinese
+        ///
+        ///Shadowsocks=Shadowsocks
+        ///
+        ///# Menu items
+        ///
+        ///Enable System Proxy=启用系统代理
+        ///Mode=系统代理模式
+        ///PAC=PAC 模式
+        ///Global=全局模式
+        ///Servers=服务器
+        ///Edit Servers...=编辑服务器...
+        ///Global Settings...=选项设置...
+        ///Start on Boot=开机启动
+        ///Allow Clients from LAN=允许来自局域网的连接
+        ///Enable balance=服务器负载均衡
+        ///Same host for same address=优先相同节点连接同一地址
+        ///Enable domain white list(http proxy only)=使用域名白名单(仅http代理)
+        ///Local PAC=使用本地 PAC
+        ///Online PAC=使用在线 PAC
+        ///Update Local PAC from Lan IP List=更新PAC为绕过局域网IP
+        ///Update Local PAC from Chn  [字符串的其余部分被截断]&quot;; 的本地化字符串。
+        /// </summary>
+        internal static string zh_tw {
+            get {
+                return ResourceManager.GetString("zh_tw", resourceCulture);
             }
         }
     }

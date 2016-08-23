@@ -524,7 +524,7 @@ namespace Shadowsocks.Controller
                 dataSock5Send.Add(0);
 
                 IPAddress ipAdd;
-                bool ForceRemoteDnsResolve = false;
+                //bool ForceRemoteDnsResolve = false;
                 bool parsed = IPAddress.TryParse(strRemoteHost, out ipAdd);
                 //if (!parsed && !ForceRemoteDnsResolve)
                 //{
@@ -649,7 +649,6 @@ namespace Shadowsocks.Controller
                 }
                 return true;
             }
-            return false;
         }
 
         public void SetTcpServer(string server, int port)
@@ -669,7 +668,7 @@ namespace Shadowsocks.Controller
             _proxy = true;
 
             IPAddress ipAdd;
-            bool ForceRemoteDnsResolve = true;
+            //bool ForceRemoteDnsResolve = true;
             bool parsed = IPAddress.TryParse(strRemoteHost, out ipAdd);
             //if (!parsed && !ForceRemoteDnsResolve)
             //{

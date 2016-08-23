@@ -304,7 +304,7 @@ namespace Shadowsocks.Model
 
         private static string CONFIG_FILE = "gui-config.json";
 
-        public bool KeepCurrentServer(string targetAddr)
+        public bool KeepCurrentServer(string targetAddr, string id)
         {
             if (sameHostForSameTarget && targetAddr != null)
             {
@@ -313,9 +313,19 @@ namespace Shadowsocks.Model
                     if (uri2time.ContainsKey(targetAddr))
                     {
                         UriVisitTime visit = uri2time[targetAddr];
-                        if (visit.index < configs.Count && configs[visit.index].enable)
+                        int index = -1;
+                        for (int i = 0; i < configs.Count; ++i)
+                        {
+                            if (configs[i].id == id)
+                            {
+                                index = i;
+                                break;
+                            }
+                        }
+                        if (index >= 0 && configs[index].enable)
                         {
                             time2uri.Remove(visit);
+                            visit.index = index;
                             visit.visitTime = DateTime.Now;
                             uri2time[targetAddr] = visit;
                             time2uri[visit] = targetAddr;

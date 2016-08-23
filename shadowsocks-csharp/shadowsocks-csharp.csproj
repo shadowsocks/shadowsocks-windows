@@ -245,6 +245,7 @@
     <None Include="Data\privoxy_conf.txt" />
     <None Include="Data\libsscrypto.dll" />
     <Content Include="Data\user-rule.txt" />
+    <None Include="Data\zh-tw.txt" />
     <Content Include="shadowsocks.ico" />
   </ItemGroup>
   <ItemGroup>

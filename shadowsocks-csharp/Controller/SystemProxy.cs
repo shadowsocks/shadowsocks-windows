@@ -37,69 +37,20 @@ namespace Shadowsocks.Controller
                 Logging.LogUsefulException(e);
             }
         }
-
-        public static int GetFIPS()
+        public static RegistryKey OpenUserRegKey(string name, bool writable)
         {
-            RegistryKey registry = null;
-            try
-            {
-                registry = Registry.LocalMachine.OpenSubKey("SYSTEM\\CurrentControlSet\\Control\\Lsa\\FipsAlgorithmPolicy", false);
-                var readProxyServer = registry.GetValue("Enabled");
-                return (int)readProxyServer;
-            }
-            catch (Exception e)
-            {
-                Logging.LogUsefulException(e);
-                // TODO this should be moved into views
-                //MessageBox.Show(I18N.GetString("Failed to update registry"));
-            }
-            finally
-            {
-                if (registry != null)
-                {
-                    try
-                    {
-                        registry.Close();
-                    }
-                    catch (Exception e)
-                    {
-                        Logging.LogUsefulException(e);
-                    }
-                }
-            }
-            return -1;
-        }
-
-        public static bool SetFIPS(int val)
-        {
-            RegistryKey registry = null;
-            try
-            {
-                registry = Registry.LocalMachine.OpenSubKey("SYSTEM\\CurrentControlSet\\Control\\Lsa\\FipsAlgorithmPolicy", true);
-                RegistrySetValue(registry, "Enabled", val);
-                return true;
-            }
-            catch (Exception e)
-            {
-                Logging.LogUsefulException(e);
-                // TODO this should be moved into views
-                //MessageBox.Show(I18N.GetString("Failed to update registry"));
-            }
-            finally
-            {
-                if (registry != null)
-                {
-                    try
-                    {
-                        registry.Close();
-                    }
-                    catch (Exception e)
-                    {
-                        Logging.LogUsefulException(e);
-                    }
-                }
-            }
-            return false;
+            // we are building x86 binary for both x86 and x64, which will
+            // cause problem when opening registry key
+            // detect operating system instead of CPU
+#if _DOTNET_4_0
+            RegistryKey userKey = RegistryKey.OpenRemoteBaseKey(RegistryHive.CurrentUser, "",
+                Environment.Is64BitOperatingSystem ? RegistryView.Registry64 : RegistryView.Registry32
+                ).OpenSubKey(name, writable);
+#else
+            RegistryKey userKey = RegistryKey.OpenRemoteBaseKey(RegistryHive.CurrentUser, ""
+                ).OpenSubKey(name, writable);
+#endif
+            return userKey;
         }
 
         public static void Update(Configuration config, bool forceDisable)
@@ -113,7 +64,7 @@ namespace Shadowsocks.Controller
             RegistryKey registry = null;
             try
             {
-                registry = Registry.CurrentUser.OpenSubKey("Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings", true);
+                registry = OpenUserRegKey(@"Software\Microsoft\Windows\CurrentVersion\Internet Settings", true);
                 if (enabled)
                 {
                     if (global)
@@ -171,7 +122,7 @@ namespace Shadowsocks.Controller
             RegistryKey registry = null;
             try
             {
-                registry = Registry.CurrentUser.OpenSubKey("Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings\\Connections", true);
+                registry = OpenUserRegKey(@"Software\Microsoft\Windows\CurrentVersion\Internet Settings\Connections", true);
                 var defaultValue = registry.GetValue("DefaultConnectionSettings");
                 var connections = registry.GetValueNames();
                 foreach (String each in connections)
@@ -220,7 +171,7 @@ namespace Shadowsocks.Controller
             RegistryKey registry = null;
             try
             {
-                registry = Registry.CurrentUser.OpenSubKey("Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings\\Connections",
+                registry = OpenUserRegKey("Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings\\Connections",
                         true);
                 byte[] defConnection = (byte[])registry.GetValue("DefaultConnectionSettings");
                 byte[] savedLegacySetting = (byte[])registry.GetValue("SavedLegacySettings");

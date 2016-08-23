@@ -89,17 +89,14 @@ namespace OpenDNS
                     {
                         port = Int32.Parse(pair[1]);
                     }
-                    catch (Exception e)
-                    {
-
-                    }
+                    catch { }
                 }
                 try
                 {
                     SendQuery2(pair[0], port);
                     break;
                 }
-                catch (Exception e)
+                catch
                 {
                     continue;
                 }

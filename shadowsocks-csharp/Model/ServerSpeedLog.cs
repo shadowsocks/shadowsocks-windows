@@ -204,8 +204,8 @@ namespace Shadowsocks.Model
                         for (iEnd = 0; iEnd < transLog.Count; ++iEnd)
                         {
                             sumBytes += transLog[iEnd].size;
-                            while (iBeg + 10 <= iEnd
-                                && (transLog[iEnd].endTime - transLog[iBeg].recvTime).TotalSeconds > 2)
+                            while (iBeg + 3 <= iEnd
+                                && (transLog[iEnd].endTime - transLog[iBeg].recvTime).TotalSeconds > 1.5)
                             {
                                 long speed = (long)((sumBytes - transLog[iBeg].size) / (transLog[iEnd].endTime - transLog[iBeg].recvTime).TotalSeconds);
                                 if (speed > maxTransDownload)
@@ -220,8 +220,8 @@ namespace Shadowsocks.Model
                     if (totalTime > 0.2)
                     {
                         long ret = (long)(totalBytes / totalTime);
-                        //if (ret > maxTransDownload)
-                        //    maxTransDownload = ret;
+                        if (totalTime > 1 && ret > maxTransDownload)
+                            maxTransDownload = ret;
                         return ret;
                     }
                     else
@@ -263,8 +263,8 @@ namespace Shadowsocks.Model
                         for (iEnd = 0; iEnd < transLog.Count; ++iEnd)
                         {
                             sumBytes += transLog[iEnd].size;
-                            while (iBeg + 10 <= iEnd
-                                && (transLog[iEnd].endTime - transLog[iBeg].recvTime).TotalSeconds > 2)
+                            while (iBeg + 3 <= iEnd
+                                && (transLog[iEnd].endTime - transLog[iBeg].recvTime).TotalSeconds > 1.5)
                             {
                                 long speed = (long)((sumBytes - transLog[iBeg].size) / (transLog[iEnd].endTime - transLog[iBeg].recvTime).TotalSeconds);
                                 if (speed > maxTransUpload)
@@ -279,8 +279,8 @@ namespace Shadowsocks.Model
                     if (totalTime > 0.2)
                     {
                         long ret = (long)(totalBytes / totalTime);
-                        //if (ret > maxTransUpload)
-                        //    maxTransUpload = ret;
+                        if (totalTime > 1 && ret > maxTransUpload)
+                            maxTransUpload = ret;
                         return ret;
                     }
                     else

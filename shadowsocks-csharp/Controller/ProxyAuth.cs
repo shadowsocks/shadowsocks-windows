@@ -524,7 +524,7 @@ namespace Shadowsocks.Controller
             Handler handler = new Handler();
 
             handler.getCurrentServer = delegate (string targetURI, bool usingRandom, bool forceRandom) { return _config.GetCurrentServer(targetURI, usingRandom, forceRandom); };
-            handler.keepCurrentServer = delegate (string targetURI) { _config.KeepCurrentServer(targetURI); };
+            handler.keepCurrentServer = delegate (string targetURI, string id) { _config.KeepCurrentServer(targetURI, id); };
             handler.connection = _connection;
             handler.connectionUDP = _connectionUDP;
             handler.cfg.reconnectTimesRemain = _config.reconnectTimes;

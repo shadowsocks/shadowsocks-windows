@@ -33,7 +33,7 @@ namespace Shadowsocks.Encryption
                     LoadLibrary("libcrypto.dll");
                     return;
                 }
-                catch (Exception e)
+                catch //(Exception e)
                 {
                     //Console.WriteLine(e.ToString());
                 }
@@ -51,7 +51,7 @@ namespace Shadowsocks.Encryption
                 catch (IOException)
                 {
                 }
-                catch (Exception e)
+                catch //(Exception e)
                 {
                     //Console.WriteLine(e.ToString());
                 }

@@ -1,0 +1,161 @@
+# translation for Traditional Chinese
+
+Shadowsocks=Shadowsocks
+
+# Menu items
+
+Enable System Proxy=啟用系統代理
+Mode=系統代理模式
+PAC=PAC 模式
+Global=全局模式
+Servers=伺服器
+Edit Servers...=編輯伺服器...
+Global Settings...=選項設置...
+Start on Boot=開機啟動
+Allow Clients from LAN=允許來自局域網的連接
+Enable balance=伺服器負載均衡
+Same host for same address=優先相同節點連接同壹地址
+Enable domain white list(http proxy only)=使用域名白名單(僅http代理)
+Local PAC=使用本地 PAC
+Online PAC=使用在線 PAC
+Update Local PAC from Lan IP List=更新PAC為繞過局域網IP
+Update Local PAC from Chn White List=更新PAC為繞過大陸常見域名列表
+Update Local PAC from Chn IP List=更新PAC為繞過大陸IP(慎用)
+Update Local PAC from GFWList=更新PAC為GFWList
+Update Local PAC from Chn Only List=更新PAC為僅通過大陸常見域名（國外訪問大陸）
+Edit Local PAC File...=編輯本地 PAC 文件...
+Edit User Rule for GFWList...=編輯 GFWList 的用戶規則...
+Show QRCode...=顯示二維碼...
+Scan QRCode from Screen...=掃描屏幕上的二維碼...
+Copy Address from clipboard...=從剪貼板復制地址...
+Server Statistic...=伺服器連接統計...
+Disconnect Current=斷開當前所有連接
+New version {0} {1} available=【點擊下載新版本{0} {1}】
+Help=幫助
+Check Update=檢查更新
+Show Logs...=顯示日誌...
+About...=關於...
+Quit=退出
+Edit Servers=編輯伺服器
+Global Settings=選項設置
+
+# Config Form
+
+&Add=添加(&A)
+&Delete=刪除(&D)
+Up=上移
+Down=下移
+
+New server=未配置的伺服器
+
+Server=伺服器(截圖註意打碼)
+Server IP=伺服器 IP
+Server Port=伺服器端口
+UDP Port=UDP端口
+Password=密碼
+Encryption=加密
+Remarks=備註
+
+Adv. Setting=高級選項
+TCPoverUDP=TCP over UDP
+UDPoverTCP=UDP over TCP
+Obfs UDP=混淆UDP協議
+NOT all server support belows=以下選項不是所有伺服端都支持
+TCP over TCP if not checked=不打鉤使用原生 TCP(暫不能用)
+UDP over UDP if not checked=不打鉤使用原生 UDP
+Recommend checked=保留功能
+Protocol=協議
+Obfs=混淆
+Obfs param=混淆參數
+SSR Link=SSR鏈接
+Original=原版
+Verify header=校驗頭部(新TCP協議)
+Verify all=校驗所有數據
+
+Balance=負載均衡
+Order=按次序
+Random=隨機
+LowLatency=低延遲優先
+LowException=低錯誤優先
+SelectedFirst=選中優先
+Timer=定時切換
+SeletedGroup=所選組切換
+AutoBan=自動禁用出錯伺服器
+
+Remote proxy=二級（前置）代理
+Proxy On=開啟代理
+PAC "direct" return this proxy=PAC“直連”使用二級代理
+Socks5(support UDP)=Socks5(支持UDP)
+Http tunnel=Http隧道
+TCP Port tunnel=TCP端口轉發(需要相關混淆插件)
+Username=用戶名
+
+Local proxy=本地代理
+Build-in http proxy=內置http代理(目前有bug)
+Proxy Port=本地端口
+Reconnect Times=重連次數
+TTL=空閑斷開秒數
+
+OK=確定
+Cancel=取消
+
+# ServerLog Form
+ServerLog=伺服器記錄
+Auto &size=自動調整大小(&S)
+Always On &Top=窗口置頂(&T)
+Clear &MaxSpeed=重置歷史最高(&M)
+&Clear=清空(&C)
+Total Connect=總連接
+Enable=開關
+Connecting=連接
+Latency=延遲
+Avg DSpeed=下載
+Max DSpeed=最高
+Avg UpSpeed=上傳
+Max UpSpeed=最高
+Upload=總上傳
+Dload=總下載
+DloadRaw=實下載
+Error=錯誤
+Timeout=超時
+Empty Response=空連
+Error Percent=出錯比例
+Continuous=連錯
+
+# QRCode Form
+
+QRCode=二維碼
+
+# PAC Url Form
+
+Edit Online PAC URL=編輯在線 PAC 網址
+Edit Online PAC URL...=編輯在線 PAC 網址...
+Please input PAC Url=請輸入 PAC 網址
+
+# Messages
+
+Shadowsocks Error: {0}=Shadowsocks 錯誤: {0}
+Port already in use=端口已被占用
+Illegal port number format=非法端口格式
+Please add at least one server=請添加至少壹個伺服器
+Server IP can not be blank=伺服器 IP 不能為空
+Password can not be blank=密碼不能為空
+Port out of range=端口超出範圍
+{0} {1} Update Found={0} {1} 更新
+Click menu to download=點擊菜單項下載
+ShadowsocksR is here=ShadowsocksR 在這裏
+You can turn on/off ShadowsocksR in the context menu=可以在右鍵菜單中開關 ShadowsocksR
+System Proxy Enabled=系統代理已啟用
+System Proxy Disabled=系統代理未啟用
+Failed to update PAC file =更新 PAC 文件失敗
+PAC updated=更新 PAC 成功
+Domain white list list updated=更新域名白名單成功
+No updates found. Please report to GFWList if you have problems with it.=未發現更新。如有問題請提交給 GFWList。
+No QRCode found. Try to zoom in or move it to the center of the screen.=未發現二維碼，嘗試把它放大或移動到靠近屏幕中間的位置
+ShadowsocksR is already running.=ShadowsocksR 已經在運行。
+Find Shadowsocks icon in your notify tray.=請在任務欄裏尋找 ShadowsocksR 圖標。
+If you want to start multiple Shadowsocks, make a copy in another directory.=如果想啟動多份，可以另外復制壹份到別的目錄。
+Failed to decode QRCode=無法解析二維碼
+Failed to update registry=無法修改註冊表\n解決方案見https://github.com/shadowsocks/shadowsocks-windows/issues/253
+System Proxy On: =系統代理已啟用：
+Running: Port {0}=正在運行：端口 {0}
