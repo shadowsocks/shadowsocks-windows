@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
@@ -10,9 +11,18 @@ namespace Shadowsocks.Controller
 {
     public class Listener
     {
-        public interface Service
+        public interface IService
         {
             bool Handle(byte[] firstPacket, int length, Socket socket, object state);
+
+            void Stop();
+        }
+
+        public abstract class Service : IService
+        {
+            public abstract bool Handle(byte[] firstPacket, int length, Socket socket, object state);
+
+            public virtual void Stop() { }
         }
 
         public class UDPState
@@ -25,9 +35,9 @@ namespace Shadowsocks.Controller
         bool _shareOverLAN;
         Socket _tcpSocket;
         Socket _udpSocket;
-        IList<Service> _services;
+        List<IService> _services;
 
-        public Listener(IList<Service> services)
+        public Listener(List<IService> services)
         {
             this._services = services;
         }
@@ -97,6 +107,8 @@ namespace Shadowsocks.Controller
                 _udpSocket.Close();
                 _udpSocket = null;
             }
+
+            _services.ForEach(s=>s.Stop());
         }
 
         public void RecvFromCallback(IAsyncResult ar)
@@ -105,7 +117,7 @@ namespace Shadowsocks.Controller
             try
             {
                 int bytesRead = _udpSocket.EndReceiveFrom(ar, ref state.remoteEndPoint);
-                foreach (Service service in _services)
+                foreach (IService service in _services)
                 {
                     if (service.Handle(state.buffer, bytesRead, _udpSocket, state))
                     {
@@ -187,7 +199,7 @@ namespace Shadowsocks.Controller
             try
             {
                 int bytesRead = conn.EndReceive(ar);
-                foreach (Service service in _services)
+                foreach (IService service in _services)
                 {
                     if (service.Handle(buf, bytesRead, conn, null))
                     {

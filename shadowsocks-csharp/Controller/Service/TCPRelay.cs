@@ -29,7 +29,7 @@ namespace Shadowsocks.Controller
             _lastSweepTime = DateTime.Now;
         }
 
-        public bool Handle(byte[] firstPacket, int length, Socket socket, object state)
+        public override bool Handle(byte[] firstPacket, int length, Socket socket, object state)
         {
             if (socket.ProtocolType != ProtocolType.Tcp
                 || (length < 2 || firstPacket[0] != 5))
@@ -60,6 +60,16 @@ namespace Shadowsocks.Controller
                 handler1.Close();
             }
             return true;
+        }
+
+        public override void Stop()
+        {
+            List<TCPHandler> handlersToClose = new List<TCPHandler>();
+            lock (Handlers)
+            {
+                handlersToClose.AddRange(Handlers);
+            }
+            handlersToClose.ForEach(h=>h.Close());
         }
 
         public void UpdateInboundCounter(Server server, long n)
