@@ -171,7 +171,7 @@ namespace Shadowsocks.View
             }
 
             this.Text = I18N.GetString("Log Viewer") +
-                $" [in: {Utils.FormatBandwidth(controller.inboundCounter)}, out: {Utils.FormatBandwidth(controller.outboundCounter)}]";
+                $" [in: {Utils.FormatBandwidth(controller.InboundCounter)}, out: {Utils.FormatBandwidth(controller.OutboundCounter)}]";
         }
 
         private void LogForm_Load(object sender, EventArgs e)

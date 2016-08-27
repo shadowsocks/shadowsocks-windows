@@ -33,8 +33,10 @@ namespace Shadowsocks.Controller
         public AvailabilityStatistics availabilityStatistics = AvailabilityStatistics.Instance;
         public StatisticsStrategyConfiguration StatisticsConfiguration { get; private set; }
 
-        public long inboundCounter = 0;
-        public long outboundCounter = 0;
+        private long _inboundCounter = 0;
+        private long _outboundCounter = 0;
+        public long InboundCounter => Interlocked.Read(ref _inboundCounter);
+        public long OutboundCounter => Interlocked.Read(ref _outboundCounter);
         public QueueLast<TrafficPerSecond> traffic;
 
         private bool stopped = false;
@@ -364,7 +366,7 @@ namespace Shadowsocks.Controller
 
         public void UpdateInboundCounter(Server server, long n)
         {
-            Interlocked.Add(ref inboundCounter, n);
+            Interlocked.Add(ref _inboundCounter, n);
             if (_config.availabilityStatistics)
             {
                 availabilityStatistics.UpdateInboundCounter(server, n);
@@ -373,7 +375,7 @@ namespace Shadowsocks.Controller
 
         public void UpdateOutboundCounter(Server server, long n)
         {
-            Interlocked.Add(ref outboundCounter, n);
+            Interlocked.Add(ref _outboundCounter, n);
             if (_config.availabilityStatistics)
             {
                 availabilityStatistics.UpdateOutboundCounter(server, n);
@@ -427,7 +429,7 @@ namespace Shadowsocks.Controller
 
                 TCPRelay tcpRelay = new TCPRelay(this, _config);
                 UDPRelay udpRelay = new UDPRelay(this);
-                List<Listener.Service> services = new List<Listener.Service>();
+                List<Listener.IService> services = new List<Listener.IService>();
                 services.Add(tcpRelay);
                 services.Add(udpRelay);
                 services.Add(_pacServer);
@@ -579,19 +581,17 @@ namespace Shadowsocks.Controller
             {
                 TrafficPerSecond previous = traffic.Last;
                 TrafficPerSecond current = new TrafficPerSecond();
-                current.inboundCounter = inboundCounter;
-                current.outboundCounter = outboundCounter;
-                current.inboundIncreasement = inboundCounter - previous.inboundCounter;
-                current.outboundIncreasement = outboundCounter - previous.outboundCounter;
+                
+                var inbound = current.inboundCounter = InboundCounter;
+                var outbound = current.outboundCounter = OutboundCounter;
+                current.inboundIncreasement = inbound - previous.inboundCounter;
+                current.outboundIncreasement = outbound - previous.outboundCounter;
 
                 traffic.Enqueue(current);
                 if (traffic.Count > queueMaxSize)
                     traffic.Dequeue();
 
-                if (TrafficChanged != null)
-                {
-                    TrafficChanged(this, new EventArgs());
-                }
+                TrafficChanged?.Invoke(this, new EventArgs());
 
                 Thread.Sleep(1000);
             }
