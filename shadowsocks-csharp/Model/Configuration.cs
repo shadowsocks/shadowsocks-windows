@@ -270,10 +270,10 @@ namespace Shadowsocks.Model
         public List<Server> configs;
         public int index;
         public bool random;
-        public bool global;
-        public bool enabled;
+        //public bool global;
+        //public bool enabled;
+        public int sysProxyMode;
         public bool shareOverLan;
-        public bool isDefault;
         public bool bypassWhiteList;
         public int localPort;
         public int reconnectTimes;
@@ -292,6 +292,7 @@ namespace Shadowsocks.Model
         public bool autoBan;
         public bool sameHostForSameTarget;
         public int keepVisitTime;
+        public bool isHideTips;
         public string dns_server;
         public Dictionary<string, string> token = new Dictionary<string, string>();
         public Dictionary<string, object> portMap = new Dictionary<string, object>();
@@ -493,7 +494,6 @@ namespace Shadowsocks.Model
         public Configuration()
         {
             index = 0;
-            isDefault = true;
             localPort = 1080;
             reconnectTimes = 3;
             keepVisitTime = 180;
@@ -509,7 +509,6 @@ namespace Shadowsocks.Model
             {
                 string configContent = File.ReadAllText(CONFIG_FILE);
                 Configuration config = SimpleJson.SimpleJson.DeserializeObject<Configuration>(configContent, new JsonSerializerStrategy());
-                config.isDefault = false;
                 if (config.localPort == 0)
                 {
                     config.localPort = 1080;
@@ -526,40 +525,6 @@ namespace Shadowsocks.Model
                 {
                     config.token = new Dictionary<string, string>();
                 }
-                {
-                    int base64_encode = 0;
-                    foreach (var server in config.configs)
-                    {
-                        string remarks = server.remarks;
-                        if (remarks.Length == 0)
-                            continue;
-                        if (server.remarks[remarks.Length - 1] == '=')
-                        {
-                            server.remarks_base64 = remarks;
-                            if (server.remarks_base64 == server.remarks)
-                            {
-                                server.remarks = remarks;
-                                base64_encode = 0;
-                                break;
-                            }
-                            else
-                            {
-                                base64_encode++;
-                            }
-                            server.remarks = remarks;
-                        }
-                    }
-                    if (base64_encode > 0)
-                    {
-                        foreach (var server in config.configs)
-                        {
-                            string remarks = server.remarks;
-                            if (remarks.Length == 0)
-                                continue;
-                            server.remarks_base64 = remarks;
-                        }
-                    }
-                }
                 return config;
             }
             catch (Exception e)
@@ -571,7 +536,6 @@ namespace Shadowsocks.Model
                 return new Configuration
                 {
                     index = 0,
-                    isDefault = true,
                     localPort = 1080,
                     reconnectTimes = 3,
                     keepVisitTime = 180,
@@ -594,7 +558,6 @@ namespace Shadowsocks.Model
             {
                 config.index = 0;
             }
-            config.isDefault = false;
             try
             {
                 using (StreamWriter sw = new StreamWriter(File.Open(CONFIG_FILE, FileMode.Create)))
@@ -615,7 +578,6 @@ namespace Shadowsocks.Model
             try
             {
                 Configuration config = SimpleJson.SimpleJson.DeserializeObject<Configuration>(config_str, new JsonSerializerStrategy());
-                config.isDefault = false;
                 return config;
             }
             catch
@@ -629,19 +591,28 @@ namespace Shadowsocks.Model
             return new Server();
         }
 
+        public static Server CopyServer(Server server)
+        {
+            Server s = new Server();
+            s.server = server.server;
+            s.server_port = server.server_port;
+            s.method = server.method;
+            s.protocol = server.protocol;
+            s.obfs = server.obfs;
+            s.obfsparam = server.obfsparam;
+            s.password = server.password;
+            s.remarks = server.remarks;
+            s.group = server.group;
+            s.udp_over_tcp = server.udp_over_tcp;
+            s.server_udp_port = server.server_udp_port;
+            return s;
+        }
+
         public static Server GetErrorServer()
         {
             Server server = new Server();
             server.server = "invalid";
             return server;
-        }
-
-        private static void Assert(bool condition)
-        {
-            if (!condition)
-            {
-                throw new Exception(I18N.GetString("assertion failure"));
-            }
         }
 
         public static void CheckPort(int port)

@@ -55,8 +55,8 @@ namespace Shadowsocks.Controller
 
         public static void Update(Configuration config, bool forceDisable)
         {
-            bool global = config.global;
-            bool enabled = config.enabled;
+            bool global = config.sysProxyMode == (int)ProxyMode.Global;
+            bool enabled = config.sysProxyMode != (int)ProxyMode.NoModify;
             if (forceDisable)
             {
                 enabled = false;

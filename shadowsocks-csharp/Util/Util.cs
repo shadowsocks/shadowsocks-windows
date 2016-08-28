@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Drawing;
 using System.IO;
 using System.IO.Compression;
 using System.Net;
@@ -231,34 +232,38 @@ namespace Shadowsocks.Util
             return data;
         }
 
-        public static class LoadResourceDll
+        public static int GetDpiMul()
         {
-            static Dictionary<string, Assembly> Dlls = new Dictionary<string, Assembly>();
-            static Dictionary<string, object> Assemblies = new Dictionary<string, object>();
-
-            static Assembly AssemblyResolve(object sender, ResolveEventArgs args)
-            {
-                //程序集
-                Assembly ass;
-                //获取加载失败的程序集的全名
-                var assName = new AssemblyName(args.Name).FullName;
-                //判断Dlls集合中是否有已加载的同名程序集
-                if (Dlls.TryGetValue(assName, out ass) && ass != null)
-                {
-                    Dlls[assName] = null;//如果有则置空并返回
-                    return ass;
-                }
-                else
-                {
-                    throw new DllNotFoundException(assName);//否则抛出加载失败的异常
-                }
-            }
+            int dpi;
+            Graphics graphics = Graphics.FromHwnd(IntPtr.Zero);
+            dpi = (int)graphics.DpiX;
+            return (dpi * 4 + 48) / 96;
         }
+
 #if !_CONSOLE
+        public enum DeviceCap
+        {
+            DESKTOPVERTRES = 117,
+            DESKTOPHORZRES = 118,
+        }
+
+        public static Point GetScreenPhysicalSize()
+        {
+            Graphics g = Graphics.FromHwnd(IntPtr.Zero);
+            IntPtr desktop = g.GetHdc();
+            int PhysicalScreenWidth = GetDeviceCaps(desktop, (int)DeviceCap.DESKTOPHORZRES);
+            int PhysicalScreenHeight = GetDeviceCaps(desktop, (int)DeviceCap.DESKTOPVERTRES);
+
+            return new Point(PhysicalScreenWidth, PhysicalScreenHeight);
+        }
+
         [DllImport("kernel32.dll")]
         [return: MarshalAs(UnmanagedType.Bool)]
         private static extern bool SetProcessWorkingSetSize(IntPtr process,
             UIntPtr minimumWorkingSetSize, UIntPtr maximumWorkingSetSize);
+
+        [DllImport("gdi32.dll")]
+        static extern int GetDeviceCaps(IntPtr hdc, int nIndex);
 #endif
     }
 }

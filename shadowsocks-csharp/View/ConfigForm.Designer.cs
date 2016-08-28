@@ -51,14 +51,17 @@
             this.CheckTCPoverUDP = new System.Windows.Forms.CheckBox();
             this.TCPProtocolComboBox = new System.Windows.Forms.ComboBox();
             this.labelObfsParam = new System.Windows.Forms.Label();
-            this.textObfsParam = new System.Windows.Forms.TextBox();
+            this.TextObfsParam = new System.Windows.Forms.TextBox();
             this.labelGroup = new System.Windows.Forms.Label();
             this.TextGroup = new System.Windows.Forms.TextBox();
             this.checkAdvSetting = new System.Windows.Forms.CheckBox();
             this.labelUDPPort = new System.Windows.Forms.Label();
-            this.textUDPPort = new System.Windows.Forms.TextBox();
+            this.TextUDPPort = new System.Windows.Forms.TextBox();
             this.checkSSRLink = new System.Windows.Forms.CheckBox();
             this.labelRemarks = new System.Windows.Forms.Label();
+            this.tableLayoutPanel3 = new System.Windows.Forms.TableLayoutPanel();
+            this.MyCancelButton = new System.Windows.Forms.Button();
+            this.OKButton = new System.Windows.Forms.Button();
             this.panel2 = new System.Windows.Forms.Panel();
             this.DeleteButton = new System.Windows.Forms.Button();
             this.AddButton = new System.Windows.Forms.Button();
@@ -72,17 +75,14 @@
             this.DownButton = new System.Windows.Forms.Button();
             this.UpButton = new System.Windows.Forms.Button();
             this.tableLayoutPanel5 = new System.Windows.Forms.TableLayoutPanel();
-            this.tableLayoutPanel3 = new System.Windows.Forms.TableLayoutPanel();
-            this.MyCancelButton = new System.Windows.Forms.Button();
-            this.OKButton = new System.Windows.Forms.Button();
             this.tableLayoutPanel1.SuspendLayout();
+            this.tableLayoutPanel3.SuspendLayout();
             this.ServerGroupBox.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.PictureQRcode)).BeginInit();
             this.tableLayoutPanel2.SuspendLayout();
             this.tableLayoutPanel7.SuspendLayout();
             this.tableLayoutPanel4.SuspendLayout();
             this.tableLayoutPanel5.SuspendLayout();
-            this.tableLayoutPanel3.SuspendLayout();
             this.SuspendLayout();
             // 
             // tableLayoutPanel1
@@ -114,12 +114,12 @@
             this.tableLayoutPanel1.Controls.Add(this.CheckTCPoverUDP, 1, 12);
             this.tableLayoutPanel1.Controls.Add(this.TCPProtocolComboBox, 1, 4);
             this.tableLayoutPanel1.Controls.Add(this.labelObfsParam, 0, 6);
-            this.tableLayoutPanel1.Controls.Add(this.textObfsParam, 1, 6);
+            this.tableLayoutPanel1.Controls.Add(this.TextObfsParam, 1, 6);
             this.tableLayoutPanel1.Controls.Add(this.labelGroup, 0, 8);
             this.tableLayoutPanel1.Controls.Add(this.TextGroup, 1, 8);
             this.tableLayoutPanel1.Controls.Add(this.checkAdvSetting, 0, 10);
             this.tableLayoutPanel1.Controls.Add(this.labelUDPPort, 0, 11);
-            this.tableLayoutPanel1.Controls.Add(this.textUDPPort, 1, 11);
+            this.tableLayoutPanel1.Controls.Add(this.TextUDPPort, 1, 11);
             this.tableLayoutPanel1.Controls.Add(this.checkSSRLink, 0, 9);
             this.tableLayoutPanel1.Controls.Add(this.labelRemarks, 0, 7);
             this.tableLayoutPanel1.Controls.Add(this.tableLayoutPanel3, 1, 15);
@@ -403,14 +403,14 @@
             this.labelObfsParam.TabIndex = 33;
             this.labelObfsParam.Text = "Obfs param";
             // 
-            // textObfsParam
+            // TextObfsParam
             // 
-            this.textObfsParam.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.textObfsParam.ImeMode = System.Windows.Forms.ImeMode.Off;
-            this.textObfsParam.Location = new System.Drawing.Point(100, 174);
-            this.textObfsParam.Name = "textObfsParam";
-            this.textObfsParam.Size = new System.Drawing.Size(215, 21);
-            this.textObfsParam.TabIndex = 35;
+            this.TextObfsParam.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.TextObfsParam.ImeMode = System.Windows.Forms.ImeMode.Off;
+            this.TextObfsParam.Location = new System.Drawing.Point(100, 174);
+            this.TextObfsParam.Name = "TextObfsParam";
+            this.TextObfsParam.Size = new System.Drawing.Size(215, 21);
+            this.TextObfsParam.TabIndex = 35;
             // 
             // labelGroup
             // 
@@ -455,17 +455,17 @@
             this.labelUDPPort.Text = "UDP Port";
             this.labelUDPPort.Visible = false;
             // 
-            // textUDPPort
+            // TextUDPPort
             // 
-            this.textUDPPort.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.textUDPPort.ImeMode = System.Windows.Forms.ImeMode.Off;
-            this.textUDPPort.Location = new System.Drawing.Point(100, 307);
-            this.textUDPPort.MaxLength = 10;
-            this.textUDPPort.Name = "textUDPPort";
-            this.textUDPPort.Size = new System.Drawing.Size(215, 21);
-            this.textUDPPort.TabIndex = 1;
-            this.textUDPPort.Visible = false;
-            this.textUDPPort.WordWrap = false;
+            this.TextUDPPort.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.TextUDPPort.ImeMode = System.Windows.Forms.ImeMode.Off;
+            this.TextUDPPort.Location = new System.Drawing.Point(100, 307);
+            this.TextUDPPort.MaxLength = 10;
+            this.TextUDPPort.Name = "TextUDPPort";
+            this.TextUDPPort.Size = new System.Drawing.Size(215, 21);
+            this.TextUDPPort.TabIndex = 1;
+            this.TextUDPPort.Visible = false;
+            this.TextUDPPort.WordWrap = false;
             // 
             // checkSSRLink
             // 
@@ -490,6 +490,53 @@
             this.labelRemarks.Size = new System.Drawing.Size(58, 15);
             this.labelRemarks.TabIndex = 39;
             this.labelRemarks.Text = "Remarks";
+            // 
+            // tableLayoutPanel3
+            // 
+            this.tableLayoutPanel3.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.tableLayoutPanel3.AutoSize = true;
+            this.tableLayoutPanel3.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.tableLayoutPanel3.ColumnCount = 2;
+            this.tableLayoutPanel3.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tableLayoutPanel3.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tableLayoutPanel3.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 20F));
+            this.tableLayoutPanel3.Controls.Add(this.MyCancelButton, 1, 0);
+            this.tableLayoutPanel3.Controls.Add(this.OKButton, 0, 0);
+            this.tableLayoutPanel3.Location = new System.Drawing.Point(100, 409);
+            this.tableLayoutPanel3.Margin = new System.Windows.Forms.Padding(3, 3, 0, 3);
+            this.tableLayoutPanel3.Name = "tableLayoutPanel3";
+            this.tableLayoutPanel3.RowCount = 1;
+            this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel3.Size = new System.Drawing.Size(159, 36);
+            this.tableLayoutPanel3.TabIndex = 14;
+            // 
+            // MyCancelButton
+            // 
+            this.MyCancelButton.AutoSize = true;
+            this.MyCancelButton.DialogResult = System.Windows.Forms.DialogResult.Cancel;
+            this.MyCancelButton.Dock = System.Windows.Forms.DockStyle.Right;
+            this.MyCancelButton.Location = new System.Drawing.Point(84, 3);
+            this.MyCancelButton.Margin = new System.Windows.Forms.Padding(3, 3, 0, 0);
+            this.MyCancelButton.Name = "MyCancelButton";
+            this.MyCancelButton.Size = new System.Drawing.Size(75, 33);
+            this.MyCancelButton.TabIndex = 9;
+            this.MyCancelButton.Text = "Cancel";
+            this.MyCancelButton.UseVisualStyleBackColor = true;
+            this.MyCancelButton.Click += new System.EventHandler(this.CancelButton_Click);
+            // 
+            // OKButton
+            // 
+            this.OKButton.AutoSize = true;
+            this.OKButton.DialogResult = System.Windows.Forms.DialogResult.OK;
+            this.OKButton.Dock = System.Windows.Forms.DockStyle.Right;
+            this.OKButton.Location = new System.Drawing.Point(3, 3);
+            this.OKButton.Margin = new System.Windows.Forms.Padding(3, 3, 3, 0);
+            this.OKButton.Name = "OKButton";
+            this.OKButton.Size = new System.Drawing.Size(75, 33);
+            this.OKButton.TabIndex = 8;
+            this.OKButton.Text = "OK";
+            this.OKButton.UseVisualStyleBackColor = true;
+            this.OKButton.Click += new System.EventHandler(this.OKButton_Click);
             // 
             // panel2
             // 
@@ -675,53 +722,6 @@
             this.tableLayoutPanel5.Size = new System.Drawing.Size(268, 494);
             this.tableLayoutPanel5.TabIndex = 17;
             // 
-            // tableLayoutPanel3
-            // 
-            this.tableLayoutPanel3.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.tableLayoutPanel3.AutoSize = true;
-            this.tableLayoutPanel3.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.tableLayoutPanel3.ColumnCount = 2;
-            this.tableLayoutPanel3.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
-            this.tableLayoutPanel3.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
-            this.tableLayoutPanel3.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 20F));
-            this.tableLayoutPanel3.Controls.Add(this.MyCancelButton, 1, 0);
-            this.tableLayoutPanel3.Controls.Add(this.OKButton, 0, 0);
-            this.tableLayoutPanel3.Location = new System.Drawing.Point(100, 409);
-            this.tableLayoutPanel3.Margin = new System.Windows.Forms.Padding(3, 3, 0, 3);
-            this.tableLayoutPanel3.Name = "tableLayoutPanel3";
-            this.tableLayoutPanel3.RowCount = 1;
-            this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel3.Size = new System.Drawing.Size(159, 36);
-            this.tableLayoutPanel3.TabIndex = 14;
-            // 
-            // MyCancelButton
-            // 
-            this.MyCancelButton.AutoSize = true;
-            this.MyCancelButton.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.MyCancelButton.Dock = System.Windows.Forms.DockStyle.Right;
-            this.MyCancelButton.Location = new System.Drawing.Point(84, 3);
-            this.MyCancelButton.Margin = new System.Windows.Forms.Padding(3, 3, 0, 0);
-            this.MyCancelButton.Name = "MyCancelButton";
-            this.MyCancelButton.Size = new System.Drawing.Size(75, 33);
-            this.MyCancelButton.TabIndex = 9;
-            this.MyCancelButton.Text = "Cancel";
-            this.MyCancelButton.UseVisualStyleBackColor = true;
-            this.MyCancelButton.Click += new System.EventHandler(this.CancelButton_Click);
-            // 
-            // OKButton
-            // 
-            this.OKButton.AutoSize = true;
-            this.OKButton.DialogResult = System.Windows.Forms.DialogResult.OK;
-            this.OKButton.Dock = System.Windows.Forms.DockStyle.Right;
-            this.OKButton.Location = new System.Drawing.Point(3, 3);
-            this.OKButton.Margin = new System.Windows.Forms.Padding(3, 3, 3, 0);
-            this.OKButton.Name = "OKButton";
-            this.OKButton.Size = new System.Drawing.Size(75, 33);
-            this.OKButton.TabIndex = 8;
-            this.OKButton.Text = "OK";
-            this.OKButton.UseVisualStyleBackColor = true;
-            this.OKButton.Click += new System.EventHandler(this.OKButton_Click);
-            // 
             // ConfigForm
             // 
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
@@ -743,6 +743,8 @@
             this.Shown += new System.EventHandler(this.ConfigForm_Shown);
             this.tableLayoutPanel1.ResumeLayout(false);
             this.tableLayoutPanel1.PerformLayout();
+            this.tableLayoutPanel3.ResumeLayout(false);
+            this.tableLayoutPanel3.PerformLayout();
             this.ServerGroupBox.ResumeLayout(false);
             this.ServerGroupBox.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.PictureQRcode)).EndInit();
@@ -753,8 +755,6 @@
             this.tableLayoutPanel4.ResumeLayout(false);
             this.tableLayoutPanel5.ResumeLayout(false);
             this.tableLayoutPanel5.PerformLayout();
-            this.tableLayoutPanel3.ResumeLayout(false);
-            this.tableLayoutPanel3.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -801,12 +801,12 @@
         private System.Windows.Forms.ComboBox ObfsCombo;
         private System.Windows.Forms.Label labelObfs;
         private System.Windows.Forms.Label labelObfsParam;
-        private System.Windows.Forms.TextBox textObfsParam;
+        private System.Windows.Forms.TextBox TextObfsParam;
         private System.Windows.Forms.Label labelGroup;
         private System.Windows.Forms.TextBox TextGroup;
         private System.Windows.Forms.CheckBox checkAdvSetting;
         private System.Windows.Forms.Label labelUDPPort;
-        private System.Windows.Forms.TextBox textUDPPort;
+        private System.Windows.Forms.TextBox TextUDPPort;
         private System.Windows.Forms.CheckBox checkSSRLink;
         private System.Windows.Forms.Label labelRemarks;
     }

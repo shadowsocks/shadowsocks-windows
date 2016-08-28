@@ -111,6 +111,16 @@ namespace Shadowsocks.Properties {
         }
         
         /// <summary>
+        ///   查找 System.Drawing.Bitmap 类型的本地化资源。
+        /// </summary>
+        internal static System.Drawing.Bitmap ngnl {
+            get {
+                object obj = ResourceManager.GetObject("ngnl", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 listen-address __PRIVOXY_BIND_IP__:__PRIVOXY_BIND_PORT__
         ///show-on-task-bar 0
         ///activity-animation 0
@@ -200,28 +210,28 @@ namespace Shadowsocks.Properties {
         }
         
         /// <summary>
-        ///   查找类似 # translation for Simplified Chinese
+        ///   查找类似 # translation for Traditional Chinese
         ///
         ///Shadowsocks=Shadowsocks
         ///
         ///# Menu items
         ///
-        ///Enable System Proxy=启用系统代理
-        ///Mode=系统代理模式
+        ///Enable System Proxy=啟用系統代理
+        ///Mode=系統代理模式
         ///PAC=PAC 模式
         ///Global=全局模式
-        ///Servers=服务器
-        ///Edit Servers...=编辑服务器...
-        ///Global Settings...=选项设置...
-        ///Start on Boot=开机启动
-        ///Allow Clients from LAN=允许来自局域网的连接
-        ///Enable balance=服务器负载均衡
-        ///Same host for same address=优先相同节点连接同一地址
-        ///Enable domain white list(http proxy only)=使用域名白名单(仅http代理)
+        ///Servers=伺服器
+        ///Edit Servers...=編輯伺服器...
+        ///Global Settings...=選項設置...
+        ///Start on Boot=開機啟動
+        ///Allow Clients from LAN=允許來自局域網的連接
+        ///Enable balance=伺服器負載均衡
+        ///Same host for same address=優先相同節點連接同壹地址
+        ///Enable domain white list(http proxy only)=使用域名白名單(僅http代理)
         ///Local PAC=使用本地 PAC
-        ///Online PAC=使用在线 PAC
-        ///Update Local PAC from Lan IP List=更新PAC为绕过局域网IP
-        ///Update Local PAC from Chn  [字符串的其余部分被截断]&quot;; 的本地化字符串。
+        ///Online PAC=使用在線 PAC
+        ///Update Local PAC from Lan IP List=更新PAC為繞過局域網IP
+        ///Update Local PAC from Chn [字符串的其余部分被截断]&quot;; 的本地化字符串。
         /// </summary>
         internal static string zh_tw {
             get {

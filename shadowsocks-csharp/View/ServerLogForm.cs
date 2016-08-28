@@ -56,12 +56,24 @@ namespace Shadowsocks.View
                 CreateMenuItem("Auto &size", new EventHandler(this.autosizeItem_Click)),
                 this.topmostItem = CreateMenuItem("Always On &Top", new EventHandler(this.topmostItem_Click)),
                 new MenuItem("-"),
+                CreateMenuItem("Copy current link", new EventHandler(this.copyLinkItem_Click)),
+                CreateMenuItem("Copy all enable links", new EventHandler(this.copyEnableLinksItem_Click)),
+                new MenuItem("-"),
                 CreateMenuItem("Clear &MaxSpeed", new EventHandler(this.ClearMaxSpeed_Click)),
                 this.clearItem = CreateMenuItem("&Clear", new EventHandler(this.ClearItem_Click)),
             });
             ServerDataGrid.ContextMenu = contextMenu1;
             controller.ConfigChanged += controller_ConfigChanged;
 
+            int dpi_mul = Util.Utils.GetDpiMul();
+            Graphics graphics = Graphics.FromHwnd(IntPtr.Zero);
+            for (int i = 0; i < ServerDataGrid.Columns.Count; ++i)
+            {
+                ServerDataGrid.Columns[i].Width = ServerDataGrid.Columns[i].Width * dpi_mul / 4;
+            }
+
+            ServerDataGrid.RowTemplate.Height = 20 * dpi_mul / 4;
+            //ServerDataGrid.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.None;
             int width = 0;
             for (int i = 0; i < ServerDataGrid.Columns.Count; ++i)
             {
@@ -613,6 +625,37 @@ namespace Shadowsocks.View
         private void autosizeItem_Click(object sender, EventArgs e)
         {
             autosizeColumns();
+        }
+
+        private void copyLinkItem_Click(object sender, EventArgs e)
+        {
+            Configuration config = controller.GetCurrentConfiguration();
+            if (config.index >= 0 && config.index < config.configs.Count)
+            {
+                try
+                {
+                    string link = controller.GetSSRRemarksLinkForServer(config.configs[config.index]);
+                    Clipboard.SetText(link);
+                }
+                catch { }
+            }
+        }
+
+        private void copyEnableLinksItem_Click(object sender, EventArgs e)
+        {
+            Configuration config = controller.GetCurrentConfiguration();
+            string link = "";
+            for (int index = 0; index < config.configs.Count; ++index)
+            {
+                if (!config.configs[index].enable)
+                    continue;
+                link += controller.GetSSRRemarksLinkForServer(config.configs[index]) + "\r\n";
+            }
+            try
+            {
+                Clipboard.SetText(link);
+            }
+            catch { }
         }
 
         private void topmostItem_Click(object sender, EventArgs e)

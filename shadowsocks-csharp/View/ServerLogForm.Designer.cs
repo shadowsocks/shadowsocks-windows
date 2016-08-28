@@ -91,7 +91,7 @@
             this.ServerDataGrid.ReadOnly = true;
             this.ServerDataGrid.RowHeadersVisible = false;
             this.ServerDataGrid.RowTemplate.Height = 23;
-            this.ServerDataGrid.Size = new System.Drawing.Size(128, 48);
+            this.ServerDataGrid.Size = new System.Drawing.Size(154, 48);
             this.ServerDataGrid.TabIndex = 0;
             this.ServerDataGrid.CellClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.ServerDataGrid_CellClick);
             this.ServerDataGrid.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.ServerDataGrid_CellDoubleClick);
@@ -118,7 +118,7 @@
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
             this.tableLayoutPanel1.RowCount = 1;
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(128, 48);
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(154, 32);
             this.tableLayoutPanel1.TabIndex = 1;
             // 
             // ID
@@ -216,7 +216,7 @@
             this.Download.MinimumWidth = 2;
             this.Download.Name = "Download";
             this.Download.ReadOnly = true;
-            this.Download.Width = 72;
+            this.Download.Width = 60;
             // 
             // Upload
             // 
@@ -224,7 +224,7 @@
             this.Upload.MinimumWidth = 2;
             this.Upload.Name = "Upload";
             this.Upload.ReadOnly = true;
-            this.Upload.Width = 72;
+            this.Upload.Width = 60;
             // 
             // DownloadRaw
             // 
@@ -281,12 +281,12 @@
             // 
             // ServerLogForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
-            this.ClientSize = new System.Drawing.Size(128, 48);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.ClientSize = new System.Drawing.Size(154, 32);
             this.Controls.Add(this.tableLayoutPanel1);
-            this.Font = new System.Drawing.Font("新宋体", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.Font = new System.Drawing.Font("新宋体", 0.12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Inch, ((byte)(0)));
+            this.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.Name = "ServerLogForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "ServerLog";

@@ -31,10 +31,6 @@ namespace Shadowsocks.View
             this.Font = System.Drawing.SystemFonts.MessageBoxFont;
             InitializeComponent();
 
-            // a dirty hack
-            //this.ServersListBox.Dock = System.Windows.Forms.DockStyle.Fill;
-            //this.PerformLayout();
-
             this.Icon = Icon.FromHandle(Resources.ssw128.GetHicon());
             this.controller = controller;
             this.updateChecker = updateChecker;
@@ -55,6 +51,34 @@ namespace Shadowsocks.View
                 focusIndex = _modifiedConfiguration.configs.Count - 1;
             if (focusIndex >= 0 && focusIndex < _modifiedConfiguration.configs.Count)
                 SetServerListSelectedIndex(focusIndex);
+
+            if (_modifiedConfiguration.isHideTips)
+                PictureQRcode.Visible = false;
+
+            int dpi_mul = Util.Utils.GetDpiMul();
+            ServersListBox.Width = ServersListBox.Width * dpi_mul / 4;
+            ServersListBox.Height = ServersListBox.Height * dpi_mul / 4;
+            AddButton.Width = AddButton.Width * dpi_mul / 4;
+            AddButton.Height = AddButton.Height * dpi_mul / 4;
+            DeleteButton.Width = DeleteButton.Width * dpi_mul / 4;
+            DeleteButton.Height = DeleteButton.Height * dpi_mul / 4;
+            UpButton.Width = UpButton.Width * dpi_mul / 4;
+            UpButton.Height = UpButton.Height * dpi_mul / 4;
+            DownButton.Width = DownButton.Width * dpi_mul / 4;
+            DownButton.Height = DownButton.Height * dpi_mul / 4;
+            IPTextBox.Width = IPTextBox.Width * dpi_mul / 4;
+            ServerPortTextBox.Width = ServerPortTextBox.Width * dpi_mul / 4;
+            PasswordTextBox.Width = PasswordTextBox.Width * dpi_mul / 4;
+            EncryptionSelect.Width = EncryptionSelect.Width * dpi_mul / 4;
+            TCPProtocolComboBox.Width = TCPProtocolComboBox.Width * dpi_mul / 4;
+            ObfsCombo.Width = ObfsCombo.Width * dpi_mul / 4;
+            TextObfsParam.Width = TextObfsParam.Width * dpi_mul / 4;
+            RemarksTextBox.Width = RemarksTextBox.Width * dpi_mul / 4;
+            TextGroup.Width = TextGroup.Width * dpi_mul / 4;
+            TextLink.Width = TextLink.Width * dpi_mul / 4;
+            TextUDPPort.Width = TextUDPPort.Width * dpi_mul / 4;
+
+            DrawLogo(350 * dpi_mul / 4);
         }
 
         private void UpdateTexts()
@@ -69,13 +93,14 @@ namespace Shadowsocks.View
             UpButton.Text = I18N.GetString("Up");
             DownButton.Text = I18N.GetString("Down");
 
-            IPLabel.Text = "**" + I18N.GetString("Server IP");
-            ServerPortLabel.Text = "**" + I18N.GetString("Server Port");
+            const string mark_str = "* ";
+            IPLabel.Text = mark_str + I18N.GetString("Server IP");
+            ServerPortLabel.Text = mark_str + I18N.GetString("Server Port");
             labelUDPPort.Text = I18N.GetString("UDP Port");
-            PasswordLabel.Text = "**" + I18N.GetString("Password");
-            EncryptionLabel.Text = "**" + I18N.GetString("Encryption");
-            TCPProtocolLabel.Text = "**" + I18N.GetString(TCPProtocolLabel.Text);
-            labelObfs.Text = "**" + I18N.GetString(labelObfs.Text);
+            PasswordLabel.Text = mark_str + I18N.GetString("Password");
+            EncryptionLabel.Text = mark_str + I18N.GetString("Encryption");
+            TCPProtocolLabel.Text = mark_str + I18N.GetString(TCPProtocolLabel.Text);
+            labelObfs.Text = mark_str + I18N.GetString(labelObfs.Text);
             labelRemarks.Text = I18N.GetString("Remarks");
 
             checkAdvSetting.Text = I18N.GetString(checkAdvSetting.Text);
@@ -125,11 +150,11 @@ namespace Shadowsocks.View
                 {
                     server = IPTextBox.Text.Trim(),
                     server_port = int.Parse(ServerPortTextBox.Text),
-                    server_udp_port = int.Parse(textUDPPort.Text),
+                    server_udp_port = int.Parse(TextUDPPort.Text),
                     password = PasswordTextBox.Text,
                     method = EncryptionSelect.Text,
                     obfs = ObfsCombo.Text,
-                    obfsparam = textObfsParam.Text,
+                    obfsparam = TextObfsParam.Text,
                     remarks = RemarksTextBox.Text,
                     group = TextGroup.Text.Trim(),
                     udp_over_tcp = CheckUDPoverUDP.Checked,
@@ -173,14 +198,30 @@ namespace Shadowsocks.View
             return -1; // ERROR
         }
 
+        private void DrawLogo(int width)
+        {
+            Bitmap drawArea = new Bitmap(width, width);
+            using (Graphics g = Graphics.FromImage(drawArea))
+            {
+                g.Clear(Color.White);
+                Bitmap ngnl = Resources.ngnl;
+                g.DrawImage(ngnl, new Rectangle(0, 0, width, width));
+                if (!_modifiedConfiguration.isHideTips)
+                    g.DrawString("Click the 'Link' text box", new Font("Arial", 14), new SolidBrush(Color.Black), new RectangleF(0, 0, 300, 300));
+            }
+            PictureQRcode.Image = drawArea;
+        }
+
         private void GenQR(string ssconfig)
         {
+            int dpi_mul = Util.Utils.GetDpiMul();
+            int width = 350 * dpi_mul / 4;
             if (TextLink.Focused)
             {
                 string qrText = ssconfig;
                 QRCode code = ZXing.QrCode.Internal.Encoder.encode(qrText, ErrorCorrectionLevel.M);
                 ByteMatrix m = code.Matrix;
-                int blockSize = Math.Max(260 / m.Height, 1);
+                int blockSize = Math.Max(width / m.Height, 1);
                 Bitmap drawArea = new Bitmap((m.Width * blockSize), (m.Height * blockSize));
                 using (Graphics g = Graphics.FromImage(drawArea))
                 {
@@ -201,17 +242,12 @@ namespace Shadowsocks.View
                 }
                 PictureQRcode.Image = drawArea;
                 PictureQRcode.Visible = true;
+                _modifiedConfiguration.isHideTips = true;
             }
             else
             {
-                PictureQRcode.Visible = false;
-                Bitmap drawArea = new Bitmap(300, 300);
-                using (Graphics g = Graphics.FromImage(drawArea))
-                {
-                    g.Clear(Color.White);
-                    g.DrawString("Click the 'Link' text box", new Font("Arial", 18), new SolidBrush(Color.Black), new RectangleF(0, 0, 300, 300));
-                }
-                PictureQRcode.Image = drawArea;
+                //PictureQRcode.Visible = false;
+                DrawLogo(PictureQRcode.Width);
             }
         }
 
@@ -223,7 +259,7 @@ namespace Shadowsocks.View
 
                 IPTextBox.Text = server.server;
                 ServerPortTextBox.Text = server.server_port.ToString();
-                textUDPPort.Text = server.server_udp_port.ToString();
+                TextUDPPort.Text = server.server_udp_port.ToString();
                 PasswordTextBox.Text = server.password;
                 EncryptionSelect.Text = server.method ?? "aes-256-cfb";
                 if (server.protocol == null || server.protocol.Length == 0)
@@ -235,7 +271,7 @@ namespace Shadowsocks.View
                     TCPProtocolComboBox.Text = server.protocol ?? "origin";
                 }
                 ObfsCombo.Text = server.obfs ?? "plain";
-                textObfsParam.Text = server.obfsparam;
+                TextObfsParam.Text = server.obfsparam;
                 RemarksTextBox.Text = server.remarks;
                 TextGroup.Text = server.group;
                 CheckUDPoverUDP.Checked = server.udp_over_tcp;
@@ -353,7 +389,9 @@ namespace Shadowsocks.View
             {
                 return;
             }
-            Server server = Configuration.GetDefaultServer();
+            Server server = _oldSelectedIndex >=0 && _oldSelectedIndex < _modifiedConfiguration.configs.Count
+                ? Configuration.CopyServer(_modifiedConfiguration.configs[_oldSelectedIndex])
+                : Configuration.GetDefaultServer();
             _modifiedConfiguration.configs.Add(server);
             LoadConfiguration(_modifiedConfiguration);
             ServersListBox.SelectedIndex = _modifiedConfiguration.configs.Count - 1;
@@ -491,16 +529,16 @@ namespace Shadowsocks.View
                 int[] properties = obfs.GetObfs()[ObfsCombo.Text];
                 if (properties[2] > 0)
                 {
-                    textObfsParam.Enabled = true;
+                    TextObfsParam.Enabled = true;
                 }
                 else
                 {
-                    textObfsParam.Enabled = false;
+                    TextObfsParam.Enabled = false;
                 }
             }
             catch
             {
-                textObfsParam.Enabled = true;
+                TextObfsParam.Enabled = true;
             }
         }
 
@@ -515,7 +553,7 @@ namespace Shadowsocks.View
             if (checkAdvSetting.Checked)
             {
                 labelUDPPort.Visible = true;
-                textUDPPort.Visible = true;
+                TextUDPPort.Visible = true;
                 //TCPoverUDPLabel.Visible = true;
                 //CheckTCPoverUDP.Visible = true;
                 UDPoverTCPLabel.Visible = true;
@@ -524,7 +562,7 @@ namespace Shadowsocks.View
             else
             {
                 labelUDPPort.Visible = false;
-                textUDPPort.Visible = false;
+                TextUDPPort.Visible = false;
                 //TCPoverUDPLabel.Visible = false;
                 //CheckTCPoverUDP.Visible = false;
                 UDPoverTCPLabel.Visible = false;

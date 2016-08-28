@@ -205,17 +205,15 @@ namespace Shadowsocks.Controller
             int bytesToSend = 0;
             int obfsSendSize;
             byte[] obfsBuffer;
+            lock (_encryptionLock)
             {
-                lock (_encryptionLock)
-                {
-                    int outlength;
-                    byte[] bytesToEncrypt = _protocol.ClientPreEncrypt(buffer, size, out outlength);
-                    connetionSendBuffer = new byte[outlength + 64];
-                    _encryptor.Encrypt(bytesToEncrypt, outlength, connetionSendBuffer, out bytesToSend);
-                    obfsBuffer = _obfs.ClientEncode(connetionSendBuffer, bytesToSend, out obfsSendSize);
-                }
+                int outlength;
+                byte[] bytesToEncrypt = _protocol.ClientPreEncrypt(buffer, size, out outlength);
+                connetionSendBuffer = new byte[outlength + 64];
+                _encryptor.Encrypt(bytesToEncrypt, outlength, connetionSendBuffer, out bytesToSend);
+                obfsBuffer = _obfs.ClientEncode(connetionSendBuffer, bytesToSend, out obfsSendSize);
+                _socket.BeginSend(obfsBuffer, 0, obfsSendSize, 0, callback, st);
             }
-            _socket.BeginSend(obfsBuffer, 0, obfsSendSize, 0, callback, st);
             return obfsSendSize;
         }
 
@@ -441,6 +439,12 @@ namespace Shadowsocks.Controller
         {
             CallbackState st = (CallbackState)ar.AsyncState;
             return st.size;
+        }
+
+        public byte[] GetAsyncResultBuffer(IAsyncResult ar)
+        {
+            CallbackState st = (CallbackState)ar.AsyncState;
+            return st.buffer;
         }
 
         public IPEndPoint GetProxyUdpEndPoint()

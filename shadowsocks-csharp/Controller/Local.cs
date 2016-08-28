@@ -101,6 +101,7 @@ namespace Shadowsocks.Controller
     class HandlerConfig
     {
         public string targetHost;
+        public int targetPort;
 
         public Double TTL = 0; // Second
         public int try_keep_alive = 0;
@@ -148,16 +149,8 @@ namespace Shadowsocks.Controller
         protected const int RecvSize = 16384;
         protected const int BufferSize = RecvSize + 1024;
         protected const int AutoSwitchOffErrorTimes = 5;
-        // remote receive buffer
-        protected byte[] remoteRecvBuffer = new byte[RecvSize * 2];
-        // remote send buffer
-        protected byte[] remoteSendBuffer = new byte[BufferSize * 2];
         // remote header send buffer
         protected byte[] remoteHeaderSendBuffer;
-        // connection receive buffer
-        protected byte[] connetionRecvBuffer = new byte[RecvSize * 2];
-        // connection send buffer
-        protected byte[] connetionSendBuffer = new byte[BufferSize * 2];
         // connection send buffer
         protected List<byte[]> connectionSendBufferList = new List<byte[]>();
 
@@ -165,10 +158,9 @@ namespace Shadowsocks.Controller
 
         protected byte[] remoteUDPRecvBuffer = new byte[RecvSize * 2];
         protected int remoteUDPRecvBufferLength = 0;
+        protected object recvUDPoverTCPLock = new object();
 
         protected bool closed = false;
-
-        protected object recvUDPoverTCPLock = new object();
 
         protected bool connectionTCPIdle;
         protected bool connectionUDPIdle;
@@ -450,7 +442,7 @@ namespace Shadowsocks.Controller
 
         public bool ReConnect()
         {
-            System.Diagnostics.Debug.WriteLine("[" + DateTime.Now.ToString() + "]" + "Reconnect " + cfg.targetHost + " " + connection.Handle.ToString());
+            System.Diagnostics.Debug.WriteLine("[" + DateTime.Now.ToString() + "]" + "Reconnect " + cfg.targetHost + ":" + cfg.targetPort.ToString() + " " + connection.Handle.ToString());
             {
                 Handler handler = new Handler();
                 handler.getCurrentServer = getCurrentServer;
@@ -596,14 +588,14 @@ namespace Shadowsocks.Controller
                 {
                     return this.ReConnect();
                 }
-                else if (this.State == ConnectState.CONNECTED)
-                {
-                    //if (obfs.getSentLength() == 0 && connectionSendBufferList != null)
-                    //{
-                    //    //this.State = ConnectState.CONNECTING;
-                    //    return this.ReConnect();
-                    //}
-                }
+                //else if (this.State == ConnectState.CONNECTED)
+                //{
+                //    if (connectionSendBufferList != null)
+                //    {
+                //        //this.State = ConnectState.CONNECTING;
+                //        return this.ReConnect();
+                //    }
+                //}
             }
             return false;
         }
@@ -672,7 +664,7 @@ namespace Shadowsocks.Controller
                 CloseSocket(ref remote);
                 CloseSocket(ref remoteUDP);
             }
-            System.Diagnostics.Debug.WriteLine("[" + DateTime.Now.ToString() + "]" + "Close 1 " + cfg.targetHost + " " + connection.Handle.ToString());
+            System.Diagnostics.Debug.WriteLine("[" + DateTime.Now.ToString() + "]" + "Close   " + cfg.targetHost + ":" + cfg.targetPort.ToString() + " " + connection.Handle.ToString());
             if (lastErrCode == 0 && server != null)
             {
                 if (speedTester.sizeRecv == 0 && speedTester.sizeUpload > 0)
@@ -702,7 +694,7 @@ namespace Shadowsocks.Controller
 
                 if (!reconnect)
                 {
-                    System.Diagnostics.Debug.WriteLine("[" + DateTime.Now.ToString() + "]" + "Disconnect " + cfg.targetHost + " " + connection.Handle.ToString());
+                    System.Diagnostics.Debug.WriteLine("[" + DateTime.Now.ToString() + "]" + "Disconnect " + cfg.targetHost + ":" + cfg.targetPort.ToString() + " " + connection.Handle.ToString());
                     CloseSocket(ref connection);
                     CloseSocket(ref connectionUDP);
                 }
@@ -815,6 +807,7 @@ namespace Shadowsocks.Controller
                 if (cfg.targetHost == null)
                 {
                     cfg.targetHost = GetQueryString();
+                    cfg.targetPort = GetQueryPort();
                     server = this.getCurrentServer(cfg.targetHost, true);
                 }
                 else
@@ -827,7 +820,7 @@ namespace Shadowsocks.Controller
                 server = select_server;
             }
             speedTester.server = server.server;
-            System.Diagnostics.Debug.WriteLine("[" + DateTime.Now.ToString() + "]" + "Connect " + cfg.targetHost + " " + connection.Handle.ToString());
+            System.Diagnostics.Debug.WriteLine("[" + DateTime.Now.ToString() + "]" + "Connect " + cfg.targetHost + ":" + cfg.targetPort.ToString() + " " + connection.Handle.ToString());
 
             ResetTimeout(cfg.TTL);
             if (cfg.fouce_local_dns_query && cfg.targetHost != null)
@@ -930,8 +923,9 @@ namespace Shadowsocks.Controller
             if (connection != null && connectionTCPIdle)
             {
                 connectionTCPIdle = false;
-                connection.BeginReceive(connetionRecvBuffer, 0, RecvSize, 0,
-                    new AsyncCallback(PipeConnectionReceiveCallback), null);
+                byte[] buffer = new byte[RecvSize * 2];
+                connection.BeginReceive(buffer, 0, RecvSize, 0,
+                    new AsyncCallback(PipeConnectionReceiveCallback), buffer);
             }
         }
 
@@ -950,13 +944,13 @@ namespace Shadowsocks.Controller
         {
             if (connectionUDP != null && connectionUDPIdle)
             {
+                connectionUDPIdle = false;
                 const int RecvSize = 65536;
-
                 IPEndPoint sender = new IPEndPoint(connectionUDP.AddressFamily == AddressFamily.InterNetworkV6 ? IPAddress.IPv6Any : IPAddress.Any, 0);
                 EndPoint tempEP = (EndPoint)sender;
-                connectionUDPIdle = false;
-                connectionUDP.BeginReceiveFrom(connetionRecvBuffer, 0, RecvSize, SocketFlags.None, ref tempEP,
-                    new AsyncCallback(PipeConnectionUDPReceiveCallback), null);
+                byte[] buffer = new byte[RecvSize];
+                connectionUDP.BeginReceiveFrom(new byte[RecvSize], 0, RecvSize, SocketFlags.None, ref tempEP,
+                    new AsyncCallback(PipeConnectionUDPReceiveCallback), buffer);
             }
         }
 
@@ -978,7 +972,7 @@ namespace Shadowsocks.Controller
             if (remote != null && remoteTCPIdle)
             {
                 remoteTCPIdle = false;
-                remote.BeginReceive(remoteRecvBuffer, RecvSize, 0,
+                remote.BeginReceive(new byte[RecvSize * 2], RecvSize, 0,
                     new AsyncCallback(PipeRemoteReceiveCallback), null);
             }
         }
@@ -989,11 +983,11 @@ namespace Shadowsocks.Controller
             {
                 bool sendback;
                 int bytesRead = remote.EndReceive(ar, out sendback);
-                remoteTCPIdle = true;
                 if (sendback)
                 {
-                    RemoteSend(new byte[0], 0);
+                    RemoteSendback(new byte[0], 0);
                 }
+                remoteTCPIdle = true;
                 return bytesRead;
             }
             return 0;
@@ -1003,12 +997,11 @@ namespace Shadowsocks.Controller
         {
             if (remoteUDP != null && remoteUDPIdle)
             {
+                remoteUDPIdle = false;
                 const int RecvSize = 65536;
-
                 IPEndPoint sender = new IPEndPoint(remoteUDP.AddressFamily == AddressFamily.InterNetworkV6 ? IPAddress.IPv6Any : IPAddress.Any, 0);
                 EndPoint tempEP = (EndPoint)sender;
-                remoteUDPIdle = false;
-                remoteUDP.BeginReceiveFrom(remoteRecvBuffer, RecvSize, SocketFlags.None, ref tempEP,
+                remoteUDP.BeginReceiveFrom(new byte[RecvSize], RecvSize, SocketFlags.None, ref tempEP,
                     new AsyncCallback(PipeRemoteUDPReceiveCallback), null);
             }
         }
@@ -1022,6 +1015,18 @@ namespace Shadowsocks.Controller
                 return bytesRead;
             }
             return 0;
+        }
+
+        private void doConnectionRecv()
+        {
+            doConnectionTCPRecv();
+            doConnectionUDPRecv();
+        }
+
+        private void doRemoteRecv()
+        {
+            doRemoteTCPRecv();
+            doRemoteUDPRecv();
         }
 
         private void SetObfsPlugin()
@@ -1077,6 +1082,40 @@ namespace Shadowsocks.Controller
             return null;
         }
 
+        private int GetQueryPort()
+        {
+            if (remoteHeaderSendBuffer == null)
+                return 0;
+
+            if (remoteHeaderSendBuffer[0] == 1)
+            {
+                if (remoteHeaderSendBuffer.Length > 6)
+                {
+                    int port = (remoteHeaderSendBuffer[5] << 8) | remoteHeaderSendBuffer[6];
+                    return port;
+                }
+                return 0;
+            }
+            if (remoteHeaderSendBuffer[0] == 4)
+            {
+                if (remoteHeaderSendBuffer.Length > 18)
+                {
+                    int port = (remoteHeaderSendBuffer[17] << 8) | remoteHeaderSendBuffer[18];
+                    return port;
+                }
+                return 0;
+            }
+            if (remoteHeaderSendBuffer[0] == 3 && remoteHeaderSendBuffer.Length > 1)
+            {
+                if (remoteHeaderSendBuffer.Length > remoteHeaderSendBuffer[1] + 1)
+                {
+                    int port = (remoteHeaderSendBuffer[remoteHeaderSendBuffer[1] + 2] << 8) | remoteHeaderSendBuffer[remoteHeaderSendBuffer[1] + 3];
+                    return port;
+                }
+            }
+            return 0;
+        }
+
         // 2 sides connection start
         private void StartPipe()
         {
@@ -1109,12 +1148,6 @@ namespace Shadowsocks.Controller
                 }
                 else // UDP
                 {
-                    const int RecvSize = 65536;
-                    const int BufferSize = RecvSize + 1024;
-                    connetionRecvBuffer = new byte[RecvSize * 2];
-                    connetionSendBuffer = new byte[BufferSize * 2];
-                    remoteRecvBuffer = new byte[RecvSize * 2];
-                    remoteSendBuffer = new byte[BufferSize * 2];
                     if (!server.udp_over_tcp &&
                         remoteUDP != null)
                     {
@@ -1203,7 +1236,10 @@ namespace Shadowsocks.Controller
             {
                 foreach (byte[] buffer in buffer_list)
                 {
-                    connectionUDP.BeginSendTo(buffer, 0, buffer.Length, SocketFlags.None, connectionUDPEndPoint, new AsyncCallback(PipeConnectionUDPSendCallback), null);
+                    if (buffer == buffer_list[buffer_list.Count - 1])
+                        connectionUDP.BeginSendTo(buffer, 0, buffer.Length, SocketFlags.None, connectionUDPEndPoint, new AsyncCallback(PipeConnectionUDPSendCallback), null);
+                    else
+                        connectionUDP.BeginSendTo(buffer, 0, buffer.Length, SocketFlags.None, connectionUDPEndPoint, new AsyncCallback(PipeConnectionUDPSendCallbackNoRecv), null);
                 }
             }
         }
@@ -1247,8 +1283,9 @@ namespace Shadowsocks.Controller
                     {
                         server.ServerSpeedLog().AddDownloadRawBytes(bytesRead);
                         speedTester.AddRecvSize(bytesRead);
+                        byte[] remoteSendBuffer = new byte[BufferSize * 2];
 
-                        Array.Copy(remoteRecvBuffer, remoteSendBuffer, bytesRead);
+                        Array.Copy(remote.GetAsyncResultBuffer(ar), remoteSendBuffer, bytesRead);
                         if (connectionUDP == null)
                         {
                             if (detector.OnRecv(remoteSendBuffer, bytesRead) > 0)
@@ -1328,7 +1365,7 @@ namespace Shadowsocks.Controller
                     }
                     else //if (bytesRead > 0)
                     {
-                        ConnectionSend(remoteSendBuffer, bytesRead);
+                        ConnectionSend(remote.GetAsyncResultBuffer(ar), bytesRead);
 
                         speedTester.AddRecvSize(bytesRead);
                         server.ServerSpeedLog().AddDownloadRawBytes(bytesRead);
@@ -1349,6 +1386,36 @@ namespace Shadowsocks.Controller
                 }
             }
         }
+
+        private void PipeRemoteSendbackCallback(IAsyncResult ar)
+        {
+            if (closed)
+            {
+                return;
+            }
+            try
+            {
+                remote.EndSend(ar);
+                if (lastKeepTime == null || (DateTime.Now - lastKeepTime).TotalSeconds > 5)
+                {
+                    if (keepCurrentServer != null) keepCurrentServer(cfg.targetHost, server.id);
+                    lastKeepTime = DateTime.Now;
+                }
+            }
+            catch (Exception e)
+            {
+                LogExceptionAndClose(e);
+            }
+        }
+
+        private void RemoteSendback(byte[] bytes, int length)
+        {
+            int send_len;
+            send_len = remote.BeginSend(bytes, length, SocketFlags.None, new AsyncCallback(PipeRemoteSendbackCallback), null);
+            server.ServerSpeedLog().AddUploadBytes(send_len);
+            speedTester.AddUploadSize(send_len);
+        }
+
 
         private void RemoteSend(byte[] bytes, int length)
         {
@@ -1386,6 +1453,8 @@ namespace Shadowsocks.Controller
                         ResetTimeout(cfg.TTL);
                         return;
                     }
+                    byte[] connetionRecvBuffer = new byte[RecvSize * 2];
+                    Array.Copy((byte[])ar.AsyncState, 0, connetionRecvBuffer, 0, bytesRead);
                     if (State == ConnectState.CONNECTED)
                     {
                         if (remoteHeaderSendBuffer != null)
@@ -1457,8 +1526,7 @@ namespace Shadowsocks.Controller
                 if (bytesRead > 0)
                 {
                     byte[] connetionSendBuffer = new byte[bytesRead];
-                    Array.Copy(connetionRecvBuffer, connetionSendBuffer, bytesRead);
-                    Logging.LogBin(LogLevel.Debug, "udp remote send", connetionRecvBuffer, bytesRead);
+                    Array.Copy((byte[])ar.AsyncState, connetionSendBuffer, bytesRead);
                     if (!server.udp_over_tcp && remoteUDP != null)
                     {
                         RemoteSendto(connetionSendBuffer, bytesRead);
@@ -1470,7 +1538,7 @@ namespace Shadowsocks.Controller
                             if (bytesRead >= 0xff00)
                             {
                                 byte[] connetionSendBuffer2 = new byte[bytesRead + 1];
-                                Array.Copy(connetionRecvBuffer, 0, connetionSendBuffer2, 1, bytesRead);
+                                Array.Copy(connetionSendBuffer, 0, connetionSendBuffer2, 1, bytesRead);
                                 connetionSendBuffer2[0] = 0xff;
                                 connetionSendBuffer2[1] = (byte)((bytesRead - 0xff00 + 1) >> 8);
                                 connetionSendBuffer2[2] = (byte)((bytesRead - 0xff00 + 1));
@@ -1506,7 +1574,6 @@ namespace Shadowsocks.Controller
             }
         }
 
-        // end SendCallback
         private void PipeRemoteSendCallback(IAsyncResult ar)
         {
             if (closed)
@@ -1516,8 +1583,7 @@ namespace Shadowsocks.Controller
             try
             {
                 remote.EndSend(ar);
-                doConnectionTCPRecv();
-                doConnectionUDPRecv();
+                doConnectionRecv();
                 if (lastKeepTime == null || (DateTime.Now - lastKeepTime).TotalSeconds > 5)
                 {
                     if (keepCurrentServer != null) keepCurrentServer(cfg.targetHost, server.id);
@@ -1539,8 +1605,7 @@ namespace Shadowsocks.Controller
             try
             {
                 remoteUDP.EndSendTo(ar);
-                doConnectionTCPRecv();
-                doConnectionUDPRecv();
+                doConnectionRecv();
             }
             catch (Exception e)
             {
@@ -1557,8 +1622,23 @@ namespace Shadowsocks.Controller
             try
             {
                 connection.EndSend(ar);
-                doRemoteTCPRecv();
-                doRemoteUDPRecv();
+                doRemoteRecv();
+            }
+            catch (Exception e)
+            {
+                LogExceptionAndClose(e);
+            }
+        }
+
+        private void PipeConnectionUDPSendCallbackNoRecv(IAsyncResult ar)
+        {
+            if (closed)
+            {
+                return;
+            }
+            try
+            {
+                connectionUDP.EndSendTo(ar);
             }
             catch (Exception e)
             {
@@ -1575,8 +1655,7 @@ namespace Shadowsocks.Controller
             try
             {
                 connectionUDP.EndSendTo(ar);
-                doRemoteTCPRecv();
-                doRemoteUDPRecv();
+                doRemoteRecv();
             }
             catch (Exception e)
             {

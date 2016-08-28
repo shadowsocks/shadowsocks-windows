@@ -157,6 +157,7 @@
     <Compile Include="Encryption\SodiumEncryptor.cs" />
     <Compile Include="Encryption\IEncryptor.cs" />
     <Compile Include="Controller\PACServer.cs" />
+    <Compile Include="Model\Host.cs" />
     <Compile Include="Model\Server.cs" />
     <Compile Include="Model\Configuration.cs" />
     <Compile Include="Model\ServerSpeedLog.cs" />
@@ -246,6 +247,7 @@
     <None Include="Data\libsscrypto.dll" />
     <Content Include="Data\user-rule.txt" />
     <None Include="Data\zh-tw.txt" />
+    <None Include="Resources\46418775_p0.jpg" />
     <Content Include="shadowsocks.ico" />
   </ItemGroup>
   <ItemGroup>

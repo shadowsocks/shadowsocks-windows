@@ -4,7 +4,7 @@ Shadowsocks=Shadowsocks
 
 # Menu items
 
-Enable System Proxy=启用系统代理
+Disable System Proxy=不修改系统(IE)代理
 Mode=系统代理模式
 PAC=PAC 模式
 Global=全局模式
@@ -100,8 +100,11 @@ OK=确定
 Cancel=取消
 
 # ServerLog Form
+
 ServerLog=服务器记录
 Auto &size=自动调整大小(&S)
+Copy current link=复制选中链接
+Copy all enable links=复制所有开启节点链接
 Always On &Top=窗口置顶(&T)
 Clear &MaxSpeed=重置历史最高(&M)
 &Clear=清空(&C)

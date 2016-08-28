@@ -21,8 +21,8 @@ namespace Shadowsocks.Controller
 
         public const string Name = "ShadowsocksR";
         public const string Copyright = "Copyright © BreakWall 2015";
-        public const string Version = "3.8.5.0";
-        public const string FullVersion = Version + " Release";
+        public const string Version = "3.8.5.3";
+        public const string FullVersion = Version + "";
 
         private static bool UseProxy = true;
 

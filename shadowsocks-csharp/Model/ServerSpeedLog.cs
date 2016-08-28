@@ -220,8 +220,16 @@ namespace Shadowsocks.Model
                     if (totalTime > 0.2)
                     {
                         long ret = (long)(totalBytes / totalTime);
-                        if (totalTime > 1 && ret > maxTransDownload)
-                            maxTransDownload = ret;
+                        if (totalTime > 1)
+                        {
+                            if (ret > maxTransDownload)
+                                maxTransDownload = ret;
+                        }
+                        else
+                        {
+                            if (totalBytes > maxTransDownload)
+                                maxTransDownload = totalBytes;
+                        }
                         return ret;
                     }
                     else
@@ -279,8 +287,16 @@ namespace Shadowsocks.Model
                     if (totalTime > 0.2)
                     {
                         long ret = (long)(totalBytes / totalTime);
-                        if (totalTime > 1 && ret > maxTransUpload)
-                            maxTransUpload = ret;
+                        if (totalTime > 1)
+                        {
+                            if (ret > maxTransUpload)
+                                maxTransUpload = ret;
+                        }
+                        else
+                        {
+                            if (totalBytes > maxTransUpload)
+                                maxTransUpload = totalBytes;
+                        }
                         return ret;
                     }
                     else

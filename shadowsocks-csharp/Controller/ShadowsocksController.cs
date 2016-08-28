@@ -8,6 +8,13 @@ using System.Net.Sockets;
 
 namespace Shadowsocks.Controller
 {
+    public enum ProxyMode
+    {
+        NoModify,
+        Pac,
+        Global,
+    }
+
     public class ShadowsocksController
     {
         // controller:
@@ -37,8 +44,7 @@ namespace Shadowsocks.Controller
         }
 
         public event EventHandler ConfigChanged;
-        public event EventHandler EnableStatusChanged;
-        public event EventHandler EnableGlobalChanged;
+        public event EventHandler ToggleModeChanged;
         //public event EventHandler ShareOverLANStatusChanged;
         public event EventHandler ShowConfigFormEvent;
 
@@ -111,6 +117,7 @@ namespace Shadowsocks.Controller
                             && mergeConfig.configs[i].method == servers[j].method
                             && mergeConfig.configs[i].protocol == servers[j].protocol
                             && mergeConfig.configs[i].obfs == servers[j].obfs
+                            && mergeConfig.configs[i].obfsparam == servers[j].obfsparam
                             && mergeConfig.configs[i].password == servers[j].password
                             && mergeConfig.configs[i].udp_over_tcp == servers[j].udp_over_tcp
                             )
@@ -132,6 +139,7 @@ namespace Shadowsocks.Controller
                         && mergeConfig.configs[i].method == servers[j].method
                         && mergeConfig.configs[i].protocol == servers[j].protocol
                         && mergeConfig.configs[i].obfs == servers[j].obfs
+                        && mergeConfig.configs[i].obfsparam == servers[j].obfsparam
                         && mergeConfig.configs[i].password == servers[j].password
                         && mergeConfig.configs[i].udp_over_tcp == servers[j].udp_over_tcp
                         )
@@ -186,8 +194,7 @@ namespace Shadowsocks.Controller
             _config.configs = config.configs;
             _config.index = config.index;
             _config.random = config.random;
-            _config.global = config.global;
-            _config.enabled = config.enabled;
+            _config.sysProxyMode = config.sysProxyMode;
             _config.shareOverLan = config.shareOverLan;
             _config.bypassWhiteList = config.bypassWhiteList;
             _config.localPort = config.localPort;
@@ -208,6 +215,7 @@ namespace Shadowsocks.Controller
             _config.autoBan = config.autoBan;
             _config.sameHostForSameTarget = config.sameHostForSameTarget;
             _config.keepVisitTime = config.keepVisitTime;
+            _config.isHideTips = config.isHideTips;
             foreach (Server s in missingServers)
             {
                 s.GetConnections().CloseAll();
@@ -231,25 +239,14 @@ namespace Shadowsocks.Controller
             }
         }
 
-        public void ToggleEnable(bool enabled)
+        public void ToggleMode(int mode)
         {
-            _config.enabled = enabled;
+            _config.sysProxyMode = mode;
             UpdateSystemProxy();
             SaveConfig(_config);
-            if (EnableStatusChanged != null)
+            if (ToggleModeChanged != null)
             {
-                EnableStatusChanged(this, new EventArgs());
-            }
-        }
-
-        public void ToggleGlobal(bool global)
-        {
-            _config.global = global;
-            UpdateSystemProxy();
-            SaveConfig(_config);
-            if (EnableGlobalChanged != null)
-            {
-                EnableGlobalChanged(this, new EventArgs());
+                ToggleModeChanged(this, new EventArgs());
             }
         }
 
@@ -313,7 +310,7 @@ namespace Shadowsocks.Controller
             {
                 polipoRunner.Stop();
             }
-            if (_config.enabled)
+            if (_config.sysProxyMode != (int)ProxyMode.NoModify)
             {
                 SystemProxy.Update(_config, true);
             }
@@ -570,7 +567,7 @@ namespace Shadowsocks.Controller
         private void UpdateSystemProxy()
         {
 #if !_CONSOLE
-            if (_config.enabled)
+            if (_config.sysProxyMode != (int)ProxyMode.NoModify)
             {
                 SystemProxy.Update(_config, false);
                 _systemProxyIsDirty = true;
