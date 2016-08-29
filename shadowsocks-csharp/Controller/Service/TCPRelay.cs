@@ -176,7 +176,13 @@ namespace Shadowsocks.Controller
             Server server = controller.GetAServer(IStrategyCallerType.TCP, (IPEndPoint)connection.RemoteEndPoint);
             if (server == null || server.server == "")
                 throw new ArgumentException("No server configured");
-            encryptor = EncryptorFactory.GetEncryptor(server.method, server.password, server.auth, false);
+            lock (_encryptionLock)
+            {
+                lock (_decryptionLock)
+                {
+                    encryptor = EncryptorFactory.GetEncryptor(server.method, server.password, server.auth, false);
+                }
+            }
             this.server = server;
         }
 

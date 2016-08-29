@@ -198,7 +198,7 @@ namespace Shadowsocks.Controller
                 name = (string)asset["name"];
                 browser_download_url = (string)asset["browser_download_url"];
                 version = ParseVersionFromURL(browser_download_url);
-                prerelease = browser_download_url.IndexOf("prerelease") >= 0;
+                prerelease = browser_download_url.IndexOf("prerelease", StringComparison.Ordinal) >= 0;
             }
 
             private static string ParseVersionFromURL(string url)

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Globalization;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
@@ -69,7 +70,7 @@ namespace Shadowsocks.Controller
                     }
                     else if (kv.Length == 1)
                     {
-                        if (line.IndexOf("pac") >= 0)
+                        if (line.IndexOf("pac", StringComparison.Ordinal) >= 0)
                         {
                             pathMatch = true;
                         }
@@ -207,7 +208,7 @@ Connection: Close
         private void PACFileWatcher_Changed(object sender, FileSystemEventArgs e)
         {
             string path = e.FullPath.ToString();
-            string currentLastWriteTime = File.GetLastWriteTime(e.FullPath).ToString();
+            string currentLastWriteTime = File.GetLastWriteTime(e.FullPath).ToString(CultureInfo.InvariantCulture);
 
             // if there is no path info stored yet or stored path has different time of write then the one now is inspected
             if (!fileChangedTime.ContainsKey(path) || fileChangedTime[path].ToString() != currentLastWriteTime)
@@ -226,7 +227,7 @@ Connection: Close
         private void UserRuleFileWatcher_Changed(object sender, FileSystemEventArgs e)
         {
             string path = e.FullPath.ToString();
-            string currentLastWriteTime = File.GetLastWriteTime(e.FullPath).ToString();
+            string currentLastWriteTime = File.GetLastWriteTime(e.FullPath).ToString(CultureInfo.InvariantCulture);
 
             // if there is no path info stored yet or stored path has different time of write then the one now is inspected
             if (!fileChangedTime.ContainsKey(path) || fileChangedTime[path].ToString() != currentLastWriteTime)

@@ -247,7 +247,7 @@ namespace Shadowsocks.View
         #region Clean up the content in LogMessageTextBox.
         private void DoCleanLogs()
         {
-            Logging.clear();
+            Logging.Clear();
             lastOffset = 0;
             LogMessageTextBox.Clear();
         }

@@ -12,8 +12,8 @@ namespace Shadowsocks.Controller
     {
         public static string LogFilePath;
 
-        private static FileStream fs;
-        private static StreamWriterWithTimestamp sw;
+        private static FileStream _fs;
+        private static StreamWriterWithTimestamp _sw;
 
         public static bool OpenLogFile()
         {
@@ -21,11 +21,11 @@ namespace Shadowsocks.Controller
             {
                 LogFilePath = Utils.GetTempPath("shadowsocks.log");
 
-                fs = new FileStream(LogFilePath, FileMode.Append);
-                sw = new StreamWriterWithTimestamp(fs);
-                sw.AutoFlush = true;
-                Console.SetOut(sw);
-                Console.SetError(sw);
+                _fs = new FileStream(LogFilePath, FileMode.Append);
+                _sw = new StreamWriterWithTimestamp(_fs);
+                _sw.AutoFlush = true;
+                Console.SetOut(_sw);
+                Console.SetError(_sw);
 
                 return true;
             }
@@ -54,11 +54,11 @@ namespace Shadowsocks.Controller
             WriteToLogFile(o);
         }
 
-        public static void clear() {
-            sw.Close();
-            sw.Dispose();
-            fs.Close();
-            fs.Dispose();
+        public static void Clear() {
+            _sw.Close();
+            _sw.Dispose();
+            _fs.Close();
+            _fs.Dispose();
             File.Delete(LogFilePath);
             OpenLogFile();
         }
