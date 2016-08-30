@@ -22,7 +22,7 @@ namespace Shadowsocks.Encryption
         public const int CLEN_BYTES = 2;
         public const int AUTH_BYTES = ONETIMEAUTH_BYTES + CLEN_BYTES;
 
-        protected static byte[] tempbuf = new byte[MAX_INPUT_SIZE];
+        protected static readonly byte[] tempbuf = new byte[MAX_INPUT_SIZE];
 
         protected Dictionary<string, Dictionary<string, int[]>> ciphers;
         protected Dictionary<string, int[]> ciphersDetail;
@@ -51,7 +51,7 @@ namespace Shadowsocks.Encryption
 
         protected abstract Dictionary<string, Dictionary<string, int[]>> getCiphers();
 
-        protected void InitKey(string method, string password)
+        private void InitKey(string method, string password)
         {
             method = method.ToLower();
             _method = method;
@@ -71,13 +71,12 @@ namespace Shadowsocks.Encryption
             {
                 byte[] passbuf = Encoding.UTF8.GetBytes(password);
                 byte[] key = new byte[32];
-                byte[] iv = new byte[16];
                 bytesToKey(passbuf, key);
                 return key;
             });
         }
 
-        protected void bytesToKey(byte[] password, byte[] key)
+        protected static void bytesToKey(byte[] password, byte[] key)
         {
             byte[] result = new byte[password.Length + 16];
             int i = 0;
@@ -239,7 +238,6 @@ namespace Shadowsocks.Encryption
             {
                 randBytes(outbuf, ivLen);
                 initCipher(outbuf, true);
-                outlength = length + ivLen;
                 reactBuffer(buf, ref length);
                 _encryptIVSent = true;
                 lock (tempbuf)
