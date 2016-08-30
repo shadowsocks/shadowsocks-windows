@@ -22,7 +22,6 @@ namespace Shadowsocks.Encryption
         public SodiumEncryptor(string method, string password, bool onetimeauth, bool isudp)
             : base(method, password, onetimeauth, isudp)
         {
-            InitKey(method, password);
         }
 
         private static Dictionary<string, Dictionary<string, int[]>> _ciphers = new Dictionary<string, Dictionary<string, int[]>> {
