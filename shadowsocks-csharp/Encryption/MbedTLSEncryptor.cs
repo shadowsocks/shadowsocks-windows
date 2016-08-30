@@ -83,7 +83,8 @@ namespace Shadowsocks.Encryption
              *  == MBEDTLS_{EN,DE}CRYPT
              *  
              */
-            if (MbedTLS.cipher_setkey(ctx, realkey, keyLen * 8, isCipher ? MbedTLS.MBEDTLS_ENCRYPT : MbedTLS.MBEDTLS_DECRYPT) != 0 )
+            if (MbedTLS.cipher_setkey(ctx, realkey, keyLen * 8,
+                isCipher ? MbedTLS.MBEDTLS_ENCRYPT : MbedTLS.MBEDTLS_DECRYPT) != 0 )
                 throw new Exception("Cannot set mbed TLS cipher key");
             if (MbedTLS.cipher_set_iv(ctx, iv, ivLen) != 0)
                 throw new Exception("Cannot set mbed TLS cipher IV");
@@ -98,16 +99,8 @@ namespace Shadowsocks.Encryption
             {
                 throw new ObjectDisposedException(this.ToString());
             }
-            IntPtr ctx;
-            if (isCipher)
-            {
-                ctx = _encryptCtx;
-            }
-            else
-            {
-                ctx = _decryptCtx;
-            }
-            if (MbedTLS.cipher_update(ctx, buf, length, outbuf, ref length) != 0 )
+            if (MbedTLS.cipher_update(isCipher ? _encryptCtx : _decryptCtx,
+                buf, length, outbuf, ref length) != 0 )
                 throw new Exception("Cannot update mbed TLS cipher context");
         }
 
