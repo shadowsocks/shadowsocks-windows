@@ -188,11 +188,18 @@ namespace Shadowsocks.Encryption
                 Buffer.BlockCopy(buf, headLen, buf, headLen + ONETIMEAUTH_BYTES + AUTH_BYTES, dataLen);
                 Buffer.BlockCopy(hash, 0, buf, headLen, ONETIMEAUTH_BYTES);
 
-                hash = OtaGenChunkHash(buf, headLen + ONETIMEAUTH_BYTES + AUTH_BYTES, dataLen);
-                Buffer.BlockCopy(hash, 0, buf, headLen + ONETIMEAUTH_BYTES + CLEN_BYTES, ONETIMEAUTH_BYTES);
-                byte[] lenBytes = BitConverter.GetBytes((ushort)IPAddress.HostToNetworkOrder((short)dataLen));
-                Buffer.BlockCopy(lenBytes, 0, buf, headLen + ONETIMEAUTH_BYTES, CLEN_BYTES);
-                length = headLen + ONETIMEAUTH_BYTES + AUTH_BYTES + dataLen;
+                if (dataLen == 0)
+                {
+                    length = headLen + ONETIMEAUTH_BYTES;
+                }
+                else
+                {
+                    hash = OtaGenChunkHash(buf, headLen + ONETIMEAUTH_BYTES + AUTH_BYTES, dataLen);
+                    Buffer.BlockCopy(hash, 0, buf, headLen + ONETIMEAUTH_BYTES + CLEN_BYTES, ONETIMEAUTH_BYTES);
+                    byte[] lenBytes = BitConverter.GetBytes((ushort) IPAddress.HostToNetworkOrder((short) dataLen));
+                    Buffer.BlockCopy(lenBytes, 0, buf, headLen + ONETIMEAUTH_BYTES, CLEN_BYTES);
+                    length = headLen + ONETIMEAUTH_BYTES + AUTH_BYTES + dataLen;
+                }
             }
             else
             {
