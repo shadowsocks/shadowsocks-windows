@@ -449,11 +449,17 @@ namespace Shadowsocks.Controller
 
         private void proxyConnectTimer_Elapsed(object sender, ElapsedEventArgs e)
         {
+            var timer = (ProxyTimer) sender;
+            timer.Elapsed -= proxyConnectTimer_Elapsed;
+            timer.Enabled = false;
+            timer.Dispose();
+
+
             if (_proxyConnected || _destConnected)
             {
                 return;
             }
-            var proxy = ((ProxyTimer)sender).Session.Remote;
+            var proxy = timer.Session.Remote;
 
             Logging.Info($"Proxy {proxy.ProxyEndPoint} timed out");
             proxy.Close();
@@ -516,13 +522,18 @@ namespace Shadowsocks.Controller
 
         private void destConnectTimer_Elapsed(object sender, ElapsedEventArgs e)
         {
+            var timer = (ServerTimer)sender;
+            timer.Elapsed -= destConnectTimer_Elapsed;
+            timer.Enabled = false;
+            timer.Dispose();
+
             if (_destConnected)
             {
                 return;
             }
 
-            var session = ((ServerTimer) sender).Session;
-            Server server = ((ServerTimer)sender).Server;
+            var session = timer.Session;
+            Server server = timer.Server;
             IStrategy strategy = controller.GetCurrentStrategy();
             strategy?.SetFailure(server);
             Logging.Info($"{server.FriendlyName()} timed out");
