@@ -36,10 +36,27 @@ namespace Shadowsocks.Util
             return new DnsEndPoint2(host, port);
         }
 
-        private class TcpUserToken : IAsyncResult
+        private class AutoReleaseAsyncResult : IAsyncResult
         {
-            public AsyncCallback Callback { get; }
-            public SocketAsyncEventArgs Args { get; }
+
+            public bool IsCompleted { get; } = true;
+            public WaitHandle AsyncWaitHandle { get; } = null;
+            public object AsyncState { get; set; }
+            public bool CompletedSynchronously { get; } = true;
+
+            public TcpUserToken UserToken { get; set; }
+
+            ~AutoReleaseAsyncResult()
+            {
+                UserToken.Dispose();
+            }
+        }
+
+        private class TcpUserToken
+        {
+            public AsyncCallback Callback { get; private set; }
+            public SocketAsyncEventArgs Args { get; private set; }
+            public object AsyncState { get; private set; }
 
             public TcpUserToken(AsyncCallback callback, object state, SocketAsyncEventArgs args)
             {
@@ -48,17 +65,27 @@ namespace Shadowsocks.Util
                 Args = args;
             }
 
-            public bool IsCompleted { get; } = true;
-            public WaitHandle AsyncWaitHandle { get; } = null;
-            public object AsyncState { get; }
-            public bool CompletedSynchronously { get; } = true;
+            public void Dispose()
+            {
+                Args?.Dispose();
+                Callback = null;
+                Args = null;
+                AsyncState = null;
+            }
         }
 
         private static void OnTcpConnectCompleted(object sender, SocketAsyncEventArgs args)
         {
+            args.Completed -= OnTcpConnectCompleted;
             TcpUserToken token = (TcpUserToken) args.UserToken;
 
-            token.Callback(token);
+            AutoReleaseAsyncResult r = new AutoReleaseAsyncResult
+            {
+                AsyncState = token.AsyncState,
+                UserToken = token
+            };
+
+            token.Callback(r);
         }
 
         public static void BeginConnectTcp(EndPoint endPoint, AsyncCallback callback, object state)
@@ -74,11 +101,13 @@ namespace Shadowsocks.Util
 
         public static Socket EndConnectTcp(IAsyncResult asyncResult)
         {
-            var tut = asyncResult as TcpUserToken;
-            if (tut == null)
+            var r = asyncResult as AutoReleaseAsyncResult;
+            if (r == null)
             {
                 throw new ArgumentException("Invalid asyncResult.", nameof(asyncResult));
             }
+
+            var tut = r.UserToken;
 
             var arg = tut.Args;
 

@@ -37,6 +37,7 @@ namespace Shadowsocks.Controller
         private readonly ConcurrentDictionary<string, List<int>> _inboundSpeedRecords = new ConcurrentDictionary<string, List<int>>();
         private readonly ConcurrentDictionary<string, List<int>> _outboundSpeedRecords = new ConcurrentDictionary<string, List<int>>();
         private readonly ConcurrentDictionary<string, InOutBoundRecord> _inOutBoundRecords = new ConcurrentDictionary<string, InOutBoundRecord>();
+
         private class InOutBoundRecord
         {
             private long _inbound;
@@ -44,65 +45,26 @@ namespace Shadowsocks.Controller
             private long _outbound;
             private long _lastOutbound;
 
-            private SpinLock _lock = new SpinLock();
-
             public void UpdateInbound(long delta)
             {
-                bool lockTaken = false;
-                try
-                {
-                    _lock.Enter(ref lockTaken);
-                    Interlocked.Add(ref _inbound, delta);
-                }
-                finally
-                {
-                    if (lockTaken)
-                    {
-                        _lock.Exit(false);
-                    }
-                }
+                Interlocked.Add(ref _inbound, delta);
             }
 
             public void UpdateOutbound(long delta)
             {
-                bool lockTaken = false;
-                try
-                {
-                    _lock.Enter(ref lockTaken);
-                    Interlocked.Add(ref _outbound, delta);
-                }
-                finally
-                {
-                    if (lockTaken)
-                    {
-                        _lock.Exit(false);
-                    }
-                }
+                Interlocked.Add(ref _outbound, delta);
             }
 
             public void GetDelta(out long inboundDelta, out long outboundDelta)
             {
-                bool lockTaken = false;
-                try
-                {
-                    _lock.Enter(ref lockTaken);
-
-                    var i = Interlocked.Read(ref _inbound);
-                    var il = Interlocked.Exchange(ref _lastInbound, i);
-                    inboundDelta = i - il;
+                var i = Interlocked.Read(ref _inbound);
+                var il = Interlocked.Exchange(ref _lastInbound, i);
+                inboundDelta = i - il;
 
 
-                    var o = Interlocked.Read(ref _outbound);
-                    var ol = Interlocked.Exchange(ref _lastOutbound, o);
-                    outboundDelta = o - ol;
-                }
-                finally
-                {
-                    if (lockTaken)
-                    {
-                        _lock.Exit(false);
-                    }
-                }
+                var o = Interlocked.Read(ref _outbound);
+                var ol = Interlocked.Exchange(ref _lastOutbound, o);
+                outboundDelta = o - ol;
             }
         }
 
