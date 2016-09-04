@@ -259,6 +259,10 @@ namespace Shadowsocks.Model
             {
                 ServerFromSSR(ssURL);
             }
+            else
+            {
+                throw new FormatException();
+            }
         }
 
         public static string DecodeBase64(string val)

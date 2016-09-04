@@ -71,18 +71,18 @@ namespace Shadowsocks.Controller
             {
                 return true;
             }
-            //if (length > 8
-            //    && firstPacket[0] == 'C'
-            //    && firstPacket[1] == 'O'
-            //    && firstPacket[2] == 'N'
-            //    && firstPacket[3] == 'N'
-            //    && firstPacket[4] == 'E'
-            //    && firstPacket[5] == 'C'
-            //    && firstPacket[6] == 'T'
-            //    && firstPacket[7] == ' ')
-            //{
-            //    return true;
-            //}
+            if (false && length > 8
+                && firstPacket[0] == 'C'
+                && firstPacket[1] == 'O'
+                && firstPacket[2] == 'N'
+                && firstPacket[3] == 'N'
+                && firstPacket[4] == 'E'
+                && firstPacket[5] == 'C'
+                && firstPacket[6] == 'T'
+                && firstPacket[7] == ' ')
+            {
+                return true;
+            }
             return false;
         }
 
@@ -949,7 +949,7 @@ namespace Shadowsocks.Controller
                 IPEndPoint sender = new IPEndPoint(connectionUDP.AddressFamily == AddressFamily.InterNetworkV6 ? IPAddress.IPv6Any : IPAddress.Any, 0);
                 EndPoint tempEP = (EndPoint)sender;
                 byte[] buffer = new byte[RecvSize];
-                connectionUDP.BeginReceiveFrom(new byte[RecvSize], 0, RecvSize, SocketFlags.None, ref tempEP,
+                connectionUDP.BeginReceiveFrom(buffer, 0, RecvSize, SocketFlags.None, ref tempEP,
                     new AsyncCallback(PipeConnectionUDPReceiveCallback), buffer);
             }
         }
@@ -1271,7 +1271,7 @@ namespace Shadowsocks.Controller
                         if (pingTime >= 0)
                             server.ServerSpeedLog().AddConnectTime(pingTime);
                     }
-                    server.ServerSpeedLog().AddDownloadBytes(bytesRecv);
+                    server.ServerSpeedLog().AddDownloadBytes(bytesRecv, DateTime.Now);
                     speedTester.AddDownloadSize(bytesRecv);
                     ResetTimeout(cfg.TTL);
 
@@ -1281,8 +1281,6 @@ namespace Shadowsocks.Controller
                     }
                     else //if (bytesRead > 0)
                     {
-                        server.ServerSpeedLog().AddDownloadRawBytes(bytesRead);
-                        speedTester.AddRecvSize(bytesRead);
                         byte[] remoteSendBuffer = new byte[BufferSize * 2];
 
                         Array.Copy(remote.GetAsyncResultBuffer(ar), remoteSendBuffer, bytesRead);
@@ -1306,6 +1304,8 @@ namespace Shadowsocks.Controller
                         {
                             UDPoverTCPConnectionSend(remoteSendBuffer, bytesRead);
                         }
+                        server.ServerSpeedLog().AddDownloadRawBytes(bytesRead);
+                        speedTester.AddRecvSize(bytesRead);
                     }
                 }
             }
@@ -1355,7 +1355,7 @@ namespace Shadowsocks.Controller
                         if (pingTime >= 0)
                             server.ServerSpeedLog().AddConnectTime(pingTime);
                     }
-                    server.ServerSpeedLog().AddDownloadBytes(bytesRecv);
+                    server.ServerSpeedLog().AddDownloadBytes(bytesRecv, DateTime.Now);
                     speedTester.AddDownloadSize(bytesRecv);
                     ResetTimeout(cfg.TTL);
 
@@ -1412,7 +1412,7 @@ namespace Shadowsocks.Controller
         {
             int send_len;
             send_len = remote.BeginSend(bytes, length, SocketFlags.None, new AsyncCallback(PipeRemoteSendbackCallback), null);
-            server.ServerSpeedLog().AddUploadBytes(send_len);
+            server.ServerSpeedLog().AddUploadBytes(send_len, DateTime.Now);
             speedTester.AddUploadSize(send_len);
         }
 
@@ -1421,7 +1421,7 @@ namespace Shadowsocks.Controller
         {
             int send_len;
             send_len = remote.BeginSend(bytes, length, SocketFlags.None, new AsyncCallback(PipeRemoteSendCallback), null);
-            server.ServerSpeedLog().AddUploadBytes(send_len);
+            server.ServerSpeedLog().AddUploadBytes(send_len, DateTime.Now);
             speedTester.AddUploadSize(send_len);
         }
 
@@ -1429,7 +1429,7 @@ namespace Shadowsocks.Controller
         {
             int send_len;
             send_len = remoteUDP.BeginSendTo(bytes, length, SocketFlags.None, remoteUDPEndPoint, new AsyncCallback(PipeRemoteUDPSendCallback), null);
-            server.ServerSpeedLog().AddUploadBytes(send_len);
+            server.ServerSpeedLog().AddUploadBytes(send_len, DateTime.Now);
             speedTester.AddUploadSize(send_len);
         }
 

@@ -387,7 +387,8 @@
             "verify_deflate",
             "verify_sha1",
             "auth_sha1",
-            "auth_sha1_v2"});
+            "auth_sha1_v2",
+            "auth_sha1_v3"});
             this.TCPProtocolComboBox.Location = new System.Drawing.Point(100, 116);
             this.TCPProtocolComboBox.Name = "TCPProtocolComboBox";
             this.TCPProtocolComboBox.Size = new System.Drawing.Size(215, 23);

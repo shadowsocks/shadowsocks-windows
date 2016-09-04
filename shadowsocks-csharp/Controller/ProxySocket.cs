@@ -32,6 +32,9 @@ namespace Shadowsocks.Controller
         protected string _proxy_server;
         protected int _proxy_udp_port;
 
+        private byte[] SendEncryptBuffer = new byte[65536];
+        private byte[] ReceiveDecryptBuffer = new byte[65536 * 2];
+
         protected bool _close;
 
         public ProxySocket(AddressFamily af, SocketType type, ProtocolType protocol)
@@ -149,7 +152,7 @@ namespace Shadowsocks.Controller
             server_addr = _proxy_server;
             _protocol.SetServerInfo(new ServerInfo(server_addr, server.server_port, "", server.getProtocolData(),
                 _encryptor.getIV(), _encryptor.getKey(), head_len, mss));
-            _obfs.SetServerInfo(new ServerInfo(server_addr, server.server_port, server.obfsparam, server.getObfsData(),
+            _obfs.SetServerInfo(new ServerInfo(server_addr, server.server_port, server.obfsparam??"", server.getObfsData(),
                 _encryptor.getIV(), _encryptor.getKey(), head_len, mss));
         }
 
@@ -176,13 +179,12 @@ namespace Shadowsocks.Controller
                     int bytesToSend = 0;
                     int obfsRecvSize;
                     byte[] remoteRecvObfsBuffer = _obfs.ClientDecode(st.buffer, bytesRead, out obfsRecvSize, out sendback);
-                    byte[] remoteSendBuffer = new byte[remoteRecvObfsBuffer.Length];
                     if (obfsRecvSize > 0)
                     {
-                        _encryptor.Decrypt(remoteRecvObfsBuffer, obfsRecvSize, remoteSendBuffer, out bytesToSend);
+                        _encryptor.Decrypt(remoteRecvObfsBuffer, obfsRecvSize, ReceiveDecryptBuffer, out bytesToSend);
                         int outlength;
-                        remoteSendBuffer = _protocol.ClientPostDecrypt(remoteSendBuffer, bytesToSend, out outlength);
-                        Array.Copy(remoteSendBuffer, 0, st.buffer, 0, outlength);
+                        byte[] buffer = _protocol.ClientPostDecrypt(ReceiveDecryptBuffer, bytesToSend, out outlength);
+                        Array.Copy(buffer, 0, st.buffer, 0, outlength);
                         return outlength;
                     }
                 }
@@ -201,7 +203,6 @@ namespace Shadowsocks.Controller
             st.size = size;
             st.state = state;
 
-            byte[] connetionSendBuffer;
             int bytesToSend = 0;
             int obfsSendSize;
             byte[] obfsBuffer;
@@ -209,9 +210,8 @@ namespace Shadowsocks.Controller
             {
                 int outlength;
                 byte[] bytesToEncrypt = _protocol.ClientPreEncrypt(buffer, size, out outlength);
-                connetionSendBuffer = new byte[outlength + 64];
-                _encryptor.Encrypt(bytesToEncrypt, outlength, connetionSendBuffer, out bytesToSend);
-                obfsBuffer = _obfs.ClientEncode(connetionSendBuffer, bytesToSend, out obfsSendSize);
+                _encryptor.Encrypt(bytesToEncrypt, outlength, SendEncryptBuffer, out bytesToSend);
+                obfsBuffer = _obfs.ClientEncode(SendEncryptBuffer, bytesToSend, out obfsSendSize);
                 _socket.BeginSend(obfsBuffer, 0, obfsSendSize, 0, callback, st);
             }
             return obfsSendSize;

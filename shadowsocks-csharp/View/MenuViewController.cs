@@ -803,10 +803,13 @@ namespace Shadowsocks.View
                             {
                                 splash.FormClosed += splash_FormClosed;
                             }
-                            else if (!ss_only && (url.StartsWith("http://") || url.StartsWith("https://")))
+                            else if (!ss_only)
                             {
                                 _urlToOpen = url;
-                                splash.FormClosed += openURLFromQRCode;
+                                //if (url.StartsWith("http://") || url.StartsWith("https://"))
+                                //    splash.FormClosed += openURLFromQRCode;
+                                //else
+                                    splash.FormClosed += showURLFromQRCode;
                             }
                             else
                             {
@@ -837,7 +840,7 @@ namespace Shadowsocks.View
 
         private void ScanQRCodeItem_Click(object sender, EventArgs e)
         {
-            ScanScreenQRCode(true);
+            ScanScreenQRCode(false);
         }
 
         void splash_FormClosed(object sender, FormClosedEventArgs e)
@@ -848,6 +851,14 @@ namespace Shadowsocks.View
         void openURLFromQRCode(object sender, FormClosedEventArgs e)
         {
             Process.Start(_urlToOpen);
+        }
+
+        void showURLFromQRCode(object sender, FormClosedEventArgs e)
+        {
+            ShowTextForm dlg = new ShowTextForm("QRCode", _urlToOpen);
+            dlg.Show();
+            dlg.Activate();
+            dlg.BringToFront();
         }
     }
 }

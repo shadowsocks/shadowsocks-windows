@@ -156,7 +156,7 @@ namespace Shadowsocks.Controller
                 }
 
                 // Start an asynchronous socket to listen for connections.
-                Console.WriteLine("ShadowsocksR started");
+                Console.WriteLine("ShadowsocksR started on port " + localPort.ToString());
                 _socket.BeginAccept(
                     new AsyncCallback(AcceptCallback),
                     _socket);

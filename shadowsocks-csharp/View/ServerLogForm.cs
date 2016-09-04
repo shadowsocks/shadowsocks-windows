@@ -231,6 +231,7 @@ namespace Shadowsocks.View
             if (ServerSpeedLogList == null)
                 return;
 
+            int last_rowcount = ServerDataGrid.RowCount;
             Configuration config = controller.GetCurrentConfiguration();
             if (listOrder.Count > config.configs.Count)
             {
@@ -240,15 +241,15 @@ namespace Shadowsocks.View
             {
                 listOrder.Add(0);
             }
-            while (ServerDataGrid.Rows.Count < config.configs.Count)
+            while (ServerDataGrid.RowCount < config.configs.Count)
             {
                 ServerDataGrid.Rows.Add();
-                int id = ServerDataGrid.Rows.Count - 1;
+                int id = ServerDataGrid.RowCount - 1;
                 ServerDataGrid[0, id].Value = id;
             }
-            if (ServerDataGrid.Rows.Count > config.configs.Count)
+            if (ServerDataGrid.RowCount > config.configs.Count)
             {
-                for (int list_index = 0; list_index < ServerDataGrid.Rows.Count; ++list_index)
+                for (int list_index = 0; list_index < ServerDataGrid.RowCount; ++list_index)
                 {
                     DataGridViewCell id_cell = ServerDataGrid[0, list_index];
                     int id = (int)id_cell.Value;
@@ -264,8 +265,8 @@ namespace Shadowsocks.View
             //for ( int id = 0; id < config.configs.Count; ++id)
             try
             {
-                for (int list_index = (lastRefreshIndex >= ServerDataGrid.Rows.Count) ? 0 : lastRefreshIndex, rowChangeCnt = 0;
-                    list_index < ServerDataGrid.Rows.Count && rowChangeCnt <= 200;
+                for (int list_index = (lastRefreshIndex >= ServerDataGrid.RowCount) ? 0 : lastRefreshIndex, rowChangeCnt = 0;
+                    list_index < ServerDataGrid.RowCount && rowChangeCnt <= 200;
                     ++list_index, ++rowChangeCnt)
                 {
                     lastRefreshIndex = list_index + 1;
@@ -572,6 +573,10 @@ namespace Shadowsocks.View
             {
                 ServerDataGrid.Sort(ServerDataGrid.SortedColumn, (ListSortDirection)((int)ServerDataGrid.SortOrder - 1));
             }
+            if (last_rowcount == 0 && config.index >= 0 && config.index < ServerDataGrid.RowCount)
+            {
+                ServerDataGrid[0, config.index].Selected = true;
+            }
         }
 
         private void autosizeColumns()
@@ -716,6 +721,54 @@ namespace Shadowsocks.View
             if (e.Button == MouseButtons.Right)
             {
                 contextMenu1.Show(ServerDataGrid, new Point(e.X, e.Y));
+            }
+            else if (e.Button == MouseButtons.Left)
+            {
+                int row_index = -1, col_index = -1;
+                for (int index = 0; index < ServerDataGrid.SelectedCells.Count; ++index)
+                {
+                    row_index = ServerDataGrid.SelectedCells[index].RowIndex;
+                    col_index = ServerDataGrid.SelectedCells[index].ColumnIndex;
+                    break;
+                }
+                if (row_index >= 0)
+                {
+                    int id = (int)ServerDataGrid[0, row_index].Value;
+                    if (ServerDataGrid.Columns[col_index].Name == "Server")
+                    {
+                        Configuration config = controller.GetCurrentConfiguration();
+                        controller.SelectServerIndex(id);
+                    }
+                    if (ServerDataGrid.Columns[col_index].Name == "Group")
+                    {
+                        Configuration config = controller.GetCurrentConfiguration();
+                        Server cur_server = config.configs[id];
+                        string group = cur_server.group;
+                        if (group != null && group.Length > 0)
+                        {
+                            bool enable = !cur_server.enable;
+                            foreach (Server server in config.configs)
+                            {
+                                if (server.group == group)
+                                {
+                                    if (server.enable != enable)
+                                    {
+                                        server.setEnable(enable);
+                                    }
+                                }
+                            }
+                            controller.SelectServerIndex(config.index);
+                        }
+                    }
+                    if (ServerDataGrid.Columns[col_index].Name == "Enable")
+                    {
+                        Configuration config = controller.GetCurrentConfiguration();
+                        Server server = config.configs[id];
+                        server.setEnable(!server.isEnable());
+                        controller.SelectServerIndex(config.index);
+                    }
+                    ServerDataGrid[0, row_index].Selected = true;
+                }
             }
         }
 

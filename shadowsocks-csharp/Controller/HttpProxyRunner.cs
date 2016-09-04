@@ -103,7 +103,7 @@ namespace Shadowsocks.Controller
                 polipoConfig = polipoConfig.Replace("__BYPASS_ACTION__", "actionsfile " + _subPath + "/bypass.action");
                 FileManager.ByteArrayToFile(runningPath + "/privoxy.conf", System.Text.Encoding.UTF8.GetBytes(polipoConfig));
 
-                string bypassConfig = "{+forward-override{forward .}}\n0.*.*.*/\n10.*.*.*/\n127.*.*.*/\n192.168.*.*/\n172.1[6-9].*.*/\n172.2[0-9].*.*/\n172.3[0-1].*.*/\n169.254.*.*/\n::1/\nfc00::/\nfe80::/\nlocalhost/\n";
+                string bypassConfig = "{+forward-override{forward .}}\n0.[0-9]*.[0-9]*.[0-9]*/\n10.[0-9]*.[0-9]*.[0-9]*/\n127.[0-9]*.[0-9]*.[0-9]*/\n192.168.[0-9]*.[0-9]*/\n172.1[6-9].[0-9]*.[0-9]*/\n172.2[0-9].[0-9]*.[0-9]*/\n172.3[0-1].[0-9]*.[0-9]*/\n169.254.[0-9]*.[0-9]*/\n::1/\nfc00::/\nfe80::/\nlocalhost/\n";
                 if (bypass)
                 {
                     string bypass_path = Path.Combine(System.Windows.Forms.Application.StartupPath, PACServer.BYPASS_FILE);

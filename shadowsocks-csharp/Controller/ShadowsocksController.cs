@@ -225,16 +225,23 @@ namespace Shadowsocks.Controller
 
         public bool AddServerBySSURL(string ssURL)
         {
-            try
+            if (ssURL.StartsWith("ss://") || ssURL.StartsWith("ssr://"))
             {
-                var server = new Server(ssURL);
-                _config.configs.Add(server);
-                SaveConfig(_config);
-                return true;
+                try
+                {
+                    var server = new Server(ssURL);
+                    _config.configs.Add(server);
+                    SaveConfig(_config);
+                    return true;
+                }
+                catch (Exception e)
+                {
+                    Logging.LogUsefulException(e);
+                    return false;
+                }
             }
-            catch (Exception e)
+            else
             {
-                Logging.LogUsefulException(e);
                 return false;
             }
         }

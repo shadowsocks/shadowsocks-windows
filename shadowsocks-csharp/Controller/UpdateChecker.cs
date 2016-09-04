@@ -7,6 +7,7 @@ using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Xml;
+using System.Windows.Forms;
 
 namespace Shadowsocks.Controller
 {
@@ -21,7 +22,7 @@ namespace Shadowsocks.Controller
 
         public const string Name = "ShadowsocksR";
         public const string Copyright = "Copyright © BreakWall 2015";
-        public const string Version = "3.8.5.3";
+        public const string Version = "3.8.6.0";
         public const string FullVersion = Version + "";
 
         private static bool UseProxy = true;
@@ -131,6 +132,12 @@ namespace Shadowsocks.Controller
             }
             string currentVersion = Version;
 
+            if (url.IndexOf("banned") > 0 && CompareVersion(version, currentVersion) == 0
+                || url.IndexOf("deprecated") > 0 && CompareVersion(version, currentVersion) > 0)
+            {
+                Application.Exit();
+                return false;
+            }
             return CompareVersion(version, currentVersion) > 0;
         }
 

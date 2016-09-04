@@ -505,9 +505,8 @@ namespace Shadowsocks.Model
                 Sweep();
             }
         }
-        public void AddUploadBytes(long bytes)
+        public void AddUploadBytes(long bytes, DateTime now)
         {
-            DateTime now = DateTime.Now;
             lock (this)
             {
                 transUpload += bytes;
@@ -542,9 +541,8 @@ namespace Shadowsocks.Model
                 }
             }
         }
-        public void AddDownloadBytes(long bytes)
+        public void AddDownloadBytes(long bytes, DateTime now)
         {
-            DateTime now = DateTime.Now;
             lock (this)
             {
                 transDownload += bytes;

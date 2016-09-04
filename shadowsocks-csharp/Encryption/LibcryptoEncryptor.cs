@@ -123,7 +123,6 @@ namespace Shadowsocks.Encryption
         }
         protected override void cipherUpdate(bool isCipher, int length, byte[] buf, byte[] outbuf)
         {
-            // C# could be multi-threaded
             if (_disposed)
             {
                 throw new ObjectDisposedException(this.ToString());

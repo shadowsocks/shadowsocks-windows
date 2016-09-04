@@ -15,7 +15,7 @@ namespace Shadowsocks.Controller
         public long sizeUpload = 0;
         public long sizeDownload = 0;
         public long sizeRecv = 0;
-        private List<TransLog> sizeDownloadList = new List<TransLog>();
+        //private List<TransLog> sizeDownloadList = new List<TransLog>();
         public string server;
         public ServerTransferTotal transfer;
 
@@ -46,10 +46,10 @@ namespace Shadowsocks.Controller
 
         public void AddDownloadSize(int size)
         {
-            if (sizeDownloadList.Count == 2)
-                sizeDownloadList[1] = new TransLog(size, DateTime.Now);
-            else
-                sizeDownloadList.Add(new TransLog(size, DateTime.Now));
+            //if (sizeDownloadList.Count == 2)
+            //    sizeDownloadList[1] = new TransLog(size, DateTime.Now);
+            //else
+            //    sizeDownloadList.Add(new TransLog(size, DateTime.Now));
             sizeDownload += size;
             if (transfer != null && server != null)
             {
@@ -71,31 +71,31 @@ namespace Shadowsocks.Controller
             }
         }
 
-        public long GetAvgDownloadSpeed()
-        {
-            if (sizeDownloadList == null || sizeDownloadList.Count < 2 || (sizeDownloadList[sizeDownloadList.Count - 1].recvTime - sizeDownloadList[0].recvTime).TotalSeconds <= 0.001)
-                return 0;
-            return (long)((sizeDownload - sizeDownloadList[0].size) / (sizeDownloadList[sizeDownloadList.Count - 1].recvTime - sizeDownloadList[0].recvTime).TotalSeconds);
-        }
+        //public long GetAvgDownloadSpeed()
+        //{
+        //    if (sizeDownloadList == null || sizeDownloadList.Count < 2 || (sizeDownloadList[sizeDownloadList.Count - 1].recvTime - sizeDownloadList[0].recvTime).TotalSeconds <= 0.001)
+        //        return 0;
+        //    return (long)((sizeDownload - sizeDownloadList[0].size) / (sizeDownloadList[sizeDownloadList.Count - 1].recvTime - sizeDownloadList[0].recvTime).TotalSeconds);
+        //}
 
-        public int GetActionType()
-        {
-            int type = 0;
-            if (sizeDownload > 1024 * 1024 * 1)
-            {
-                type |= 1;
-            }
-            if (sizeUpload > 1024 * 1024 * 1)
-            {
-                type |= 2;
-            }
-            double time = (DateTime.Now - timeConnectEnd).TotalSeconds;
-            if (time > 5 && (sizeDownload + sizeUpload) / time > 1024 * 16)
-            {
-                type |= 4;
-            }
-            return type;
-        }
+        //public int GetActionType()
+        //{
+        //    int type = 0;
+        //    if (sizeDownload > 1024 * 1024 * 1)
+        //    {
+        //        type |= 1;
+        //    }
+        //    if (sizeUpload > 1024 * 1024 * 1)
+        //    {
+        //        type |= 2;
+        //    }
+        //    double time = (DateTime.Now - timeConnectEnd).TotalSeconds;
+        //    if (time > 5 && (sizeDownload + sizeUpload) / time > 1024 * 16)
+        //    {
+        //        type |= 4;
+        //    }
+        //    return type;
+        //}
     }
 
     class ProtocolResponseDetector
