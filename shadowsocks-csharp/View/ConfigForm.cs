@@ -128,7 +128,9 @@ namespace Shadowsocks.View
                 EnableKCPCheckBox.Checked = server.enable_kcp;
                 KCPRemoteAddrTextbox.Text = server.kcp_remote_addr;
                 KCPParamsTextBox.Text = server.kcp_cli_params;
-            }
+				KCPParamsTextBox.Enabled = EnableKCPCheckBox.Checked;
+				KCPRemoteAddrTextbox.Enabled = EnableKCPCheckBox.Checked;
+			}
         }
 
         private void LoadConfiguration(Configuration configuration)
