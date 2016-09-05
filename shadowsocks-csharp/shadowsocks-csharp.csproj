@@ -139,6 +139,7 @@
     <Compile Include="3rd\zxing\ResultPoint.cs" />
     <Compile Include="3rd\zxing\ResultPointCallback.cs" />
     <Compile Include="3rd\zxing\WriterException.cs" />
+    <Compile Include="Controller\Service\KCPProxyRunner.cs" />
     <Compile Include="Proxy\DirectConnect.cs" />
     <Compile Include="Proxy\IProxy.cs" />
     <Compile Include="Controller\Service\AvailabilityStatistics.cs" />
@@ -256,6 +257,7 @@
       <SubType>Designer</SubType>
     </None>
     <None Include="Data\abp.js.gz" />
+    <None Include="Data\kcptun.exe.gz" />
     <None Include="Data\libsscrypto.dll.gz" />
     <None Include="Data\mgwz.dll.gz" />
     <None Include="Data\privoxy.exe.gz" />

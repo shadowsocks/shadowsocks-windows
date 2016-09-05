@@ -54,6 +54,10 @@ namespace Shadowsocks.View
             MyCancelButton.Text = I18N.GetString("Cancel");
             MoveUpButton.Text = I18N.GetString("Move &Up");
             MoveDownButton.Text = I18N.GetString("Move D&own");
+            EnableKCPLabel.Text = I18N.GetString(EnableKCPLabel.Text);
+            KCPRemoteAddrLabel.Text = I18N.GetString(KCPRemoteAddrLabel.Text);
+            KCPParamsLabel.Text = I18N.GetString(KCPParamsLabel.Text);
+            EnableKCPCheckBox.Text = I18N.GetString(EnableKCPCheckBox.Text);
             this.Text = I18N.GetString("Edit Servers");
         }
 
@@ -84,7 +88,10 @@ namespace Shadowsocks.View
                     password = PasswordTextBox.Text,
                     method = EncryptionSelect.Text,
                     remarks = RemarksTextBox.Text,
-                    auth = OneTimeAuth.Checked
+                    auth = OneTimeAuth.Checked,
+                    enable_kcp = EnableKCPCheckBox.Checked,
+                    kcp_remote_addr = KCPRemoteAddrTextbox.Text,
+                    kcp_cli_params = KCPParamsTextBox.Text
                 };
                 int localPort = int.Parse(ProxyPortTextBox.Text);
                 Configuration.CheckServer(server);
@@ -118,7 +125,12 @@ namespace Shadowsocks.View
                 EncryptionSelect.Text = server.method ?? "aes-256-cfb";
                 RemarksTextBox.Text = server.remarks;
                 OneTimeAuth.Checked = server.auth;
-            }
+                EnableKCPCheckBox.Checked = server.enable_kcp;
+                KCPRemoteAddrTextbox.Text = server.kcp_remote_addr;
+                KCPParamsTextBox.Text = server.kcp_cli_params;
+				KCPParamsTextBox.Enabled = EnableKCPCheckBox.Checked;
+				KCPRemoteAddrTextbox.Enabled = EnableKCPCheckBox.Checked;
+			}
         }
 
         private void LoadConfiguration(Configuration configuration)
@@ -326,6 +338,25 @@ namespace Shadowsocks.View
             {
                 MoveConfigItem(+1);  // +1 means move forward
             }
+        }
+
+        private void EnableKCPCheckBox_CheckedChanged(object sender, EventArgs e)
+        {
+            IPTextBox.Enabled = !EnableKCPCheckBox.Checked;
+            if (EnableKCPCheckBox.Checked)
+            {
+                IPTextBox.Text = "127.0.0.1";
+            }
+            else
+            {
+                var parts = KCPRemoteAddrTextbox.Text.Split(':');
+                if (parts.Length > 1)
+                {
+                    IPTextBox.Text = parts[0].Trim();
+                }
+            }
+            KCPParamsTextBox.Enabled = EnableKCPCheckBox.Checked;
+            KCPRemoteAddrTextbox.Enabled = EnableKCPCheckBox.Checked;
         }
     }
 }

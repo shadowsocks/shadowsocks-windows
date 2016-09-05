@@ -10,8 +10,8 @@
 
 namespace Shadowsocks.Properties {
     using System;
-
-
+    
+    
     /// <summary>
     ///   A strongly-typed resource class, for looking up localized strings, etc.
     /// </summary>
@@ -31,7 +31,7 @@ namespace Shadowsocks.Properties {
         [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
         internal Resources() {
         }
-
+        
         /// <summary>
         ///   Returns the cached ResourceManager instance used by this class.
         /// </summary>
@@ -45,7 +45,7 @@ namespace Shadowsocks.Properties {
                 return resourceMan;
             }
         }
-
+        
         /// <summary>
         ///   Overrides the current thread's CurrentUICulture property for all
         ///   resource lookups using this strongly typed resource class.
@@ -59,7 +59,7 @@ namespace Shadowsocks.Properties {
                 resourceCulture = value;
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
@@ -69,7 +69,7 @@ namespace Shadowsocks.Properties {
                 return ((byte[])(obj));
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to # translation for Simplified Chinese
         ///
@@ -83,7 +83,9 @@ namespace Shadowsocks.Properties {
         ///Global=全局模式
         ///Servers=服务器
         ///Edit Servers...=编辑服务器...
+        ///Statistics Config...=统计配置...
         ///Start on Boot=开机启动
+        ///SOCKS5 Proxy...=SOCKS5代理设置...
         ///Allow Clients from LAN=允许来自局域网的连接
         ///Local PAC=使用本地 PAC
         ///Online PAC=使用在线 PAC
@@ -91,15 +93,24 @@ namespace Shadowsocks.Properties {
         ///Update Local PAC from GFWList=从 GFWList 更新本地 PAC
         ///Edit User Rule for GFWList...=编辑 GFWList 的用户规则...
         ///Show QRCode...=显示二维码...
-        ///Scan QRCode from Screen...=扫描屏幕上的二维码...
-        ///Availability Statistic [rest of string was truncated]&quot;;.
+        ///Scan QRCode from Screen. [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string cn {
             get {
                 return ResourceManager.GetString("cn", resourceCulture);
             }
         }
-
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] kcptun_exe {
+            get {
+                object obj = ResourceManager.GetObject("kcptun_exe", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
@@ -109,7 +120,7 @@ namespace Shadowsocks.Properties {
                 return ((byte[])(obj));
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
@@ -119,20 +130,21 @@ namespace Shadowsocks.Properties {
                 return ((byte[])(obj));
             }
         }
-
+        
         /// <summary>
-        ///   Looks up a localized string similar to listen-address __POLIPO_BIND_IP__:8123
+        ///   Looks up a localized string similar to listen-address __POLIPO_BIND_IP__:__POLIPO_BIND_PORT__
         ///show-on-task-bar 0
         ///activity-animation 0
         ///forward-socks5 / 127.0.0.1:__SOCKS_PORT__ .
-        ///hide-console.
+        ///hide-console
+        ///.
         /// </summary>
         internal static string privoxy_conf {
             get {
                 return ResourceManager.GetString("privoxy_conf", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
@@ -142,7 +154,7 @@ namespace Shadowsocks.Properties {
                 return ((byte[])(obj));
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
@@ -152,7 +164,7 @@ namespace Shadowsocks.Properties {
                 return ((byte[])(obj));
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
@@ -162,7 +174,7 @@ namespace Shadowsocks.Properties {
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
@@ -172,7 +184,7 @@ namespace Shadowsocks.Properties {
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
@@ -212,7 +224,7 @@ namespace Shadowsocks.Properties {
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to ! Put user rules line by line in this file.
         ///! See https://adblockplus.org/en/filter-cheatsheet

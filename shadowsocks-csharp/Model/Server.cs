@@ -22,6 +22,11 @@ namespace Shadowsocks.Model
         public string remarks;
         public bool auth;
 
+        //kcp
+        public bool enable_kcp;
+        public string kcp_remote_addr;
+        public string kcp_cli_params;
+
         public override int GetHashCode()
         {
             return server.GetHashCode() ^ server_port;

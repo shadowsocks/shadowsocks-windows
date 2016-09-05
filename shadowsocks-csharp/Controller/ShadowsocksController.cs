@@ -29,6 +29,7 @@ namespace Shadowsocks.Controller
         private Configuration _config;
         private StrategyManager _strategyManager;
         private PolipoRunner polipoRunner;
+        private KcptunProxyRunner kcptunRunner;
         private GFWListUpdater gfwListUpdater;
         public AvailabilityStatistics availabilityStatistics = AvailabilityStatistics.Instance;
         public StatisticsStrategyConfiguration StatisticsConfiguration { get; private set; }
@@ -267,6 +268,10 @@ namespace Shadowsocks.Controller
             {
                 polipoRunner.Stop();
             }
+            if (kcptunRunner != null)
+            {
+                kcptunRunner.Stop();
+            }
             if (_config.enabled)
             {
                 SystemProxy.Update(_config, true);
@@ -392,6 +397,10 @@ namespace Shadowsocks.Controller
             {
                 polipoRunner = new PolipoRunner();
             }
+            if (kcptunRunner == null)
+            {
+                kcptunRunner = new KcptunProxyRunner();
+            }
             if (_pacServer == null)
             {
                 _pacServer = new PACServer();
@@ -417,6 +426,7 @@ namespace Shadowsocks.Controller
             // though UseShellExecute is set to true now
             // http://stackoverflow.com/questions/10235093/socket-doesnt-close-after-application-exits-if-a-launched-process-is-open
             polipoRunner.Stop();
+            kcptunRunner.Stop();
             try
             {
                 var strategy = GetCurrentStrategy();
@@ -426,6 +436,7 @@ namespace Shadowsocks.Controller
                 }
 
                 polipoRunner.Start(_config);
+                kcptunRunner.Start(_config);
 
                 TCPRelay tcpRelay = new TCPRelay(this, _config);
                 UDPRelay udpRelay = new UDPRelay(this);

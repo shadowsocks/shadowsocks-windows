@@ -52,6 +52,11 @@ New server=未配置的服务器
 Move &Up=上移(&U)
 Move D&own=下移(&O)
 
+Enable KCP=启用KCP协议
+Using KCP if checked=打勾使用KCP协议
+KCP Server(HOST:PORT)=KCP服务器地址
+KCP Command Parameters=KCP命令行参数
+
 # Proxy Form
 
 Edit Proxy=代理设置
