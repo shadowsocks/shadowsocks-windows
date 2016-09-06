@@ -439,6 +439,7 @@ namespace Shadowsocks.View
             {
                 configForm = new ConfigForm(controller);
                 configForm.Show();
+                configForm.Activate();
                 configForm.FormClosed += configForm_FormClosed;
             }
         }
@@ -453,6 +454,7 @@ namespace Shadowsocks.View
             {
                 proxyForm = new ProxyForm(controller);
                 proxyForm.Show();
+                proxyForm.Activate();
                 proxyForm.FormClosed += proxyForm_FormClosed;
             }
         }
@@ -463,6 +465,7 @@ namespace Shadowsocks.View
             {
                 LogForm f = new LogForm(controller, Logging.LogFilePath);
                 f.Show();
+                f.Activate();
                 f.FormClosed += logForm_FormClosed;
 
                 logForms.Add(f);
