@@ -101,6 +101,19 @@ namespace Shadowsocks.Properties {
         }
 
         /// <summary>
+        ///   Looks up a localized string similar to # translation for Traditional Chinese
+        ///
+        ///Shadowsocks=Shadowsocks
+        ///
+        ///# Menu items
+        /// </summary>
+        internal static string zh_tw {
+            get {
+                return ResourceManager.GetString("zh_tw", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
         internal static byte[] libsscrypto_dll {
