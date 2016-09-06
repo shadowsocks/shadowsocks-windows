@@ -24,7 +24,6 @@ namespace Shadowsocks.View
         #region chart
         List<float> inboundPoints = new List<float>();
         List<float> outboundPoints = new List<float>();
-        long maxSpeed = 0;
         Tuple<float, string, long> bandwidthScale = new Tuple<float, string, long>(0, "B", 1);
         TextAnnotation inboundAnnotation = new TextAnnotation();
         TextAnnotation outboundAnnotation = new TextAnnotation();
@@ -59,6 +58,7 @@ namespace Shadowsocks.View
 
         private void controller_TrafficChanged(object sender, EventArgs e)
         {
+            long maxSpeed = 0;
             inboundPoints.Clear();
             outboundPoints.Clear();
             foreach (var trafficPerSecond in controller.traffic)
@@ -218,7 +218,7 @@ namespace Shadowsocks.View
             config.SetFont(LogMessageTextBox.Font);
             config.SetBackgroundColor(LogMessageTextBox.BackColor);
             config.SetTextColor(LogMessageTextBox.ForeColor);
-            if(!(config.maximized = WindowState == FormWindowState.Maximized)) {
+            if (WindowState != FormWindowState.Minimized && !(config.maximized = WindowState == FormWindowState.Maximized)) {
                 config.top = Top;
                 config.left = Left;
                 config.height = Height;
