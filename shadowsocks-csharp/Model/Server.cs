@@ -10,7 +10,7 @@ namespace Shadowsocks.Model
     public class Server
     {
         public static readonly Regex
-            UrlFinder = new Regex("^ss://((?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?)$",
+            UrlFinder = new Regex("^ss://((?:[A-Za-z0-9+/]+)|((?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?))$",
                                   RegexOptions.Compiled | RegexOptions.IgnoreCase),
             DetailsParser = new Regex("^((?<method>.+?)(?<auth>-auth)??:(?<password>.*)@(?<hostname>.+?)" +
                                       ":(?<port>\\d+?))$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
