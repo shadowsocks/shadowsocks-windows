@@ -20,7 +20,7 @@ Edit Local PAC File...=編輯本地 PAC 文件...
 Update Local PAC from GFWList=從 GFWList 更新本地 PAC
 Edit User Rule for GFWList...=編輯 GFWList 的用戶規則...
 Show QRCode...=顯示二維碼...
-Scan QRCode from Screen...=掃描屏幕上的二維碼...
+Scan QRCode from Screen...=掃描螢幕上的二維碼...
 Availability Statistics=統計可用性
 Show Logs...=顯示日誌...
 Verbose Logging=詳細記錄日誌
@@ -39,11 +39,11 @@ Choose by statistics=根據統計
 &Add=添加(&A)
 &Delete=刪除(&D)
 Server=伺服器
-Server Addr=伺服器地址
-Server Port=伺服器端口
+Server Addr=伺服器位址
+Server Port=伺服器連接埠
 Password=密碼
 Encryption=加密
-Proxy Port=代理端口
+Proxy Port=代理連接埠
 Remarks=備註
 Onetime Authentication=壹次性認證
 OK=確定
@@ -56,13 +56,13 @@ Move D&own=下移(&O)
 
 Edit Proxy=代理設置
 Use Proxy=使用代理
-Proxy Addr=代理地址
-Proxy Port=代理端口
+Proxy Addr=代理位址
+Proxy Port=代理連接埠
 
 # Log Form
 
 &File=文件(&F)
-&Open Location=在資源管理器中打開(&O)
+&Open Location=在資料總管中打開(&O)
 E&xit=退出(&X)
 &View=視圖(&V)
 &Clean Logs=清空日誌(&C)
@@ -87,13 +87,13 @@ Please input PAC Url=請輸入 PAC 網址
 # Messages
 
 Shadowsocks Error: {0}=Shadowsocks 錯誤: {0}
-Port already in use=端口已被占用
-Illegal port number format=非法端口格式
+Port already in use=連接埠已被占用
+Illegal port number format=非法連接埠格式
 Please add at least one server=請添加至少壹個伺服器
 Server IP can not be blank=伺服器 IP 不能為空
 Password can not be blank=密碼不能為空
-Port out of range=端口超出範圍
-Port can't be 8123=端口不能為 8123
+Port out of range=連接埠超出範圍
+Port can't be 8123=連接埠不能為 8123
 Shadowsocks {0} Update Found=Shadowsocks {0} 更新
 No update is available=沒有可用的更新
 Click here to update=點擊這裏升級
@@ -111,7 +111,7 @@ If you want to start multiple Shadowsocks, make a copy in another directory.=如
 Failed to decode QRCode=無法解析二維碼
 Failed to update registry=無法修改註冊表
 System Proxy On: =系統代理已啟用：
-Running: Port {0}=正在運行：端口 {0}
+Running: Port {0}=正在運行：連接埠 {0}
 Unexpected error, shadowsocks will exit. Please report to=非預期錯誤，Shadowsocks將退出。請提交此錯誤到
 Unsupported operating system, use Windows Vista at least.=不支持的操作系統版本，最低需求為Windows Vista。
 Proxy request failed=代理請求失敗
