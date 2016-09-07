@@ -76,7 +76,7 @@ Outbound=出站
 
 # QRCode Form
 
-QRCode= QR 碼
+QRCode=QR 碼
 
 # PAC Url Form
 
