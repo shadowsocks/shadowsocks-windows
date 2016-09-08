@@ -57,9 +57,12 @@ namespace Shadowsocks.View
         {
             List<float> inboundPoints = new List<float>();
             List<float> outboundPoints = new List<float>();
+            TextAnnotation inboundAnnotation = new TextAnnotation();
+            TextAnnotation outboundAnnotation = new TextAnnotation();
             Tuple<float, string, long> bandwidthScale;
             const long minScale = 50;
             long maxSpeed = 0;
+            long lastInbound, lastOutbound;
 
             lock (this)
             {
@@ -71,6 +74,8 @@ namespace Shadowsocks.View
                     outboundPoints.Add(trafficPerSecond.Item2);
                     maxSpeed = Math.Max(maxSpeed, Math.Max(trafficPerSecond.Item1, trafficPerSecond.Item2));
                 }
+                lastInbound = traffic.Last().Item1;
+                lastOutbound = traffic.Last().Item2;
             }
 
             if (maxSpeed > 0)
@@ -96,12 +101,10 @@ namespace Shadowsocks.View
                 trafficChart.Series["Outbound"].Points.DataBindY(outboundPoints);
                 trafficChart.ChartAreas[0].AxisY.LabelStyle.Format = "{0:0.##} " + bandwidthScale.Item2;
                 trafficChart.ChartAreas[0].AxisY.Maximum = bandwidthScale.Item1;
-                TextAnnotation inboundAnnotation = new TextAnnotation();
-                TextAnnotation outboundAnnotation = new TextAnnotation();
                 inboundAnnotation.AnchorDataPoint = trafficChart.Series["Inbound"].Points.Last();
-                inboundAnnotation.Text = Utils.FormatBandwidth(controller.traffic.Last.inboundIncreasement);
+                inboundAnnotation.Text = Utils.FormatBandwidth(lastInbound);
                 outboundAnnotation.AnchorDataPoint = trafficChart.Series["Outbound"].Points.Last();
-                outboundAnnotation.Text = Utils.FormatBandwidth(controller.traffic.Last.outboundIncreasement);
+                outboundAnnotation.Text = Utils.FormatBandwidth(lastOutbound);
                 trafficChart.Annotations.Clear();
                 trafficChart.Annotations.Add(inboundAnnotation);
                 trafficChart.Annotations.Add(outboundAnnotation);
