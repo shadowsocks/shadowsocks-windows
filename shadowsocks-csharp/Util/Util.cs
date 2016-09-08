@@ -117,6 +117,44 @@ namespace Shadowsocks.Util
             return $"{result.Item1:0.##}{result.Item2}";
         }
 
+        public static string FormatBytes(long bytes)
+        {
+            const long K = 1024L;
+            const long M = K * 1024L;
+            const long G = M * 1024L;
+            const long T = G * 1024L;
+            const long P = T * 1024L;
+            const long E = P * 1024L;
+
+            if (bytes >= P * 990)
+                return (bytes / (double)E).ToString("F5") + "EB";
+            if (bytes >= T * 990)
+                return (bytes / (double)P).ToString("F5") + "PB";
+            if (bytes >= G * 990)
+                return (bytes / (double)T).ToString("F5") + "TB";
+            if (bytes >= M * 990)
+            {
+                return (bytes / (double)G).ToString("F4") + "GB";
+            }
+            if (bytes >= M * 100)
+            {
+                return (bytes / (double)M).ToString("F1") + "MB";
+            }
+            if (bytes >= M * 10)
+            {
+                return (bytes / (double)M).ToString("F2") + "MB";
+            }
+            if (bytes >= K * 990)
+            {
+                return (bytes / (double)M).ToString("F3") + "MB";
+            }
+            if (bytes > K * 2)
+            {
+                return (bytes / (double)K).ToString("F1") + "KB";
+            }
+            return bytes.ToString();
+        }
+
         /// <summary>
         /// Return scaled bandwidth
         /// </summary>

@@ -89,7 +89,7 @@ namespace Shadowsocks.Controller
             StatisticsConfiguration = StatisticsStrategyConfiguration.Load();
             _strategyManager = new StrategyManager(this);
             StartReleasingMemory();
-            StartTrafficStatistics(60);
+            StartTrafficStatistics(61);
         }
 
         public void Start()
