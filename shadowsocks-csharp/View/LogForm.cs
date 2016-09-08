@@ -22,11 +22,8 @@ namespace Shadowsocks.View
         ShadowsocksController controller;
 
         #region chart
-        List<float> inboundPoints = new List<float>();
-        List<float> outboundPoints = new List<float>();
-        Tuple<float, string, long> bandwidthScale = new Tuple<float, string, long>(0, "B", 1);
-        TextAnnotation inboundAnnotation = new TextAnnotation();
-        TextAnnotation outboundAnnotation = new TextAnnotation();
+        long lastMaxSpeed;
+        public ShadowsocksController.QueueLast<Tuple<long, long>> traffic = new ShadowsocksController.QueueLast<Tuple<long, long>>();
         #endregion
 
         public LogForm(ShadowsocksController controller, string filename)
@@ -56,16 +53,40 @@ namespace Shadowsocks.View
             UpdateTexts();
         }
 
-        private void controller_TrafficChanged(object sender, EventArgs e)
+        private void update_TrafficChart()
         {
+            List<float> inboundPoints = new List<float>();
+            List<float> outboundPoints = new List<float>();
+            TextAnnotation inboundAnnotation = new TextAnnotation();
+            TextAnnotation outboundAnnotation = new TextAnnotation();
+            Tuple<float, string, long> bandwidthScale;
+            const long minScale = 50;
             long maxSpeed = 0;
-            inboundPoints.Clear();
-            outboundPoints.Clear();
-            foreach (var trafficPerSecond in controller.traffic)
+            long lastInbound, lastOutbound;
+
+            lock (this)
             {
-                inboundPoints.Add(trafficPerSecond.inboundIncreasement);
-                outboundPoints.Add(trafficPerSecond.outboundIncreasement);
-                maxSpeed = Math.Max(maxSpeed, Math.Max(trafficPerSecond.inboundIncreasement, trafficPerSecond.outboundIncreasement));
+                if (traffic.Count == 0)
+                    return;
+                foreach (var trafficPerSecond in traffic)
+                {
+                    inboundPoints.Add(trafficPerSecond.Item1);
+                    outboundPoints.Add(trafficPerSecond.Item2);
+                    maxSpeed = Math.Max(maxSpeed, Math.Max(trafficPerSecond.Item1, trafficPerSecond.Item2));
+                }
+                lastInbound = traffic.Last().Item1;
+                lastOutbound = traffic.Last().Item2;
+            }
+
+            if (maxSpeed > 0)
+            {
+                lastMaxSpeed -= lastMaxSpeed / 32;
+                maxSpeed = Math.Max(minScale, Math.Max(maxSpeed, lastMaxSpeed));
+                lastMaxSpeed = maxSpeed;
+            }
+            else
+            {
+                maxSpeed = lastMaxSpeed = minScale;
             }
 
             bandwidthScale = Utils.GetBandwidthScale(maxSpeed);
@@ -74,29 +95,31 @@ namespace Shadowsocks.View
             inboundPoints = inboundPoints.Select(p => p / bandwidthScale.Item3).ToList();
             outboundPoints = outboundPoints.Select(p => p / bandwidthScale.Item3).ToList();
 
-            try
+            if (trafficChart.IsHandleCreated)
             {
-                if (trafficChart.InvokeRequired && trafficChart.IsHandleCreated)
-                {
-                    trafficChart.Invoke(new Action(() =>
-                    {
-                        trafficChart.Series["Inbound"].Points.DataBindY(inboundPoints);
-                        trafficChart.Series["Outbound"].Points.DataBindY(outboundPoints);
-                        trafficChart.ChartAreas[0].AxisY.LabelStyle.Format = "{0:0.##} " + bandwidthScale.Item2;
-                        inboundAnnotation.AnchorDataPoint = trafficChart.Series["Inbound"].Points.Last();
-                        inboundAnnotation.Text = Utils.FormatBandwidth(controller.traffic.Last.inboundIncreasement);
-                        outboundAnnotation.AnchorDataPoint = trafficChart.Series["Outbound"].Points.Last();
-                        outboundAnnotation.Text = Utils.FormatBandwidth(controller.traffic.Last.outboundIncreasement);
-                        trafficChart.Annotations.Clear();
-                        trafficChart.Annotations.Add(inboundAnnotation);
-                        trafficChart.Annotations.Add(outboundAnnotation);
-                    }));
-                }
+                trafficChart.Series["Inbound"].Points.DataBindY(inboundPoints);
+                trafficChart.Series["Outbound"].Points.DataBindY(outboundPoints);
+                trafficChart.ChartAreas[0].AxisY.LabelStyle.Format = "{0:0.##} " + bandwidthScale.Item2;
+                trafficChart.ChartAreas[0].AxisY.Maximum = bandwidthScale.Item1;
+                inboundAnnotation.AnchorDataPoint = trafficChart.Series["Inbound"].Points.Last();
+                inboundAnnotation.Text = Utils.FormatBandwidth(lastInbound);
+                outboundAnnotation.AnchorDataPoint = trafficChart.Series["Outbound"].Points.Last();
+                outboundAnnotation.Text = Utils.FormatBandwidth(lastOutbound);
+                trafficChart.Annotations.Clear();
+                trafficChart.Annotations.Add(inboundAnnotation);
+                trafficChart.Annotations.Add(outboundAnnotation);
             }
-            catch (ObjectDisposedException)
+        }
+
+        private void controller_TrafficChanged(object sender, EventArgs e)
+        {
+            lock (this)
             {
-                // suppress the thread race error:
-                // when closing the form but the Invoked Action is still working and cause 'Chart is Disposed' exception
+                traffic = new ShadowsocksController.QueueLast<Tuple<long, long>>();
+                foreach (var trafficPerSecond in controller.traffic)
+                {
+                    traffic.Enqueue(new Tuple<long, long>(trafficPerSecond.inboundIncreasement, trafficPerSecond.outboundIncreasement));
+                }
             }
         }
 
@@ -124,6 +147,7 @@ namespace Shadowsocks.View
         private void Timer_Tick(object sender, EventArgs e)
         {
             UpdateContent();
+            update_TrafficChart();
         }
 
         private void InitContent()
@@ -149,29 +173,35 @@ namespace Shadowsocks.View
 
         private void UpdateContent()
         {
-            try {
-                using(StreamReader reader = new StreamReader(new FileStream(filename,
-                         FileMode.Open, FileAccess.Read, FileShare.ReadWrite))) {
+            try
+            {
+                using (StreamReader reader = new StreamReader(new FileStream(filename,
+                         FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
+                {
                     reader.BaseStream.Seek(lastOffset, SeekOrigin.Begin);
 
                     string line = "";
                     bool changed = false;
-                    while((line = reader.ReadLine()) != null) {
+                    while ((line = reader.ReadLine()) != null)
+                    {
                         changed = true;
                         LogMessageTextBox.AppendText(line + Environment.NewLine);
                     }
 
-                    if(changed) {
+                    if (changed)
+                    {
                         LogMessageTextBox.ScrollToCaret();
                     }
 
                     lastOffset = reader.BaseStream.Position;
                 }
-            } catch(FileNotFoundException) {
+            }
+            catch (FileNotFoundException)
+            {
             }
 
             this.Text = I18N.GetString("Log Viewer") +
-                $" [in: {Utils.FormatBandwidth(controller.InboundCounter)}, out: {Utils.FormatBandwidth(controller.OutboundCounter)}]";
+                $" [in: {Utils.FormatBytes(controller.InboundCounter)}, out: {Utils.FormatBytes(controller.OutboundCounter)}]";
         }
 
         private void LogForm_Load(object sender, EventArgs e)
@@ -179,7 +209,7 @@ namespace Shadowsocks.View
             InitContent();
 
             timer = new Timer();
-            timer.Interval = 300;
+            timer.Interval = 100;
             timer.Tick += Timer_Tick;
             timer.Start();
 
@@ -190,7 +220,8 @@ namespace Shadowsocks.View
             Width = config.width;
             Top = config.GetBestTop();
             Left = config.GetBestLeft();
-            if(config.maximized) {
+            if (config.maximized)
+            {
                 WindowState = FormWindowState.Maximized;
             }
 
@@ -218,7 +249,8 @@ namespace Shadowsocks.View
             config.SetFont(LogMessageTextBox.Font);
             config.SetBackgroundColor(LogMessageTextBox.BackColor);
             config.SetTextColor(LogMessageTextBox.ForeColor);
-            if (WindowState != FormWindowState.Minimized && !(config.maximized = WindowState == FormWindowState.Maximized)) {
+            if (WindowState != FormWindowState.Minimized && !(config.maximized = WindowState == FormWindowState.Maximized))
+            {
                 config.top = Top;
                 config.left = Left;
                 config.height = Height;

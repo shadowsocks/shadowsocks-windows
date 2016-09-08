@@ -250,6 +250,8 @@
             chartArea1.AxisX.MajorGrid.Interval = 5D;
             chartArea1.AxisX.MajorGrid.LineColor = System.Drawing.Color.LightGray;
             chartArea1.AxisX.MajorTickMark.Enabled = false;
+            chartArea1.AxisX.Maximum = 61D;
+            chartArea1.AxisX.Minimum = 1D;
             chartArea1.AxisY.IntervalAutoMode = System.Windows.Forms.DataVisualization.Charting.IntervalAutoMode.VariableCount;
             chartArea1.AxisY.LabelAutoFitMaxFontSize = 8;
             chartArea1.AxisY.LabelStyle.Interval = 0D;
@@ -266,12 +268,14 @@
             this.trafficChart.Location = new System.Drawing.Point(0, 0);
             this.trafficChart.Name = "trafficChart";
             this.trafficChart.Palette = System.Windows.Forms.DataVisualization.Charting.ChartColorPalette.None;
+            series1.BorderWidth = 2;
             series1.ChartArea = "ChartArea1";
             series1.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
             series1.Color = System.Drawing.Color.FromArgb(255, 128, 0);
             series1.IsXValueIndexed = true;
             series1.Legend = "Legend1";
             series1.Name = "Inbound";
+            series2.BorderWidth = 2;
             series2.ChartArea = "ChartArea1";
             series2.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
             series2.Color = System.Drawing.Color.FromArgb(128, 128, 255);
