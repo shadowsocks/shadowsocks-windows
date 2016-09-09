@@ -1,3 +1,13 @@
+3.3 2016-09-09
+- Update Privoxy to 3.0.26
+- Change minimum system version explicitly to Windows Vista
+  since we are using dual-mode socket
+- Support running multiple instances of Privoxy for system proxy
+- Improve networking
+- New traffic chart and icon style
+- I18N: Traditional Chinese support
+- Bug fixes and improvements
+
 3.2 2016-08-13
 - Add AES-CTR, blowfish and camellia ciphers support,
   including aes-256-ctr, aes-192-ctr, aes-128-ctr,
