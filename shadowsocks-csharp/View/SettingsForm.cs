@@ -28,6 +28,29 @@ namespace Shadowsocks.View
             UpdateTexts();
             controller.ConfigChanged += controller_ConfigChanged;
 
+            int dpi_mul = Util.Utils.GetDpiMul();
+            int font_height = 9;
+            //Font new_font = new Font("Arial", (float)(9.0 * dpi_mul / 4));
+            //this.Font = new_font;
+            comboProxyType.Height = comboProxyType.Height - font_height + font_height * dpi_mul / 4;
+            comboProxyType.Width = comboProxyType.Width * dpi_mul / 4;
+            RandomComboBox.Height = RandomComboBox.Height - font_height + font_height * dpi_mul / 4;
+            RandomComboBox.Width = RandomComboBox.Width * dpi_mul / 4;
+
+            TextS5Server.Width = TextS5Server.Width * dpi_mul / 4;
+            TextS5Port.Width = TextS5Port.Width * dpi_mul / 4;
+            TextS5User.Width = TextS5User.Width * dpi_mul / 4;
+            TextS5Pass.Width = TextS5Pass.Width * dpi_mul / 4;
+            TextUserAgent.Width = TextUserAgent.Width * dpi_mul / 4;
+
+            ProxyPortTextBox.Width = ProxyPortTextBox.Width * dpi_mul / 4;
+            TextAuthUser.Width = TextAuthUser.Width * dpi_mul / 4;
+            TextAuthPass.Width = TextAuthPass.Width * dpi_mul / 4;
+
+            DNSText.Width = DNSText.Width * dpi_mul / 4;
+            ReconnectText.Width = ReconnectText.Width * dpi_mul / 4;
+            TTLText.Width = TTLText.Width * dpi_mul / 4;
+
             LoadCurrentConfiguration();
         }
         private void SettingsForm_FormClosed(object sender, FormClosedEventArgs e)
@@ -47,6 +70,7 @@ namespace Shadowsocks.View
             ProxyPortLabel.Text = I18N.GetString("Proxy Port");
             ReconnectLabel.Text = I18N.GetString("Reconnect Times");
             TTLLabel.Text = I18N.GetString("TTL");
+            labelTimeout.Text = I18N.GetString(labelTimeout.Text);
 
             checkAutoStartup.Text = I18N.GetString(checkAutoStartup.Text);
             checkRandom.Text = I18N.GetString(checkRandom.Text);
@@ -107,6 +131,7 @@ namespace Shadowsocks.View
                 _modifiedConfiguration.random = checkRandom.Checked;
                 _modifiedConfiguration.randomAlgorithm = RandomComboBox.SelectedIndex;
                 _modifiedConfiguration.TTL = TTLText.Text.Length == 0 ? 0 : int.Parse(TTLText.Text);
+                _modifiedConfiguration.connect_timeout = textTimeout.Text.Length == 0 ? 0 : int.Parse(textTimeout.Text);
                 _modifiedConfiguration.dns_server = DNSText.Text;
                 _modifiedConfiguration.proxyEnable = CheckSockProxy.Checked;
                 _modifiedConfiguration.pacDirectGoProxy = checkBoxPacProxy.Checked;
@@ -140,6 +165,7 @@ namespace Shadowsocks.View
             checkRandom.Checked = _modifiedConfiguration.random;
             RandomComboBox.SelectedIndex = _modifiedConfiguration.randomAlgorithm;
             TTLText.Text = _modifiedConfiguration.TTL.ToString();
+            textTimeout.Text = _modifiedConfiguration.connect_timeout.ToString();
             DNSText.Text = _modifiedConfiguration.dns_server;
 
             CheckSockProxy.Checked = _modifiedConfiguration.proxyEnable;

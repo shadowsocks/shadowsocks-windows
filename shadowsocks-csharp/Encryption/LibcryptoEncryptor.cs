@@ -38,29 +38,26 @@ namespace Shadowsocks.Encryption
             }
         }
 
-        private static Dictionary<string, int[]> _ciphers = new Dictionary<string, int[]> {
-                {"aes-128-cfb", new int[]{16, 16, CIPHER_AES}},
-                {"aes-192-cfb", new int[]{24, 16, CIPHER_AES}},
-                {"aes-256-cfb", new int[]{32, 16, CIPHER_AES}},
-                {"aes-128-ctr", new int[]{16, 16, CIPHER_AES}},
-                {"aes-192-ctr", new int[]{24, 16, CIPHER_AES}},
-                {"aes-256-ctr", new int[]{32, 16, CIPHER_AES}},
-                {"camellia-128-cfb", new int[]{16, 16, CIPHER_CAMELLIA}},
-                {"camellia-192-cfb", new int[]{24, 16, CIPHER_CAMELLIA}},
-                {"camellia-256-cfb", new int[]{32, 16, CIPHER_CAMELLIA}},
-                //{"camellia-128-ofb", new int[]{16, 16, CIPHER_CAMELLIA}},
-                //{"camellia-192-ofb", new int[]{24, 16, CIPHER_CAMELLIA}},
-                //{"camellia-256-ofb", new int[]{32, 16, CIPHER_CAMELLIA}},
-                {"bf-cfb", new int[]{16, 8, CIPHER_OTHER_CFB}},
-                {"cast5-cfb", new int[]{16, 8, CIPHER_OTHER_CFB}},
-                {"des-cfb", new int[]{8, 8, CIPHER_OTHER_CFB}}, // weak
-                {"des-ede3-cfb", new int[]{24, 8, CIPHER_OTHER_CFB}},
-                {"idea-cfb", new int[]{16, 8, CIPHER_OTHER_CFB}},
-                {"rc2-cfb", new int[]{16, 8, CIPHER_OTHER_CFB}},
-                //{"rc4", new int[]{16, 0, CIPHER_RC4}}, // weak
-                {"rc4-md5", new int[]{16, 16, CIPHER_RC4}}, // weak
-                {"rc4-md5-6", new int[]{16, 6, CIPHER_RC4}}, // weak
-                {"seed-cfb", new int[]{16, 16, CIPHER_OTHER_CFB}},
+        private static Dictionary<string, EncryptorInfo> _ciphers = new Dictionary<string, EncryptorInfo> {
+                {"aes-128-cfb", new EncryptorInfo(16, 16, true, CIPHER_AES)},
+                {"aes-192-cfb", new EncryptorInfo(24, 16, true, CIPHER_AES)},
+                {"aes-256-cfb", new EncryptorInfo(32, 16, true, CIPHER_AES)},
+                {"aes-128-ctr", new EncryptorInfo(16, 16, true, CIPHER_AES)},
+                {"aes-192-ctr", new EncryptorInfo(24, 16, true, CIPHER_AES)},
+                {"aes-256-ctr", new EncryptorInfo(32, 16, true, CIPHER_AES)},
+                {"camellia-128-cfb", new EncryptorInfo(16, 16, true, CIPHER_CAMELLIA)},
+                {"camellia-192-cfb", new EncryptorInfo(24, 16, true, CIPHER_CAMELLIA)},
+                {"camellia-256-cfb", new EncryptorInfo(32, 16, true, CIPHER_CAMELLIA)},
+                {"bf-cfb", new EncryptorInfo(16, 8, true, CIPHER_OTHER_CFB)},
+                {"cast5-cfb", new EncryptorInfo(16, 8, true, CIPHER_OTHER_CFB)},
+                //{"des-cfb", new EncryptorInfo(8, 8, true, CIPHER_OTHER_CFB)}, // weak
+                //{"des-ede3-cfb", new EncryptorInfo(24, 8, true, CIPHER_OTHER_CFB)},
+                {"idea-cfb", new EncryptorInfo(16, 8, true, CIPHER_OTHER_CFB)},
+                {"rc2-cfb", new EncryptorInfo(16, 8, true, CIPHER_OTHER_CFB)},
+                {"rc4", new EncryptorInfo(16, 0, false, CIPHER_RC4)}, // weak
+                {"rc4-md5", new EncryptorInfo(16, 16, true, CIPHER_RC4)}, // weak
+                {"rc4-md5-6", new EncryptorInfo(16, 6, true, CIPHER_RC4)}, // weak
+                {"seed-cfb", new EncryptorInfo(16, 16, true, CIPHER_OTHER_CFB)},
         };
 
         public static List<string> SupportedCiphers()
@@ -73,7 +70,7 @@ namespace Shadowsocks.Encryption
             return Libcrypto.isSupport();
         }
 
-        protected override Dictionary<string, int[]> getCiphers()
+        protected override Dictionary<string, EncryptorInfo> getCiphers()
         {
             return _ciphers;
         }

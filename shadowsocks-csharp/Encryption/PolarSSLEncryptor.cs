@@ -22,12 +22,12 @@ namespace Shadowsocks.Encryption
             InitKey(method, password);
         }
 
-        private static Dictionary<string, int[]> _ciphers = new Dictionary<string, int[]> {
-                {"aes-128-cfb", new int[]{16, 16, CIPHER_AES, PolarSSL.AES_CTX_SIZE}},
-                {"aes-192-cfb", new int[]{24, 16, CIPHER_AES, PolarSSL.AES_CTX_SIZE}},
-                {"aes-256-cfb", new int[]{32, 16, CIPHER_AES, PolarSSL.AES_CTX_SIZE}},
-                //{"rc4", new int[]{16, 0, CIPHER_RC4, PolarSSL.ARC4_CTX_SIZE}},
-                {"rc4-md5", new int[]{16, 16, CIPHER_RC4, PolarSSL.ARC4_CTX_SIZE}},
+        private static Dictionary<string, EncryptorInfo> _ciphers = new Dictionary<string, EncryptorInfo> {
+                {"aes-128-cfb", new EncryptorInfo(16, 16, true, CIPHER_AES, PolarSSL.AES_CTX_SIZE)},
+                {"aes-192-cfb", new EncryptorInfo(24, 16, true, CIPHER_AES, PolarSSL.AES_CTX_SIZE)},
+                {"aes-256-cfb", new EncryptorInfo(32, 16, true, CIPHER_AES, PolarSSL.AES_CTX_SIZE)},
+                {"rc4", new EncryptorInfo(16, 0, false, CIPHER_RC4, PolarSSL.ARC4_CTX_SIZE)},
+                {"rc4-md5", new EncryptorInfo(16, 16, true, CIPHER_RC4, PolarSSL.ARC4_CTX_SIZE)},
         };
 
         public static List<string> SupportedCiphers()
@@ -35,7 +35,7 @@ namespace Shadowsocks.Encryption
             return new List<string>(_ciphers.Keys);
         }
 
-        protected override Dictionary<string, int[]> getCiphers()
+        protected override Dictionary<string, EncryptorInfo> getCiphers()
         {
             return _ciphers;
         }
@@ -49,7 +49,7 @@ namespace Shadowsocks.Encryption
             {
                 if (_encryptCtx == IntPtr.Zero)
                 {
-                    ctx = Marshal.AllocHGlobal(_cipherInfo[3]);
+                    ctx = Marshal.AllocHGlobal(_cipherInfo.ctx_size);
                     _encryptCtx = ctx;
                 }
                 else
@@ -61,7 +61,7 @@ namespace Shadowsocks.Encryption
             {
                 if (_decryptCtx == IntPtr.Zero)
                 {
-                    ctx = Marshal.AllocHGlobal(_cipherInfo[3]);
+                    ctx = Marshal.AllocHGlobal(_cipherInfo.ctx_size);
                     _decryptCtx = ctx;
                 }
                 else

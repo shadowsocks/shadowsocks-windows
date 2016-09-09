@@ -28,13 +28,13 @@ namespace Shadowsocks.Encryption
             _decryptBuf = new byte[MAX_INPUT_SIZE + SODIUM_BLOCK_SIZE];
         }
 
-        private static Dictionary<string, int[]> _ciphers = new Dictionary<string, int[]> {
-                {"salsa20", new int[]{32, 8, CIPHER_SALSA20}},
-                {"chacha20", new int[]{32, 8, CIPHER_CHACHA20}},
-                {"chacha20-ietf", new int[]{32, 12, CIPHER_CHACHA20_IETF}},
+        private static Dictionary<string, EncryptorInfo> _ciphers = new Dictionary<string, EncryptorInfo> {
+                {"salsa20", new EncryptorInfo(32, 8, true, CIPHER_SALSA20)},
+                {"chacha20", new EncryptorInfo(32, 8, true, CIPHER_CHACHA20)},
+                {"chacha20-ietf", new EncryptorInfo(32, 12, true, CIPHER_CHACHA20_IETF)},
         };
 
-        protected override Dictionary<string, int[]> getCiphers()
+        protected override Dictionary<string, EncryptorInfo> getCiphers()
         {
             return _ciphers;
         }

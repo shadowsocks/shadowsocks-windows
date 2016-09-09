@@ -198,7 +198,7 @@
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="View\ServerLogForm.cs">
-      <SubType>Form</SubType>
+      <SubType>Component</SubType>
     </Compile>
     <Compile Include="View\ServerLogForm.Designer.cs">
       <DependentUpon>ServerLogForm.cs</DependentUpon>
@@ -253,7 +253,6 @@
     <None Include="Resources\ssw128.png" />
     <Content Include="Data\cn.txt" />
     <None Include="Data\privoxy_conf.txt" />
-    <None Include="Data\libsscrypto.dll" />
     <Content Include="Data\user-rule.txt" />
     <None Include="Data\zh-tw.txt" />
     <None Include="Resources\46418775_p0.jpg" />

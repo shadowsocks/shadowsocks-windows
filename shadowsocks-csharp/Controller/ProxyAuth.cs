@@ -540,6 +540,7 @@ namespace Shadowsocks.Controller
                 handler.cfg.proxyUserAgent = _config.proxyUserAgent;
             }
             handler.cfg.TTL = _config.TTL;
+            handler.cfg.connect_timeout = _config.connect_timeout;
             handler.cfg.autoSwitchOff = _config.autoBan;
             if (_config.dns_server != null && _config.dns_server.Length > 0)
             {

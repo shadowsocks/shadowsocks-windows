@@ -12,6 +12,15 @@ using System.Threading;
 
 namespace Shadowsocks.View
 {
+    class DoubleBufferListView : DataGridView
+    {
+        public DoubleBufferListView()
+        {
+            SetStyle(ControlStyles.DoubleBuffer | ControlStyles.OptimizedDoubleBuffer | ControlStyles.AllPaintingInWmPaint, true);
+            UpdateStyles();
+        }
+    }
+
     public partial class ServerLogForm : Form
     {
         private ShadowsocksController controller;
@@ -35,19 +44,20 @@ namespace Shadowsocks.View
             this.Icon = Icon.FromHandle(Resources.ssw128.GetHicon());
             InitializeComponent();
             this.Width = 810;
+            int dpi_mul = Util.Utils.GetDpiMul();
 
             Configuration config = controller.GetCurrentConfiguration();
             if (config.configs.Count < 8)
             {
-                this.Height = 300;
+                this.Height = 300 * dpi_mul / 4;
             }
             else if (config.configs.Count < 20)
             {
-                this.Height = 300 + (config.configs.Count - 8) * 16;
+                this.Height = (300 + (config.configs.Count - 8) * 16) * dpi_mul / 4;
             }
             else
             {
-                this.Height = 500;
+                this.Height = 500 * dpi_mul / 4;
             }
             UpdateTexts();
             UpdateLog();
@@ -65,8 +75,6 @@ namespace Shadowsocks.View
             ServerDataGrid.ContextMenu = contextMenu1;
             controller.ConfigChanged += controller_ConfigChanged;
 
-            int dpi_mul = Util.Utils.GetDpiMul();
-            Graphics graphics = Graphics.FromHwnd(IntPtr.Zero);
             for (int i = 0; i < ServerDataGrid.Columns.Count; ++i)
             {
                 ServerDataGrid.Columns[i].Width = ServerDataGrid.Columns[i].Width * dpi_mul / 4;
@@ -260,9 +268,6 @@ namespace Shadowsocks.View
                     }
                 }
             }
-            //int index = 0;
-            //foreach (Server server in config.configs)
-            //for ( int id = 0; id < config.configs.Count; ++id)
             try
             {
                 for (int list_index = (lastRefreshIndex >= ServerDataGrid.RowCount) ? 0 : lastRefreshIndex, rowChangeCnt = 0;
@@ -819,9 +824,13 @@ namespace Shadowsocks.View
             if (e.RowIndex >= 0)
             {
                 int id = (int)ServerDataGrid[0, e.RowIndex].Value;
+                if (ServerDataGrid.Columns[e.ColumnIndex].Name == "ID")
+                {
+                    controller.ShowConfigForm(id);
+                }
                 if (ServerDataGrid.Columns[e.ColumnIndex].Name == "Server")
                 {
-                    controller.ShowConfigForm();
+                    controller.ShowConfigForm(id);
                 }
                 if (ServerDataGrid.Columns[e.ColumnIndex].Name == "Connecting")
                 {

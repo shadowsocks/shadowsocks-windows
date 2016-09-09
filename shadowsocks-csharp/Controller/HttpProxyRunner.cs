@@ -97,8 +97,6 @@ namespace Shadowsocks.Controller
                 _runningPort = this.GetFreePort();
                 polipoConfig = polipoConfig.Replace("__SOCKS_PORT__", configuration.localPort.ToString());
                 polipoConfig = polipoConfig.Replace("__PRIVOXY_BIND_PORT__", _runningPort.ToString());
-                polipoConfig = polipoConfig.Replace("__KEEP_ALIVE_TIMEOUT__", "3600");
-                polipoConfig = polipoConfig.Replace("__CONNECTION_SHARING__", "1");
                 polipoConfig = polipoConfig.Replace("__PRIVOXY_BIND_IP__", "127.0.0.1");
                 polipoConfig = polipoConfig.Replace("__BYPASS_ACTION__", "actionsfile " + _subPath + "/bypass.action");
                 FileManager.ByteArrayToFile(runningPath + "/privoxy.conf", System.Text.Encoding.UTF8.GetBytes(polipoConfig));

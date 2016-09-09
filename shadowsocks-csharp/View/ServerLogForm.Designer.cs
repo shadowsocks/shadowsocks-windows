@@ -29,7 +29,8 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            this.ServerDataGrid = new System.Windows.Forms.DataGridView();
+            //this.ServerDataGrid = new System.Windows.Forms.DataGridView();
+            this.ServerDataGrid = new DoubleBufferListView();
             this.timer = new System.Windows.Forms.Timer(this.components);
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.ID = new System.Windows.Forms.DataGridViewTextBoxColumn();

@@ -279,6 +279,7 @@ namespace Shadowsocks.Model
         public int reconnectTimes;
         public int randomAlgorithm;
         public int TTL;
+        public int connect_timeout;
         public bool proxyEnable;
         public bool pacDirectGoProxy;
         public int proxyType;
@@ -599,7 +600,7 @@ namespace Shadowsocks.Model
             s.method = server.method;
             s.protocol = server.protocol;
             s.obfs = server.obfs;
-            s.obfsparam = server.obfsparam;
+            s.obfsparam = server.obfsparam??"";
             s.password = server.password;
             s.remarks = server.remarks;
             s.group = server.group;

@@ -70,6 +70,8 @@
             this.TTLText = new System.Windows.Forms.TextBox();
             this.label2 = new System.Windows.Forms.Label();
             this.DNSText = new System.Windows.Forms.TextBox();
+            this.labelTimeout = new System.Windows.Forms.Label();
+            this.textTimeout = new System.Windows.Forms.TextBox();
             this.tableLayoutPanel1.SuspendLayout();
             this.tableLayoutPanel2.SuspendLayout();
             this.Socks5ProxyGroup.SuspendLayout();
@@ -98,7 +100,7 @@
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(570, 409);
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(599, 465);
             this.tableLayoutPanel1.TabIndex = 0;
             // 
             // tableLayoutPanel2
@@ -112,23 +114,23 @@
             this.tableLayoutPanel2.Controls.Add(this.CheckAutoBan, 1, 3);
             this.tableLayoutPanel2.Controls.Add(this.checkRandom, 1, 1);
             this.tableLayoutPanel2.Controls.Add(this.checkAutoStartup, 1, 0);
-            this.tableLayoutPanel2.Location = new System.Drawing.Point(356, 3);
+            this.tableLayoutPanel2.Location = new System.Drawing.Point(372, 3);
             this.tableLayoutPanel2.Name = "tableLayoutPanel2";
             this.tableLayoutPanel2.RowCount = 4;
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel2.Size = new System.Drawing.Size(211, 104);
+            this.tableLayoutPanel2.Size = new System.Drawing.Size(224, 116);
             this.tableLayoutPanel2.TabIndex = 21;
             // 
             // LabelRandom
             // 
             this.LabelRandom.AutoSize = true;
             this.LabelRandom.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.LabelRandom.Location = new System.Drawing.Point(3, 50);
+            this.LabelRandom.Location = new System.Drawing.Point(3, 56);
             this.LabelRandom.Name = "LabelRandom";
-            this.LabelRandom.Size = new System.Drawing.Size(52, 29);
+            this.LabelRandom.Size = new System.Drawing.Size(65, 32);
             this.LabelRandom.TabIndex = 12;
             this.LabelRandom.Text = "Balance";
             this.LabelRandom.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
@@ -146,17 +148,17 @@
             "SelectedFirst",
             "Timer",
             "SeletedGroup"});
-            this.RandomComboBox.Location = new System.Drawing.Point(61, 53);
+            this.RandomComboBox.Location = new System.Drawing.Point(74, 59);
             this.RandomComboBox.Name = "RandomComboBox";
-            this.RandomComboBox.Size = new System.Drawing.Size(147, 23);
+            this.RandomComboBox.Size = new System.Drawing.Size(147, 26);
             this.RandomComboBox.TabIndex = 13;
             // 
             // CheckAutoBan
             // 
             this.CheckAutoBan.AutoSize = true;
-            this.CheckAutoBan.Location = new System.Drawing.Point(61, 82);
+            this.CheckAutoBan.Location = new System.Drawing.Point(74, 91);
             this.CheckAutoBan.Name = "CheckAutoBan";
-            this.CheckAutoBan.Size = new System.Drawing.Size(72, 19);
+            this.CheckAutoBan.Size = new System.Drawing.Size(87, 22);
             this.CheckAutoBan.TabIndex = 18;
             this.CheckAutoBan.Text = "AutoBan";
             this.CheckAutoBan.UseVisualStyleBackColor = true;
@@ -164,9 +166,9 @@
             // checkRandom
             // 
             this.checkRandom.AutoSize = true;
-            this.checkRandom.Location = new System.Drawing.Point(61, 28);
+            this.checkRandom.Location = new System.Drawing.Point(74, 31);
             this.checkRandom.Name = "checkRandom";
-            this.checkRandom.Size = new System.Drawing.Size(112, 19);
+            this.checkRandom.Size = new System.Drawing.Size(135, 22);
             this.checkRandom.TabIndex = 19;
             this.checkRandom.Text = "Enable balance";
             this.checkRandom.UseVisualStyleBackColor = true;
@@ -174,9 +176,9 @@
             // checkAutoStartup
             // 
             this.checkAutoStartup.AutoSize = true;
-            this.checkAutoStartup.Location = new System.Drawing.Point(61, 3);
+            this.checkAutoStartup.Location = new System.Drawing.Point(74, 3);
             this.checkAutoStartup.Name = "checkAutoStartup";
-            this.checkAutoStartup.Size = new System.Drawing.Size(96, 19);
+            this.checkAutoStartup.Size = new System.Drawing.Size(118, 22);
             this.checkAutoStartup.TabIndex = 20;
             this.checkAutoStartup.Text = "Start on Boot";
             this.checkAutoStartup.UseVisualStyleBackColor = true;
@@ -189,7 +191,7 @@
             this.Socks5ProxyGroup.Margin = new System.Windows.Forms.Padding(14, 0, 0, 0);
             this.Socks5ProxyGroup.Name = "Socks5ProxyGroup";
             this.tableLayoutPanel1.SetRowSpan(this.Socks5ProxyGroup, 2);
-            this.Socks5ProxyGroup.Size = new System.Drawing.Size(339, 241);
+            this.Socks5ProxyGroup.Size = new System.Drawing.Size(355, 277);
             this.Socks5ProxyGroup.TabIndex = 19;
             this.Socks5ProxyGroup.TabStop = false;
             this.Socks5ProxyGroup.Text = "Remote proxy";
@@ -223,16 +225,16 @@
             this.tableLayoutPanel9.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel9.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel9.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel9.Size = new System.Drawing.Size(322, 189);
+            this.tableLayoutPanel9.Size = new System.Drawing.Size(338, 220);
             this.tableLayoutPanel9.TabIndex = 0;
             // 
             // LabelS5Password
             // 
             this.LabelS5Password.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.LabelS5Password.AutoSize = true;
-            this.LabelS5Password.Location = new System.Drawing.Point(14, 141);
+            this.LabelS5Password.Location = new System.Drawing.Point(15, 163);
             this.LabelS5Password.Name = "LabelS5Password";
-            this.LabelS5Password.Size = new System.Drawing.Size(63, 15);
+            this.LabelS5Password.Size = new System.Drawing.Size(78, 18);
             this.LabelS5Password.TabIndex = 5;
             this.LabelS5Password.Text = "Password";
             // 
@@ -240,62 +242,62 @@
             // 
             this.LabelS5Username.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.LabelS5Username.AutoSize = true;
-            this.LabelS5Username.Location = new System.Drawing.Point(11, 114);
+            this.LabelS5Username.Location = new System.Drawing.Point(13, 131);
             this.LabelS5Username.Name = "LabelS5Username";
-            this.LabelS5Username.Size = new System.Drawing.Size(66, 15);
+            this.LabelS5Username.Size = new System.Drawing.Size(80, 18);
             this.LabelS5Username.TabIndex = 4;
             this.LabelS5Username.Text = "Username";
             // 
             // TextS5Pass
             // 
             this.TextS5Pass.ImeMode = System.Windows.Forms.ImeMode.Off;
-            this.TextS5Pass.Location = new System.Drawing.Point(83, 138);
+            this.TextS5Pass.Location = new System.Drawing.Point(99, 159);
             this.TextS5Pass.Name = "TextS5Pass";
-            this.TextS5Pass.Size = new System.Drawing.Size(236, 21);
+            this.TextS5Pass.Size = new System.Drawing.Size(236, 26);
             this.TextS5Pass.TabIndex = 7;
             // 
             // LabelS5Port
             // 
             this.LabelS5Port.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.LabelS5Port.AutoSize = true;
-            this.LabelS5Port.Location = new System.Drawing.Point(48, 87);
+            this.LabelS5Port.Location = new System.Drawing.Point(56, 99);
             this.LabelS5Port.Name = "LabelS5Port";
-            this.LabelS5Port.Size = new System.Drawing.Size(29, 15);
+            this.LabelS5Port.Size = new System.Drawing.Size(37, 18);
             this.LabelS5Port.TabIndex = 1;
             this.LabelS5Port.Text = "Port";
             // 
             // TextS5User
             // 
             this.TextS5User.ImeMode = System.Windows.Forms.ImeMode.Off;
-            this.TextS5User.Location = new System.Drawing.Point(83, 111);
+            this.TextS5User.Location = new System.Drawing.Point(99, 127);
             this.TextS5User.Name = "TextS5User";
-            this.TextS5User.Size = new System.Drawing.Size(236, 21);
+            this.TextS5User.Size = new System.Drawing.Size(236, 26);
             this.TextS5User.TabIndex = 6;
             // 
             // LabelS5Server
             // 
             this.LabelS5Server.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.LabelS5Server.AutoSize = true;
-            this.LabelS5Server.Location = new System.Drawing.Point(21, 60);
+            this.LabelS5Server.Location = new System.Drawing.Point(21, 67);
             this.LabelS5Server.Name = "LabelS5Server";
-            this.LabelS5Server.Size = new System.Drawing.Size(56, 15);
+            this.LabelS5Server.Size = new System.Drawing.Size(72, 18);
             this.LabelS5Server.TabIndex = 0;
             this.LabelS5Server.Text = "Server IP";
             // 
             // TextS5Port
             // 
             this.TextS5Port.ImeMode = System.Windows.Forms.ImeMode.Off;
-            this.TextS5Port.Location = new System.Drawing.Point(83, 84);
+            this.TextS5Port.Location = new System.Drawing.Point(99, 95);
             this.TextS5Port.Name = "TextS5Port";
-            this.TextS5Port.Size = new System.Drawing.Size(236, 21);
+            this.TextS5Port.Size = new System.Drawing.Size(236, 26);
             this.TextS5Port.TabIndex = 3;
             // 
             // TextS5Server
             // 
             this.TextS5Server.ImeMode = System.Windows.Forms.ImeMode.Off;
-            this.TextS5Server.Location = new System.Drawing.Point(83, 57);
+            this.TextS5Server.Location = new System.Drawing.Point(99, 63);
             this.TextS5Server.Name = "TextS5Server";
-            this.TextS5Server.Size = new System.Drawing.Size(236, 21);
+            this.TextS5Server.Size = new System.Drawing.Size(236, 26);
             this.TextS5Server.TabIndex = 2;
             // 
             // comboProxyType
@@ -306,9 +308,9 @@
             "Socks5(support UDP)",
             "Http tunnel",
             "TCP Port tunnel"});
-            this.comboProxyType.Location = new System.Drawing.Point(83, 28);
+            this.comboProxyType.Location = new System.Drawing.Point(99, 31);
             this.comboProxyType.Name = "comboProxyType";
-            this.comboProxyType.Size = new System.Drawing.Size(236, 23);
+            this.comboProxyType.Size = new System.Drawing.Size(236, 26);
             this.comboProxyType.TabIndex = 9;
             // 
             // CheckSockProxy
@@ -316,7 +318,7 @@
             this.CheckSockProxy.AutoSize = true;
             this.CheckSockProxy.Location = new System.Drawing.Point(3, 3);
             this.CheckSockProxy.Name = "CheckSockProxy";
-            this.CheckSockProxy.Size = new System.Drawing.Size(74, 19);
+            this.CheckSockProxy.Size = new System.Drawing.Size(90, 22);
             this.CheckSockProxy.TabIndex = 8;
             this.CheckSockProxy.Text = "Proxy On";
             this.CheckSockProxy.UseVisualStyleBackColor = true;
@@ -324,9 +326,9 @@
             // checkBoxPacProxy
             // 
             this.checkBoxPacProxy.AutoSize = true;
-            this.checkBoxPacProxy.Location = new System.Drawing.Point(83, 3);
+            this.checkBoxPacProxy.Location = new System.Drawing.Point(99, 3);
             this.checkBoxPacProxy.Name = "checkBoxPacProxy";
-            this.checkBoxPacProxy.Size = new System.Drawing.Size(179, 19);
+            this.checkBoxPacProxy.Size = new System.Drawing.Size(227, 22);
             this.checkBoxPacProxy.TabIndex = 10;
             this.checkBoxPacProxy.Text = "PAC \"direct\" return this proxy";
             this.checkBoxPacProxy.UseVisualStyleBackColor = true;
@@ -335,28 +337,28 @@
             // 
             this.label1.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(12, 168);
+            this.label1.Location = new System.Drawing.Point(11, 195);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(65, 15);
+            this.label1.Size = new System.Drawing.Size(82, 18);
             this.label1.TabIndex = 5;
             this.label1.Text = "UserAgent";
             // 
             // TextUserAgent
             // 
             this.TextUserAgent.ImeMode = System.Windows.Forms.ImeMode.Off;
-            this.TextUserAgent.Location = new System.Drawing.Point(83, 165);
+            this.TextUserAgent.Location = new System.Drawing.Point(99, 191);
             this.TextUserAgent.Name = "TextUserAgent";
-            this.TextUserAgent.Size = new System.Drawing.Size(236, 21);
+            this.TextUserAgent.Size = new System.Drawing.Size(236, 26);
             this.TextUserAgent.TabIndex = 7;
             // 
             // ListenGroup
             // 
             this.ListenGroup.AutoSize = true;
             this.ListenGroup.Controls.Add(this.tableLayoutPanel4);
-            this.ListenGroup.Location = new System.Drawing.Point(14, 241);
+            this.ListenGroup.Location = new System.Drawing.Point(14, 277);
             this.ListenGroup.Margin = new System.Windows.Forms.Padding(14, 0, 0, 0);
             this.ListenGroup.Name = "ListenGroup";
-            this.ListenGroup.Size = new System.Drawing.Size(325, 168);
+            this.ListenGroup.Size = new System.Drawing.Size(339, 181);
             this.ListenGroup.TabIndex = 22;
             this.ListenGroup.TabStop = false;
             this.ListenGroup.Text = "Local proxy";
@@ -381,51 +383,51 @@
             this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel4.Size = new System.Drawing.Size(314, 116);
+            this.tableLayoutPanel4.Size = new System.Drawing.Size(328, 124);
             this.tableLayoutPanel4.TabIndex = 0;
             // 
             // TextAuthPass
             // 
             this.TextAuthPass.ImeMode = System.Windows.Forms.ImeMode.Off;
-            this.TextAuthPass.Location = new System.Drawing.Point(75, 82);
+            this.TextAuthPass.Location = new System.Drawing.Point(89, 95);
             this.TextAuthPass.Name = "TextAuthPass";
-            this.TextAuthPass.Size = new System.Drawing.Size(236, 21);
+            this.TextAuthPass.Size = new System.Drawing.Size(236, 26);
             this.TextAuthPass.TabIndex = 9;
             // 
             // LabelAuthPass
             // 
             this.LabelAuthPass.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.LabelAuthPass.AutoSize = true;
-            this.LabelAuthPass.Location = new System.Drawing.Point(6, 90);
+            this.LabelAuthPass.Location = new System.Drawing.Point(5, 99);
             this.LabelAuthPass.Name = "LabelAuthPass";
-            this.LabelAuthPass.Size = new System.Drawing.Size(63, 15);
+            this.LabelAuthPass.Size = new System.Drawing.Size(78, 18);
             this.LabelAuthPass.TabIndex = 8;
             this.LabelAuthPass.Text = "Password";
             // 
             // TextAuthUser
             // 
             this.TextAuthUser.ImeMode = System.Windows.Forms.ImeMode.Off;
-            this.TextAuthUser.Location = new System.Drawing.Point(75, 55);
+            this.TextAuthUser.Location = new System.Drawing.Point(89, 63);
             this.TextAuthUser.Name = "TextAuthUser";
-            this.TextAuthUser.Size = new System.Drawing.Size(236, 21);
+            this.TextAuthUser.Size = new System.Drawing.Size(236, 26);
             this.TextAuthUser.TabIndex = 7;
             // 
             // LabelAuthUser
             // 
             this.LabelAuthUser.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.LabelAuthUser.AutoSize = true;
-            this.LabelAuthUser.Location = new System.Drawing.Point(3, 58);
+            this.LabelAuthUser.Location = new System.Drawing.Point(3, 67);
             this.LabelAuthUser.Name = "LabelAuthUser";
-            this.LabelAuthUser.Size = new System.Drawing.Size(66, 15);
+            this.LabelAuthUser.Size = new System.Drawing.Size(80, 18);
             this.LabelAuthUser.TabIndex = 5;
             this.LabelAuthUser.Text = "Username";
             // 
             // checkShareOverLan
             // 
             this.checkShareOverLan.AutoSize = true;
-            this.checkShareOverLan.Location = new System.Drawing.Point(75, 3);
+            this.checkShareOverLan.Location = new System.Drawing.Point(89, 3);
             this.checkShareOverLan.Name = "checkShareOverLan";
-            this.checkShareOverLan.Size = new System.Drawing.Size(151, 19);
+            this.checkShareOverLan.Size = new System.Drawing.Size(186, 22);
             this.checkShareOverLan.TabIndex = 5;
             this.checkShareOverLan.Text = "Allow Clients from LAN";
             this.checkShareOverLan.UseVisualStyleBackColor = true;
@@ -433,10 +435,10 @@
             // ProxyPortTextBox
             // 
             this.ProxyPortTextBox.ImeMode = System.Windows.Forms.ImeMode.Off;
-            this.ProxyPortTextBox.Location = new System.Drawing.Point(75, 28);
+            this.ProxyPortTextBox.Location = new System.Drawing.Point(89, 31);
             this.ProxyPortTextBox.MaxLength = 10;
             this.ProxyPortTextBox.Name = "ProxyPortTextBox";
-            this.ProxyPortTextBox.Size = new System.Drawing.Size(236, 21);
+            this.ProxyPortTextBox.Size = new System.Drawing.Size(236, 26);
             this.ProxyPortTextBox.TabIndex = 4;
             this.ProxyPortTextBox.WordWrap = false;
             // 
@@ -444,9 +446,9 @@
             // 
             this.ProxyPortLabel.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.ProxyPortLabel.AutoSize = true;
-            this.ProxyPortLabel.Location = new System.Drawing.Point(40, 31);
+            this.ProxyPortLabel.Location = new System.Drawing.Point(46, 35);
             this.ProxyPortLabel.Name = "ProxyPortLabel";
-            this.ProxyPortLabel.Size = new System.Drawing.Size(29, 15);
+            this.ProxyPortLabel.Size = new System.Drawing.Size(37, 18);
             this.ProxyPortLabel.TabIndex = 3;
             this.ProxyPortLabel.Text = "Port";
             // 
@@ -458,13 +460,13 @@
             this.tableLayoutPanel10.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLayoutPanel10.Controls.Add(this.tableLayoutPanel3, 0, 2);
             this.tableLayoutPanel10.Controls.Add(this.tableLayoutPanel5, 0, 1);
-            this.tableLayoutPanel10.Location = new System.Drawing.Point(365, 257);
+            this.tableLayoutPanel10.Location = new System.Drawing.Point(379, 280);
             this.tableLayoutPanel10.Name = "tableLayoutPanel10";
             this.tableLayoutPanel10.RowCount = 3;
             this.tableLayoutPanel10.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel10.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel10.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel10.Size = new System.Drawing.Size(193, 135);
+            this.tableLayoutPanel10.Size = new System.Drawing.Size(209, 182);
             this.tableLayoutPanel10.TabIndex = 20;
             // 
             // tableLayoutPanel3
@@ -478,7 +480,7 @@
             this.tableLayoutPanel3.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 23F));
             this.tableLayoutPanel3.Controls.Add(this.MyCancelButton, 1, 0);
             this.tableLayoutPanel3.Controls.Add(this.OKButton, 0, 0);
-            this.tableLayoutPanel3.Location = new System.Drawing.Point(6, 90);
+            this.tableLayoutPanel3.Location = new System.Drawing.Point(14, 137);
             this.tableLayoutPanel3.Margin = new System.Windows.Forms.Padding(3, 3, 0, 3);
             this.tableLayoutPanel3.Name = "tableLayoutPanel3";
             this.tableLayoutPanel3.RowCount = 1;
@@ -522,40 +524,44 @@
             this.tableLayoutPanel5.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tableLayoutPanel5.Controls.Add(this.ReconnectLabel, 0, 3);
             this.tableLayoutPanel5.Controls.Add(this.ReconnectText, 1, 3);
-            this.tableLayoutPanel5.Controls.Add(this.TTLLabel, 0, 4);
-            this.tableLayoutPanel5.Controls.Add(this.TTLText, 1, 4);
+            this.tableLayoutPanel5.Controls.Add(this.TTLLabel, 0, 5);
+            this.tableLayoutPanel5.Controls.Add(this.TTLText, 1, 5);
             this.tableLayoutPanel5.Controls.Add(this.label2, 0, 0);
             this.tableLayoutPanel5.Controls.Add(this.DNSText, 1, 0);
+            this.tableLayoutPanel5.Controls.Add(this.labelTimeout, 0, 4);
+            this.tableLayoutPanel5.Controls.Add(this.textTimeout, 1, 4);
             this.tableLayoutPanel5.Location = new System.Drawing.Point(0, 0);
             this.tableLayoutPanel5.Margin = new System.Windows.Forms.Padding(0);
             this.tableLayoutPanel5.Name = "tableLayoutPanel5";
             this.tableLayoutPanel5.Padding = new System.Windows.Forms.Padding(3);
-            this.tableLayoutPanel5.RowCount = 5;
+            this.tableLayoutPanel5.RowCount = 6;
             this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel5.Size = new System.Drawing.Size(193, 87);
+            this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
+            this.tableLayoutPanel5.Size = new System.Drawing.Size(209, 134);
             this.tableLayoutPanel5.TabIndex = 9;
             // 
             // ReconnectLabel
             // 
             this.ReconnectLabel.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.ReconnectLabel.AutoSize = true;
-            this.ReconnectLabel.Location = new System.Drawing.Point(6, 36);
+            this.ReconnectLabel.Location = new System.Drawing.Point(6, 42);
             this.ReconnectLabel.Name = "ReconnectLabel";
-            this.ReconnectLabel.Size = new System.Drawing.Size(66, 15);
+            this.ReconnectLabel.Size = new System.Drawing.Size(82, 18);
             this.ReconnectLabel.TabIndex = 3;
             this.ReconnectLabel.Text = "Reconnect";
             // 
             // ReconnectText
             // 
             this.ReconnectText.ImeMode = System.Windows.Forms.ImeMode.Off;
-            this.ReconnectText.Location = new System.Drawing.Point(78, 33);
+            this.ReconnectText.Location = new System.Drawing.Point(94, 38);
             this.ReconnectText.MaxLength = 10;
             this.ReconnectText.Name = "ReconnectText";
-            this.ReconnectText.Size = new System.Drawing.Size(109, 21);
+            this.ReconnectText.Size = new System.Drawing.Size(109, 26);
             this.ReconnectText.TabIndex = 4;
             this.ReconnectText.WordWrap = false;
             // 
@@ -563,19 +569,19 @@
             // 
             this.TTLLabel.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.TTLLabel.AutoSize = true;
-            this.TTLLabel.Location = new System.Drawing.Point(44, 63);
+            this.TTLLabel.Location = new System.Drawing.Point(53, 106);
             this.TTLLabel.Name = "TTLLabel";
-            this.TTLLabel.Size = new System.Drawing.Size(28, 15);
+            this.TTLLabel.Size = new System.Drawing.Size(35, 18);
             this.TTLLabel.TabIndex = 3;
             this.TTLLabel.Text = "TTL";
             // 
             // TTLText
             // 
             this.TTLText.ImeMode = System.Windows.Forms.ImeMode.Off;
-            this.TTLText.Location = new System.Drawing.Point(78, 60);
+            this.TTLText.Location = new System.Drawing.Point(94, 102);
             this.TTLText.MaxLength = 10;
             this.TTLText.Name = "TTLText";
-            this.TTLText.Size = new System.Drawing.Size(109, 21);
+            this.TTLText.Size = new System.Drawing.Size(109, 26);
             this.TTLText.TabIndex = 4;
             this.TTLText.WordWrap = false;
             // 
@@ -583,21 +589,41 @@
             // 
             this.label2.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(39, 9);
+            this.label2.Location = new System.Drawing.Point(46, 10);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(33, 15);
+            this.label2.Size = new System.Drawing.Size(42, 18);
             this.label2.TabIndex = 3;
             this.label2.Text = "DNS";
             // 
             // DNSText
             // 
             this.DNSText.ImeMode = System.Windows.Forms.ImeMode.Off;
-            this.DNSText.Location = new System.Drawing.Point(78, 6);
+            this.DNSText.Location = new System.Drawing.Point(94, 6);
             this.DNSText.MaxLength = 0;
             this.DNSText.Name = "DNSText";
-            this.DNSText.Size = new System.Drawing.Size(109, 21);
+            this.DNSText.Size = new System.Drawing.Size(109, 26);
             this.DNSText.TabIndex = 4;
             this.DNSText.WordWrap = false;
+            // 
+            // labelTimeout
+            // 
+            this.labelTimeout.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.labelTimeout.AutoSize = true;
+            this.labelTimeout.Location = new System.Drawing.Point(21, 74);
+            this.labelTimeout.Name = "labelTimeout";
+            this.labelTimeout.Size = new System.Drawing.Size(67, 18);
+            this.labelTimeout.TabIndex = 3;
+            this.labelTimeout.Text = " Timeout";
+            // 
+            // textTimeout
+            // 
+            this.textTimeout.ImeMode = System.Windows.Forms.ImeMode.Off;
+            this.textTimeout.Location = new System.Drawing.Point(94, 70);
+            this.textTimeout.MaxLength = 10;
+            this.textTimeout.Name = "textTimeout";
+            this.textTimeout.Size = new System.Drawing.Size(109, 26);
+            this.textTimeout.TabIndex = 4;
+            this.textTimeout.WordWrap = false;
             // 
             // SettingsForm
             // 
@@ -606,7 +632,7 @@
             this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.ClientSize = new System.Drawing.Size(728, 573);
             this.Controls.Add(this.tableLayoutPanel1);
-            this.Font = new System.Drawing.Font("Arial", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.Font = new System.Drawing.Font("Arial", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
@@ -681,5 +707,7 @@
         private System.Windows.Forms.TextBox TextUserAgent;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.TextBox DNSText;
+        private System.Windows.Forms.Label labelTimeout;
+        private System.Windows.Forms.TextBox textTimeout;
     }
 }

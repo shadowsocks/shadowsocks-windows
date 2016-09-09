@@ -201,6 +201,7 @@ namespace Shadowsocks.Controller
             _config.reconnectTimes = config.reconnectTimes;
             _config.randomAlgorithm = config.randomAlgorithm;
             _config.TTL = config.TTL;
+            _config.connect_timeout = config.connect_timeout;
             _config.dns_server = config.dns_server;
             _config.proxyEnable = config.proxyEnable;
             _config.pacDirectGoProxy = config.pacDirectGoProxy;
@@ -367,8 +368,8 @@ namespace Shadowsocks.Controller
         public string GetSSRRemarksLinkForServer(Server server)
         {
             string main_part = server.server + ":" + server.server_port + ":" + server.protocol + ":" + server.method + ":" + server.obfs + ":" + Util.Utils.EncodeUrlSafeBase64(server.password).Replace("=", "");
-            string param_str = "obfsparam=" + Util.Utils.EncodeUrlSafeBase64(server.obfsparam).Replace("=", "");
-            if (server.remarks.Length > 0)
+            string param_str = "obfsparam=" + Util.Utils.EncodeUrlSafeBase64(server.obfsparam??"").Replace("=", "");
+            if (server.remarks != null && server.remarks.Length > 0)
             {
                 param_str += "&remarks=" + Util.Utils.EncodeUrlSafeBase64(server.remarks).Replace("=", "");
             }
@@ -624,11 +625,11 @@ namespace Shadowsocks.Controller
             }
         }
 
-        public void ShowConfigForm()
+        public void ShowConfigForm(int index)
         {
             if (ShowConfigFormEvent != null)
             {
-                ShowConfigFormEvent(this, new EventArgs());
+                ShowConfigFormEvent(index, new EventArgs());
             }
         }
     }

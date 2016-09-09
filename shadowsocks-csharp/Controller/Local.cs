@@ -104,6 +104,7 @@ namespace Shadowsocks.Controller
         public int targetPort;
 
         public Double TTL = 0; // Second
+        public Double connect_timeout = 0;
         public int try_keep_alive = 0;
         public string dns_servers;
         public bool fouce_local_dns_query = false;
@@ -556,25 +557,20 @@ namespace Shadowsocks.Controller
                 speedTester.BeginConnect();
                 IAsyncResult result = remote.BeginConnect(remoteEP,
                     new AsyncCallback(ConnectCallback), new CallbackStatus());
-                double t = cfg.TTL;
-                if (t <= 0) t = 4 * 30;
-                else if (t <= 10) t = 10;
-                if (cfg.reconnectTimesRemain + cfg.reconnectTimes > 0 || cfg.TTL > 0)
+                double t = cfg.connect_timeout <= 0 ? 30 : cfg.connect_timeout;
+                bool success = result.AsyncWaitHandle.WaitOne((int)(t * 1000), true);
+                if (!success)
                 {
-                    bool success = result.AsyncWaitHandle.WaitOne((int)(t * 250), true);
-                    if (!success)
+                    ((CallbackStatus)result.AsyncState).SetIfEqu(-1, 0);
+                    if (((CallbackStatus)result.AsyncState).Status == -1)
                     {
-                        ((CallbackStatus)result.AsyncState).SetIfEqu(-1, 0);
-                        if (((CallbackStatus)result.AsyncState).Status == -1)
+                        if (lastErrCode == 0)
                         {
-                            if (lastErrCode == 0)
-                            {
-                                lastErrCode = 8;
-                                server.ServerSpeedLog().AddTimeoutTimes();
-                            }
-                            CloseSocket(ref remote);
-                            Close();
+                            lastErrCode = 8;
+                            server.ServerSpeedLog().AddTimeoutTimes();
                         }
+                        CloseSocket(ref remote);
+                        Close();
                     }
                 }
             }

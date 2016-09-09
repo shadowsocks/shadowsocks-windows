@@ -14,7 +14,7 @@ Global Settings...=選項設置...
 Start on Boot=開機啟動
 Allow Clients from LAN=允許來自局域網的連接
 Enable balance=伺服器負載均衡
-Same host for same address=優先相同節點連接同壹地址
+Same host for same address=優先相同節點連接同壹位址
 Enable domain white list(http proxy only)=使用域名白名單(僅http代理)
 Local PAC=使用本地 PAC
 Online PAC=使用在線 PAC
@@ -25,9 +25,9 @@ Update Local PAC from GFWList=更新PAC為GFWList
 Update Local PAC from Chn Only List=更新PAC為僅通過大陸常見域名（國外訪問大陸）
 Edit Local PAC File...=編輯本地 PAC 文件...
 Edit User Rule for GFWList...=編輯 GFWList 的用戶規則...
-Show QRCode...=顯示二維碼...
-Scan QRCode from Screen...=掃描屏幕上的二維碼...
-Copy Address from clipboard...=從剪貼板復制地址...
+Show QRCode...=顯示 QR 碼...
+Scan QRCode from Screen...=掃描螢幕上的 QR 碼...
+Copy Address from clipboard...=從剪貼板復制位址...
 Server Statistic...=伺服器連接統計...
 Disconnect Current=斷開當前所有連接
 New version {0} {1} available=【點擊下載新版本{0} {1}】
@@ -94,6 +94,7 @@ Local proxy=本地代理
 Build-in http proxy=內置http代理(目前有bug)
 Proxy Port=本地端口
 Reconnect Times=重連次數
+ Timeout=連接超時
 TTL=空閑斷開秒數
 
 OK=確定
@@ -127,7 +128,7 @@ Continuous=連錯
 
 # QRCode Form
 
-QRCode=二維碼
+QRCode=QR 碼
 
 # PAC Url Form
 
@@ -156,9 +157,9 @@ Domain white list list updated=更新域名白名單成功
 No updates found. Please report to GFWList if you have problems with it.=未發現更新。如有問題請提交給 GFWList。
 No QRCode found. Try to zoom in or move it to the center of the screen.=未發現二維碼，嘗試把它放大或移動到靠近屏幕中間的位置
 ShadowsocksR is already running.=ShadowsocksR 已經在運行。
-Find Shadowsocks icon in your notify tray.=請在任務欄裏尋找 ShadowsocksR 圖標。
+Find Shadowsocks icon in your notify tray.=請在工作列裏尋找 ShadowsocksR 圖標。
 If you want to start multiple Shadowsocks, make a copy in another directory.=如果想啟動多份，可以另外復制壹份到別的目錄。
-Failed to decode QRCode=無法解析二維碼
+Failed to decode QRCode=無法解析 QR 碼
 Failed to update registry=無法修改註冊表\n解決方案見https://github.com/shadowsocks/shadowsocks-windows/issues/253
 System Proxy On: =系統代理已啟用：
 Running: Port {0}=正在運行：端口 {0}

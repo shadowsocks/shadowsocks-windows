@@ -12,5 +12,6 @@ namespace Shadowsocks.Encryption
         void ResetDecrypt();
         byte[] getIV();
         byte[] getKey();
+        EncryptorInfo getInfo();
     }
 }

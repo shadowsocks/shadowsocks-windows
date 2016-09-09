@@ -78,7 +78,6 @@ namespace Shadowsocks.Controller
                         string pacUrl;
                         pacUrl = "http://127.0.0.1:" + config.localPort.ToString() + "/pac?t=" + GetTimestamp(DateTime.Now);
                         RegistrySetValue(registry, "ProxyEnable", 0);
-                        var readProxyServer = registry.GetValue("ProxyServer");
                         RegistrySetValue(registry, "ProxyServer", "");
                         RegistrySetValue(registry, "AutoConfigURL", pacUrl);
                     }
@@ -127,12 +126,16 @@ namespace Shadowsocks.Controller
                 var connections = registry.GetValueNames();
                 foreach (String each in connections)
                 {
-                    if (!(each.Equals("DefaultConnectionSettings")
-                        || each.Equals("LAN Connection")
-                        || each.Equals("SavedLegacySettings")))
+                    switch (each.ToUpperInvariant())
                     {
-                        //set all the connections's proxy as the lan
-                        registry.SetValue(each, defaultValue);
+                        case "DEFAULTCONNECTIONSETTINGS":
+                        case "LAN CONNECTION":
+                        case "SAVEDLEGACYSETTINGS":
+                            continue;
+                        default:
+                            //set all the connections's proxy as the lan
+                            registry.SetValue(each, defaultValue);
+                            continue;
                     }
                 }
                 SystemProxy.NotifyIE();
@@ -174,14 +177,18 @@ namespace Shadowsocks.Controller
                 registry = OpenUserRegKey("Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings\\Connections",
                         true);
                 byte[] defConnection = (byte[])registry.GetValue("DefaultConnectionSettings");
-                byte[] savedLegacySetting = (byte[])registry.GetValue("SavedLegacySettings");
                 if (defConnection == null)
                 {
                     defConnection = new byte[32];
                     defConnection[0] = 0x46;
-                    defConnection[4] = 0xcc;
-                    defConnection[5] = 0xe;
                     defConnection[8] = 0x1;
+                }
+                byte[] savedLegacySetting = (byte[])registry.GetValue("SavedLegacySettings");
+                if (savedLegacySetting == null)
+                {
+                    savedLegacySetting = new byte[32];
+                    savedLegacySetting[0] = 0x46;
+                    savedLegacySetting[8] = 0x1;
                 }
                 if (set)
                 {

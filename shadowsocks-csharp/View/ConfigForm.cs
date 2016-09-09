@@ -39,7 +39,9 @@ namespace Shadowsocks.View
 
             foreach (string name in EncryptorFactory.GetEncryptor())
             {
-                EncryptionSelect.Items.Add(name);
+                EncryptorInfo info = EncryptorFactory.GetEncryptorInfo(name);
+                if (info.display)
+                    EncryptionSelect.Items.Add(name);
             }
             UpdateTexts();
             controller.ConfigChanged += controller_ConfigChanged;
@@ -66,17 +68,41 @@ namespace Shadowsocks.View
             UpButton.Height = UpButton.Height * dpi_mul / 4;
             DownButton.Width = DownButton.Width * dpi_mul / 4;
             DownButton.Height = DownButton.Height * dpi_mul / 4;
-            IPTextBox.Width = IPTextBox.Width * dpi_mul / 4;
-            ServerPortTextBox.Width = ServerPortTextBox.Width * dpi_mul / 4;
-            PasswordTextBox.Width = PasswordTextBox.Width * dpi_mul / 4;
-            EncryptionSelect.Width = EncryptionSelect.Width * dpi_mul / 4;
-            TCPProtocolComboBox.Width = TCPProtocolComboBox.Width * dpi_mul / 4;
-            ObfsCombo.Width = ObfsCombo.Width * dpi_mul / 4;
-            TextObfsParam.Width = TextObfsParam.Width * dpi_mul / 4;
-            RemarksTextBox.Width = RemarksTextBox.Width * dpi_mul / 4;
-            TextGroup.Width = TextGroup.Width * dpi_mul / 4;
-            TextLink.Width = TextLink.Width * dpi_mul / 4;
-            TextUDPPort.Width = TextUDPPort.Width * dpi_mul / 4;
+
+            //IPTextBox.Width = IPTextBox.Width * dpi_mul / 4;
+            //ServerPortTextBox.Width = ServerPortTextBox.Width * dpi_mul / 4;
+            //PasswordTextBox.Width = PasswordTextBox.Width * dpi_mul / 4;
+            //EncryptionSelect.Width = EncryptionSelect.Width * dpi_mul / 4;
+            //TCPProtocolComboBox.Width = TCPProtocolComboBox.Width * dpi_mul / 4;
+            //ObfsCombo.Width = ObfsCombo.Width * dpi_mul / 4;
+            //TextObfsParam.Width = TextObfsParam.Width * dpi_mul / 4;
+            //RemarksTextBox.Width = RemarksTextBox.Width * dpi_mul / 4;
+            //TextGroup.Width = TextGroup.Width * dpi_mul / 4;
+            //TextLink.Width = TextLink.Width * dpi_mul / 4;
+            //TextUDPPort.Width = TextUDPPort.Width * dpi_mul / 4;
+            //Font new_font = new Font("Arial", (float)(9.0 * dpi_mul / 4));
+            //this.Font = new_font;
+            //IPTextBox.Font = new_font;
+            //ServerPortTextBox.Font = new_font;
+            //PasswordTextBox.Font = new_font;
+            //EncryptionSelect.Font = new_font;
+            //TCPProtocolComboBox.Font = new_font;
+            //ObfsCombo.Font = new_font;
+            //TextObfsParam.Font = new_font;
+            //RemarksTextBox.Font = new_font;
+            //TextGroup.Font = new_font;
+            //TextLink.Font = new_font;
+            //TextUDPPort.Font = new_font;
+
+            int font_height = 9;
+            EncryptionSelect.Height = EncryptionSelect.Height - font_height + font_height * dpi_mul / 4;
+            TCPProtocolComboBox.Height = TCPProtocolComboBox.Height - font_height + font_height * dpi_mul / 4;
+            ObfsCombo.Height = ObfsCombo.Height - font_height + font_height * dpi_mul / 4;
+
+            //MyCancelButton.Height = MyCancelButton.Height * dpi_mul / 4;
+            MyCancelButton.Width = MyCancelButton.Width * dpi_mul / 4;
+            OKButton.Width = OKButton.Width * dpi_mul / 4;
+            //OKButton.Height = OKButton.Height * dpi_mul / 4;
 
             DrawLogo(350 * dpi_mul / 4);
         }
@@ -221,8 +247,8 @@ namespace Shadowsocks.View
                 string qrText = ssconfig;
                 QRCode code = ZXing.QrCode.Internal.Encoder.encode(qrText, ErrorCorrectionLevel.M);
                 ByteMatrix m = code.Matrix;
-                int blockSize = Math.Max(width / m.Height, 1);
-                Bitmap drawArea = new Bitmap((m.Width * blockSize), (m.Height * blockSize));
+                int blockSize = Math.Max(width / (m.Width + 2), 1);
+                Bitmap drawArea = new Bitmap(((m.Width + 2) * blockSize), ((m.Height + 2) * blockSize));
                 using (Graphics g = Graphics.FromImage(drawArea))
                 {
                     g.Clear(Color.White);
@@ -234,7 +260,8 @@ namespace Shadowsocks.View
                             {
                                 if (m[row, col] != 0)
                                 {
-                                    g.FillRectangle(b, blockSize * row, blockSize * col, blockSize, blockSize);
+                                    g.FillRectangle(b, blockSize * (row + 1), blockSize * (col + 1),
+                                        blockSize, blockSize);
                                 }
                             }
                         }

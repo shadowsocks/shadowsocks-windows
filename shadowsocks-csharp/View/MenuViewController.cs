@@ -139,6 +139,7 @@ namespace Shadowsocks.View
             else if (!global)
             {
                 mul_b = 0.4;
+                mul_g = 0.8;
             }
             if (!random)
             {
@@ -367,6 +368,22 @@ namespace Shadowsocks.View
             }
         }
 
+        private void ShowConfigForm(int index)
+        {
+            if (configForm != null)
+            {
+                configForm.Activate();
+            }
+            else
+            {
+                configForm = new ConfigForm(controller, updateChecker, index);
+                configForm.Show();
+                configForm.Activate();
+                configForm.BringToFront();
+                configForm.FormClosed += configForm_FormClosed;
+            }
+        }
+
         private void ShowSettingForm()
         {
             if (settingsForm != null)
@@ -423,7 +440,14 @@ namespace Shadowsocks.View
 
         private void Config_Click(object sender, EventArgs e)
         {
-            ShowConfigForm(false);
+            if (typeof(int) == sender.GetType())
+            {
+                ShowConfigForm((int)sender);
+            }
+            else
+            {
+                ShowConfigForm(false);
+            }
         }
 
         private void Setting_Click(object sender, EventArgs e)

@@ -10,7 +10,7 @@ namespace Shadowsocks.Encryption
     {
         protected static byte[] tempbuf = new byte[MAX_INPUT_SIZE];
 
-        protected Dictionary<string, int[]> ciphers;
+        protected Dictionary<string, EncryptorInfo> ciphers;
 
         private static readonly Dictionary<string, byte[]> CachedKeys = new Dictionary<string, byte[]>();
         protected byte[] _encryptIV;
@@ -21,7 +21,7 @@ namespace Shadowsocks.Encryption
         protected int _decryptIVOffset = 0;
         protected string _method;
         protected int _cipher;
-        protected int[] _cipherInfo;
+        protected EncryptorInfo _cipherInfo;
         protected byte[] _key;
         protected int keyLen;
         protected byte[] _iv;
@@ -34,7 +34,7 @@ namespace Shadowsocks.Encryption
             InitKey(method, password);
         }
 
-        protected abstract Dictionary<string, int[]> getCiphers();
+        protected abstract Dictionary<string, EncryptorInfo> getCiphers();
 
         public override byte[] getIV()
         {
@@ -46,6 +46,10 @@ namespace Shadowsocks.Encryption
             Array.Resize(ref key, keyLen);
             return key;
         }
+        public override EncryptorInfo getInfo()
+        {
+            return _cipherInfo;
+        }
 
         protected void InitKey(string method, string password)
         {
@@ -54,13 +58,13 @@ namespace Shadowsocks.Encryption
             string k = method + ":" + password;
             ciphers = getCiphers();
             _cipherInfo = ciphers[_method];
-            _cipher = _cipherInfo[2];
+            _cipher = _cipherInfo.type;
             if (_cipher == 0)
             {
                 throw new Exception("method not found");
             }
-            keyLen = ciphers[_method][0];
-            ivLen = ciphers[_method][1];
+            keyLen = ciphers[_method].key_size;
+            ivLen = ciphers[_method].iv_size;
             if (!CachedKeys.ContainsKey(k))
             {
                 lock (CachedKeys)

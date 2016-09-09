@@ -56,5 +56,20 @@ namespace Shadowsocks.Encryption
             IEncryptor result = (IEncryptor)c.Invoke(new object[] { method, password });
             return result;
         }
+
+        public static EncryptorInfo GetEncryptorInfo(string method)
+        {
+            if (string.IsNullOrEmpty(method))
+            {
+                method = "aes-256-cfb";
+            }
+            method = method.ToLowerInvariant();
+            Type t = _registeredEncryptors[method];
+            ConstructorInfo c = t.GetConstructor(_constructorTypes);
+            IEncryptor result = (IEncryptor)c.Invoke(new object[] { method, "0" });
+            EncryptorInfo info = result.getInfo();
+            result.Dispose();
+            return info;
+        }
     }
 }

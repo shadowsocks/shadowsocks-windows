@@ -222,7 +222,7 @@ namespace Shadowsocks.Model
             ret.method = (string)method.Clone();
             ret.protocol = protocol;
             ret.obfs = (string)obfs.Clone();
-            ret.obfsparam = (string)obfsparam.Clone();
+            ret.obfsparam = obfsparam == null ? "" : (string)obfsparam.Clone();
             ret.remarks_base64 = (string)remarks_base64.Clone();
             ret.enable = enable;
             ret.udp_over_tcp = udp_over_tcp;

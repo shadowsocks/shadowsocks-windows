@@ -3,6 +3,23 @@ using System.Text;
 
 namespace Shadowsocks.Encryption
 {
+    public struct EncryptorInfo
+    {
+        public int iv_size;
+        public int key_size;
+        public bool display;
+        public int type;
+        public int ctx_size;
+
+        public EncryptorInfo(int key, int iv, bool display, int type, int ctx = 0)
+        {
+            key_size = key;
+            iv_size = iv;
+            this.display = display;
+            this.type = type;
+            ctx_size = ctx;
+        }
+    }
     public abstract class EncryptorBase
         : IEncryptor
     {
@@ -33,5 +50,6 @@ namespace Shadowsocks.Encryption
         public abstract void Dispose();
         public abstract byte[] getIV();
         public abstract byte[] getKey();
+        public abstract EncryptorInfo getInfo();
     }
 }
