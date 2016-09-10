@@ -270,14 +270,14 @@
             this.trafficChart.Palette = System.Windows.Forms.DataVisualization.Charting.ChartColorPalette.None;
             series1.BorderWidth = 2;
             series1.ChartArea = "ChartArea1";
-            series1.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
+            series1.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Spline;
             series1.Color = System.Drawing.Color.FromArgb(255, 128, 0);
             series1.IsXValueIndexed = true;
             series1.Legend = "Legend1";
             series1.Name = "Inbound";
             series2.BorderWidth = 2;
             series2.ChartArea = "ChartArea1";
-            series2.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
+            series2.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Spline;
             series2.Color = System.Drawing.Color.FromArgb(128, 128, 255);
             series2.IsXValueIndexed = true;
             series2.Legend = "Legend1";
