@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using System.Windows.Forms;
+using Microsoft.Win32;
 
 using Shadowsocks.Controller;
 using Shadowsocks.Util;
@@ -12,6 +13,8 @@ namespace Shadowsocks
 {
     static class Program
     {
+        static ShadowsocksController controller;
+
         /// <summary>
         /// 应用程序的主入口点。
         /// </summary>
@@ -30,6 +33,8 @@ namespace Shadowsocks
             using (Mutex mutex = new Mutex(false, "Global\\Shadowsocks_" + Application.StartupPath.GetHashCode()))
             {
                 AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
+                Application.ApplicationExit += Application_ApplicationExit;
+                SystemEvents.PowerModeChanged += SystemEvents_PowerModeChanged;
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
 
@@ -56,7 +61,7 @@ namespace Shadowsocks
 #else
                 Logging.OpenLogFile();
 #endif
-                ShadowsocksController controller = new ShadowsocksController();
+                controller = new ShadowsocksController();
                 MenuViewController viewController = new MenuViewController(controller);
                 controller.Start();
                 Application.Run();
@@ -74,6 +79,30 @@ namespace Shadowsocks
                     Environment.NewLine + (e.ExceptionObject?.ToString()),
                     "Shadowsocks Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 Application.Exit();
+            }
+        }
+
+        private static void SystemEvents_PowerModeChanged(object sender, PowerModeChangedEventArgs e)
+        {
+            switch (e.Mode)
+            {
+                case PowerModes.Resume:
+                    Logging.Info("os wake up");
+                    controller?.Start();
+                    break;
+                case PowerModes.Suspend:
+                    controller?.Stop();
+                    Logging.Info("os suspend");
+                    break;
+            }
+        }
+
+        private static void Application_ApplicationExit(object sender, EventArgs e)
+        {
+            if (controller != null)
+            {
+                controller.Stop();
+                controller = null;
             }
         }
     }
