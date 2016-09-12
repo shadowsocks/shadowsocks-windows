@@ -65,6 +65,10 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="GlobalHotKey, Version=1.1.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>3rd\GlobalHotKey.1.1.0\lib\GlobalHotKey.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="Microsoft.VisualBasic" />
     <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
@@ -139,6 +143,7 @@
     <Compile Include="3rd\zxing\ResultPoint.cs" />
     <Compile Include="3rd\zxing\ResultPointCallback.cs" />
     <Compile Include="3rd\zxing\WriterException.cs" />
+    <Compile Include="Model\HotKeyConfig.cs" />
     <Compile Include="Proxy\DirectConnect.cs" />
     <Compile Include="Proxy\IProxy.cs" />
     <Compile Include="Controller\Service\AvailabilityStatistics.cs" />

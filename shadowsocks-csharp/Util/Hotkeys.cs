@@ -1,79 +1,91 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Windows.Forms;
+using System.Windows.Input;
+using GlobalHotKey;
+using Shadowsocks.Controller;
 
 namespace Shadowsocks.Util
 {
-    public class HotKeys
+    public static class HotKeys
     {
-        int keyid;
-        Dictionary<int, HotKeyCallBackHanlder> keymap = new Dictionary<int, HotKeyCallBackHanlder>();   //每一个key对于一个处理函数
-        public delegate void HotKeyCallBackHanlder();
+        private static HotKeyManager _hotKeyManager;
 
-        private const int WM_HOTKEY = 0x0312;
+        public delegate void HotKeyCallBackHandler();
+        // map key and corresponding handler function
+        private static Dictionary<HotKey, HotKeyCallBackHandler> keymap = new Dictionary<HotKey, HotKeyCallBackHandler>();
 
-        [Flags]
-        public enum KeyModifier
+        public static void Init()
         {
-            None = 0x0000,
-            Alt = 0x0001,
-            Control = 0x0002,
-            Shift = 0x0004,
-            /*
-             * Reserved by operating system
-             * https://msdn.microsoft.com/en-us/library/ms646309.aspx
-             * Win = 0x0008
-             */
+            _hotKeyManager = new HotKeyManager();
+            _hotKeyManager.KeyPressed += HotKeyManagerPressed;
         }
 
-        public class HotKeyException : Exception
+        public static void Destroy()
         {
-            
+            // He will unreg all keys and dispose resources
+            _hotKeyManager.Dispose();
         }
 
-        public void RegHotKey(IntPtr hWnd, int modifiers, Keys vk, HotKeyCallBackHanlder callBack)
+        static void HotKeyManagerPressed(object sender, KeyPressedEventArgs e)
         {
-            int id = Interlocked.Increment( ref keyid );
-            if (!RegisterHotKey(hWnd, id, modifiers, vk))
-                throw new Exception("注册失败！");
-            keymap[id] = callBack;
+            var hotkey = e.HotKey;
+            HotKeyCallBackHandler callback;
+            if (keymap.TryGetValue(hotkey, out callback))
+                callback();
         }
 
-        public void UnRegHotKey(IntPtr hWnd, HotKeyCallBackHanlder callBack)
+        public static bool IsExist(HotKey hotKey)
         {
-            foreach (KeyValuePair<int, HotKeyCallBackHanlder> var in keymap)
+            return keymap.ContainsKey(hotKey);
+        }
+
+        public static bool IsExist(Key key, ModifierKeys modifiers)
+        {
+            return keymap.ContainsKey(new HotKey(key, modifiers));
+        }
+
+        public static int Regist(Key key, ModifierKeys modifiers, HotKeyCallBackHandler callBack)
+        {
+            try
             {
-                if (var.Value == callBack)
+                _hotKeyManager.Register(key, modifiers);
+                var hotkey = new HotKey(key, modifiers);
+                if (IsExist(hotkey))
                 {
-                    UnregisterHotKey(hWnd, var.Key);
-                    keymap.Remove( var.Key );
-                    return;
+                    // already registered
+                    return -3;
                 }
+                keymap[hotkey] = callBack;
+                return 0;
             }
-        }
-
-        // 快捷键消息处理
-        public void ProcessHotKey(Message m)
-        {
-            if (m.Msg == WM_HOTKEY)
+            catch (ArgumentException)
             {
-                int id = m.WParam.ToInt32();
-                HotKeyCallBackHanlder callback;
-                if (keymap.TryGetValue(id, out callback))
-                    callback();
+                // already registered
+                // notify user to change key
+                return -1;
+            }
+            catch (Win32Exception win32Exception)
+            {
+                // WinAPI error
+                Logging.LogUsefulException(win32Exception);
+                return -2;
             }
         }
 
-        [DllImport("user32.dll", SetLastError = true)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        static extern bool RegisterHotKey(IntPtr hWnd, int id, int modifiers, Keys vk);
+        public static void UnRegist(HotKey key)
+        {
+            _hotKeyManager.Unregister(key);
+        }
 
-        [DllImport("user32.dll", SetLastError = true)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        static extern bool UnregisterHotKey(IntPtr hWnd, int id);
+        public static void UnRegist(Key key, ModifierKeys modifiers)
+        {
+            _hotKeyManager.Unregister(key, modifiers);
+        }
     }
 }

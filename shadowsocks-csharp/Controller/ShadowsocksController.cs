@@ -322,6 +322,16 @@ namespace Shadowsocks.Controller
             SaveConfig(_config);
         }
 
+        public void SaveHotkeyConfig(HotkeyConfig newConfig)
+        {
+            _config.hotkey = newConfig;
+            SaveConfig(_config);
+            if (ConfigChanged != null)
+            {
+                ConfigChanged(this, new EventArgs());
+            }
+        }
+
         public void SavePACUrl(string pacUrl)
         {
             _config.pacUrl = pacUrl;
