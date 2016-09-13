@@ -69,13 +69,13 @@ namespace Shadowsocks.Util
             string str = "";
             if ( modifier.HasFlag( ModifierKeys.Control ) )
                 str += "Ctrl + ";
-            else if ( modifier.HasFlag( ModifierKeys.Shift ) )
+            if ( modifier.HasFlag( ModifierKeys.Shift ) )
                 str += "Shift + ";
-            else if ( modifier.HasFlag( ModifierKeys.Alt ) )
+            if ( modifier.HasFlag( ModifierKeys.Alt ) )
                 str += "Alt + ";
             // In general, Win key is reserved by operating system
             // It leaves here just for sanity
-            else if ( modifier.HasFlag( ModifierKeys.Windows ) )
+            if ( modifier.HasFlag( ModifierKeys.Windows ) )
                 str += "Win + ";
             str += key.ToString();
             return str;

@@ -2,6 +2,9 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Shadowsocks.Controller;
 using Shadowsocks.Encryption;
+using Shadowsocks.Util;
+using GlobalHotKey;
+using System.Windows.Input;
 using System.Threading;
 using System.Collections.Generic;
 
@@ -20,6 +23,26 @@ namespace test
             Assert.IsTrue(UpdateChecker.Asset.CompareVersion("1.2.1", "1.2") > 0);
             Assert.IsTrue(UpdateChecker.Asset.CompareVersion("2.3.1", "2.4") < 0);
             Assert.IsTrue(UpdateChecker.Asset.CompareVersion("1.3.2", "1.3.1") > 0);
+        }
+
+        [ TestMethod ]
+        public void TestDisplayHotkey() {
+            Assert.AreEqual( "Ctrl + A", HotKeys.DisplayHotKey( Key.A, ModifierKeys.Control ) );
+            Assert.AreEqual( "Ctrl + Alt + D2", HotKeys.DisplayHotKey( Key.D2, (ModifierKeys.Alt | ModifierKeys.Control) ) );
+            Assert.AreEqual( "Ctrl + Shift + Alt + F6", HotKeys.DisplayHotKey( Key.F6, (ModifierKeys.Alt|ModifierKeys.Control|ModifierKeys.Shift)));
+        }
+
+        [ TestMethod ]
+        public void TestParseHotKey() {
+            Assert.IsTrue( HotKeys.ParseHotKey( "44|2" ).Equals( new HotKey(Key.A, ModifierKeys.Control) ) );
+            Assert.IsTrue( HotKeys.ParseHotKey( "44|3" ).Equals( new HotKey(Key.A, (ModifierKeys.Control|ModifierKeys.Alt)) ) );
+        }
+
+        [TestMethod]
+        public void TestHotKey2str()
+        {
+            Assert.IsTrue(HotKeys.HotKey2str( Key.A, ModifierKeys.Control ) == "44|2");
+            Assert.IsTrue(HotKeys.HotKey2str( Key.A, (ModifierKeys.Control | ModifierKeys.Alt)) == "44|3");
         }
 
         [TestMethod]
