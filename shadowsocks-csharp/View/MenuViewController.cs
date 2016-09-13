@@ -223,6 +223,7 @@ namespace Shadowsocks.View
                 CreateMenuGroup("Help", new MenuItem[] {
                     CreateMenuItem("Check Update", new EventHandler(this.CheckUpdate_Click)),
                     CreateMenuItem("Show Logs...", new EventHandler(this.ShowLogItem_Click)),
+                    CreateMenuItem("Feedback...", new EventHandler(this.FeedbackItem_Click)),
                     CreateMenuItem("About...", new EventHandler(this.AboutItem_Click)),
                     CreateMenuItem("Donate...", new EventHandler(this.DonateItem_Click)),
                 }),
@@ -478,9 +479,15 @@ namespace Shadowsocks.View
             Application.Exit();
         }
 
+        private void FeedbackItem_Click(object sender, EventArgs e)
+        {
+            Process.Start("https://github.com/breakwa11/shadowsocks-rss/issues/new");
+        }
+
         private void AboutItem_Click(object sender, EventArgs e)
         {
-            Process.Start("https://github.com/breakwa11/shadowsocks-rss");
+            Process.Start("https://bit.no.com:43110/shadowsocksr.bit");
+            //Process.Start("https://github.com/breakwa11/shadowsocks-rss");
         }
 
         private void DonateItem_Click(object sender, EventArgs e)

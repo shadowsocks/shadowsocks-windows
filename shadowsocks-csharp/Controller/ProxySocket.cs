@@ -55,6 +55,18 @@ namespace Shadowsocks.Controller
             }
         }
 
+        public bool GoS5Proxy
+        {
+            get
+            {
+                return _proxy;
+            }
+            set
+            {
+                _proxy = value;
+            }
+        }
+
         public bool CanSendKeepAlive
         {
             get
@@ -149,7 +161,8 @@ namespace Shadowsocks.Controller
             }
             int mss = 1460;
             string server_addr = server.server;
-            server_addr = _proxy_server;
+            if (_proxy_server != null)
+                server_addr = _proxy_server;
             _protocol.SetServerInfo(new ServerInfo(server_addr, server.server_port, "", server.getProtocolData(),
                 _encryptor.getIV(), _encryptor.getKey(), head_len, mss));
             _obfs.SetServerInfo(new ServerInfo(server_addr, server.server_port, server.obfsparam??"", server.getObfsData(),

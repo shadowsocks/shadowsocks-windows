@@ -15,27 +15,36 @@ namespace Shadowsocks.Encryption
         {
             _registeredEncryptors = new Dictionary<string, Type>();
             _registeredEncryptorNames = new List<string>();
+
+            {
+                foreach (string method in MbedTLSEncryptor.SupportedCiphers())
+                {
+                    if (!_registeredEncryptorNames.Contains(method))
+                    {
+                        _registeredEncryptorNames.Add(method);
+                        _registeredEncryptors.Add(method, typeof(MbedTLSEncryptor));
+                    }
+                }
+            }
             if (LibcryptoEncryptor.isSupport())
             {
                 LibcryptoEncryptor.InitAviable();
                 foreach (string method in LibcryptoEncryptor.SupportedCiphers())
                 {
-                    _registeredEncryptorNames.Add(method);
-                    _registeredEncryptors.Add(method, typeof(LibcryptoEncryptor));
-                }
-            }
-            else
-            {
-                foreach (string method in PolarSSLEncryptor.SupportedCiphers())
-                {
-                    _registeredEncryptorNames.Add(method);
-                    _registeredEncryptors.Add(method, typeof(PolarSSLEncryptor));
+                    if (!_registeredEncryptorNames.Contains(method))
+                    {
+                        _registeredEncryptorNames.Add(method);
+                        _registeredEncryptors.Add(method, typeof(LibcryptoEncryptor));
+                    }
                 }
             }
             foreach (string method in SodiumEncryptor.SupportedCiphers())
             {
-                _registeredEncryptorNames.Add(method);
-                _registeredEncryptors.Add(method, typeof(SodiumEncryptor));
+                if (!_registeredEncryptorNames.Contains(method))
+                {
+                    _registeredEncryptorNames.Add(method);
+                    _registeredEncryptors.Add(method, typeof(SodiumEncryptor));
+                }
             }
         }
 

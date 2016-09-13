@@ -10,14 +10,16 @@ namespace Shadowsocks.Encryption
         public bool display;
         public int type;
         public int ctx_size;
+        public string name;
 
-        public EncryptorInfo(int key, int iv, bool display, int type, int ctx = 0)
+        public EncryptorInfo(int key, int iv, bool display, int type, int ctx = 0, string name = "")
         {
             key_size = key;
             iv_size = iv;
             this.display = display;
             this.type = type;
             ctx_size = ctx;
+            this.name = name;
         }
     }
     public abstract class EncryptorBase
@@ -37,7 +39,7 @@ namespace Shadowsocks.Encryption
         protected byte[] GetPasswordHash()
         {
             byte[] inputBytes = Encoding.UTF8.GetBytes(Password);
-            byte[] hash = MbedTLS.MbedTLSMD5(inputBytes);
+            byte[] hash = MbedTLS.MD5(inputBytes);
             return hash;
         }
 

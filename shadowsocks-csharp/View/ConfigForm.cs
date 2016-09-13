@@ -307,7 +307,20 @@ namespace Shadowsocks.View
 
                 ServerGroupBox.Visible = true;
 
-                if (checkSSRLink.Checked)
+                if (TCPProtocolComboBox.Text == "origin"
+                    && ObfsCombo.Text == "plain"
+                    && !CheckUDPoverUDP.Checked
+                    )
+                {
+                    CheckSSR.Checked = false;
+                    checkAdvSetting.Checked = false;
+                }
+                else
+                {
+                    CheckSSR.Checked = true;
+                }
+
+                if (checkSSRLink.Checked && CheckSSR.Checked)
                 {
                     TextLink.Text = controller.GetSSRRemarksLinkForServer(server);
                 }
@@ -322,6 +335,7 @@ namespace Shadowsocks.View
                 }
 
                 PasswordLabel.Checked = false;
+                Update_SSR_controls_Visable();
                 GenQR(TextLink.Text);
                 //IPTextBox.Focus();
             }
@@ -577,14 +591,18 @@ namespace Shadowsocks.View
 
         private void checkAdvSetting_CheckedChanged(object sender, EventArgs e)
         {
+            Update_SSR_controls_Visable();
+        }
+
+        private void Update_SSR_controls_Visable()
+        {
+            SuspendLayout();
             if (checkAdvSetting.Checked)
             {
                 labelUDPPort.Visible = true;
                 TextUDPPort.Visible = true;
                 //TCPoverUDPLabel.Visible = true;
                 //CheckTCPoverUDP.Visible = true;
-                UDPoverTCPLabel.Visible = true;
-                CheckUDPoverUDP.Visible = true;
             }
             else
             {
@@ -595,6 +613,37 @@ namespace Shadowsocks.View
                 UDPoverTCPLabel.Visible = false;
                 CheckUDPoverUDP.Visible = false;
             }
+            if (CheckSSR.Checked)
+            {
+                TCPProtocolLabel.Visible = true;
+                TCPProtocolComboBox.Visible = true;
+                labelObfs.Visible = true;
+                ObfsCombo.Visible = true;
+                labelObfsParam.Visible = true;
+                TextObfsParam.Visible = true;
+            }
+            else
+            {
+                TCPProtocolLabel.Visible = false;
+                TCPProtocolComboBox.Visible = false;
+                labelObfs.Visible = false;
+                ObfsCombo.Visible = false;
+                labelObfsParam.Visible = false;
+                TextObfsParam.Visible = false;
+                UDPoverTCPLabel.Visible = false;
+                CheckUDPoverUDP.Visible = false;
+            }
+            if (CheckSSR.Checked && checkAdvSetting.Checked)
+            {
+                UDPoverTCPLabel.Visible = true;
+                CheckUDPoverUDP.Visible = true;
+            }
+            ResumeLayout();
+        }
+
+        private void CheckSSR_CheckedChanged(object sender, EventArgs e)
+        {
+            Update_SSR_controls_Visable();
         }
     }
 }

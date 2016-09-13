@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 using Shadowsocks.Model;
 
 namespace Shadowsocks.Controller
@@ -32,8 +33,6 @@ namespace Shadowsocks.Controller
             private Socket _local;
             private Socket _remote;
             private bool _closed = false;
-            private bool _localShutdown = false;
-            private bool _remoteShutdown = false;
             private Configuration _config;
             HttpPraser httpProxyState;
             public const int RecvSize = 16384;
@@ -44,11 +43,11 @@ namespace Shadowsocks.Controller
 
             public void Start(Configuration config, byte[] firstPacket, int length, Socket socket, int targetPort)
             {
-                this._firstPacket = firstPacket;
-                this._firstPacketLength = length;
-                this._local = socket;
-                this._targetPort = targetPort;
-                this._config = config;
+                _firstPacket = firstPacket;
+                _firstPacketLength = length;
+                _local = socket;
+                _targetPort = targetPort;
+                _config = config;
                 if ((_config.authUser ?? "").Length == 0 || Util.Utils.isMatchSubNet(((IPEndPoint)this._local.RemoteEndPoint).Address, "127.0.0.0/8"))
                 {
                     Connect();
@@ -119,13 +118,13 @@ namespace Shadowsocks.Controller
                     else
                     {
                         Console.WriteLine("failed to recv data in HttpHandshakeRecv");
-                        this.Close();
+                        Close();
                     }
                 }
                 catch (Exception e)
                 {
                     Logging.LogUsefulException(e);
-                    this.Close();
+                    Close();
                 }
             }
 
@@ -144,7 +143,7 @@ namespace Shadowsocks.Controller
                 catch (Exception e)
                 {
                     Logging.LogUsefulException(e);
-                    this.Close();
+                    Close();
                 }
             }
 
@@ -158,7 +157,7 @@ namespace Shadowsocks.Controller
                 catch (Exception e)
                 {
                     Logging.LogUsefulException(e);
-                    this.Close();
+                    Close();
                 }
 
             }
@@ -172,7 +171,6 @@ namespace Shadowsocks.Controller
                     bool parsed = IPAddress.TryParse("127.0.0.1", out ipAddress);
                     IPEndPoint remoteEP = new IPEndPoint(ipAddress, _targetPort);
 
-
                     _remote = new Socket(ipAddress.AddressFamily,
                         SocketType.Stream, ProtocolType.Tcp);
                     _remote.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, true);
@@ -184,7 +182,7 @@ namespace Shadowsocks.Controller
                 catch (Exception e)
                 {
                     Logging.LogUsefulException(e);
-                    this.Close();
+                    Close();
                 }
             }
 
@@ -202,7 +200,7 @@ namespace Shadowsocks.Controller
                 catch (Exception e)
                 {
                     Logging.LogUsefulException(e);
-                    this.Close();
+                    Close();
                 }
             }
 
@@ -219,7 +217,7 @@ namespace Shadowsocks.Controller
                 catch (Exception e)
                 {
                     Logging.LogUsefulException(e);
-                    this.Close();
+                    Close();
                 }
             }
 
@@ -241,7 +239,7 @@ namespace Shadowsocks.Controller
                 catch (Exception e)
                 {
                     Logging.LogUsefulException(e);
-                    this.Close();
+                    Close();
                 }
             }
 
@@ -261,15 +259,13 @@ namespace Shadowsocks.Controller
                     }
                     else
                     {
-                        _local.Shutdown(SocketShutdown.Send);
-                        _localShutdown = true;
-                        CheckClose();
+                        Close();
                     }
                 }
                 catch (Exception e)
                 {
                     Logging.LogUsefulException(e);
-                    this.Close();
+                    Close();
                 }
             }
 
@@ -289,15 +285,13 @@ namespace Shadowsocks.Controller
                     }
                     else
                     {
-                        _remote.Shutdown(SocketShutdown.Send);
-                        _remoteShutdown = true;
-                        CheckClose();
+                        Close();
                     }
                 }
                 catch (Exception e)
                 {
                     Logging.LogUsefulException(e);
-                    this.Close();
+                    Close();
                 }
             }
 
@@ -316,7 +310,7 @@ namespace Shadowsocks.Controller
                 catch (Exception e)
                 {
                     Logging.LogUsefulException(e);
-                    this.Close();
+                    Close();
                 }
             }
 
@@ -335,15 +329,7 @@ namespace Shadowsocks.Controller
                 catch (Exception e)
                 {
                     Logging.LogUsefulException(e);
-                    this.Close();
-                }
-            }
-
-            private void CheckClose()
-            {
-                if (_localShutdown && _remoteShutdown)
-                {
-                    this.Close();
+                    Close();
                 }
             }
 
@@ -357,6 +343,7 @@ namespace Shadowsocks.Controller
                     }
                     _closed = true;
                 }
+                Thread.Sleep(100);
                 if (_local != null)
                 {
                     try

@@ -11,7 +11,6 @@ namespace Shadowsocks.Encryption
     class Libcrypto
     {
         delegate IntPtr EncryptFunc();
-        //const string DLLNAME = "libcrypto";
         const string DLLNAME = "libeay32";
         static Dictionary<string, EncryptFunc> encrypt_func_map;
 
@@ -28,21 +27,12 @@ namespace Shadowsocks.Encryption
                 //{
                 //    //Console.WriteLine(e.ToString());
                 //}
-                try
-                {
-                    LoadLibrary("libcrypto.dll");
-                    return;
-                }
-                catch //(Exception e)
-                {
-                    //Console.WriteLine(e.ToString());
-                }
                 string runningPath = Path.Combine(System.Windows.Forms.Application.StartupPath, @"temp"); // Path.GetTempPath();
                 if (!Directory.Exists(runningPath))
                 {
                     Directory.CreateDirectory(runningPath);
                 }
-                string dllPath = runningPath + "/libcrypto.dll";
+                string dllPath = runningPath + "/libeay32.dll";
                 try
                 {
                     //FileManager.UncompressFile(dllPath, Resources.libsscrypto_dll);
@@ -65,11 +55,7 @@ namespace Shadowsocks.Encryption
                     func_map["aes-128-cfb"] = EVP_aes_128_cfb;
                     func_map["aes-192-cfb"] = EVP_aes_192_cfb;
                     func_map["aes-256-cfb"] = EVP_aes_256_cfb;
-                    func_map["aes-128-ofb"] = EVP_aes_128_ofb;
-                    func_map["aes-192-ofb"] = EVP_aes_192_ofb;
-                    func_map["aes-256-ofb"] = EVP_aes_256_ofb;
                     func_map["bf-cfb"] = EVP_bf_cfb;
-                    func_map["cast5-cfb"] = EVP_cast5_cfb;
                     encrypt_func_map = func_map;
                     OpenSSL_add_all_ciphers();
                 }
@@ -172,23 +158,10 @@ namespace Shadowsocks.Encryption
         public static extern IntPtr EVP_aes_128_cfb();
 
         [DllImport(DLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        public static extern IntPtr EVP_aes_256_ofb();
-
-        [DllImport(DLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        public static extern IntPtr EVP_aes_192_ofb();
-
-        [DllImport(DLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        public static extern IntPtr EVP_aes_128_ofb();
-
-        [DllImport(DLLNAME, CallingConvention = CallingConvention.Cdecl)]
         public static extern IntPtr EVP_rc4();
 
         [DllImport(DLLNAME, CallingConvention = CallingConvention.Cdecl)]
         public static extern IntPtr EVP_bf_cfb();
-
-        [DllImport(DLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        public static extern IntPtr EVP_cast5_cfb();
-
 
         [DllImport(DLLNAME, CallingConvention = CallingConvention.Cdecl)]
         public static extern IntPtr EVP_CIPHER_CTX_new();

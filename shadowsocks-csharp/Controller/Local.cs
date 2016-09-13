@@ -533,6 +533,8 @@ namespace Shadowsocks.Controller
                     remoteUDP = new ProxySocket(ipAddress.AddressFamily,
                         SocketType.Dgram, ProtocolType.Udp);
                     remoteUDP.GetSocket().Bind(new IPEndPoint(ipAddress.AddressFamily == AddressFamily.InterNetworkV6 ? IPAddress.IPv6Any : IPAddress.Any, 0));
+
+                    remoteUDP.SetEncryptor(EncryptorFactory.GetEncryptor(server.method, server.password));
                     remoteUDP.SetProtocol(ObfsFactory.GetObfs(server.protocol));
                     remoteUDP.SetObfs(ObfsFactory.GetObfs(server.obfs));
                 }
@@ -699,6 +701,18 @@ namespace Shadowsocks.Controller
                     connection = null;
                     connectionUDP = null;
                 }
+
+                getCurrentServer = null;
+                keepCurrentServer = null;
+
+                detector = null;
+                speedTester = null;
+                random = null;
+                remoteUDPRecvBuffer = null;
+
+                server = null;
+                select_server = null;
+                cfg = null;
             }
             catch (Exception e)
             {
@@ -714,6 +728,11 @@ namespace Shadowsocks.Controller
                 remoteUDPEndPoint = remote.GetProxyUdpEndPoint();
                 remote.SetTcpServer(server.server, server.server_port);
                 remote.SetUdpServer(server.server, server.server_udp_port == 0 ? server.server_port : server.server_udp_port);
+                if (remoteUDP != null)
+                {
+                    remoteUDP.GoS5Proxy = true;
+                    remoteUDP.SetUdpServer(server.server, server.server_udp_port == 0 ? server.server_port : server.server_udp_port);
+                }
                 return ret;
             }
             else if (cfg.proxyType == 1)
@@ -1336,7 +1355,7 @@ namespace Shadowsocks.Controller
 
                 int bytesRead = endRemoteUDPRecv(ar, ref tempEP);
 
-                if (remote.IsClose)
+                if (remoteUDP.IsClose)
                 {
                     final_close = true;
                 }
@@ -1361,7 +1380,7 @@ namespace Shadowsocks.Controller
                     }
                     else //if (bytesRead > 0)
                     {
-                        ConnectionSend(remote.GetAsyncResultBuffer(ar), bytesRead);
+                        ConnectionSend(remoteUDP.GetAsyncResultBuffer(ar), bytesRead);
 
                         speedTester.AddRecvSize(bytesRead);
                         server.ServerSpeedLog().AddDownloadRawBytes(bytesRead);

@@ -94,13 +94,13 @@ namespace Shadowsocks.Encryption
             {
                 if (i == 0)
                 {
-                    md5sum = MbedTLS.MbedTLSMD5(password);
+                    md5sum = MbedTLS.MD5(password);
                 }
                 else
                 {
                     md5sum.CopyTo(result, 0);
                     password.CopyTo(result, md5sum.Length);
-                    md5sum = MbedTLS.MbedTLSMD5(result);
+                    md5sum = MbedTLS.MD5(result);
                 }
                 md5sum.CopyTo(key, i);
                 i += md5sum.Length;
