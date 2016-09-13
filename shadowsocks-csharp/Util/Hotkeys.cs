@@ -40,14 +40,45 @@ namespace Shadowsocks.Util
                 callback();
         }
 
-        public static bool IsExist(HotKey hotKey)
-        {
-            return keymap.ContainsKey(hotKey);
+        public static bool IsExist( HotKey hotKey ) { return keymap.Any( v => v.Key.Equals( hotKey ) ); }
+
+        public static string HotKey2str( HotKey key ) {
+            var keyNum = ( int ) key.Key;
+            var modifierNum = ( int ) key.Modifiers;
+            return $"{keyNum}|{modifierNum}";
         }
 
-        public static bool IsExist(Key key, ModifierKeys modifiers)
-        {
-            return keymap.ContainsKey(new HotKey(key, modifiers));
+        public static string HotKey2str( Key key, ModifierKeys modifier ) {
+            var keyNum = ( int ) key;
+            var modifierNum = ( int ) modifier;
+            return $"{keyNum}|{modifierNum}";
+        }
+
+        public static HotKey ParseHotKey( string s ) {
+            if (s.IsNullOrEmpty()) return null;
+            string[] strings = s.Split( '|' );
+            var key = (Key)int.Parse(strings[ 0 ]);
+            var modifierCombination = (ModifierKeys)int.Parse(strings[ 1 ]);
+            if ( ! ModifierKeysConverter.IsDefinedModifierKeys( modifierCombination ) ) return null;
+            return new HotKey(key, modifierCombination);
+        }
+
+        public static string DisplayHotKey( HotKey key ) { return DisplayHotKey( key.Key, key.Modifiers ); }
+
+        public static string DisplayHotKey( Key key, ModifierKeys modifier ) {
+            string str = "";
+            if ( modifier.HasFlag( ModifierKeys.Control ) )
+                str += "Ctrl + ";
+            else if ( modifier.HasFlag( ModifierKeys.Shift ) )
+                str += "Shift + ";
+            else if ( modifier.HasFlag( ModifierKeys.Alt ) )
+                str += "Alt + ";
+            // In general, Win key is reserved by operating system
+            // It leaves here just for sanity
+            else if ( modifier.HasFlag( ModifierKeys.Windows ) )
+                str += "Win + ";
+            str += key.ToString();
+            return str;
         }
 
         public static int Regist(Key key, ModifierKeys modifiers, HotKeyCallBackHandler callBack)
