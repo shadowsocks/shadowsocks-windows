@@ -3,11 +3,8 @@
 namespace Shadowsocks.Model
 {
     /*
-     * Key codes are stored as enum, and they actually
-     * use type: int
-     *
      * Format:
-     *  <keycode-number>|<key-modifiers-combination-number>
+     *  <modifiers-combination>+<key>
      *
      */
     [Serializable]

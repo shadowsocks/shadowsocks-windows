@@ -26,38 +26,29 @@ namespace test
         }
 
         [ TestMethod ]
-        public void TestDisplayHotkey() {
-            Assert.AreEqual( "Ctrl + A", HotKeys.DisplayHotKey( Key.A, ModifierKeys.Control ) );
-            Assert.AreEqual( "Ctrl + Alt + D2", HotKeys.DisplayHotKey( Key.D2, (ModifierKeys.Alt | ModifierKeys.Control) ) );
-            Assert.AreEqual( "Ctrl + Shift + Alt + F6", HotKeys.DisplayHotKey( Key.F6, (ModifierKeys.Alt|ModifierKeys.Control|ModifierKeys.Shift)));
-        }
-
-        [ TestMethod ]
-        public void TestParseHotKeyFromConfig() {
-            Assert.IsTrue( HotKeys.ParseHotKeyFromConfig( "44|2" ).Equals( new HotKey(Key.A, ModifierKeys.Control) ) );
-            Assert.IsTrue( HotKeys.ParseHotKeyFromConfig( "44|3" ).Equals( new HotKey(Key.A, (ModifierKeys.Control|ModifierKeys.Alt)) ) );
+        public void TestHotKey2Str() {
+            Assert.AreEqual( "Ctrl+A", HotKeys.HotKey2Str( Key.A, ModifierKeys.Control ) );
+            Assert.AreEqual( "Ctrl+Alt+D2", HotKeys.HotKey2Str( Key.D2, (ModifierKeys.Alt | ModifierKeys.Control) ) );
+            Assert.AreEqual("Ctrl+Alt+Shift+NumPad7", HotKeys.HotKey2Str(Key.NumPad7, (ModifierKeys.Alt|ModifierKeys.Control|ModifierKeys.Shift)));
+            Assert.AreEqual( "Ctrl+Alt+Shift+F6", HotKeys.HotKey2Str( Key.F6, (ModifierKeys.Alt|ModifierKeys.Control|ModifierKeys.Shift)));
+            Assert.AreNotEqual("Ctrl+Shift+Alt+F6", HotKeys.HotKey2Str(Key.F6, (ModifierKeys.Alt | ModifierKeys.Control | ModifierKeys.Shift)));
         }
 
         [TestMethod]
-        public void TestParseHotKeyFromScreen()
+        public void TestStr2HotKey()
         {
-            Assert.IsTrue(HotKeys.ParseHotKeyFromScreen("Ctrl + A").Equals(new HotKey(Key.A, ModifierKeys.Control)));
-            Assert.IsTrue(HotKeys.ParseHotKeyFromScreen("Ctrl + Alt + A").Equals(new HotKey(Key.A, (ModifierKeys.Control | ModifierKeys.Alt))));
-            Assert.IsTrue(HotKeys.ParseHotKeyFromScreen("Ctrl + Shift + A").Equals(new HotKey(Key.A, (ModifierKeys.Control | ModifierKeys.Shift))));
-            Assert.IsTrue(HotKeys.ParseHotKeyFromScreen("Ctrl + Shift + Alt + A").Equals(new HotKey(Key.A, (ModifierKeys.Control | ModifierKeys.Alt| ModifierKeys.Shift))));
-            Assert.IsTrue(HotKeys.ParseHotKeyFromScreen("Ctrl + Alt + Shift + A").Equals(new HotKey(Key.A, (ModifierKeys.Control | ModifierKeys.Alt| ModifierKeys.Shift))));
-            // BUG
-            // HotKey testKey1 = HotKeys.ParseHotKeyFromScreen("Ctrl+Alt+Shift+A");
-            //Assert.IsTrue(testKey1 != null && testKey1.Equals(new HotKey(Key.A, (ModifierKeys.Control | ModifierKeys.Alt | ModifierKeys.Shift))));
-            //HotKey testKey2 = HotKeys.ParseHotKeyFromScreen("Ctrl+Alt+Shift+A");
-            //Assert.IsFalse(testKey2 != null && testKey2.Equals(new HotKey(Key.A, (ModifierKeys.Control | ModifierKeys.Alt | ModifierKeys.Shift))));
-        }
-
-        [TestMethod]
-        public void TestHotKey2str()
-        {
-            Assert.IsTrue(HotKeys.HotKey2str( Key.A, ModifierKeys.Control ) == "44|2");
-            Assert.IsTrue(HotKeys.HotKey2str( Key.A, (ModifierKeys.Control | ModifierKeys.Alt)) == "44|3");
+            Assert.IsTrue(HotKeys.Str2HotKey("Ctrl+A").Equals(new HotKey(Key.A, ModifierKeys.Control)));
+            Assert.IsTrue(HotKeys.Str2HotKey("Ctrl+Alt+A").Equals(new HotKey(Key.A, (ModifierKeys.Control | ModifierKeys.Alt))));
+            Assert.IsTrue(HotKeys.Str2HotKey("Ctrl+Shift+A").Equals(new HotKey(Key.A, (ModifierKeys.Control | ModifierKeys.Shift))));
+            Assert.IsTrue(HotKeys.Str2HotKey("Ctrl+Alt+Shift+A").Equals(new HotKey(Key.A, (ModifierKeys.Control | ModifierKeys.Alt| ModifierKeys.Shift))));
+            HotKey testKey0 = HotKeys.Str2HotKey("Ctrl+Alt+Shift+A");
+            Assert.IsTrue(testKey0 != null && testKey0.Equals(new HotKey(Key.A, (ModifierKeys.Control | ModifierKeys.Alt | ModifierKeys.Shift))));
+            HotKey testKey1 = HotKeys.Str2HotKey("Ctrl+Alt+Shift+F2");
+            Assert.IsTrue(testKey1 != null && testKey1.Equals(new HotKey(Key.F2, (ModifierKeys.Control | ModifierKeys.Alt | ModifierKeys.Shift))));
+            HotKey testKey2 = HotKeys.Str2HotKey("Ctrl+Shift+Alt+D7");
+            Assert.IsTrue(testKey2 != null && testKey2.Equals(new HotKey(Key.D7, (ModifierKeys.Control | ModifierKeys.Alt | ModifierKeys.Shift))));
+            HotKey testKey3 = HotKeys.Str2HotKey("Ctrl+Shift+Alt+NumPad7");
+            Assert.IsTrue(testKey3 != null && testKey3.Equals(new HotKey(Key.NumPad7, (ModifierKeys.Control | ModifierKeys.Alt | ModifierKeys.Shift))));
         }
 
         [TestMethod]
