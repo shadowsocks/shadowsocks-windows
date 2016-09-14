@@ -24,13 +24,13 @@ namespace Shadowsocks.Encryption
         {
         }
 
-        private static Dictionary<string, Dictionary<string, int[]>> _ciphers = new Dictionary<string, Dictionary<string, int[]>> {
-            { "salsa20", new Dictionary<string, int[]> { { "salsa20", new int[] { 32, 8, CIPHER_SALSA20 } } } },
-            { "chacha20", new Dictionary<string, int[]> { { "chacha20", new int[] { 32, 8, CIPHER_CHACHA20 } } } },
-            { "chacha20-ietf", new Dictionary<string, int[]> { { "chacha20-ietf", new int[] { 32, 12, CIPHER_CHACHA20_IETF } } } }
+        private static Dictionary<string, EncryptorInfo> _ciphers = new Dictionary<string, EncryptorInfo> {
+            { "salsa20", new EncryptorInfo("salsa20", 32, 8, CIPHER_SALSA20) },
+            { "chacha20", new EncryptorInfo("chacha20", 32, 8, CIPHER_CHACHA20) },
+            { "chacha20-ietf", new EncryptorInfo("chacha20-ietf", 32, 12, CIPHER_CHACHA20_IETF) }
         };
 
-        protected override Dictionary<string, Dictionary<string, int[]>> getCiphers()
+        protected override Dictionary<string, EncryptorInfo> getCiphers()
         {
             return _ciphers;
         }
