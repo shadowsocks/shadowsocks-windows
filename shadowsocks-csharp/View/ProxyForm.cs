@@ -12,7 +12,7 @@ namespace Shadowsocks.View
         private ShadowsocksController controller;
 
         // this is a copy of configuration that we are working on
-        private Configuration _modifiedConfiguration;
+        private ProxyConfig _modifiedConfiguration;
 
         public ProxyForm(ShadowsocksController controller)
         {
@@ -46,8 +46,9 @@ namespace Shadowsocks.View
 
         private void LoadCurrentConfiguration()
         {
-            _modifiedConfiguration = controller.GetConfigurationCopy();
-
+            _modifiedConfiguration = controller.GetConfigurationCopy().proxy;
+            if(_modifiedConfiguration == null)
+                _modifiedConfiguration = new ProxyConfig();
             UseProxyCheckBox.Checked = _modifiedConfiguration.useProxy;
             ProxyServerTextBox.Text = _modifiedConfiguration.proxyServer;
             ProxyPortTextBox.Text = _modifiedConfiguration.proxyPort.ToString();
@@ -92,6 +93,16 @@ namespace Shadowsocks.View
         private void ProxyForm_FormClosed(object sender, FormClosedEventArgs e)
         {
             controller.ConfigChanged -= controller_ConfigChanged;
+            var conf = controller.GetConfigurationCopy().proxy;
+            if (conf == null)
+                conf = new ProxyConfig();
+            conf.useProxy = UseProxyCheckBox.Checked;
+            conf.proxyServer = ProxyServerTextBox.Text;
+            int tmpProxyPort;
+            int.TryParse(ProxyPortTextBox.Text, out tmpProxyPort);
+            conf.proxyPort = tmpProxyPort;
+            controller.SaveProxyConfig(conf);
+
         }
 
         private void UseProxyCheckBox_CheckedChanged(object sender, EventArgs e)
@@ -108,6 +119,8 @@ namespace Shadowsocks.View
             }
             else
             {
+                ProxyServerTextBox.Text = string.Empty;
+                ProxyPortTextBox.Text = string.Empty;
                 ProxyServerTextBox.Enabled = false;
                 ProxyPortTextBox.Enabled = false;
             }

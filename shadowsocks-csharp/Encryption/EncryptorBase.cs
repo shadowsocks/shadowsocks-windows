@@ -2,6 +2,22 @@
 
 namespace Shadowsocks.Encryption
 {
+    public struct EncryptorInfo
+    {
+        public string name;
+        public int key_size;
+        public int iv_size;
+        public int type;
+
+        public EncryptorInfo(string name, int key_size, int iv_size, int type)
+        {
+            this.name = name;
+            this.key_size = key_size;
+            this.iv_size = iv_size;
+            this.type = type;
+        }
+    }
+
     public abstract class EncryptorBase
         : IEncryptor
     {
