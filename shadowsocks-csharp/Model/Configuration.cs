@@ -26,9 +26,7 @@ namespace Shadowsocks.Model
         public bool autoCheckUpdate;
         public bool isVerboseLogging;
         public LogViewerConfig logViewer;
-        public bool useProxy;
-        public string proxyServer;
-        public int proxyPort;
+        public ProxyConfig proxy;
 
         private static string CONFIG_FILE = "gui-config.json";
 

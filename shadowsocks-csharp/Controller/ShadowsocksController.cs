@@ -217,15 +217,15 @@ namespace Shadowsocks.Controller
 
         public void DisableProxy()
         {
-            _config.useProxy = false;
+            _config.proxy.useProxy = false;
             SaveConfig(_config);
         }
 
         public void EnableProxy(string proxy, int port)
         {
-            _config.useProxy = true;
-            _config.proxyServer = proxy;
-            _config.proxyPort = port;
+            _config.proxy.useProxy = true;
+            _config.proxy.proxyServer = proxy;
+            _config.proxy.proxyPort = port;
             SaveConfig(_config);
         }
 
@@ -353,6 +353,12 @@ namespace Shadowsocks.Controller
         public void SaveLogViewerConfig(LogViewerConfig newConfig)
         {
             _config.logViewer = newConfig;
+            Configuration.Save(_config);
+        }
+
+        public void SaveProxyConfig(ProxyConfig newConfig)
+        {
+            _config.proxy = newConfig;
             Configuration.Save(_config);
         }
 

@@ -412,10 +412,10 @@ namespace Shadowsocks.Controller
                 // Setting up proxy
                 IProxy remote;
                 EndPoint proxyEP;
-                if (_config.useProxy)
+                if (_config.proxy.useProxy)
                 {
                     remote = new Socks5Proxy();
-                    proxyEP = SocketUtil.GetEndPoint(_config.proxyServer, _config.proxyPort);
+                    proxyEP = SocketUtil.GetEndPoint(_config.proxy.proxyServer, _config.proxy.proxyPort);
                 }
                 else
                 {
