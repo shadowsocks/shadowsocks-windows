@@ -34,6 +34,7 @@ namespace Shadowsocks.View
 
         private void LoadConfiguration(HotkeyConfig config)
         {
+            // replace "+" with " + "
             txtSwitchSystemProxy.Text = config.SwitchSystemProxy;
             txtChangeToPac.Text = config.ChangeToPac;
             txtChangeToGlobal.Text = config.ChangeToGlobal;
@@ -169,6 +170,7 @@ namespace Shadowsocks.View
             HotkeyConfig config = _controller.GetConfigurationCopy().hotkey;
             if (config == null)
                 config = new HotkeyConfig();
+            // save config: replace " + " with "+"
             config.SwitchSystemProxy = txtSwitchSystemProxy.Text;
             config.ChangeToPac = txtChangeToPac.Text;
             config.ChangeToGlobal = txtChangeToGlobal.Text;
