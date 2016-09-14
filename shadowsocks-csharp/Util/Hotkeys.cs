@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Globalization;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -39,14 +40,10 @@ namespace Shadowsocks.Util
             if (keymap.TryGetValue(hotkey, out callback))
                 callback();
         }
-
+        
         public static bool IsExist( HotKey hotKey ) { return keymap.Any( v => v.Key.Equals( hotKey ) ); }
 
-        public static string HotKey2str( HotKey key ) {
-            var keyNum = ( int ) key.Key;
-            var modifierNum = ( int ) key.Modifiers;
-            return $"{keyNum}|{modifierNum}";
-        }
+        public static string HotKey2str( HotKey key ) { return HotKey2str( key.Key, key.Modifiers ); }
 
         public static string HotKey2str( Key key, ModifierKeys modifier ) {
             var keyNum = ( int ) key;
@@ -54,13 +51,33 @@ namespace Shadowsocks.Util
             return $"{keyNum}|{modifierNum}";
         }
 
-        public static HotKey ParseHotKey( string s ) {
+        public static HotKey ParseHotKeyFromConfig( string s ) {
             if (s.IsNullOrEmpty()) return null;
             string[] strings = s.Split( '|' );
             var key = (Key)int.Parse(strings[ 0 ]);
             var modifierCombination = (ModifierKeys)int.Parse(strings[ 1 ]);
             if ( ! ModifierKeysConverter.IsDefinedModifierKeys( modifierCombination ) ) return null;
             return new HotKey(key, modifierCombination);
+        }
+
+        public static HotKey ParseHotKeyFromScreen( string s ) {
+            try {
+                if ( s.IsNullOrEmpty() ) return null;
+                int offset = s.LastIndexOf( "+", StringComparison.OrdinalIgnoreCase );
+                if (offset <= 0) return null;
+                string modifierStr = s.Substring( 0, offset ).Trim();
+                string keyStr = s.Substring( offset + 1 ).Trim();
+
+                KeyConverter kc = new KeyConverter();
+                ModifierKeysConverter mkc = new ModifierKeysConverter();
+                Key key = ( Key ) kc.ConvertFrom( keyStr.ToUpper() );
+                ModifierKeys modifier = ( ModifierKeys ) mkc.ConvertFrom( modifierStr );
+
+                return new HotKey(key, modifier);
+            } catch ( NotSupportedException ) {
+                // converter exception
+                return null;
+            }
         }
 
         public static string DisplayHotKey( HotKey key ) { return DisplayHotKey( key.Key, key.Modifiers ); }
@@ -79,6 +96,10 @@ namespace Shadowsocks.Util
                 str += "Win + ";
             str += key.ToString();
             return str;
+        }
+
+        public static int Regist( HotKey key, HotKeyCallBackHandler callBack ) {
+            return Regist( key.Key, key.Modifiers, callBack );
         }
 
         public static int Regist(Key key, ModifierKeys modifiers, HotKeyCallBackHandler callBack)
@@ -118,5 +139,12 @@ namespace Shadowsocks.Util
         {
             _hotKeyManager.Unregister(key, modifiers);
         }
+
+        public static IEnumerable<TControl> GetChildControls<TControl>(this Control control) where TControl : Control
+        {
+            var children = (control.Controls != null) ? control.Controls.OfType<TControl>() : Enumerable.Empty<TControl>();
+            return children.SelectMany(c => GetChildControls<TControl>(c)).Concat(children);
+        }
+
     }
 }
