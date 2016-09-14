@@ -20,18 +20,18 @@ namespace Shadowsocks.Encryption
         {
         }
 
-        private static Dictionary<string, Dictionary<string, int[]>> _ciphers = new Dictionary<string, Dictionary<string, int[]>> {
-            { "aes-128-cfb", new Dictionary<string, int[]> { { "AES-128-CFB128", new int[] { 16, 16, CIPHER_AES } } } },
-            { "aes-192-cfb", new Dictionary<string, int[]> { { "AES-192-CFB128", new int[] { 24, 16, CIPHER_AES } } } },
-            { "aes-256-cfb", new Dictionary<string, int[]> { { "AES-256-CFB128", new int[] { 32, 16, CIPHER_AES } } } },
-            { "aes-128-ctr", new Dictionary<string, int[]> { { "AES-128-CTR", new int[] { 16, 16, CIPHER_AES } } } },
-            { "aes-192-ctr", new Dictionary<string, int[]> { { "AES-192-CTR", new int[] { 24, 16, CIPHER_AES } } } },
-            { "aes-256-ctr", new Dictionary<string, int[]> { { "AES-256-CTR", new int[] { 32, 16, CIPHER_AES } } } },
-            { "bf-cfb", new Dictionary<string, int[]> { { "BLOWFISH-CFB64", new int[] { 16, 8, CIPHER_BLOWFISH } } } },
-            { "camellia-128-cfb", new Dictionary<string, int[]> { { "CAMELLIA-128-CFB128", new int[] { 16, 16, CIPHER_CAMELLIA } } } },
-            { "camellia-192-cfb", new Dictionary<string, int[]> { { "CAMELLIA-192-CFB128", new int[] { 24, 16, CIPHER_CAMELLIA } } } },
-            { "camellia-256-cfb", new Dictionary<string, int[]> { { "CAMELLIA-256-CFB128", new int[] { 32, 16, CIPHER_CAMELLIA } } } },
-            { "rc4-md5", new Dictionary<string, int[]> { { "ARC4-128", new int[] { 16, 16, CIPHER_RC4 } } } }
+        private static Dictionary<string, EncryptorInfo> _ciphers = new Dictionary<string, EncryptorInfo> {
+            { "aes-128-cfb", new EncryptorInfo("AES-128-CFB128", 16, 16, CIPHER_AES) },
+            { "aes-192-cfb", new EncryptorInfo("AES-192-CFB128", 24, 16, CIPHER_AES) },
+            { "aes-256-cfb", new EncryptorInfo("AES-256-CFB128", 32, 16, CIPHER_AES) },
+            { "aes-128-ctr", new EncryptorInfo("AES-128-CTR", 16, 16, CIPHER_AES) },
+            { "aes-192-ctr", new EncryptorInfo("AES-192-CTR", 24, 16, CIPHER_AES) },
+            { "aes-256-ctr", new EncryptorInfo("AES-256-CTR", 32, 16, CIPHER_AES) },
+            { "bf-cfb", new EncryptorInfo("BLOWFISH-CFB64", 16, 8, CIPHER_BLOWFISH) },
+            { "camellia-128-cfb", new EncryptorInfo("CAMELLIA-128-CFB128", 16, 16, CIPHER_CAMELLIA) },
+            { "camellia-192-cfb", new EncryptorInfo("CAMELLIA-192-CFB128", 24, 16, CIPHER_CAMELLIA) },
+            { "camellia-256-cfb", new EncryptorInfo("CAMELLIA-256-CFB128", 32, 16, CIPHER_CAMELLIA) },
+            { "rc4-md5", new EncryptorInfo("ARC4-128", 16, 16, CIPHER_RC4) }
         };
 
         public static List<string> SupportedCiphers()
@@ -39,7 +39,7 @@ namespace Shadowsocks.Encryption
             return new List<string>(_ciphers.Keys);
         }
 
-        protected override Dictionary<string, Dictionary<string, int[]>> getCiphers()
+        protected override Dictionary<string, EncryptorInfo> getCiphers()
         {
             return _ciphers;
         }
