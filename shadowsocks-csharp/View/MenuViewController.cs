@@ -49,9 +49,11 @@ namespace Shadowsocks.View
         private MenuItem editOnlinePACItem;
         private MenuItem autoCheckUpdatesToggleItem;
         private MenuItem proxyItem;
+        private MenuItem hotKeyItem;
         private MenuItem VerboseLoggingToggleItem;
         private ConfigForm configForm;
         private ProxyForm proxyForm;
+        private HotkeySettingsForm hotkeySettingsForm;
         private List<LogForm> logForms = new List<LogForm>();
         private bool logFormsVisible = false;
         private string _urlToOpen;
@@ -271,6 +273,7 @@ namespace Shadowsocks.View
                 new MenuItem("-"),
                 CreateMenuItem("Show Logs...", new EventHandler(this.ShowLogItem_Click)),
                 this.VerboseLoggingToggleItem = CreateMenuItem( "Verbose Logging", new EventHandler(this.VerboseLoggingToggleItem_Click) ),
+                this.hotKeyItem = CreateMenuItem("Edit Hotkeys...", new EventHandler(this.hotKeyItem_Click)),
                 CreateMenuGroup("Updates...", new MenuItem[] {
                     CreateMenuItem("Check for Updates...", new EventHandler(this.checkUpdatesItem_Click)),
                     new MenuItem("-"),
@@ -459,6 +462,21 @@ namespace Shadowsocks.View
             }
         }
 
+        private void ShowHotKeySettingsForm()
+        {
+            if (hotkeySettingsForm != null)
+            {
+                hotkeySettingsForm.Activate();
+            }
+            else
+            {
+                hotkeySettingsForm = new HotkeySettingsForm(controller);
+                hotkeySettingsForm.Show();
+                hotkeySettingsForm.Activate();
+                hotkeySettingsForm.FormClosed += hotkeySettingsForm_FormClosed;
+            }
+        }
+
         private void ShowLogForms()
         {
             if (logForms.Count == 0)
@@ -501,6 +519,12 @@ namespace Shadowsocks.View
         void proxyForm_FormClosed(object sender, FormClosedEventArgs e)
         {
             proxyForm = null;
+            Utils.ReleaseMemory(true);
+        }
+
+        void hotkeySettingsForm_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            hotkeySettingsForm = null;
             Utils.ReleaseMemory(true);
         }
 
@@ -819,6 +843,11 @@ namespace Shadowsocks.View
         private void proxyItem_Click(object sender, EventArgs e)
         {
             ShowProxyForm();
+        }
+
+        private void hotKeyItem_Click(object sender, EventArgs e)
+        {
+            ShowHotKeySettingsForm();
         }
     }
 }

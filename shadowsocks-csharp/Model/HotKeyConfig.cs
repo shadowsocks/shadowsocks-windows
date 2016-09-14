@@ -15,6 +15,16 @@ namespace Shadowsocks.Model
         public string ChangeToGlobal;
         public string SwitchAllowLan;
         public string ShowLogs;
-        public bool AllowSwitchServer = false;
+        public bool AllowSwitchServer;
+
+        public HotkeyConfig()
+        {
+            SwitchSystemProxy = "";
+            ChangeToPac = "";
+            ChangeToGlobal = "";
+            SwitchAllowLan = "";
+            ShowLogs = "";
+            AllowSwitchServer = false;
+        }
     }
 }

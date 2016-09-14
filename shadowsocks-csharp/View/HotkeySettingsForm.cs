@@ -11,32 +11,52 @@ namespace Shadowsocks.View
 {
     public partial class HotkeySettingsForm : Form
     {
-        private HotkeyConfig _conf;
+        private ShadowsocksController _controller;
+
+        // this is a copy of configuration that we are working on
+        private HotkeyConfig _modifiedConfig;
+
         private StringBuilder _sb = new StringBuilder();
 
         // TODO: not finished
-        public HotkeySettingsForm(HotkeyConfig conf)
+        public HotkeySettingsForm(ShadowsocksController controller)
         {
             InitializeComponent();
-            _conf = conf;
-            Icon = Icon.FromHandle(Resources.ssw128.GetHicon());
+
+            UpdateTexts();
+            this.Icon = Icon.FromHandle(Resources.ssw128.GetHicon());
+
+            _controller = controller;
+            _controller.ConfigChanged += controller_ConfigChanged;
+
+            LoadCurrentConfiguration();
         }
 
-        private void HotkeySetting_Load(object sender, EventArgs e)
+        private void LoadConfiguration(HotkeyConfig config)
         {
-            I18n();
-
-            txtSwitchSystemProxy.Text = _conf.SwitchSystemProxy;
-            txtChangeToPac.Text = _conf.ChangeToPac;
-            txtChangeToGlobal.Text = _conf.ChangeToGlobal;
-            txtSwitchAllowLan.Text = _conf.SwitchAllowLan;
-            txtShowLogs.Text = _conf.ShowLogs;
-            ckbAllowSwitchServer.Checked = _conf.AllowSwitchServer;
+            txtSwitchSystemProxy.Text = config.SwitchSystemProxy;
+            txtChangeToPac.Text = config.ChangeToPac;
+            txtChangeToGlobal.Text = config.ChangeToGlobal;
+            txtSwitchAllowLan.Text = config.SwitchAllowLan;
+            txtShowLogs.Text = config.ShowLogs;
+            ckbAllowSwitchServer.Checked = config.AllowSwitchServer;
         }
 
-        private void I18n()
+        private void controller_ConfigChanged(object sender, EventArgs e)
         {
-            Text = I18N.GetString(Text);
+            LoadCurrentConfiguration();
+        }
+
+        private void LoadCurrentConfiguration()
+        {
+            _modifiedConfig = _controller.GetConfigurationCopy().hotkey;
+            if (_modifiedConfig == null)
+                _modifiedConfig = new HotkeyConfig();
+            LoadConfiguration(_modifiedConfig);
+        }
+
+        private void UpdateTexts()
+        {
             lblSwitchSystemProxy.Text = I18N.GetString(lblSwitchSystemProxy.Text);
             lblChangeToPac.Text = I18N.GetString(lblChangeToPac.Text);
             lblChangeToGlobal.Text = I18N.GetString(lblChangeToGlobal.Text);
@@ -45,6 +65,7 @@ namespace Shadowsocks.View
             ckbAllowSwitchServer.Text = I18N.GetString(ckbAllowSwitchServer.Text);
             ok.Text = I18N.GetString(ok.Text);
             cancel.Text = I18N.GetString(cancel.Text);
+            this.Text = I18N.GetString(Text);
         }
 
 
@@ -141,6 +162,20 @@ namespace Shadowsocks.View
             conf.ShowLogs = txtShowLogs.Text;
             conf.AllowSwitchServer = ckbAllowSwitchServer.Checked;
             //controller.SaveHotkeyConfig( conf );
+        }
+
+        private void HotkeySettingsForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            HotkeyConfig config = _controller.GetConfigurationCopy().hotkey;
+            if (config == null)
+                config = new HotkeyConfig();
+            config.SwitchSystemProxy = txtSwitchSystemProxy.Text;
+            config.ChangeToPac = txtChangeToPac.Text;
+            config.ChangeToGlobal = txtChangeToGlobal.Text;
+            config.SwitchAllowLan = txtSwitchAllowLan.Text;
+            config.ShowLogs = txtShowLogs.Text;
+            config.AllowSwitchServer = ckbAllowSwitchServer.Checked;
+            _controller.SaveHotKeyConfig(config);
         }
     }
 }
