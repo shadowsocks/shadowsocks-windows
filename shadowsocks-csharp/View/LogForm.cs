@@ -162,9 +162,11 @@ namespace Shadowsocks.View
                 }
 
                 string line = "";
+                string append_text = "";
                 while ((line = reader.ReadLine()) != null)
-                    LogMessageTextBox.AppendText(line + Environment.NewLine);
+                    append_text += line + Environment.NewLine;
 
+                LogMessageTextBox.AppendText(append_text);
                 LogMessageTextBox.ScrollToCaret();
 
                 lastOffset = reader.BaseStream.Position;
@@ -182,14 +184,16 @@ namespace Shadowsocks.View
 
                     string line = "";
                     bool changed = false;
+                    string append_text = "";
                     while ((line = reader.ReadLine()) != null)
                     {
                         changed = true;
-                        LogMessageTextBox.AppendText(line + Environment.NewLine);
+                        append_text += line + Environment.NewLine;
                     }
 
                     if (changed)
                     {
+                        LogMessageTextBox.AppendText(append_text);
                         LogMessageTextBox.ScrollToCaret();
                     }
 
