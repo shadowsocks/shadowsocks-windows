@@ -13,6 +13,18 @@ using Shadowsocks.Util;
 
 namespace Shadowsocks.View
 {
+    struct TrafficInfo
+    {
+        public long inbound;
+        public long outbound;
+
+        public TrafficInfo(long inbound, long outbound)
+        {
+            this.inbound = inbound;
+            this.outbound = outbound;
+        }
+    }
+
     public partial class LogForm : Form
     {
         long lastOffset;
@@ -23,7 +35,7 @@ namespace Shadowsocks.View
 
         #region chart
         long lastMaxSpeed;
-        public ShadowsocksController.QueueLast<Tuple<long, long>> traffic = new ShadowsocksController.QueueLast<Tuple<long, long>>();
+        ShadowsocksController.QueueLast<TrafficInfo> traffic = new ShadowsocksController.QueueLast<TrafficInfo>();
         #endregion
 
         public LogForm(ShadowsocksController controller, string filename)
@@ -59,7 +71,7 @@ namespace Shadowsocks.View
             List<float> outboundPoints = new List<float>();
             TextAnnotation inboundAnnotation = new TextAnnotation();
             TextAnnotation outboundAnnotation = new TextAnnotation();
-            Tuple<float, string, long> bandwidthScale;
+            BandwidthScaleInfo bandwidthScale;
             const long minScale = 50;
             long maxSpeed = 0;
             long lastInbound, lastOutbound;
@@ -70,12 +82,12 @@ namespace Shadowsocks.View
                     return;
                 foreach (var trafficPerSecond in traffic)
                 {
-                    inboundPoints.Add(trafficPerSecond.Item1);
-                    outboundPoints.Add(trafficPerSecond.Item2);
-                    maxSpeed = Math.Max(maxSpeed, Math.Max(trafficPerSecond.Item1, trafficPerSecond.Item2));
+                    inboundPoints.Add(trafficPerSecond.inbound);
+                    outboundPoints.Add(trafficPerSecond.outbound);
+                    maxSpeed = Math.Max(maxSpeed, Math.Max(trafficPerSecond.inbound, trafficPerSecond.outbound));
                 }
-                lastInbound = traffic.Last().Item1;
-                lastOutbound = traffic.Last().Item2;
+                lastInbound = traffic.Last().inbound;
+                lastOutbound = traffic.Last().outbound;
             }
 
             if (maxSpeed > 0)
@@ -92,15 +104,15 @@ namespace Shadowsocks.View
             bandwidthScale = Utils.GetBandwidthScale(maxSpeed);
 
             //rescale the original data points, since it is List<float>, .ForEach does not work
-            inboundPoints = inboundPoints.Select(p => p / bandwidthScale.Item3).ToList();
-            outboundPoints = outboundPoints.Select(p => p / bandwidthScale.Item3).ToList();
+            inboundPoints = inboundPoints.Select(p => p / bandwidthScale.unit).ToList();
+            outboundPoints = outboundPoints.Select(p => p / bandwidthScale.unit).ToList();
 
             if (trafficChart.IsHandleCreated)
             {
                 trafficChart.Series["Inbound"].Points.DataBindY(inboundPoints);
                 trafficChart.Series["Outbound"].Points.DataBindY(outboundPoints);
-                trafficChart.ChartAreas[0].AxisY.LabelStyle.Format = "{0:0.##} " + bandwidthScale.Item2;
-                trafficChart.ChartAreas[0].AxisY.Maximum = bandwidthScale.Item1;
+                trafficChart.ChartAreas[0].AxisY.LabelStyle.Format = "{0:0.##} " + bandwidthScale.unit_name;
+                trafficChart.ChartAreas[0].AxisY.Maximum = bandwidthScale.value;
                 inboundAnnotation.AnchorDataPoint = trafficChart.Series["Inbound"].Points.Last();
                 inboundAnnotation.Text = Utils.FormatBandwidth(lastInbound);
                 outboundAnnotation.AnchorDataPoint = trafficChart.Series["Outbound"].Points.Last();
@@ -115,10 +127,10 @@ namespace Shadowsocks.View
         {
             lock (this)
             {
-                traffic = new ShadowsocksController.QueueLast<Tuple<long, long>>();
+                traffic = new ShadowsocksController.QueueLast<TrafficInfo>();
                 foreach (var trafficPerSecond in controller.traffic)
                 {
-                    traffic.Enqueue(new Tuple<long, long>(trafficPerSecond.inboundIncreasement, trafficPerSecond.outboundIncreasement));
+                    traffic.Enqueue(new TrafficInfo(trafficPerSecond.inboundIncreasement, trafficPerSecond.outboundIncreasement));
                 }
             }
         }
