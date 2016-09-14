@@ -37,6 +37,7 @@ namespace Shadowsocks
                 SystemEvents.PowerModeChanged += SystemEvents_PowerModeChanged;
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
+                Application.ApplicationExit += (sender, args) => HotKeys.Destroy();
 
                 if (!mutex.WaitOne(0, false))
                 {
@@ -63,6 +64,7 @@ namespace Shadowsocks
 #endif
                 controller = new ShadowsocksController();
                 MenuViewController viewController = new MenuViewController(controller);
+                HotKeys.Init();
                 controller.Start();
                 Application.Run();
             }

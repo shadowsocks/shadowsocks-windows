@@ -29,6 +29,7 @@ namespace Shadowsocks.Model
         public bool useProxy;
         public string proxyServer;
         public int proxyPort;
+        public HotkeyConfig hotkey;
 
         private static string CONFIG_FILE = "gui-config.json";
 

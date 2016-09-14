@@ -27,6 +27,7 @@ Verbose Logging=详细记录日志
 Updates...=更新...
 Check for Updates...=检查更新
 Check for Updates at Startup=启动时检查更新
+Edit Hotkeys...=编辑快捷键...
 About...=关于...
 Quit=退出
 Edit Servers=编辑服务器
@@ -83,6 +84,10 @@ QRCode=二维码
 Edit Online PAC URL=编辑在线 PAC 网址
 Edit Online PAC URL...=编辑在线 PAC 网址...
 Please input PAC Url=请输入 PAC 网址
+
+# HotkeySettings Form
+
+Allow Change Server Use Ctrl+Alt+Shift+Number=允许使用 Ctrl+Alt+Shift+数字键 切换服务器
 
 # Messages
 
