@@ -35,19 +35,13 @@ namespace Shadowsocks.View
             Icon = Icon.FromHandle(Resources.ssw128.GetHicon());
 
             LogViewerConfig config = controller.GetConfigurationCopy().logViewer;
-            if (config == null)
-            {
-                config = new LogViewerConfig();
-            }
-            else
-            {
-                topMostTrigger = config.topMost;
-                wrapTextTrigger = config.wrapText;
-                toolbarTrigger = config.toolbarShown;
-                LogMessageTextBox.BackColor = config.GetBackgroundColor();
-                LogMessageTextBox.ForeColor = config.GetTextColor();
-                LogMessageTextBox.Font = config.GetFont();
-            }
+
+            topMostTrigger = config.topMost;
+            wrapTextTrigger = config.wrapText;
+            toolbarTrigger = config.toolbarShown;
+            LogMessageTextBox.BackColor = config.GetBackgroundColor();
+            LogMessageTextBox.ForeColor = config.GetTextColor();
+            LogMessageTextBox.Font = config.GetFont();
 
             controller.TrafficChanged += controller_TrafficChanged;
 
@@ -219,8 +213,7 @@ namespace Shadowsocks.View
             timer.Start();
 
             LogViewerConfig config = controller.GetConfigurationCopy().logViewer;
-            if (config == null)
-                config = new LogViewerConfig();
+
             Height = config.height;
             Width = config.width;
             Top = config.GetBestTop();
@@ -246,8 +239,7 @@ namespace Shadowsocks.View
             timer.Stop();
             controller.TrafficChanged -= controller_TrafficChanged;
             LogViewerConfig config = controller.GetConfigurationCopy().logViewer;
-            if (config == null)
-                config = new LogViewerConfig();
+
             config.topMost = topMostTrigger;
             config.wrapText = wrapTextTrigger;
             config.toolbarShown = toolbarTrigger;
