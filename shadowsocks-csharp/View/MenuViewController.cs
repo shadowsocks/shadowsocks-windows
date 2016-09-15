@@ -844,5 +844,10 @@ namespace Shadowsocks.View
         {
             ShowLogForm();
         }
+
+        public void ShowLogForm_HotKey()
+        {
+            ShowLogForm();
+        }
     }
 }
