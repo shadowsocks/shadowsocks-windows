@@ -47,8 +47,11 @@ namespace Shadowsocks.View
         private void LoadCurrentConfiguration()
         {
             _modifiedConfiguration = controller.GetConfigurationCopy().proxy;
-            if(_modifiedConfiguration == null)
+            if (_modifiedConfiguration == null)
+            {
                 _modifiedConfiguration = new ProxyConfig();
+                controller.SaveProxyConfig(_modifiedConfiguration);
+            }
             UseProxyCheckBox.Checked = _modifiedConfiguration.useProxy;
             ProxyServerTextBox.Text = _modifiedConfiguration.proxyServer;
             ProxyPortTextBox.Text = _modifiedConfiguration.proxyPort.ToString();
@@ -82,6 +85,14 @@ namespace Shadowsocks.View
             {
                 controller.DisableProxy();
             }
+
+            _modifiedConfiguration.useProxy = UseProxyCheckBox.Checked;
+            _modifiedConfiguration.proxyServer = ProxyServerTextBox.Text;
+            var tmpProxyPort = 0;
+            int.TryParse(ProxyPortTextBox.Text, out tmpProxyPort);
+            _modifiedConfiguration.proxyPort = tmpProxyPort;
+            controller.SaveProxyConfig(_modifiedConfiguration);
+
             this.Close();
         }
 
@@ -93,16 +104,6 @@ namespace Shadowsocks.View
         private void ProxyForm_FormClosed(object sender, FormClosedEventArgs e)
         {
             controller.ConfigChanged -= controller_ConfigChanged;
-            var conf = controller.GetConfigurationCopy().proxy;
-            if (conf == null)
-                conf = new ProxyConfig();
-            conf.useProxy = UseProxyCheckBox.Checked;
-            conf.proxyServer = ProxyServerTextBox.Text;
-            int tmpProxyPort;
-            int.TryParse(ProxyPortTextBox.Text, out tmpProxyPort);
-            conf.proxyPort = tmpProxyPort;
-            controller.SaveProxyConfig(conf);
-
         }
 
         private void UseProxyCheckBox_CheckedChanged(object sender, EventArgs e)
@@ -119,8 +120,8 @@ namespace Shadowsocks.View
             }
             else
             {
-                ProxyServerTextBox.Text = string.Empty;
-                ProxyPortTextBox.Text = string.Empty;
+                ProxyServerTextBox.Clear();
+                ProxyPortTextBox.Clear();
                 ProxyServerTextBox.Enabled = false;
                 ProxyPortTextBox.Enabled = false;
             }
