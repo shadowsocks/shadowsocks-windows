@@ -47,11 +47,6 @@ namespace Shadowsocks.View
         private void LoadCurrentConfiguration()
         {
             _modifiedConfiguration = controller.GetConfigurationCopy().proxy;
-            if (_modifiedConfiguration == null)
-            {
-                _modifiedConfiguration = new ProxyConfig();
-                controller.SaveProxyConfig(_modifiedConfiguration);
-            }
             UseProxyCheckBox.Checked = _modifiedConfiguration.useProxy;
             ProxyServerTextBox.Text = _modifiedConfiguration.proxyServer;
             ProxyPortTextBox.Text = _modifiedConfiguration.proxyPort.ToString();
