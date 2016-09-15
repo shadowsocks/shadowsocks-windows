@@ -33,7 +33,7 @@ namespace Shadowsocks.Util
             _hotKeyManager.Dispose();
         }
 
-        static void HotKeyManagerPressed(object sender, KeyPressedEventArgs e)
+        private static void HotKeyManagerPressed(object sender, KeyPressedEventArgs e)
         {
             var hotkey = e.HotKey;
             HotKeyCallBackHandler callback;
@@ -88,49 +88,61 @@ namespace Shadowsocks.Util
             }
         }
 
-        public static int Regist( HotKey key, HotKeyCallBackHandler callBack )
+        public static bool Regist( HotKey key, HotKeyCallBackHandler callBack )
         {
-            if (key == null || callBack == null) return -1;
-            return Regist( key.Key, key.Modifiers, callBack );
-        }
-
-        public static int Regist(Key key, ModifierKeys modifiers, HotKeyCallBackHandler callBack)
-        {
+            if (key == null)
+                throw new ArgumentNullException(nameof(key));
+            if (callBack == null)
+                throw new ArgumentNullException(nameof(callBack));
             try
             {
-                _hotKeyManager.Register(key, modifiers);
-                var hotkey = new HotKey(key, modifiers);
-                if (IsExist(hotkey))
-                {
-                    // already registered
-                    return -1;
-                }
-                keymap[hotkey] = callBack;
-                return 0;
+                _hotKeyManager.Register(key);
+                keymap[key] = callBack;
+                return true;
             }
             catch (ArgumentException)
             {
-                // already registered
-                // notify user to change key
-                return -1;
+                // already called this method with the specific hotkey
+                // return success silently
+                return true;
             }
-            catch (Win32Exception win32Exception)
+            catch (Win32Exception)
             {
-                // WinAPI error
-                Logging.LogUsefulException(win32Exception);
-                return -2;
+                // this hotkey already registered by other programs
+                // notify user to change key
+                return false;
+            }
+        }
+
+        public static bool Regist(Key key, ModifierKeys modifiers, HotKeyCallBackHandler callBack)
+        {
+            try
+            {
+                var hotkey = _hotKeyManager.Register(key, modifiers);
+                keymap[hotkey] = callBack;
+                return true;
+            }
+            catch (ArgumentException)
+            {
+                // already called this method with the specific hotkey
+                // return success silently
+                return true;
+            }
+            catch (Win32Exception)
+            {
+                // already registered by other programs
+                // notify user to change key
+                return false;
             }
         }
 
         public static void UnRegist(HotKey key)
         {
-            if (key == null) return;
-            UnRegist(key.Key, key.Modifiers);
-        }
-
-        public static void UnRegist(Key key, ModifierKeys modifiers)
-        {
-            _hotKeyManager.Unregister(key, modifiers);
+            if (key == null)
+                throw new ArgumentNullException(nameof(key));
+            _hotKeyManager.Unregister(key);
+            if(keymap.ContainsKey(key))
+                keymap.Remove(key);
         }
 
         public static IEnumerable<TControl> GetChildControls<TControl>(this Control control) where TControl : Control

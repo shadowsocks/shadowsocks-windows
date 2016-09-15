@@ -3,6 +3,7 @@ using Shadowsocks.Model;
 using Shadowsocks.Properties;
 using Shadowsocks.Util;
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Reflection;
@@ -13,6 +14,12 @@ namespace Shadowsocks.View
 {
     public partial class HotkeySettingsForm : Form
     {
+        /*
+         * XXX: The labelName, TextBoxName and callbackName
+         *      must follow this rule to make use of reflection
+         *
+         *      <BaseName><Control-Type-Name>
+         */
         private ShadowsocksController _controller;
 
         // this is a copy of configuration that we are working on
@@ -24,7 +31,7 @@ namespace Shadowsocks.View
         public HotkeySettingsForm(ShadowsocksController controller)
         {
             InitializeComponent();
-
+            SetupCallbackMap();
             UpdateTexts();
             this.Icon = Icon.FromHandle(Resources.ssw128.GetHicon());
 
@@ -34,14 +41,26 @@ namespace Shadowsocks.View
             LoadCurrentConfiguration();
         }
 
+        private void SetupCallbackMap()
+        {
+            cbMap["SwitchSystemProxy"] = SwitchSystemProxyCallback;
+            cbMap["ChangeToPac"] = ChangeToPacCallback;
+            cbMap["ChangeToGlobal"] = ChangeToGlobalCallback;
+            cbMap["SwitchAllowLan"] = SwitchAllowLanCallback;
+            cbMap["ShowLogs"] = ShowLogsCallback;
+            cbMap["ServerMoveUp"] = ServerMoveUpCallback;
+            cbMap["ServerMoveDown"] = ServerMoveDownCallback;
+        }
+
         private void LoadConfiguration(HotkeyConfig config)
         {
-            txtSwitchSystemProxy.Text = config.SwitchSystemProxy;
-            txtChangeToPac.Text = config.ChangeToPac;
-            txtChangeToGlobal.Text = config.ChangeToGlobal;
-            txtSwitchAllowLan.Text = config.SwitchAllowLan;
-            txtShowLogs.Text = config.ShowLogs;
-            ckbAllowSwitchServer.Checked = config.AllowSwitchServer;
+            SwitchSystemProxyTextBox.Text = config.SwitchSystemProxy;
+            ChangeToPacTextBox.Text = config.ChangeToPac;
+            ChangeToGlobalTextBox.Text = config.ChangeToGlobal;
+            SwitchAllowLanTextBox.Text = config.SwitchAllowLan;
+            ShowLogsTextBox.Text = config.ShowLogs;
+            ServerMoveUpTextBox.Text = config.ServerMoveUp;
+            ServerMoveDownTextBox.Text = config.ServerMoveDown;
         }
 
         private void controller_ConfigChanged(object sender, EventArgs e)
@@ -52,23 +71,20 @@ namespace Shadowsocks.View
         private void LoadCurrentConfiguration()
         {
             _modifiedConfig = _controller.GetConfigurationCopy().hotkey;
-            if (_modifiedConfig == null) {
-                _modifiedConfig = new HotkeyConfig();
-                _controller.SaveHotKeyConfig(_modifiedConfig);
-			}
             LoadConfiguration(_modifiedConfig);
         }
 
         private void UpdateTexts()
         {
-            lblSwitchSystemProxy.Text = I18N.GetString(lblSwitchSystemProxy.Text);
-            lblChangeToPac.Text = I18N.GetString(lblChangeToPac.Text);
-            lblChangeToGlobal.Text = I18N.GetString(lblChangeToGlobal.Text);
-            lblSwitchAllowLan.Text = I18N.GetString(lblSwitchAllowLan.Text);
-            lblShowLogs.Text = I18N.GetString(lblShowLogs.Text);
-            ckbAllowSwitchServer.Text = I18N.GetString(ckbAllowSwitchServer.Text);
-            ok.Text = I18N.GetString(ok.Text);
-            cancel.Text = I18N.GetString(cancel.Text);
+            SwitchSystemProxyLabel.Text = I18N.GetString(SwitchSystemProxyLabel.Text);
+            ChangeToPacLabel.Text = I18N.GetString(ChangeToPacLabel.Text);
+            ChangeToGlobalLabel.Text = I18N.GetString(ChangeToGlobalLabel.Text);
+            SwitchAllowLanLabel.Text = I18N.GetString(SwitchAllowLanLabel.Text);
+            ShowLogsLabel.Text = I18N.GetString(ShowLogsLabel.Text);
+            ServerMoveUpLabel.Text = I18N.GetString(ServerMoveUpLabel.Text);
+            ServerMoveDownLabel.Text = I18N.GetString(ServerMoveDownLabel.Text);
+            btnOK.Text = I18N.GetString(btnOK.Text);
+            btnCancel.Text = I18N.GetString(btnCancel.Text);
             this.Text = I18N.GetString(Text);
         }
 
@@ -121,21 +137,54 @@ namespace Shadowsocks.View
         /// </summary>
         private void HotkeyUp(object sender, KeyEventArgs e)
         {
+            // Don't parse and reg keys if BackSpace is pressed
+            if ((Keys)e.KeyValue == Keys.Back) return;
+
             TextBox tb = sender as TextBox;
             string content = tb.Text.TrimEnd();
             if (content.Length >= 1 && content[content.Length - 1] == '+')
             {
                 tb.Text = "";
             }
+
+            // try to register and show result
+            var pos = tb.Name.LastIndexOf("TextBox", StringComparison.OrdinalIgnoreCase);
+            var rawName = tb.Name.Substring(0, pos);
+            var labelName = rawName + "Label";
+            var callbackName = rawName + "Callback";
+            var hotkey = HotKeys.Str2HotKey(tb.Text);
+            if (hotkey == null)
+            {
+                MessageBox.Show($"Cannot parse hotkey {tb.Text}");
+                tb.Clear();
+                return;
+            }
+//            var callback = GetDelegateViaMethodName(this.GetType(), callbackName);
+//            if (callback == null)
+//            {
+//                MessageBox.Show($"No {callbackName}");
+//                return;
+//            }
+            
+            object label = GetFieldViaName(this.GetType(), labelName, this);
+            if (label == null)
+            {
+                MessageBox.Show($"No {labelName}");
+                return;
+            }
+            // TODO: dynamic create delegate
+            bool regResult = HotKeys.Regist(hotkey, cbMap[rawName]);
+            Label lb = label as Label;
+            lb.BackColor = regResult ? Color.Green : Color.Yellow;
         }
 
-        private void cancel_Click(object sender, EventArgs e)
+        private void CancelButton_Click(object sender, EventArgs e)
         {
             this.Close();
         }
 
 
-        private void ok_Click(object sender, EventArgs e)
+        private void OKButton_Click(object sender, EventArgs e)
         {
             if (!CanParseHotkey(this))
             {
@@ -147,17 +196,15 @@ namespace Shadowsocks.View
             // if already registered by other progs
             // notify to change
 
-            // if first run, no action is needed
-            // otherwise, try to register, if failed
-            // open this form and notify to change settings
-
-
             // use the corresponding label color to indicate
             // reg result.
             // Green: not occupied by others and success
             // Yellow: already reg by others and need action
             // Transparent without color: first run or empty config
 
+            // if first run, no action is needed
+            // otherwise, try to register, if failed
+            // open this form and notify to change settings
 
             // All check passed, saving
             SaveConfig();
@@ -172,40 +219,142 @@ namespace Shadowsocks.View
 
         private void SaveConfig()
         {
-            _modifiedConfig.SwitchSystemProxy = txtSwitchSystemProxy.Text;
-            _modifiedConfig.ChangeToPac = txtChangeToPac.Text;
-            _modifiedConfig.ChangeToGlobal = txtChangeToGlobal.Text;
-            _modifiedConfig.SwitchAllowLan = txtSwitchAllowLan.Text;
-            _modifiedConfig.ShowLogs = txtShowLogs.Text;
-            _modifiedConfig.AllowSwitchServer = ckbAllowSwitchServer.Checked;
-            _controller.SaveHotKeyConfig(_modifiedConfig);
+            _modifiedConfig.SwitchSystemProxy = SwitchSystemProxyTextBox.Text;
+            _modifiedConfig.ChangeToPac = ChangeToPacTextBox.Text;
+            _modifiedConfig.ChangeToGlobal = ChangeToGlobalTextBox.Text;
+            _modifiedConfig.SwitchAllowLan = SwitchAllowLanTextBox.Text;
+            _modifiedConfig.ShowLogs = ShowLogsTextBox.Text;
+            _modifiedConfig.ServerMoveUp = ServerMoveUpTextBox.Text;
+            _modifiedConfig.ServerMoveDown = ServerMoveDownTextBox.Text;
+            _controller.SaveHotkeyConfig(_modifiedConfig);
         }
 
-        // callbacks to invoke methods in controller
+        #region Callbacks
 
+        private Dictionary<string, HotKeys.HotKeyCallBackHandler> cbMap = new Dictionary<string, HotKeys.HotKeyCallBackHandler>();
+        
         private void SwitchSystemProxyCallback()
         {
-            
+            var status = _controller.GetConfigurationCopy().enabled;
+            _controller.ToggleEnable(!status);
         }
 
         private void ChangeToPacCallback()
         {
-            
+            _controller.ToggleGlobal(false);
         }
 
         private void ChangeToGlobalCallback()
         {
-            
+            _controller.ToggleGlobal(true);
         }
 
         private void SwitchAllowLanCallback()
         {
-            
+            var status = _controller.GetConfigurationCopy().shareOverLan;
+            _controller.ToggleShareOverLAN(!status);
         }
 
         private void ShowLogsCallback()
         {
-            
+            // must use the current MenuViewController
+            // thus I choose Reflection
+            Assembly ass = Assembly.GetExecutingAssembly();
+            FieldInfo fi = ass.GetType("Shadowsocks.Program")
+                .GetField("_viewController",
+                BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.IgnoreCase);
+            // To retrieve the value of a static field, pass null here
+            var mvc = fi.GetValue(null) as MenuViewController;
+            mvc.ShowLogForm_HotKey();
+        }
+
+        private void ServerMoveUpCallback()
+        {
+            int currIndex;
+            int serverCount;
+            GetCurrServerInfo(out currIndex, out serverCount);
+            if (currIndex - 1 < 0)
+            {
+                // revert to last server
+                currIndex = serverCount - 1;
+            }
+            else
+            {
+                currIndex -= 1;
+            }
+            _controller.SelectServerIndex(currIndex);
+        }
+
+        private void ServerMoveDownCallback()
+        {
+            int currIndex;
+            int serverCount;
+            GetCurrServerInfo(out currIndex, out serverCount);
+            if (currIndex + 1 == serverCount)
+            {
+                // revert to first server
+                currIndex = 0;
+            }
+            else
+            {
+                currIndex += 1;
+            }
+            _controller.SelectServerIndex(currIndex);
+        }
+
+        private void GetCurrServerInfo(out int currIndex, out int serverCount)
+        {
+            var currConfig = _controller.GetCurrentConfiguration();
+            currIndex = currConfig.index;
+            serverCount = currConfig.configs.Count;
+        }
+
+        #endregion
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="type">from which type</param>
+        /// <param name="name">field name</param>
+        /// <param name="obj">pass null if static field</param>
+        /// <returns></returns>
+        private object GetFieldViaName(Type type, string name, object obj)
+        {
+            // In general, TextBoxes and Labels are private
+            FieldInfo o = type.GetField(name,
+                BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.IgnoreCase | BindingFlags.Static);
+            return o == null ? null : o.GetValue(obj);
+        }
+
+        private object GetDelegateViaMethodName(Type type, string methodname)
+        {
+            // In general, TextBoxes and Labels are private
+            // TODO
+            MethodInfo dynMethod = type.GetMethod(methodname,
+                BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.IgnoreCase);
+
+
+            return null;
+        }
+
+        private void TextBox_TextChanged(object sender, EventArgs e)
+        {
+            TextBox tb = sender as TextBox;
+            string content = tb.Text.Trim();
+            if (!content.IsNullOrEmpty()) return;
+
+            // reset the corresponding label color
+            var pos = tb.Name.LastIndexOf("TextBox", StringComparison.OrdinalIgnoreCase);
+            var rawName = tb.Name.Substring(0, pos);
+            var labelName = rawName + "Label";
+            object label = GetFieldViaName(this.GetType(), labelName, this);
+            if (label == null)
+            {
+                MessageBox.Show($"No {labelName}");
+                return;
+            }
+            Label lb = label as Label;
+            lb.BackColor = Color.Empty;
         }
     }
 }

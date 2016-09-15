@@ -16,7 +16,8 @@ namespace Shadowsocks.Model
         public string ChangeToGlobal;
         public string SwitchAllowLan;
         public string ShowLogs;
-        public bool AllowSwitchServer;
+        public string ServerMoveUp;
+        public string ServerMoveDown;
 
         public HotkeyConfig()
         {
@@ -25,7 +26,8 @@ namespace Shadowsocks.Model
             ChangeToGlobal = "";
             SwitchAllowLan = "";
             ShowLogs = "";
-            AllowSwitchServer = false;
+            ServerMoveUp = "";
+            ServerMoveDown = "";
         }
     }
 }
