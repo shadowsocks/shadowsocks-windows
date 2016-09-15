@@ -52,8 +52,7 @@ namespace Shadowsocks.View
         private MenuItem VerboseLoggingToggleItem;
         private ConfigForm configForm;
         private ProxyForm proxyForm;
-        private List<LogForm> logForms = new List<LogForm>();
-        private bool logFormsVisible = false;
+        private LogForm logForm;
         private string _urlToOpen;
 
         public MenuViewController(ShadowsocksController controller)
@@ -133,6 +132,8 @@ namespace Shadowsocks.View
             MessageBox.Show(e.GetException().ToString(), String.Format(I18N.GetString("Shadowsocks Error: {0}"), e.GetException().Message));
         }
 
+        #region Tray Icon
+
         private void UpdateTrayIcon()
         {
             int dpi;
@@ -177,10 +178,10 @@ namespace Shadowsocks.View
             }
             // we want to show more details but notify icon title is limited to 63 characters
             string text = I18N.GetString("Shadowsocks") + " " + UpdateChecker.Version + "\n" +
-                (enabled ?
-                    I18N.GetString("System Proxy On: ") + (global ? I18N.GetString("Global") : I18N.GetString("PAC")) :
-                    String.Format(I18N.GetString("Running: Port {0}"), config.localPort))  // this feedback is very important because they need to know Shadowsocks is running
-                + "\n" + serverInfo;
+                          (enabled ?
+                              I18N.GetString("System Proxy On: ") + (global ? I18N.GetString("Global") : I18N.GetString("PAC")) :
+                              String.Format(I18N.GetString("Running: Port {0}"), config.localPort))  // this feedback is very important because they need to know Shadowsocks is running
+                          + "\n" + serverInfo;
             _notifyIcon.Text = text.Substring(0, Math.Min(63, text.Length));
         }
 
@@ -201,7 +202,7 @@ namespace Shadowsocks.View
                         else if (global)
                         {
                             Color flyBlue = Color.FromArgb(25, 125, 191);
-                            // Muliply with flyBlue
+                            // Multiply with flyBlue
                             int red   = color.R * flyBlue.R / 255;
                             int green = color.G * flyBlue.G / 255; 
                             int blue  = color.B * flyBlue.B / 255;
@@ -229,6 +230,10 @@ namespace Shadowsocks.View
             canvas.Save();
             return bitmap;
         }
+
+        #endregion
+
+        #region MenuItems and MenuGroups
 
         private MenuItem CreateMenuItem(string text, EventHandler click)
         {
@@ -281,6 +286,8 @@ namespace Shadowsocks.View
                 CreateMenuItem("Quit", new EventHandler(this.Quit_Click))
             });
         }
+
+        #endregion
 
         private void controller_ConfigChanged(object sender, EventArgs e)
         {
@@ -406,7 +413,7 @@ namespace Shadowsocks.View
                 i++;
             }
 
-            // user want a seperator item between strategy and servers menugroup
+            // user wants a seperator item between strategy and servers menugroup
             items.Add( i++, new MenuItem("-") );
 
             int strategyCount = i;
@@ -459,31 +466,25 @@ namespace Shadowsocks.View
             }
         }
 
-        private void ShowLogForms()
+        private void ShowLogForm()
         {
-            if (logForms.Count == 0)
+            if (logForm != null)
             {
-                LogForm f = new LogForm(controller, Logging.LogFilePath);
-                f.Show();
-                f.Activate();
-                f.FormClosed += logForm_FormClosed;
-
-                logForms.Add(f);
-                logFormsVisible = true;
+                logForm.Activate();
             }
             else
             {
-                logFormsVisible = !logFormsVisible;
-                foreach (LogForm f in logForms)
-                {
-                    f.Visible = logFormsVisible;
-                }
+                logForm = new LogForm(controller, Logging.LogFilePath);
+                logForm.Show();
+                logForm.Activate();
+                logForm.FormClosed += logForm_FormClosed;
             }
         }
 
         void logForm_FormClosed(object sender, FormClosedEventArgs e)
         {
-            logForms.Remove((LogForm)sender);
+            logForm = null;
+            Utils.ReleaseMemory(true);
         }
 
         void configForm_FormClosed(object sender, FormClosedEventArgs e)
@@ -519,11 +520,9 @@ namespace Shadowsocks.View
         private void CheckUpdateForFirstRun()
         {
             Configuration config = controller.GetConfigurationCopy();
-            if (!config.isDefault)
-            {
-                _isStartupChecking = true;
-                updateChecker.CheckUpdate(config, 3000);
-            }
+            if (config.isDefault) return;
+            _isStartupChecking = true;
+            updateChecker.CheckUpdate(config, 3000);
         }
 
         private void ShowFirstTimeBalloon()
@@ -547,7 +546,7 @@ namespace Shadowsocks.View
             }
             else if (e.Button == MouseButtons.Middle)
             {
-                ShowLogForms();
+                ShowLogForm();
             }
         }
 
@@ -605,15 +604,6 @@ namespace Shadowsocks.View
         {
             MenuItem item = (MenuItem)sender;
             controller.SelectStrategy((string)item.Tag);
-        }
-
-        private void ShowLogItem_Click(object sender, EventArgs e)
-        {
-            LogForm f = new LogForm(controller, Logging.LogFilePath);
-            f.Show();
-            f.FormClosed += logForm_FormClosed;
-
-            logForms.Add(f);
         }
 
         private void VerboseLoggingToggleItem_Click( object sender, EventArgs e ) {
@@ -819,6 +809,11 @@ namespace Shadowsocks.View
         private void proxyItem_Click(object sender, EventArgs e)
         {
             ShowProxyForm();
+        }
+
+        private void ShowLogItem_Click(object sender, EventArgs e)
+        {
+            ShowLogForm();
         }
     }
 }

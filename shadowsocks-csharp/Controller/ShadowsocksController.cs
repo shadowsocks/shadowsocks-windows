@@ -348,18 +348,30 @@ namespace Shadowsocks.Controller
         {
             _config.autoCheckUpdate = enabled;
             Configuration.Save(_config);
+            if (ConfigChanged != null)
+            {
+                ConfigChanged(this, new EventArgs());
+            }
         }
 
         public void SaveLogViewerConfig(LogViewerConfig newConfig)
         {
             _config.logViewer = newConfig;
             Configuration.Save(_config);
+            if (ConfigChanged != null)
+            {
+                ConfigChanged(this, new EventArgs());
+            }
         }
 
         public void SaveProxyConfig(ProxyConfig newConfig)
         {
             _config.proxy = newConfig;
             Configuration.Save(_config);
+            if (ConfigChanged != null)
+            {
+                ConfigChanged(this, new EventArgs());
+            }
         }
 
         public void UpdateLatency(Server server, TimeSpan latency)
