@@ -4,6 +4,8 @@ using Shadowsocks.Properties;
 using Shadowsocks.Util;
 using System;
 using System.Drawing;
+using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Windows.Forms;
 
@@ -34,7 +36,6 @@ namespace Shadowsocks.View
 
         private void LoadConfiguration(HotkeyConfig config)
         {
-            // replace "+" with " + "
             txtSwitchSystemProxy.Text = config.SwitchSystemProxy;
             txtChangeToPac.Text = config.ChangeToPac;
             txtChangeToGlobal.Text = config.ChangeToGlobal;
@@ -51,8 +52,10 @@ namespace Shadowsocks.View
         private void LoadCurrentConfiguration()
         {
             _modifiedConfig = _controller.GetConfigurationCopy().hotkey;
-            if (_modifiedConfig == null)
+            if (_modifiedConfig == null) {
                 _modifiedConfig = new HotkeyConfig();
+                _controller.SaveHotKeyConfig(_modifiedConfig);
+			}
             LoadConfiguration(_modifiedConfig);
         }
 
@@ -79,18 +82,19 @@ namespace Shadowsocks.View
             //Combination key only
             if (e.Modifiers != 0)
             {
-                // XXX: don't change this order
+                // XXX: Hotkey parsing depends on the sequence, more specifically, ModifierKeysConverter.
+                // Windows key is reserved by operating system, we deny this key.
                 if (e.Control)
                 {
-                    _sb.Append("Ctrl + ");
+                    _sb.Append("Ctrl+");
                 }
                 if (e.Alt)
                 {
-                    _sb.Append("Alt + ");
+                    _sb.Append("Alt+");
                 }
                 if (e.Shift)
                 {
-                    _sb.Append("Shift + ");
+                    _sb.Append("Shift+");
                 }
 
                 Keys keyvalue = (Keys) e.KeyValue;
@@ -133,51 +137,75 @@ namespace Shadowsocks.View
 
         private void ok_Click(object sender, EventArgs e)
         {
-            //Save Config
-
-
-            var allTextboxes = HotKeys.GetChildControls<TextBox>(this);
-            foreach (TextBox tb in allTextboxes)
+            if (!CanParseHotkey(this))
             {
-                if (HotKeys.Str2HotKey(tb.Text.ToString()) == null)
-                {
-                    // parse err
-                    MessageBox.Show("Can not parse");
-                    return;
-                }
+                // msgbox i18n
+                // let users report this issue
+                return;
             }
             // try to register keys
+            // if already registered by other progs
+            // notify to change
 
-            // write into config
-            //WriteHotKeyConfig( conf );
+            // if first run, no action is needed
+            // otherwise, try to register, if failed
+            // open this form and notify to change settings
 
+
+            // use the corresponding label color to indicate
+            // reg result.
+            // Green: not occupied by others and success
+            // Yellow: already reg by others and need action
+            // Transparent without color: first run or empty config
+
+
+            // All check passed, saving
+            SaveConfig();
             this.Close();
         }
 
-        private void WriteHotKeyConfig(HotkeyConfig conf)
+        private bool CanParseHotkey(Control control)
         {
-            conf.SwitchSystemProxy = txtSwitchSystemProxy.Text;
-            conf.ChangeToPac = txtChangeToPac.Text;
-            conf.ChangeToGlobal = txtChangeToGlobal.Text;
-            conf.SwitchAllowLan = txtSwitchAllowLan.Text;
-            conf.ShowLogs = txtShowLogs.Text;
-            conf.AllowSwitchServer = ckbAllowSwitchServer.Checked;
-            //controller.SaveHotkeyConfig( conf );
+            var allTextboxes = HotKeys.GetChildControls<TextBox>(control);
+            return allTextboxes.All(tb => HotKeys.Str2HotKey(tb.Text.ToString()) != null);
         }
 
-        private void HotkeySettingsForm_FormClosing(object sender, FormClosingEventArgs e)
+        private void SaveConfig()
         {
-            HotkeyConfig config = _controller.GetConfigurationCopy().hotkey;
-            if (config == null)
-                config = new HotkeyConfig();
-            // save config: replace " + " with "+"
-            config.SwitchSystemProxy = txtSwitchSystemProxy.Text;
-            config.ChangeToPac = txtChangeToPac.Text;
-            config.ChangeToGlobal = txtChangeToGlobal.Text;
-            config.SwitchAllowLan = txtSwitchAllowLan.Text;
-            config.ShowLogs = txtShowLogs.Text;
-            config.AllowSwitchServer = ckbAllowSwitchServer.Checked;
-            _controller.SaveHotKeyConfig(config);
+            _modifiedConfig.SwitchSystemProxy = txtSwitchSystemProxy.Text;
+            _modifiedConfig.ChangeToPac = txtChangeToPac.Text;
+            _modifiedConfig.ChangeToGlobal = txtChangeToGlobal.Text;
+            _modifiedConfig.SwitchAllowLan = txtSwitchAllowLan.Text;
+            _modifiedConfig.ShowLogs = txtShowLogs.Text;
+            _modifiedConfig.AllowSwitchServer = ckbAllowSwitchServer.Checked;
+            _controller.SaveHotKeyConfig(_modifiedConfig);
+        }
+
+        // callbacks to invoke methods in controller
+
+        private void SwitchSystemProxyCallback()
+        {
+            
+        }
+
+        private void ChangeToPacCallback()
+        {
+            
+        }
+
+        private void ChangeToGlobalCallback()
+        {
+            
+        }
+
+        private void SwitchAllowLanCallback()
+        {
+            
+        }
+
+        private void ShowLogsCallback()
+        {
+            
         }
     }
 }

@@ -97,7 +97,7 @@ namespace Shadowsocks.Model
             }
             catch (IOException e)
             {
-                Console.Error.WriteLine(e);
+                Logging.LogUsefulException(e);
             }
         }
 

@@ -7,6 +7,7 @@ namespace Shadowsocks.Model
      *  <modifiers-combination>+<key>
      *
      */
+
     [Serializable]
     public class HotkeyConfig
     {

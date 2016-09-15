@@ -262,8 +262,7 @@
             this.Name = "HotkeySettingsForm";
             this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "HotkeySetting...";
-            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.HotkeySettingsForm_FormClosing);
+            this.Text = "Edit Hotkeys...";
             tableLayoutPanel1.ResumeLayout(false);
             tableLayoutPanel1.PerformLayout();
             flowLayoutPanel1.ResumeLayout(false);
