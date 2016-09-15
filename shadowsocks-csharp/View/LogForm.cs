@@ -10,6 +10,7 @@ using Shadowsocks.Controller;
 using Shadowsocks.Properties;
 using Shadowsocks.Model;
 using Shadowsocks.Util;
+using System.Text;
 
 namespace Shadowsocks.View
 {
@@ -162,9 +163,11 @@ namespace Shadowsocks.View
                 }
 
                 string line = "";
+                StringBuilder appendText = new StringBuilder(1024);
                 while ((line = reader.ReadLine()) != null)
-                    LogMessageTextBox.AppendText(line + Environment.NewLine);
+                    appendText.Append(line + Environment.NewLine);
 
+                LogMessageTextBox.AppendText(appendText.ToString());
                 LogMessageTextBox.ScrollToCaret();
 
                 lastOffset = reader.BaseStream.Position;
@@ -182,14 +185,16 @@ namespace Shadowsocks.View
 
                     string line = "";
                     bool changed = false;
+                    StringBuilder appendText = new StringBuilder(128);
                     while ((line = reader.ReadLine()) != null)
                     {
                         changed = true;
-                        LogMessageTextBox.AppendText(line + Environment.NewLine);
+                        appendText.Append(line + Environment.NewLine);
                     }
 
                     if (changed)
                     {
+                        LogMessageTextBox.AppendText(appendText.ToString());
                         LogMessageTextBox.ScrollToCaret();
                     }
 
