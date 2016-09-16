@@ -3,12 +3,13 @@ using Shadowsocks.Model;
 using Shadowsocks.Properties;
 using Shadowsocks.Util;
 using System;
-using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Forms;
+using System.Windows.Navigation;
 
 namespace Shadowsocks.View
 {
@@ -31,7 +32,6 @@ namespace Shadowsocks.View
         public HotkeySettingsForm(ShadowsocksController controller)
         {
             InitializeComponent();
-            SetupCallbackMap();
             UpdateTexts();
             this.Icon = Icon.FromHandle(Resources.ssw128.GetHicon());
 
@@ -39,17 +39,6 @@ namespace Shadowsocks.View
             _controller.ConfigChanged += controller_ConfigChanged;
 
             LoadCurrentConfiguration();
-        }
-
-        private void SetupCallbackMap()
-        {
-            cbMap["SwitchSystemProxy"] = SwitchSystemProxyCallback;
-            cbMap["ChangeToPac"] = ChangeToPacCallback;
-            cbMap["ChangeToGlobal"] = ChangeToGlobalCallback;
-            cbMap["SwitchAllowLan"] = SwitchAllowLanCallback;
-            cbMap["ShowLogs"] = ShowLogsCallback;
-            cbMap["ServerMoveUp"] = ServerMoveUpCallback;
-            cbMap["ServerMoveDown"] = ServerMoveDownCallback;
         }
 
         private void LoadConfiguration(HotkeyConfig config)
@@ -159,12 +148,12 @@ namespace Shadowsocks.View
                 tb.Clear();
                 return;
             }
-//            var callback = GetDelegateViaMethodName(this.GetType(), callbackName);
-//            if (callback == null)
-//            {
-//                MessageBox.Show($"No {callbackName}");
-//                return;
-//            }
+            var callback = GetDelegateViaMethodName(this.GetType(), callbackName);
+            if (callback == null)
+            {
+                MessageBox.Show($"No {callbackName}");
+                return;
+            }
             
             object label = GetFieldViaName(this.GetType(), labelName, this);
             if (label == null)
@@ -172,8 +161,8 @@ namespace Shadowsocks.View
                 MessageBox.Show($"No {labelName}");
                 return;
             }
-            // TODO: dynamic create delegate
-            bool regResult = HotKeys.Regist(hotkey, cbMap[rawName]);
+            HotKeys.HotKeyCallBackHandler cb = callback as HotKeys.HotKeyCallBackHandler; 
+            bool regResult = HotKeys.Regist(hotkey, cb);
             Label lb = label as Label;
             lb.BackColor = regResult ? Color.Green : Color.Yellow;
         }
@@ -231,8 +220,6 @@ namespace Shadowsocks.View
 
         #region Callbacks
 
-        private Dictionary<string, HotKeys.HotKeyCallBackHandler> cbMap = new Dictionary<string, HotKeys.HotKeyCallBackHandler>();
-        
         private void SwitchSystemProxyCallback()
         {
             var status = _controller.GetConfigurationCopy().enabled;
@@ -326,15 +313,16 @@ namespace Shadowsocks.View
             return o == null ? null : o.GetValue(obj);
         }
 
-        private object GetDelegateViaMethodName(Type type, string methodname)
+        private Delegate GetDelegateViaMethodName(Type type, string methodname)
         {
             // In general, TextBoxes and Labels are private
-            // TODO
+            HotkeySettingsForm form = new HotkeySettingsForm(_controller);
+            Type delegateType = Type.GetType("Shadowsocks.Util.HotKeys").GetNestedType("HotKeyCallBackHandler");
             MethodInfo dynMethod = type.GetMethod(methodname,
                 BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.IgnoreCase);
+            if (dynMethod == null) return null;
 
-
-            return null;
+            return Delegate.CreateDelegate(delegateType, form, dynMethod);
         }
 
         private void TextBox_TextChanged(object sender, EventArgs e)

@@ -61,6 +61,8 @@ namespace Shadowsocks.Model
                     config.logViewer = new LogViewerConfig();
                 if (config.proxy == null)
                     config.proxy = new ProxyConfig();
+                if (config.hotkey == null)
+                    config.hotkey = new HotkeyConfig();
                 return config;
             }
             catch (Exception e)
