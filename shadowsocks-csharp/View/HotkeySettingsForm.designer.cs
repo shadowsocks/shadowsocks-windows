@@ -37,8 +37,9 @@
             this.ShowLogsLabel = new System.Windows.Forms.Label();
             this.ServerMoveUpLabel = new System.Windows.Forms.Label();
             this.ServerMoveDownLabel = new System.Windows.Forms.Label();
-            this.btnCancel = new System.Windows.Forms.Button();
-            this.btnOK = new System.Windows.Forms.Button();
+            this.OKButton = new System.Windows.Forms.Button();
+            this.CancelButton = new System.Windows.Forms.Button();
+            this.RegisterAllButton = new System.Windows.Forms.Button();
             this.SwitchSystemProxyTextBox = new System.Windows.Forms.TextBox();
             this.ChangeToPacTextBox = new System.Windows.Forms.TextBox();
             this.ChangeToGlobalTextBox = new System.Windows.Forms.TextBox();
@@ -174,8 +175,9 @@
             // flowLayoutPanel1
             // 
             tableLayoutPanel1.SetColumnSpan(flowLayoutPanel1, 2);
-            flowLayoutPanel1.Controls.Add(this.btnCancel);
-            flowLayoutPanel1.Controls.Add(this.btnOK);
+            flowLayoutPanel1.Controls.Add(this.OKButton);
+            flowLayoutPanel1.Controls.Add(this.CancelButton);
+            flowLayoutPanel1.Controls.Add(this.RegisterAllButton);
             flowLayoutPanel1.FlowDirection = System.Windows.Forms.FlowDirection.BottomUp;
             flowLayoutPanel1.Location = new System.Drawing.Point(0, 227);
             flowLayoutPanel1.Margin = new System.Windows.Forms.Padding(0);
@@ -185,27 +187,38 @@
             flowLayoutPanel1.Size = new System.Drawing.Size(475, 44);
             flowLayoutPanel1.TabIndex = 6;
             // 
-            // btnCancel
+            // OKButton
             // 
-            this.btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.btnCancel.Location = new System.Drawing.Point(381, 10);
-            this.btnCancel.Name = "btnCancel";
-            this.btnCancel.Size = new System.Drawing.Size(75, 31);
-            this.btnCancel.TabIndex = 1;
-            this.btnCancel.Text = "Cancel";
-            this.btnCancel.UseVisualStyleBackColor = true;
-            this.btnCancel.Click += new System.EventHandler(this.CancelButton_Click);
+            this.OKButton.DialogResult = System.Windows.Forms.DialogResult.OK;
+            this.OKButton.Location = new System.Drawing.Point(381, 10);
+            this.OKButton.Name = "OKButton";
+            this.OKButton.Size = new System.Drawing.Size(75, 31);
+            this.OKButton.TabIndex = 0;
+            this.OKButton.Text = "OK";
+            this.OKButton.UseVisualStyleBackColor = true;
+            this.OKButton.Click += new System.EventHandler(this.OKButton_Click);
             // 
-            // btnOK
+            // CancelButton
             // 
-            this.btnOK.DialogResult = System.Windows.Forms.DialogResult.OK;
-            this.btnOK.Location = new System.Drawing.Point(300, 10);
-            this.btnOK.Name = "btnOK";
-            this.btnOK.Size = new System.Drawing.Size(75, 31);
-            this.btnOK.TabIndex = 0;
-            this.btnOK.Text = "OK";
-            this.btnOK.UseVisualStyleBackColor = true;
-            this.btnOK.Click += new System.EventHandler(this.OKButton_Click);
+            this.CancelButton.DialogResult = System.Windows.Forms.DialogResult.Cancel;
+            this.CancelButton.Location = new System.Drawing.Point(300, 10);
+            this.CancelButton.Name = "CancelButton";
+            this.CancelButton.Size = new System.Drawing.Size(75, 31);
+            this.CancelButton.TabIndex = 1;
+            this.CancelButton.Text = "Cancel";
+            this.CancelButton.UseVisualStyleBackColor = true;
+            this.CancelButton.Click += new System.EventHandler(this.CancelButton_Click);
+            // 
+            // RegisterAllButton
+            // 
+            this.RegisterAllButton.DialogResult = System.Windows.Forms.DialogResult.Cancel;
+            this.RegisterAllButton.Location = new System.Drawing.Point(219, 10);
+            this.RegisterAllButton.Name = "RegisterAllButton";
+            this.RegisterAllButton.Size = new System.Drawing.Size(75, 31);
+            this.RegisterAllButton.TabIndex = 2;
+            this.RegisterAllButton.Text = "Reg All";
+            this.RegisterAllButton.UseVisualStyleBackColor = true;
+            this.RegisterAllButton.Click += new System.EventHandler(this.RegisterAllButton_Click);
             // 
             // SwitchSystemProxyTextBox
             // 
@@ -216,7 +229,6 @@
             this.SwitchSystemProxyTextBox.ReadOnly = true;
             this.SwitchSystemProxyTextBox.Size = new System.Drawing.Size(276, 25);
             this.SwitchSystemProxyTextBox.TabIndex = 7;
-            this.SwitchSystemProxyTextBox.TextChanged += new System.EventHandler(this.TextBox_TextChanged);
             this.SwitchSystemProxyTextBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.HotkeyDown);
             this.SwitchSystemProxyTextBox.KeyUp += new System.Windows.Forms.KeyEventHandler(this.HotkeyUp);
             // 
@@ -229,7 +241,6 @@
             this.ChangeToPacTextBox.ReadOnly = true;
             this.ChangeToPacTextBox.Size = new System.Drawing.Size(276, 25);
             this.ChangeToPacTextBox.TabIndex = 8;
-            this.ChangeToPacTextBox.TextChanged += new System.EventHandler(this.TextBox_TextChanged);
             this.ChangeToPacTextBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.HotkeyDown);
             this.ChangeToPacTextBox.KeyUp += new System.Windows.Forms.KeyEventHandler(this.HotkeyUp);
             // 
@@ -242,7 +253,6 @@
             this.ChangeToGlobalTextBox.ReadOnly = true;
             this.ChangeToGlobalTextBox.Size = new System.Drawing.Size(276, 25);
             this.ChangeToGlobalTextBox.TabIndex = 9;
-            this.ChangeToGlobalTextBox.TextChanged += new System.EventHandler(this.TextBox_TextChanged);
             this.ChangeToGlobalTextBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.HotkeyDown);
             this.ChangeToGlobalTextBox.KeyUp += new System.Windows.Forms.KeyEventHandler(this.HotkeyUp);
             // 
@@ -255,7 +265,6 @@
             this.SwitchAllowLanTextBox.ReadOnly = true;
             this.SwitchAllowLanTextBox.Size = new System.Drawing.Size(276, 25);
             this.SwitchAllowLanTextBox.TabIndex = 10;
-            this.SwitchAllowLanTextBox.TextChanged += new System.EventHandler(this.TextBox_TextChanged);
             this.SwitchAllowLanTextBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.HotkeyDown);
             this.SwitchAllowLanTextBox.KeyUp += new System.Windows.Forms.KeyEventHandler(this.HotkeyUp);
             // 
@@ -268,7 +277,6 @@
             this.ShowLogsTextBox.ReadOnly = true;
             this.ShowLogsTextBox.Size = new System.Drawing.Size(276, 25);
             this.ShowLogsTextBox.TabIndex = 11;
-            this.ShowLogsTextBox.TextChanged += new System.EventHandler(this.TextBox_TextChanged);
             this.ShowLogsTextBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.HotkeyDown);
             this.ShowLogsTextBox.KeyUp += new System.Windows.Forms.KeyEventHandler(this.HotkeyUp);
             // 
@@ -281,7 +289,6 @@
             this.ServerMoveUpTextBox.ReadOnly = true;
             this.ServerMoveUpTextBox.Size = new System.Drawing.Size(276, 25);
             this.ServerMoveUpTextBox.TabIndex = 12;
-            this.ServerMoveUpTextBox.TextChanged += new System.EventHandler(this.TextBox_TextChanged);
             this.ServerMoveUpTextBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.HotkeyDown);
             this.ServerMoveUpTextBox.KeyUp += new System.Windows.Forms.KeyEventHandler(this.HotkeyUp);
             // 
@@ -294,7 +301,6 @@
             this.ServerMoveDownTextBox.ReadOnly = true;
             this.ServerMoveDownTextBox.Size = new System.Drawing.Size(276, 25);
             this.ServerMoveDownTextBox.TabIndex = 13;
-            this.ServerMoveDownTextBox.TextChanged += new System.EventHandler(this.TextBox_TextChanged);
             this.ServerMoveDownTextBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.HotkeyDown);
             this.ServerMoveDownTextBox.KeyUp += new System.Windows.Forms.KeyEventHandler(this.HotkeyUp);
             // 
@@ -328,8 +334,8 @@
         private System.Windows.Forms.Label ShowLogsLabel;
         private System.Windows.Forms.Label ServerMoveUpLabel;
         private System.Windows.Forms.Label ServerMoveDownLabel;
-        private System.Windows.Forms.Button btnOK;
-        private System.Windows.Forms.Button btnCancel;
+        private System.Windows.Forms.Button OKButton;
+        private System.Windows.Forms.Button CancelButton;
         private System.Windows.Forms.TextBox ShowLogsTextBox;
         private System.Windows.Forms.TextBox SwitchAllowLanTextBox;
         private System.Windows.Forms.TextBox ChangeToGlobalTextBox;
@@ -337,5 +343,6 @@
         private System.Windows.Forms.TextBox SwitchSystemProxyTextBox;
         private System.Windows.Forms.TextBox ServerMoveUpTextBox;
         private System.Windows.Forms.TextBox ServerMoveDownTextBox;
+        private System.Windows.Forms.Button RegisterAllButton;
     }
 }

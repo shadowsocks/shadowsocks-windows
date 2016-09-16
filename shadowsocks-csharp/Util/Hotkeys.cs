@@ -41,8 +41,24 @@ namespace Shadowsocks.Util
                 callback();
         }
         
-        public static bool IsExist( HotKey hotKey ) { return keymap.Any( v => v.Key.Equals( hotKey ) ); }
+        public static bool IsHotkeyExists( HotKey hotKey ) { return keymap.Any( v => v.Key.Equals( hotKey ) ); }
 
+        public static bool IsCallbackExists( HotKeyCallBackHandler cb, out HotKey hotkey)
+        {
+            if (cb == null) throw new ArgumentNullException(nameof(cb));
+            try
+            {
+                var key = keymap.First(x => x.Value == cb).Key;
+                hotkey = key;
+                return true;
+            }
+            catch (InvalidOperationException)
+            {
+                // not found
+                hotkey = null;
+                return false;
+            }
+        }
         public static string HotKey2Str( HotKey key ) { return HotKey2Str( key.Key, key.Modifiers ); }
 
         public static string HotKey2Str( Key key, ModifierKeys modifier ) {

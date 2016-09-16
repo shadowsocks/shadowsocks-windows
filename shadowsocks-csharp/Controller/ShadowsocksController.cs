@@ -322,16 +322,6 @@ namespace Shadowsocks.Controller
             SaveConfig(_config);
         }
 
-        public void SaveHotkeyConfig(HotkeyConfig newConfig)
-        {
-            _config.hotkey = newConfig;
-            SaveConfig(_config);
-            if (ConfigChanged != null)
-            {
-                ConfigChanged(this, new EventArgs());
-            }
-        }
-
         public void SavePACUrl(string pacUrl)
         {
             _config.pacUrl = pacUrl;
@@ -374,16 +364,20 @@ namespace Shadowsocks.Controller
             }
         }
 
-        public void SaveHotKeyConfig(HotkeyConfig newConfig)
-        {
-            _config.hotkey = newConfig;
-            Configuration.Save(_config);
-        }
-
         public void SaveProxyConfig(ProxyConfig newConfig)
         {
             _config.proxy = newConfig;
             Configuration.Save(_config);
+            if (ConfigChanged != null)
+            {
+                ConfigChanged(this, new EventArgs());
+            }
+        }
+
+        public void SaveHotkeyConfig(HotkeyConfig newConfig)
+        {
+            _config.hotkey = newConfig;
+            SaveConfig(_config);
             if (ConfigChanged != null)
             {
                 ConfigChanged(this, new EventArgs());
@@ -581,6 +575,8 @@ namespace Shadowsocks.Controller
             File.WriteAllText(PACServer.PAC_FILE, abpContent, Encoding.UTF8);
         }
 
+        #region Memory Management
+
         private void StartReleasingMemory()
         {
             _ramThread = new Thread(new ThreadStart(ReleaseMemory));
@@ -596,6 +592,10 @@ namespace Shadowsocks.Controller
                 Thread.Sleep(30 * 1000);
             }
         }
+
+        #endregion
+
+        #region Traffic Statistics
 
         private void StartTrafficStatistics(int queueMaxSize)
         {
@@ -630,6 +630,8 @@ namespace Shadowsocks.Controller
                 Thread.Sleep(1000);
             }
         }
+
+        #endregion
 
     }
 }
