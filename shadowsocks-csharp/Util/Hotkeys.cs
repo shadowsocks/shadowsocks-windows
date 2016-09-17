@@ -1,15 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Globalization;
 using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading;
 using System.Windows.Forms;
 using System.Windows.Input;
 using GlobalHotKey;
-using Shadowsocks.Controller;
 
 namespace Shadowsocks.Util
 {
@@ -19,7 +14,7 @@ namespace Shadowsocks.Util
 
         public delegate void HotKeyCallBackHandler();
         // map key and corresponding handler function
-        private static Dictionary<HotKey, HotKeyCallBackHandler> keymap = new Dictionary<HotKey, HotKeyCallBackHandler>();
+        private static Dictionary<HotKey, HotKeyCallBackHandler> _keymap = new Dictionary<HotKey, HotKeyCallBackHandler>();
 
         public static void Init()
         {
@@ -27,28 +22,28 @@ namespace Shadowsocks.Util
             _hotKeyManager.KeyPressed += HotKeyManagerPressed;
         }
 
-        public static void Destroy()
-        {
-            // He will unreg all keys and dispose resources
-            _hotKeyManager.Dispose();
-        }
+        public static void Destroy() => _hotKeyManager.Dispose();
 
         private static void HotKeyManagerPressed(object sender, KeyPressedEventArgs e)
         {
             var hotkey = e.HotKey;
             HotKeyCallBackHandler callback;
-            if (keymap.TryGetValue(hotkey, out callback))
+            if (_keymap.TryGetValue(hotkey, out callback))
                 callback();
         }
         
-        public static bool IsHotkeyExists( HotKey hotKey ) { return keymap.Any( v => v.Key.Equals( hotKey ) ); }
+        public static bool IsHotkeyExists( HotKey hotKey )
+        {
+            if (hotKey == null) throw new ArgumentNullException(nameof(hotKey));
+            return _keymap.Any( v => v.Key.Equals( hotKey ) );
+        }
 
         public static bool IsCallbackExists( HotKeyCallBackHandler cb, out HotKey hotkey)
         {
             if (cb == null) throw new ArgumentNullException(nameof(cb));
             try
             {
-                var key = keymap.First(x => x.Value == cb).Key;
+                var key = _keymap.First(x => x.Value == cb).Key;
                 hotkey = key;
                 return true;
             }
@@ -59,9 +54,16 @@ namespace Shadowsocks.Util
                 return false;
             }
         }
-        public static string HotKey2Str( HotKey key ) { return HotKey2Str( key.Key, key.Modifiers ); }
+        public static string HotKey2Str( HotKey key )
+        {
+            if (key == null) throw new ArgumentNullException(nameof(key));
+            return HotKey2Str( key.Key, key.Modifiers );
+        }
 
-        public static string HotKey2Str( Key key, ModifierKeys modifier ) {
+        public static string HotKey2Str( Key key, ModifierKeys modifier )
+        {
+            if (!Enum.IsDefined(typeof(Key), key))
+                throw new InvalidEnumArgumentException(nameof(key), (int) key, typeof(Key));
             try
             {
                 ModifierKeysConverter mkc = new ModifierKeysConverter();
@@ -113,7 +115,7 @@ namespace Shadowsocks.Util
             try
             {
                 _hotKeyManager.Register(key);
-                keymap[key] = callBack;
+                _keymap[key] = callBack;
                 return true;
             }
             catch (ArgumentException)
@@ -132,10 +134,12 @@ namespace Shadowsocks.Util
 
         public static bool Regist(Key key, ModifierKeys modifiers, HotKeyCallBackHandler callBack)
         {
+            if (!Enum.IsDefined(typeof(Key), key))
+                throw new InvalidEnumArgumentException(nameof(key), (int) key, typeof(Key));
             try
             {
                 var hotkey = _hotKeyManager.Register(key, modifiers);
-                keymap[hotkey] = callBack;
+                _keymap[hotkey] = callBack;
                 return true;
             }
             catch (ArgumentException)
@@ -157,17 +161,14 @@ namespace Shadowsocks.Util
             if (key == null)
                 throw new ArgumentNullException(nameof(key));
             _hotKeyManager.Unregister(key);
-            if(keymap.ContainsKey(key))
-                keymap.Remove(key);
+            if(_keymap.ContainsKey(key))
+                _keymap.Remove(key);
         }
 
         public static IEnumerable<TControl> GetChildControls<TControl>(this Control control) where TControl : Control
         {
-            var children = (control.Controls != null) ? control.Controls.OfType<TControl>() : Enumerable.Empty<TControl>();
+            var children = control.Controls.Count > 0 ? control.Controls.OfType<TControl>() : Enumerable.Empty<TControl>();
             return children.SelectMany(c => GetChildControls<TControl>(c)).Concat(children);
         }
-
-        // callbacks
-        
     }
 }

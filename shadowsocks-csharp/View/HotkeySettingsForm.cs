@@ -1,10 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Windows.Forms;
-using System.Windows.Navigation;
+
 using Shadowsocks.Controller;
 using Shadowsocks.Model;
 using Shadowsocks.Properties;
@@ -14,18 +15,17 @@ namespace Shadowsocks.View
 {
     public partial class HotkeySettingsForm : Form
     {
-        /*
-         * XXX: The labelName, TextBoxName and callbackName
-         *      must follow this rule to make use of reflection
-         *
-         *      <BaseName><Control-Type-Name>
-         */
         private ShadowsocksController _controller;
 
         // this is a copy of configuration that we are working on
         private HotkeyConfig _modifiedConfig;
 
         private StringBuilder _sb = new StringBuilder();
+
+        private IEnumerable<TextBox> _allTextBoxes;
+
+        private static Label _lb = null;
+        private static HotKeys.HotKeyCallBackHandler _callBack = null;
 
         public HotkeySettingsForm(ShadowsocksController controller)
         {
@@ -37,6 +37,10 @@ namespace Shadowsocks.View
             _controller.ConfigChanged += controller_ConfigChanged;
 
             LoadCurrentConfiguration();
+
+            // get all textboxes belong to this form
+            _allTextBoxes = HotKeys.GetChildControls<TextBox>(this.tableLayoutPanel1);
+            if (!_allTextBoxes.Any()) throw new Exception("Cannot get all textboxes");
         }
 
         private void controller_ConfigChanged(object sender, EventArgs e)
@@ -63,17 +67,18 @@ namespace Shadowsocks.View
 
         private void UpdateTexts()
         {
-            SwitchSystemProxyLabel.Text = I18N.GetString(SwitchSystemProxyLabel.Text);
-            ChangeToPacLabel.Text = I18N.GetString(ChangeToPacLabel.Text);
-            ChangeToGlobalLabel.Text = I18N.GetString(ChangeToGlobalLabel.Text);
-            SwitchAllowLanLabel.Text = I18N.GetString(SwitchAllowLanLabel.Text);
-            ShowLogsLabel.Text = I18N.GetString(ShowLogsLabel.Text);
-            ServerMoveUpLabel.Text = I18N.GetString(ServerMoveUpLabel.Text);
-            ServerMoveDownLabel.Text = I18N.GetString(ServerMoveDownLabel.Text);
-            OKButton.Text = I18N.GetString(OKButton.Text);
-            CancelButton.Text = I18N.GetString(CancelButton.Text);
-            RegisterAllButton.Text = I18N.GetString(RegisterAllButton.Text);
-            this.Text = I18N.GetString(Text);
+            // I18N stuff
+            SwitchSystemProxyLabel.Text = I18N.GetString("Switch system proxy");
+            ChangeToPacLabel.Text = I18N.GetString("Switch to PAC mode");
+            ChangeToGlobalLabel.Text = I18N.GetString("Switch to Global mode");
+            SwitchAllowLanLabel.Text = I18N.GetString("Switch share over LAN");
+            ShowLogsLabel.Text = I18N.GetString("Show Logs");
+            ServerMoveUpLabel.Text = I18N.GetString("Switch to prev server");
+            ServerMoveDownLabel.Text = I18N.GetString("Switch to next server");
+            btnOK.Text = I18N.GetString("OK");
+            btnCancel.Text = I18N.GetString("Cancel");
+            btnRegisterAll.Text = I18N.GetString("Reg All");
+            this.Text = I18N.GetString("Edit Hotkeys...");
         }
 
         /// <summary>
@@ -124,20 +129,31 @@ namespace Shadowsocks.View
         /// </summary>
         private void HotkeyUp(object sender, KeyEventArgs e)
         {
-            // Don't parse and reg keys if BackSpace is pressed
-            if ((Keys)e.KeyValue == Keys.Back) return;
-
             TextBox tb = sender as TextBox;
             string content = tb.Text.TrimEnd();
             if (content.Length >= 1 && content[content.Length - 1] == '+')
             {
                 tb.Text = "";
             }
-            // empty means disable this hotkey or user wants to
-            // change it to another key combination
-            if (tb.Text.IsNullOrEmpty()) return;
-            // try to register and show result
-            TryRegHotkey(tb);
+        }
+
+        private void TextBox_TextChanged(object sender, EventArgs e)
+        {
+            TextBox tb = sender as TextBox;
+
+            if (tb.Text == "")
+            {
+                // unreg
+                UnregHotkey(tb);
+            }
+        }
+
+        private void UnregHotkey(TextBox tb)
+        {
+
+            PrepareForHotkey(tb, out _callBack, out _lb);
+
+            UnregPrevHotkey(_callBack);
         }
 
         private void CancelButton_Click(object sender, EventArgs e)
@@ -147,23 +163,18 @@ namespace Shadowsocks.View
 
         private void OKButton_Click(object sender, EventArgs e)
         {
-            if (!CanParseHotkey(this))
-            {
-                // msgbox i18n
-                // let users report this issue
-                return;
-            }
-
             // try to register, notify to change settings if failed
-            var allTextboxes = HotKeys.GetChildControls<TextBox>(this);
-            foreach (TextBox tb in allTextboxes)
+            foreach (var tb in _allTextBoxes)
             {
                 if (tb.Text.IsNullOrEmpty())
                 {
                     continue;
                 }
                 if (!TryRegHotkey(tb))
+                {
+                    MessageBox.Show(I18N.GetString("Register hotkey failed"));
                     return;
+                }
             }
 
             // All check passed, saving
@@ -173,8 +184,7 @@ namespace Shadowsocks.View
 
         private void RegisterAllButton_Click(object sender, EventArgs e)
         {
-            var allTextboxes = HotKeys.GetChildControls<TextBox>(this);
-            foreach (TextBox tb in allTextboxes)
+            foreach (var tb in _allTextBoxes)
             {
                 if (tb.Text.IsNullOrEmpty())
                 {
@@ -184,58 +194,19 @@ namespace Shadowsocks.View
             }
         }
 
-        private bool CanParseHotkey(Control control)
-        {
-            var allTextboxes = HotKeys.GetChildControls<TextBox>(control);
-            foreach (var tb in allTextboxes)
-            {
-                if (tb.Text.IsNullOrEmpty())
-                    continue;
-                if (HotKeys.Str2HotKey(tb.Text) == null)
-                    return false;
-            }
-            return true;
-        }
-
         private bool TryRegHotkey(TextBox tb)
         {
-            if (tb == null)
-                throw new ArgumentNullException(nameof(tb));
-
-            var pos = tb.Name.LastIndexOf("TextBox", StringComparison.OrdinalIgnoreCase);
-            var rawName = tb.Name.Substring(0, pos);
-            var labelName = rawName + "Label";
-            var callbackName = rawName + "Callback";
-
             var hotkey = HotKeys.Str2HotKey(tb.Text);
             if (hotkey == null)
             {
-                MessageBox.Show(I18N.GetString("Cannot parse hotkey: ") + tb.Text);
                 tb.Clear();
+                MessageBox.Show(I18N.GetString("Cannot parse hotkey: ") + tb.Text);
                 return false;
             }
-            var callback = GetDelegateViaMethodName(this.GetType(), callbackName);
-            if (callback == null)
-            {
-                MessageBox.Show($"No {callbackName}");
-                return false;
-            }
-            HotKeys.HotKeyCallBackHandler cb = callback as HotKeys.HotKeyCallBackHandler;
 
-            object label = GetFieldViaName(this.GetType(), labelName, this);
-            if (label == null)
-            {
-                MessageBox.Show($"No {labelName}");
-                return false;
-            }
-            Label lb = label as Label;
+            PrepareForHotkey(tb, out _callBack, out _lb);
 
-            GlobalHotKey.HotKey prevHotKey;
-            if (HotKeys.IsCallbackExists(cb, out prevHotKey))
-            {
-                // unregister previous one
-                HotKeys.UnRegist(prevHotKey);
-            }
+            UnregPrevHotkey(_callBack);
 
             // try to register keys
             // if already registered by other progs
@@ -248,9 +219,19 @@ namespace Shadowsocks.View
             //         or change to another one
             // Transparent without color: first run or empty config
 
-            bool regResult = HotKeys.Regist(hotkey, cb);
-            lb.BackColor = regResult ? Color.Green : Color.Yellow;
+            bool regResult = HotKeys.Regist(hotkey, _callBack);
+            _lb.BackColor = regResult ? Color.Green : Color.Yellow;
             return regResult;
+        }
+
+        private static void UnregPrevHotkey(HotKeys.HotKeyCallBackHandler cb)
+        {
+            GlobalHotKey.HotKey prevHotKey;
+            if (HotKeys.IsCallbackExists(cb, out prevHotKey))
+            {
+                // unregister previous one
+                HotKeys.UnRegist(prevHotKey);
+            }
         }
 
         private void SaveConfig()
@@ -269,17 +250,21 @@ namespace Shadowsocks.View
 
         private void SwitchSystemProxyCallback()
         {
-            var status = _controller.GetConfigurationCopy().enabled;
-            _controller.ToggleEnable(!status);
+            bool enabled = _controller.GetConfigurationCopy().enabled;
+            _controller.ToggleEnable(!enabled);
         }
 
         private void ChangeToPacCallback()
         {
+            bool enabled = _controller.GetConfigurationCopy().enabled;
+            if (enabled == false) return;
             _controller.ToggleGlobal(false);
         }
 
         private void ChangeToGlobalCallback()
         {
+            bool enabled = _controller.GetConfigurationCopy().enabled;
+            if (enabled == false) return;
             _controller.ToggleGlobal(true);
         }
 
@@ -294,7 +279,7 @@ namespace Shadowsocks.View
             // Get the current MenuViewController in this program via reflection
             FieldInfo fi = Assembly.GetExecutingAssembly().GetType("Shadowsocks.Program")
                 .GetField("_viewController",
-                BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.IgnoreCase);
+                    BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.IgnoreCase);
             // To retrieve the value of a static field, pass null here
             var mvc = fi.GetValue(null) as MenuViewController;
             mvc.ShowLogForm_HotKey();
@@ -343,7 +328,44 @@ namespace Shadowsocks.View
 
         #endregion
 
-        #region Form handling utils
+        #region Prepare hotkey
+
+        /// <summary>
+        /// Find correct callback and corresponding label
+        /// </summary>
+        /// <param name="tb"></param>
+        /// <param name="cb"></param>
+        /// <param name="lb"></param>
+        private void PrepareForHotkey(TextBox tb, out HotKeys.HotKeyCallBackHandler cb, out Label lb)
+        {
+            /*
+             * XXX: The labelName, TextBoxName and callbackName
+             *      must follow this rule to make use of reflection
+             *
+             *      <BaseName><Control-Type-Name>
+             */
+            if (tb == null)
+                throw new ArgumentNullException(nameof(tb));
+
+            var pos = tb.Name.LastIndexOf("TextBox", StringComparison.OrdinalIgnoreCase);
+            var rawName = tb.Name.Substring(0, pos);
+            var labelName = rawName + "Label";
+            var callbackName = rawName + "Callback";
+
+            var callback = GetDelegateViaMethodName(this.GetType(), callbackName);
+            if (callback == null)
+            {
+                throw new Exception($"{callbackName} not found");
+            }
+            cb = callback as HotKeys.HotKeyCallBackHandler;
+
+            object label = GetFieldViaName(this.GetType(), labelName, this);
+            if (label == null)
+            {
+                throw new Exception($"{labelName} not found");
+            }
+            lb = label as Label;
+        }
 
         /// <summary>
         ///
@@ -355,12 +377,11 @@ namespace Shadowsocks.View
         private static object GetFieldViaName(Type type, string name, object obj)
         {
             if (type == null) throw new ArgumentNullException(nameof(type));
-            if (name == null) throw new ArgumentNullException(nameof(name));
-            if (obj == null) throw new ArgumentNullException(nameof(obj));
+            if (name.IsNullOrEmpty()) throw new ArgumentException(nameof(name));
             // In general, TextBoxes and Labels are private
-            FieldInfo o = type.GetField(name,
+            FieldInfo fi = type.GetField(name,
                 BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.IgnoreCase | BindingFlags.Static);
-            return o == null ? null : o.GetValue(obj);
+            return fi == null ? null : fi.GetValue(obj);
         }
 
         /// <summary>
@@ -373,15 +394,13 @@ namespace Shadowsocks.View
         {
             if (type == null) throw new ArgumentNullException(nameof(type));
             if (methodname.IsNullOrEmpty()) throw new ArgumentException(nameof(methodname));
-            // In general, the modifier of delegate is private
-            HotkeySettingsForm form = new HotkeySettingsForm(_controller);
+            //HotkeySettingsForm form = new HotkeySettingsForm(_controller);
             Type delegateType = Type.GetType("Shadowsocks.Util.HotKeys").GetNestedType("HotKeyCallBackHandler");
             MethodInfo dynMethod = type.GetMethod(methodname,
                 BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.IgnoreCase);
-            return dynMethod == null ? null : Delegate.CreateDelegate(delegateType, form, dynMethod);
+            return dynMethod == null ? null : Delegate.CreateDelegate(delegateType, this, dynMethod);
         }
 
         #endregion
-
     }
 }
