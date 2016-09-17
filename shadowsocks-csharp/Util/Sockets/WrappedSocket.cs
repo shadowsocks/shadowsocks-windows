@@ -12,17 +12,14 @@ namespace Shadowsocks.Util.Sockets
      * If the server address is host name, then it may have both ipv4 and ipv6 address
      * after resolving. The main idea is we don't want to resolve and choose the address
      * by ourself. Instead, Socket.ConnectAsync() do handle this thing internally by trying
-     * each address and returning an established socket connection. Such approach solves
-     * two problem:
-     * 1. Async DNS resolving.
-     * 2. 
+     * each address and returning an established socket connection.
      */
     public class WrappedSocket
     {
         public EndPoint LocalEndPoint => _activeSocket?.LocalEndPoint;
 
+        // Only used during connection and close, so it won't cost too much.
         private SpinLock _socketSyncLock = new SpinLock();
-            // Only used during connection and close, so it won't cost too much.
 
         private volatile bool _disposed;
         private bool Connected => _activeSocket != null;
