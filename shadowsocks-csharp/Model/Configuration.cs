@@ -27,6 +27,7 @@ namespace Shadowsocks.Model
         public bool isVerboseLogging;
         public LogViewerConfig logViewer;
         public ProxyConfig proxy;
+        public HotkeyConfig hotkey;
 
         private static string CONFIG_FILE = "gui-config.json";
 
@@ -60,6 +61,8 @@ namespace Shadowsocks.Model
                     config.logViewer = new LogViewerConfig();
                 if (config.proxy == null)
                     config.proxy = new ProxyConfig();
+                if (config.hotkey == null)
+                    config.hotkey = new HotkeyConfig();
                 return config;
             }
             catch (Exception e)
@@ -100,7 +103,7 @@ namespace Shadowsocks.Model
             }
             catch (IOException e)
             {
-                Console.Error.WriteLine(e);
+                Logging.LogUsefulException(e);
             }
         }
 

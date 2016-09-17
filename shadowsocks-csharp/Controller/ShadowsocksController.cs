@@ -374,6 +374,16 @@ namespace Shadowsocks.Controller
             }
         }
 
+        public void SaveHotkeyConfig(HotkeyConfig newConfig)
+        {
+            _config.hotkey = newConfig;
+            SaveConfig(_config);
+            if (ConfigChanged != null)
+            {
+                ConfigChanged(this, new EventArgs());
+            }
+        }
+
         public void UpdateLatency(Server server, TimeSpan latency)
         {
             if (_config.availabilityStatistics)
@@ -565,6 +575,8 @@ namespace Shadowsocks.Controller
             File.WriteAllText(PACServer.PAC_FILE, abpContent, Encoding.UTF8);
         }
 
+        #region Memory Management
+
         private void StartReleasingMemory()
         {
             _ramThread = new Thread(new ThreadStart(ReleaseMemory));
@@ -580,6 +592,10 @@ namespace Shadowsocks.Controller
                 Thread.Sleep(30 * 1000);
             }
         }
+
+        #endregion
+
+        #region Traffic Statistics
 
         private void StartTrafficStatistics(int queueMaxSize)
         {
@@ -614,6 +630,8 @@ namespace Shadowsocks.Controller
                 Thread.Sleep(1000);
             }
         }
+
+        #endregion
 
     }
 }

@@ -27,6 +27,7 @@ Verbose Logging=詳細記錄日誌
 Updates...=更新...
 Check for Updates...=檢查更新
 Check for Updates at Startup=啟動時檢查更新
+Edit Hotkeys...=編輯熱鍵...
 About...=關於...
 Quit=退出
 Edit Servers=編輯伺服器
@@ -84,6 +85,17 @@ Edit Online PAC URL=編輯在線 PAC 網址
 Edit Online PAC URL...=編輯在線 PAC 網址...
 Please input PAC Url=請輸入 PAC 網址
 
+# HotkeySettings Form
+
+Switch system proxy=切换系統代理狀態
+Switch to PAC mode=切换為PAC模式
+Switch to Global mode=切换為全局模式
+Switch share over LAN=切换局域網共享
+Show Logs=顯示日誌
+Switch to prev server=切换上個伺服器
+Switch to next server=切换下個伺服器
+Reg All=註冊全部熱鍵
+
 # Messages
 
 Shadowsocks Error: {0}=Shadowsocks 錯誤: {0}
@@ -116,3 +128,5 @@ Unexpected error, shadowsocks will exit. Please report to=非預期錯誤，Shad
 Unsupported operating system, use Windows Vista at least.=不支持的作業系統版本，最低需求為Windows Vista。
 Proxy request failed=代理請求失敗
 Proxy handshake failed=代理握手失敗
+Register hotkey failed=註冊熱鍵失敗
+Cannot parse hotkey: {0}=解析熱鍵失敗: {0}
