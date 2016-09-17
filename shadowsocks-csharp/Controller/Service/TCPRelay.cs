@@ -173,6 +173,8 @@ namespace Shadowsocks.Controller
             this._config = config;
             this._tcprelay = tcprelay;
             this._connection = socket;
+
+            lastActivity = DateTime.Now;
         }
 
         public void CreateRemote()
@@ -195,7 +197,6 @@ namespace Shadowsocks.Controller
             _firstPacket = firstPacket;
             _firstPacketLength = length;
             HandshakeReceive();
-            lastActivity = DateTime.Now;
         }
 
         private void CheckClose()
