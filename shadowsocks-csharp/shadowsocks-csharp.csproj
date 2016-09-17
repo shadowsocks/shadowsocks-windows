@@ -186,7 +186,8 @@
     <Compile Include="Util\Hotkeys.cs" />
     <Compile Include="Util\ProcessManagement\Job.cs" />
     <Compile Include="Util\ProcessManagement\ThreadUtil.cs" />
-    <Compile Include="Util\SocketUtil.cs" />
+    <Compile Include="Util\Sockets\SocketUtil.cs" />
+    <Compile Include="Util\Sockets\WrappedSocket.cs" />
     <Compile Include="Util\Util.cs" />
     <Compile Include="View\ConfigForm.cs">
       <SubType>Form</SubType>

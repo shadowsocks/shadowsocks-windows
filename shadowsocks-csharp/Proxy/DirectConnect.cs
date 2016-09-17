@@ -2,7 +2,7 @@
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
-using Shadowsocks.Util;
+using Shadowsocks.Util.Sockets;
 
 namespace Shadowsocks.Proxy
 {
@@ -31,7 +31,7 @@ namespace Shadowsocks.Proxy
             }
         }
 
-        private Socket _remote;
+        private WrappedSocket _remote = new WrappedSocket();
 
         public EndPoint LocalEndPoint => _remote.LocalEndPoint;
 
@@ -55,12 +55,13 @@ namespace Shadowsocks.Proxy
         {
             DestEndPoint = destEndPoint;
 
-            SocketUtil.BeginConnectTcp(destEndPoint, callback, state);
+            _remote.BeginConnect(destEndPoint, callback, state);
         }
 
         public void EndConnectDest(IAsyncResult asyncResult)
         {
-            _remote = SocketUtil.EndConnectTcp(asyncResult);
+            _remote.EndConnect(asyncResult);
+            _remote.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, true);
         }
 
         public void BeginSend(byte[] buffer, int offset, int size, SocketFlags socketFlags, AsyncCallback callback,
@@ -92,7 +93,7 @@ namespace Shadowsocks.Proxy
 
         public void Close()
         {
-            _remote?.Close();
+            _remote?.Dispose();
         }
     }
 }

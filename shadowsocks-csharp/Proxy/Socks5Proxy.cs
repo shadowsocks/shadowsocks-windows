@@ -1,12 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using Shadowsocks.Controller;
-using Shadowsocks.Util;
+using Shadowsocks.Util.Sockets;
 
 namespace Shadowsocks.Proxy
 {
@@ -41,7 +39,7 @@ namespace Shadowsocks.Proxy
             public Exception ex { get; set; }
         }
 
-        private Socket _remote;
+        private WrappedSocket _remote = new WrappedSocket();
 
         private const int Socks5PktMaxSize = 4 + 16 + 2;
         private readonly byte[] _receiveBuffer = new byte[Socks5PktMaxSize];
@@ -58,7 +56,7 @@ namespace Shadowsocks.Proxy
 
             ProxyEndPoint = remoteEP;
 
-            SocketUtil.BeginConnectTcp(remoteEP, ConnectCallback, st);
+            _remote.BeginConnect(remoteEP, ConnectCallback, st);
         }
 
         public void EndConnectProxy(IAsyncResult asyncResult)
@@ -168,7 +166,7 @@ namespace Shadowsocks.Proxy
 
         public void Close()
         {
-            _remote?.Close();
+            _remote?.Dispose();
         }
         
 
@@ -177,7 +175,9 @@ namespace Shadowsocks.Proxy
             var state = (Socks5State) ar.AsyncState;
             try
             {
-                _remote = SocketUtil.EndConnectTcp(ar);
+                _remote.EndConnect(ar);
+
+                _remote.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, true);
 
                 byte[] handshake = {5, 1, 0};
                 _remote.BeginSend(handshake, 0, handshake.Length, 0, Socks5HandshakeSendCallback, state);

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Net;
 using System.Net.Sockets;
-using Shadowsocks.Util;
+using Shadowsocks.Util.Sockets;
 
 namespace Shadowsocks.Controller
 {
@@ -29,7 +29,7 @@ namespace Shadowsocks.Controller
             private byte[] _firstPacket;
             private int _firstPacketLength;
             private Socket _local;
-            private Socket _remote;
+            private WrappedSocket _remote;
             private bool _closed = false;
             private bool _localShutdown = false;
             private bool _remoteShutdown = false;
@@ -46,10 +46,11 @@ namespace Shadowsocks.Controller
                 this._local = socket;
                 try
                 {
-                    EndPoint remoteEP = SocketUtil.GetEndPoint("localhost", targetPort);
+                    EndPoint remoteEP = SocketUtil.GetEndPoint("127.0.0.1", targetPort);
 
                     // Connect to the remote endpoint.
-                    SocketUtil.BeginConnectTcp(remoteEP, ConnectCallback, null);
+                    _remote = new WrappedSocket();
+                    _remote.BeginConnect(remoteEP, ConnectCallback, null);
                 }
                 catch (Exception e)
                 {
@@ -66,7 +67,8 @@ namespace Shadowsocks.Controller
                 }
                 try
                 {
-                    _remote = SocketUtil.EndConnectTcp(ar);
+                    _remote.EndConnect(ar);
+                    _remote.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, true);
                     HandshakeReceive();
                 }
                 catch (Exception e)
@@ -243,7 +245,7 @@ namespace Shadowsocks.Controller
                     try
                     {
                         _remote.Shutdown(SocketShutdown.Both);
-                        _remote.Close();
+                        _remote.Dispose();
                     }
                     catch (SocketException e)
                     {

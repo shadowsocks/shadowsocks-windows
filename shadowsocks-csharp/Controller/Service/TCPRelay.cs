@@ -9,7 +9,7 @@ using Shadowsocks.Controller.Strategy;
 using Shadowsocks.Encryption;
 using Shadowsocks.Model;
 using Shadowsocks.Proxy;
-using Shadowsocks.Util;
+using Shadowsocks.Util.Sockets;
 
 namespace Shadowsocks.Controller
 {
@@ -37,7 +37,6 @@ namespace Shadowsocks.Controller
             socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, true);
             TCPHandler handler = new TCPHandler(_controller, _config, this, socket);
 
-            handler.Start(firstPacket, length);
             IList<TCPHandler> handlersToClose = new List<TCPHandler>();
             lock (Handlers)
             {
@@ -56,6 +55,15 @@ namespace Shadowsocks.Controller
                 Logging.Debug("Closing timed out TCP connection.");
                 handler1.Close();
             }
+
+            /*
+             * Start after we put it into Handlers set. Otherwise if it failed in handler.Start()
+             * then it will call handler.Close() before we add it into the set.
+             * Then the handler will never release until the next Handle call. Sometimes it will
+             * cause odd problems (especially during memory profiling).
+             */
+            handler.Start(firstPacket, length);
+
             return true;
         }
 
@@ -165,6 +173,8 @@ namespace Shadowsocks.Controller
             this._config = config;
             this._tcprelay = tcprelay;
             this._connection = socket;
+
+            lastActivity = DateTime.Now;
         }
 
         public void CreateRemote()
@@ -187,7 +197,6 @@ namespace Shadowsocks.Controller
             _firstPacket = firstPacket;
             _firstPacketLength = length;
             HandshakeReceive();
-            lastActivity = DateTime.Now;
         }
 
         private void CheckClose()
@@ -452,7 +461,7 @@ namespace Shadowsocks.Controller
             timer.Dispose();
 
 
-            if (_proxyConnected || _destConnected)
+            if (_proxyConnected || _destConnected || _closed)
             {
                 return;
             }
@@ -524,7 +533,7 @@ namespace Shadowsocks.Controller
             timer.Enabled = false;
             timer.Dispose();
 
-            if (_destConnected)
+            if (_destConnected || _closed)
             {
                 return;
             }
