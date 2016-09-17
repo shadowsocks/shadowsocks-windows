@@ -92,12 +92,45 @@ namespace Shadowsocks
             {
                 case PowerModes.Resume:
                     Logging.Info("os wake up");
-                    _controller?.Start();
+                    if (_controller != null)
+                    {
+                        System.Timers.Timer timer = new System.Timers.Timer(5 * 1000);
+                        timer.Elapsed += Timer_Elapsed;
+                        timer.AutoReset = false;
+                        timer.Enabled = true;
+                        timer.Start();
+                    }
                     break;
                 case PowerModes.Suspend:
                     _controller?.Stop();
                     Logging.Info("os suspend");
                     break;
+            }
+        }
+
+        private static void Timer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+        {
+            try
+            {
+                _controller?.Start();
+            }
+            catch (Exception ex)
+            {
+                Logging.LogUsefulException(ex);
+            }
+            finally
+            {
+                try
+                {
+                    System.Timers.Timer timer = (System.Timers.Timer)sender;
+                    timer.Enabled = false;
+                    timer.Stop();
+                    timer.Dispose();
+                }
+                catch (Exception ex)
+                {
+                    Logging.LogUsefulException(ex);
+                }
             }
         }
 
