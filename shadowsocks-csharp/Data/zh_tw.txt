@@ -128,3 +128,5 @@ Unexpected error, shadowsocks will exit. Please report to=非預期錯誤，Shad
 Unsupported operating system, use Windows Vista at least.=不支持的作業系統版本，最低需求為Windows Vista。
 Proxy request failed=代理請求失敗
 Proxy handshake failed=代理握手失敗
+Register hotkey failed=註冊熱鍵失敗
+Cannot parse hotkey: {0}=解析熱鍵失敗: {0}

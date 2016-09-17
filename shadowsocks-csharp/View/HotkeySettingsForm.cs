@@ -199,8 +199,8 @@ namespace Shadowsocks.View
             var hotkey = HotKeys.Str2HotKey(tb.Text);
             if (hotkey == null)
             {
+                MessageBox.Show(string.Format(I18N.GetString("Cannot parse hotkey: {0}"), tb.Text));
                 tb.Clear();
-                MessageBox.Show(I18N.GetString("Cannot parse hotkey: ") + tb.Text);
                 return false;
             }
 
