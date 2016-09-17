@@ -13,7 +13,9 @@ namespace Shadowsocks
 {
     static class Program
     {
-        static ShadowsocksController controller;
+        private static ShadowsocksController _controller;
+        // XXX: Don't change this name
+        private static MenuViewController _viewController;
 
         /// <summary>
         /// 应用程序的主入口点。
@@ -37,6 +39,7 @@ namespace Shadowsocks
                 SystemEvents.PowerModeChanged += SystemEvents_PowerModeChanged;
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
+                Application.ApplicationExit += (sender, args) => HotKeys.Destroy();
 
                 if (!mutex.WaitOne(0, false))
                 {
@@ -61,9 +64,10 @@ namespace Shadowsocks
 #else
                 Logging.OpenLogFile();
 #endif
-                controller = new ShadowsocksController();
-                MenuViewController viewController = new MenuViewController(controller);
-                controller.Start();
+                _controller = new ShadowsocksController();
+                _viewController = new MenuViewController(_controller);
+                HotKeys.Init();
+                _controller.Start();
                 Application.Run();
             }
         }
@@ -88,10 +92,10 @@ namespace Shadowsocks
             {
                 case PowerModes.Resume:
                     Logging.Info("os wake up");
-                    controller?.Start();
+                    _controller?.Start();
                     break;
                 case PowerModes.Suspend:
-                    controller?.Stop();
+                    _controller?.Stop();
                     Logging.Info("os suspend");
                     break;
             }
@@ -99,10 +103,10 @@ namespace Shadowsocks
 
         private static void Application_ApplicationExit(object sender, EventArgs e)
         {
-            if (controller != null)
+            if (_controller != null)
             {
-                controller.Stop();
-                controller = null;
+                _controller.Stop();
+                _controller = null;
             }
         }
     }

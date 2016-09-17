@@ -16,8 +16,7 @@ namespace Shadowsocks.Encryption
 
         protected static byte[] tempbuf = new byte[MAX_INPUT_SIZE];
 
-        protected Dictionary<string, Dictionary<string, int[]>> ciphers;
-        protected Dictionary<string, int[]> ciphersDetail;
+        protected Dictionary<string, EncryptorInfo> ciphers;
 
         private static readonly ConcurrentDictionary<string, byte[]> CachedKeys = new ConcurrentDictionary<string, byte[]>();
         protected byte[] _encryptIV;
@@ -28,7 +27,7 @@ namespace Shadowsocks.Encryption
         protected int _cipher;
         // cipher name in MbedTLS, useless when using LibSodium
         protected string _cipherMbedName;
-        protected int[] _cipherInfo;
+        protected EncryptorInfo _cipherInfo;
         protected byte[] _key;
         protected int keyLen;
         protected int ivLen;
@@ -39,7 +38,7 @@ namespace Shadowsocks.Encryption
             InitKey(method, password);
         }
 
-        protected abstract Dictionary<string, Dictionary<string, int[]>> getCiphers();
+        protected abstract Dictionary<string, EncryptorInfo> getCiphers();
 
         private void InitKey(string method, string password)
         {
@@ -47,16 +46,15 @@ namespace Shadowsocks.Encryption
             _method = method;
             string k = method + ":" + password;
             ciphers = getCiphers();
-            ciphersDetail = ciphers[_method];
-            _cipherMbedName = ciphersDetail.Keys.FirstOrDefault();
-            _cipherInfo = ciphers[_method][_cipherMbedName];
-            _cipher = _cipherInfo[2];
+            _cipherInfo = ciphers[_method];
+            _cipherMbedName = _cipherInfo.name;
+            _cipher = _cipherInfo.type;
             if (_cipher == 0)
             {
                 throw new Exception("method not found");
             }
-            keyLen = _cipherInfo[0];
-            ivLen = _cipherInfo[1];
+            keyLen = _cipherInfo.key_size;
+            ivLen = _cipherInfo.iv_size;
             _key = CachedKeys.GetOrAdd(k, (nk) =>
             {
                 byte[] passbuf = Encoding.UTF8.GetBytes(password);

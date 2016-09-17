@@ -27,6 +27,7 @@ Verbose Logging=詳細記錄日誌
 Updates...=更新...
 Check for Updates...=檢查更新
 Check for Updates at Startup=啟動時檢查更新
+Edit Hotkeys...=編輯熱鍵...
 About...=關於...
 Quit=退出
 Edit Servers=編輯伺服器
@@ -84,12 +85,23 @@ Edit Online PAC URL=編輯在線 PAC 網址
 Edit Online PAC URL...=編輯在線 PAC 網址...
 Please input PAC Url=請輸入 PAC 網址
 
+# HotkeySettings Form
+
+Switch system proxy=切换系統代理狀態
+Switch to PAC mode=切换為PAC模式
+Switch to Global mode=切换為全局模式
+Switch share over LAN=切换局域網共享
+Show Logs=顯示日誌
+Switch to prev server=切换上個伺服器
+Switch to next server=切换下個伺服器
+Reg All=註冊全部熱鍵
+
 # Messages
 
 Shadowsocks Error: {0}=Shadowsocks 錯誤: {0}
 Port already in use=連接埠號碼已被占用
 Illegal port number format=非法連接埠號碼格式
-Please add at least one server=請新增至少壹個伺服器
+Please add at least one server=請新增至少一個伺服器
 Server IP can not be blank=伺服器 IP 不能為空
 Password can not be blank=密碼不能為空
 Port out of range=連接埠號碼超出範圍
@@ -107,7 +119,7 @@ No updates found. Please report to GFWList if you have problems with it.=未發�
 No QRCode found. Try to zoom in or move it to the center of the screen.=未發現 QR 碼，嘗試把它放大或移動到靠近屏幕中間的位置
 Shadowsocks is already running.=Shadowsocks 已經在運行。
 Find Shadowsocks icon in your notify tray.=請在工作列裏尋找 Shadowsocks 圖標。
-If you want to start multiple Shadowsocks, make a copy in another directory.=如果想同時啟動多個，可以另外復制壹份到別的目錄。
+If you want to start multiple Shadowsocks, make a copy in another directory.=如果想同時啟動多個，可以另外復制一份到別的目錄。
 Failed to decode QRCode=無法解析 QR 碼
 Failed to update registry=無法修改登錄檔
 System Proxy On: =系統代理已啟用：
@@ -116,3 +128,5 @@ Unexpected error, shadowsocks will exit. Please report to=非預期錯誤，Shad
 Unsupported operating system, use Windows Vista at least.=不支持的作業系統版本，最低需求為Windows Vista。
 Proxy request failed=代理請求失敗
 Proxy handshake failed=代理握手失敗
+Register hotkey failed=註冊熱鍵失敗
+Cannot parse hotkey: {0}=解析熱鍵失敗: {0}

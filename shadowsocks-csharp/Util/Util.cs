@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using Microsoft.Win32;
@@ -9,6 +11,20 @@ using Shadowsocks.Controller;
 
 namespace Shadowsocks.Util
 {
+    public struct BandwidthScaleInfo
+    {
+        public float value;
+        public string unit_name;
+        public long unit;
+
+        public BandwidthScaleInfo(float value, string unit_name, long unit)
+        {
+            this.value = value;
+            this.unit_name = unit_name;
+            this.unit = unit;
+        }
+    }
+
     public class Utils
     {
         private static bool? _portableMode;
@@ -114,7 +130,7 @@ namespace Shadowsocks.Util
         public static string FormatBandwidth(long n)
         {
             var result = GetBandwidthScale(n);
-            return $"{result.Item1:0.##}{result.Item2}";
+            return $"{result.value:0.##}{result.unit_name}";
         }
 
         public static string FormatBytes(long bytes)
@@ -127,32 +143,32 @@ namespace Shadowsocks.Util
             const long E = P * 1024L;
 
             if (bytes >= P * 990)
-                return (bytes / (double)E).ToString("F5") + "EB";
+                return (bytes / (double)E).ToString("F5") + "EiB";
             if (bytes >= T * 990)
-                return (bytes / (double)P).ToString("F5") + "PB";
+                return (bytes / (double)P).ToString("F5") + "PiB";
             if (bytes >= G * 990)
-                return (bytes / (double)T).ToString("F5") + "TB";
+                return (bytes / (double)T).ToString("F5") + "TiB";
             if (bytes >= M * 990)
             {
-                return (bytes / (double)G).ToString("F4") + "GB";
+                return (bytes / (double)G).ToString("F4") + "GiB";
             }
             if (bytes >= M * 100)
             {
-                return (bytes / (double)M).ToString("F1") + "MB";
+                return (bytes / (double)M).ToString("F1") + "MiB";
             }
             if (bytes >= M * 10)
             {
-                return (bytes / (double)M).ToString("F2") + "MB";
+                return (bytes / (double)M).ToString("F2") + "MiB";
             }
             if (bytes >= K * 990)
             {
-                return (bytes / (double)M).ToString("F3") + "MB";
+                return (bytes / (double)M).ToString("F3") + "MiB";
             }
             if (bytes > K * 2)
             {
-                return (bytes / (double)K).ToString("F1") + "KB";
+                return (bytes / (double)K).ToString("F1") + "KiB";
             }
-            return bytes.ToString();
+            return bytes.ToString() + "B";
         }
 
         /// <summary>
@@ -160,11 +176,9 @@ namespace Shadowsocks.Util
         /// </summary>
         /// <param name="n">Raw bandwidth</param>
         /// <returns>
-        /// Item1: float, bandwidth with suitable scale (eg. 56)
-        /// Item2: string, scale unit name (eg. KiB)
-        /// Item3: long, scale unit (eg. 1024)
+        /// The BandwidthScaleInfo struct
         /// </returns>
-        public static Tuple<float, string, long> GetBandwidthScale(long n)
+        public static BandwidthScaleInfo GetBandwidthScale(long n)
         {
             long scale = 1;
             float f = n;
@@ -193,7 +207,7 @@ namespace Shadowsocks.Util
                 scale <<= 10;
                 unit = "TiB";
             }
-            return new Tuple<float, string, long>(f, unit, scale);
+            return new BandwidthScaleInfo(f, unit, scale);
         }
 
         public static RegistryKey OpenUserRegKey( string name, bool writable ) {
