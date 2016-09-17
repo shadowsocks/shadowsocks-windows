@@ -70,9 +70,9 @@
             // btnOK
             // 
             this.btnOK.DialogResult = System.Windows.Forms.DialogResult.OK;
-            this.btnOK.Location = new System.Drawing.Point(381, 10);
+            this.btnOK.Location = new System.Drawing.Point(333, 10);
             this.btnOK.Name = "btnOK";
-            this.btnOK.Size = new System.Drawing.Size(75, 31);
+            this.btnOK.Size = new System.Drawing.Size(123, 31);
             this.btnOK.TabIndex = 0;
             this.btnOK.Text = "OK";
             this.btnOK.UseVisualStyleBackColor = true;
@@ -81,9 +81,9 @@
             // btnCancel
             // 
             this.btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.btnCancel.Location = new System.Drawing.Point(300, 10);
+            this.btnCancel.Location = new System.Drawing.Point(204, 10);
             this.btnCancel.Name = "btnCancel";
-            this.btnCancel.Size = new System.Drawing.Size(75, 31);
+            this.btnCancel.Size = new System.Drawing.Size(123, 31);
             this.btnCancel.TabIndex = 1;
             this.btnCancel.Text = "Cancel";
             this.btnCancel.UseVisualStyleBackColor = true;
@@ -92,9 +92,9 @@
             // btnRegisterAll
             // 
             this.btnRegisterAll.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.btnRegisterAll.Location = new System.Drawing.Point(219, 10);
+            this.btnRegisterAll.Location = new System.Drawing.Point(75, 10);
             this.btnRegisterAll.Name = "btnRegisterAll";
-            this.btnRegisterAll.Size = new System.Drawing.Size(75, 31);
+            this.btnRegisterAll.Size = new System.Drawing.Size(123, 31);
             this.btnRegisterAll.TabIndex = 2;
             this.btnRegisterAll.Text = "Reg All";
             this.btnRegisterAll.UseVisualStyleBackColor = true;
