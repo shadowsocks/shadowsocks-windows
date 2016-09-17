@@ -46,7 +46,7 @@ namespace Shadowsocks.Controller
                 this._local = socket;
                 try
                 {
-                    EndPoint remoteEP = SocketUtil.GetEndPoint("localhost", targetPort);
+                    EndPoint remoteEP = SocketUtil.GetEndPoint("127.0.0.1", targetPort);
 
                     // Connect to the remote endpoint.
                     _remote = new WrappedSocket();
