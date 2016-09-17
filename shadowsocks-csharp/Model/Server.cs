@@ -7,7 +7,7 @@ using Shadowsocks.Controller;
 namespace Shadowsocks.Model
 {
     [Serializable]
-    public class Server
+    public class Server: ICloneable
     {
         public static readonly Regex
             UrlFinder = new Regex("^ss://((?:[A-Za-z0-9+/]+)|((?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?))$",
@@ -86,6 +86,19 @@ namespace Shadowsocks.Model
         public string Identifier()
         {
             return server + ':' + server_port;
+        }
+
+        public object Clone()
+        {
+            return new Server
+            {
+                server = server,
+                server_port = server_port,
+                password = password,
+                method = method,
+                remarks = remarks,
+                auth = auth,
+            };
         }
     }
 }
