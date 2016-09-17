@@ -336,16 +336,13 @@ namespace Shadowsocks.View
                 return;
             }
 
-            if (ServersListBox.SelectedIndex >= 0 && ServersListBox.SelectedIndex < _modifiedConfiguration.configs.Count)
-            {
-                Server selectedServer = _modifiedConfiguration.configs[ServersListBox.SelectedIndex];
-                Server clone = (Server)selectedServer.Clone();
+            Server selectedServer = controller.GetCurrentServer();
+            Server clone = (Server)selectedServer.Clone();
 
-                _modifiedConfiguration.configs.Add(clone);
-                LoadConfiguration(_modifiedConfiguration);
-                ServersListBox.SelectedIndex = _modifiedConfiguration.configs.Count - 1;
-                _lastSelectedIndex = ServersListBox.SelectedIndex;
-            }
+            _modifiedConfiguration.configs.Add(clone);
+            LoadConfiguration(_modifiedConfiguration);
+            ServersListBox.SelectedIndex = _modifiedConfiguration.configs.Count - 1;
+            _lastSelectedIndex = ServersListBox.SelectedIndex;
         }
     }
 }
