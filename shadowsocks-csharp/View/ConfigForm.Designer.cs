@@ -56,6 +56,7 @@
             this.ProxyPortLabel = new System.Windows.Forms.Label();
             this.tableLayoutPanel3 = new System.Windows.Forms.TableLayoutPanel();
             this.tableLayoutPanel4 = new System.Windows.Forms.TableLayoutPanel();
+            this.DuplicateButton = new System.Windows.Forms.Button();
             this.tableLayoutPanel1.SuspendLayout();
             this.ServerGroupBox.SuspendLayout();
             this.tableLayoutPanel2.SuspendLayout();
@@ -332,7 +333,7 @@
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel2.Size = new System.Drawing.Size(438, 265);
+            this.tableLayoutPanel2.Size = new System.Drawing.Size(438, 296);
             this.tableLayoutPanel2.TabIndex = 7;
             // 
             // tableLayoutPanel6
@@ -345,7 +346,7 @@
             this.tableLayoutPanel6.Controls.Add(this.MoveDownButton, 1, 0);
             this.tableLayoutPanel6.Controls.Add(this.MoveUpButton, 0, 0);
             this.tableLayoutPanel6.Dock = System.Windows.Forms.DockStyle.Top;
-            this.tableLayoutPanel6.Location = new System.Drawing.Point(0, 233);
+            this.tableLayoutPanel6.Location = new System.Drawing.Point(0, 264);
             this.tableLayoutPanel6.Margin = new System.Windows.Forms.Padding(0);
             this.tableLayoutPanel6.Name = "tableLayoutPanel6";
             this.tableLayoutPanel6.RowCount = 1;
@@ -398,13 +399,13 @@
             this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 27F));
             this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 27F));
             this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 27F));
-            this.tableLayoutPanel5.Size = new System.Drawing.Size(196, 33);
+            this.tableLayoutPanel5.Size = new System.Drawing.Size(196, 64);
             this.tableLayoutPanel5.TabIndex = 9;
             // 
             // ProxyPortTextBox
             // 
             this.ProxyPortTextBox.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.ProxyPortTextBox.Location = new System.Drawing.Point(77, 6);
+            this.ProxyPortTextBox.Location = new System.Drawing.Point(77, 21);
             this.ProxyPortTextBox.MaxLength = 10;
             this.ProxyPortTextBox.Name = "ProxyPortTextBox";
             this.ProxyPortTextBox.Size = new System.Drawing.Size(113, 21);
@@ -415,7 +416,7 @@
             // 
             this.ProxyPortLabel.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.ProxyPortLabel.AutoSize = true;
-            this.ProxyPortLabel.Location = new System.Drawing.Point(6, 10);
+            this.ProxyPortLabel.Location = new System.Drawing.Point(6, 26);
             this.ProxyPortLabel.Name = "ProxyPortLabel";
             this.ProxyPortLabel.Size = new System.Drawing.Size(65, 12);
             this.ProxyPortLabel.TabIndex = 3;
@@ -432,7 +433,7 @@
             this.tableLayoutPanel3.Controls.Add(this.MyCancelButton, 1, 0);
             this.tableLayoutPanel3.Controls.Add(this.OKButton, 0, 0);
             this.tableLayoutPanel3.Dock = System.Windows.Forms.DockStyle.Right;
-            this.tableLayoutPanel3.Location = new System.Drawing.Point(279, 236);
+            this.tableLayoutPanel3.Location = new System.Drawing.Point(279, 267);
             this.tableLayoutPanel3.Margin = new System.Windows.Forms.Padding(3, 3, 0, 3);
             this.tableLayoutPanel3.Name = "tableLayoutPanel3";
             this.tableLayoutPanel3.RowCount = 1;
@@ -447,16 +448,30 @@
             this.tableLayoutPanel4.ColumnCount = 2;
             this.tableLayoutPanel4.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tableLayoutPanel4.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tableLayoutPanel4.Controls.Add(this.DuplicateButton, 0, 1);
             this.tableLayoutPanel4.Controls.Add(this.DeleteButton, 1, 0);
             this.tableLayoutPanel4.Controls.Add(this.AddButton, 0, 0);
             this.tableLayoutPanel4.Dock = System.Windows.Forms.DockStyle.Top;
             this.tableLayoutPanel4.Location = new System.Drawing.Point(0, 200);
             this.tableLayoutPanel4.Margin = new System.Windows.Forms.Padding(0);
             this.tableLayoutPanel4.Name = "tableLayoutPanel4";
-            this.tableLayoutPanel4.RowCount = 1;
+            this.tableLayoutPanel4.RowCount = 2;
             this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel4.Size = new System.Drawing.Size(166, 32);
+            this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel4.Size = new System.Drawing.Size(166, 64);
             this.tableLayoutPanel4.TabIndex = 8;
+            // 
+            // DuplicateButton
+            // 
+            this.DuplicateButton.Dock = System.Windows.Forms.DockStyle.Left;
+            this.DuplicateButton.Location = new System.Drawing.Point(0, 38);
+            this.DuplicateButton.Margin = new System.Windows.Forms.Padding(0, 6, 3, 3);
+            this.DuplicateButton.Name = "DuplicateButton";
+            this.DuplicateButton.Size = new System.Drawing.Size(80, 23);
+            this.DuplicateButton.TabIndex = 10;
+            this.DuplicateButton.Text = "Dupli&cate";
+            this.DuplicateButton.UseVisualStyleBackColor = true;
+            this.DuplicateButton.Click += new System.EventHandler(this.DuplicateButton_Click);
             // 
             // ConfigForm
             // 
@@ -526,6 +541,7 @@
         private System.Windows.Forms.Button MoveDownButton;
         private System.Windows.Forms.Button MoveUpButton;
         private System.Windows.Forms.CheckBox OneTimeAuth;
+        private System.Windows.Forms.Button DuplicateButton;
     }
 }
 

@@ -39,6 +39,7 @@ Choose by statistics=根據統計
 
 &Add=新增(&A)
 &Delete=移除(&D)
+Dupli&cate=複製(&C)
 Server=伺服器
 Server Addr=伺服器位址
 Server Port=伺服器連接埠
