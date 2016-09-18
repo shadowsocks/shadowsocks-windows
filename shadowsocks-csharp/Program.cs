@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using System.Windows.Forms;
+using Microsoft.Win32;
 #if !_CONSOLE
 using Shadowsocks.View;
 #endif
@@ -14,6 +15,11 @@ namespace Shadowsocks
 {
     static class Program
     {
+        static ShadowsocksController _controller;
+#if !_CONSOLE
+        static MenuViewController _viewController;
+#endif
+
         /// <summary>
         /// 应用程序的主入口点。
         /// </summary>
@@ -24,6 +30,8 @@ namespace Shadowsocks
             using (Mutex mutex = new Mutex(false, "Global\\ShadowsocksR_" + Application.StartupPath.GetHashCode()))
             {
                 Application.EnableVisualStyles();
+                Application.ApplicationExit += Application_ApplicationExit;
+                SystemEvents.PowerModeChanged += SystemEvents_PowerModeChanged;
                 Application.SetCompatibleTextRenderingDefault(false);
 
                 if (!mutex.WaitOne(0, false))
@@ -38,23 +46,75 @@ namespace Shadowsocks
 //#if !DEBUG
                 Logging.OpenLogFile();
 //#endif
-                ShadowsocksController controller = new ShadowsocksController();
+                _controller = new ShadowsocksController();
 
 #if !_CONSOLE
-                MenuViewController viewController = new MenuViewController(controller);
+                _viewController = new MenuViewController(_controller);
 #endif
 
-                controller.Start();
+                _controller.Start();
 
 #if !_CONSOLE
-                Util.Utils.ReleaseMemory();
+                //Util.Utils.ReleaseMemory();
 
                 Application.Run();
             }
 #else
             Console.ReadLine();
-            controller.Stop();
+            _controller.Stop();
 #endif
+        }
+
+        private static void SystemEvents_PowerModeChanged(object sender, PowerModeChangedEventArgs e)
+        {
+            switch (e.Mode)
+            {
+                case PowerModes.Resume:
+                    if (_controller != null)
+                    {
+                        System.Timers.Timer timer = new System.Timers.Timer(5 * 1000);
+                        timer.Elapsed += Timer_Elapsed;
+                        timer.AutoReset = false;
+                        timer.Enabled = true;
+                        timer.Start();
+                    }
+                    break;
+                case PowerModes.Suspend:
+                    _controller?.Stop();
+                    break;
+            }
+        }
+
+        private static void Timer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+        {
+            try
+            {
+                _controller?.Start();
+            }
+            catch (Exception ex)
+            {
+                Logging.LogUsefulException(ex);
+            }
+            finally
+            {
+                try
+                {
+                    System.Timers.Timer timer = (System.Timers.Timer)sender;
+                    timer.Enabled = false;
+                    timer.Stop();
+                    timer.Dispose();
+                }
+                catch (Exception ex)
+                {
+                    Logging.LogUsefulException(ex);
+                }
+            }
+        }
+
+        private static void Application_ApplicationExit(object sender, EventArgs e)
+        {
+            _controller?.Stop();
+            _controller = null;
         }
     }
 }

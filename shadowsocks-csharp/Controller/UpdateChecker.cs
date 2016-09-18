@@ -13,16 +13,15 @@ namespace Shadowsocks.Controller
 {
     public class UpdateChecker
     {
-        //private const string UpdateURL = "https://sourceforge.net/api/file/index/project-id/1817190/path/dist/mtime/desc/limit/10/rss";
-        private const string UpdateURL = "https://raw.github.com/breakwa11/shadowsocks-rss/master/update/ssr-win-3.8.xml";
+        private const string UpdateURL = "https://raw.githubusercontent.com/breakwa11/breakwa11.github.io/master/update/ssr-win-3.8.xml";
 
         public string LatestVersionNumber;
         public string LatestVersionURL;
         public event EventHandler NewVersionFound;
 
         public const string Name = "ShadowsocksR";
-        public const string Copyright = "Copyright © BreakWall 2015";
-        public const string Version = "3.8.8.0";
+        public const string Copyright = "Copyright © BreakWall 2016";
+        public const string Version = "3.8.9.0";
         public const string FullVersion = Version + "";
 
         private static bool UseProxy = true;

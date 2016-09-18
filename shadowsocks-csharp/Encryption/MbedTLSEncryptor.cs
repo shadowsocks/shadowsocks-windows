@@ -21,19 +21,19 @@ namespace Shadowsocks.Encryption
         }
 
         private static Dictionary<string, EncryptorInfo> _ciphers = new Dictionary<string, EncryptorInfo> {
-            { "aes-128-cfb", new EncryptorInfo(16, 16, true, CIPHER_AES, 0, "AES-128-CFB128") },
-            { "aes-192-cfb", new EncryptorInfo(24, 16, true, CIPHER_AES, 0, "AES-192-CFB128") },
-            { "aes-256-cfb", new EncryptorInfo(32, 16, true, CIPHER_AES, 0, "AES-256-CFB128") },
-            { "aes-128-ctr", new EncryptorInfo(16, 16, true, CIPHER_AES, 0, "AES-128-CTR") },
-            { "aes-192-ctr", new EncryptorInfo(24, 16, true, CIPHER_AES, 0, "AES-192-CTR") },
-            { "aes-256-ctr", new EncryptorInfo(32, 16, true, CIPHER_AES, 0, "AES-256-CTR") },
-            { "bf-cfb", new EncryptorInfo(16, 8, true, CIPHER_BLOWFISH, 0, "BLOWFISH-CFB64") },
-            { "camellia-128-cfb", new EncryptorInfo(16, 16, true, CIPHER_CAMELLIA, 0, "CAMELLIA-128-CFB128") },
-            { "camellia-192-cfb", new EncryptorInfo(24, 16, true, CIPHER_CAMELLIA, 0, "CAMELLIA-192-CFB128") },
-            { "camellia-256-cfb", new EncryptorInfo(32, 16, true, CIPHER_CAMELLIA, 0, "CAMELLIA-256-CFB128") },
-            { "rc4", new EncryptorInfo(16, 16, false, CIPHER_RC4, 0, "ARC4-128") },
-            { "rc4-md5", new EncryptorInfo(16, 16, true, CIPHER_RC4, 0, "ARC4-128") },
-            { "rc4-md5-6", new EncryptorInfo(16, 6, true, CIPHER_RC4, 0, "ARC4-128") },
+            { "aes-128-cfb", new EncryptorInfo(16, 16, true, CIPHER_AES, "AES-128-CFB128") },
+            { "aes-192-cfb", new EncryptorInfo(24, 16, true, CIPHER_AES, "AES-192-CFB128") },
+            { "aes-256-cfb", new EncryptorInfo(32, 16, true, CIPHER_AES, "AES-256-CFB128") },
+            { "aes-128-ctr", new EncryptorInfo(16, 16, true, CIPHER_AES, "AES-128-CTR") },
+            { "aes-192-ctr", new EncryptorInfo(24, 16, true, CIPHER_AES, "AES-192-CTR") },
+            { "aes-256-ctr", new EncryptorInfo(32, 16, true, CIPHER_AES, "AES-256-CTR") },
+            { "bf-cfb", new EncryptorInfo(16, 8, true, CIPHER_BLOWFISH, "BLOWFISH-CFB64") },
+            { "camellia-128-cfb", new EncryptorInfo(16, 16, true, CIPHER_CAMELLIA, "CAMELLIA-128-CFB128") },
+            { "camellia-192-cfb", new EncryptorInfo(24, 16, true, CIPHER_CAMELLIA, "CAMELLIA-192-CFB128") },
+            { "camellia-256-cfb", new EncryptorInfo(32, 16, true, CIPHER_CAMELLIA, "CAMELLIA-256-CFB128") },
+            { "rc4", new EncryptorInfo(16, 16, false, CIPHER_RC4, "ARC4-128") },
+            { "rc4-md5", new EncryptorInfo(16, 16, true, CIPHER_RC4, "ARC4-128") },
+            { "rc4-md5-6", new EncryptorInfo(16, 6, true, CIPHER_RC4, "ARC4-128") },
         };
 
         public static List<string> SupportedCiphers()

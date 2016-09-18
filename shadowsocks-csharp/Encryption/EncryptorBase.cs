@@ -5,20 +5,18 @@ namespace Shadowsocks.Encryption
 {
     public struct EncryptorInfo
     {
-        public int iv_size;
         public int key_size;
+        public int iv_size;
         public bool display;
         public int type;
-        public int ctx_size;
         public string name;
 
-        public EncryptorInfo(int key, int iv, bool display, int type, int ctx = 0, string name = "")
+        public EncryptorInfo(int key, int iv, bool display, int type, string name = "")
         {
             key_size = key;
             iv_size = iv;
             this.display = display;
             this.type = type;
-            ctx_size = ctx;
             this.name = name;
         }
     }

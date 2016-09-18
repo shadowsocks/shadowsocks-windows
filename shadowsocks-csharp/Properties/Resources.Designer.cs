@@ -226,7 +226,7 @@ namespace Shadowsocks.Properties {
         ///Start on Boot=開機啟動
         ///Allow Clients from LAN=允許來自局域網的連接
         ///Enable balance=伺服器負載均衡
-        ///Same host for same address=優先相同節點連接同壹地址
+        ///Same host for same address=優先相同節點連接同一地址
         ///Enable domain white list(http proxy only)=使用域名白名單(僅http代理)
         ///Local PAC=使用本地 PAC
         ///Online PAC=使用在線 PAC

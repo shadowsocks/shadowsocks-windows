@@ -144,10 +144,9 @@ namespace Shadowsocks.Controller
         //protected Socket remote;
         protected ProxySocket remote;
         protected ProxySocket remoteUDP;
-        protected IPEndPoint remoteUDPEndPoint;
         protected DnsQuery dns;
         // Size of receive buffer.
-        protected const int RecvSize = 16384;
+        protected const int RecvSize = 8192;
         protected const int BufferSize = RecvSize + 1024;
         protected const int AutoSwitchOffErrorTimes = 5;
         // remote header send buffer
@@ -157,16 +156,13 @@ namespace Shadowsocks.Controller
 
         protected DateTime lastKeepTime;
 
-        protected byte[] remoteUDPRecvBuffer = new byte[RecvSize * 2];
+        protected byte[] remoteUDPRecvBuffer = new byte[RecvSize];
         protected int remoteUDPRecvBufferLength = 0;
         protected object recvUDPoverTCPLock = new object();
 
         protected bool closed = false;
 
-        protected bool connectionTCPIdle;
-        protected bool connectionUDPIdle;
-        protected bool remoteTCPIdle;
-        protected bool remoteUDPIdle;
+        protected bool connectionTCPIdle, connectionUDPIdle, remoteTCPIdle, remoteUDPIdle;
         protected int remoteRecvCount = 0;
         protected int connectionRecvCount = 0;
 
@@ -496,16 +492,6 @@ namespace Shadowsocks.Controller
         private void BeginConnect(IPAddress ipAddress, int serverPort)
         {
             IPEndPoint remoteEP = new IPEndPoint(ipAddress, serverPort);
-            if (server.server_udp_port == 0)
-            {
-                IPEndPoint _remoteEP = new IPEndPoint(ipAddress, serverPort);
-                remoteUDPEndPoint = remoteEP;
-            }
-            else
-            {
-                IPEndPoint _remoteEP = new IPEndPoint(ipAddress, server.server_udp_port);
-                remoteUDPEndPoint = _remoteEP;
-            }
 
             if (cfg.socks5RemotePort != 0
                 || connectionUDP == null
@@ -537,6 +523,16 @@ namespace Shadowsocks.Controller
                     remoteUDP.SetEncryptor(EncryptorFactory.GetEncryptor(server.method, server.password));
                     remoteUDP.SetProtocol(ObfsFactory.GetObfs(server.protocol));
                     remoteUDP.SetObfs(ObfsFactory.GetObfs(server.obfs));
+                    if (server.server_udp_port == 0 || cfg.socks5RemotePort != 0)
+                    {
+                        IPEndPoint _remoteEP = new IPEndPoint(ipAddress, serverPort);
+                        remoteUDP.SetUdpEndPoint(_remoteEP);
+                    }
+                    else
+                    {
+                        IPEndPoint _remoteEP = new IPEndPoint(ipAddress, server.server_udp_port);
+                        remoteUDP.SetUdpEndPoint(_remoteEP);
+                    }
                 }
                 catch (SocketException)
                 {
@@ -725,13 +721,13 @@ namespace Shadowsocks.Controller
             if (cfg.proxyType == 0)
             {
                 bool ret = remote.ConnectSocks5ProxyServer(strRemoteHost, iRemotePort, connectionUDP != null && !server.udp_over_tcp, cfg.socks5RemoteUsername, cfg.socks5RemotePassword);
-                remoteUDPEndPoint = remote.GetProxyUdpEndPoint();
                 remote.SetTcpServer(server.server, server.server_port);
                 remote.SetUdpServer(server.server, server.server_udp_port == 0 ? server.server_port : server.server_udp_port);
                 if (remoteUDP != null)
                 {
                     remoteUDP.GoS5Proxy = true;
                     remoteUDP.SetUdpServer(server.server, server.server_udp_port == 0 ? server.server_port : server.server_udp_port);
+                    remoteUDP.SetUdpEndPoint(remote.GetProxyUdpEndPoint());
                 }
                 return ret;
             }
@@ -1204,10 +1200,7 @@ namespace Shadowsocks.Controller
             List<byte[]> buffer_list = new List<byte[]>();
             lock (recvUDPoverTCPLock)
             {
-                if (bytesToSend + remoteUDPRecvBufferLength > remoteUDPRecvBuffer.Length)
-                {
-                    Array.Resize(ref remoteUDPRecvBuffer, bytesToSend + remoteUDPRecvBufferLength);
-                }
+                Util.Utils.SetArrayMinSize(ref remoteUDPRecvBuffer, bytesToSend + remoteUDPRecvBufferLength);
                 Array.Copy(send_buffer, 0, remoteUDPRecvBuffer, remoteUDPRecvBufferLength, bytesToSend);
                 remoteUDPRecvBufferLength += bytesToSend;
                 while (remoteUDPRecvBufferLength > 6)
@@ -1443,7 +1436,7 @@ namespace Shadowsocks.Controller
         private void RemoteSendto(byte[] bytes, int length)
         {
             int send_len;
-            send_len = remoteUDP.BeginSendTo(bytes, length, SocketFlags.None, remoteUDPEndPoint, new AsyncCallback(PipeRemoteUDPSendCallback), null);
+            send_len = remoteUDP.BeginSendTo(bytes, length, SocketFlags.None, new AsyncCallback(PipeRemoteUDPSendCallback), null);
             server.ServerSpeedLog().AddUploadBytes(send_len, DateTime.Now);
             speedTester.AddUploadSize(send_len);
         }

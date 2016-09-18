@@ -165,6 +165,12 @@ namespace Shadowsocks.Controller
             return ret;
         }
 
+        public void MergeConfiguration(Configuration mergeConfig)
+        {
+            MergeConfiguration(_config, mergeConfig.configs);
+            SaveConfig(_config);
+        }
+
         public void SaveServers(List<Server> servers, int localPort)
         {
             List<Server> missingServers = MergeConfiguration(_config, servers);

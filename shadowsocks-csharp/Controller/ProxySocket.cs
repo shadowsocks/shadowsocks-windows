@@ -32,8 +32,10 @@ namespace Shadowsocks.Controller
         protected string _proxy_server;
         protected int _proxy_udp_port;
 
-        private byte[] SendEncryptBuffer = new byte[65536];
-        private byte[] ReceiveDecryptBuffer = new byte[65536 * 2];
+        protected const int RecvSize = 2048;
+
+        private byte[] SendEncryptBuffer = new byte[RecvSize];
+        private byte[] ReceiveDecryptBuffer = new byte[RecvSize * 2];
 
         protected bool _close;
 
@@ -194,6 +196,7 @@ namespace Shadowsocks.Controller
                     byte[] remoteRecvObfsBuffer = _obfs.ClientDecode(st.buffer, bytesRead, out obfsRecvSize, out sendback);
                     if (obfsRecvSize > 0)
                     {
+                        Util.Utils.SetArrayMinSize(ref ReceiveDecryptBuffer, obfsRecvSize);
                         _encryptor.Decrypt(remoteRecvObfsBuffer, obfsRecvSize, ReceiveDecryptBuffer, out bytesToSend);
                         int outlength;
                         byte[] buffer = _protocol.ClientPostDecrypt(ReceiveDecryptBuffer, bytesToSend, out outlength);
@@ -223,6 +226,7 @@ namespace Shadowsocks.Controller
             {
                 int outlength;
                 byte[] bytesToEncrypt = _protocol.ClientPreEncrypt(buffer, size, out outlength);
+                Util.Utils.SetArrayMinSize(ref SendEncryptBuffer, outlength + 32);
                 _encryptor.Encrypt(bytesToEncrypt, outlength, SendEncryptBuffer, out bytesToSend);
                 obfsBuffer = _obfs.ClientEncode(SendEncryptBuffer, bytesToSend, out obfsSendSize);
                 _socket.BeginSend(obfsBuffer, 0, obfsSendSize, 0, callback, st);
@@ -373,7 +377,7 @@ namespace Shadowsocks.Controller
             return bytesRead;
         }
 
-        public int BeginSendTo(byte[] buffer, int size, SocketFlags flags, EndPoint ep, AsyncCallback callback, object state)
+        public int BeginSendTo(byte[] buffer, int size, SocketFlags flags, AsyncCallback callback, object state)
         {
             CallbackState st = new CallbackState();
             st.buffer = buffer;
@@ -439,7 +443,7 @@ namespace Shadowsocks.Controller
                 bytesToSend = bytesToEncrypt.Length;
                 Array.Copy(bytesToEncrypt, connetionSendBuffer, bytesToSend);
             }
-            _socket.BeginSendTo(connetionSendBuffer, 0, bytesToSend, flags, ep, callback, st);
+            _socket.BeginSendTo(connetionSendBuffer, 0, bytesToSend, flags, _remoteUDPEndPoint, callback, st);
             return bytesToSend;
         }
 
@@ -678,6 +682,11 @@ namespace Shadowsocks.Controller
         {
             _proxy_server = server;
             _proxy_udp_port = port;
+        }
+
+        public void SetUdpEndPoint(IPEndPoint ep)
+        {
+            _remoteUDPEndPoint = ep;
         }
 
         public bool ConnectHttpProxyServer(string strRemoteHost, int iRemotePort, string socks5RemoteUsername, string socks5RemotePassword, string proxyUserAgent)

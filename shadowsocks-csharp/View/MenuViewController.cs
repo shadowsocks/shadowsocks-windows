@@ -32,13 +32,9 @@ namespace Shadowsocks.View
         private MenuItem enableItem;
         private MenuItem modeItem;
         private MenuItem SeperatorItem;
-        //private MenuItem ConfigItem;
         private MenuItem ServersItem;
         private MenuItem globalModeItem;
         private MenuItem PACModeItem;
-        //private MenuItem editLocalPACItem;
-        //private MenuItem updateFromGFWListItem;
-        //private MenuItem editGFWUserRuleItem;
         private MenuItem SelectRandomItem;
         private MenuItem sameHostForSameTargetItem;
         private MenuItem httpWhiteListItem;
@@ -59,7 +55,6 @@ namespace Shadowsocks.View
             controller.ConfigChanged += controller_ConfigChanged;
             controller.PACFileReadyToOpen += controller_FileReadyToOpen;
             controller.UserRuleFileReadyToOpen += controller_FileReadyToOpen;
-            //controller.ShareOverLANStatusChanged += controller_ShareOverLANStatusChanged;
             controller.Errored += controller_Errored;
             controller.UpdatePACFromGFWListCompleted += controller_UpdatePACFromGFWListCompleted;
             controller.UpdatePACFromGFWListError += controller_UpdatePACFromGFWListError;
@@ -83,7 +78,7 @@ namespace Shadowsocks.View
                 ShowConfigForm(false);
             }
 
-            timerDelayCheckUpdate = new System.Timers.Timer(1000 * 10.0);
+            timerDelayCheckUpdate = new System.Timers.Timer(1000.0 * 10);
             timerDelayCheckUpdate.Elapsed += timer_Elapsed;
             timerDelayCheckUpdate.Start();
         }
@@ -93,11 +88,14 @@ namespace Shadowsocks.View
             updateChecker.CheckUpdate(controller.GetConfiguration());
             if (timerDelayCheckUpdate != null)
             {
-                timerDelayCheckUpdate.Elapsed -= timer_Elapsed;
-                timerDelayCheckUpdate.Stop();
-                timerDelayCheckUpdate = new System.Timers.Timer(1000.0 * 60 * 60 * 2);
-                timerDelayCheckUpdate.Elapsed += timer_Elapsed;
-                timerDelayCheckUpdate.Start();
+                if (timerDelayCheckUpdate.Interval <= 1000.0 * 30)
+                {
+                    timerDelayCheckUpdate.Interval = 1000.0 * 60 * 5;
+                }
+                else
+                {
+                    timerDelayCheckUpdate.Interval = 1000.0 * 60 * 60 * 2;
+                }
             }
         }
 
@@ -206,28 +204,30 @@ namespace Shadowsocks.View
                 ServersItem = CreateMenuGroup("Servers", new MenuItem[] {
                     SeperatorItem = new MenuItem("-"),
                     CreateMenuItem("Edit Servers...", new EventHandler(this.Config_Click)),
+                    CreateMenuItem("Import servers from file...", new EventHandler(this.Import_Click)),
+                    new MenuItem("-"),
+                    sameHostForSameTargetItem = CreateMenuItem("Same host for same address", new EventHandler(this.SelectSameHostForSameTargetItem_Click)),
+                    httpWhiteListItem = CreateMenuItem("Enable domain white list(http proxy only)", new EventHandler(this.HttpWhiteListItem_Click)),
+                    new MenuItem("-"),
+                    CreateMenuItem("Server Statistic...", new EventHandler(this.ShowServerLogItem_Click)),
+                    CreateMenuItem("Disconnect Current", new EventHandler(this.DisconnectCurrent_Click)),
                     //CreateMenuItem("Show QRCode...", new EventHandler(this.QRCodeItem_Click)),
                 }),
                 SelectRandomItem = CreateMenuItem("Enable balance", new EventHandler(this.SelectRandomItem_Click)),
                 CreateMenuItem("Global Settings...", new EventHandler(this.Setting_Click)),
-                new MenuItem("-"),
-                sameHostForSameTargetItem = CreateMenuItem("Same host for same address", new EventHandler(this.SelectSameHostForSameTargetItem_Click)),
-                httpWhiteListItem = CreateMenuItem("Enable domain white list(http proxy only)", new EventHandler(this.HttpWhiteListItem_Click)),
                 UpdateItem = CreateMenuItem("Update available", new EventHandler(this.UpdateItem_Clicked)),
                 new MenuItem("-"),
                 CreateMenuItem("Scan QRCode from Screen...", new EventHandler(this.ScanQRCodeItem_Click)),
                 CreateMenuItem("Copy Address from clipboard...", new EventHandler(this.CopyAddress_Click)),
                 new MenuItem("-"),
-                CreateMenuItem("Server Statistic...", new EventHandler(this.ShowServerLogItem_Click)),
-                CreateMenuItem("Disconnect Current", new EventHandler(this.DisconnectCurrent_Click)),
                 CreateMenuGroup("Help", new MenuItem[] {
                     CreateMenuItem("Check Update", new EventHandler(this.CheckUpdate_Click)),
                     CreateMenuItem("Show Logs...", new EventHandler(this.ShowLogItem_Click)),
+                    CreateMenuItem("Open Wiki...", new EventHandler(this.OpenWiki_Click)),
                     CreateMenuItem("Feedback...", new EventHandler(this.FeedbackItem_Click)),
                     CreateMenuItem("About...", new EventHandler(this.AboutItem_Click)),
                     CreateMenuItem("Donate...", new EventHandler(this.DonateItem_Click)),
                 }),
-                new MenuItem("-"),
                 CreateMenuItem("Quit", new EventHandler(this.Quit_Click))
             });
             this.UpdateItem.Visible = false;
@@ -338,18 +338,38 @@ namespace Shadowsocks.View
             }
 
             Configuration configuration = controller.GetConfiguration();
+            SortedDictionary<string, MenuItem> group = new SortedDictionary<string, MenuItem>();
             for (int i = 0; i < configuration.configs.Count; i++)
             {
+                string group_name;
                 Server server = configuration.configs[i];
+                if (server.group == null || server.group.Length == 0)
+                    group_name = "!(no group)";
+                else
+                    group_name = server.group;
+
                 MenuItem item = new MenuItem(server.FriendlyName());
                 item.Tag = i;
                 item.Click += AServerItem_Click;
-                items.Add(i, item);
-            }
+                if (configuration.index == i)
+                    item.Checked = true;
 
-            if (configuration.index >= 0 && configuration.index < configuration.configs.Count)
+                if (group.ContainsKey(group_name))
+                {
+                    group[group_name].MenuItems.Add(item);
+                }
+                else
+                {
+                    group[group_name] = new MenuItem(group_name, new MenuItem[1] { item });
+                }
+            }
             {
-                items[configuration.index].Checked = true;
+                int i = 0;
+                foreach (KeyValuePair<string, MenuItem> pair in group)
+                {
+                    items.Add(i, pair.Value);
+                    ++i;
+                }
             }
         }
 
@@ -451,6 +471,25 @@ namespace Shadowsocks.View
             }
         }
 
+        private void Import_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog dlg = new OpenFileDialog();
+            dlg.InitialDirectory = System.Windows.Forms.Application.StartupPath;
+            if (dlg.ShowDialog() == DialogResult.OK)
+            {
+                string name = dlg.FileName;
+                Configuration cfg = Configuration.LoadFile(name);
+                if (cfg.configs.Count == 1 && cfg.configs[0].server == Configuration.GetDefaultServer().server)
+                {
+                    MessageBox.Show("Load config file failed", "ShadowsocksR");
+                }
+                else
+                {
+                    controller.MergeConfiguration(cfg);
+                }
+            }
+        }
+
         private void Setting_Click(object sender, EventArgs e)
         {
             ShowSettingForm();
@@ -477,6 +516,11 @@ namespace Shadowsocks.View
             }
             _notifyIcon.Visible = false;
             Application.Exit();
+        }
+
+        private void OpenWiki_Click(object sender, EventArgs e)
+        {
+            Process.Start("https://github.com/breakwa11/shadowsocks-rss/wiki");
         }
 
         private void FeedbackItem_Click(object sender, EventArgs e)
@@ -575,22 +619,22 @@ namespace Shadowsocks.View
 
         private void UpdatePACFromLanIPListItem_Click(object sender, EventArgs e)
         {
-            controller.UpdatePACFromOnlinePac("https://raw.githubusercontent.com/breakwa11/gfw_whitelist/master/ssr/ss_lanip.pac");
+            controller.UpdatePACFromOnlinePac("https://raw.githubusercontent.com/breakwa11/breakwa11.github.io/master/ssr/ss_lanip.pac");
         }
 
         private void UpdatePACFromCNWhiteListItem_Click(object sender, EventArgs e)
         {
-            controller.UpdatePACFromOnlinePac("https://raw.githubusercontent.com/breakwa11/gfw_whitelist/master/ssr/ss_white.pac");
+            controller.UpdatePACFromOnlinePac("https://raw.githubusercontent.com/breakwa11/breakwa11.github.io/master/ssr/ss_white.pac");
         }
 
         private void UpdatePACFromCNOnlyListItem_Click(object sender, EventArgs e)
         {
-            controller.UpdatePACFromOnlinePac("https://raw.githubusercontent.com/breakwa11/gfw_whitelist/master/ssr/ss_r_white.pac");
+            controller.UpdatePACFromOnlinePac("https://raw.githubusercontent.com/breakwa11/breakwa11.github.io/master/ssr/ss_white_r.pac");
         }
 
         private void UpdatePACFromCNIPListItem_Click(object sender, EventArgs e)
         {
-            controller.UpdatePACFromOnlinePac("https://raw.githubusercontent.com/breakwa11/gfw_whitelist/master/ssr/ss_cnip.pac");
+            controller.UpdatePACFromOnlinePac("https://raw.githubusercontent.com/breakwa11/breakwa11.github.io/master/ssr/ss_cnip.pac");
         }
 
         private void EditUserRuleFileForGFWListItem_Click(object sender, EventArgs e)

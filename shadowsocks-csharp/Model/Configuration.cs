@@ -504,11 +504,11 @@ namespace Shadowsocks.Model
             };
         }
 
-        public static Configuration Load()
+        public static Configuration LoadFile(string filename)
         {
             try
             {
-                string configContent = File.ReadAllText(CONFIG_FILE);
+                string configContent = File.ReadAllText(filename);
                 Configuration config = SimpleJson.SimpleJson.DeserializeObject<Configuration>(configContent, new JsonSerializerStrategy());
                 if (config.localPort == 0)
                 {
@@ -547,6 +547,11 @@ namespace Shadowsocks.Model
                     portMap = new Dictionary<string, object>()
                 };
             }
+        }
+
+        public static Configuration Load()
+        {
+            return LoadFile(CONFIG_FILE);
         }
 
         public static void Save(Configuration config)

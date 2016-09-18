@@ -94,15 +94,15 @@ namespace Shadowsocks.View
             //TextLink.Font = new_font;
             //TextUDPPort.Font = new_font;
 
-            int font_height = 9;
-            EncryptionSelect.Height = EncryptionSelect.Height - font_height + font_height * dpi_mul / 4;
-            TCPProtocolComboBox.Height = TCPProtocolComboBox.Height - font_height + font_height * dpi_mul / 4;
-            ObfsCombo.Height = ObfsCombo.Height - font_height + font_height * dpi_mul / 4;
+            //int font_height = 9;
+            //EncryptionSelect.Height = EncryptionSelect.Height - font_height + font_height * dpi_mul / 4;
+            //TCPProtocolComboBox.Height = TCPProtocolComboBox.Height - font_height + font_height * dpi_mul / 4;
+            //ObfsCombo.Height = ObfsCombo.Height - font_height + font_height * dpi_mul / 4;
 
-            //MyCancelButton.Height = MyCancelButton.Height * dpi_mul / 4;
-            MyCancelButton.Width = MyCancelButton.Width * dpi_mul / 4;
-            OKButton.Width = OKButton.Width * dpi_mul / 4;
-            //OKButton.Height = OKButton.Height * dpi_mul / 4;
+            ////MyCancelButton.Height = MyCancelButton.Height * dpi_mul / 4;
+            //MyCancelButton.Width = MyCancelButton.Width * dpi_mul / 4;
+            //OKButton.Width = OKButton.Width * dpi_mul / 4;
+            ////OKButton.Height = OKButton.Height * dpi_mul / 4;
 
             DrawLogo(350 * dpi_mul / 4);
         }

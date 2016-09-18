@@ -232,6 +232,22 @@ namespace Shadowsocks.Util
             return data;
         }
 
+        public static void SetArrayMinSize<T>(ref T[] array, int size)
+        {
+            if (size > array.Length)
+            {
+                Array.Resize(ref array, size);
+            }
+        }
+
+        public static void SetArrayMinSize2<T>(ref T[] array, int size)
+        {
+            if (size > array.Length)
+            {
+                Array.Resize(ref array, size * 2);
+            }
+        }
+
         public static int GetDpiMul()
         {
             int dpi;

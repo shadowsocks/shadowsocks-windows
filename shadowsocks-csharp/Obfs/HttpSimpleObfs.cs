@@ -430,10 +430,7 @@ namespace Shadowsocks.Obfs
                     }
                     foreach (byte[] data in data_sent_buffer)
                     {
-                        while (outdata.Length < outlength + data.Length)
-                        {
-                            Array.Resize(ref outdata, outdata.Length * 2);
-                        }
+                        Util.Utils.SetArrayMinSize2(ref outdata, outlength + data.Length);
                         Array.Copy(data, 0, outdata, outlength, data.Length);
                         SentLength += data.Length;
                         outlength += data.Length;
