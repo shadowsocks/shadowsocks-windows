@@ -146,8 +146,8 @@ namespace Shadowsocks.Controller
         protected ProxySocket remoteUDP;
         protected DnsQuery dns;
         // Size of receive buffer.
-        protected const int RecvSize = 8192;
-        protected const int BufferSize = RecvSize + 1024;
+        protected const int RecvSize = 4096;
+        protected const int BufferSize = 16384;
         protected const int AutoSwitchOffErrorTimes = 5;
         // remote header send buffer
         protected byte[] remoteHeaderSendBuffer;
@@ -156,7 +156,7 @@ namespace Shadowsocks.Controller
 
         protected DateTime lastKeepTime;
 
-        protected byte[] remoteUDPRecvBuffer = new byte[RecvSize];
+        protected byte[] remoteUDPRecvBuffer = new byte[BufferSize];
         protected int remoteUDPRecvBufferLength = 0;
         protected object recvUDPoverTCPLock = new object();
 
@@ -934,7 +934,7 @@ namespace Shadowsocks.Controller
             if (connection != null && connectionTCPIdle)
             {
                 connectionTCPIdle = false;
-                byte[] buffer = new byte[RecvSize * 2];
+                byte[] buffer = new byte[BufferSize];
                 connection.BeginReceive(buffer, 0, RecvSize, 0,
                     new AsyncCallback(PipeConnectionReceiveCallback), buffer);
             }
@@ -956,11 +956,11 @@ namespace Shadowsocks.Controller
             if (connectionUDP != null && connectionUDPIdle)
             {
                 connectionUDPIdle = false;
-                const int RecvSize = 65536;
+                const int BufferSize = 65536;
                 IPEndPoint sender = new IPEndPoint(connectionUDP.AddressFamily == AddressFamily.InterNetworkV6 ? IPAddress.IPv6Any : IPAddress.Any, 0);
                 EndPoint tempEP = (EndPoint)sender;
-                byte[] buffer = new byte[RecvSize];
-                connectionUDP.BeginReceiveFrom(buffer, 0, RecvSize, SocketFlags.None, ref tempEP,
+                byte[] buffer = new byte[BufferSize];
+                connectionUDP.BeginReceiveFrom(buffer, 0, BufferSize, SocketFlags.None, ref tempEP,
                     new AsyncCallback(PipeConnectionUDPReceiveCallback), buffer);
             }
         }
@@ -983,7 +983,7 @@ namespace Shadowsocks.Controller
             if (remote != null && remoteTCPIdle)
             {
                 remoteTCPIdle = false;
-                remote.BeginReceive(new byte[RecvSize * 2], RecvSize, 0,
+                remote.BeginReceive(new byte[BufferSize], RecvSize, 0,
                     new AsyncCallback(PipeRemoteReceiveCallback), null);
             }
         }
@@ -1009,10 +1009,10 @@ namespace Shadowsocks.Controller
             if (remoteUDP != null && remoteUDPIdle)
             {
                 remoteUDPIdle = false;
-                const int RecvSize = 65536;
+                const int BufferSize = 65536;
                 IPEndPoint sender = new IPEndPoint(remoteUDP.AddressFamily == AddressFamily.InterNetworkV6 ? IPAddress.IPv6Any : IPAddress.Any, 0);
                 EndPoint tempEP = (EndPoint)sender;
-                remoteUDP.BeginReceiveFrom(new byte[RecvSize], RecvSize, SocketFlags.None, ref tempEP,
+                remoteUDP.BeginReceiveFrom(new byte[BufferSize], BufferSize, SocketFlags.None, ref tempEP,
                     new AsyncCallback(PipeRemoteUDPReceiveCallback), null);
             }
         }
@@ -1289,7 +1289,7 @@ namespace Shadowsocks.Controller
                     }
                     else //if (bytesRead > 0)
                     {
-                        byte[] remoteSendBuffer = new byte[BufferSize * 2];
+                        byte[] remoteSendBuffer = new byte[BufferSize];
 
                         Array.Copy(remote.GetAsyncResultBuffer(ar), remoteSendBuffer, bytesRead);
                         if (connectionUDP == null)
@@ -1461,7 +1461,7 @@ namespace Shadowsocks.Controller
                         ResetTimeout(cfg.TTL);
                         return;
                     }
-                    byte[] connetionRecvBuffer = new byte[RecvSize * 2];
+                    byte[] connetionRecvBuffer = new byte[BufferSize];
                     Array.Copy((byte[])ar.AsyncState, 0, connetionRecvBuffer, 0, bytesRead);
                     if (State == ConnectState.CONNECTED)
                     {
