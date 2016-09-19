@@ -20,7 +20,7 @@ namespace Shadowsocks.Controller
         public event EventHandler NewVersionFound;
 
         public const string Name = "ShadowsocksR";
-        public const string Copyright = "Copyright © BreakWall 2016";
+        public const string Copyright = "Copyright © BreakWall 2016. Fork from Shadowsocks by clowwindy";
         public const string Version = "3.8.9.0";
         public const string FullVersion = Version + "";
 

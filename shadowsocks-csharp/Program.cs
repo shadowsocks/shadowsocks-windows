@@ -29,6 +29,7 @@ namespace Shadowsocks
 #if !_CONSOLE
             using (Mutex mutex = new Mutex(false, "Global\\ShadowsocksR_" + Application.StartupPath.GetHashCode()))
             {
+                AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
                 Application.EnableVisualStyles();
                 Application.ApplicationExit += Application_ApplicationExit;
                 SystemEvents.PowerModeChanged += SystemEvents_PowerModeChanged;
@@ -115,6 +116,19 @@ namespace Shadowsocks
         {
             _controller?.Stop();
             _controller = null;
+        }
+
+        private static int exited = 0;
+        private static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
+        {
+            if (Interlocked.Increment(ref exited) == 1)
+            {
+                Logging.Log(LogLevel.Error, e.ExceptionObject?.ToString());
+                MessageBox.Show(I18N.GetString("Unexpected error, ShadowsocksR will exit.") +
+                    Environment.NewLine + (e.ExceptionObject?.ToString()),
+                    "Shadowsocks Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Application.Exit();
+            }
         }
     }
 }

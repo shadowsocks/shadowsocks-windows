@@ -58,6 +58,7 @@
     <Prefer32Bit>false</Prefer32Bit>
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
+  <PropertyGroup />
   <PropertyGroup>
     <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
@@ -196,7 +197,7 @@
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="View\ServerLogForm.cs">
-      <SubType>Component</SubType>
+      <SubType>Form</SubType>
     </Compile>
     <Compile Include="View\ServerLogForm.Designer.cs">
       <DependentUpon>ServerLogForm.cs</DependentUpon>

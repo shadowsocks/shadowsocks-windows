@@ -29,7 +29,7 @@ namespace Shadowsocks.View
             controller.ConfigChanged += controller_ConfigChanged;
 
             int dpi_mul = Util.Utils.GetDpiMul();
-            int font_height = 9;
+            //int font_height = 9;
             //Font new_font = new Font("Arial", (float)(9.0 * dpi_mul / 4));
             //this.Font = new_font;
 

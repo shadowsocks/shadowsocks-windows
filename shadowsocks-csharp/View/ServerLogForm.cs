@@ -12,21 +12,21 @@ using System.Threading;
 
 namespace Shadowsocks.View
 {
-    class DoubleBufferListView : DataGridView
-    {
-        public DoubleBufferListView()
-        {
-            SetStyle( ControlStyles.DoubleBuffer
-                    | ControlStyles.OptimizedDoubleBuffer
-                    | ControlStyles.UserPaint
-                    | ControlStyles.AllPaintingInWmPaint
-                    , true);
-            UpdateStyles();
-        }
-    }
-
     public partial class ServerLogForm : Form
     {
+        class DoubleBufferListView : DataGridView
+        {
+            public DoubleBufferListView()
+            {
+                SetStyle(ControlStyles.DoubleBuffer
+                        | ControlStyles.OptimizedDoubleBuffer
+                        | ControlStyles.UserPaint
+                        | ControlStyles.AllPaintingInWmPaint
+                        , true);
+                UpdateStyles();
+            }
+        }
+
         private ShadowsocksController controller;
         private ContextMenu contextMenu1;
         private MenuItem topmostItem;
@@ -47,6 +47,7 @@ namespace Shadowsocks.View
             this.controller = controller;
             this.Icon = Icon.FromHandle(Resources.ssw128.GetHicon());
             InitializeComponent();
+
             this.Width = 810;
             int dpi_mul = Util.Utils.GetDpiMul();
 

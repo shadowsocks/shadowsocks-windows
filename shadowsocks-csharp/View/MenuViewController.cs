@@ -191,6 +191,7 @@ namespace Shadowsocks.View
                 }),
                 CreateMenuGroup("PAC ", new MenuItem[] {
                     CreateMenuItem("Update Local PAC from Lan IP List", new EventHandler(this.UpdatePACFromLanIPListItem_Click)),
+                    new MenuItem("-"),
                     CreateMenuItem("Update Local PAC from Chn White List", new EventHandler(this.UpdatePACFromCNWhiteListItem_Click)),
                     CreateMenuItem("Update Local PAC from Chn IP List", new EventHandler(this.UpdatePACFromCNIPListItem_Click)),
                     CreateMenuItem("Update Local PAC from GFWList", new EventHandler(this.UpdatePACFromGFWListItem_Click)),
@@ -339,12 +340,14 @@ namespace Shadowsocks.View
 
             Configuration configuration = controller.GetConfiguration();
             SortedDictionary<string, MenuItem> group = new SortedDictionary<string, MenuItem>();
+            const string def_group = "!(no group)";
+            string select_group = "";
             for (int i = 0; i < configuration.configs.Count; i++)
             {
                 string group_name;
                 Server server = configuration.configs[i];
                 if (server.group == null || server.group.Length == 0)
-                    group_name = "!(no group)";
+                    group_name = def_group;
                 else
                     group_name = server.group;
 
@@ -352,7 +355,10 @@ namespace Shadowsocks.View
                 item.Tag = i;
                 item.Click += AServerItem_Click;
                 if (configuration.index == i)
+                {
                     item.Checked = true;
+                    select_group = group_name;
+                }
 
                 if (group.ContainsKey(group_name))
                 {
@@ -367,6 +373,18 @@ namespace Shadowsocks.View
                 int i = 0;
                 foreach (KeyValuePair<string, MenuItem> pair in group)
                 {
+                    if (pair.Key == def_group)
+                    {
+                        pair.Value.Text = "(empty group)";
+                    }
+                    if (pair.Key == select_group)
+                    {
+                        pair.Value.Text = "● " + pair.Value.Text;
+                    }
+                    else
+                    {
+                        pair.Value.Text = "　" + pair.Value.Text;
+                    }
                     items.Add(i, pair.Value);
                     ++i;
                 }

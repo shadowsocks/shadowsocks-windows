@@ -30,6 +30,15 @@ namespace Shadowsocks.View
         {
             this.Font = System.Drawing.SystemFonts.MessageBoxFont;
             InitializeComponent();
+            try
+            {
+                ServersListBox.Font = new System.Drawing.Font("Consolas", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            }
+            catch
+            {
+                ServersListBox.Font = new System.Drawing.Font("Courier New", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            }
+
 
             this.Icon = Icon.FromHandle(Resources.ssw128.GetHicon());
             this.controller = controller;
