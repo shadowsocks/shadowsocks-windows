@@ -14,6 +14,8 @@ namespace Shadowsocks.Controller
     {
         private const string GFWLIST_URL = "https://raw.githubusercontent.com/gfwlist/gfwlist/master/gfwlist.txt";
 
+        private const string GFWLIST_BACKUP_URL = "https://raw.githubusercontent.com/breakwa11/breakwa11.github.io/master/ssr/gfwlist.txt";
+
         private const string GFWLIST_TEMPLATE_URL = "https://raw.githubusercontent.com/breakwa11/breakwa11.github.io/master/ssr/ss_gfw.pac";
 
         private const string BYPASS_LIST_URL = "https://raw.githubusercontent.com/breakwa11/breakwa11.github.io/master/ssr/ss_bypass.action";
@@ -81,6 +83,10 @@ namespace Shadowsocks.Controller
             try
             {
                 List<string> lines = ParseResult(e.Result);
+                if (lines.Count == 0)
+                {
+                    throw new Exception("Empty GFWList");
+                }
                 if (File.Exists(USER_RULE_FILE))
                 {
                     string local = File.ReadAllText(USER_RULE_FILE, Encoding.UTF8);
@@ -123,7 +129,23 @@ namespace Shadowsocks.Controller
             {
                 if (Error != null)
                 {
-                    Error(this, new ErrorEventArgs(ex));
+                    WebClient http = sender as WebClient;
+                    if (http.BaseAddress.StartsWith(GFWLIST_URL))
+                    {
+                        http.BaseAddress = GFWLIST_BACKUP_URL;
+                        http.DownloadStringAsync(new Uri(GFWLIST_BACKUP_URL + "?rnd=" + random.Next().ToString()));
+                    }
+                    else
+                    {
+                        if (e.Error != null)
+                        {
+                            Error(this, new ErrorEventArgs(e.Error));
+                        }
+                        else
+                        {
+                            Error(this, new ErrorEventArgs(ex));
+                        }
+                    }
                 }
             }
         }
@@ -205,6 +227,7 @@ namespace Shadowsocks.Controller
             {
                 WebClient http = new WebClient();
                 http.Proxy = new WebProxy(IPAddress.Loopback.ToString(), config.localPort);
+                http.BaseAddress = GFWLIST_URL;
                 http.DownloadStringCompleted += http_DownloadStringCompleted;
                 http.DownloadStringAsync(new Uri(GFWLIST_URL + "?rnd=" + random.Next().ToString()));
             }

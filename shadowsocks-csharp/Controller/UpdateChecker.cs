@@ -178,6 +178,10 @@ namespace Shadowsocks.Controller
             }
             catch (Exception ex)
             {
+                if (e.Error != null)
+                {
+                    Logging.Debug(e.Error.ToString());
+                }
                 Logging.Debug(ex.ToString());
                 if (NewVersionFound != null)
                 {
