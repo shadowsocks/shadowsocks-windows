@@ -621,33 +621,34 @@ namespace Shadowsocks.View
                 TextUDPPort.Visible = false;
                 //TCPoverUDPLabel.Visible = false;
                 //CheckTCPoverUDP.Visible = false;
-                UDPoverTCPLabel.Visible = false;
-                CheckUDPoverUDP.Visible = false;
             }
             if (CheckSSR.Checked)
             {
-                TCPProtocolLabel.Visible = true;
-                TCPProtocolComboBox.Visible = true;
-                labelObfs.Visible = true;
-                ObfsCombo.Visible = true;
-                labelObfsParam.Visible = true;
-                TextObfsParam.Visible = true;
+                TCPProtocolLabel.Enabled = true;
+                TCPProtocolComboBox.Enabled = true;
+                labelObfs.Enabled = true;
+                ObfsCombo.Enabled = true;
+                labelObfsParam.Enabled = true;
+                TextObfsParam.Enabled = true;
             }
             else
             {
-                TCPProtocolLabel.Visible = false;
-                TCPProtocolComboBox.Visible = false;
-                labelObfs.Visible = false;
-                ObfsCombo.Visible = false;
-                labelObfsParam.Visible = false;
-                TextObfsParam.Visible = false;
-                UDPoverTCPLabel.Visible = false;
-                CheckUDPoverUDP.Visible = false;
+                TCPProtocolLabel.Enabled = false;
+                TCPProtocolComboBox.Enabled = false;
+                labelObfs.Enabled = false;
+                ObfsCombo.Enabled = false;
+                labelObfsParam.Enabled = false;
+                TextObfsParam.Enabled = false;
             }
             if (CheckSSR.Checked && checkAdvSetting.Checked)
             {
                 UDPoverTCPLabel.Visible = true;
                 CheckUDPoverUDP.Visible = true;
+            }
+            else
+            {
+                UDPoverTCPLabel.Visible = false;
+                CheckUDPoverUDP.Visible = false;
             }
             ResumeLayout();
         }
