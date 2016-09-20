@@ -1,3 +1,7 @@
+3.3.1 2016-09-20
+- Add global hotkey support
+- Bug fixes and improvements
+
 3.3 2016-09-09
 - Update Privoxy to 3.0.26
 - Change minimum system version explicitly to Windows Vista
