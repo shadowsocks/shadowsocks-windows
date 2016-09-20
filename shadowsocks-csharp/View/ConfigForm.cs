@@ -218,9 +218,10 @@ namespace Shadowsocks.View
                 return;
             }
             Server currServer = _modifiedConfiguration.configs[_lastSelectedIndex];
-            _modifiedConfiguration.configs.Add(currServer);
+            var currIndex = _modifiedConfiguration.configs.IndexOf( currServer );
+            _modifiedConfiguration.configs.Insert(currIndex + 1, currServer);
             LoadConfiguration(_modifiedConfiguration);
-            ServersListBox.SelectedIndex = _modifiedConfiguration.configs.Count - 1;
+            ServersListBox.SelectedIndex = currIndex + 1;
             _lastSelectedIndex = ServersListBox.SelectedIndex;
         }
 
