@@ -275,6 +275,10 @@ namespace Shadowsocks.View
                             }
                         }
                     }
+                    Bitmap ngnl = Resources.ngnl;
+                    int div = 11, div_l = 4, div_r = 7;
+                    int l = (m.Width * div_l + div - 1) / div * blockSize, r = (m.Width * div_r + div - 1) / div * blockSize;
+                    g.DrawImage(ngnl, new Rectangle(l + blockSize, l + blockSize, r - l, r - l));
                 }
                 PictureQRcode.Image = drawArea;
                 PictureQRcode.Visible = true;
