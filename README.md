@@ -54,6 +54,37 @@ If you want to manage multiple servers using other tools like SwitchyOmega,
 you can start multiple Shadowsocks instances. To avoid configuration conflicts,
 copy Shadowsocks to a new directory and choose a different local port.
 
+#### Global hotkeys
+
+Hotkeys are NOT registered automatically. You should re-register all hotkeys after
+restarting Shadowsocks. If you are using multiple instances of Shadowsocks,
+you must set different key combination for other instances.
+
+##### How to input?
+
+1. Put focus in the corresponding textbox.
+2. Press the key combination that you want to use.
+3. Release all keys when you think it is ready.
+4. Your input appears in the textbox.
+
+##### How to change?
+
+1. Put focus in the corresponding textbox.
+2. Press BackSpace key to clear content.
+3. Re-input new key combination.
+
+##### How to deactivate?
+
+1. Clear content in the textbox that you want to deactivate,
+if you want to deactivate all, please clear all textboxes.
+2. Press OK button to confirm.
+
+##### Meaning of label color
+
+- Green: This key combination is not occupied by other programs and register successfully.
+- Yellow: This key combination is occupied by other programs and you have to change to another one.
+- Transparent without color: The initial status.
+
 #### Server Configuration
 
 Please visit [Servers] for more information.
