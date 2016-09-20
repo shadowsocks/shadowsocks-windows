@@ -23,8 +23,8 @@ namespace Shadowsocks.Controller
         protected IPEndPoint _remoteUDPEndPoint;
 
         protected IEncryptor _encryptor;
-        protected object _encryptionLock = new object();
-        protected object _decryptionLock = new object();
+        //protected object _encryptionLock = new object();
+        //protected object _decryptionLock = new object();
         public IObfs _protocol;
         public IObfs _obfs;
         //protected object obfsLock = new object();
@@ -111,9 +111,9 @@ namespace Shadowsocks.Controller
                 _obfs = null;
             }
 
-            lock (_encryptionLock)
+            //lock (_encryptionLock)
             {
-                lock (_decryptionLock)
+                //lock (_decryptionLock)
                 {
                     if (_encryptor != null)
                         ((IDisposable)_encryptor).Dispose();
@@ -189,7 +189,7 @@ namespace Shadowsocks.Controller
                 CallbackState st = (CallbackState)ar.AsyncState;
                 st.size = bytesRead;
 
-                lock (_decryptionLock)
+                //lock (_decryptionLock)
                 {
                     int bytesToSend = 0;
                     int obfsRecvSize;
@@ -222,7 +222,7 @@ namespace Shadowsocks.Controller
             int bytesToSend = 0;
             int obfsSendSize;
             byte[] obfsBuffer;
-            lock (_encryptionLock)
+            //lock (_encryptionLock)
             {
                 int outlength;
                 byte[] bytesToEncrypt = _protocol.ClientPreEncrypt(buffer, size, out outlength);
@@ -356,7 +356,7 @@ namespace Shadowsocks.Controller
                 }
                 byte[] remoteSendBuffer = new byte[65536];
                 byte[] obfsBuffer;
-                lock (_decryptionLock)
+                //lock (_decryptionLock)
                 {
                     byte[] decryptBuffer = new byte[65536];
                     _encryptor.ResetDecrypt();
@@ -390,7 +390,7 @@ namespace Shadowsocks.Controller
 
             bytesToEncrypt = new byte[length];
             Array.Copy(buffer, bytes_beg, bytesToEncrypt, 0, length);
-            lock (_encryptionLock)
+            //lock (_encryptionLock)
             {
                 _encryptor.ResetEncrypt();
                 _protocol.SetServerInfoIV(_encryptor.getIV());
