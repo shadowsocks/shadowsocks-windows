@@ -388,7 +388,8 @@
             "verify_sha1",
             "auth_sha1",
             "auth_sha1_v2",
-            "auth_sha1_v3"});
+            "auth_sha1_v3",
+            "auth_sha1_v4"});
             this.TCPProtocolComboBox.Location = new System.Drawing.Point(108, 151);
             this.TCPProtocolComboBox.Name = "TCPProtocolComboBox";
             this.TCPProtocolComboBox.Size = new System.Drawing.Size(233, 25);
@@ -613,7 +614,7 @@
             this.ServersListBox.Dock = System.Windows.Forms.DockStyle.Fill;
             this.ServersListBox.FormattingEnabled = true;
             this.ServersListBox.IntegralHeight = false;
-            this.ServersListBox.ItemHeight = 15;
+            this.ServersListBox.ItemHeight = 17;
             this.ServersListBox.Location = new System.Drawing.Point(0, 0);
             this.ServersListBox.Margin = new System.Windows.Forms.Padding(0);
             this.ServersListBox.Name = "ServersListBox";
