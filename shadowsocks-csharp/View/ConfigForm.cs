@@ -322,11 +322,13 @@ namespace Shadowsocks.View
                     )
                 {
                     CheckSSR.Checked = false;
+                    CheckSSR.Enabled = true;
                     checkAdvSetting.Checked = false;
                 }
                 else
                 {
                     CheckSSR.Checked = true;
+                    CheckSSR.Enabled = false;
                 }
 
                 if (checkSSRLink.Checked && CheckSSR.Checked)

@@ -698,9 +698,6 @@ namespace Shadowsocks.Controller
                     connectionUDP = null;
                 }
 
-                getCurrentServer = null;
-                keepCurrentServer = null;
-
                 detector = null;
                 speedTester = null;
                 random = null;
