@@ -564,15 +564,7 @@ namespace Shadowsocks.View
 
         private void notifyIcon1_Click(object sender, MouseEventArgs e)
         {
-            if (e.Button == MouseButtons.Left)
-            {
-                // Easter egg
-                _notifyIcon.BalloonTipTitle = "Keep a low profile";
-                _notifyIcon.BalloonTipText = "If you want to keep a secret, you must also hide it from yourself.";
-                _notifyIcon.BalloonTipIcon = ToolTipIcon.Warning;
-                _notifyIcon.ShowBalloonTip(5 * 1000);
-            }
-            else if (e.Button == MouseButtons.Middle)
+            if ( e.Button == MouseButtons.Middle )
             {
                 ShowLogForm();
             }
