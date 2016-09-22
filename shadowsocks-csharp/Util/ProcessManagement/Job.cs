@@ -14,7 +14,7 @@ namespace Shadowsocks.Util.ProcessManagement
         [DllImport("kernel32.dll", CharSet = CharSet.Unicode)]
         private static extern IntPtr CreateJobObject(IntPtr a, string lpName);
 
-        [DllImport("kernel32.dll")]
+        [DllImport("kernel32.dll", SetLastError = true)]
         private static extern bool SetInformationJobObject(IntPtr hJob, JobObjectInfoType infoType, IntPtr lpJobObjectInfo, UInt32 cbJobObjectInfoLength);
 
         [DllImport("kernel32.dll", SetLastError = true)]
