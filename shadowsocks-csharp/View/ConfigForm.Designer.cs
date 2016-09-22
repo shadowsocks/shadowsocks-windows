@@ -383,13 +383,13 @@
             this.TCPProtocolComboBox.FormattingEnabled = true;
             this.TCPProtocolComboBox.Items.AddRange(new object[] {
             "origin",
-            "verify_simple",
             "verify_deflate",
             "verify_sha1",
             "auth_sha1",
             "auth_sha1_v2",
             "auth_sha1_v3",
-            "auth_sha1_v4"});
+            "auth_sha1_v4",
+            "auth_aes128"});
             this.TCPProtocolComboBox.Location = new System.Drawing.Point(108, 151);
             this.TCPProtocolComboBox.Name = "TCPProtocolComboBox";
             this.TCPProtocolComboBox.Size = new System.Drawing.Size(233, 25);

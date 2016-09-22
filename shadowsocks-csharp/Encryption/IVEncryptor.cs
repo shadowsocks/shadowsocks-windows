@@ -36,6 +36,15 @@ namespace Shadowsocks.Encryption
 
         protected abstract Dictionary<string, EncryptorInfo> getCiphers();
 
+        public override bool SetIV(byte[] iv)
+        {
+            if (iv != null && iv.Length == ivLen)
+            {
+                iv.CopyTo(_iv, 0);
+                return true;
+            }
+            return false;
+        }
         public override byte[] getIV()
         {
             return _iv;

@@ -705,7 +705,6 @@ namespace Shadowsocks.Controller
 
                 server = null;
                 select_server = null;
-                cfg = null;
             }
             catch (Exception e)
             {
@@ -748,7 +747,7 @@ namespace Shadowsocks.Controller
             {
                 if (server.DnsBuffer().isExpired(host))
                 {
-                    if (dns_servers != null)
+                    if (dns_servers != null && dns_servers.Length > 0)
                     {
                         OpenDNS.Types[] types;
                         //if (false)

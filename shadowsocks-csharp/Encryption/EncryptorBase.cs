@@ -40,7 +40,7 @@ namespace Shadowsocks.Encryption
             byte[] hash = MbedTLS.MD5(inputBytes);
             return hash;
         }
-
+        public abstract bool SetIV(byte[] iv);
         public abstract void Encrypt(byte[] buf, int length, byte[] outbuf, out int outlength);
 
         public abstract void Decrypt(byte[] buf, int length, byte[] outbuf, out int outlength);

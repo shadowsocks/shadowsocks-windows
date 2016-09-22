@@ -39,6 +39,9 @@ namespace Shadowsocks.Encryption
         }
 
         private static Dictionary<string, EncryptorInfo> _ciphers = new Dictionary<string, EncryptorInfo> {
+                {"aes-128-cbc", new EncryptorInfo(16, 16, false, CIPHER_AES)},
+                {"aes-192-cbc", new EncryptorInfo(24, 16, false, CIPHER_AES)},
+                {"aes-256-cbc", new EncryptorInfo(32, 16, false, CIPHER_AES)},
                 {"aes-128-cfb", new EncryptorInfo(16, 16, true, CIPHER_AES)},
                 {"aes-192-cfb", new EncryptorInfo(24, 16, true, CIPHER_AES)},
                 {"aes-256-cfb", new EncryptorInfo(32, 16, true, CIPHER_AES)},
