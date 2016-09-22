@@ -764,10 +764,7 @@ namespace Shadowsocks.Obfs
             outlength = 0;
             while (recv_buf_len > 4)
             {
-                byte[] crcdata = new byte[2];
-                crcdata[crcdata.Length - 2] = recv_buf[0];
-                crcdata[crcdata.Length - 1] = recv_buf[1];
-                ulong crc32 = Util.CRC32.CalcCRC32(crcdata, (int)crcdata.Length);
+                ulong crc32 = Util.CRC32.CalcCRC32(recv_buf, 2);
                 if ((uint)((recv_buf[3] << 8) | recv_buf[2]) != ((uint)crc32 & 0xffff))
                 {
                     throw new ObfsException("ClientPostDecrypt data error");
