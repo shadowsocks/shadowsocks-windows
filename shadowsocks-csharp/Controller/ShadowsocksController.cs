@@ -221,9 +221,10 @@ namespace Shadowsocks.Controller
             SaveConfig(_config);
         }
 
-        public void EnableProxy(string proxy, int port)
+        public void EnableProxy(int type, string proxy, int port)
         {
             _config.proxy.useProxy = true;
+            _config.proxy.proxyType = type;
             _config.proxy.proxyServer = proxy;
             _config.proxy.proxyPort = port;
             SaveConfig(_config);
