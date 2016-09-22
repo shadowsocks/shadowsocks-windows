@@ -355,20 +355,18 @@ namespace Shadowsocks.Controller
                     return 0; // drop
                 }
                 byte[] remoteSendBuffer = new byte[65536];
-                int obfsSendSize;
                 byte[] obfsBuffer;
                 lock (_decryptionLock)
                 {
                     byte[] decryptBuffer = new byte[65536];
                     _encryptor.ResetDecrypt();
                     _encryptor.Decrypt(st.buffer, bytesRead, decryptBuffer, out bytesToSend);
-                    decryptBuffer = ParseUDPHeader(decryptBuffer, ref bytesToSend);
+                    obfsBuffer = _protocol.ClientUdpPostDecrypt(decryptBuffer, bytesToSend, out bytesToSend);
+                    decryptBuffer = ParseUDPHeader(obfsBuffer, ref bytesToSend);
                     AddRemoteUDPRecvBufferHeader(decryptBuffer, remoteSendBuffer, ref bytesToSend);
-
-                    obfsBuffer = _protocol.ClientUdpPostDecrypt(remoteSendBuffer, bytesToSend, out obfsSendSize);
                 }
-                Array.Copy(obfsBuffer, 0, st.buffer, 0, obfsSendSize);
-                return obfsSendSize;
+                Array.Copy(remoteSendBuffer, 0, st.buffer, 0, bytesToSend);
+                return bytesToSend;
             }
             else
             {

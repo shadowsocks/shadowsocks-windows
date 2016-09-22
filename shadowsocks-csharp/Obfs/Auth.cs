@@ -1017,6 +1017,27 @@ namespace Shadowsocks.Obfs
             return outdata;
         }
 
+        public override byte[] ClientUdpPreEncrypt(byte[] plaindata, int datalength, out int outlength)
+        {
+            byte[] outdata = new byte[datalength + 4];
+            outlength = datalength + 4;
+            Array.Copy(plaindata, 0, outdata, 0, datalength);
+            ulong adler = Util.Adler32.CalcAdler32(outdata, datalength);
+            BitConverter.GetBytes((uint)adler).CopyTo(outdata, datalength);
+            return outdata;
+        }
+
+        public override byte[] ClientUdpPostDecrypt(byte[] plaindata, int datalength, out int outlength)
+        {
+            if (Util.Adler32.CheckAdler32(plaindata, datalength))
+            {
+                outlength = datalength - 4;
+                return plaindata;
+            }
+            outlength = 0;
+            return plaindata;
+        }
+
         public override void Dispose()
         {
         }
