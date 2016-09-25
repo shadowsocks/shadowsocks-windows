@@ -32,6 +32,7 @@ namespace Shadowsocks.View
         private void UpdateTexts()
         {
             UseProxyCheckBox.Text = I18N.GetString("Use Proxy");
+            ProxyTypeLabel.Text = I18N.GetString("Proxy Type");
             ProxyAddrLabel.Text = I18N.GetString("Proxy Addr");
             ProxyPortLable.Text = I18N.GetString("Proxy Port");
             OKButton.Text = I18N.GetString("OK");
@@ -50,6 +51,7 @@ namespace Shadowsocks.View
             UseProxyCheckBox.Checked = _modifiedConfiguration.useProxy;
             ProxyServerTextBox.Text = _modifiedConfiguration.proxyServer;
             ProxyPortTextBox.Text = _modifiedConfiguration.proxyPort.ToString();
+            ProxyTypeComboBox.SelectedIndex = _modifiedConfiguration.proxyType;
         }
 
         private void OKButton_Click(object sender, EventArgs e)
@@ -58,12 +60,13 @@ namespace Shadowsocks.View
             {
                 try
                 {
+                    var type = ProxyTypeComboBox.SelectedIndex;
                     var proxy = ProxyServerTextBox.Text;
                     var port = int.Parse(ProxyPortTextBox.Text);
                     Configuration.CheckServer(proxy);
                     Configuration.CheckPort(port);
 
-                    controller.EnableProxy(proxy, port);
+                    controller.EnableProxy(type, proxy, port);
                 }
                 catch (FormatException)
                 {
@@ -82,6 +85,7 @@ namespace Shadowsocks.View
             }
 
             _modifiedConfiguration.useProxy = UseProxyCheckBox.Checked;
+            _modifiedConfiguration.proxyType = ProxyTypeComboBox.SelectedIndex;
             _modifiedConfiguration.proxyServer = ProxyServerTextBox.Text;
             var tmpProxyPort = 0;
             int.TryParse(ProxyPortTextBox.Text, out tmpProxyPort);
@@ -112,6 +116,7 @@ namespace Shadowsocks.View
             {
                 ProxyServerTextBox.Enabled = true;
                 ProxyPortTextBox.Enabled = true;
+                ProxyTypeComboBox.Enabled = true;
             }
             else
             {
@@ -119,6 +124,7 @@ namespace Shadowsocks.View
                 ProxyPortTextBox.Clear();
                 ProxyServerTextBox.Enabled = false;
                 ProxyPortTextBox.Enabled = false;
+                ProxyTypeComboBox.Enabled = false;
             }
         }
     }

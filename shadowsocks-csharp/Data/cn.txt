@@ -12,7 +12,7 @@ Servers=服务器
 Edit Servers...=编辑服务器...
 Statistics Config...=统计配置...
 Start on Boot=开机启动
-SOCKS5 Proxy...=SOCKS5代理设置...
+Forward Proxy...=正向代理设置...
 Allow Clients from LAN=允许来自局域网的连接
 Local PAC=使用本地 PAC
 Online PAC=使用在线 PAC
@@ -58,6 +58,7 @@ Move D&own=下移(&O)
 
 Edit Proxy=代理设置
 Use Proxy=使用代理
+Proxy Type=代理类型
 Proxy Addr=代理地址
 Proxy Port=代理端口
 

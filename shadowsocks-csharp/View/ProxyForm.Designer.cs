@@ -38,9 +38,13 @@
             this.ProxyServerTextBox = new System.Windows.Forms.TextBox();
             this.ProxyPortLable = new System.Windows.Forms.Label();
             this.ProxyPortTextBox = new System.Windows.Forms.TextBox();
+            this.tableLayoutPanel4 = new System.Windows.Forms.TableLayoutPanel();
+            this.ProxyTypeLabel = new System.Windows.Forms.Label();
+            this.ProxyTypeComboBox = new System.Windows.Forms.ComboBox();
             this.tableLayoutPanel1.SuspendLayout();
             this.tableLayoutPanel3.SuspendLayout();
             this.tableLayoutPanel2.SuspendLayout();
+            this.tableLayoutPanel4.SuspendLayout();
             this.SuspendLayout();
             // 
             // tableLayoutPanel1
@@ -49,16 +53,18 @@
             this.tableLayoutPanel1.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.tableLayoutPanel1.ColumnCount = 1;
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
-            this.tableLayoutPanel1.Controls.Add(this.tableLayoutPanel3, 0, 2);
+            this.tableLayoutPanel1.Controls.Add(this.tableLayoutPanel3, 0, 3);
             this.tableLayoutPanel1.Controls.Add(this.UseProxyCheckBox, 0, 0);
-            this.tableLayoutPanel1.Controls.Add(this.tableLayoutPanel2, 0, 1);
+            this.tableLayoutPanel1.Controls.Add(this.tableLayoutPanel2, 0, 2);
+            this.tableLayoutPanel1.Controls.Add(this.tableLayoutPanel4, 0, 1);
             this.tableLayoutPanel1.Location = new System.Drawing.Point(15, 15);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
-            this.tableLayoutPanel1.RowCount = 3;
+            this.tableLayoutPanel1.RowCount = 4;
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(395, 87);
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(395, 123);
             this.tableLayoutPanel1.TabIndex = 0;
             // 
             // tableLayoutPanel3
@@ -72,7 +78,7 @@
             this.tableLayoutPanel3.Controls.Add(this.MyCancelButton, 1, 0);
             this.tableLayoutPanel3.Controls.Add(this.OKButton, 0, 0);
             this.tableLayoutPanel3.Dock = System.Windows.Forms.DockStyle.Right;
-            this.tableLayoutPanel3.Location = new System.Drawing.Point(236, 58);
+            this.tableLayoutPanel3.Location = new System.Drawing.Point(236, 94);
             this.tableLayoutPanel3.Margin = new System.Windows.Forms.Padding(3, 3, 0, 3);
             this.tableLayoutPanel3.Name = "tableLayoutPanel3";
             this.tableLayoutPanel3.RowCount = 1;
@@ -129,10 +135,11 @@
             this.tableLayoutPanel2.Controls.Add(this.ProxyServerTextBox, 1, 0);
             this.tableLayoutPanel2.Controls.Add(this.ProxyPortLable, 2, 0);
             this.tableLayoutPanel2.Controls.Add(this.ProxyPortTextBox, 3, 0);
-            this.tableLayoutPanel2.Location = new System.Drawing.Point(3, 25);
+            this.tableLayoutPanel2.Location = new System.Drawing.Point(3, 61);
             this.tableLayoutPanel2.Name = "tableLayoutPanel2";
             this.tableLayoutPanel2.RowCount = 1;
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
             this.tableLayoutPanel2.Size = new System.Drawing.Size(389, 27);
             this.tableLayoutPanel2.TabIndex = 1;
             // 
@@ -174,6 +181,45 @@
             this.ProxyPortTextBox.TabIndex = 3;
             this.ProxyPortTextBox.WordWrap = false;
             // 
+            // tableLayoutPanel4
+            // 
+            this.tableLayoutPanel4.AutoSize = true;
+            this.tableLayoutPanel4.ColumnCount = 2;
+            this.tableLayoutPanel4.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tableLayoutPanel4.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tableLayoutPanel4.Controls.Add(this.ProxyTypeLabel, 0, 0);
+            this.tableLayoutPanel4.Controls.Add(this.ProxyTypeComboBox, 1, 0);
+            this.tableLayoutPanel4.Location = new System.Drawing.Point(3, 25);
+            this.tableLayoutPanel4.Name = "tableLayoutPanel4";
+            this.tableLayoutPanel4.RowCount = 1;
+            this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel4.Size = new System.Drawing.Size(198, 30);
+            this.tableLayoutPanel4.TabIndex = 10;
+            // 
+            // ProxyTypeLabel
+            // 
+            this.ProxyTypeLabel.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.ProxyTypeLabel.AutoSize = true;
+            this.ProxyTypeLabel.Location = new System.Drawing.Point(3, 9);
+            this.ProxyTypeLabel.Name = "ProxyTypeLabel";
+            this.ProxyTypeLabel.Size = new System.Drawing.Size(65, 12);
+            this.ProxyTypeLabel.TabIndex = 1;
+            this.ProxyTypeLabel.Text = "Proxy Type";
+            // 
+            // ProxyTypeComboBox
+            // 
+            this.ProxyTypeComboBox.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.ProxyTypeComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.ProxyTypeComboBox.FormattingEnabled = true;
+            this.ProxyTypeComboBox.Items.AddRange(new object[] {
+            "SOCKS5",
+            "HTTP"});
+            this.ProxyTypeComboBox.Location = new System.Drawing.Point(74, 5);
+            this.ProxyTypeComboBox.Margin = new System.Windows.Forms.Padding(3, 5, 3, 5);
+            this.ProxyTypeComboBox.Name = "ProxyTypeComboBox";
+            this.ProxyTypeComboBox.Size = new System.Drawing.Size(121, 20);
+            this.ProxyTypeComboBox.TabIndex = 2;
+            // 
             // ProxyForm
             // 
             this.AcceptButton = this.OKButton;
@@ -182,7 +228,7 @@
             this.AutoSize = true;
             this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.CancelButton = this.MyCancelButton;
-            this.ClientSize = new System.Drawing.Size(441, 149);
+            this.ClientSize = new System.Drawing.Size(441, 165);
             this.Controls.Add(this.tableLayoutPanel1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.MaximizeBox = false;
@@ -197,6 +243,8 @@
             this.tableLayoutPanel3.ResumeLayout(false);
             this.tableLayoutPanel2.ResumeLayout(false);
             this.tableLayoutPanel2.PerformLayout();
+            this.tableLayoutPanel4.ResumeLayout(false);
+            this.tableLayoutPanel4.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -214,5 +262,8 @@
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel3;
         private System.Windows.Forms.Button MyCancelButton;
         private System.Windows.Forms.Button OKButton;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel4;
+        private System.Windows.Forms.Label ProxyTypeLabel;
+        private System.Windows.Forms.ComboBox ProxyTypeComboBox;
     }
 }

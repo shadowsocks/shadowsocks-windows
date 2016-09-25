@@ -12,7 +12,7 @@ Servers=伺服器
 Edit Servers...=編輯伺服器...
 Statistics Config...=統計配置...
 Start on Boot=開機啟動
-SOCKS5 Proxy...=SOCKS5代理設置...
+Forward Proxy...=正向代理設置...
 Allow Clients from LAN=允許來自區域網路的連接
 Local PAC=使用本地 PAC
 Online PAC=使用在線 PAC
@@ -58,6 +58,7 @@ Move D&own=下移(&O)
 
 Edit Proxy=代理設置
 Use Proxy=使用代理
+Proxy Type=代理類別
 Proxy Addr=代理位址
 Proxy Port=代理連接埠
 

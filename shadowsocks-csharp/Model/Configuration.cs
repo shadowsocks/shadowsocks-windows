@@ -63,6 +63,11 @@ namespace Shadowsocks.Model
                     config.proxy = new ProxyConfig();
                 if (config.hotkey == null)
                     config.hotkey = new HotkeyConfig();
+
+                if (config.proxy.proxyType < ProxyConfig.PROXY_SOCKS5 || config.proxy.proxyType > ProxyConfig.PROXY_HTTP)
+                {
+                    config.proxy.proxyType = ProxyConfig.PROXY_SOCKS5;
+                }
                 return config;
             }
             catch (Exception e)

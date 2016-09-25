@@ -420,7 +420,17 @@ namespace Shadowsocks.Controller
                 EndPoint proxyEP;
                 if (_config.proxy.useProxy)
                 {
-                    remote = new Socks5Proxy();
+                    switch (_config.proxy.proxyType)
+                    {
+                        case ProxyConfig.PROXY_SOCKS5:
+                            remote = new Socks5Proxy();
+                            break;
+                        case ProxyConfig.PROXY_HTTP:
+                            remote = new HttpProxy();
+                            break;
+                        default:
+                            throw new NotSupportedException("Unknown forward proxy.");
+                    }
                     proxyEP = SocketUtil.GetEndPoint(_config.proxy.proxyServer, _config.proxy.proxyPort);
                 }
                 else
