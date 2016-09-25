@@ -145,12 +145,15 @@ namespace Shadowsocks.Proxy
 
         private void OnFinish(byte[] lastBytes, int index, int length, object state)
         {
-            // TODO: save last bytes
             var st = (FakeAsyncResult)state;
 
-            if (!_established)
+            if (st.innerState.ex == null)
             {
-                st.innerState.ex = new Exception(I18N.GetString("Proxy request failed"));
+                if (!_established)
+                {
+                    st.innerState.ex = new Exception(I18N.GetString("Proxy request failed"));
+                }
+                // TODO: save last bytes
             }
             st.innerState.Callback?.Invoke(st);
         }
@@ -160,7 +163,6 @@ namespace Shadowsocks.Proxy
             var st = (FakeAsyncResult) state;
 
             st.innerState.ex = ex;
-            st.innerState.Callback?.Invoke(st);
         }
 
         private static readonly Regex HttpRespondHeaderRegex = new Regex(@"^(HTTP/1\.\d) (\d{3}) (.+)$");
