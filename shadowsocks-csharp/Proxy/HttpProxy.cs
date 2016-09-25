@@ -63,7 +63,7 @@ namespace Shadowsocks.Proxy
         }
 
         private const string HTTP_CRLF = "\r\n";
-        private const string HTTP_CONNECT_TEMPLETE = 
+        private const string HTTP_CONNECT_TEMPLATE = 
             "CONNECT {0} HTTP/1.1" + HTTP_CRLF + 
             "Host: {0}" + HTTP_CRLF +
             "Proxy-Connection: keep-alive" + HTTP_CRLF +
@@ -73,7 +73,7 @@ namespace Shadowsocks.Proxy
         public void BeginConnectDest(EndPoint destEndPoint, AsyncCallback callback, object state)
         {
             DestEndPoint = destEndPoint;
-            string request = string.Format(HTTP_CONNECT_TEMPLETE, destEndPoint);
+            string request = string.Format(HTTP_CONNECT_TEMPLATE, destEndPoint);
 
             var b = Encoding.UTF8.GetBytes(request);
 
