@@ -429,8 +429,7 @@ namespace Shadowsocks.Controller
                             remote = new HttpProxy();
                             break;
                         default:
-                            remote = new Socks5Proxy();
-                            break;
+                            throw new NotSupportedException("Unknown forward proxy.");
                     }
                     proxyEP = SocketUtil.GetEndPoint(_config.proxy.proxyServer, _config.proxy.proxyPort);
                 }
