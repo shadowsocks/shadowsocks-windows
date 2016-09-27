@@ -237,7 +237,10 @@ namespace Shadowsocks.Controller
                 try
                 {
                     var server = new Server(ssURL);
-                    _config.configs.Add(server);
+                    int index = _config.index + 1;
+                    if (index < 0 || index > _config.configs.Count)
+                        index = _config.configs.Count;
+                    _config.configs.Insert(index, server);
                     SaveConfig(_config);
                     return true;
                 }

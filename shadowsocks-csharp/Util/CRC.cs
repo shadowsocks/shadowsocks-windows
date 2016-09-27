@@ -91,5 +91,12 @@ namespace Shadowsocks.Util
             int checksum = (input[len - 1] << 24) | (input[len - 2] << 16) | (input[len - 3] << 8) | input[len - 4];
             return (int)adler32 == checksum;
         }
+
+        public static bool CheckAdler32(byte[] input, int len, uint xor)
+        {
+            ulong adler32 = CalcAdler32(input, len - 4) ^ xor;
+            int checksum = (input[len - 1] << 24) | (input[len - 2] << 16) | (input[len - 3] << 8) | input[len - 4];
+            return (int)adler32 == checksum;
+        }
     }
 }

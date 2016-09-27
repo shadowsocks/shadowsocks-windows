@@ -259,7 +259,7 @@ namespace Shadowsocks.Controller
                 // +----+-----+-------+------+----------+----------+
                 // | 1  |  1  | X'00' |  1   | Variable |    2     |
                 // +----+-----+-------+------+----------+----------+
-                _connection.BeginReceive(_connetionRecvBuffer, 0, 1024, 0,
+                _connection.BeginReceive(_connetionRecvBuffer, 0, 5, 0,
                     new AsyncCallback(HandshakeReceive2Callback), null);
             }
             catch (Exception e)
@@ -275,41 +275,51 @@ namespace Shadowsocks.Controller
             {
                 int bytesRead = _connection.EndReceive(ar);
 
-                if (bytesRead >= 3)
+                if (bytesRead >= 5)
                 {
                     command = _connetionRecvBuffer[1];
-                    if (bytesRead > 3)
-                    {
-                        _remoteHeaderSendBuffer = new byte[bytesRead - 3];
-                        Array.Copy(_connetionRecvBuffer, 3, _remoteHeaderSendBuffer, 0, _remoteHeaderSendBuffer.Length);
-                    }
-                    else
-                    {
-                        _remoteHeaderSendBuffer = null;
-                    }
+                    _remoteHeaderSendBuffer = new byte[bytesRead - 3];
+                    Array.Copy(_connetionRecvBuffer, 3, _remoteHeaderSendBuffer, 0, _remoteHeaderSendBuffer.Length);
 
-                    if (command == 3) // UDP
-                    {
-                        if (bytesRead >= 5)
-                        {
-                            if (_remoteHeaderSendBuffer == null)
-                            {
-                                _remoteHeaderSendBuffer = new byte[bytesRead - 3];
-                                Array.Copy(_connetionRecvBuffer, 3, _remoteHeaderSendBuffer, 0, _remoteHeaderSendBuffer.Length);
-                            }
-                            else
-                            {
-                                Array.Resize(ref _remoteHeaderSendBuffer, _remoteHeaderSendBuffer.Length + bytesRead - 3);
-                                Array.Copy(_connetionRecvBuffer, 3, _remoteHeaderSendBuffer, _remoteHeaderSendBuffer.Length - bytesRead, bytesRead);
-                            }
+                    int recv_size = 0;
+                    if (_remoteHeaderSendBuffer[0] == 1)
+                        recv_size = 4 - 1;
+                    else if (_remoteHeaderSendBuffer[0] == 4)
+                        recv_size = 16 - 1;
+                    else if (_remoteHeaderSendBuffer[0] == 3)
+                        recv_size = _remoteHeaderSendBuffer[1];
+                    if (recv_size == 0)
+                        throw new Exception("Wrong socks5 addr type");
+                    _connection.BeginReceive(_connetionRecvBuffer, 0, recv_size, 0,
+                        new AsyncCallback(HandshakeReceive3Callback), null);
+                }
+                else
+                {
+                    Console.WriteLine("failed to recv data in HandshakeReceive2Callback");
+                    Close();
+                }
+            }
+            catch (Exception e)
+            {
+                Logging.LogUsefulException(e);
+                Close();
+            }
+        }
 
-                            RspSocks5UDPHeader(bytesRead);
-                        }
-                        else
-                        {
-                            Console.WriteLine("failed to recv data in HandshakeReceive2Callback");
-                            this.Close();
-                        }
+        private void HandshakeReceive3Callback(IAsyncResult ar)
+        {
+            try
+            {
+                int bytesRead = _connection.EndReceive(ar);
+
+                if (bytesRead > 0)
+                {
+                    Array.Resize(ref _remoteHeaderSendBuffer, _remoteHeaderSendBuffer.Length + bytesRead);
+                    Array.Copy(_connetionRecvBuffer, 0, _remoteHeaderSendBuffer, _remoteHeaderSendBuffer.Length - bytesRead, bytesRead);
+
+                    if (command == 3)
+                    {
+                        RspSocks5UDPHeader(bytesRead);
                     }
                     else
                     {
@@ -318,7 +328,7 @@ namespace Shadowsocks.Controller
                 }
                 else
                 {
-                    Console.WriteLine("failed to recv data in HandshakeReceive2Callback");
+                    Console.WriteLine("failed to recv data in HandshakeReceive3Callback");
                     Close();
                 }
             }

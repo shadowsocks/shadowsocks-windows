@@ -815,6 +815,8 @@ namespace Shadowsocks.Obfs
         {
             has_sent_header = false;
             has_recv_header = false;
+            pack_id = 0;
+            recv_id = 0;
         }
         private static Dictionary<string, int[]> _obfs = new Dictionary<string, int[]> {
             {"auth_aes128", new int[]{1, 0, 1}},
@@ -824,6 +826,9 @@ namespace Shadowsocks.Obfs
         protected bool has_recv_header;
         protected static RNGCryptoServiceProvider g_random = new RNGCryptoServiceProvider();
         protected const string SALT = "auth_aes128";
+
+        protected uint pack_id;
+        protected uint recv_id;
 
         public static List<string> SupportedObfs()
         {
@@ -842,12 +847,12 @@ namespace Shadowsocks.Obfs
 
         public void PackData(byte[] data, int datalength, byte[] outdata, out int outlength)
         {
-            int rand_len = (datalength > 1200 ? 0 : (datalength > 400 ? random.Next(256) : random.Next(512))) + 1;
+            int rand_len = (datalength > 1200 ? 0 : pack_id > 4 ? random.Next(32) : (datalength > 400 ? random.Next(128) : random.Next(512))) + 1;
             outlength = rand_len + datalength + 8;
             if (datalength > 0)
                 Array.Copy(data, 0, outdata, rand_len + 4, datalength);
-            outdata[0] = (byte)(outlength >> 8);
-            outdata[1] = (byte)(outlength);
+            outdata[0] = (byte)(outlength);
+            outdata[1] = (byte)(outlength >> 8);
             ulong crc32 = Util.CRC32.CalcCRC32(outdata, 2);
             BitConverter.GetBytes((ushort)crc32).CopyTo(outdata, 2);
             if (rand_len < 128)
@@ -857,21 +862,27 @@ namespace Shadowsocks.Obfs
             else
             {
                 outdata[4] = 0xFF;
-                outdata[5] = (byte)(rand_len >> 8);
-                outdata[6] = (byte)(rand_len);
+                outdata[5] = (byte)(rand_len);
+                outdata[6] = (byte)(rand_len >> 8);
             }
-            ulong adler = Util.Adler32.CalcAdler32(outdata, outlength - 4);
+            ulong adler = Util.Adler32.CalcAdler32(outdata, outlength - 4) ^ pack_id;
+            ++pack_id;
             BitConverter.GetBytes((uint)adler).CopyTo(outdata, outlength - 4);
         }
 
         public void PackAuthData(byte[] data, int datalength, byte[] outdata, out int outlength)
         {
-            int rand_len = (datalength > 400 ? random.Next(128) : random.Next(1024));
-            int data_offset = rand_len + 16 + 10;
+            int rand_len = (datalength > 400 ? random.Next(512) : random.Next(1024));
+            int data_offset = rand_len + 16 + 10 + 4;
             outlength = data_offset + datalength + 4;
-            byte[] encrypt = new byte[26];
+            byte[] encrypt = new byte[30];
             byte[] encrypt_data = new byte[32];
             AuthData authData = (AuthData)this.Server.data;
+            {
+                byte[] rnd_data = new byte[rand_len];
+                random.NextBytes(rnd_data);
+                rnd_data.CopyTo(outdata, data_offset - rand_len);
+            }
 
             lock (authData)
             {
@@ -892,26 +903,36 @@ namespace Shadowsocks.Obfs
             UInt64 utc_time_second = (UInt64)Math.Floor(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1, 0, 0, 0)).TotalSeconds);
             UInt32 utc_time = (UInt32)(utc_time_second);
             Array.Copy(BitConverter.GetBytes(utc_time), 0, encrypt, 0, 4);
-            encrypt[12] = (byte)(outlength >> 8);
-            encrypt[13] = (byte)(outlength);
-            encrypt[14] = (byte)(rand_len >> 8);
-            encrypt[15] = (byte)(rand_len);
+            encrypt[12] = (byte)(outlength);
+            encrypt[13] = (byte)(outlength >> 8);
+            encrypt[14] = (byte)(rand_len);
+            encrypt[15] = (byte)(rand_len >> 8);
 
-            Encryption.IEncryptor encryptor = Encryption.EncryptorFactory.GetEncryptor("aes-128-cbc", SALT);
-            int enc_outlen;
-            encryptor.SetIV(new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 });
-            encryptor.Encrypt(encrypt, 16, encrypt_data, out enc_outlen);
-            encryptor.Dispose();
-            Array.Copy(encrypt_data, 16, encrypt, 0, 16);
+            {
+                byte[] uid = new byte[4];
+                random.NextBytes(uid);
 
-            byte[] key = new byte[Server.iv.Length + Server.key.Length];
-            Server.iv.CopyTo(key, 0);
-            Server.key.CopyTo(key, Server.iv.Length);
+                byte[] encrypt_key = new byte[Server.key.Length + 4];
+                uid.CopyTo(encrypt_key, 0);
+                Server.key.CopyTo(encrypt_key, 4);
 
-            HMACSHA1 sha1 = new HMACSHA1(key);
-            byte[] sha1data = sha1.ComputeHash(encrypt, 0, 16);
-            Array.Copy(sha1data, 0, encrypt, 16, 10);
+                Encryption.IEncryptor encryptor = Encryption.EncryptorFactory.GetEncryptor("aes-128-cbc", System.Convert.ToBase64String(encrypt_key) + SALT);
+                int enc_outlen;
+                encryptor.SetIV(new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 });
+                encryptor.Encrypt(encrypt, 16, encrypt_data, out enc_outlen);
+                encryptor.Dispose();
+                Array.Copy(encrypt_data, 16, encrypt, 4, 16);
+                uid.CopyTo(encrypt, 0);
+            }
+            {
+                byte[] key = new byte[Server.iv.Length + Server.key.Length];
+                Server.iv.CopyTo(key, 0);
+                Server.key.CopyTo(key, Server.iv.Length);
 
+                HMACSHA1 sha1 = new HMACSHA1(key);
+                byte[] sha1data = sha1.ComputeHash(encrypt, 0, 20);
+                Array.Copy(sha1data, 0, encrypt, 20, 10);
+            }
             encrypt.CopyTo(outdata, 0);
             Array.Copy(data, 0, outdata, data_offset, datalength);
 
@@ -927,10 +948,13 @@ namespace Shadowsocks.Obfs
             outlength = 0;
             const int unit_len = 8100;
             int ogn_datalength = datalength;
+            bool first_mark = false;
             if (!has_sent_header)
             {
-                int headsize = GetHeadSize(plaindata, 30);
-                int _datalength = Math.Min(random.Next(32) + headsize, datalength);
+                first_mark = true;
+                System.Diagnostics.Debug.WriteLine("First len " + datalength.ToString());
+                //int headsize = GetHeadSize(plaindata, 30);
+                int _datalength = datalength; // Math.Min(random.Next(32) + headsize, datalength);
                 int outlen;
                 PackAuthData(data, _datalength, packdata, out outlen);
                 has_sent_header = true;
@@ -964,6 +988,8 @@ namespace Shadowsocks.Obfs
                 Array.Copy(packdata, 0, outdata, outlength, outlen);
                 outlength += outlen;
             }
+            if (first_mark)
+                System.Diagnostics.Debug.WriteLine("First outlen " + outlength.ToString());
             return outdata;
         }
 
@@ -975,15 +1001,12 @@ namespace Shadowsocks.Obfs
             outlength = 0;
             while (recv_buf_len > 4)
             {
-                byte[] crcdata = new byte[2];
-                crcdata[crcdata.Length - 2] = recv_buf[0];
-                crcdata[crcdata.Length - 1] = recv_buf[1];
-                ulong crc32 = Util.CRC32.CalcCRC32(crcdata, (int)crcdata.Length);
+                ulong crc32 = Util.CRC32.CalcCRC32(recv_buf, 2);
                 if ((uint)((recv_buf[3] << 8) | recv_buf[2]) != ((uint)crc32 & 0xffff))
                 {
                     throw new ObfsException("ClientPostDecrypt data error");
                 }
-                int len = (recv_buf[0] << 8) + recv_buf[1];
+                int len = (recv_buf[1] << 8) + recv_buf[0];
                 if (len >= 8192 || len < 7)
                 {
                     throw new ObfsException("ClientPostDecrypt data error");
@@ -991,8 +1014,9 @@ namespace Shadowsocks.Obfs
                 if (len > recv_buf_len)
                     break;
 
-                if (Util.Adler32.CheckAdler32(recv_buf, len))
+                if (Util.Adler32.CheckAdler32(recv_buf, len, recv_id))
                 {
+                    ++recv_id;
                     int pos = recv_buf[4];
                     if (pos < 255)
                     {
@@ -1000,7 +1024,7 @@ namespace Shadowsocks.Obfs
                     }
                     else
                     {
-                        pos = ((recv_buf[5] << 8) | recv_buf[6]) + 4;
+                        pos = ((recv_buf[6] << 8) | recv_buf[5]) + 4;
                     }
                     int outlen = len - pos - 4;
                     Util.Utils.SetArrayMinSize2(ref outdata, outlength + outlen);

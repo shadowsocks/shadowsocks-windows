@@ -59,7 +59,13 @@ namespace Shadowsocks.View
             if (_modifiedConfiguration.index >= 0 && _modifiedConfiguration.index < _modifiedConfiguration.configs.Count)
                 _oldSelectedID = _modifiedConfiguration.configs[_modifiedConfiguration.index].id;
             if (focusIndex == -1)
-                focusIndex = _modifiedConfiguration.configs.Count - 1;
+            {
+                int index = _modifiedConfiguration.index + 1;
+                if (index < 0 || index > _modifiedConfiguration.configs.Count)
+                    index = _modifiedConfiguration.configs.Count;
+
+                focusIndex = index;
+            }
             if (focusIndex >= 0 && focusIndex < _modifiedConfiguration.configs.Count)
                 SetServerListSelectedIndex(focusIndex);
 
@@ -448,9 +454,9 @@ namespace Shadowsocks.View
             Server server = _oldSelectedIndex >=0 && _oldSelectedIndex < _modifiedConfiguration.configs.Count
                 ? Configuration.CopyServer(_modifiedConfiguration.configs[_oldSelectedIndex])
                 : Configuration.GetDefaultServer();
-            _modifiedConfiguration.configs.Add(server);
+            _modifiedConfiguration.configs.Insert(_oldSelectedIndex, server);
             LoadConfiguration(_modifiedConfiguration);
-            ServersListBox.SelectedIndex = _modifiedConfiguration.configs.Count - 1;
+            ServersListBox.SelectedIndex = _oldSelectedIndex + 1;
             _oldSelectedIndex = ServersListBox.SelectedIndex;
         }
 

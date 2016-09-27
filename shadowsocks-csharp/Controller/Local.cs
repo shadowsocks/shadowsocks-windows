@@ -161,6 +161,7 @@ namespace Shadowsocks.Controller
         protected object recvUDPoverTCPLock = new object();
 
         protected bool closed = false;
+        protected bool local_error = false;
 
         protected bool connectionTCPIdle, connectionUDPIdle, remoteTCPIdle, remoteUDPIdle;
         protected int remoteRecvCount = 0;
@@ -576,6 +577,8 @@ namespace Shadowsocks.Controller
 
         public bool TryReconnect()
         {
+            if (local_error)
+                return false;
             if (cfg.reconnectTimesRemain > 0)
             {
                 if (this.State == ConnectState.CONNECTING)
@@ -1114,7 +1117,7 @@ namespace Shadowsocks.Controller
             }
             if (remoteHeaderSendBuffer[0] == 3 && remoteHeaderSendBuffer.Length > 1)
             {
-                if (remoteHeaderSendBuffer.Length > remoteHeaderSendBuffer[1] + 1)
+                if (remoteHeaderSendBuffer.Length > remoteHeaderSendBuffer[1] + 2)
                 {
                     int port = (remoteHeaderSendBuffer[remoteHeaderSendBuffer[1] + 2] << 8) | remoteHeaderSendBuffer[remoteHeaderSendBuffer[1] + 3];
                     return port;
@@ -1145,12 +1148,13 @@ namespace Shadowsocks.Controller
                 // remote ready
                 if (connectionUDP == null) // TCP
                 {
-                    detector.OnSend(remoteHeaderSendBuffer, remoteHeaderSendBuffer.Length);
-                    byte[] data = new byte[remoteHeaderSendBuffer.Length];
-                    Array.Copy(remoteHeaderSendBuffer, data, data.Length);
-                    connectionSendBufferList.Add(data);
-                    RemoteSend(remoteHeaderSendBuffer, remoteHeaderSendBuffer.Length);
-                    remoteHeaderSendBuffer = null;
+                    //detector.OnSend(remoteHeaderSendBuffer, remoteHeaderSendBuffer.Length);
+                    //byte[] data = new byte[remoteHeaderSendBuffer.Length];
+                    //Array.Copy(remoteHeaderSendBuffer, data, data.Length);
+                    //connectionSendBufferList.Add(data);
+                    //RemoteSend(remoteHeaderSendBuffer, remoteHeaderSendBuffer.Length);
+                    //remoteHeaderSendBuffer = null;
+
                     //remote.GetSocket().SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, false);
                 }
                 else // UDP
@@ -1494,11 +1498,13 @@ namespace Shadowsocks.Controller
                 }
                 else
                 {
+                    local_error = true;
                     final_close = true;
                 }
             }
             catch (Exception e)
             {
+                local_error = true;
                 LogException(e);
                 final_close = true;
             }
@@ -1630,6 +1636,7 @@ namespace Shadowsocks.Controller
             }
             catch (Exception e)
             {
+                local_error = true;
                 LogExceptionAndClose(e);
             }
         }
