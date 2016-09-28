@@ -1480,6 +1480,7 @@ namespace Shadowsocks.Controller
                     if (speedTester.sizeRecv > 0)
                     {
                         connectionSendBufferList = null;
+                        server.ServerSpeedLog().ResetContinurousTimes();
                     }
                     else if (connectionSendBufferList != null)
                     {

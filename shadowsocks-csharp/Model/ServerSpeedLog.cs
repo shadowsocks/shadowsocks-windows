@@ -438,16 +438,9 @@ namespace Shadowsocks.Model
             lock (this)
             {
                 errorConnectTimes += 1;
-                errorContinurousTimes += 1;
+                errorContinurousTimes += 2;
                 errList.AddLast(new ErrorLog(1));
-                if (lastError == 1)
-                {
-                }
-                else
-                {
-                    lastError = 1;
-                    //errorContinurousTimes = 0;
-                }
+                lastError = 1;
                 Sweep();
             }
         }
@@ -458,14 +451,7 @@ namespace Shadowsocks.Model
                 errorTimeoutTimes += 1;
                 errorContinurousTimes += 1;
                 errList.AddLast(new ErrorLog(2));
-                if (lastError == 2)
-                {
-                }
-                else
-                {
-                    lastError = 2;
-                    //errorContinurousTimes = 0;
-                }
+                lastError = 2;
                 Sweep();
             }
         }
@@ -474,16 +460,9 @@ namespace Shadowsocks.Model
             lock (this)
             {
                 errorDecodeTimes += 1;
-                errorContinurousTimes += 1;
+                errorContinurousTimes += 10;
                 errList.AddLast(new ErrorLog(3));
-                if (lastError == 3)
-                {
-                }
-                else
-                {
-                    lastError = 3;
-                    //errorContinurousTimes = 0;
-                }
+                lastError = 3;
                 Sweep();
             }
         }
@@ -494,14 +473,7 @@ namespace Shadowsocks.Model
                 errorEmptyTimes += 1;
                 errorContinurousTimes += 1;
                 errList.AddLast(new ErrorLog(0));
-                if (lastError == 4)
-                {
-                }
-                else
-                {
-                    lastError = 4;
-                    //errorContinurousTimes = 0;
-                }
+                lastError = 4;
                 Sweep();
             }
         }

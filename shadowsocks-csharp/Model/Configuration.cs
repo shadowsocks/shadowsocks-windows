@@ -14,6 +14,9 @@ namespace Shadowsocks.Model
         private int lastSelectIndex;
         private DateTime lastSelectTime;
         private int lastUserSelectIndex;
+        private const int MAX_CHANCE = 1000;
+        private const int ERROR_PENALTY = MAX_CHANCE / 20;
+        private const int CONNECTION_PENALTY = MAX_CHANCE / 50;
 
         enum SelectAlgorithm
         {
@@ -51,41 +54,41 @@ namespace Shadowsocks.Model
             return left;
         }
 
-        private double Algorithm2(ServerSpeedLog serverSpeedLog)
+        private double Algorithm2(ServerSpeedLog serverSpeedLog) // perfer less delay
         {
-            if (serverSpeedLog.ErrorContinurousTimes > 30)
+            if (serverSpeedLog.ErrorContinurousTimes > 20)
                 return 1;
-            else if (serverSpeedLog.TotalConnectTimes < 3)
-                return 500;
-            else if (serverSpeedLog.AvgConnectTime < 0)
+            else if (serverSpeedLog.AvgConnectTime < 0 && serverSpeedLog.TotalConnectTimes >= 3)
                 return 1;
-            else if (serverSpeedLog.AvgConnectTime <= 20)
-                return 500;
+            else if (serverSpeedLog.TotalConnectTimes < 1)
+                return MAX_CHANCE;
             else
             {
+                long avgConnectTime = serverSpeedLog.AvgConnectTime <= 0 ? 1 : serverSpeedLog.AvgConnectTime;
                 long connections = serverSpeedLog.TotalConnectTimes - serverSpeedLog.TotalDisconnectTimes;
-                double chance = 10000.0 / serverSpeedLog.AvgConnectTime - connections * 5;
-                if (chance > 500) chance = 500;
-                chance -= serverSpeedLog.ErrorContinurousTimes * 10;
+                double chance = MAX_CHANCE * 10.0 / avgConnectTime - connections * CONNECTION_PENALTY;
+                if (chance > MAX_CHANCE) chance = MAX_CHANCE;
+                chance -= serverSpeedLog.ErrorContinurousTimes * ERROR_PENALTY;
                 if (chance < 1) chance = 1;
                 return chance;
             }
         }
 
-        private double Algorithm3(ServerSpeedLog serverSpeedLog)
+        private double Algorithm3(ServerSpeedLog serverSpeedLog) // perfer less error
         {
-            if (serverSpeedLog.ErrorContinurousTimes > 30)
+            if (serverSpeedLog.ErrorContinurousTimes > 20)
                 return 1;
-            else if (serverSpeedLog.TotalConnectTimes < 3)
-                return 500;
-            else if (serverSpeedLog.AvgConnectTime < 0)
+            else if (serverSpeedLog.AvgConnectTime < 0 && serverSpeedLog.TotalConnectTimes >= 3)
                 return 1;
+            else if (serverSpeedLog.TotalConnectTimes < 1)
+                return MAX_CHANCE;
             else
             {
+                long avgConnectTime = serverSpeedLog.AvgConnectTime <= 0 ? 1 : serverSpeedLog.AvgConnectTime;
                 long connections = serverSpeedLog.TotalConnectTimes - serverSpeedLog.TotalDisconnectTimes;
-                double chance = 20.0 / (serverSpeedLog.AvgConnectTime / 500 + 1) - connections;
-                if (chance > 500) chance = 500;
-                chance -= serverSpeedLog.ErrorContinurousTimes * 2;
+                double chance = MAX_CHANCE * 1.0 / (avgConnectTime / 500 + 1) - connections * CONNECTION_PENALTY;
+                if (chance > MAX_CHANCE) chance = MAX_CHANCE;
+                chance -= serverSpeedLog.ErrorContinurousTimes * ERROR_PENALTY;
                 if (chance < 1) chance = 1;
                 return chance;
             }
@@ -496,12 +499,14 @@ namespace Shadowsocks.Model
         {
             index = 0;
             localPort = 1080;
-            reconnectTimes = 3;
+            reconnectTimes = 2;
             keepVisitTime = 180;
+            connect_timeout = 5;
             configs = new List<Server>()
             {
                 GetDefaultServer()
             };
+            portMap = new Dictionary<string, object>();
         }
 
         public static Configuration LoadFile(string filename)
@@ -534,18 +539,7 @@ namespace Shadowsocks.Model
                 {
                     Console.WriteLine(e);
                 }
-                return new Configuration
-                {
-                    index = 0,
-                    localPort = 1080,
-                    reconnectTimes = 3,
-                    keepVisitTime = 180,
-                    configs = new List<Server>()
-                    {
-                        GetDefaultServer()
-                    },
-                    portMap = new Dictionary<string, object>()
-                };
+                return new Configuration();
             }
         }
 
