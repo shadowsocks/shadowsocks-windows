@@ -25,9 +25,9 @@ namespace Shadowsocks.Encryption
         }
 
         private static Dictionary<string, EncryptorInfo> _ciphers = new Dictionary<string, EncryptorInfo> {
-            { "salsa20", new EncryptorInfo("salsa20", 32, 8, CIPHER_SALSA20) },
-            { "chacha20", new EncryptorInfo("chacha20", 32, 8, CIPHER_CHACHA20) },
-            { "chacha20-ietf", new EncryptorInfo("chacha20-ietf", 32, 12, CIPHER_CHACHA20_IETF) }
+            { "salsa20", new EncryptorInfo(32, 8, CIPHER_SALSA20) },
+            { "chacha20", new EncryptorInfo(32, 8, CIPHER_CHACHA20) },
+            { "chacha20-ietf", new EncryptorInfo(32, 12, CIPHER_CHACHA20_IETF) }
         };
 
         protected override Dictionary<string, EncryptorInfo> getCiphers()

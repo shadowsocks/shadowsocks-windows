@@ -4,17 +4,27 @@ namespace Shadowsocks.Encryption
 {
     public struct EncryptorInfo
     {
-        public string name;
-        public int key_size;
-        public int iv_size;
-        public int type;
+        public int KeySize;
+        public int IvSize;
+        public int Type;
+        public string InnerLibName;
 
-        public EncryptorInfo(string name, int key_size, int iv_size, int type)
+        // For those who make use of internal crypto method name
+        // e.g. mbed TLS
+        public EncryptorInfo(string innerLibName, int keySize, int ivSize, int type)
         {
-            this.name = name;
-            this.key_size = key_size;
-            this.iv_size = iv_size;
-            this.type = type;
+            this.KeySize = keySize;
+            this.IvSize = ivSize;
+            this.Type = type;
+            this.InnerLibName = innerLibName;
+        }
+
+        public EncryptorInfo(int keySize, int ivSize, int type)
+        {
+            this.KeySize = keySize;
+            this.IvSize = ivSize;
+            this.Type = type;
+            this.InnerLibName = string.Empty;
         }
     }
 

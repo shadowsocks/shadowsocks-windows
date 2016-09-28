@@ -25,9 +25,9 @@ namespace Shadowsocks.Encryption
         protected bool _encryptIVSent;
         protected string _method;
         protected int _cipher;
-        // cipher name in MbedTLS, useless when using LibSodium
-        protected string _cipherMbedName;
-        protected EncryptorInfo _cipherInfo;
+        // internal name in the crypto library
+        protected string _innerLibName;
+        protected EncryptorInfo CipherInfo;
         protected byte[] _key;
         protected int keyLen;
         protected int ivLen;
@@ -46,15 +46,15 @@ namespace Shadowsocks.Encryption
             _method = method;
             string k = method + ":" + password;
             ciphers = getCiphers();
-            _cipherInfo = ciphers[_method];
-            _cipherMbedName = _cipherInfo.name;
-            _cipher = _cipherInfo.type;
+            CipherInfo = ciphers[_method];
+            _innerLibName = CipherInfo.InnerLibName;
+            _cipher = CipherInfo.Type;
             if (_cipher == 0)
             {
                 throw new Exception("method not found");
             }
-            keyLen = _cipherInfo.key_size;
-            ivLen = _cipherInfo.iv_size;
+            keyLen = CipherInfo.KeySize;
+            ivLen = CipherInfo.IvSize;
             _key = CachedKeys.GetOrAdd(k, (nk) =>
             {
                 byte[] passbuf = Encoding.UTF8.GetBytes(password);

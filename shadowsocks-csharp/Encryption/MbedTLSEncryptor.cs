@@ -70,7 +70,7 @@ namespace Shadowsocks.Encryption
                 realkey = _key;
             }
             MbedTLS.cipher_init(ctx);
-            if (MbedTLS.cipher_setup( ctx, MbedTLS.cipher_info_from_string( _cipherMbedName ) ) != 0 )
+            if (MbedTLS.cipher_setup( ctx, MbedTLS.cipher_info_from_string( _innerLibName ) ) != 0 )
                 throw new Exception("Cannot initialize mbed TLS cipher context");
             /*
              * MbedTLS takes key length by bit
