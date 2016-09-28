@@ -198,7 +198,7 @@
       <DependentUpon>ConfigForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Controller\Service\TCPRelay.cs" />
-    <Compile Include="Controller\Service\PolipoRunner.cs" />
+    <Compile Include="Controller\Service\PrivoxyRunner.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Controller\ShadowsocksController.cs" />

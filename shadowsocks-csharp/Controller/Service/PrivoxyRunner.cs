@@ -16,21 +16,21 @@ using Shadowsocks.Util.ProcessManagement;
 
 namespace Shadowsocks.Controller
 {
-    class PolipoRunner
+    class PrivoxyRunner
     {
         private static int Uid;
         private static string UniqueConfigFile;
-        private static Job PolipoJob;
+        private static Job PrivoxyJob;
         private Process _process;
         private int _runningPort;
 
-        static PolipoRunner()
+        static PrivoxyRunner()
         {
             try
             {
-                Uid = Application.StartupPath.GetHashCode(); // Currently we use ss's StartupPath to identify different polipo instance.
+                Uid = Application.StartupPath.GetHashCode(); // Currently we use ss's StartupPath to identify different Privoxy instance.
                 UniqueConfigFile = $"privoxy_{Uid}.conf";
-                PolipoJob = new Job();
+                PrivoxyJob = new Job();
 
                 FileManager.UncompressFile(Utils.GetTempPath("ss_privoxy.exe"), Resources.privoxy_exe);
                 FileManager.UncompressFile(Utils.GetTempPath("mgwz.dll"), Resources.mgwz_dll);
@@ -54,17 +54,17 @@ namespace Shadowsocks.Controller
             Server server = configuration.GetCurrentServer();
             if (_process == null)
             {
-                Process[] existingPolipo = Process.GetProcessesByName("ss_privoxy");
-                foreach (Process p in existingPolipo.Where(IsChildProcess))
+                Process[] existingPrivoxy = Process.GetProcessesByName("ss_privoxy");
+                foreach (Process p in existingPrivoxy.Where(IsChildProcess))
                 {
                     KillProcess(p);
                 }
-                string polipoConfig = Resources.privoxy_conf;
+                string privoxyConfig = Resources.privoxy_conf;
                 _runningPort = this.GetFreePort();
-                polipoConfig = polipoConfig.Replace("__SOCKS_PORT__", configuration.localPort.ToString());
-                polipoConfig = polipoConfig.Replace("__POLIPO_BIND_PORT__", _runningPort.ToString());
-                polipoConfig = polipoConfig.Replace("__POLIPO_BIND_IP__", configuration.shareOverLan ? "0.0.0.0" : "127.0.0.1");
-                FileManager.ByteArrayToFile(Utils.GetTempPath(UniqueConfigFile), Encoding.UTF8.GetBytes(polipoConfig));
+                privoxyConfig = privoxyConfig.Replace("__SOCKS_PORT__", configuration.localPort.ToString());
+                privoxyConfig = privoxyConfig.Replace("__PRIVOXY_BIND_PORT__", _runningPort.ToString());
+                privoxyConfig = privoxyConfig.Replace("__PRIVOXY_BIND_IP__", configuration.shareOverLan ? "0.0.0.0" : "127.0.0.1");
+                FileManager.ByteArrayToFile(Utils.GetTempPath(UniqueConfigFile), Encoding.UTF8.GetBytes(privoxyConfig));
 
                 _process = new Process();
                 // Configure the process using the StartInfo properties.
@@ -80,7 +80,7 @@ namespace Shadowsocks.Controller
                  * Add this process to job obj associated with this ss process, so that
                  * when ss exit unexpectedly, this process will be forced killed by system.
                  */
-                PolipoJob.AddProcess(_process.Handle);
+                PrivoxyJob.AddProcess(_process.Handle);
             }
             RefreshTrayArea();
         }

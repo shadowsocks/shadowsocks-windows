@@ -28,7 +28,7 @@ namespace Shadowsocks.Controller
         private PACServer _pacServer;
         private Configuration _config;
         private StrategyManager _strategyManager;
-        private PolipoRunner polipoRunner;
+        private PrivoxyRunner privoxyRunner;
         private GFWListUpdater gfwListUpdater;
         public AvailabilityStatistics availabilityStatistics = AvailabilityStatistics.Instance;
         public StatisticsStrategyConfiguration StatisticsConfiguration { get; private set; }
@@ -264,9 +264,9 @@ namespace Shadowsocks.Controller
             {
                 _listener.Stop();
             }
-            if (polipoRunner != null)
+            if (privoxyRunner != null)
             {
-                polipoRunner.Stop();
+                privoxyRunner.Stop();
             }
             if (_config.enabled)
             {
@@ -417,9 +417,9 @@ namespace Shadowsocks.Controller
             _config = Configuration.Load();
             StatisticsConfiguration = StatisticsStrategyConfiguration.Load();
 
-            if (polipoRunner == null)
+            if (privoxyRunner == null)
             {
-                polipoRunner = new PolipoRunner();
+                privoxyRunner = new PrivoxyRunner();
             }
             if (_pacServer == null)
             {
@@ -441,11 +441,11 @@ namespace Shadowsocks.Controller
             {
                 _listener.Stop();
             }
-            // don't put polipoRunner.Start() before pacServer.Stop()
+            // don't put PrivoxyRunner.Start() before pacServer.Stop()
             // or bind will fail when switching bind address from 0.0.0.0 to 127.0.0.1
             // though UseShellExecute is set to true now
             // http://stackoverflow.com/questions/10235093/socket-doesnt-close-after-application-exits-if-a-launched-process-is-open
-            polipoRunner.Stop();
+            privoxyRunner.Stop();
             try
             {
                 var strategy = GetCurrentStrategy();
@@ -454,7 +454,7 @@ namespace Shadowsocks.Controller
                     strategy.ReloadServers();
                 }
 
-                polipoRunner.Start(_config);
+                privoxyRunner.Start(_config);
 
                 TCPRelay tcpRelay = new TCPRelay(this, _config);
                 UDPRelay udpRelay = new UDPRelay(this);
@@ -462,7 +462,7 @@ namespace Shadowsocks.Controller
                 services.Add(tcpRelay);
                 services.Add(udpRelay);
                 services.Add(_pacServer);
-                services.Add(new PortForwarder(polipoRunner.RunningPort));
+                services.Add(new PortForwarder(privoxyRunner.RunningPort));
                 _listener = new Listener(services);
                 _listener.Start(_config);
             }
