@@ -34,6 +34,9 @@ namespace Shadowsocks.View
         const int BACK_OFFSET = 65536;
         ShadowsocksController controller;
 
+        // global traffic update lock, make it static
+        private static readonly object _lock = new object();
+
         #region chart
         long lastMaxSpeed;
         ShadowsocksController.QueueLast<TrafficInfo> traffic = new ShadowsocksController.QueueLast<TrafficInfo>();
@@ -71,7 +74,7 @@ namespace Shadowsocks.View
             long maxSpeed = 0;
             long lastInbound, lastOutbound;
 
-            lock (this)
+            lock (_lock)
             {
                 if (traffic.Count == 0)
                     return;
@@ -120,7 +123,7 @@ namespace Shadowsocks.View
 
         private void controller_TrafficChanged(object sender, EventArgs e)
         {
-            lock (this)
+            lock (_lock)
             {
                 traffic = new ShadowsocksController.QueueLast<TrafficInfo>();
                 foreach (var trafficPerSecond in controller.traffic)

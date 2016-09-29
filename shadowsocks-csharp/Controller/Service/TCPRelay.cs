@@ -160,8 +160,10 @@ namespace Shadowsocks.Controller
         private bool    _remoteShutdown = false;
         private bool    _closed = false;
 
-        private object  _encryptionLock = new object();
-        private object  _decryptionLock = new object();
+        // instance-based lock without static
+        private readonly object  _encryptionLock = new object();
+        private readonly object  _decryptionLock = new object();
+        private readonly object  _closeConnLock = new object();
 
         private DateTime _startConnectTime;
         private DateTime _startReceivingTime;
@@ -207,7 +209,7 @@ namespace Shadowsocks.Controller
 
         public void Close()
         {
-            lock (this)
+            lock (_closeConnLock)
             {
                 if (_closed) return;
                 _closed = true;

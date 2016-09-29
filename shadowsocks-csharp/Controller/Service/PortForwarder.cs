@@ -39,6 +39,9 @@ namespace Shadowsocks.Controller
             // connection receive buffer
             private byte[] connetionRecvBuffer = new byte[RecvSize];
 
+            // instance-based lock
+            private readonly object _Lock = new object();
+
             public void Start(byte[] firstPacket, int length, Socket socket, int targetPort)
             {
                 this._firstPacket = firstPacket;
@@ -220,7 +223,7 @@ namespace Shadowsocks.Controller
 
             public void Close()
             {
-                lock (this)
+                lock (_Lock)
                 {
                     if (_closed)
                     {

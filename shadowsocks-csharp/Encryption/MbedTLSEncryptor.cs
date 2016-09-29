@@ -15,6 +15,9 @@ namespace Shadowsocks.Encryption
         private IntPtr _encryptCtx = IntPtr.Zero;
         private IntPtr _decryptCtx = IntPtr.Zero;
 
+        // instance based lock
+        private readonly object _Lock = new object();
+
         public MbedTLSEncryptor(string method, string password, bool onetimeauth, bool isudp)
             : base(method, password, onetimeauth, isudp)
         {
@@ -120,7 +123,7 @@ namespace Shadowsocks.Encryption
 
         protected virtual void Dispose(bool disposing)
         {
-            lock (this)
+            lock (_Lock)
             {
                 if (_disposed)
                 {
