@@ -259,7 +259,7 @@ namespace Shadowsocks.Controller
                         response = new byte[] { 0, 91 };
                         Logging.Error("socks 5 protocol error");
                     }
-                    _connection?.BeginSend(response, 0, response.Length, SocketFlags.None, new AsyncCallback(HandshakeSendCallback), null);
+                    _connection.BeginSend(response, 0, response.Length, SocketFlags.None, new AsyncCallback(HandshakeSendCallback), null);
                 }
                 else
                     Close();
@@ -378,7 +378,7 @@ namespace Shadowsocks.Controller
         {
             try
             {
-                _connection?.EndSend(ar);
+                _connection.EndSend(ar);
                 StartConnect();
             }
             catch (Exception e)
@@ -583,7 +583,7 @@ namespace Shadowsocks.Controller
 
                 var remote = session.Remote;
                 // Complete the connection.
-                remote?.EndConnectDest(ar);
+                remote.EndConnectDest(ar);
                 
                 _destConnected = true;
 
@@ -621,7 +621,7 @@ namespace Shadowsocks.Controller
             {
                 _startReceivingTime = DateTime.Now;
                 session.Remote.BeginReceive(_remoteRecvBuffer, 0, RecvSize, SocketFlags.None, new AsyncCallback(PipeRemoteReceiveCallback), session);
-                _connection?.BeginReceive(_connetionRecvBuffer, 0, RecvSize, SocketFlags.None, new AsyncCallback(PipeConnectionReceiveCallback), 
+                _connection.BeginReceive(_connetionRecvBuffer, 0, RecvSize, SocketFlags.None, new AsyncCallback(PipeConnectionReceiveCallback),
                     new AsyncSession<bool>(session, true) /* to tell the callback this is the first time reading packet, and we haven't found the header yet. */);
             }
             catch (Exception e)
@@ -646,7 +646,6 @@ namespace Shadowsocks.Controller
                     int bytesToSend;
                     lock (_decryptionLock)
                     {
-                        if (_closed) return;
                         _encryptor.Decrypt(_remoteRecvBuffer, bytesRead, _remoteSendBuffer, out bytesToSend);
                     }
                     _connection.BeginSend(_remoteSendBuffer, 0, bytesToSend, SocketFlags.None, new AsyncCallback(PipeConnectionSendCallback), session);
@@ -672,7 +671,6 @@ namespace Shadowsocks.Controller
             if (_closed) return;
             try
             {
-                if(_connection == null) return;
                 int bytesRead = _connection.EndReceive(ar);
                 _totalWrite += bytesRead;
 
@@ -720,7 +718,6 @@ namespace Shadowsocks.Controller
                     int bytesToSend;
                     lock (_encryptionLock)
                     {
-                        if (_closed) return;
                         _encryptor.Encrypt(_connetionRecvBuffer, bytesRead, _connetionSendBuffer, out bytesToSend);
                     }
                     _tcprelay.UpdateOutboundCounter(_server, bytesToSend);
@@ -750,7 +747,7 @@ namespace Shadowsocks.Controller
             {
                 var session = (AsyncSession)ar.AsyncState;
                 session.Remote.EndSend(ar);
-                _connection?.BeginReceive(_connetionRecvBuffer, 0, RecvSize, SocketFlags.None, new AsyncCallback(PipeConnectionReceiveCallback), session);
+                _connection.BeginReceive(_connetionRecvBuffer, 0, RecvSize, SocketFlags.None, new AsyncCallback(PipeConnectionReceiveCallback), session);
             }
             catch (Exception e)
             {
@@ -761,11 +758,10 @@ namespace Shadowsocks.Controller
 
         private void PipeConnectionSendCallback(IAsyncResult ar)
         {
-            if (_closed) return;
             try
             {
                 var session = (AsyncSession)ar.AsyncState;
-                _connection?.EndSend(ar);
+                _connection.EndSend(ar);
                 session.Remote.BeginReceive(_remoteRecvBuffer, 0, RecvSize, SocketFlags.None, new AsyncCallback(PipeRemoteReceiveCallback), session);
             }
             catch (Exception e)
