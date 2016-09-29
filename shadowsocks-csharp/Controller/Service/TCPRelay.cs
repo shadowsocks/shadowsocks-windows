@@ -218,8 +218,8 @@ namespace Shadowsocks.Controller
             }
             try
             {
-                _connection?.Shutdown(SocketShutdown.Both);
-                _connection?.Close();
+                _connection.Shutdown(SocketShutdown.Both);
+                _connection.Close();
             }
             catch (Exception e)
             {
@@ -227,9 +227,9 @@ namespace Shadowsocks.Controller
             }
             try
             {
-                var remote = _currentRemoteSession?.Remote;
-                remote?.Shutdown(SocketShutdown.Both);
-                remote?.Close();
+                var remote = _currentRemoteSession.Remote;
+                remote.Shutdown(SocketShutdown.Both);
+                remote.Close();
             }
             catch (Exception e)
             {

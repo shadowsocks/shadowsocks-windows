@@ -67,7 +67,7 @@ namespace Shadowsocks.Proxy
         public void BeginSend(byte[] buffer, int offset, int size, SocketFlags socketFlags, AsyncCallback callback,
             object state)
         {
-            _remote?.BeginSend(buffer, offset, size, socketFlags, callback, state);
+            _remote.BeginSend(buffer, offset, size, socketFlags, callback, state);
         }
 
         public int EndSend(IAsyncResult asyncResult)
@@ -78,7 +78,7 @@ namespace Shadowsocks.Proxy
         public void BeginReceive(byte[] buffer, int offset, int size, SocketFlags socketFlags, AsyncCallback callback,
             object state)
         {
-            _remote?.BeginReceive(buffer, offset, size, socketFlags, callback, state);
+            _remote.BeginReceive(buffer, offset, size, socketFlags, callback, state);
         }
 
         public int EndReceive(IAsyncResult asyncResult)
@@ -88,12 +88,12 @@ namespace Shadowsocks.Proxy
 
         public void Shutdown(SocketShutdown how)
         {
-            _remote?.Shutdown(how);
+            _remote.Shutdown(how);
         }
 
         public void Close()
         {
-            _remote?.Dispose();
+            _remote.Dispose();
         }
     }
 }
