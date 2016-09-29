@@ -139,8 +139,6 @@ namespace Shadowsocks.Controller
 
         private AsyncSession _currentRemoteSession;
 
-        private const int   MaxRetry = 4;
-        private int         _retryCount = 0;
         private bool        _proxyConnected;
         private bool        _destConnected;
 
@@ -481,7 +479,7 @@ namespace Shadowsocks.Controller
 
             Logging.Info($"Proxy {proxy.ProxyEndPoint} timed out");
             proxy.Close();
-            RetryConnect();
+            Close();
         }
 
         private void ProxyConnectCallback(IAsyncResult ar)
@@ -534,7 +532,7 @@ namespace Shadowsocks.Controller
             catch (Exception e)
             {
                 Logging.LogUsefulException(e);
-                RetryConnect();
+                Close();
             }
         }
 
@@ -556,19 +554,7 @@ namespace Shadowsocks.Controller
             strategy?.SetFailure(server);
             Logging.Info($"{server.FriendlyName()} timed out");
             session.Remote.Close();
-            RetryConnect();
-        }
-
-        private void RetryConnect()
-        {
-            if (_retryCount < MaxRetry)
-            {
-                Logging.Debug($"Connection failed, retry ({_retryCount})");
-                StartConnect();
-                _retryCount++;
-            }
-            else
-                Close();
+            Close();
         }
 
         private void ConnectCallback(IAsyncResult ar)
@@ -612,7 +598,7 @@ namespace Shadowsocks.Controller
                     strategy?.SetFailure(_server);
                 }
                 Logging.LogUsefulException(e);
-                RetryConnect();
+                Close();
             }
         }
 
