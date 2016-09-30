@@ -39,8 +39,10 @@ namespace Shadowsocks.Controller
             {
                 if (runKey != null)
                 {
-                    try { runKey.Close(); }
-                    catch (Exception e)
+                    try {
+                        runKey.Close();
+                        runKey.Dispose();
+                    } catch (Exception e)
                     { Logging.LogUsefulException(e); }
                 }
             }
@@ -84,8 +86,10 @@ namespace Shadowsocks.Controller
             {
                 if (runKey != null)
                 {
-                    try { runKey.Close(); }
-                    catch (Exception e)
+                    try {
+                        runKey.Close();
+                        runKey.Dispose();
+                    } catch (Exception e)
                     { Logging.LogUsefulException(e); }
                 }
             }

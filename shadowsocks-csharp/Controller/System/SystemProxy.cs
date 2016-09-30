@@ -84,8 +84,10 @@ namespace Shadowsocks.Controller
                 MessageBox.Show( I18N.GetString( "Failed to update registry" ) );
             } finally {
                 if ( registry != null ) {
-                    try { registry.Close(); }
-                    catch (Exception e)
+                    try {
+                        registry.Close();
+                        registry.Dispose();
+                    } catch (Exception e)
                     { Logging.LogUsefulException(e); }
                 }
             }
@@ -119,8 +121,10 @@ namespace Shadowsocks.Controller
                 Logging.LogUsefulException( e );
             } finally {
                 if ( registry != null ) {
-                    try { registry.Close(); }
-                    catch (Exception e)
+                    try {
+                        registry.Close();
+                        registry.Dispose();
+                    } catch (Exception e)
                     { Logging.LogUsefulException(e); }
                 }
             }
@@ -165,8 +169,10 @@ namespace Shadowsocks.Controller
             } finally {
                 if (registry != null)
                 {
-                    try { registry.Close(); }
-                    catch (Exception e)
+                    try {
+                        registry.Close();
+                        registry.Dispose();
+                    } catch (Exception e)
                     { Logging.LogUsefulException(e); }
                 }
             }
