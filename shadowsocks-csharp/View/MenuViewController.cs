@@ -501,12 +501,14 @@ namespace Shadowsocks.View
 
         void logForm_FormClosed(object sender, FormClosedEventArgs e)
         {
+            logForm.Dispose();
             logForm = null;
             Utils.ReleaseMemory(true);
         }
 
         void configForm_FormClosed(object sender, FormClosedEventArgs e)
         {
+            configForm.Dispose();
             configForm = null;
             Utils.ReleaseMemory(true);
             if (_isFirstRun)
@@ -519,12 +521,14 @@ namespace Shadowsocks.View
 
         void proxyForm_FormClosed(object sender, FormClosedEventArgs e)
         {
+            proxyForm.Dispose();
             proxyForm = null;
             Utils.ReleaseMemory(true);
         }
 
         void hotkeySettingsForm_FormClosed(object sender, FormClosedEventArgs e)
         {
+            hotkeySettingsForm.Dispose();
             hotkeySettingsForm = null;
             Utils.ReleaseMemory(true);
         }

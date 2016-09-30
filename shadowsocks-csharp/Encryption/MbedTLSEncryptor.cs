@@ -15,9 +15,6 @@ namespace Shadowsocks.Encryption
         private IntPtr _encryptCtx = IntPtr.Zero;
         private IntPtr _decryptCtx = IntPtr.Zero;
 
-        // instance based lock
-        private readonly object _Lock = new object();
-
         public MbedTLSEncryptor(string method, string password, bool onetimeauth, bool isudp)
             : base(method, password, onetimeauth, isudp)
         {
@@ -108,7 +105,11 @@ namespace Shadowsocks.Encryption
         }
 
         #region IDisposable
+
         private bool _disposed;
+
+        // instance based lock
+        private readonly object _lock = new object();
 
         public override void Dispose()
         {
@@ -123,31 +124,32 @@ namespace Shadowsocks.Encryption
 
         protected virtual void Dispose(bool disposing)
         {
-            lock (_Lock)
+            lock (_lock)
             {
-                if (_disposed)
-                {
-                    return;
-                }
+                if (_disposed) return;
                 _disposed = true;
             }
 
             if (disposing)
             {
-                if (_encryptCtx != IntPtr.Zero)
-                {
-                    MbedTLS.cipher_free(_encryptCtx);
-                    Marshal.FreeHGlobal(_encryptCtx);
-                    _encryptCtx = IntPtr.Zero;
-                }
-                if (_decryptCtx != IntPtr.Zero)
-                {
-                    MbedTLS.cipher_free(_decryptCtx);
-                    Marshal.FreeHGlobal(_decryptCtx);
-                    _decryptCtx = IntPtr.Zero;
-                }
+                // free managed objects
+            }
+
+            // free unmanaged objects
+            if (_encryptCtx != IntPtr.Zero)
+            {
+                MbedTLS.cipher_free(_encryptCtx);
+                Marshal.FreeHGlobal(_encryptCtx);
+                _encryptCtx = IntPtr.Zero;
+            }
+            if (_decryptCtx != IntPtr.Zero)
+            {
+                MbedTLS.cipher_free(_decryptCtx);
+                Marshal.FreeHGlobal(_decryptCtx);
+                _decryptCtx = IntPtr.Zero;
             }
         }
+
         #endregion
     }
 }

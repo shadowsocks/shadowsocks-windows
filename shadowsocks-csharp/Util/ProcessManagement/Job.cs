@@ -24,7 +24,7 @@ namespace Shadowsocks.Util.ProcessManagement
         [return: MarshalAs(UnmanagedType.Bool)]
         private static extern bool CloseHandle(IntPtr hObject);
 
-        private IntPtr handle;
+        private IntPtr handle = IntPtr.Zero;
         private bool disposed;
 
         public Job()
@@ -70,19 +70,26 @@ namespace Shadowsocks.Util.ProcessManagement
 
         private void Dispose(bool disposing)
         {
-            if (disposed)
-                return;
+            if (disposed) return;
+            disposed = true;
 
             if (disposing) { }
 
             Close();
-            disposed = true;
         }
 
-        public void Close()
+        private void Close()
         {
-            CloseHandle(handle);
-            handle = IntPtr.Zero;
+            if (handle != IntPtr.Zero)
+            {
+                CloseHandle(handle);
+                handle = IntPtr.Zero;
+            }
+        }
+
+        ~Job()
+        {
+            Dispose(false);
         }
 
         public bool AddProcess(IntPtr processHandle)
