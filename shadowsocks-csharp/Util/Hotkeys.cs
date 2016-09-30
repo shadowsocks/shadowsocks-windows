@@ -22,7 +22,11 @@ namespace Shadowsocks.Util
             _hotKeyManager.KeyPressed += HotKeyManagerPressed;
         }
 
-        public static void Destroy() => _hotKeyManager.Dispose();
+        public static void Destroy()
+        {
+            _hotKeyManager.KeyPressed -= HotKeyManagerPressed;
+            _hotKeyManager.Dispose();
+        }
 
         private static void HotKeyManagerPressed(object sender, KeyPressedEventArgs e)
         {
@@ -79,7 +83,8 @@ namespace Shadowsocks.Util
             }
         }
 
-        public static HotKey Str2HotKey( string s ) {
+        public static HotKey Str2HotKey(string s)
+        {
             try
             {
                 if (s.IsNullOrEmpty()) return null;
