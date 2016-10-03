@@ -1,3 +1,7 @@
+3.3.2 2016-10-03
+- Add HTTP forward proxy support
+- Bug fixes and improvements
+
 3.3.1 2016-09-20
 - Add global hotkey support
 - Bug fixes and improvements
