@@ -168,9 +168,9 @@
             this.checkRandom.AutoSize = true;
             this.checkRandom.Location = new System.Drawing.Point(62, 30);
             this.checkRandom.Name = "checkRandom";
-            this.checkRandom.Size = new System.Drawing.Size(115, 21);
+            this.checkRandom.Size = new System.Drawing.Size(105, 21);
             this.checkRandom.TabIndex = 19;
-            this.checkRandom.Text = "Enable balance";
+            this.checkRandom.Text = "Load balance";
             this.checkRandom.UseVisualStyleBackColor = true;
             // 
             // checkAutoStartup

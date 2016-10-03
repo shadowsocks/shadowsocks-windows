@@ -13,6 +13,7 @@ namespace Shadowsocks.Controller
     {
         public byte[] buffer;
         public int size;
+        public int protocol_size;
         public object state;
     }
 
@@ -23,7 +24,7 @@ namespace Shadowsocks.Controller
         protected IPEndPoint _remoteUDPEndPoint;
 
         protected IEncryptor _encryptor;
-        //protected object _encryptionLock = new object();
+        protected object _encryptionLock = new object();
         //protected object _decryptionLock = new object();
         public IObfs _protocol;
         public IObfs _obfs;
@@ -73,13 +74,30 @@ namespace Shadowsocks.Controller
         {
             get
             {
+                return _protocol.isKeepAlive();
+            }
+        }
+
+        public bool isProtocolSendback
+        {
+            get
+            {
                 Dictionary<string, int> protocols = new Dictionary<string, int>();
-                protocols["auth_sha1_v2"] = 1;
+                protocols["auth_aes128_sha1"] = 1;
                 if (protocols.ContainsKey(_protocol.Name()))
                 {
                     return true;
                 }
                 return false;
+                //return _protocol.isAlwaysSendback();
+            }
+        }
+
+        public bool isObfsSendback
+        {
+            get
+            {
+                return _obfs.isAlwaysSendback();
             }
         }
 
@@ -111,7 +129,7 @@ namespace Shadowsocks.Controller
                 _obfs = null;
             }
 
-            //lock (_encryptionLock)
+            lock (_encryptionLock)
             {
                 //lock (_decryptionLock)
                 {
@@ -199,6 +217,7 @@ namespace Shadowsocks.Controller
                         Util.Utils.SetArrayMinSize(ref ReceiveDecryptBuffer, obfsRecvSize);
                         _encryptor.Decrypt(remoteRecvObfsBuffer, obfsRecvSize, ReceiveDecryptBuffer, out bytesToSend);
                         int outlength;
+                        st.protocol_size = bytesToSend;
                         byte[] buffer = _protocol.ClientPostDecrypt(ReceiveDecryptBuffer, bytesToSend, out outlength);
                         Array.Copy(buffer, 0, st.buffer, 0, outlength);
                         return outlength;
@@ -213,6 +232,23 @@ namespace Shadowsocks.Controller
             return bytesRead;
         }
 
+        public int Send(byte[] buffer, int size, SocketFlags flags)
+        {
+            int bytesToSend = 0;
+            int obfsSendSize;
+            byte[] obfsBuffer;
+            lock (_encryptionLock)
+            {
+                int outlength;
+                byte[] bytesToEncrypt = _protocol.ClientPreEncrypt(buffer, size, out outlength);
+                Util.Utils.SetArrayMinSize(ref SendEncryptBuffer, outlength + 32);
+                _encryptor.Encrypt(bytesToEncrypt, outlength, SendEncryptBuffer, out bytesToSend);
+                obfsBuffer = _obfs.ClientEncode(SendEncryptBuffer, bytesToSend, out obfsSendSize);
+                _socket.Send(obfsBuffer, obfsSendSize, 0);
+            }
+            return obfsSendSize;
+        }
+
         public int BeginSend(byte[] buffer, int size, SocketFlags flags, AsyncCallback callback, object state)
         {
             CallbackState st = new CallbackState();
@@ -222,7 +258,7 @@ namespace Shadowsocks.Controller
             int bytesToSend = 0;
             int obfsSendSize;
             byte[] obfsBuffer;
-            //lock (_encryptionLock)
+            lock (_encryptionLock)
             {
                 int outlength;
                 byte[] bytesToEncrypt = _protocol.ClientPreEncrypt(buffer, size, out outlength);
@@ -390,7 +426,7 @@ namespace Shadowsocks.Controller
 
             bytesToEncrypt = new byte[length];
             Array.Copy(buffer, bytes_beg, bytesToEncrypt, 0, length);
-            //lock (_encryptionLock)
+            lock (_encryptionLock)
             {
                 _encryptor.ResetEncrypt();
                 _protocol.SetServerInfoIV(_encryptor.getIV());
@@ -454,6 +490,12 @@ namespace Shadowsocks.Controller
         {
             CallbackState st = (CallbackState)ar.AsyncState;
             return st.size;
+        }
+
+        public int GetAsyncProtocolSize(IAsyncResult ar)
+        {
+            CallbackState st = (CallbackState)ar.AsyncState;
+            return st.protocol_size;
         }
 
         public byte[] GetAsyncResultBuffer(IAsyncResult ar)

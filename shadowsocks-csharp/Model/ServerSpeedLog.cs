@@ -57,7 +57,6 @@ namespace Shadowsocks.Model
         private long errorTimeoutTimes = 0;
         private long errorDecodeTimes = 0;
         private long errorEmptyTimes = 0;
-        private int lastError = 0;
         private long errorContinurousTimes = 0;
         private long transUpload = 0;
         private long transDownload = 0;
@@ -348,7 +347,6 @@ namespace Shadowsocks.Model
                 errorDecodeTimes = 0;
                 errorEmptyTimes = 0;
                 errList.Clear();
-                lastError = 0;
                 errorContinurousTimes = 0;
             }
         }
@@ -374,7 +372,6 @@ namespace Shadowsocks.Model
                 errorDecodeTimes = 0;
                 errorEmptyTimes = 0;
                 errList.Clear();
-                lastError = 0;
                 errorContinurousTimes = 0;
                 transUpload = 0;
                 transDownload = 0;
@@ -440,7 +437,6 @@ namespace Shadowsocks.Model
                 errorConnectTimes += 1;
                 errorContinurousTimes += 2;
                 errList.AddLast(new ErrorLog(1));
-                lastError = 1;
                 Sweep();
             }
         }
@@ -451,7 +447,6 @@ namespace Shadowsocks.Model
                 errorTimeoutTimes += 1;
                 errorContinurousTimes += 1;
                 errList.AddLast(new ErrorLog(2));
-                lastError = 2;
                 Sweep();
             }
         }
@@ -462,7 +457,6 @@ namespace Shadowsocks.Model
                 errorDecodeTimes += 1;
                 errorContinurousTimes += 10;
                 errList.AddLast(new ErrorLog(3));
-                lastError = 3;
                 Sweep();
             }
         }
@@ -473,7 +467,6 @@ namespace Shadowsocks.Model
                 errorEmptyTimes += 1;
                 errorContinurousTimes += 1;
                 errList.AddLast(new ErrorLog(0));
-                lastError = 4;
                 Sweep();
             }
         }
@@ -560,7 +553,6 @@ namespace Shadowsocks.Model
         {
             lock (this)
             {
-                lastError = 0;
                 errorDecodeTimes = 0;
                 errorEmptyTimes = 0;
                 errorContinurousTimes = 0;
@@ -570,7 +562,6 @@ namespace Shadowsocks.Model
         {
             lock (this)
             {
-                lastError = 0;
                 errorEmptyTimes = 0;
                 errorContinurousTimes = 0;
             }

@@ -21,6 +21,17 @@ namespace Shadowsocks.Obfs
             return Method;
         }
 
+        public virtual bool isKeepAlive()
+        {
+            return false;
+        }
+
+        public virtual bool isAlwaysSendback()
+        {
+            return false;
+        }
+
+
         public virtual byte[] ClientPreEncrypt(byte[] plaindata, int datalength, out int outlength)
         {
             outlength = datalength;

@@ -153,7 +153,6 @@
             // ObfsCombo
             // 
             this.ObfsCombo.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.ObfsCombo.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.ObfsCombo.FormattingEnabled = true;
             this.ObfsCombo.Items.AddRange(new object[] {
             "plain",
@@ -244,7 +243,6 @@
             // EncryptionSelect
             // 
             this.EncryptionSelect.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.EncryptionSelect.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.EncryptionSelect.FormattingEnabled = true;
             this.EncryptionSelect.Location = new System.Drawing.Point(108, 120);
             this.EncryptionSelect.Name = "EncryptionSelect";
@@ -379,15 +377,12 @@
             // TCPProtocolComboBox
             // 
             this.TCPProtocolComboBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.TCPProtocolComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.TCPProtocolComboBox.FormattingEnabled = true;
             this.TCPProtocolComboBox.Items.AddRange(new object[] {
             "origin",
             "verify_deflate",
             "verify_sha1",
-            "auth_sha1",
             "auth_sha1_v2",
-            "auth_sha1_v3",
             "auth_sha1_v4",
             "auth_aes128"});
             this.TCPProtocolComboBox.Location = new System.Drawing.Point(108, 151);

@@ -298,6 +298,11 @@ namespace Shadowsocks.Obfs
             return new TlsAuthData();
         }
 
+        public override bool isAlwaysSendback()
+        {
+            return true;
+        }
+
         protected byte[] sni(string url)
         {
             if (url == null)

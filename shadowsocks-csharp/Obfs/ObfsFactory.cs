@@ -45,10 +45,6 @@ namespace Shadowsocks.Obfs
             {
                 _registeredObfs.Add(method, typeof(AuthSHA1V2));
             }
-            foreach (string method in AuthSHA1V3.SupportedObfs())
-            {
-                _registeredObfs.Add(method, typeof(AuthSHA1V3));
-            }
             foreach (string method in AuthSHA1V4.SupportedObfs())
             {
                 _registeredObfs.Add(method, typeof(AuthSHA1V4));
@@ -56,6 +52,10 @@ namespace Shadowsocks.Obfs
             foreach (string method in AuthAES128.SupportedObfs())
             {
                 _registeredObfs.Add(method, typeof(AuthAES128));
+            }
+            foreach (string method in AuthAES128SHA1.SupportedObfs())
+            {
+                _registeredObfs.Add(method, typeof(AuthAES128SHA1));
             }
         }
 

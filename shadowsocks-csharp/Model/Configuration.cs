@@ -14,9 +14,10 @@ namespace Shadowsocks.Model
         private int lastSelectIndex;
         private DateTime lastSelectTime;
         private int lastUserSelectIndex;
-        private const int MAX_CHANCE = 1000;
+        private const int MAX_CHANCE = 10000;
         private const int ERROR_PENALTY = MAX_CHANCE / 20;
-        private const int CONNECTION_PENALTY = MAX_CHANCE / 50;
+        private const int CONNECTION_PENALTY = MAX_CHANCE / 100;
+        private const int MIN_CHANCE = 10;
 
         enum SelectAlgorithm
         {
@@ -56,40 +57,48 @@ namespace Shadowsocks.Model
 
         private double Algorithm2(ServerSpeedLog serverSpeedLog) // perfer less delay
         {
-            if (serverSpeedLog.ErrorContinurousTimes > 20)
+            if (serverSpeedLog.ErrorContinurousTimes >= 20)
                 return 1;
+            else if (serverSpeedLog.ErrorContinurousTimes >= 10)
+                return MIN_CHANCE;
             else if (serverSpeedLog.AvgConnectTime < 0 && serverSpeedLog.TotalConnectTimes >= 3)
-                return 1;
+                return MIN_CHANCE;
             else if (serverSpeedLog.TotalConnectTimes < 1)
                 return MAX_CHANCE;
             else
             {
                 long avgConnectTime = serverSpeedLog.AvgConnectTime <= 0 ? 1 : serverSpeedLog.AvgConnectTime;
+                if (serverSpeedLog.TotalConnectTimes >= 1 && serverSpeedLog.AvgConnectTime < 0)
+                    avgConnectTime = 5000;
                 long connections = serverSpeedLog.TotalConnectTimes - serverSpeedLog.TotalDisconnectTimes;
                 double chance = MAX_CHANCE * 10.0 / avgConnectTime - connections * CONNECTION_PENALTY;
                 if (chance > MAX_CHANCE) chance = MAX_CHANCE;
                 chance -= serverSpeedLog.ErrorContinurousTimes * ERROR_PENALTY;
-                if (chance < 1) chance = 1;
+                if (chance < MIN_CHANCE) chance = MIN_CHANCE;
                 return chance;
             }
         }
 
         private double Algorithm3(ServerSpeedLog serverSpeedLog) // perfer less error
         {
-            if (serverSpeedLog.ErrorContinurousTimes > 20)
+            if (serverSpeedLog.ErrorContinurousTimes >= 20)
                 return 1;
+            else if (serverSpeedLog.ErrorContinurousTimes >= 10)
+                return MIN_CHANCE;
             else if (serverSpeedLog.AvgConnectTime < 0 && serverSpeedLog.TotalConnectTimes >= 3)
-                return 1;
+                return MIN_CHANCE;
             else if (serverSpeedLog.TotalConnectTimes < 1)
                 return MAX_CHANCE;
             else
             {
                 long avgConnectTime = serverSpeedLog.AvgConnectTime <= 0 ? 1 : serverSpeedLog.AvgConnectTime;
+                if (serverSpeedLog.TotalConnectTimes >= 1 && serverSpeedLog.AvgConnectTime < 0)
+                    avgConnectTime = 5000;
                 long connections = serverSpeedLog.TotalConnectTimes - serverSpeedLog.TotalDisconnectTimes;
                 double chance = MAX_CHANCE * 1.0 / (avgConnectTime / 500 + 1) - connections * CONNECTION_PENALTY;
                 if (chance > MAX_CHANCE) chance = MAX_CHANCE;
                 chance -= serverSpeedLog.ErrorContinurousTimes * ERROR_PENALTY;
-                if (chance < 1) chance = 1;
+                if (chance < MIN_CHANCE) chance = MIN_CHANCE;
                 return chance;
             }
         }
@@ -186,8 +195,11 @@ namespace Shadowsocks.Model
                         foreach (ServerIndex s in serverList)
                         {
                             double chance = Algorithm3(s.server.ServerSpeedLog());
-                            chances.Add(lastBeginVal + chance);
-                            lastBeginVal += chance;
+                            if (chance > 0)
+                            {
+                                chances.Add(lastBeginVal + chance);
+                                lastBeginVal += chance;
+                            }
                         }
                         {
                             double target = randomGennarator.NextDouble() * lastBeginVal;
@@ -204,8 +216,11 @@ namespace Shadowsocks.Model
                         foreach (ServerIndex s in serverList)
                         {
                             double chance = Algorithm2(s.server.ServerSpeedLog());
-                            chances.Add(lastBeginVal + chance);
-                            lastBeginVal += chance;
+                            if (chance > 0)
+                            {
+                                chances.Add(lastBeginVal + chance);
+                                lastBeginVal += chance;
+                            }
                         }
                         if (algorithm == (int)SelectAlgorithm.SelectedFirst && randomGennarator.Next(3) == 0 && configs[curIndex].isEnable())
                         {

@@ -14,6 +14,7 @@ namespace Shadowsocks.Controller
         public DateTime timeBeginDownload;
         public long sizeUpload = 0;
         public long sizeDownload = 0;
+        public long sizeProtocolRecv = 0;
         public long sizeRecv = 0;
         //private List<TransLog> sizeDownloadList = new List<TransLog>();
         public string server;
@@ -55,6 +56,10 @@ namespace Shadowsocks.Controller
             {
                 transfer.AddDownload(server, size);
             }
+        }
+        public void AddProtocolRecvSize(int size)
+        {
+            sizeProtocolRecv += size;
         }
 
         public void AddRecvSize(int size)
