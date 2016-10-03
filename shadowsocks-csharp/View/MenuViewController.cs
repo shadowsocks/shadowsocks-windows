@@ -567,8 +567,14 @@ namespace Shadowsocks.View
         {
             if (e.Button == MouseButtons.Left)
             {
-                GetAsyncKeyState(Keys.ShiftKey);
-                if (GetAsyncKeyState(Keys.ShiftKey) < 0)
+                int SCA_key = GetAsyncKeyState(Keys.ShiftKey) < 0 ? 1 : 0;
+                SCA_key |= GetAsyncKeyState(Keys.ControlKey) < 0 ? 2 : 0;
+                SCA_key |= GetAsyncKeyState(Keys.Alt) < 0 ? 4 : 0;
+                if (SCA_key == 2)
+                {
+                    ShowServerLogForm();
+                }
+                else if (SCA_key == 1)
                 {
                     ShowSettingForm();
                 }

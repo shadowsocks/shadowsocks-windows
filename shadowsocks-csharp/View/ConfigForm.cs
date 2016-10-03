@@ -282,7 +282,7 @@ namespace Shadowsocks.View
                         }
                     }
                     Bitmap ngnl = Resources.ngnl;
-                    int div = 11, div_l = 4, div_r = 7;
+                    int div = 13, div_l = 5, div_r = 8;
                     int l = (m.Width * div_l + div - 1) / div * blockSize, r = (m.Width * div_r + div - 1) / div * blockSize;
                     g.DrawImage(ngnl, new Rectangle(l + blockSize, l + blockSize, r - l, r - l));
                 }
@@ -316,7 +316,7 @@ namespace Shadowsocks.View
                 {
                     TCPProtocolComboBox.Text = server.protocol ?? "origin";
                 }
-                ObfsCombo.Text = server.obfs ?? "plain";
+                string obfs_text = server.obfs ?? "plain";
                 TextObfsParam.Text = server.obfsparam;
                 RemarksTextBox.Text = server.remarks;
                 TextGroup.Text = server.group;
@@ -327,7 +327,7 @@ namespace Shadowsocks.View
                 ServerGroupBox.Visible = true;
 
                 if (TCPProtocolComboBox.Text == "origin"
-                    && ObfsCombo.Text == "plain"
+                    && obfs_text == "plain"
                     && !CheckUDPoverUDP.Checked
                     )
                 {
@@ -357,6 +357,7 @@ namespace Shadowsocks.View
 
                 PasswordLabel.Checked = false;
                 Update_SSR_controls_Visable();
+                ObfsCombo.Text = obfs_text;
                 GenQR(TextLink.Text);
                 //IPTextBox.Focus();
             }
