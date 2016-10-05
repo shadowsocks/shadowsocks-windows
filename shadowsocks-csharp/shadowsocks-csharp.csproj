@@ -190,6 +190,11 @@
     <Compile Include="Util\Sockets\LineReader.cs" />
     <Compile Include="Util\Sockets\SocketUtil.cs" />
     <Compile Include="Util\Sockets\WrappedSocket.cs" />
+    <Compile Include="Util\SystemProxy\INTERNET_OPTION.cs" />
+    <Compile Include="Util\SystemProxy\INTERNET_PER_CONN_OPTION.cs" />
+    <Compile Include="Util\SystemProxy\INTERNET_PER_CONN_OPTION_LIST.cs" />
+    <Compile Include="Util\SystemProxy\NativeMethods.cs" />
+    <Compile Include="Util\SystemProxy\WinINet.cs" />
     <Compile Include="Util\Util.cs" />
     <Compile Include="View\ConfigForm.cs">
       <SubType>Form</SubType>

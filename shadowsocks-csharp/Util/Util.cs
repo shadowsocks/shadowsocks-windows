@@ -5,6 +5,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Security;
 using System.Windows.Forms;
 using Microsoft.Win32;
 using Shadowsocks.Controller;
@@ -210,14 +211,34 @@ namespace Shadowsocks.Util
             return new BandwidthScaleInfo(f, unit, scale);
         }
 
-        public static RegistryKey OpenUserRegKey( string name, bool writable ) {
+        public static RegistryKey OpenUserRegKey( string name, bool writable )
+        {
             // we are building x86 binary for both x86 and x64, which will
             // cause problem when opening registry key
             // detect operating system instead of CPU
-            RegistryKey userKey = RegistryKey.OpenRemoteBaseKey( RegistryHive.CurrentUser, "",
-                Environment.Is64BitOperatingSystem ? RegistryView.Registry64 : RegistryView.Registry32 )
-                .OpenSubKey( name, writable );
-            return userKey;
+            if (name.IsNullOrEmpty()) throw new ArgumentException(nameof(name));
+            try
+            {
+                RegistryKey userKey = RegistryKey.OpenBaseKey(RegistryHive.CurrentUser,
+                        Environment.Is64BitOperatingSystem ? RegistryView.Registry64 : RegistryView.Registry32)
+                    .OpenSubKey(name, writable);
+                return userKey;
+            }
+            catch (UnauthorizedAccessException uae)
+            {
+                Logging.LogUsefulException(uae);
+                return null;
+            }
+            catch (SecurityException se)
+            {
+                Logging.LogUsefulException(se);
+                return null;
+            }
+            catch (ArgumentException ae)
+            {
+                MessageBox.Show("OpenUserRegKey: " + ae.ToString());
+                return null;
+            }
         }
 
         public static bool IsWinVistaOrHigher() {
