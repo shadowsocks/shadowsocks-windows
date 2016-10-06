@@ -95,7 +95,6 @@ namespace Shadowsocks.Controller
 
     class TCPHandler
     {
-
         class AsyncSession
         {
             public IProxy Remote { get; }
@@ -121,6 +120,8 @@ namespace Shadowsocks.Controller
             }
         }
 
+        private readonly int _serverTimeout;
+        private readonly int _proxyTimeout;
 
         // Size of receive buffer.
         public static readonly int RecvSize = 8192;
@@ -169,10 +170,12 @@ namespace Shadowsocks.Controller
 
         public TCPHandler(ShadowsocksController controller, Configuration config, TCPRelay tcprelay, Socket socket)
         {
-            this._controller = controller;
-            this._config = config;
-            this._tcprelay = tcprelay;
-            this._connection = socket;
+            _controller = controller;
+            _config = config;
+            _tcprelay = tcprelay;
+            _connection = socket;
+            _proxyTimeout = config.proxy.proxyTimeout * 1000;
+            _serverTimeout = config.GetCurrentServer().timeout * 1000;
 
             lastActivity = DateTime.Now;
         }
@@ -442,7 +445,7 @@ namespace Shadowsocks.Controller
                 var session = new AsyncSession(remote);
                 _currentRemoteSession = session;
 
-                ProxyTimer proxyTimer = new ProxyTimer(3000);
+                ProxyTimer proxyTimer = new ProxyTimer(_proxyTimeout);
                 proxyTimer.AutoReset = false;
                 proxyTimer.Elapsed += proxyConnectTimer_Elapsed;
                 proxyTimer.Enabled = true;
@@ -515,7 +518,7 @@ namespace Shadowsocks.Controller
                 }
 
                 _startConnectTime = DateTime.Now;
-                ServerTimer connectTimer = new ServerTimer(3000);
+                ServerTimer connectTimer = new ServerTimer(_serverTimeout);
                 connectTimer.AutoReset = false;
                 connectTimer.Elapsed += destConnectTimer_Elapsed;
                 connectTimer.Enabled = true;
