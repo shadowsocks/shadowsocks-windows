@@ -79,16 +79,32 @@ namespace Shadowsocks.View
                 {
                     return true;
                 }
-                Server server = new Server
+                Server server = new Server();
+                server.server = IPTextBox.Text.Trim();
+                try
                 {
-                    server = IPTextBox.Text.Trim(),
-                    server_port = int.Parse(ServerPortTextBox.Text),
-                    password = PasswordTextBox.Text,
-                    method = EncryptionSelect.Text,
-                    remarks = RemarksTextBox.Text,
-                    timeout = int.Parse(TimeoutTextBox.Text),
-                    auth = OneTimeAuth.Checked
-                };
+                    server.server_port = int.Parse(ServerPortTextBox.Text);
+                }
+                catch (FormatException)
+                {
+                    MessageBox.Show(I18N.GetString("Illegal port number format"));
+                    ServerPortTextBox.Clear();
+                    return false;
+                }
+                server.password = PasswordTextBox.Text;
+                server.method = EncryptionSelect.Text;
+                server.remarks = RemarksTextBox.Text;
+                try
+                {
+                    server.timeout = int.Parse(TimeoutTextBox.Text);
+                }
+                catch (FormatException)
+                {
+                    MessageBox.Show(I18N.GetString("Illegal timeout format"));
+                    TimeoutTextBox.Clear();
+                    return false;
+                }
+                server.auth = OneTimeAuth.Checked;
                 int localPort = int.Parse(ProxyPortTextBox.Text);
                 Configuration.CheckServer(server);
                 Configuration.CheckLocalPort(localPort);
@@ -96,10 +112,6 @@ namespace Shadowsocks.View
                 _modifiedConfiguration.localPort = localPort;
 
                 return true;
-            }
-            catch (FormatException)
-            {
-                MessageBox.Show(I18N.GetString("Illegal port number format"));
             }
             catch (Exception ex)
             {

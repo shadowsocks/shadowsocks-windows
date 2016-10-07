@@ -104,6 +104,7 @@ Reg All=註冊全部捷徑鍵
 Shadowsocks Error: {0}=Shadowsocks 錯誤: {0}
 Port already in use=連接埠號碼已被占用
 Illegal port number format=非法連接埠號碼格式
+Illegal timeout format=非法超時格式
 Please add at least one server=請新增至少一個伺服器
 Server IP can not be blank=伺服器 IP 不能為空
 Password can not be blank=密碼不能為空
