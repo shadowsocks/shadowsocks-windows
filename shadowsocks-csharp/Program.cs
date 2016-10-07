@@ -32,8 +32,12 @@ namespace Shadowsocks
             }
 
             Utils.ReleaseMemory(true);
-            using (Mutex mutex = new Mutex(false, "Global\\Shadowsocks_" + Application.StartupPath.GetHashCode()))
+            using (Mutex mutex = new Mutex(false, $"Global\\Shadowsocks_{Application.StartupPath.GetHashCode()}"))
             {
+                Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
+                // handle UI exceptions
+                Application.ThreadException += Application_ThreadException;
+                // handle non-UI exceptions
                 AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
                 Application.ApplicationExit += Application_ApplicationExit;
                 SystemEvents.PowerModeChanged += SystemEvents_PowerModeChanged;
@@ -48,8 +52,9 @@ namespace Shadowsocks
                     {
                         Process oldProcess = oldProcesses[0];
                     }
-                    MessageBox.Show(I18N.GetString("Find Shadowsocks icon in your notify tray.") + "\n" +
-                        I18N.GetString("If you want to start multiple Shadowsocks, make a copy in another directory."),
+                    MessageBox.Show(I18N.GetString("Find Shadowsocks icon in your notify tray.")
+                        + Environment.NewLine
+                        + I18N.GetString("If you want to start multiple Shadowsocks, make a copy in another directory."),
                         I18N.GetString("Shadowsocks is already running."));
                     return;
                 }
@@ -78,12 +83,21 @@ namespace Shadowsocks
             if (Interlocked.Increment(ref exited) == 1)
             {
                 Logging.Error(e.ExceptionObject?.ToString());
-                MessageBox.Show(I18N.GetString("Unexpected error, shadowsocks will exit. Please report to") +
-                    " https://github.com/shadowsocks/shadowsocks-windows/issues " +
-                    Environment.NewLine + (e.ExceptionObject?.ToString()),
+                MessageBox.Show(
+                    $"{I18N.GetString("Unexpected error, shadowsocks will exit. Please report to")} https://github.com/shadowsocks/shadowsocks-windows/issues {Environment.NewLine}{(e.ExceptionObject?.ToString())}",
                     "Shadowsocks Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 Application.Exit();
             }
+        }
+
+        private static void Application_ThreadException(object sender, ThreadExceptionEventArgs e)
+        {
+            string errorMsg = $"Exception Type: {e.GetType().Name}{Environment.NewLine}Stack Trace:{Environment.NewLine}{e.Exception.StackTrace}";
+            Logging.Error(errorMsg);
+            MessageBox.Show(
+                $"{I18N.GetString("Unexpected error, shadowsocks will exit. Please report to")} https://github.com/shadowsocks/shadowsocks-windows/issues {Environment.NewLine}{errorMsg}",
+                "Shadowsocks Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            Application.Exit();
         }
 
         private static void SystemEvents_PowerModeChanged(object sender, PowerModeChangedEventArgs e)
