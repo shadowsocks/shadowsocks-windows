@@ -84,7 +84,7 @@ namespace Shadowsocks
             {
                 Logging.Error(e.ExceptionObject?.ToString());
                 MessageBox.Show(
-                    $"{I18N.GetString("Unexpected error, shadowsocks will exit. Please report to")} https://github.com/shadowsocks/shadowsocks-windows/issues {Environment.NewLine}{(e.ExceptionObject?.ToString())}",
+                    $"{I18N.GetString("Unexpected error, shadowsocks will exit. Please report to")} https://github.com/shadowsocks/shadowsocks-windows/issues {Environment.NewLine}{e.ExceptionObject?.ToString()}",
                     "Shadowsocks Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 Application.Exit();
             }
@@ -92,7 +92,7 @@ namespace Shadowsocks
 
         private static void Application_ThreadException(object sender, ThreadExceptionEventArgs e)
         {
-            string errorMsg = $"Exception Type: {e.GetType().Name}{Environment.NewLine}Stack Trace:{Environment.NewLine}{e.Exception.StackTrace}";
+            string errorMsg = $"Exception Type: {e.Exception.GetType().Name}{Environment.NewLine}Stack Trace:{Environment.NewLine}{e.Exception.StackTrace}";
             Logging.Error(errorMsg);
             MessageBox.Show(
                 $"{I18N.GetString("Unexpected error, shadowsocks will exit. Please report to")} https://github.com/shadowsocks/shadowsocks-windows/issues {Environment.NewLine}{errorMsg}",
