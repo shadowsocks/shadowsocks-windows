@@ -17,22 +17,47 @@
  WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
 \***************************************************************************/
 
+using System;
 using System.Runtime.InteropServices;
 
 namespace Shadowsocks.Util.SystemProxy
 {
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
-    public struct INTERNET_PER_CONN_OPTION_LIST
+    public struct INTERNET_PER_CONN_OPTION_LIST : IDisposable
     {
         public int Size;
 
         // The connection to be set. NULL means LAN.
         public System.IntPtr Connection;
-        
+
         public int OptionCount;
         public int OptionError;
 
         // List of INTERNET_PER_CONN_OPTIONs.
         public System.IntPtr pOptions;
+
+        public void Dispose()
+        {
+            Dispose( true );
+            GC.SuppressFinalize( this );
+        }
+
+        private void Dispose( bool disposing )
+        {
+            if ( disposing )
+            {
+                if ( Connection != IntPtr.Zero )
+                {
+                    Marshal.FreeHGlobal( Connection );
+                    Connection = IntPtr.Zero;
+                }
+
+                if ( pOptions != IntPtr.Zero )
+                {
+                    Marshal.FreeHGlobal( pOptions );
+                    pOptions = IntPtr.Zero;
+                }
+            }
+        }
     }
 }

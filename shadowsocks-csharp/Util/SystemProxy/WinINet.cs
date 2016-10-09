@@ -121,12 +121,6 @@ namespace Shadowsocks.Util.SystemProxy
                 intptrStruct, optionListSize);
 
             // Free the allocated memory.
-            foreach (var v in _optionlist)
-            {
-                // free strings
-                if (v.Value.pszValue != IntPtr.Zero)
-                    Marshal.FreeHGlobal(v.Value.pszValue);
-            }
             Marshal.FreeCoTaskMem(buffer);
             Marshal.FreeCoTaskMem(intptrStruct);
 
