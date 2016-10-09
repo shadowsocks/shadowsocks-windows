@@ -82,14 +82,14 @@ namespace Shadowsocks.Controller
         {
             get
             {
-                Dictionary<string, int> protocols = new Dictionary<string, int>();
-                protocols["auth_aes128_sha1"] = 1;
-                if (protocols.ContainsKey(_protocol.Name()))
-                {
-                    return true;
-                }
-                return false;
-                //return _protocol.isAlwaysSendback();
+                //Dictionary<string, int> protocols = new Dictionary<string, int>();
+                //protocols["auth_aes128_sha1"] = 1;
+                //if (protocols.ContainsKey(_protocol.Name()))
+                //{
+                //    return true;
+                //}
+                //return false;
+                return _protocol.isAlwaysSendback();
             }
         }
 

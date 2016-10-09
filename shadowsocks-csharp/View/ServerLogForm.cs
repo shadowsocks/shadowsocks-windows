@@ -28,7 +28,7 @@ namespace Shadowsocks.View
         }
 
         private ShadowsocksController controller;
-        private ContextMenu contextMenu1;
+        //private ContextMenu contextMenu1;
         private MenuItem topmostItem;
         private MenuItem clearItem;
         private List<int> listOrder = new List<int>();
@@ -67,17 +67,22 @@ namespace Shadowsocks.View
             UpdateTexts();
             UpdateLog();
 
-            this.contextMenu1 = new ContextMenu(new MenuItem[] {
-                CreateMenuItem("Auto &size", new EventHandler(this.autosizeItem_Click)),
-                this.topmostItem = CreateMenuItem("Always On &Top", new EventHandler(this.topmostItem_Click)),
-                new MenuItem("-"),
-                CreateMenuItem("Copy current link", new EventHandler(this.copyLinkItem_Click)),
-                CreateMenuItem("Copy all enable links", new EventHandler(this.copyEnableLinksItem_Click)),
-                new MenuItem("-"),
-                CreateMenuItem("Clear &MaxSpeed", new EventHandler(this.ClearMaxSpeed_Click)),
-                this.clearItem = CreateMenuItem("&Clear", new EventHandler(this.ClearItem_Click)),
+            this.Menu = new MainMenu(new MenuItem[] {
+                CreateMenuGroup("&Control", new MenuItem[] {
+                    CreateMenuItem("&Disconnect All", new EventHandler(this.Disconnect_Click)),
+                    CreateMenuItem("Clear &MaxSpeed", new EventHandler(this.ClearMaxSpeed_Click)),
+                    this.clearItem = CreateMenuItem("&Clear", new EventHandler(this.ClearItem_Click)),
+                }),
+                CreateMenuGroup("C&opy", new MenuItem[] {
+                    CreateMenuItem("Copy current link", new EventHandler(this.copyLinkItem_Click)),
+                    CreateMenuItem("Copy all enable links", new EventHandler(this.copyEnableLinksItem_Click)),
+                    CreateMenuItem("Copy all links", new EventHandler(this.copyLinksItem_Click)),
+                }),
+                CreateMenuGroup("&Window", new MenuItem[] {
+                    CreateMenuItem("Auto &size", new EventHandler(this.autosizeItem_Click)),
+                    this.topmostItem = CreateMenuItem("Always On &Top", new EventHandler(this.topmostItem_Click)),
+                }),
             });
-            ServerDataGrid.ContextMenu = contextMenu1;
             controller.ConfigChanged += controller_ConfigChanged;
 
             for (int i = 0; i < ServerDataGrid.Columns.Count; ++i)
@@ -96,6 +101,10 @@ namespace Shadowsocks.View
             }
             this.Width = width + SystemInformation.VerticalScrollBarWidth + (this.Width - this.ClientSize.Width) + 1;
             ServerDataGrid.AutoResizeColumnHeadersHeight();
+        }
+        private MenuItem CreateMenuGroup(string text, MenuItem[] items)
+        {
+            return new MenuItem(I18N.GetString(text), items);
         }
 
         private MenuItem CreateMenuItem(string text, EventHandler click)
@@ -673,10 +682,35 @@ namespace Shadowsocks.View
             catch { }
         }
 
+        private void copyLinksItem_Click(object sender, EventArgs e)
+        {
+            Configuration config = controller.GetCurrentConfiguration();
+            string link = "";
+            for (int index = 0; index < config.configs.Count; ++index)
+            {
+                link += controller.GetSSRRemarksLinkForServer(config.configs[index]) + "\r\n";
+            }
+            try
+            {
+                Clipboard.SetText(link);
+            }
+            catch { }
+        }
+
         private void topmostItem_Click(object sender, EventArgs e)
         {
             topmostItem.Checked = !topmostItem.Checked;
             this.TopMost = topmostItem.Checked;
+        }
+
+        private void Disconnect_Click(object sender, EventArgs e)
+        {
+            Configuration config = controller.GetCurrentConfiguration();
+            for (int id = 0; id < config.configs.Count; ++id)
+            {
+                Server server = config.configs[id];
+                server.GetConnections().CloseAll();
+            }
         }
 
         private void ClearMaxSpeed_Click(object sender, EventArgs e)
@@ -730,7 +764,6 @@ namespace Shadowsocks.View
         {
             if (e.Button == MouseButtons.Right)
             {
-                contextMenu1.Show(ServerDataGrid, new Point(e.X, e.Y));
             }
             else if (e.Button == MouseButtons.Left)
             {

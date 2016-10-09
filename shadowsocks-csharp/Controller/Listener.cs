@@ -17,7 +17,6 @@ namespace Shadowsocks.Controller
         }
 
         Configuration _config;
-        //bool _buildinHttpProxy;
         bool _shareOverLAN;
         bool _bypassWhiteList;
         string _authUser;
@@ -67,7 +66,6 @@ namespace Shadowsocks.Controller
             try
             {
                 if (this._shareOverLAN != config.shareOverLan
-                    //|| _buildinHttpProxy != config.buildinHttpProxy
                     || _authUser != config.authUser
                     || _authPass != config.authPass
                     || _bypassWhiteList != config.bypassWhiteList
@@ -86,7 +84,6 @@ namespace Shadowsocks.Controller
         {
             this._config = config;
             this._shareOverLAN = config.shareOverLan;
-            //this._buildinHttpProxy = config.buildinHttpProxy;
             this._authUser = config.authUser;
             this._authPass = config.authPass;
             this._bypassWhiteList = config.bypassWhiteList;

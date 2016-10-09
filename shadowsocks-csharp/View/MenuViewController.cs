@@ -30,11 +30,13 @@ namespace Shadowsocks.View
         private ContextMenu contextMenu1;
 
         private MenuItem enableItem;
+        private MenuItem PACModeItem;
+        private MenuItem globalModeItem;
         private MenuItem modeItem;
+        private MenuItem ruleBypassLan;
+        private MenuItem ruleDisableBypass;
         private MenuItem SeperatorItem;
         private MenuItem ServersItem;
-        private MenuItem globalModeItem;
-        private MenuItem PACModeItem;
         private MenuItem SelectRandomItem;
         private MenuItem sameHostForSameTargetItem;
         private MenuItem httpWhiteListItem;
@@ -52,6 +54,7 @@ namespace Shadowsocks.View
             LoadMenu();
 
             controller.ToggleModeChanged += controller_ToggleModeChanged;
+            controller.ToggleRuleModeChanged += controller_ToggleRuleModeChanged;
             controller.ConfigChanged += controller_ConfigChanged;
             controller.PACFileReadyToOpen += controller_FileReadyToOpen;
             controller.UserRuleFileReadyToOpen += controller_FileReadyToOpen;
@@ -201,6 +204,10 @@ namespace Shadowsocks.View
                     CreateMenuItem("Edit local PAC file...", new EventHandler(this.EditPACFileItem_Click)),
                     CreateMenuItem("Edit user rule for GFWList...", new EventHandler(this.EditUserRuleFileForGFWListItem_Click)),
                 }),
+                CreateMenuGroup("Proxy rule", new MenuItem[] {
+                    ruleBypassLan = CreateMenuItem("Bypass Lan", new EventHandler(this.RuleBypassLanItem_Click)),
+                    ruleDisableBypass = CreateMenuItem("Disable bypass", new EventHandler(this.RuleBypassDisableItem_Click)),
+                }),
                 new MenuItem("-"),
                 ServersItem = CreateMenuGroup("Servers", new MenuItem[] {
                     SeperatorItem = new MenuItem("-"),
@@ -225,7 +232,10 @@ namespace Shadowsocks.View
                     CreateMenuItem("Check update", new EventHandler(this.CheckUpdate_Click)),
                     CreateMenuItem("Show logs...", new EventHandler(this.ShowLogItem_Click)),
                     CreateMenuItem("Open wiki...", new EventHandler(this.OpenWiki_Click)),
+                    new MenuItem("-"),
                     CreateMenuItem("Feedback...", new EventHandler(this.FeedbackItem_Click)),
+                    CreateMenuItem("Gen custom QRCode...", new EventHandler(this.showURLFromQRCode)),
+                    new MenuItem("-"),
                     CreateMenuItem("About...", new EventHandler(this.AboutItem_Click)),
                     CreateMenuItem("Donate...", new EventHandler(this.DonateItem_Click)),
                 }),
@@ -243,9 +253,13 @@ namespace Shadowsocks.View
         private void controller_ToggleModeChanged(object sender, EventArgs e)
         {
             Configuration config = controller.GetConfiguration();
-            enableItem.Checked = config.sysProxyMode == (int)ProxyMode.NoModify;
-            PACModeItem.Checked = config.sysProxyMode == (int)ProxyMode.Pac;
-            globalModeItem.Checked = config.sysProxyMode == (int)ProxyMode.Global;
+            UpdateSysProxyMode(config);
+        }
+
+        private void controller_ToggleRuleModeChanged(object sender, EventArgs e)
+        {
+            Configuration config = controller.GetConfiguration();
+            UpdateProxyRule(config);
         }
 
         void controller_FileReadyToOpen(object sender, ShadowsocksController.PathEventArgs e)
@@ -318,16 +332,30 @@ namespace Shadowsocks.View
             _notifyIcon.BalloonTipClicked -= notifyIcon1_BalloonTipClicked;
         }
 
+        private void UpdateSysProxyMode(Configuration config)
+        {
+            enableItem.Checked = config.sysProxyMode == (int)ProxyMode.NoModify;
+            PACModeItem.Checked = config.sysProxyMode == (int)ProxyMode.Pac;
+            globalModeItem.Checked = config.sysProxyMode == (int)ProxyMode.Global;
+        }
+
+        private void UpdateProxyRule(Configuration config)
+        {
+            ruleDisableBypass.Checked = config.proxyRuleMode == 0;
+            ruleBypassLan.Checked = config.proxyRuleMode == 1;
+        }
+
         private void LoadCurrentConfiguration()
         {
             Configuration config = controller.GetConfiguration();
             UpdateServersMenu();
-            enableItem.Checked = config.sysProxyMode == (int)ProxyMode.NoModify;
-            PACModeItem.Checked = config.sysProxyMode == (int)ProxyMode.Pac;
-            globalModeItem.Checked = config.sysProxyMode == (int)ProxyMode.Global;
+            UpdateSysProxyMode(config);
+
+            UpdateProxyRule(config);
+
             SelectRandomItem.Checked = config.random;
             sameHostForSameTargetItem.Checked = config.sameHostForSameTarget;
-            httpWhiteListItem.Checked = config.bypassWhiteList;
+            //httpWhiteListItem.Checked = config.bypassWhiteList;
         }
 
         private void UpdateServersMenu()
@@ -602,6 +630,16 @@ namespace Shadowsocks.View
         private void PACModeItem_Click(object sender, EventArgs e)
         {
             controller.ToggleMode(1);
+        }
+
+        private void RuleBypassLanItem_Click(object sender, EventArgs e)
+        {
+            controller.ToggleRuleMode(1);
+        }
+
+        private void RuleBypassDisableItem_Click(object sender, EventArgs e)
+        {
+            controller.ToggleRuleMode(0);
         }
 
         private void SelectRandomItem_Click(object sender, EventArgs e)
@@ -952,12 +990,22 @@ namespace Shadowsocks.View
             Process.Start(_urlToOpen);
         }
 
-        void showURLFromQRCode(object sender, FormClosedEventArgs e)
+        void showURLFromQRCode()
         {
             ShowTextForm dlg = new ShowTextForm("QRCode", _urlToOpen);
             dlg.Show();
             dlg.Activate();
             dlg.BringToFront();
+        }
+
+        void showURLFromQRCode(object sender, FormClosedEventArgs e)
+        {
+            showURLFromQRCode();
+        }
+
+        void showURLFromQRCode(object sender, System.EventArgs e)
+        {
+            showURLFromQRCode();
         }
     }
 }

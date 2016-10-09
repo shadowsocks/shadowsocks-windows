@@ -117,10 +117,9 @@ namespace Shadowsocks.Util
             }
         }
 
-        public static bool isLAN(Socket socket)
+        public static bool isLAN(IPAddress ip)
         {
-            IPAddress ip = ((IPEndPoint)socket.RemoteEndPoint).Address;
-            byte[] addr = ((IPEndPoint)socket.RemoteEndPoint).Address.GetAddressBytes();
+            byte[] addr = ip.GetAddressBytes();
             if (addr.Length == 4)
             {
                 string[] netmasks = new string[]
@@ -149,6 +148,11 @@ namespace Shadowsocks.Util
                 return false;
             }
             return true;
+        }
+
+        public static bool isLAN(Socket socket)
+        {
+            return isLAN(((IPEndPoint)socket.RemoteEndPoint).Address);
         }
 
         public static string urlDecode(string str)

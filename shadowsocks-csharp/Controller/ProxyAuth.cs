@@ -90,6 +90,7 @@ namespace Shadowsocks.Controller
         private void Close()
         {
             CloseSocket(ref _connection);
+            CloseSocket(ref _connectionUDP);
         }
 
         bool AuthConnection(Socket connection, string authUser, string authPass)
@@ -262,7 +263,7 @@ namespace Shadowsocks.Controller
                         recv_size = _remoteHeaderSendBuffer[1];
                     if (recv_size == 0)
                         throw new Exception("Wrong socks5 addr type");
-                    HandshakeReceive3Callback(recv_size);
+                    HandshakeReceive3Callback(recv_size + 2); // recv port
                 }
                 else
                 {
@@ -519,9 +520,24 @@ namespace Shadowsocks.Controller
                     newFirstPacket[addr.Length + 3] = (byte)(cfg.server_port % 256);
                     Array.Copy(_firstPacket, 0, newFirstPacket, addr.Length + 4, _firstPacketLength);
                     _remoteHeaderSendBuffer = newFirstPacket;
+
+                    handler.Start(_remoteHeaderSendBuffer, _remoteHeaderSendBuffer.Length);
+                    return;
                 }
             }
-            handler.Start(_remoteHeaderSendBuffer, _remoteHeaderSendBuffer.Length);
+            else
+            {
+                if (_connectionUDP == null && new Socks5Forwarder(_config).Handle(_remoteHeaderSendBuffer, _remoteHeaderSendBuffer.Length, _connection))
+                {
+                    return;
+                }
+                else
+                {
+                    handler.Start(_remoteHeaderSendBuffer, _remoteHeaderSendBuffer.Length);
+                    return;
+                }
+            }
+            Close();
         }
     }
 }

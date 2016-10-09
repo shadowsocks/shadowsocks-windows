@@ -497,6 +497,13 @@ namespace Shadowsocks.Controller
             {
                 State = ConnectState.HANDSHAKE;
                 remoteHeaderSendBuffer = firstPacket;
+
+                detector.OnSend(remoteHeaderSendBuffer, length);
+                byte[] data = new byte[length];
+                Array.Copy(remoteHeaderSendBuffer, data, data.Length);
+                connectionSendBufferList.Add(data);
+                remoteHeaderSendBuffer = data;
+
                 Connect();
             }
         }
@@ -1165,14 +1172,14 @@ namespace Shadowsocks.Controller
 
                 speedTester.BeginUpload();
 
+                //if (remoteHeaderSendBuffer[0] != 1 && remoteHeaderSendBuffer[0] != 3 && remoteHeaderSendBuffer[0] != 4)
+                //{
+                //    throw new Exception("Wrong header");
+                //}
                 // remote ready
                 if (connectionUDP == null) // TCP
                 {
-                    detector.OnSend(remoteHeaderSendBuffer, remoteHeaderSendBuffer.Length);
-                    byte[] data = new byte[remoteHeaderSendBuffer.Length];
-                    Array.Copy(remoteHeaderSendBuffer, data, data.Length);
-                    connectionSendBufferList.Add(data);
-                    if (cfg.reconnectTimes > 0)
+                    if (cfg.reconnectTimes > 0 || cfg.targetPort != 0)
                     {
                         RemoteSend(remoteHeaderSendBuffer, remoteHeaderSendBuffer.Length);
                         remoteHeaderSendBuffer = null;

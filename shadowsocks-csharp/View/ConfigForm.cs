@@ -30,15 +30,7 @@ namespace Shadowsocks.View
         {
             this.Font = System.Drawing.SystemFonts.MessageBoxFont;
             InitializeComponent();
-            try
-            {
-                ServersListBox.Font = new System.Drawing.Font("Consolas", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            }
-            catch
-            {
-                ServersListBox.Font = new System.Drawing.Font("Courier New", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            }
-
+            ServersListBox.Font = CreateFont();
 
             this.Icon = Icon.FromHandle(Resources.ssw128.GetHicon());
             this.controller = controller;
@@ -66,8 +58,6 @@ namespace Shadowsocks.View
 
                 focusIndex = index;
             }
-            if (focusIndex >= 0 && focusIndex < _modifiedConfiguration.configs.Count)
-                SetServerListSelectedIndex(focusIndex);
 
             if (_modifiedConfiguration.isHideTips)
                 PictureQRcode.Visible = false;
@@ -120,6 +110,33 @@ namespace Shadowsocks.View
             ////OKButton.Height = OKButton.Height * dpi_mul / 4;
 
             DrawLogo(350 * dpi_mul / 4);
+
+            ShowWindow();
+
+            if (focusIndex >= 0 && focusIndex < _modifiedConfiguration.configs.Count)
+            {
+                SetServerListSelectedIndex(focusIndex);
+                LoadSelectedServer();
+            }
+        }
+
+        private Font CreateFont()
+        {
+            try
+            {
+                return new System.Drawing.Font("Consolas", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            }
+            catch
+            {
+                try
+                {
+                    return new System.Drawing.Font("新宋体", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+                }
+                catch
+                {
+                    return new System.Drawing.Font(System.Drawing.FontFamily.GenericMonospace, 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+                }
+            }
         }
 
         private void UpdateTexts()
@@ -317,6 +334,7 @@ namespace Shadowsocks.View
                     TCPProtocolComboBox.Text = server.protocol ?? "origin";
                 }
                 string obfs_text = server.obfs ?? "plain";
+                ObfsCombo.Text = obfs_text;
                 TextObfsParam.Text = server.obfsparam;
                 RemarksTextBox.Text = server.remarks;
                 TextGroup.Text = server.group;
@@ -325,23 +343,21 @@ namespace Shadowsocks.View
                 _SelectedID = server.id;
 
                 ServerGroupBox.Visible = true;
+                bool ssr = false;
 
                 if (TCPProtocolComboBox.Text == "origin"
                     && obfs_text == "plain"
                     && !CheckUDPoverUDP.Checked
                     )
                 {
-                    CheckSSR.Checked = false;
-                    CheckSSR.Enabled = true;
                     checkAdvSetting.Checked = false;
                 }
                 else
                 {
-                    CheckSSR.Checked = true;
-                    CheckSSR.Enabled = false;
+                    ssr = true;
                 }
 
-                if (checkSSRLink.Checked && CheckSSR.Checked)
+                if (checkSSRLink.Checked && ssr)
                 {
                     TextLink.Text = controller.GetSSRRemarksLinkForServer(server);
                 }
@@ -357,7 +373,7 @@ namespace Shadowsocks.View
 
                 PasswordLabel.Checked = false;
                 Update_SSR_controls_Visable();
-                ObfsCombo.Text = obfs_text;
+                UpdateObfsTextbox();
                 GenQR(TextLink.Text);
                 //IPTextBox.Focus();
             }
@@ -455,7 +471,7 @@ namespace Shadowsocks.View
             Server server = _oldSelectedIndex >=0 && _oldSelectedIndex < _modifiedConfiguration.configs.Count
                 ? Configuration.CopyServer(_modifiedConfiguration.configs[_oldSelectedIndex])
                 : Configuration.GetDefaultServer();
-            _modifiedConfiguration.configs.Insert(_oldSelectedIndex, server);
+            _modifiedConfiguration.configs.Insert(_oldSelectedIndex < 0 ? 0 : _oldSelectedIndex, server);
             LoadConfiguration(_modifiedConfiguration);
             ServersListBox.SelectedIndex = _oldSelectedIndex + 1;
             _oldSelectedIndex = ServersListBox.SelectedIndex;
@@ -584,7 +600,7 @@ namespace Shadowsocks.View
             }
         }
 
-        private void ObfsCombo_TextChanged(object sender, EventArgs e)
+        private void UpdateObfsTextbox()
         {
             try
             {
@@ -603,6 +619,11 @@ namespace Shadowsocks.View
             {
                 TextObfsParam.Enabled = true;
             }
+        }
+
+        private void ObfsCombo_TextChanged(object sender, EventArgs e)
+        {
+            UpdateObfsTextbox();
         }
 
         private void checkSSRLink_CheckedChanged(object sender, EventArgs e)
@@ -633,25 +654,7 @@ namespace Shadowsocks.View
                 //TCPoverUDPLabel.Visible = false;
                 //CheckTCPoverUDP.Visible = false;
             }
-            if (CheckSSR.Checked)
-            {
-                TCPProtocolLabel.Enabled = true;
-                TCPProtocolComboBox.Enabled = true;
-                labelObfs.Enabled = true;
-                ObfsCombo.Enabled = true;
-                labelObfsParam.Enabled = true;
-                TextObfsParam.Enabled = true;
-            }
-            else
-            {
-                TCPProtocolLabel.Enabled = false;
-                TCPProtocolComboBox.Enabled = false;
-                labelObfs.Enabled = false;
-                ObfsCombo.Enabled = false;
-                labelObfsParam.Enabled = false;
-                TextObfsParam.Enabled = false;
-            }
-            if (CheckSSR.Checked && checkAdvSetting.Checked)
+            if (checkAdvSetting.Checked)
             {
                 UDPoverTCPLabel.Visible = true;
                 CheckUDPoverUDP.Visible = true;
@@ -662,11 +665,6 @@ namespace Shadowsocks.View
                 CheckUDPoverUDP.Visible = false;
             }
             ResumeLayout();
-        }
-
-        private void CheckSSR_CheckedChanged(object sender, EventArgs e)
-        {
-            Update_SSR_controls_Visable();
         }
     }
 }

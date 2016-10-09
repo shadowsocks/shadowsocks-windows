@@ -35,7 +35,7 @@ namespace Shadowsocks.Controller
             private bool _closed = false;
             private Configuration _config;
             HttpPraser httpProxyState;
-            public const int RecvSize = 16384;
+            public const int RecvSize = 4096;
             // remote receive buffer
             private byte[] remoteRecvBuffer = new byte[RecvSize];
             // connection receive buffer

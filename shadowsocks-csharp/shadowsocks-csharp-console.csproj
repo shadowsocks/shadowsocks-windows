@@ -89,6 +89,7 @@
     <Compile Include="Controller\Logging.cs" />
     <Compile Include="Controller\ProxyAuth.cs" />
     <Compile Include="Controller\ProxySocket.cs" />
+    <Compile Include="Controller\Socks5Forwarder.cs" />
     <Compile Include="Controller\SpeedTest.cs" />
     <Compile Include="Controller\UpdateChecker.cs" />
     <Compile Include="Encryption\EncryptorBase.cs" />

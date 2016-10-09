@@ -209,5 +209,21 @@ namespace Shadowsocks.View
         {
             this.Close();
         }
+
+        private void buttonDefault_Click(object sender, EventArgs e)
+        {
+            if (CheckSockProxy.Checked)
+            {
+                ReconnectText.Text = "4";
+                textTimeout.Text = "10";
+                TTLText.Text = "60";
+            }
+            else
+            {
+                ReconnectText.Text = "4";
+                textTimeout.Text = "5";
+                TTLText.Text = "60";
+            }
+        }
     }
 }

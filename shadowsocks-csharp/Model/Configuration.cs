@@ -288,8 +288,6 @@ namespace Shadowsocks.Model
         public List<Server> configs;
         public int index;
         public bool random;
-        //public bool global;
-        //public bool enabled;
         public int sysProxyMode;
         public bool shareOverLan;
         public bool bypassWhiteList;
@@ -313,10 +311,10 @@ namespace Shadowsocks.Model
         public int keepVisitTime;
         public bool isHideTips;
         public string dns_server;
+        public int proxyRuleMode;
         public Dictionary<string, string> token = new Dictionary<string, string>();
         public Dictionary<string, object> portMap = new Dictionary<string, object>();
 
-        //public bool buildinHttpProxy;
         private ServerSelectStrategy serverStrategy = new ServerSelectStrategy();
         private Dictionary<string, UriVisitTime> uri2time = new Dictionary<string, UriVisitTime>();
         private SortedDictionary<UriVisitTime, string> time2uri = new SortedDictionary<UriVisitTime, string>();

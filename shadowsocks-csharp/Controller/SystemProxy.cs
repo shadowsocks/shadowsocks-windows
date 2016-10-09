@@ -55,12 +55,13 @@ namespace Shadowsocks.Controller
 
         public static void Update(Configuration config, bool forceDisable)
         {
-            bool global = config.sysProxyMode == (int)ProxyMode.Global;
-            bool enabled = config.sysProxyMode != (int)ProxyMode.NoModify;
+            int sysProxyMode = config.sysProxyMode;
             if (forceDisable)
             {
-                enabled = false;
+                sysProxyMode = (int)ProxyMode.NoModify;
             }
+            bool global = sysProxyMode == (int)ProxyMode.Global;
+            bool enabled = sysProxyMode != (int)ProxyMode.NoModify;
             RegistryKey registry = null;
             try
             {
@@ -88,8 +89,7 @@ namespace Shadowsocks.Controller
                     RegistrySetValue(registry, "ProxyServer", "");
                     RegistrySetValue(registry, "AutoConfigURL", "");
                 }
-                //Set AutoDetectProxy Off
-                IEAutoDetectProxy(false);
+                IEProxyUpdate(config, sysProxyMode);
                 SystemProxy.NotifyIE();
                 //Must Notify IE first, or the connections do not chanage
                 CopyProxySettingFromLan();
@@ -107,6 +107,9 @@ namespace Shadowsocks.Controller
                     try
                     {
                         registry.Close();
+#if _DOTNET_4_0
+                        registry.Dispose();
+#endif
                     }
                     catch (Exception e)
                     {
@@ -151,6 +154,9 @@ namespace Shadowsocks.Controller
                     try
                     {
                         registry.Close();
+#if _DOTNET_4_0
+                        registry.Dispose();
+#endif
                     }
                     catch (Exception e)
                     {
@@ -165,11 +171,53 @@ namespace Shadowsocks.Controller
             return value.ToString("yyyyMMddHHmmssffff");
         }
 
+        private static void BytePushback(byte[] buffer, ref int buffer_len, int val)
+        {
+            BitConverter.GetBytes(val).CopyTo(buffer, buffer_len);
+            buffer_len += 4;
+        }
+
+        private static void BytePushback(byte[] buffer, ref int buffer_len, string str)
+        {
+            BytePushback(buffer, ref buffer_len, str.Length);
+            byte[] bytes = System.Text.Encoding.UTF8.GetBytes(str);
+            bytes.CopyTo(buffer, buffer_len);
+            buffer_len += bytes.Length;
+        }
+
+        private static byte[] GenConnectionSettings(Configuration config, int sysProxyMode, int counter)
+        {
+            byte[] buffer = new byte[1024];
+            int buffer_len = 0;
+            BytePushback(buffer, ref buffer_len, 70);
+            BytePushback(buffer, ref buffer_len, counter + 1);
+            if (sysProxyMode == (int)ProxyMode.NoModify)
+                BytePushback(buffer, ref buffer_len, 1);
+            else if (sysProxyMode == (int)ProxyMode.Pac)
+                BytePushback(buffer, ref buffer_len, 5);
+            else
+                BytePushback(buffer, ref buffer_len, 3);
+
+            string proxy = "127.0.0.1:" + config.localPort.ToString();
+            BytePushback(buffer, ref buffer_len, proxy);
+
+            string bypass = "localhost;127.*;10.*;172.16.*;172.17.*;172.18.*;172.19.*;172.20.*;172.21.*;172.22.*;172.23.*;172.24.*;172.25.*;172.26.*;172.27.*;172.28.*;172.29.*;172.30.*;172.31.*;172.32.*;192.168.*";
+            BytePushback(buffer, ref buffer_len, bypass);
+
+            string pacUrl = "";
+            pacUrl = "http://127.0.0.1:" + config.localPort.ToString() + "/pac?t=" + GetTimestamp(DateTime.Now);
+            BytePushback(buffer, ref buffer_len, pacUrl);
+
+            buffer_len += 0x20;
+
+            Array.Resize(ref buffer, buffer_len);
+            return buffer;
+        }
+
         /// <summary>
         /// Checks or unchecks the IE Options Connection setting of "Automatically detect Proxy"
         /// </summary>
-        /// <param name="set">Provide 'true' if you want to check the 'Automatically detect Proxy' check box. To uncheck, pass 'false'</param>
-        private static void IEAutoDetectProxy(bool set)
+        private static void IEProxyUpdate(Configuration config, int sysProxyMode)
         {
             RegistryKey registry = null;
             try
@@ -177,31 +225,14 @@ namespace Shadowsocks.Controller
                 registry = OpenUserRegKey("Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings\\Connections",
                         true);
                 byte[] defConnection = (byte[])registry.GetValue("DefaultConnectionSettings");
-                if (defConnection == null)
+                int counter = 0;
+                if (defConnection != null && defConnection.Length >= 8)
                 {
-                    defConnection = new byte[32];
-                    defConnection[0] = 0x46;
-                    defConnection[8] = 0x1;
+                    counter = defConnection[4] | (defConnection[5] << 8);
                 }
-                byte[] savedLegacySetting = (byte[])registry.GetValue("SavedLegacySettings");
-                if (savedLegacySetting == null)
-                {
-                    savedLegacySetting = new byte[32];
-                    savedLegacySetting[0] = 0x46;
-                    savedLegacySetting[8] = 0x1;
-                }
-                if (set)
-                {
-                    defConnection[8] = Convert.ToByte(defConnection[8] & 8);
-                    savedLegacySetting[8] = Convert.ToByte(savedLegacySetting[8] & 8);
-                }
-                else
-                {
-                    defConnection[8] = Convert.ToByte(defConnection[8] & ~8);
-                    savedLegacySetting[8] = Convert.ToByte(savedLegacySetting[8] & ~8);
-                }
+                defConnection = GenConnectionSettings(config, sysProxyMode, counter);
                 RegistrySetValue(registry, "DefaultConnectionSettings", defConnection);
-                RegistrySetValue(registry, "SavedLegacySettings", savedLegacySetting);
+                RegistrySetValue(registry, "SavedLegacySettings", defConnection);
             }
             finally
             {
@@ -210,6 +241,9 @@ namespace Shadowsocks.Controller
                     try
                     {
                         registry.Close();
+#if _DOTNET_4_0
+                        registry.Dispose();
+#endif
                     }
                     catch (Exception e)
                     {

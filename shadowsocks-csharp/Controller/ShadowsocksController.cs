@@ -45,6 +45,7 @@ namespace Shadowsocks.Controller
 
         public event EventHandler ConfigChanged;
         public event EventHandler ToggleModeChanged;
+        public event EventHandler ToggleRuleModeChanged;
         //public event EventHandler ShareOverLANStatusChanged;
         public event EventHandler ShowConfigFormEvent;
 
@@ -267,22 +268,22 @@ namespace Shadowsocks.Controller
             }
         }
 
+        public void ToggleRuleMode(int mode)
+        {
+            _config.proxyRuleMode = mode;
+            SaveConfig(_config);
+            if (ToggleRuleModeChanged != null)
+            {
+                ToggleRuleModeChanged(this, new EventArgs());
+            }
+        }
+
         public void ToggleBypass(bool bypass)
         {
             _config.bypassWhiteList = bypass;
             UpdateSystemProxy();
             SaveConfig(_config);
         }
-
-        //public void ToggleShareOverLAN(bool enabled)
-        //{
-        //    _config.shareOverLan = enabled;
-        //    SaveConfig(_config);
-        //    if (ShareOverLANStatusChanged != null)
-        //    {
-        //        ShareOverLANStatusChanged(this, new EventArgs());
-        //    }
-        //}
 
         public void ToggleSelectRandom(bool enabled)
         {
