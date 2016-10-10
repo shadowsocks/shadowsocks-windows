@@ -23,7 +23,7 @@ namespace Shadowsocks.Controller
         public string LatestVersionLocalName;
         public event EventHandler CheckUpdateCompleted;
 
-        public const string Version = "3.3.2";
+        public const string Version = "3.3.3";
 
         private class CheckUpdateTimer : System.Timers.Timer
         {

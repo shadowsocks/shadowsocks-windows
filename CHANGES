@@ -1,3 +1,9 @@
+3.3.3 2016-10-10
+- Add timeout support for server and forward proxy,
+  only integer is allowed
+- Use wininet API to setup system proxy
+- Upgrade to .NET Framework 4.6.2
+
 3.3.2 2016-10-03
 - Add HTTP forward proxy support
 - Bug fixes and improvements
