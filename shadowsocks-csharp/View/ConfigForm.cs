@@ -296,7 +296,7 @@ namespace Shadowsocks.View
         {
             int index = ServersListBox.SelectedIndex;
             Server server = _modifiedConfiguration.configs[index];
-            object item = ServersListBox.SelectedItem;
+            object item = ServersListBox.Items[index];
 
             _modifiedConfiguration.configs.Remove(server);
             _modifiedConfiguration.configs.Insert(index + step, server);
