@@ -25,6 +25,7 @@ namespace Shadowsocks.Controller
 
         protected IEncryptor _encryptor;
         protected object _encryptionLock = new object();
+        protected string _password;
         //protected object _decryptionLock = new object();
         public IObfs _protocol;
         public IObfs _obfs;
@@ -82,13 +83,6 @@ namespace Shadowsocks.Controller
         {
             get
             {
-                //Dictionary<string, int> protocols = new Dictionary<string, int>();
-                //protocols["auth_aes128_sha1"] = 1;
-                //if (protocols.ContainsKey(_protocol.Name()))
-                //{
-                //    return true;
-                //}
-                //return false;
                 return _protocol.isAlwaysSendback();
             }
         }
@@ -151,9 +145,10 @@ namespace Shadowsocks.Controller
             _socket.EndConnect(ar);
         }
 
-        public void SetEncryptor(IEncryptor encryptor)
+        public void CreateEncryptor(string method, string password)
         {
-            _encryptor = encryptor;
+            _encryptor = EncryptorFactory.GetEncryptor(method, password);
+            _password = password;
         }
 
         public void SetProtocol(IObfs protocol)
@@ -184,9 +179,9 @@ namespace Shadowsocks.Controller
             if (_proxy_server != null)
                 server_addr = _proxy_server;
             _protocol.SetServerInfo(new ServerInfo(server_addr, server.server_port, "", server.getProtocolData(),
-                _encryptor.getIV(), _encryptor.getKey(), head_len, mss));
+                _encryptor.getIV(), _password, _encryptor.getKey(), head_len, mss));
             _obfs.SetServerInfo(new ServerInfo(server_addr, server.server_port, server.obfsparam??"", server.getObfsData(),
-                _encryptor.getIV(), _encryptor.getKey(), head_len, mss));
+                _encryptor.getIV(), _password, _encryptor.getKey(), head_len, mss));
         }
 
         public IAsyncResult BeginReceive(byte[] buffer, int size, SocketFlags flags, AsyncCallback callback, object state)

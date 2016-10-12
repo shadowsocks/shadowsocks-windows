@@ -232,6 +232,11 @@ namespace Shadowsocks.Obfs
                 Array.Copy(data, 0, outdata, rand_len + 2, datalength);
             outdata[0] = (byte)(outlength >> 8);
             outdata[1] = (byte)(outlength);
+            {
+                byte[] rnd_data = new byte[rand_len];
+                random.NextBytes(rnd_data);
+                rnd_data.CopyTo(outdata, 2);
+            }
             if (rand_len < 128)
             {
                 outdata[2] = (byte)(rand_len);
@@ -252,6 +257,11 @@ namespace Shadowsocks.Obfs
             int data_offset = rand_len + 4 + 2;
             outlength = data_offset + datalength + 12 + 10;
             AuthData authData = (AuthData)this.Server.data;
+            {
+                byte[] rnd_data = new byte[rand_len];
+                random.NextBytes(rnd_data);
+                rnd_data.CopyTo(outdata, data_offset - rand_len);
+            }
             lock (authData)
             {
                 if (authData.connectionID > 0xFF000000)
@@ -447,6 +457,11 @@ namespace Shadowsocks.Obfs
             outdata[1] = (byte)(outlength);
             ulong crc32 = Util.CRC32.CalcCRC32(outdata, 2);
             BitConverter.GetBytes((ushort)crc32).CopyTo(outdata, 2);
+            {
+                byte[] rnd_data = new byte[rand_len];
+                random.NextBytes(rnd_data);
+                rnd_data.CopyTo(outdata, 4);
+            }
             if (rand_len < 128)
             {
                 outdata[4] = (byte)(rand_len);
@@ -467,6 +482,11 @@ namespace Shadowsocks.Obfs
             int data_offset = rand_len + 4 + 2;
             outlength = data_offset + datalength + 12 + 10;
             AuthData authData = (AuthData)this.Server.data;
+            {
+                byte[] rnd_data = new byte[rand_len];
+                random.NextBytes(rnd_data);
+                rnd_data.CopyTo(outdata, data_offset - rand_len);
+            }
             lock (authData)
             {
                 if (authData.connectionID > 0xFF000000)
@@ -677,6 +697,11 @@ namespace Shadowsocks.Obfs
             outdata[1] = (byte)(outlength >> 8);
             ulong crc32 = Util.CRC32.CalcCRC32(outdata, 2);
             BitConverter.GetBytes((ushort)crc32).CopyTo(outdata, 2);
+            {
+                byte[] rnd_data = new byte[rand_len];
+                random.NextBytes(rnd_data);
+                rnd_data.CopyTo(outdata, 4);
+            }
             if (rand_len < 128)
             {
                 outdata[4] = (byte)(rand_len);
@@ -958,6 +983,11 @@ namespace Shadowsocks.Obfs
             byte[] key = new byte[user_key.Length + 4];
             user_key.CopyTo(key, 0);
             BitConverter.GetBytes(pack_id).CopyTo(key, key.Length - 4);
+            {
+                byte[] rnd_data = new byte[rand_len];
+                random.NextBytes(rnd_data);
+                rnd_data.CopyTo(outdata, 4);
+            }
 
             {
                 HMAC sha1 = CreateHMAC(key);
@@ -1045,12 +1075,12 @@ namespace Shadowsocks.Obfs
                 Array.Copy(sha1data, 0, encrypt, 20, 4);
             }
             {
-                byte[] rnd = new byte[3];
+                byte[] rnd = new byte[1];
                 random.NextBytes(rnd);
                 rnd.CopyTo(outdata, 0);
                 HMAC sha1 = CreateHMAC(key);
-                byte[] sha1data = sha1.ComputeHash(rnd, 0, 3);
-                Array.Copy(sha1data, 0, outdata, 3, 4);
+                byte[] sha1data = sha1.ComputeHash(rnd, 0, rnd.Length);
+                Array.Copy(sha1data, 0, outdata, rnd.Length, 7 - rnd.Length);
             }
             encrypt.CopyTo(outdata, 7);
             Array.Copy(data, 0, outdata, data_offset, datalength);

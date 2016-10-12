@@ -34,7 +34,7 @@ namespace Shadowsocks.Encryption
             { "camellia-128-cfb", new EncryptorInfo(16, 16, true, CIPHER_CAMELLIA, "CAMELLIA-128-CFB128") },
             { "camellia-192-cfb", new EncryptorInfo(24, 16, true, CIPHER_CAMELLIA, "CAMELLIA-192-CFB128") },
             { "camellia-256-cfb", new EncryptorInfo(32, 16, true, CIPHER_CAMELLIA, "CAMELLIA-256-CFB128") },
-            { "rc4", new EncryptorInfo(16, 16, false, CIPHER_RC4, "ARC4-128") },
+            { "rc4", new EncryptorInfo(16, 0, true, CIPHER_RC4, "ARC4-128") },
             { "rc4-md5", new EncryptorInfo(16, 16, true, CIPHER_RC4, "ARC4-128") },
             { "rc4-md5-6", new EncryptorInfo(16, 6, true, CIPHER_RC4, "ARC4-128") },
         };

@@ -19,9 +19,10 @@ namespace Shadowsocks.Obfs
         public int tcp_mss;
         public byte[] iv;
         public byte[] key;
+        public string key_str;
         public int head_len;
 
-        public ServerInfo(string host, int port, string param, object data, byte[] iv, byte[] key, int head_len, int tcp_mss)
+        public ServerInfo(string host, int port, string param, object data, byte[] iv, string key_str, byte[] key, int head_len, int tcp_mss)
         {
             this.host = host;
             this.port = port;
@@ -29,6 +30,7 @@ namespace Shadowsocks.Obfs
             this.data = data;
             this.iv = iv;
             this.key = key;
+            this.key_str = key_str;
             this.head_len = head_len;
             this.tcp_mss = tcp_mss;
         }

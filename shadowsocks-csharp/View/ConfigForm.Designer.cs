@@ -476,7 +476,8 @@
             "verify_sha1",
             "auth_sha1_v2",
             "auth_sha1_v4",
-            "auth_aes128"});
+            "auth_aes128_md5",
+            "auth_aes128_sha1"});
             this.TCPProtocolComboBox.Location = new System.Drawing.Point(108, 124);
             this.TCPProtocolComboBox.Name = "TCPProtocolComboBox";
             this.TCPProtocolComboBox.Size = new System.Drawing.Size(233, 25);

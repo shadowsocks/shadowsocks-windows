@@ -166,7 +166,7 @@ namespace Shadowsocks.Controller
         protected bool is_obfs_sendback = false;
 
         protected bool connectionTCPIdle, connectionUDPIdle, remoteTCPIdle, remoteUDPIdle;
-        protected int remoteRecvCount = 0;
+        //protected int remoteRecvCount = 0;
         protected int connectionRecvCount = 0;
 
         protected SpeedTester speedTester = new SpeedTester();
@@ -174,6 +174,7 @@ namespace Shadowsocks.Controller
         protected Random random = new Random();
         protected System.Timers.Timer timer;
         protected object timerLock = new object();
+        protected DateTime lastTimerSetTime;
 
         enum ConnectState
         {
@@ -206,31 +207,42 @@ namespace Shadowsocks.Controller
                 return;
 
             cfg.try_keep_alive = 0;
-            lock (timerLock)
+
+            if (time <= 0)
             {
-                if (time <= 0)
+                if (timer != null)
                 {
-                    if (timer != null)
+                    lock (timerLock)
                     {
-                        timer.Enabled = false;
-                        timer.Elapsed -= timer_Elapsed;
-                        timer.Dispose();
-                        timer = null;
+                        if (timer != null)
+                        {
+                            timer.Enabled = false;
+                            timer.Elapsed -= timer_Elapsed;
+                            timer.Dispose();
+                            timer = null;
+                        }
                     }
                 }
-                else
+            }
+            else
+            {
+                if (lastTimerSetTime != null && (DateTime.Now - lastTimerSetTime).TotalMilliseconds > 500)
                 {
-                    if (timer == null)
+                    lock (timerLock)
                     {
-                        timer = new System.Timers.Timer(time * 1000.0);
-                        timer.Elapsed += timer_Elapsed;
+                        if (timer == null)
+                        {
+                            timer = new System.Timers.Timer(time * 1000.0);
+                            timer.Elapsed += timer_Elapsed;
+                        }
+                        else
+                        {
+                            timer.Interval = time * 1000.0;
+                            timer.Stop();
+                        }
+                        timer.Start();
+                        lastTimerSetTime = DateTime.Now;
                     }
-                    else
-                    {
-                        timer.Interval = time * 1000.0;
-                        timer.Stop();
-                    }
-                    timer.Start();
                 }
             }
         }
@@ -521,7 +533,7 @@ namespace Shadowsocks.Controller
                 remote.GetSocket().SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, true);
                 try
                 {
-                    remote.SetEncryptor(EncryptorFactory.GetEncryptor(server.method, server.password));
+                    remote.CreateEncryptor(server.method, server.password);
                 }
                 catch
                 {
@@ -539,7 +551,7 @@ namespace Shadowsocks.Controller
                         SocketType.Dgram, ProtocolType.Udp);
                     remoteUDP.GetSocket().Bind(new IPEndPoint(ipAddress.AddressFamily == AddressFamily.InterNetworkV6 ? IPAddress.IPv6Any : IPAddress.Any, 0));
 
-                    remoteUDP.SetEncryptor(EncryptorFactory.GetEncryptor(server.method, server.password));
+                    remoteUDP.CreateEncryptor(server.method, server.password);
                     remoteUDP.SetProtocol(ObfsFactory.GetObfs(server.protocol));
                     remoteUDP.SetObfs(ObfsFactory.GetObfs(server.obfs));
                     if (server.server_udp_port == 0 || cfg.socks5RemotePort != 0)
@@ -668,9 +680,11 @@ namespace Shadowsocks.Controller
                 }
                 closed = true;
             }
+            Thread.Sleep(100);
             for (int i = 0; i < 10; ++i)
             {
-                if (remoteRecvCount <= 0 && connectionRecvCount <= 0)
+                if (//remoteRecvCount <= 0 &&
+                    connectionRecvCount <= 0)
                     break;
                 Thread.Sleep(10 * (i + 1) * (i + 1));
             }
@@ -1291,7 +1305,7 @@ namespace Shadowsocks.Controller
 
         private void PipeRemoteReceiveCallback(IAsyncResult ar)
         {
-            Interlocked.Increment(ref remoteRecvCount);
+            //Interlocked.Increment(ref remoteRecvCount);
             bool final_close = false;
             try
             {
@@ -1363,7 +1377,7 @@ namespace Shadowsocks.Controller
             }
             finally
             {
-                Interlocked.Decrement(ref remoteRecvCount);
+                //Interlocked.Decrement(ref remoteRecvCount);
                 if (final_close)
                 {
                     Close();
@@ -1375,7 +1389,7 @@ namespace Shadowsocks.Controller
         private void PipeRemoteUDPReceiveCallback(IAsyncResult ar)
         {
             bool final_close = false;
-            Interlocked.Decrement(ref remoteRecvCount);
+            //Interlocked.Decrement(ref remoteRecvCount);
             try
             {
                 if (closed)
@@ -1426,7 +1440,7 @@ namespace Shadowsocks.Controller
             }
             finally
             {
-                Interlocked.Decrement(ref remoteRecvCount);
+                //Interlocked.Decrement(ref remoteRecvCount);
                 if (final_close)
                 {
                     Close();

@@ -167,7 +167,7 @@ namespace Shadowsocks.Encryption
 
         public override void Decrypt(byte[] buf, int length, byte[] outbuf, out int outlength)
         {
-            if (_decryptIVReceived < ivLen)
+            if (_decryptIVReceived <= ivLen)
             {
                 int start_pos = ivLen;
                 if (_decryptIVReceived + length < ivLen)
@@ -199,6 +199,7 @@ namespace Shadowsocks.Encryption
 
                 if (outlength > 0)
                 {
+                    _decryptIVReceived += outlength;
                     lock (tempbuf)
                     {
                         // C# could be multi-threaded
