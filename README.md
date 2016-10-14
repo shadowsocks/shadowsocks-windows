@@ -32,7 +32,7 @@ port in `Servers -> Edit Servers`
 
 1. You can change PAC rules by editing the PAC file. When you save the PAC file
 with any editor, Shadowsocks will notify browsers about the change automatically
-2. You can also update PAC file from [GFWList] (maintained by 3rd party)
+2. You can also update PAC file from [GFWList] \(maintained by 3rd party)
 3. You can also use online PAC URL
 
 #### Server Auto Switching
