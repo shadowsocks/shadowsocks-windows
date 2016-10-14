@@ -19,17 +19,19 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
+using Shadowsocks.Controller;
 
 namespace Shadowsocks.Util.SystemProxy
 {
     public static class WinINet
     {
         /// <summary>
-        /// Set IE settings for LAN connection.
+        /// Set IE settings.
         /// </summary>
-        public static void SetIEProxy(bool enable, bool global, string proxyServer, string pacURL)
+        private static void SetIEProxy(bool enable, bool global, string proxyServer, string pacURL, string connName)
         {
             List<INTERNET_PER_CONN_OPTION> _optionlist = new List<INTERNET_PER_CONN_OPTION>();
+
             if (enable)
             {
                 if (global)
@@ -38,17 +40,18 @@ namespace Shadowsocks.Util.SystemProxy
                     _optionlist.Add(new INTERNET_PER_CONN_OPTION
                     {
                         dwOption = (int)INTERNET_PER_CONN_OptionEnum.INTERNET_PER_CONN_FLAGS_UI,
-                        Value = { dwValue = (int)INTERNET_OPTION_PER_CONN_FLAGS_UI.PROXY_TYPE_PROXY }
+                        Value = { dwValue = (int)(INTERNET_OPTION_PER_CONN_FLAGS_UI.PROXY_TYPE_PROXY
+                                                | INTERNET_OPTION_PER_CONN_FLAGS_UI.PROXY_TYPE_DIRECT) }
                     });
                     _optionlist.Add(new INTERNET_PER_CONN_OPTION
                     {
                         dwOption = (int)INTERNET_PER_CONN_OptionEnum.INTERNET_PER_CONN_PROXY_SERVER,
-                        Value = { pszValue = Marshal.StringToHGlobalAnsi(proxyServer) }
+                        Value = { pszValue = Marshal.StringToHGlobalAuto(proxyServer) }
                     });
                     _optionlist.Add(new INTERNET_PER_CONN_OPTION
                     {
                         dwOption = (int)INTERNET_PER_CONN_OptionEnum.INTERNET_PER_CONN_PROXY_BYPASS,
-                        Value = { pszValue = Marshal.StringToHGlobalAnsi("<local>") }
+                        Value = { pszValue = Marshal.StringToHGlobalAuto("<local>") }
                     });
                 }
                 else
@@ -62,7 +65,7 @@ namespace Shadowsocks.Util.SystemProxy
                     _optionlist.Add(new INTERNET_PER_CONN_OPTION
                     {
                         dwOption = (int)INTERNET_PER_CONN_OptionEnum.INTERNET_PER_CONN_AUTOCONFIG_URL,
-                        Value = { pszValue = Marshal.StringToHGlobalAnsi(pacURL) }
+                        Value = { pszValue = Marshal.StringToHGlobalAuto(pacURL) }
                     });
                 }
             }
@@ -101,8 +104,9 @@ namespace Shadowsocks.Util.SystemProxy
             // Return the unmanaged size of an object in bytes.
             optionList.Size = Marshal.SizeOf(optionList);
 
-            // IntPtr.Zero means LAN connection.
-            optionList.Connection = IntPtr.Zero;
+            optionList.Connection = connName.IsNullOrEmpty()
+                ? IntPtr.Zero // NULL means LAN
+                : Marshal.StringToHGlobalAuto(connName); // TODO: not working if contains Chinese
 
             optionList.OptionCount = _optionlist.Count;
             optionList.OptionError = 0;
@@ -132,15 +136,56 @@ namespace Shadowsocks.Util.SystemProxy
 
             // Notify the system that the registry settings have been changed and cause
             // the proxy data to be reread from the registry for a handle.
-            NativeMethods.InternetSetOption(
-                IntPtr.Zero,
-                INTERNET_OPTION.INTERNET_OPTION_SETTINGS_CHANGED,
-                IntPtr.Zero, 0);
+//            bReturn = NativeMethods.InternetSetOption(
+//                IntPtr.Zero,
+//                INTERNET_OPTION.INTERNET_OPTION_SETTINGS_CHANGED,
+//                IntPtr.Zero, 0);
+//            if ( ! bReturn )
+//            {
+//                Logging.Error("InternetSetOption:INTERNET_OPTION_SETTINGS_CHANGED");
+//            }
 
-            NativeMethods.InternetSetOption(
+            bReturn = NativeMethods.InternetSetOption(
+                IntPtr.Zero,
+                INTERNET_OPTION.INTERNET_OPTION_PROXY_SETTINGS_CHANGED,
+                IntPtr.Zero, 0);
+            if (!bReturn)
+            {
+                Logging.Error("InternetSetOption:INTERNET_OPTION_PROXY_SETTINGS_CHANGED");
+            }
+
+            bReturn = NativeMethods.InternetSetOption(
                 IntPtr.Zero,
                 INTERNET_OPTION.INTERNET_OPTION_REFRESH,
                 IntPtr.Zero, 0);
+            if (!bReturn)
+            {
+                Logging.Error("InternetSetOption:INTERNET_OPTION_REFRESH");
+            }
+        }
+
+        public static void SetIEProxy(bool enable, bool global, string proxyServer, string pacURL)
+        {
+            string[] allConnections = null;
+            var ret = RAS.GetAllConns(ref allConnections);
+
+            if (ret == 2)
+                throw new Exception("Cannot get all connections");
+
+            if (ret == 1)
+            {
+                // no entries, only set LAN
+                SetIEProxy(enable, global, proxyServer, pacURL, null);
+            }
+            else if (ret == 0)
+            {
+                // found entries, set LAN and each connection
+                SetIEProxy(enable, global, proxyServer, pacURL, null);
+                foreach (string connName in allConnections)
+                {
+                    SetIEProxy(enable, global, proxyServer, pacURL, connName);
+                }
+            }
         }
     }
 }

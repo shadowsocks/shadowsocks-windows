@@ -190,6 +190,7 @@
     <Compile Include="Util\SystemProxy\INTERNET_PER_CONN_OPTION.cs" />
     <Compile Include="Util\SystemProxy\INTERNET_PER_CONN_OPTION_LIST.cs" />
     <Compile Include="Util\SystemProxy\NativeMethods.cs" />
+    <Compile Include="Util\SystemProxy\RAS.cs" />
     <Compile Include="Util\SystemProxy\WinINet.cs" />
     <Compile Include="Util\Util.cs" />
     <Compile Include="View\ConfigForm.cs">

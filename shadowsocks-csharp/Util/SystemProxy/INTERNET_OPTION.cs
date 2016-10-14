@@ -30,7 +30,13 @@ namespace Shadowsocks.Util.SystemProxy
         INTERNET_OPTION_SETTINGS_CHANGED = 39,
 
         // Causes the proxy data to be reread from the registry for a handle.
-        INTERNET_OPTION_REFRESH = 37
+        INTERNET_OPTION_REFRESH = 37,
+
+        // Alerts the current WinInet instance that proxy settings have changed
+        // and that they must update with the new settings.
+        // To alert all available WinInet instances, set the Buffer parameter of
+        // InternetSetOption to NULL and BufferLength to 0 when passing this option.
+        INTERNET_OPTION_PROXY_SETTINGS_CHANGED = 95
 
     }
 }

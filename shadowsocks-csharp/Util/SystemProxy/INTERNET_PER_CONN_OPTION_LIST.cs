@@ -22,7 +22,7 @@ using System.Runtime.InteropServices;
 
 namespace Shadowsocks.Util.SystemProxy
 {
-    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
+    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
     public struct INTERNET_PER_CONN_OPTION_LIST : IDisposable
     {
         public int Size;

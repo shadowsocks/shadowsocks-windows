@@ -26,7 +26,7 @@ namespace Shadowsocks.Util.SystemProxy
         /// <summary>
         /// Sets an Internet option.
         /// </summary>
-        [DllImport("wininet.dll", CharSet = CharSet.Ansi, SetLastError = true)]
+        [DllImport("wininet.dll", CharSet = CharSet.Auto, SetLastError = true)]
         internal static extern bool InternetSetOption(
             IntPtr hInternet,
             INTERNET_OPTION dwOption,
