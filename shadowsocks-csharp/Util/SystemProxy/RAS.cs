@@ -98,21 +98,19 @@ namespace Shadowsocks.Util.SystemProxy
         /// </returns>
         public static uint GetAllConns(ref string[] allConns)
         {
-            int lpNames = 1;
+            int lpNames = 0;
             int entryNameSize = 0;
             int lpSize = 0;
             uint retval = ERROR_SUCCESS;
             RasEntryName[] names = null;
 
             entryNameSize = Marshal.SizeOf(typeof(RasEntryName));
-            lpSize = lpNames * entryNameSize;
 
-            names = new RasEntryName[lpNames];
-            names[0].dwSize = entryNameSize;
+            // Windows Vista or later:  To determine the required buffer size, call RasEnumEntries
+            // with lprasentryname set to NULL. The variable pointed to by lpcb should be set to zero.
+            // The function will return the required buffer size in lpcb and an error code of ERROR_BUFFER_TOO_SMALL.
+            retval = RasEnumEntries(null, null, null, ref lpSize, out lpNames);
 
-            retval = RAS.RasEnumEntries(null, null, names, ref lpSize, out lpNames);
-
-            //if we have more than one connection, we need to resize
             if (retval == ERROR_BUFFER_TOO_SMALL)
             {
                 names = new RasEntryName[lpNames];
@@ -121,8 +119,7 @@ namespace Shadowsocks.Util.SystemProxy
                     names[i].dwSize = entryNameSize;
                 }
 
-                retval = RAS.RasEnumEntries(null, null, names, ref lpSize, out lpNames);
-
+                retval = RasEnumEntries(null, null, names, ref lpSize, out lpNames);
             }
 
             if (retval == ERROR_SUCCESS)
@@ -145,7 +142,6 @@ namespace Shadowsocks.Util.SystemProxy
             {
                 return 2;
             }
-            
         }
     }
 }
