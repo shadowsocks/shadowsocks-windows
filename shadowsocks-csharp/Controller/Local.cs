@@ -54,6 +54,7 @@ namespace Shadowsocks.Controller
 
     class Local : Listener.Service
     {
+        private delegate void InvokeHandler();
         private Configuration _config;
         private ServerTransferTotal _transfer;
         private IPRangeSet _IPRange;
@@ -75,7 +76,7 @@ namespace Shadowsocks.Controller
             {
                 return true;
             }
-            if (false && length > 8
+            if (length > 8
                 && firstPacket[0] == 'C'
                 && firstPacket[1] == 'O'
                 && firstPacket[2] == 'N'
@@ -97,7 +98,9 @@ namespace Shadowsocks.Controller
             {
                 return false;
             }
+            InvokeHandler handler = () =>
             new ProxyAuthHandler(_config, _transfer, _IPRange, firstPacket, length, socket);
+            handler.BeginInvoke(null, null);
             return true;
         }
     }
