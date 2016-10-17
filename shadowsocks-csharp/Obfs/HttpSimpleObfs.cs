@@ -395,13 +395,27 @@ namespace Shadowsocks.Obfs
             byte[] outdata = new byte[datalength + 4096];
             if (handshake_status == 8)
             {
-                outdata[0] = 0x17;
-                outdata[1] = 0x3;
-                outdata[2] = 0x3;
-                outdata[3] = (byte)(datalength >> 8);
-                outdata[4] = (byte)(datalength);
-                outlength = datalength + 5;
-                Array.Copy(encryptdata, 0, outdata, 5, datalength);
+                outlength = 0;
+                while (datalength > 4096)
+                {
+                    int len = random.Next(1500, 4096);
+                    outdata[outlength] = 0x17;
+                    outdata[outlength + 1] = 0x3;
+                    outdata[outlength + 2] = 0x3;
+                    outdata[outlength + 3] = (byte)(len >> 8);
+                    outdata[outlength + 4] = (byte)(len);
+                    Array.Copy(encryptdata, 0, outdata, outlength + 5, len);
+                    Array.Copy(encryptdata, len, encryptdata, 0, datalength - len);
+                    outlength += len + 5;
+                    datalength -= len;
+                }
+                outdata[outlength] = 0x17;
+                outdata[outlength + 1] = 0x3;
+                outdata[outlength + 2] = 0x3;
+                outdata[outlength + 3] = (byte)(datalength >> 8);
+                outdata[outlength + 4] = (byte)(datalength);
+                Array.Copy(encryptdata, 0, outdata, outlength + 5, datalength);
+                outlength += datalength + 5;
             }
             else if (handshake_status == 1)
             {

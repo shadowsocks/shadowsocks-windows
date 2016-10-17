@@ -34,24 +34,26 @@ namespace Shadowsocks.View
             //this.Font = new_font;
 
             //comboProxyType.Height = comboProxyType.Height - font_height + font_height * dpi_mul / 4;
-            //comboProxyType.Width = comboProxyType.Width * dpi_mul / 4;
+            comboProxyType.Width = comboProxyType.Width * dpi_mul / 4;
             //RandomComboBox.Height = RandomComboBox.Height - font_height + font_height * dpi_mul / 4;
-            //RandomComboBox.Width = RandomComboBox.Width * dpi_mul / 4;
+            RandomComboBox.Width = RandomComboBox.Width * dpi_mul / 4;
 
-            //TextS5Server.Width = TextS5Server.Width * dpi_mul / 4;
-            //TextS5Port.Width = TextS5Port.Width * dpi_mul / 4;
-            //TextS5User.Width = TextS5User.Width * dpi_mul / 4;
-            //TextS5Pass.Width = TextS5Pass.Width * dpi_mul / 4;
-            //TextUserAgent.Width = TextUserAgent.Width * dpi_mul / 4;
+            TextS5Server.Width = TextS5Server.Width * dpi_mul / 4;
+            TextS5Port.Width = TextS5Port.Width * dpi_mul / 4;
+            TextS5User.Width = TextS5User.Width * dpi_mul / 4;
+            TextS5Pass.Width = TextS5Pass.Width * dpi_mul / 4;
+            TextUserAgent.Width = TextUserAgent.Width * dpi_mul / 4;
 
-            //ProxyPortTextBox.Width = ProxyPortTextBox.Width * dpi_mul / 4;
-            //TextAuthUser.Width = TextAuthUser.Width * dpi_mul / 4;
-            //TextAuthPass.Width = TextAuthPass.Width * dpi_mul / 4;
+            ProxyPortTextBox.Width = ProxyPortTextBox.Width * dpi_mul / 4;
+            TextAuthUser.Width = TextAuthUser.Width * dpi_mul / 4;
+            TextAuthPass.Width = TextAuthPass.Width * dpi_mul / 4;
 
-            //DNSText.Width = DNSText.Width * dpi_mul / 4;
-            //ReconnectText.Width = ReconnectText.Width * dpi_mul / 4;
-            //textTimeout.Width = ReconnectText.Width * dpi_mul / 4;
-            //TTLText.Width = TTLText.Width * dpi_mul / 4;
+            buttonDefault.Height = buttonDefault.Height * dpi_mul / 4;
+            buttonDefault.Width = buttonDefault.Width * dpi_mul / 4;
+            DNSText.Width = DNSText.Width * dpi_mul / 4;
+            ReconnectText.Width = ReconnectText.Width * dpi_mul / 4;
+            textTimeout.Width = textTimeout.Width * dpi_mul / 4;
+            TTLText.Width = TTLText.Width * dpi_mul / 4;
 
             LoadCurrentConfiguration();
         }

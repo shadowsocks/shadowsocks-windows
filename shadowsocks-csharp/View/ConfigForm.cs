@@ -63,16 +63,18 @@ namespace Shadowsocks.View
                 PictureQRcode.Visible = false;
 
             int dpi_mul = Util.Utils.GetDpiMul();
-            //ServersListBox.Width = ServersListBox.Width * dpi_mul / 4;
+            //ServersListBox.Height = ServersListBox.Height * 4 / dpi_mul;
+            ServersListBox.Width = ServersListBox.Width * dpi_mul / 4;
             //ServersListBox.Height = ServersListBox.Height * dpi_mul / 4;
-            //AddButton.Width = AddButton.Width * dpi_mul / 4;
-            //AddButton.Height = AddButton.Height * dpi_mul / 4;
-            //DeleteButton.Width = DeleteButton.Width * dpi_mul / 4;
-            //DeleteButton.Height = DeleteButton.Height * dpi_mul / 4;
-            //UpButton.Width = UpButton.Width * dpi_mul / 4;
-            //UpButton.Height = UpButton.Height * dpi_mul / 4;
-            //DownButton.Width = DownButton.Width * dpi_mul / 4;
-            //DownButton.Height = DownButton.Height * dpi_mul / 4;
+            ServersListBox.Height = checkAdvSetting.Top + checkAdvSetting.Height;
+            AddButton.Width = AddButton.Width * dpi_mul / 4;
+            AddButton.Height = AddButton.Height * dpi_mul / 4;
+            DeleteButton.Width = DeleteButton.Width * dpi_mul / 4;
+            DeleteButton.Height = DeleteButton.Height * dpi_mul / 4;
+            UpButton.Width = UpButton.Width * dpi_mul / 4;
+            UpButton.Height = UpButton.Height * dpi_mul / 4;
+            DownButton.Width = DownButton.Width * dpi_mul / 4;
+            DownButton.Height = DownButton.Height * dpi_mul / 4;
 
             //IPTextBox.Width = IPTextBox.Width * dpi_mul / 4;
             //ServerPortTextBox.Width = ServerPortTextBox.Width * dpi_mul / 4;
@@ -85,31 +87,19 @@ namespace Shadowsocks.View
             //TextGroup.Width = TextGroup.Width * dpi_mul / 4;
             //TextLink.Width = TextLink.Width * dpi_mul / 4;
             //TextUDPPort.Width = TextUDPPort.Width * dpi_mul / 4;
-            //Font new_font = new Font("Arial", (float)(9.0 * dpi_mul / 4));
-            //this.Font = new_font;
-            //IPTextBox.Font = new_font;
-            //ServerPortTextBox.Font = new_font;
-            //PasswordTextBox.Font = new_font;
-            //EncryptionSelect.Font = new_font;
-            //TCPProtocolComboBox.Font = new_font;
-            //ObfsCombo.Font = new_font;
-            //TextObfsParam.Font = new_font;
-            //RemarksTextBox.Font = new_font;
-            //TextGroup.Font = new_font;
-            //TextLink.Font = new_font;
-            //TextUDPPort.Font = new_font;
 
             //int font_height = 9;
             //EncryptionSelect.Height = EncryptionSelect.Height - font_height + font_height * dpi_mul / 4;
             //TCPProtocolComboBox.Height = TCPProtocolComboBox.Height - font_height + font_height * dpi_mul / 4;
             //ObfsCombo.Height = ObfsCombo.Height - font_height + font_height * dpi_mul / 4;
 
-            ////MyCancelButton.Height = MyCancelButton.Height * dpi_mul / 4;
-            //MyCancelButton.Width = MyCancelButton.Width * dpi_mul / 4;
             //OKButton.Width = OKButton.Width * dpi_mul / 4;
-            ////OKButton.Height = OKButton.Height * dpi_mul / 4;
+            OKButton.Height = OKButton.Height * dpi_mul / 4;
+            //MyCancelButton.Width = MyCancelButton.Width * dpi_mul / 4;
+            MyCancelButton.Height = MyCancelButton.Height * dpi_mul / 4;
 
-            DrawLogo(350 * 4 / 4);
+            DrawLogo(350 * dpi_mul / 4);
+            //DrawLogo(350);
 
             ShowWindow();
 
