@@ -9,6 +9,7 @@ using Shadowsocks.Model;
 using System.Timers;
 using System.Threading;
 using OpenDNS;
+using Shadowsocks.Util;
 
 namespace Shadowsocks.Controller
 {
@@ -55,10 +56,13 @@ namespace Shadowsocks.Controller
     {
         private Configuration _config;
         private ServerTransferTotal _transfer;
-        public Local(Configuration config, ServerTransferTotal transfer)
+        private IPRangeSet _IPRange;
+
+        public Local(Configuration config, ServerTransferTotal transfer, IPRangeSet IPRange)
         {
-            this._config = config;
-            this._transfer = transfer;
+            _config = config;
+            _transfer = transfer;
+            _IPRange = IPRange;
         }
 
         protected bool Accept(byte[] firstPacket, int length)
@@ -93,7 +97,7 @@ namespace Shadowsocks.Controller
             {
                 return false;
             }
-            new ProxyAuthHandler(_config, _transfer, firstPacket, length, socket);
+            new ProxyAuthHandler(_config, _transfer, _IPRange, firstPacket, length, socket);
             return true;
         }
     }
@@ -142,9 +146,8 @@ namespace Shadowsocks.Controller
         protected ProtocolResponseDetector detector = new ProtocolResponseDetector();
         // remote socket.
         //protected Socket remote;
-        protected ProxySocket remote;
-        protected ProxySocket remoteUDP;
-        protected DnsQuery dns;
+        protected ProxyEncryptSocket remote;
+        protected ProxyEncryptSocket remoteUDP;
         // Size of receive buffer.
         protected const int RecvSize = 4096;
         protected const int BufferSize = 16384;
@@ -257,7 +260,7 @@ namespace Shadowsocks.Controller
 
             try
             {
-                if (cfg.try_keep_alive <= 0 && State == ConnectState.CONNECTED && remote != null && remote.CanSendKeepAlive)
+                if (cfg.try_keep_alive <= 0 && State == ConnectState.CONNECTED && remote != null && remoteUDP == null && remote.CanSendKeepAlive)
                 {
                     cfg.try_keep_alive++;
                     RemoteSendWithoutCallback(null, -1);
@@ -528,7 +531,7 @@ namespace Shadowsocks.Controller
                 || connectionUDP == null
                 || connectionUDP != null && server.udp_over_tcp)
             {
-                remote = new ProxySocket(ipAddress.AddressFamily,
+                remote = new ProxyEncryptSocket(ipAddress.AddressFamily,
                     SocketType.Stream, ProtocolType.Tcp);
                 remote.GetSocket().SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, true);
                 try
@@ -547,7 +550,7 @@ namespace Shadowsocks.Controller
             {
                 try
                 {
-                    remoteUDP = new ProxySocket(ipAddress.AddressFamily,
+                    remoteUDP = new ProxyEncryptSocket(ipAddress.AddressFamily,
                         SocketType.Dgram, ProtocolType.Udp);
                     remoteUDP.GetSocket().Bind(new IPEndPoint(ipAddress.AddressFamily == AddressFamily.InterNetworkV6 ? IPAddress.IPv6Any : IPAddress.Any, 0));
 
@@ -648,13 +651,13 @@ namespace Shadowsocks.Controller
             }
         }
 
-        private void CloseSocket(ref ProxySocket sock)
+        private void CloseSocket(ref ProxyEncryptSocket sock)
         {
             lock (this)
             {
                 if (sock != null)
                 {
-                    ProxySocket s = sock;
+                    ProxyEncryptSocket s = sock;
                     sock = null;
                     try
                     {
@@ -783,72 +786,6 @@ namespace Shadowsocks.Controller
             }
         }
 
-        private IPAddress QueryDns(string host, string dns_servers)
-        {
-            IPAddress ipAddress;
-            bool parsed = IPAddress.TryParse(host, out ipAddress);
-            if (!parsed)
-            {
-                if (server.DnsBuffer().isExpired(host))
-                {
-                    if (dns_servers != null && dns_servers.Length > 0)
-                    {
-                        OpenDNS.Types[] types;
-                        //if (false)
-                        //    types = new Types[] { Types.AAAA, Types.A };
-                        //else
-                            types = new Types[] { Types.A, Types.AAAA };
-                        string[] dns_server = dns_servers.Split(',');
-                        for (int query_i = 0; query_i < types.Length; ++query_i)
-                        {
-                            dns = new DnsQuery(host, types[query_i]);
-                            dns.RecursionDesired = true;
-                            foreach (string server in dns_server)
-                            {
-                                dns.Servers.Add(server);
-                            }
-                            if (dns.Send())
-                            {
-                                int count = dns.Response.Answers.Count;
-                                if (count > 0)
-                                {
-                                    for (int i = 0; i < count; ++i)
-                                    {
-                                        if (((ResourceRecord)dns.Response.Answers[i]).Type != types[query_i])
-                                            continue;
-                                        return ((OpenDNS.Address)dns.Response.Answers[i]).IP;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    {
-                        try
-                        {
-                            GetHostEntryHandler callback = new GetHostEntryHandler(Dns.GetHostEntry);
-                            IAsyncResult result = callback.BeginInvoke(host, null, null);
-                            if (result.AsyncWaitHandle.WaitOne(5, false))
-                            {
-                                foreach(IPAddress ad in callback.EndInvoke(result).AddressList)
-                                {
-                                    return ad;
-                                    //if (ad.AddressFamily == AddressFamily.InterNetwork)
-                                    //{
-                                    //    return ad;
-                                    //}
-                                }
-                            }
-                        }
-                        catch
-                        {
-
-                        }
-                    }
-                }
-            }
-            return ipAddress;
-        }
-
         private void Connect()
         {
             remote = null;
@@ -876,12 +813,43 @@ namespace Shadowsocks.Controller
             ResetTimeout(cfg.TTL);
             if (cfg.fouce_local_dns_query && cfg.targetHost != null)
             {
-                IPAddress ipAddress = QueryDns(cfg.targetHost, cfg.dns_servers);
+                IPAddress ipAddress;
+                //if (server.DnsBuffer().isExpired(cfg.targetHost))
+                //{
+                //    ipAddress = Util.Utils.QueryDns(cfg.targetHost, cfg.dns_servers);
+                //}
+                //else
+                //{
+                //    ipAddress = server.DnsBuffer().ip;
+                //}
+                //if (ipAddress != null)
+                //{
+                //    server.DnsBuffer().UpdateDns(cfg.targetHost, ipAddress);
+                //    cfg.targetHost = ipAddress.ToString();
+                //    ResetTimeout(cfg.TTL);
+                //}
+
+                string host = cfg.targetHost;
+
+                if (!IPAddress.TryParse(host, out ipAddress))
+                {
+                    ipAddress = Utils.DnsBuffer.Get(host);
+                }
+                if (ipAddress == null)
+                {
+                    ipAddress = Utils.QueryDns(host, cfg.dns_servers);
+                }
                 if (ipAddress != null)
                 {
-                    server.DnsBuffer().UpdateDns(cfg.targetHost, ipAddress);
+                    Utils.DnsBuffer.Set(host, ipAddress);
+                    Utils.DnsBuffer.Sweep();
+
                     cfg.targetHost = ipAddress.ToString();
                     ResetTimeout(cfg.TTL);
+                }
+                else
+                {
+                    //throw new SocketException((int)SocketError.HostNotFound);
                 }
             }
 
@@ -911,7 +879,14 @@ namespace Shadowsocks.Controller
                         bool dns_ok = false;
                         if (!dns_ok)
                         {
-                            ipAddress = QueryDns(serverURI, cfg.dns_servers);
+                            if (server.DnsBuffer().isExpired(serverURI))
+                            {
+                                ipAddress = Util.Utils.QueryDns(serverURI, cfg.dns_servers);
+                            }
+                            else
+                            {
+                                ipAddress = server.DnsBuffer().ip;
+                            }
                             if (ipAddress != null)
                             {
                                 server.DnsBuffer().UpdateDns(serverURI, ipAddress);

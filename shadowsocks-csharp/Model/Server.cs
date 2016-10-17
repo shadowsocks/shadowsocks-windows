@@ -23,15 +23,116 @@ namespace Shadowsocks.Model
         {
             if (updateTime == null) return true;
             if (this.host != host) return true;
-            return (DateTime.Now - updateTime).TotalMinutes > 10;
+            return (DateTime.Now - updateTime).TotalMinutes > 30;
         }
         public void UpdateDns(string host, IPAddress ip)
         {
             updateTime = DateTime.Now;
             this.ip = new IPAddress(ip.GetAddressBytes());
-            this.host = (string)host.Clone();
+            this.host = host;
         }
     }
+
+    public class LRUCache<K, V>
+    {
+        protected Dictionary<K, V> _store = new Dictionary<K, V>();
+        protected Dictionary<K, DateTime> _key_2_time = new Dictionary<K, DateTime>();
+        protected Dictionary<DateTime, K> _time_2_key = new Dictionary<DateTime, K>();
+        protected object _lock = new object();
+        protected int _sweep_time;
+
+        public LRUCache(int sweep_time = 60 * 60)
+        {
+            _sweep_time = sweep_time;
+        }
+
+        public V Get(K key)
+        {
+            lock (_lock)
+            {
+                if (_store.ContainsKey(key))
+                {
+                    DateTime t = _key_2_time[key];
+                    _key_2_time.Remove(key);
+                    _time_2_key.Remove(t);
+                    t = DateTime.Now;
+                    while (_time_2_key.ContainsKey(t))
+                    {
+                        t = t.AddTicks(1);
+                    }
+                    _time_2_key[t] = key;
+                    _key_2_time[key] = t;
+                    return _store[key];
+                }
+                return default(V);
+            }
+        }
+
+        public V Set(K key, V val)
+        {
+            lock (_lock)
+            {
+                DateTime t;
+                if (_store.ContainsKey(key))
+                {
+                    t = _key_2_time[key];
+                    _key_2_time.Remove(key);
+                    _time_2_key.Remove(t);
+                }
+                t = DateTime.Now;
+                while (_time_2_key.ContainsKey(t))
+                {
+                    t = t.AddTicks(1);
+                }
+                _time_2_key[t] = key;
+                _key_2_time[key] = t;
+                _store[key] = val;
+                return val;
+            }
+        }
+
+        public void Del(K key)
+        {
+            lock (_lock)
+            {
+                DateTime t;
+                if (_store.ContainsKey(key))
+                {
+                    t = _key_2_time[key];
+                    _key_2_time.Remove(key);
+                    _time_2_key.Remove(t);
+                    _store.Remove(key);
+                }
+            }
+        }
+
+        public void Sweep()
+        {
+            lock (_lock)
+            {
+                DateTime now = DateTime.Now;
+                for (int i = 0; i < 10; ++i)
+                {
+                    bool finish = false;
+                    foreach (KeyValuePair<DateTime, K> p in _time_2_key)
+                    {
+                        if ((now - p.Key).TotalSeconds < _sweep_time)
+                        {
+                            finish = true;
+                            break;
+                        }
+                        _key_2_time.Remove(p.Value);
+                        _time_2_key.Remove(p.Key);
+                        _store.Remove(p.Value);
+                        break;
+                    }
+                    if (finish)
+                        break;
+                }
+            }
+        }
+    }
+
     public class Connections
     {
         private System.Collections.Generic.Dictionary<Socket, Int32> sockets = new Dictionary<Socket, int>();

@@ -6,32 +6,42 @@ using System.Text;
 using System.Threading;
 using OpenDNS;
 using Shadowsocks.Model;
+using Shadowsocks.Util;
 
 namespace Shadowsocks.Controller
 {
     class Socks5Forwarder : Listener.Service
     {
-        Configuration _config;
+        private Configuration _config;
+        private IPRangeSet _IPRange;
 
-        public Socks5Forwarder(Configuration config)
+        public Socks5Forwarder(Configuration config, IPRangeSet IPRange)
         {
-            this._config = config;
+            _config = config;
+            _IPRange = IPRange;
         }
 
         public bool Handle(byte[] firstPacket, int length, Socket socket)
         {
+            int handle = IsHandle(firstPacket, length, socket);
+            if (handle > 0)
+            {
+                new Handler().Start(_config, _IPRange, firstPacket, length, socket, _config.proxyEnable && handle == 2);
+                return true;
+            }
+            return false;
+        }
+
+        public int IsHandle(byte[] firstPacket, int length, Socket socket)
+        {
             if (length >= 7)
             {
+                IPAddress ipAddress = null;
                 if (firstPacket[0] == 1)
                 {
                     byte[] addr = new byte[4];
                     Array.Copy(firstPacket, 1, addr, 0, addr.Length);
-                    IPAddress ipAddress = new IPAddress(addr);
-                    if (_config.proxyRuleMode == 1 && Util.Utils.isLAN(ipAddress))
-                    {
-                        new Handler().Start(_config, firstPacket, length, socket);
-                        return true;
-                    }
+                    ipAddress = new IPAddress(addr);
                 }
                 else if (firstPacket[0] == 3)
                 {
@@ -41,21 +51,28 @@ namespace Shadowsocks.Controller
                     {
                         Array.Copy(firstPacket, 2, addr, 0, addr.Length);
                         string host = Encoding.UTF8.GetString(firstPacket, 2, len);
-                        IPAddress ipAddress;
                         if (IPAddress.TryParse(host, out ipAddress))
                         {
-                            if (_config.proxyRuleMode == 1 && Util.Utils.isLAN(ipAddress))
-                            {
-                                new Handler().Start(_config, firstPacket, length, socket);
-                                return true;
-                            }
+                            //pass
                         }
                         else
                         {
-                            if (_config.proxyRuleMode == 1 && host.ToLower() == "localhost")
+                            if (_config.proxyRuleMode != 0
+                                && host.ToLower() == "localhost") //TODO: load system host file
                             {
-                                new Handler().Start(_config, firstPacket, length, socket);
-                                return true;
+                                return 1;
+                            }
+                            if (_config.proxyRuleMode == 2 && _IPRange != null)
+                            {
+                                ipAddress = Utils.DnsBuffer.Get(host);
+                                if (ipAddress == null)
+                                {
+                                    ipAddress = Util.Utils.QueryDns(host, _config.dns_server);
+                                    if (ipAddress != null)
+                                    {
+                                        Utils.DnsBuffer.Set(host, ipAddress);
+                                    }
+                                }
                             }
                         }
                     }
@@ -64,155 +81,127 @@ namespace Shadowsocks.Controller
                 {
                     byte[] addr = new byte[16];
                     Array.Copy(firstPacket, 1, addr, 0, addr.Length);
-                    IPAddress ipAddress = new IPAddress(addr);
-                    if (_config.proxyRuleMode == 1 && Util.Utils.isLAN(ipAddress))
+                    ipAddress = new IPAddress(addr);
+                }
+                if (ipAddress != null)
+                {
+                    if (_config.proxyRuleMode != 0
+                        && Util.Utils.isLAN(ipAddress))
                     {
-                        new Handler().Start(_config, firstPacket, length, socket);
-                        return true;
+                        return 1;
+                    }
+                    if (_config.proxyRuleMode == 2 && _IPRange != null
+                        && ipAddress.AddressFamily == AddressFamily.InterNetwork
+                        )
+                    {
+                        if (_IPRange.IsInIPRange(ipAddress))
+                        {
+                            return 2;
+                        }
+                        Utils.DnsBuffer.Sweep();
                     }
                 }
             }
-            return false;
+            return 0;
         }
 
         class Handler
         {
-            private delegate IPHostEntry GetHostEntryHandler(string ip);
+            private IPRangeSet _IPRange;
+            private Configuration _config;
 
             private byte[] _firstPacket;
             private int _firstPacketLength;
             private Socket _local;
-            private Socket _remote;
+            private ProxySocketTun _remote;
+
             private bool _closed = false;
-            private Configuration _config;
+            private bool _remote_go_proxy = false;
+            private string _remote_host;
+            private int _remote_port;
+
             public const int RecvSize = 4096;
             // remote receive buffer
             private byte[] remoteRecvBuffer = new byte[RecvSize];
             // connection receive buffer
             private byte[] connetionRecvBuffer = new byte[RecvSize];
 
-            public void Start(Configuration config, byte[] firstPacket, int length, Socket socket)
+            public void Start(Configuration config, IPRangeSet IPRange, byte[] firstPacket, int length, Socket socket, bool proxy)
             {
+                _IPRange = IPRange;
                 _firstPacket = firstPacket;
                 _firstPacketLength = length;
                 _local = socket;
                 _config = config;
+                _remote_go_proxy = proxy;
                 Connect();
-            }
-
-            private void StartConnect()
-            {
-                try
-                {
-                    Connect();
-                }
-                catch (Exception e)
-                {
-                    Logging.LogUsefulException(e);
-                    Close();
-                }
-
-            }
-
-            private IPAddress QueryDns(string host, string dns_servers)
-            {
-                IPAddress ipAddress;
-                bool parsed = IPAddress.TryParse(host, out ipAddress);
-                if (!parsed)
-                {
-                    //if (server.DnsBuffer().isExpired(host))
-                    {
-                        if (dns_servers != null && dns_servers.Length > 0)
-                        {
-                            OpenDNS.Types[] types;
-                            //if (false)
-                            //    types = new Types[] { Types.AAAA, Types.A };
-                            //else
-                            types = new Types[] { Types.A, Types.AAAA };
-                            string[] dns_server = dns_servers.Split(',');
-                            for (int query_i = 0; query_i < types.Length; ++query_i)
-                            {
-                                DnsQuery dns = new DnsQuery(host, types[query_i]);
-                                dns.RecursionDesired = true;
-                                foreach (string server in dns_server)
-                                {
-                                    dns.Servers.Add(server);
-                                }
-                                if (dns.Send())
-                                {
-                                    int count = dns.Response.Answers.Count;
-                                    if (count > 0)
-                                    {
-                                        for (int i = 0; i < count; ++i)
-                                        {
-                                            if (((ResourceRecord)dns.Response.Answers[i]).Type != types[query_i])
-                                                continue;
-                                            return ((OpenDNS.Address)dns.Response.Answers[i]).IP;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        {
-                            try
-                            {
-                                GetHostEntryHandler callback = new GetHostEntryHandler(Dns.GetHostEntry);
-                                IAsyncResult result = callback.BeginInvoke(host, null, null);
-                                if (result.AsyncWaitHandle.WaitOne(5, false))
-                                {
-                                    foreach (IPAddress ad in callback.EndInvoke(result).AddressList)
-                                    {
-                                        return ad;
-                                        //if (ad.AddressFamily == AddressFamily.InterNetwork)
-                                        //{
-                                        //    return ad;
-                                        //}
-                                    }
-                                }
-                            }
-                            catch
-                            {
-
-                            }
-                        }
-                    }
-                }
-                return ipAddress;
             }
 
             private void Connect()
             {
                 try
                 {
-                    IPAddress ipAddress;
-                    int _targetPort;
-                    if (_firstPacket[0] == 1)
+                    IPAddress ipAddress = null;
+                    int _targetPort = 0;
                     {
-                        byte[] addr = new byte[4];
-                        Array.Copy(_firstPacket, 1, addr, 0, addr.Length);
-                        ipAddress = new IPAddress(addr);
-                        _targetPort = (_firstPacket[5] << 8) | _firstPacket[6];
+                        if (_firstPacket[0] == 1)
+                        {
+                            byte[] addr = new byte[4];
+                            Array.Copy(_firstPacket, 1, addr, 0, addr.Length);
+                            ipAddress = new IPAddress(addr);
+                            _targetPort = (_firstPacket[5] << 8) | _firstPacket[6];
+                            _remote_host = ipAddress.ToString();
+                        }
+                        else if (_firstPacket[0] == 4)
+                        {
+                            byte[] addr = new byte[16];
+                            Array.Copy(_firstPacket, 1, addr, 0, addr.Length);
+                            ipAddress = new IPAddress(addr);
+                            _targetPort = (_firstPacket[17] << 8) | _firstPacket[18];
+                            _remote_host = ipAddress.ToString();
+                        }
+                        else if (_firstPacket[0] == 3)
+                        {
+                            int len = _firstPacket[1];
+                            byte[] addr = new byte[len];
+                            Array.Copy(_firstPacket, 2, addr, 0, addr.Length);
+                            _remote_host = Encoding.UTF8.GetString(_firstPacket, 2, len);
+
+                            if (!_remote_go_proxy)
+                            {
+                                if (!IPAddress.TryParse(_remote_host, out ipAddress))
+                                {
+                                    ipAddress = Utils.DnsBuffer.Get(_remote_host);
+                                }
+                                if (ipAddress == null)
+                                {
+                                    ipAddress = Utils.QueryDns(_remote_host, _config.dns_server);
+                                }
+                                if (ipAddress != null)
+                                {
+                                    Utils.DnsBuffer.Set(_remote_host, ipAddress);
+                                    Utils.DnsBuffer.Sweep();
+                                }
+                                else
+                                {
+                                    throw new SocketException((int)SocketError.HostNotFound);
+                                }
+                            }
+                            _targetPort = (_firstPacket[len + 2] << 8) | _firstPacket[len + 3];
+                        }
+                        _remote_port = _targetPort;
                     }
-                    else if (_firstPacket[0] == 4)
+                    if (_remote_go_proxy)
                     {
-                        byte[] addr = new byte[16];
-                        Array.Copy(_firstPacket, 1, addr, 0, addr.Length);
-                        ipAddress = new IPAddress(addr);
-                        _targetPort = (_firstPacket[17] << 8) | _firstPacket[18];
+                        IPAddress.TryParse(_config.proxyHost, out ipAddress);
+                        _targetPort = _config.proxyPort;
                     }
-                    else //if (_firstPacket[0] == 3)
-                    {
-                        int len = _firstPacket[1];
-                        byte[] addr = new byte[len];
-                        Array.Copy(_firstPacket, 2, addr, 0, addr.Length);
-                        ipAddress = QueryDns(Encoding.UTF8.GetString(_firstPacket, 2, len), _config.dns_server);
-                        _targetPort = (_firstPacket[len + 2] << 8) | _firstPacket[len + 3];
-                    }
+                    // ProxyAuth recv only socks5 head, so don't need to save anything else
                     IPEndPoint remoteEP = new IPEndPoint(ipAddress, _targetPort);
 
-                    _remote = new Socket(ipAddress.AddressFamily,
+                    _remote = new ProxySocketTun(ipAddress.AddressFamily,
                         SocketType.Stream, ProtocolType.Tcp);
-                    _remote.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, true);
+                    _remote.GetSocket().SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, true);
 
                     // Connect to the remote endpoint.
                     _remote.BeginConnect(remoteEP,
@@ -225,6 +214,24 @@ namespace Shadowsocks.Controller
                 }
             }
 
+            private bool ConnectProxyServer(string strRemoteHost, int iRemotePort)
+            {
+                if (_config.proxyType == 0)
+                {
+                    bool ret = _remote.ConnectSocks5ProxyServer(strRemoteHost, iRemotePort, false, _config.proxyAuthUser, _config.proxyAuthPass);
+                    return ret;
+                }
+                else if (_config.proxyType == 1)
+                {
+                    bool ret = _remote.ConnectHttpProxyServer(strRemoteHost, iRemotePort, _config.proxyAuthUser, _config.proxyAuthPass, _config.proxyUserAgent);
+                    return ret;
+                }
+                else
+                {
+                    return true;
+                }
+            }
+
             private void ConnectCallback(IAsyncResult ar)
             {
                 if (_closed)
@@ -234,6 +241,13 @@ namespace Shadowsocks.Controller
                 try
                 {
                     _remote.EndConnect(ar);
+                    if (_remote_go_proxy)
+                    {
+                        if (!ConnectProxyServer(_remote_host, _remote_port))
+                        {
+                            throw new SocketException((int)SocketError.ConnectionReset);
+                        }
+                    }
                     StartPipe();
                 }
                 catch (Exception e)
@@ -251,7 +265,7 @@ namespace Shadowsocks.Controller
                 }
                 try
                 {
-                    _remote.BeginReceive(remoteRecvBuffer, 0, RecvSize, 0,
+                    _remote.BeginReceive(remoteRecvBuffer, RecvSize, 0,
                         new AsyncCallback(PipeRemoteReceiveCallback), null);
                     _local.BeginReceive(connetionRecvBuffer, 0, RecvSize, 0,
                         new AsyncCallback(PipeConnectionReceiveCallback), null);
@@ -271,7 +285,8 @@ namespace Shadowsocks.Controller
                 }
                 try
                 {
-                    int bytesRead = _remote.EndReceive(ar);
+                    bool sendback;
+                    int bytesRead = _remote.EndReceive(ar, out sendback);
 
                     if (bytesRead > 0)
                     {
@@ -301,7 +316,7 @@ namespace Shadowsocks.Controller
 
                     if (bytesRead > 0)
                     {
-                        _remote.BeginSend(connetionRecvBuffer, 0, bytesRead, 0, new AsyncCallback(PipeRemoteSendCallback), null);
+                        _remote.BeginSend(connetionRecvBuffer, bytesRead, 0, new AsyncCallback(PipeRemoteSendCallback), null);
                     }
                     else
                     {
@@ -324,7 +339,7 @@ namespace Shadowsocks.Controller
                 try
                 {
                     _remote.EndSend(ar);
-                    _local.BeginReceive(this.connetionRecvBuffer, 0, RecvSize, 0,
+                    _local.BeginReceive(connetionRecvBuffer, 0, RecvSize, 0,
                         new AsyncCallback(PipeConnectionReceiveCallback), null);
                 }
                 catch (Exception e)
@@ -343,7 +358,7 @@ namespace Shadowsocks.Controller
                 try
                 {
                     _local.EndSend(ar);
-                    _remote.BeginReceive(this.remoteRecvBuffer, 0, RecvSize, 0,
+                    _remote.BeginReceive(remoteRecvBuffer, RecvSize, 0,
                         new AsyncCallback(PipeRemoteReceiveCallback), null);
                 }
                 catch (Exception e)
@@ -364,18 +379,6 @@ namespace Shadowsocks.Controller
                     _closed = true;
                 }
                 Thread.Sleep(100);
-                if (_local != null)
-                {
-                    try
-                    {
-                        _local.Shutdown(SocketShutdown.Both);
-                        _local.Close();
-                    }
-                    catch (Exception e)
-                    {
-                        Logging.LogUsefulException(e);
-                    }
-                }
                 if (_remote != null)
                 {
                     try
@@ -384,6 +387,18 @@ namespace Shadowsocks.Controller
                         _remote.Close();
                     }
                     catch (SocketException e)
+                    {
+                        Logging.LogUsefulException(e);
+                    }
+                }
+                if (_local != null)
+                {
+                    try
+                    {
+                        _local.Shutdown(SocketShutdown.Both);
+                        _local.Close();
+                    }
+                    catch (Exception e)
                     {
                         Logging.LogUsefulException(e);
                     }

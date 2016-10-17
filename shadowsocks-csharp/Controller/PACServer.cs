@@ -72,43 +72,46 @@ namespace Shadowsocks.Controller
                     }
                     else if (kv.Length == 1)
                     {
-                        if (line.IndexOf("pac") > 0 && line.IndexOf("GET") == 0)
+                        if (line.IndexOf("auth=" + _config.localAuthPassword) > 0)
                         {
-                            string url = line.Substring(line.IndexOf(" ") + 1);
-                            url = url.Substring(0, url.IndexOf(" "));
-                            pathMatch = true;
-                            int port_pos = url.IndexOf("port=");
-                            if (port_pos > 0)
+                            if (line.IndexOf(" /pac?") > 0 && line.IndexOf("GET") == 0)
                             {
-                                string port = url.Substring(port_pos + 5);
-                                if (port.IndexOf("&") >= 0)
+                                string url = line.Substring(line.IndexOf(" ") + 1);
+                                url = url.Substring(0, url.IndexOf(" "));
+                                pathMatch = true;
+                                int port_pos = url.IndexOf("port=");
+                                if (port_pos > 0)
                                 {
-                                    port = port.Substring(0, port.IndexOf("&"));
-                                }
-
-                                int ip_pos = url.IndexOf("ip=");
-                                if (ip_pos > 0)
-                                {
-                                    proxy = url.Substring(ip_pos + 3);
-                                    if (proxy.IndexOf("&") >= 0)
+                                    string port = url.Substring(port_pos + 5);
+                                    if (port.IndexOf("&") >= 0)
                                     {
-                                        proxy = proxy.Substring(0, proxy.IndexOf("&"));
+                                        port = port.Substring(0, port.IndexOf("&"));
                                     }
-                                    proxy += ":" + port + ";";
-                                }
-                                else
-                                {
-                                    proxy = "127.0.0.1:" + port + ";";
-                                }
-                            }
 
-                            if (url.IndexOf("type=socks4") > 0 || url.IndexOf("type=s4") > 0)
-                            {
-                                socksType = 4;
-                            }
-                            if (url.IndexOf("type=socks5") > 0 || url.IndexOf("type=s5") > 0)
-                            {
-                                socksType = 5;
+                                    int ip_pos = url.IndexOf("ip=");
+                                    if (ip_pos > 0)
+                                    {
+                                        proxy = url.Substring(ip_pos + 3);
+                                        if (proxy.IndexOf("&") >= 0)
+                                        {
+                                            proxy = proxy.Substring(0, proxy.IndexOf("&"));
+                                        }
+                                        proxy += ":" + port + ";";
+                                    }
+                                    else
+                                    {
+                                        proxy = "127.0.0.1:" + port + ";";
+                                    }
+                                }
+
+                                if (url.IndexOf("type=socks4") > 0 || url.IndexOf("type=s4") > 0)
+                                {
+                                    socksType = 4;
+                                }
+                                if (url.IndexOf("type=socks5") > 0 || url.IndexOf("type=s5") > 0)
+                                {
+                                    socksType = 5;
+                                }
                             }
                         }
                     }

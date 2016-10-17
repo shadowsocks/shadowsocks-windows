@@ -166,7 +166,6 @@ namespace Shadowsocks.Controller
             {
                 try
                 {
-                    // TODO async resolving
                     IPAddress ipAddress;
                     bool parsed = IPAddress.TryParse("127.0.0.1", out ipAddress);
                     IPEndPoint remoteEP = new IPEndPoint(ipAddress, _targetPort);

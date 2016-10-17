@@ -24,7 +24,7 @@ namespace Shadowsocks.Controller
     {
         private Configuration _config;
         private ServerTransferTotal _transfer;
-
+        private IPRangeSet _IPRange;
 
         private byte[] _firstPacket;
         private int _firstPacketLength;
@@ -40,12 +40,13 @@ namespace Shadowsocks.Controller
 
         protected HttpPraser httpProxyState;
 
-        public ProxyAuthHandler(Configuration config, ServerTransferTotal transfer, byte[] firstPacket, int length, Socket socket)
+        public ProxyAuthHandler(Configuration config, ServerTransferTotal transfer, IPRangeSet IPRange, byte[] firstPacket, int length, Socket socket)
         {
             int local_port = ((IPEndPoint)socket.LocalEndPoint).Port;
 
             _config = config;
             _transfer = transfer;
+            _IPRange = IPRange;
             _firstPacket = firstPacket;
             _firstPacketLength = length;
             _connection = socket;
@@ -527,7 +528,7 @@ namespace Shadowsocks.Controller
             }
             else
             {
-                if (_connectionUDP == null && new Socks5Forwarder(_config).Handle(_remoteHeaderSendBuffer, _remoteHeaderSendBuffer.Length, _connection))
+                if (_connectionUDP == null && new Socks5Forwarder(_config, _IPRange).Handle(_remoteHeaderSendBuffer, _remoteHeaderSendBuffer.Length, _connection))
                 {
                     return;
                 }

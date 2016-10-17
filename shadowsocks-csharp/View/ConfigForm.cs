@@ -63,16 +63,16 @@ namespace Shadowsocks.View
                 PictureQRcode.Visible = false;
 
             int dpi_mul = Util.Utils.GetDpiMul();
-            ServersListBox.Width = ServersListBox.Width * dpi_mul / 4;
-            ServersListBox.Height = ServersListBox.Height * dpi_mul / 4;
-            AddButton.Width = AddButton.Width * dpi_mul / 4;
-            AddButton.Height = AddButton.Height * dpi_mul / 4;
-            DeleteButton.Width = DeleteButton.Width * dpi_mul / 4;
-            DeleteButton.Height = DeleteButton.Height * dpi_mul / 4;
-            UpButton.Width = UpButton.Width * dpi_mul / 4;
-            UpButton.Height = UpButton.Height * dpi_mul / 4;
-            DownButton.Width = DownButton.Width * dpi_mul / 4;
-            DownButton.Height = DownButton.Height * dpi_mul / 4;
+            //ServersListBox.Width = ServersListBox.Width * dpi_mul / 4;
+            //ServersListBox.Height = ServersListBox.Height * dpi_mul / 4;
+            //AddButton.Width = AddButton.Width * dpi_mul / 4;
+            //AddButton.Height = AddButton.Height * dpi_mul / 4;
+            //DeleteButton.Width = DeleteButton.Width * dpi_mul / 4;
+            //DeleteButton.Height = DeleteButton.Height * dpi_mul / 4;
+            //UpButton.Width = UpButton.Width * dpi_mul / 4;
+            //UpButton.Height = UpButton.Height * dpi_mul / 4;
+            //DownButton.Width = DownButton.Width * dpi_mul / 4;
+            //DownButton.Height = DownButton.Height * dpi_mul / 4;
 
             //IPTextBox.Width = IPTextBox.Width * dpi_mul / 4;
             //ServerPortTextBox.Width = ServerPortTextBox.Width * dpi_mul / 4;
@@ -109,7 +109,7 @@ namespace Shadowsocks.View
             //OKButton.Width = OKButton.Width * dpi_mul / 4;
             ////OKButton.Height = OKButton.Height * dpi_mul / 4;
 
-            DrawLogo(350 * dpi_mul / 4);
+            DrawLogo(350 * 4 / 4);
 
             ShowWindow();
 

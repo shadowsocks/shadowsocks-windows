@@ -49,13 +49,16 @@ namespace Shadowsocks.Controller
                     }
                     else if (kv.Length == 1)
                     {
-                        if (line.IndexOf("api?") > 0)
+                        if (line.IndexOf("auth=" + _config.localAuthPassword) > 0)
                         {
-                            req = line.Substring(line.IndexOf("api?") + 4);
-                            if (line.IndexOf("GET ") == 0 || line.IndexOf("POST ") == 0)
+                            if (line.IndexOf(" /api?") > 0)
                             {
-                                pathMatch = true;
-                                req = req.Substring(0, req.IndexOf(" "));
+                                req = line.Substring(line.IndexOf("api?") + 4);
+                                if (line.IndexOf("GET ") == 0 || line.IndexOf("POST ") == 0)
+                                {
+                                    pathMatch = true;
+                                    req = req.Substring(0, req.IndexOf(" "));
+                                }
                             }
                         }
                     }

@@ -158,6 +158,7 @@
     <Compile Include="Encryption\IEncryptor.cs" />
     <Compile Include="Controller\PACServer.cs" />
     <Compile Include="Model\Host.cs" />
+    <Compile Include="Model\IPRangeSet.cs" />
     <Compile Include="Model\Server.cs" />
     <Compile Include="Model\Configuration.cs" />
     <Compile Include="Model\ServerSpeedLog.cs" />
@@ -188,12 +189,6 @@
     <Compile Include="Controller\ShadowsocksController.cs" />
     <Compile Include="Controller\SystemProxy.cs" />
     <Compile Include="View\MenuViewController.cs" />
-    <Compile Include="View\QRCodeForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="View\QRCodeForm.Designer.cs">
-      <DependentUpon>QRCodeForm.cs</DependentUpon>
-    </Compile>
     <Compile Include="View\QRCodeSplashForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -223,9 +218,6 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <SubType>Designer</SubType>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-    <EmbeddedResource Include="View\QRCodeForm.resx">
-      <DependentUpon>QRCodeForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="View\ServerLogForm.resx">
       <DependentUpon>ServerLogForm.cs</DependentUpon>

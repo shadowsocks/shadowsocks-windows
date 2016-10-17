@@ -18,13 +18,14 @@ namespace Shadowsocks.View
             InitializeComponent();
 
             this.Text = title;
+            PictureQRcode.Height = this.ClientSize.Height - textBox.Height;
             textBox.Text = text;
         }
 
         private void GenQR(string ssconfig)
         {
             int dpi_mul = Util.Utils.GetDpiMul();
-            int width = Math.Min(PictureQRcode.Width, PictureQRcode.Height) * dpi_mul / 4;
+            int width = Math.Min(PictureQRcode.Width, PictureQRcode.Height) * 4 / 4;
             {
                 string qrText = ssconfig;
                 QRCode code = ZXing.QrCode.Internal.Encoder.encode(qrText, ErrorCorrectionLevel.M);

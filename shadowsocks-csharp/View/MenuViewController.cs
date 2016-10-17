@@ -33,8 +33,12 @@ namespace Shadowsocks.View
         private MenuItem PACModeItem;
         private MenuItem globalModeItem;
         private MenuItem modeItem;
+
         private MenuItem ruleBypassLan;
+        private MenuItem ruleBypassChina;
+        private MenuItem ruleBypassNotChina;
         private MenuItem ruleDisableBypass;
+
         private MenuItem SeperatorItem;
         private MenuItem ServersItem;
         private MenuItem SelectRandomItem;
@@ -205,7 +209,10 @@ namespace Shadowsocks.View
                     CreateMenuItem("Edit user rule for GFWList...", new EventHandler(this.EditUserRuleFileForGFWListItem_Click)),
                 }),
                 CreateMenuGroup("Proxy rule", new MenuItem[] {
-                    ruleBypassLan = CreateMenuItem("Bypass Lan", new EventHandler(this.RuleBypassLanItem_Click)),
+                    ruleBypassLan = CreateMenuItem("Bypass LAN", new EventHandler(this.RuleBypassLanItem_Click)),
+                    ruleBypassChina = CreateMenuItem("Bypass LAN && China", new EventHandler(this.RuleBypassChinaItem_Click)),
+                    ruleBypassNotChina = CreateMenuItem("Bypass LAN && not China", new EventHandler(this.RuleBypassNotChinaItem_Click)),
+                    new MenuItem("-"),
                     ruleDisableBypass = CreateMenuItem("Disable bypass", new EventHandler(this.RuleBypassDisableItem_Click)),
                 }),
                 new MenuItem("-"),
@@ -343,6 +350,8 @@ namespace Shadowsocks.View
         {
             ruleDisableBypass.Checked = config.proxyRuleMode == 0;
             ruleBypassLan.Checked = config.proxyRuleMode == 1;
+            ruleBypassChina.Checked = config.proxyRuleMode == 2;
+            ruleBypassNotChina.Checked = config.proxyRuleMode == 3;
         }
 
         private void LoadCurrentConfiguration()
@@ -637,6 +646,16 @@ namespace Shadowsocks.View
             controller.ToggleRuleMode(1);
         }
 
+        private void RuleBypassChinaItem_Click(object sender, EventArgs e)
+        {
+            controller.ToggleRuleMode(2);
+        }
+
+        private void RuleBypassNotChinaItem_Click(object sender, EventArgs e)
+        {
+            controller.ToggleRuleMode(3);
+        }
+
         private void RuleBypassDisableItem_Click(object sender, EventArgs e)
         {
             controller.ToggleRuleMode(0);
@@ -766,14 +785,6 @@ namespace Shadowsocks.View
                 }
                 ShowConfigForm(true);
             }
-        }
-
-        private void QRCodeItem_Click(object sender, EventArgs e)
-        {
-            QRCodeForm qrCodeForm = new QRCodeForm(controller.GetSSLinkForCurrentServer());
-            //qrCodeForm.Icon = this.Icon;
-            // TODO
-            qrCodeForm.Show();
         }
 
         private bool ScanQRCode(Screen screen, Bitmap fullImage, Rectangle cropRect, out string url, out Rectangle rect)

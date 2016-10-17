@@ -68,11 +68,11 @@
             this.ReconnectText = new System.Windows.Forms.TextBox();
             this.TTLLabel = new System.Windows.Forms.Label();
             this.TTLText = new System.Windows.Forms.TextBox();
-            this.label2 = new System.Windows.Forms.Label();
-            this.DNSText = new System.Windows.Forms.TextBox();
             this.labelTimeout = new System.Windows.Forms.Label();
             this.textTimeout = new System.Windows.Forms.TextBox();
+            this.DNSText = new System.Windows.Forms.TextBox();
             this.buttonDefault = new System.Windows.Forms.Button();
+            this.label2 = new System.Windows.Forms.Label();
             this.tableLayoutPanel1.SuspendLayout();
             this.tableLayoutPanel2.SuspendLayout();
             this.Socks5ProxyGroup.SuspendLayout();
@@ -586,26 +586,6 @@
             this.TTLText.TabIndex = 4;
             this.TTLText.WordWrap = false;
             // 
-            // label2
-            // 
-            this.label2.Anchor = System.Windows.Forms.AnchorStyles.Right;
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(40, 38);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(34, 17);
-            this.label2.TabIndex = 3;
-            this.label2.Text = "DNS";
-            // 
-            // DNSText
-            // 
-            this.DNSText.ImeMode = System.Windows.Forms.ImeMode.Off;
-            this.DNSText.Location = new System.Drawing.Point(80, 35);
-            this.DNSText.MaxLength = 0;
-            this.DNSText.Name = "DNSText";
-            this.DNSText.Size = new System.Drawing.Size(109, 23);
-            this.DNSText.TabIndex = 4;
-            this.DNSText.WordWrap = false;
-            // 
             // labelTimeout
             // 
             this.labelTimeout.Anchor = System.Windows.Forms.AnchorStyles.Right;
@@ -626,6 +606,16 @@
             this.textTimeout.TabIndex = 4;
             this.textTimeout.WordWrap = false;
             // 
+            // DNSText
+            // 
+            this.DNSText.ImeMode = System.Windows.Forms.ImeMode.Off;
+            this.DNSText.Location = new System.Drawing.Point(80, 35);
+            this.DNSText.MaxLength = 0;
+            this.DNSText.Name = "DNSText";
+            this.DNSText.Size = new System.Drawing.Size(109, 23);
+            this.DNSText.TabIndex = 4;
+            this.DNSText.WordWrap = false;
+            // 
             // buttonDefault
             // 
             this.buttonDefault.Location = new System.Drawing.Point(80, 6);
@@ -636,9 +626,20 @@
             this.buttonDefault.UseVisualStyleBackColor = true;
             this.buttonDefault.Click += new System.EventHandler(this.buttonDefault_Click);
             // 
+            // label2
+            // 
+            this.label2.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(40, 38);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(34, 17);
+            this.label2.TabIndex = 3;
+            this.label2.Text = "DNS";
+            // 
             // SettingsForm
             // 
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
+            this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.AutoSize = true;
             this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.ClientSize = new System.Drawing.Size(728, 573);

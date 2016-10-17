@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading;
 using System.Net.Sockets;
+using System.Net;
 
 namespace Shadowsocks.Controller
 {
@@ -29,6 +30,7 @@ namespace Shadowsocks.Controller
         private PACServer _pacServer;
         private Configuration _config;
         private ServerTransferTotal _transfer;
+        public IPRangeSet _rangeSet;
 #if !_CONSOLE
         private HttpProxyRunner polipoRunner;
 #endif
@@ -84,6 +86,16 @@ namespace Shadowsocks.Controller
             if (Errored != null)
             {
                 Errored(this, new ErrorEventArgs(e));
+            }
+        }
+
+        public void ReloadIPRange()
+        {
+            _rangeSet = new IPRangeSet();
+            _rangeSet.LoadApnic("CN");
+            if (_config.proxyRuleMode == 3)
+            {
+                _rangeSet.Reverse();
             }
         }
 
@@ -436,6 +448,7 @@ namespace Shadowsocks.Controller
             // some logic in configuration updated the config when saving, we need to read it again
             _config = MergeGetConfiguration(_config);
             _config.FlushPortMapCache();
+            ReloadIPRange();
 
 #if !_CONSOLE
             if (polipoRunner == null)
@@ -468,7 +481,7 @@ namespace Shadowsocks.Controller
                 {
                     if (_listener != null && !_listener.isConfigChange(_config))
                     {
-                        Local local = new Local(_config, _transfer);
+                        Local local = new Local(_config, _transfer, _rangeSet);
                         _listener.GetServices()[0] = local;
 #if !_CONSOLE
                         if (polipoRunner.HasExited())
@@ -493,7 +506,7 @@ namespace Shadowsocks.Controller
                         polipoRunner.Start(_config);
 #endif
 
-                        Local local = new Local(_config, _transfer);
+                        Local local = new Local(_config, _transfer, _rangeSet);
                         List<Listener.Service> services = new List<Listener.Service>();
                         services.Add(local);
                         services.Add(_pacServer);
@@ -541,7 +554,7 @@ namespace Shadowsocks.Controller
             {
                 try
                 {
-                    Local local = new Local(_config, _transfer);
+                    Local local = new Local(_config, _transfer, _rangeSet);
                     List<Listener.Service> services = new List<Listener.Service>();
                     services.Add(local);
                     Listener listener = new Listener(services);

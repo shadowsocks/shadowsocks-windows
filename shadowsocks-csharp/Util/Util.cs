@@ -10,11 +10,25 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
+using OpenDNS;
+using Shadowsocks.Model;
 
 namespace Shadowsocks.Util
 {
     public class Utils
     {
+        private delegate IPHostEntry GetHostEntryHandler(string ip);
+
+        private static LRUCache<string, IPAddress> dnsBuffer = new LRUCache<string, IPAddress>();
+
+        public static LRUCache<string, IPAddress> DnsBuffer
+        {
+            get
+            {
+                return dnsBuffer;
+            }
+        }
+
         public static void ReleaseMemory()
         {
 #if !_CONSOLE
@@ -250,6 +264,67 @@ namespace Shadowsocks.Util
             {
                 Array.Resize(ref array, size * 2);
             }
+        }
+
+        public static IPAddress QueryDns(string host, string dns_servers, bool IPv6_first = false)
+        {
+            IPAddress ipAddress = null;
+            {
+                if (dns_servers != null && dns_servers.Length > 0)
+                {
+                    OpenDNS.Types[] types;
+                    if (IPv6_first)
+                        types = new Types[] { Types.AAAA, Types.A };
+                    else
+                        types = new Types[] { Types.A, Types.AAAA };
+                    string[] dns_server = dns_servers.Split(',');
+                    for (int query_i = 0; query_i < types.Length; ++query_i)
+                    {
+                        DnsQuery dns = new DnsQuery(host, types[query_i]);
+                        dns.RecursionDesired = true;
+                        foreach (string server in dns_server)
+                        {
+                            dns.Servers.Add(server);
+                        }
+                        if (dns.Send())
+                        {
+                            int count = dns.Response.Answers.Count;
+                            if (count > 0)
+                            {
+                                for (int i = 0; i < count; ++i)
+                                {
+                                    if (((ResourceRecord)dns.Response.Answers[i]).Type != types[query_i])
+                                        continue;
+                                    return ((OpenDNS.Address)dns.Response.Answers[i]).IP;
+                                }
+                            }
+                        }
+                    }
+                }
+                {
+                    try
+                    {
+                        GetHostEntryHandler callback = new GetHostEntryHandler(Dns.GetHostEntry);
+                        IAsyncResult result = callback.BeginInvoke(host, null, null);
+                        if (result.AsyncWaitHandle.WaitOne(5, false))
+                        {
+                            foreach (IPAddress ad in callback.EndInvoke(result).AddressList)
+                            {
+                                return ad;
+                                //if (ad.AddressFamily == AddressFamily.InterNetwork)
+                                //{
+                                //    return ad;
+                                //}
+                            }
+                        }
+                    }
+                    catch
+                    {
+
+                    }
+                }
+            }
+            return ipAddress;
         }
 
         public static int GetDpiMul()

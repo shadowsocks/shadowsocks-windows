@@ -292,10 +292,16 @@ namespace Shadowsocks.Model
         public bool shareOverLan;
         public bool bypassWhiteList;
         public int localPort;
+        public string localAuthPassword;
+
+        public string dns_server;
         public int reconnectTimes;
         public int randomAlgorithm;
         public int TTL;
         public int connect_timeout;
+
+        public int proxyRuleMode;
+
         public bool proxyEnable;
         public bool pacDirectGoProxy;
         public int proxyType;
@@ -304,14 +310,17 @@ namespace Shadowsocks.Model
         public string proxyAuthUser;
         public string proxyAuthPass;
         public string proxyUserAgent;
+
         public string authUser;
         public string authPass;
+
         public bool autoBan;
         public bool sameHostForSameTarget;
+
         public int keepVisitTime;
+
         public bool isHideTips;
-        public string dns_server;
-        public int proxyRuleMode;
+
         public Dictionary<string, string> token = new Dictionary<string, string>();
         public Dictionary<string, object> portMap = new Dictionary<string, object>();
 
@@ -522,28 +531,56 @@ namespace Shadowsocks.Model
             portMap = new Dictionary<string, object>();
         }
 
+        public void FixConfiguration()
+        {
+            if (localPort == 0)
+            {
+                localPort = 1080;
+            }
+            if (keepVisitTime == 0)
+            {
+                keepVisitTime = 180;
+            }
+            if (portMap == null)
+            {
+                portMap = new Dictionary<string, object>();
+            }
+            if (token == null)
+            {
+                token = new Dictionary<string, string>();
+            }
+            if (connect_timeout == 0)
+            {
+                connect_timeout = 10;
+                reconnectTimes = 2;
+                TTL = 180;
+                keepVisitTime = 180;
+            }
+            if (localAuthPassword == null || localAuthPassword.Length < 16)
+            {
+                localAuthPassword = randString(20);
+            }
+        }
+
+        private static string randString(int len)
+        {
+            string set = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
+            string ret = "";
+            Random random = new Random();
+            for (int i = 0; i < len; ++i)
+            {
+                ret += set[random.Next(set.Length)];
+            }
+            return ret;
+        }
+
         public static Configuration LoadFile(string filename)
         {
             try
             {
                 string configContent = File.ReadAllText(filename);
                 Configuration config = SimpleJson.SimpleJson.DeserializeObject<Configuration>(configContent, new JsonSerializerStrategy());
-                if (config.localPort == 0)
-                {
-                    config.localPort = 1080;
-                }
-                if (config.keepVisitTime == 0)
-                {
-                    config.keepVisitTime = 180;
-                }
-                if (config.portMap == null)
-                {
-                    config.portMap = new Dictionary<string, object>();
-                }
-                if (config.token == null)
-                {
-                    config.token = new Dictionary<string, string>();
-                }
+                config.FixConfiguration();
                 return config;
             }
             catch (Exception e)
@@ -591,6 +628,7 @@ namespace Shadowsocks.Model
             try
             {
                 Configuration config = SimpleJson.SimpleJson.DeserializeObject<Configuration>(config_str, new JsonSerializerStrategy());
+                config.FixConfiguration();
                 return config;
             }
             catch

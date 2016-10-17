@@ -10,3 +10,4 @@ TestResults
 *.user
 *.exe
 
+/templates
