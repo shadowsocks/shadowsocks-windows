@@ -26,7 +26,14 @@ namespace Shadowsocks.Controller
             int handle = IsHandle(firstPacket, length, socket);
             if (handle > 0)
             {
-                new Handler().Start(_config, _IPRange, firstPacket, length, socket, _config.proxyEnable && handle == 2);
+                if (_config.proxyEnable)
+                {
+                    new Handler().Start(_config, _IPRange, firstPacket, length, socket, handle == 2);
+                }
+                else
+                {
+                    new Handler().Start(_config, _IPRange, firstPacket, length, socket, false);
+                }
                 return true;
             }
             return false;
@@ -151,6 +158,7 @@ namespace Shadowsocks.Controller
                             ipAddress = new IPAddress(addr);
                             _targetPort = (_firstPacket[5] << 8) | _firstPacket[6];
                             _remote_host = ipAddress.ToString();
+                            System.Diagnostics.Debug.WriteLine("[" + DateTime.Now.ToString() + "]" + "Direct connect " + _remote_host + ":" + _targetPort.ToString());
                         }
                         else if (_firstPacket[0] == 4)
                         {
@@ -159,6 +167,7 @@ namespace Shadowsocks.Controller
                             ipAddress = new IPAddress(addr);
                             _targetPort = (_firstPacket[17] << 8) | _firstPacket[18];
                             _remote_host = ipAddress.ToString();
+                            System.Diagnostics.Debug.WriteLine("[" + DateTime.Now.ToString() + "]" + "Direct connect " + _remote_host + ":" + _targetPort.ToString());
                         }
                         else if (_firstPacket[0] == 3)
                         {
@@ -166,6 +175,8 @@ namespace Shadowsocks.Controller
                             byte[] addr = new byte[len];
                             Array.Copy(_firstPacket, 2, addr, 0, addr.Length);
                             _remote_host = Encoding.UTF8.GetString(_firstPacket, 2, len);
+                            _targetPort = (_firstPacket[len + 2] << 8) | _firstPacket[len + 3];
+                            System.Diagnostics.Debug.WriteLine("[" + DateTime.Now.ToString() + "]" + "Direct connect " + _remote_host + ":" + _targetPort.ToString());
 
                             if (!_remote_go_proxy)
                             {
@@ -187,7 +198,6 @@ namespace Shadowsocks.Controller
                                     throw new SocketException((int)SocketError.HostNotFound);
                                 }
                             }
-                            _targetPort = (_firstPacket[len + 2] << 8) | _firstPacket[len + 3];
                         }
                         _remote_port = _targetPort;
                     }

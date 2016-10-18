@@ -280,6 +280,8 @@ namespace Shadowsocks.Obfs
         private int handshake_status;
         private List<byte[]> data_sent_buffer = new List<byte[]>();
         private byte[] data_recv_buffer = new byte[0];
+        private uint send_id = 0;
+
         protected static RNGCryptoServiceProvider g_random = new RNGCryptoServiceProvider();
         private Random random = new Random();
 
@@ -384,6 +386,19 @@ namespace Shadowsocks.Obfs
             hmac_sha1(outdata, outlength);
         }
 
+        protected void PackData(byte[] data, ref int start, int len, byte[] outdata, ref int outlength)
+        {
+            outdata[outlength] = 0x17;
+            outdata[outlength + 1] = 0x3;
+            outdata[outlength + 2] = 0x3;
+            outdata[outlength + 3] = (byte)(len >> 8);
+            outdata[outlength + 4] = (byte)(len);
+            Array.Copy(data, start, outdata, outlength + 5, len);
+            start += len;
+            outlength += len + 5;
+            ++send_id;
+        }
+
         public override byte[] ClientEncode(byte[] encryptdata, int datalength, out int outlength)
         {
             if (handshake_status == -1)
@@ -395,27 +410,24 @@ namespace Shadowsocks.Obfs
             byte[] outdata = new byte[datalength + 4096];
             if (handshake_status == 8)
             {
+                int start = 0;
                 outlength = 0;
-                while (datalength > 4096)
+                while (send_id <= 4 && datalength - start > 256)
                 {
-                    int len = random.Next(1500, 4096);
-                    outdata[outlength] = 0x17;
-                    outdata[outlength + 1] = 0x3;
-                    outdata[outlength + 2] = 0x3;
-                    outdata[outlength + 3] = (byte)(len >> 8);
-                    outdata[outlength + 4] = (byte)(len);
-                    Array.Copy(encryptdata, 0, outdata, outlength + 5, len);
-                    Array.Copy(encryptdata, len, encryptdata, 0, datalength - len);
-                    outlength += len + 5;
-                    datalength -= len;
+                    int len = random.Next(512) + 64;
+                    if (len > datalength - start) len = datalength - start;
+                    PackData(encryptdata, ref start, len, outdata, ref outlength);
                 }
-                outdata[outlength] = 0x17;
-                outdata[outlength + 1] = 0x3;
-                outdata[outlength + 2] = 0x3;
-                outdata[outlength + 3] = (byte)(datalength >> 8);
-                outdata[outlength + 4] = (byte)(datalength);
-                Array.Copy(encryptdata, 0, outdata, outlength + 5, datalength);
-                outlength += datalength + 5;
+                while (datalength - start > 2048)
+                {
+                    int len = random.Next(4096) + 100;
+                    if (len > datalength - start) len = datalength - start;
+                    PackData(encryptdata, ref start, len, outdata, ref outlength);
+                }
+                if (datalength - start > 0)
+                {
+                    PackData(encryptdata, ref start, datalength - start, outdata, ref outlength);
+                }
             }
             else if (handshake_status == 1)
             {

@@ -24,8 +24,15 @@ namespace Shadowsocks.Model
             {
                 uint pos = i / 32;
                 int mv = (int)(i & 31);
-                _set[pos] |= (byte)(1u << mv);
+                _set[pos] |= (1u << mv);
             }
+        }
+
+        public void Insert(IPAddress addr, uint size)
+        {
+            byte[] bytes_addr = addr.GetAddressBytes();
+            Array.Reverse(bytes_addr);
+            Insert(BitConverter.ToUInt32(bytes_addr, 0), size);
         }
 
         public bool isIn(uint ip)
@@ -33,7 +40,7 @@ namespace Shadowsocks.Model
             ip /= 256;
             uint pos = ip / 32;
             int mv = (int)(ip & 31);
-            return (_set[pos] & (byte)(1u << mv)) != 0;
+            return (_set[pos] & (1u << mv)) != 0;
         }
 
         public bool IsInIPRange(IPAddress addr)
@@ -63,11 +70,8 @@ namespace Shadowsocks.Model
                                 continue;
                             IPAddress addr;
                             IPAddress.TryParse(parts[3], out addr);
-                            byte[] bytes_addr = addr.GetAddressBytes();
-                            Array.Reverse(bytes_addr);
-                            uint start = BitConverter.ToUInt32(bytes_addr, 0);
                             uint size = UInt32.Parse(parts[4]);
-                            Insert(start, size);
+                            Insert(addr, size);
                         }
                     }
                     return true;
