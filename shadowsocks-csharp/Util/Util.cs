@@ -211,7 +211,7 @@ namespace Shadowsocks.Util
             return new BandwidthScaleInfo(f, unit, scale);
         }
 
-        public static RegistryKey OpenUserRegKey( string name, bool writable )
+        public static RegistryKey OpenRegKey( string name, bool writable, RegistryHive hive = RegistryHive.CurrentUser )
         {
             // we are building x86 binary for both x86 and x64, which will
             // cause problem when opening registry key
@@ -219,7 +219,7 @@ namespace Shadowsocks.Util
             if (name.IsNullOrEmpty()) throw new ArgumentException(nameof(name));
             try
             {
-                RegistryKey userKey = RegistryKey.OpenBaseKey(RegistryHive.CurrentUser,
+                RegistryKey userKey = RegistryKey.OpenBaseKey(hive,
                         Environment.Is64BitOperatingSystem ? RegistryView.Registry64 : RegistryView.Registry32)
                     .OpenSubKey(name, writable);
                 return userKey;
@@ -236,7 +236,7 @@ namespace Shadowsocks.Util
             }
             catch (ArgumentException ae)
             {
-                MessageBox.Show("OpenUserRegKey: " + ae.ToString());
+                MessageBox.Show("OpenRegKey: " + ae.ToString());
                 return null;
             }
         }
