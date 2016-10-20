@@ -237,10 +237,10 @@ namespace Shadowsocks.Encryption
 
         protected static void randBytes(byte[] buf, int length)
         {
-            byte[] temp = new byte[length];
-            RNGCryptoServiceProvider rngServiceProvider = new RNGCryptoServiceProvider();
-            rngServiceProvider.GetBytes(temp);
-            temp.CopyTo(buf, 0);
+            using (RNGCryptoServiceProvider rng = new RNGCryptoServiceProvider())
+            {
+                rng.GetBytes(buf, 0, length);
+            }
         }
 
         public override void Encrypt(byte[] buf, int length, byte[] outbuf, out int outlength)
