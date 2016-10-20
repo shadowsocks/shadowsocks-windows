@@ -77,7 +77,7 @@ namespace Shadowsocks.Controller
                     else
                     {
                         string pacUrl;
-                        pacUrl = "http://127.0.0.1:" + config.localPort.ToString() + "/pac?" + "auth=" + config.localAuthPassword + "&t=" + GetTimestamp(DateTime.Now);
+                        pacUrl = "http://127.0.0.1:" + config.localPort.ToString() + "/pac?" + "auth=" + config.localAuthPassword + "&t=" + Util.Utils.GetTimestamp(DateTime.Now);
                         RegistrySetValue(registry, "ProxyEnable", 0);
                         RegistrySetValue(registry, "ProxyServer", "");
                         RegistrySetValue(registry, "AutoConfigURL", pacUrl);
@@ -166,11 +166,6 @@ namespace Shadowsocks.Controller
             }
         }
 
-        private static String GetTimestamp(DateTime value)
-        {
-            return value.ToString("yyyyMMddHHmmssffff");
-        }
-
         private static void BytePushback(byte[] buffer, ref int buffer_len, int val)
         {
             BitConverter.GetBytes(val).CopyTo(buffer, buffer_len);
@@ -205,7 +200,7 @@ namespace Shadowsocks.Controller
             BytePushback(buffer, ref buffer_len, bypass);
 
             string pacUrl = "";
-            pacUrl = "http://127.0.0.1:" + config.localPort.ToString() + "/pac?" + "auth=" + config.localAuthPassword + "&t=" + GetTimestamp(DateTime.Now);
+            pacUrl = "http://127.0.0.1:" + config.localPort.ToString() + "/pac?" + "auth=" + config.localAuthPassword + "&t=" + Util.Utils.GetTimestamp(DateTime.Now);
             BytePushback(buffer, ref buffer_len, pacUrl);
 
             buffer_len += 0x20;

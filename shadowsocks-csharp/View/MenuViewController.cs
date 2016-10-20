@@ -205,6 +205,7 @@ namespace Shadowsocks.View
                     new MenuItem("-"),
                     CreateMenuItem("Update local PAC from Chn Only list", new EventHandler(this.UpdatePACFromCNOnlyListItem_Click)),
                     new MenuItem("-"),
+                    CreateMenuItem("Copy PAC URL", new EventHandler(this.CopyPACURLItem_Click)),
                     CreateMenuItem("Edit local PAC file...", new EventHandler(this.EditPACFileItem_Click)),
                     CreateMenuItem("Edit user rule for GFWList...", new EventHandler(this.EditUserRuleFileForGFWListItem_Click)),
                 }),
@@ -541,6 +542,7 @@ namespace Shadowsocks.View
                 else
                 {
                     controller.MergeConfiguration(cfg);
+                    LoadCurrentConfiguration();
                 }
             }
         }
@@ -688,6 +690,21 @@ namespace Shadowsocks.View
             controller.ToggleBypass(httpWhiteListItem.Checked);
         }
 
+        private void CopyPACURLItem_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                Configuration config = controller.GetCurrentConfiguration();
+                string pacUrl;
+                pacUrl = "http://127.0.0.1:" + config.localPort.ToString() + "/pac?" + "auth=" + config.localAuthPassword + "&t=" + Util.Utils.GetTimestamp(DateTime.Now);
+                Clipboard.SetText(pacUrl);
+            }
+            catch
+            {
+
+            }
+        }
+
         private void EditPACFileItem_Click(object sender, EventArgs e)
         {
             controller.TouchPACFile();
@@ -775,15 +792,22 @@ namespace Shadowsocks.View
 
         private void CopyAddress_Click(object sender, EventArgs e)
         {
-            IDataObject iData = Clipboard.GetDataObject();
-            if (iData.GetDataPresent(DataFormats.Text))
+            try
             {
-                string[] urls = ((string)iData.GetData(DataFormats.Text)).Split(new string[] { "\r", "\n", "\t", " " }, StringSplitOptions.RemoveEmptyEntries);
-                foreach (string url in urls)
+                IDataObject iData = Clipboard.GetDataObject();
+                if (iData.GetDataPresent(DataFormats.Text))
                 {
-                    controller.AddServerBySSURL(url);
+                    string[] urls = ((string)iData.GetData(DataFormats.Text)).Split(new string[] { "\r", "\n", "\t", " " }, StringSplitOptions.RemoveEmptyEntries);
+                    foreach (string url in urls)
+                    {
+                        controller.AddServerBySSURL(url);
+                    }
+                    ShowConfigForm(true);
                 }
-                ShowConfigForm(true);
+            }
+            catch
+            {
+
             }
         }
 

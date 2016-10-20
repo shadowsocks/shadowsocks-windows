@@ -150,9 +150,21 @@ namespace Shadowsocks.Util
                     //"198.18.0.0/15",
                     //"198.51.100.0/24",
                     //"203.0.113.0/24",
+                };
+                foreach (string netmask in netmasks)
+                {
+                    if (isMatchSubNet(ip, netmask))
+                        return true;
+                }
+                return false;
+            }
+            else if (addr.Length == 16)
+            {
+                string[] netmasks = new string[]
+                {
                     "::1/128",
                     "fc00::/7",
-                    "fe80::/10"
+                    "fe80::/10",
                 };
                 foreach (string netmask in netmasks)
                 {
@@ -167,6 +179,11 @@ namespace Shadowsocks.Util
         public static bool isLAN(Socket socket)
         {
             return isLAN(((IPEndPoint)socket.RemoteEndPoint).Address);
+        }
+
+        public static String GetTimestamp(DateTime value)
+        {
+            return value.ToString("yyyyMMddHHmmssffff");
         }
 
         public static string urlDecode(string str)

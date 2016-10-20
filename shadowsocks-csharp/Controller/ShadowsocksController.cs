@@ -115,6 +115,37 @@ namespace Shadowsocks.Controller
             return _config;
         }
 
+        public void AppendConfiguration(Configuration mergeConfig, List<Server> servers)
+        {
+            if (servers != null)
+            {
+                for (int j = 0; j < servers.Count; ++j)
+                {
+                    int i = 0;
+                    for (; i < mergeConfig.configs.Count; ++i)
+                    {
+                        if (mergeConfig.configs[i].server == servers[j].server
+                            && mergeConfig.configs[i].server_port == servers[j].server_port
+                            && mergeConfig.configs[i].server_udp_port == servers[j].server_udp_port
+                            && mergeConfig.configs[i].method == servers[j].method
+                            && mergeConfig.configs[i].protocol == servers[j].protocol
+                            && mergeConfig.configs[i].obfs == servers[j].obfs
+                            && mergeConfig.configs[i].obfsparam == servers[j].obfsparam
+                            && mergeConfig.configs[i].password == servers[j].password
+                            && mergeConfig.configs[i].udp_over_tcp == servers[j].udp_over_tcp
+                            )
+                        {
+                            break;
+                        }
+                    }
+                    if (i == mergeConfig.configs.Count)
+                    {
+                        mergeConfig.configs.Add(servers[j]);
+                    }
+                }
+            }
+        }
+
         public List<Server> MergeConfiguration(Configuration mergeConfig, List<Server> servers)
         {
             List<Server> missingServers = new List<Server>();
@@ -180,7 +211,7 @@ namespace Shadowsocks.Controller
 
         public void MergeConfiguration(Configuration mergeConfig)
         {
-            MergeConfiguration(_config, mergeConfig.configs);
+            AppendConfiguration(_config, mergeConfig.configs);
             SaveConfig(_config);
         }
 
