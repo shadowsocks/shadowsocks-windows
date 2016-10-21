@@ -1,3 +1,8 @@
+3.3.4 2016-10-21
+- Fix IE dial-up and VPN connection proxy settings
+  not changed since release 3.3.3.
+- Fix a UI bug
+
 3.3.3 2016-10-10
 - Add timeout support for server and forward proxy,
   only integer is allowed
