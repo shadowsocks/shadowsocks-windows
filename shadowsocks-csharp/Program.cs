@@ -107,7 +107,7 @@ namespace Shadowsocks
                     Logging.Info("os wake up");
                     if (_controller != null)
                     {
-                        System.Timers.Timer timer = new System.Timers.Timer(5 * 1000);
+                        System.Timers.Timer timer = new System.Timers.Timer(10 * 1000);
                         timer.Elapsed += Timer_Elapsed;
                         timer.AutoReset = false;
                         timer.Enabled = true;
@@ -115,7 +115,11 @@ namespace Shadowsocks
                     }
                     break;
                 case PowerModes.Suspend:
-                    _controller?.Stop();
+                    if (_controller != null)
+                    {
+                        _controller.Stop();
+                        Logging.Info("controller stopped");
+                    }
                     Logging.Info("os suspend");
                     break;
             }
@@ -125,7 +129,11 @@ namespace Shadowsocks
         {
             try
             {
-                _controller?.Start();
+                if (_controller != null)
+                {
+                    _controller.Start();
+                    Logging.Info("controller started");
+                }
             }
             catch (Exception ex)
             {
@@ -149,6 +157,7 @@ namespace Shadowsocks
 
         private static void Application_ApplicationExit(object sender, EventArgs e)
         {
+            SystemEvents.PowerModeChanged -= SystemEvents_PowerModeChanged;
             HotKeys.Destroy();
             if (_controller != null)
             {
