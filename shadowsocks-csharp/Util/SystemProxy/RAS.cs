@@ -1,13 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Runtime.InteropServices;
 
 namespace Shadowsocks.Util.SystemProxy
 {
-    public static class RAS
+    internal static class RemoteAccessService
     {
         private enum RasFieldSizeConstants
         {
@@ -69,22 +64,28 @@ namespace Shadowsocks.Util.SystemProxy
             #endregion
 
             public int dwSize;
+
             [MarshalAs(UnmanagedType.ByValTStr, SizeConst=(int)RasFieldSizeConstants.RAS_MaxEntryName + 1)]
             public string szEntryName;
 
             public int dwFlags;
 
-            [MarshalAs(UnmanagedType.ByValTStr,SizeConst=(int)RasFieldSizeConstants.RAS_MaxPath + 1)]
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst=(int)RasFieldSizeConstants.RAS_MaxPath + 1)]
             public string szPhonebookPath;
         }
 
         [DllImport("rasapi32.dll", CharSet = CharSet.Auto)]
         private static extern uint RasEnumEntries(
-            string reserved, // reserved, must be NULL
-            string lpszPhonebook, // pointer to full path and file name of phone-book file
-            [In, Out] RasEntryName[] lprasentryname, // buffer to receive phone-book entries
-            ref int lpcb, // size in bytes of buffer
-            out int lpcEntries // number of entries written to buffer
+            // reserved, must be NULL
+            string reserved,
+            // pointer to full path and file name of phone-book file
+            string lpszPhonebook,
+            // buffer to receive phone-book entries
+            [In, Out] RasEntryName[] lprasentryname,
+            // size in bytes of buffer
+            ref int lpcb,
+            // number of entries written to buffer
+            out int lpcEntries
         );
 
         /// <summary>
