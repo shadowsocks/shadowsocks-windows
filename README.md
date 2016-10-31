@@ -96,7 +96,7 @@ system temp folder, create a `shadowsocks_portable_mode.txt` into shadowsocks fo
 
 #### Develop
 
-Visual Studio 2015 is required.
+[Visual Studio 2015] & [.NET Framework 4.6.2 Developer Pack] are required.
 
 #### License
 
@@ -109,3 +109,5 @@ GPLv3
 [GFWList]:        https://github.com/gfwlist/gfwlist
 [Servers]:        https://github.com/shadowsocks/shadowsocks/wiki/Ports-and-Clients#linux--server-side
 [中文说明]:       https://github.com/shadowsocks/shadowsocks-windows/wiki/Shadowsocks-Windows-%E4%BD%BF%E7%94%A8%E8%AF%B4%E6%98%8E
+[Visual Studio 2015]: https://www.visualstudio.com/downloads/
+[.NET Framework 4.6.2 Developer Pack]: https://www.microsoft.com/download/details.aspx?id=53321
