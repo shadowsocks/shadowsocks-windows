@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Security;
 using System.Windows.Forms;
 using Microsoft.Win32;
 using Shadowsocks.Controller;
@@ -224,19 +221,14 @@ namespace Shadowsocks.Util
                     .OpenSubKey(name, writable);
                 return userKey;
             }
-            catch (UnauthorizedAccessException uae)
-            {
-                Logging.LogUsefulException(uae);
-                return null;
-            }
-            catch (SecurityException se)
-            {
-                Logging.LogUsefulException(se);
-                return null;
-            }
             catch (ArgumentException ae)
             {
                 MessageBox.Show("OpenRegKey: " + ae.ToString());
+                return null;
+            }
+            catch (Exception e)
+            {
+                Logging.LogUsefulException(e);
                 return null;
             }
         }

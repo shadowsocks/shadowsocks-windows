@@ -136,15 +136,6 @@ namespace Shadowsocks.Util.SystemProxy
 
             // Notify the system that the registry settings have been changed and cause
             // the proxy data to be reread from the registry for a handle.
-//            bReturn = NativeMethods.InternetSetOption(
-//                IntPtr.Zero,
-//                INTERNET_OPTION.INTERNET_OPTION_SETTINGS_CHANGED,
-//                IntPtr.Zero, 0);
-//            if ( ! bReturn )
-//            {
-//                Logging.Error("InternetSetOption:INTERNET_OPTION_SETTINGS_CHANGED");
-//            }
-
             bReturn = NativeMethods.InternetSetOption(
                 IntPtr.Zero,
                 INTERNET_OPTION.INTERNET_OPTION_PROXY_SETTINGS_CHANGED,
@@ -167,7 +158,7 @@ namespace Shadowsocks.Util.SystemProxy
         public static void SetIEProxy(bool enable, bool global, string proxyServer, string pacURL)
         {
             string[] allConnections = null;
-            var ret = RAS.GetAllConns(ref allConnections);
+            var ret = RemoteAccessService.GetAllConns(ref allConnections);
 
             if (ret == 2)
                 throw new Exception("Cannot get all connections");
