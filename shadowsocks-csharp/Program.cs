@@ -36,6 +36,9 @@ namespace Shadowsocks
             {
                 MessageBox.Show(I18N.GetString("Unsupported .NET Framework, please update to 4.6.2 or later."),
                 "Shadowsocks Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+
+                Process.Start(
+                    "http://dotnetsocial.cloudapp.net/GetDotnet?tfm=.NETFramework,Version=v4.6.2");
                 return;
             }
 
