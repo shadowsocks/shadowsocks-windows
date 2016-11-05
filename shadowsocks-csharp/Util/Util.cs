@@ -208,7 +208,7 @@ namespace Shadowsocks.Util
             return new BandwidthScaleInfo(f, unit, scale);
         }
 
-        public static RegistryKey OpenRegKey( string name, bool writable, RegistryHive hive = RegistryHive.CurrentUser )
+        public static RegistryKey OpenRegKey(string name, bool writable, RegistryHive hive = RegistryHive.CurrentUser)
         {
             // we are building x86 binary for both x86 and x64, which will
             // cause problem when opening registry key
@@ -233,7 +233,8 @@ namespace Shadowsocks.Util
             }
         }
 
-        public static bool IsWinVistaOrHigher() {
+        public static bool IsWinVistaOrHigher()
+        {
             return Environment.OSVersion.Version.Major > 5;
         }
 
@@ -241,5 +242,35 @@ namespace Shadowsocks.Util
         [return: MarshalAs(UnmanagedType.Bool)]
         private static extern bool SetProcessWorkingSetSize(IntPtr process,
             UIntPtr minimumWorkingSetSize, UIntPtr maximumWorkingSetSize);
+
+
+        // See: https://msdn.microsoft.com/en-us/library/hh925568(v=vs.110).aspx
+        public static bool IsSupportedRuntimeVersion()
+        {
+            /*
+             * +-----------------------------------------------------------------+----------------------------+
+             * | Version                                                         | Value of the Release DWORD |
+             * +-----------------------------------------------------------------+----------------------------+
+             * | .NET Framework 4.6.2 installed on Windows 10 Anniversary Update | 394802                     |
+             * | .NET Framework 4.6.2 installed on all other Windows OS versions | 394806                     |
+             * +-----------------------------------------------------------------+----------------------------+
+             */
+            const int minSupportedRelease = 394802;
+
+            const string subkey = @"SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\Full\";
+            using (var ndpKey = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry32).OpenSubKey(subkey))
+            {
+                if (ndpKey?.GetValue("Release") != null)
+                {
+                    var releaseKey = (int)ndpKey.GetValue("Release");
+
+                    if (releaseKey >= minSupportedRelease)
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
     }
 }

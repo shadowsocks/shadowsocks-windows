@@ -31,6 +31,14 @@ namespace Shadowsocks
                 return;
             }
 
+            // Check .NET Framework version
+            if (!Utils.IsSupportedRuntimeVersion())
+            {
+                MessageBox.Show(I18N.GetString("Unsupported .NET Framework, please update to 4.6.2 or later."),
+                "Shadowsocks Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
             Utils.ReleaseMemory(true);
             using (Mutex mutex = new Mutex(false, $"Global\\Shadowsocks_{Application.StartupPath.GetHashCode()}"))
             {

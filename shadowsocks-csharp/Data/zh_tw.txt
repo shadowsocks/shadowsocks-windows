@@ -130,6 +130,7 @@ System Proxy On: =系統代理已啟用：
 Running: Port {0}=正在運行：連接埠號碼 {0}
 Unexpected error, shadowsocks will exit. Please report to=非預期錯誤，Shadowsocks將退出。請提交此錯誤到
 Unsupported operating system, use Windows Vista at least.=不支持的作業系統版本，最低需求為Windows Vista。
+Unsupported .NET Framework, please update to 4.6.2 or later.=當前 .NET Framework 版本過低，最低需求為4.6.2。
 Proxy request failed=代理請求失敗
 Proxy handshake failed=代理握手失敗
 Register hotkey failed=註冊捷徑鍵失敗
