@@ -258,7 +258,7 @@ namespace Shadowsocks.Util
             const int minSupportedRelease = 394802;
 
             const string subkey = @"SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\Full\";
-            using (var ndpKey = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry32).OpenSubKey(subkey))
+            using (var ndpKey = OpenRegKey(subkey, false, RegistryHive.LocalMachine))
             {
                 if (ndpKey?.GetValue("Release") != null)
                 {
