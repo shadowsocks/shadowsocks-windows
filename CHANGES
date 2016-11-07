@@ -1,3 +1,8 @@
+3.3.5 2016-11-7
+- Improve system power mode handling
+- Update mbed TLS to 2.4.0
+- Check .NET Framework version on startup
+
 3.3.4 2016-10-21
 - Fix IE dial-up and VPN connection proxy settings
   not changed since release 3.3.3.
