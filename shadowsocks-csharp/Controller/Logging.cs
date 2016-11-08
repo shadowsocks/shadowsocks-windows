@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.IO;
 using System.Net.Sockets;
 using System.Net;
@@ -122,6 +123,16 @@ namespace Shadowsocks.Controller
             }
             else if (e is ObjectDisposedException)
             {
+            }
+            else if (e is Win32Exception)
+            {
+                var ex = (Win32Exception) e;
+
+                // Win32Exception (0x80004005): A 32 bit processes cannot access modules of a 64 bit process.
+                if ((uint) ex.ErrorCode != 0x80004005)
+                {
+                    Info(e);
+                }
             }
             else
             {
