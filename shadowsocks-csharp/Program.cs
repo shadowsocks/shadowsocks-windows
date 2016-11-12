@@ -172,6 +172,8 @@ namespace Shadowsocks
 
         private static void Application_ApplicationExit(object sender, EventArgs e)
         {
+            // detach static event handlers
+            Application.ApplicationExit -= Application_ApplicationExit;
             SystemEvents.PowerModeChanged -= SystemEvents_PowerModeChanged;
             Application.ThreadException -= Application_ThreadException;
             HotKeys.Destroy();
