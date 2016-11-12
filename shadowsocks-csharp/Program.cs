@@ -92,9 +92,10 @@ namespace Shadowsocks
         {
             if (Interlocked.Increment(ref exited) == 1)
             {
-                Logging.Error(e.ExceptionObject?.ToString());
+                string errMsg = e.ExceptionObject.ToString();
+                Logging.Error(errMsg);
                 MessageBox.Show(
-                    $"{I18N.GetString("Unexpected error, shadowsocks will exit. Please report to")} https://github.com/shadowsocks/shadowsocks-windows/issues {Environment.NewLine}{e.ExceptionObject?.ToString()}",
+                    $"{I18N.GetString("Unexpected error, shadowsocks will exit. Please report to")} https://github.com/shadowsocks/shadowsocks-windows/issues {Environment.NewLine}{errMsg}",
                     "Shadowsocks non-UI Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 Application.Exit();
             }
@@ -102,12 +103,15 @@ namespace Shadowsocks
 
         private static void Application_ThreadException(object sender, ThreadExceptionEventArgs e)
         {
-            string errorMsg = $"Exception Type: {e.Exception.GetType().Name}{Environment.NewLine}Stack Trace:{Environment.NewLine}{e.Exception.StackTrace}";
-            Logging.Error(errorMsg);
-            MessageBox.Show(
-                $"{I18N.GetString("Unexpected error, shadowsocks will exit. Please report to")} https://github.com/shadowsocks/shadowsocks-windows/issues {Environment.NewLine}{errorMsg}",
-                "Shadowsocks UI Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            Application.Exit();
+            if (Interlocked.Increment(ref exited) == 1)
+            {
+                string errorMsg = $"Exception Detail: {Environment.NewLine}{e.Exception}";
+                Logging.Error(errorMsg);
+                MessageBox.Show(
+                    $"{I18N.GetString("Unexpected error, shadowsocks will exit. Please report to")} https://github.com/shadowsocks/shadowsocks-windows/issues {Environment.NewLine}{errorMsg}",
+                    "Shadowsocks UI Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Application.Exit();
+            }
         }
 
         private static void SystemEvents_PowerModeChanged(object sender, PowerModeChangedEventArgs e)
@@ -168,7 +172,10 @@ namespace Shadowsocks
 
         private static void Application_ApplicationExit(object sender, EventArgs e)
         {
+            // detach static event handlers
+            Application.ApplicationExit -= Application_ApplicationExit;
             SystemEvents.PowerModeChanged -= SystemEvents_PowerModeChanged;
+            Application.ThreadException -= Application_ThreadException;
             HotKeys.Destroy();
             if (_controller != null)
             {

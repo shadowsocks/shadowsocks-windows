@@ -272,6 +272,7 @@ namespace Shadowsocks.Controller
             {
                 SystemProxy.Update(_config, true);
             }
+            Encryption.RNG.Close();
         }
 
         public void TouchPACFile()
@@ -413,6 +414,7 @@ namespace Shadowsocks.Controller
 
         protected void Reload()
         {
+            Encryption.RNG.Reload();
             // some logic in configuration updated the config when saving, we need to read it again
             _config = Configuration.Load();
             StatisticsConfiguration = StatisticsStrategyConfiguration.Load();

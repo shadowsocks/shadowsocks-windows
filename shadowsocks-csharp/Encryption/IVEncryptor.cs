@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Concurrent;
-using System.Linq;
-using System.Security.Cryptography;
 using System.Text;
 using System.Net;
 
@@ -237,10 +235,7 @@ namespace Shadowsocks.Encryption
 
         protected static void randBytes(byte[] buf, int length)
         {
-            using (RNGCryptoServiceProvider rng = new RNGCryptoServiceProvider())
-            {
-                rng.GetBytes(buf, 0, length);
-            }
+            RNG.GetBytes(buf, length);
         }
 
         public override void Encrypt(byte[] buf, int length, byte[] outbuf, out int outlength)
