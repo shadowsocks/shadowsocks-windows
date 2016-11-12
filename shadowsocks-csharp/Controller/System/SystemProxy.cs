@@ -21,25 +21,32 @@ namespace Shadowsocks.Controller
                 enabled = false;
             }
 
-            if (enabled)
+            try
             {
-                if (global)
+                if (enabled)
                 {
-                    WinINet.SetIEProxy(true, true, "127.0.0.1:" + config.localPort.ToString(), "");
+                    if (global)
+                    {
+                        WinINet.SetIEProxy(true, true, "127.0.0.1:" + config.localPort.ToString(), "");
+                    }
+                    else
+                    {
+                        string pacUrl;
+                        if (config.useOnlinePac && !config.pacUrl.IsNullOrEmpty())
+                            pacUrl = config.pacUrl;
+                        else
+                            pacUrl = $"http://127.0.0.1:{config.localPort}/pac?t={GetTimestamp(DateTime.Now)}";
+                        WinINet.SetIEProxy(true, false, "", pacUrl);
+                    }
                 }
                 else
                 {
-                    string pacUrl;
-                    if (config.useOnlinePac && !config.pacUrl.IsNullOrEmpty())
-                        pacUrl = config.pacUrl;
-                    else
-                        pacUrl = $"http://127.0.0.1:{config.localPort}/pac?t={GetTimestamp(DateTime.Now)}";
-                    WinINet.SetIEProxy(true, false, "", pacUrl);
+                    WinINet.SetIEProxy(false, false, "", "");
                 }
             }
-            else
+            catch (ProxyException ex)
             {
-                WinINet.SetIEProxy(false, false, "", "");
+                Logging.LogUsefulException(ex);
             }
         }
     }

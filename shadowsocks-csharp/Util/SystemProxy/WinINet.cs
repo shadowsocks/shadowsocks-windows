@@ -17,6 +17,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Runtime.InteropServices;
 using Shadowsocks.Controller;
@@ -131,7 +132,7 @@ namespace Shadowsocks.Util.SystemProxy
             // Throw an exception if this operation failed.
             if (!bReturn)
             {
-                throw new Exception("InternetSetOption: " + Marshal.GetLastWin32Error());
+                throw new ProxyException("InternetSetOption failed.", new Win32Exception());
             }
 
             // Notify the system that the registry settings have been changed and cause
@@ -161,7 +162,7 @@ namespace Shadowsocks.Util.SystemProxy
             var ret = RemoteAccessService.GetAllConns(ref allConnections);
 
             if (ret == 2)
-                throw new Exception("Cannot get all connections");
+                throw new ProxyException("Cannot get all connections");
 
             if (ret == 1)
             {
