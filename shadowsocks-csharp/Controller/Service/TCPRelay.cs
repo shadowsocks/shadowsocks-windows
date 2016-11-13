@@ -168,6 +168,8 @@ namespace Shadowsocks.Controller
         private DateTime _startReceivingTime;
         private DateTime _startSendingTime;
 
+        private EndPoint _destEndPoint = null;
+
         public TCPHandler(ShadowsocksController controller, Configuration config, TCPRelay tcprelay, Socket socket)
         {
             _controller = controller;
@@ -182,7 +184,7 @@ namespace Shadowsocks.Controller
 
         public void CreateRemote()
         {
-            Server server = _controller.GetAServer(IStrategyCallerType.TCP, (IPEndPoint)_connection.RemoteEndPoint);
+            Server server = _controller.GetAServer(IStrategyCallerType.TCP, (IPEndPoint)_connection.RemoteEndPoint, _destEndPoint);
             if (server == null || server.server == "")
                 throw new ArgumentException("No server configured");
             lock (_encryptionLock)
@@ -286,9 +288,11 @@ namespace Shadowsocks.Controller
                 // +-----+-----+-------+------+----------+----------+
                 // |  1  |  1  | X'00' |  1   | Variable |    2     |
                 // +-----+-----+-------+------+----------+----------+
-                // Skip first 3 bytes
+                // Skip first 3 bytes, and read 2 more bytes to analysis the address.
+                // 2 more bytes is designed if address is domain then we don't need to read once more to get the addr length.
                 // TODO validate
-                _connection.BeginReceive(_connetionRecvBuffer, 0, 3, SocketFlags.None, new AsyncCallback(handshakeReceive2Callback), null);
+                _connection.BeginReceive(_connetionRecvBuffer, 0, 3 + 2, SocketFlags.None,
+                    new AsyncCallback(handshakeReceive2Callback), null);
             }
             catch (Exception e)
             {
@@ -303,20 +307,113 @@ namespace Shadowsocks.Controller
             try
             {
                 int bytesRead = _connection.EndReceive(ar);
-                if (bytesRead >= 3)
+                if (bytesRead >= 5)
                 {
                     _command = _connetionRecvBuffer[1];
-                    if (_command == 1)
+                    if (_command != 1 && _command != 3)
                     {
-                        byte[] response = { 5, 0, 0, 1, 0, 0, 0, 0, 0, 0 };
-                        _connection.BeginSend(response, 0, response.Length, SocketFlags.None, new AsyncCallback(ResponseCallback), null);
+                        Logging.Debug("Unsupported CMD=" + _command);
+                        Close();
                     }
-                    else if (_command == 3)
-                        HandleUDPAssociate();
+                    else
+                    {
+                        int atyp = _connetionRecvBuffer[3];
+
+                        switch (atyp)
+                        {
+                            case 1: // IPv4 address, 4 bytes
+                                ReadAddress(4 + 2 - 1);
+                                break;
+                            case 3: // domain name, length + str
+                                int len = _connetionRecvBuffer[4];
+                                ReadAddress(len + 2);
+                                break;
+                            case 4: // IPv6 address, 16 bytes
+                                ReadAddress(16 + 2 - 1);
+                                break;
+                            default:
+                                Logging.Debug("Unsupported ATYP=" + atyp);
+                                Close();
+                                break;
+                        }
+                    }
                 }
                 else
                 {
                     Logging.Debug("failed to recv data in Shadowsocks.Controller.TCPHandler.handshakeReceive2Callback()");
+                    Close();
+                }
+            }
+            catch (Exception e)
+            {
+                Logging.LogUsefulException(e);
+                Close();
+            }
+        }
+
+        private void ReadAddress(int bytesRemain)
+        {
+            Array.Copy(_connetionRecvBuffer, 3, _connetionRecvBuffer, 0, 2);
+
+            // Read the remain address bytes
+            _connection.BeginReceive(_connetionRecvBuffer, 2, RecvSize - 2, SocketFlags.None, OnAddressFullyRead, bytesRemain);
+        }
+
+        private void OnAddressFullyRead(IAsyncResult ar)
+        {
+            if (_closed) return;
+            try
+            {
+                int bytesRead = _connection.EndReceive(ar);
+                int bytesRemain = (int) ar.AsyncState;
+                if (bytesRead >= bytesRemain)
+                {
+                    _firstPacketLength = bytesRead + 2;
+
+                    int atyp = _connetionRecvBuffer[0];
+
+                    string dst_addr = "Unknown";
+                    int dst_port = -1;
+                    switch (atyp)
+                    {
+                        case 1: // IPv4 address, 4 bytes
+                            dst_addr = new IPAddress(_connetionRecvBuffer.Skip(1).Take(4).ToArray()).ToString();
+                            dst_port = (_connetionRecvBuffer[5] << 8) + _connetionRecvBuffer[6];
+
+                            break;
+                        case 3: // domain name, length + str
+                            int len = _connetionRecvBuffer[1];
+                            dst_addr = System.Text.Encoding.UTF8.GetString(_connetionRecvBuffer, 2, len);
+                            dst_port = (_connetionRecvBuffer[len + 2] << 8) + _connetionRecvBuffer[len + 3];
+
+                            break;
+                        case 4: // IPv6 address, 16 bytes
+                            dst_addr = $"[{new IPAddress(_connetionRecvBuffer.Skip(1).Take(16).ToArray())}]";
+                            dst_port = (_connetionRecvBuffer[17] << 8) + _connetionRecvBuffer[18];
+
+                            break;
+                    }
+                    if (_config.isVerboseLogging)
+                    {
+                        Logging.Info($"connect to {dst_addr}:{dst_port}");
+                    }
+
+                    _destEndPoint = SocketUtil.GetEndPoint(dst_addr, dst_port);
+
+                    if (_command == 1)
+                    {
+                        byte[] response = {5, 0, 0, 1, 0, 0, 0, 0, 0, 0};
+                        _connection.BeginSend(response, 0, response.Length, SocketFlags.None,
+                            new AsyncCallback(ResponseCallback), null);
+                    }
+                    else if (_command == 3)
+                    {
+                        HandleUDPAssociate();
+                    }
+                }
+                else
+                {
+                    Logging.Debug("failed to recv data in Shadowsocks.Controller.TCPHandler.OnAddressFullyRead()");
                     Close();
                 }
             }
@@ -612,8 +709,7 @@ namespace Shadowsocks.Controller
             {
                 _startReceivingTime = DateTime.Now;
                 session.Remote.BeginReceive(_remoteRecvBuffer, 0, RecvSize, SocketFlags.None, new AsyncCallback(PipeRemoteReceiveCallback), session);
-                _connection.BeginReceive(_connetionRecvBuffer, 0, RecvSize, SocketFlags.None, new AsyncCallback(PipeConnectionReceiveCallback),
-                    new AsyncSession<bool>(session, true) /* to tell the callback this is the first time reading packet, and we haven't found the header yet. */);
+                SendToServer(_firstPacketLength, session);
             }
             catch (Exception e)
             {
@@ -663,59 +759,13 @@ namespace Shadowsocks.Controller
             try
             {
                 int bytesRead = _connection.EndReceive(ar);
-                _totalWrite += bytesRead;
 
-                var session = (AsyncSession<bool>) ar.AsyncState;
+                var session = (AsyncSession) ar.AsyncState;
                 var remote = session.Remote;
 
                 if (bytesRead > 0)
                 {
-                    /*
-                     * Only the first packet contains the socks5 header, it doesn't make sense to parse every packets. 
-                     * Also it's unnecessary to parse these data if we turn off the VerboseLogging.
-                     */
-                    if (session.State && _config.isVerboseLogging)
-                    {
-                        int atyp = _connetionRecvBuffer[0];
-                        string dst_addr;
-                        int dst_port;
-                        switch (atyp)
-                        {
-                            case 1: // IPv4 address, 4 bytes
-                                dst_addr = new IPAddress(_connetionRecvBuffer.Skip(1).Take(4).ToArray()).ToString();
-                                dst_port = (_connetionRecvBuffer[5] << 8) + _connetionRecvBuffer[6];
-
-                                Logging.Info($"connect to {dst_addr}:{dst_port}");
-                                session.State = false;
-                                break;
-                            case 3: // domain name, length + str
-                                int len = _connetionRecvBuffer[1];
-                                dst_addr = System.Text.Encoding.UTF8.GetString(_connetionRecvBuffer, 2, len);
-                                dst_port = (_connetionRecvBuffer[len + 2] << 8) + _connetionRecvBuffer[len + 3];
-
-                                Logging.Info($"connect to {dst_addr}:{dst_port}");
-                                session.State = false;
-                                break;
-                            case 4: // IPv6 address, 16 bytes
-                                dst_addr = new IPAddress(_connetionRecvBuffer.Skip(1).Take(16).ToArray()).ToString();
-                                dst_port = (_connetionRecvBuffer[17] << 8) + _connetionRecvBuffer[18];
-
-                                Logging.Info($"connect to [{dst_addr}]:{dst_port}");
-                                session.State = false;
-                                break;
-                        }
-                    }
-
-                    int bytesToSend;
-                    lock (_encryptionLock)
-                    {
-                        _encryptor.Encrypt(_connetionRecvBuffer, bytesRead, _connetionSendBuffer, out bytesToSend);
-                    }
-                    _tcprelay.UpdateOutboundCounter(_server, bytesToSend);
-                    _startSendingTime = DateTime.Now;
-                    remote.BeginSend(_connetionSendBuffer, 0, bytesToSend, SocketFlags.None, new AsyncCallback(PipeRemoteSendCallback), session);
-                    IStrategy strategy = _controller.GetCurrentStrategy();
-                    strategy?.UpdateLastWrite(_server);
+                    SendToServer(bytesRead, session);
                 }
                 else
                 {
@@ -729,6 +779,21 @@ namespace Shadowsocks.Controller
                 Logging.LogUsefulException(e);
                 Close();
             }
+        }
+
+        private void SendToServer(int length, AsyncSession session)
+        {
+            _totalWrite += length;
+            int bytesToSend;
+            lock (_encryptionLock)
+            {
+                _encryptor.Encrypt(_connetionRecvBuffer, length, _connetionSendBuffer, out bytesToSend);
+            }
+            _tcprelay.UpdateOutboundCounter(_server, bytesToSend);
+            _startSendingTime = DateTime.Now;
+            session.Remote.BeginSend(_connetionSendBuffer, 0, bytesToSend, SocketFlags.None, new AsyncCallback(PipeRemoteSendCallback), session);
+            IStrategy strategy = _controller.GetCurrentStrategy();
+            strategy?.UpdateLastWrite(_server);
         }
 
         private void PipeRemoteSendCallback(IAsyncResult ar)

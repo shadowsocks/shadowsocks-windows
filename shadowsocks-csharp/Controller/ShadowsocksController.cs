@@ -139,12 +139,12 @@ namespace Shadowsocks.Controller
             return null;
         }
 
-        public Server GetAServer(IStrategyCallerType type, IPEndPoint localIPEndPoint)
+        public Server GetAServer(IStrategyCallerType type, IPEndPoint localIPEndPoint, EndPoint destEndPoint)
         {
             IStrategy strategy = GetCurrentStrategy();
             if (strategy != null)
             {
-                return strategy.GetAServer(type, localIPEndPoint);
+                return strategy.GetAServer(type, localIPEndPoint, destEndPoint);
             }
             if (_config.index < 0)
             {
