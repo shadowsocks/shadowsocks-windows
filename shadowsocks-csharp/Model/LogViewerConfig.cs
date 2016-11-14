@@ -12,7 +12,7 @@ namespace Shadowsocks.Model
         public bool wrapText;
         public bool toolbarShown;
 
-        public Font Font { get; set; } = new Font("Console", 8F);
+        public Font Font { get; set; } = new Font("Consolas", 8F);
 
         public Color BackgroundColor { get; set; } = Color.Black;
 
