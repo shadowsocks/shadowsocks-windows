@@ -25,5 +25,13 @@ namespace Shadowsocks.Model
             proxyPort = 0;
             proxyTimeout = DefaultProxyTimeoutSec;
         }
+
+        public void CheckConfig()
+        {
+            if (proxyType < PROXY_SOCKS5 || proxyType > PROXY_HTTP)
+            {
+                proxyType = PROXY_SOCKS5;
+            }
+        }
     }
 }

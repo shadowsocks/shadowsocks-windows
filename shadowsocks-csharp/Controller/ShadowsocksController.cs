@@ -359,6 +359,7 @@ namespace Shadowsocks.Controller
         public void SaveLogViewerConfig(LogViewerConfig newConfig)
         {
             _config.logViewer = newConfig;
+            newConfig.SaveSize();
             Configuration.Save(_config);
             if (ConfigChanged != null)
             {

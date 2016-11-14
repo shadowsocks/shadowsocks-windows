@@ -141,6 +141,11 @@
     <Compile Include="3rd\zxing\WriterException.cs" />
     <Compile Include="Model\HotKeyConfig.cs" />
     <Compile Include="Model\ProxyConfig.cs" />
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <DependentUpon>Settings.settings</DependentUpon>
+    </Compile>
     <Compile Include="Proxy\DirectConnect.cs" />
     <Compile Include="Proxy\HttpProxy.cs" />
     <Compile Include="Proxy\IProxy.cs" />
@@ -179,6 +184,7 @@
     <Compile Include="Controller\Strategy\StrategyManager.cs" />
     <Compile Include="Controller\Strategy\IStrategy.cs" />
     <Compile Include="Proxy\Socks5Proxy.cs" />
+    <Compile Include="Settings.cs" />
     <Compile Include="StringEx.cs" />
     <Compile Include="Util\Hotkeys.cs" />
     <Compile Include="Util\ProcessManagement\Job.cs" />
@@ -287,6 +293,10 @@
   <ItemGroup>
     <None Include="packages.config" />
     <None Include="Properties\DataSources\Shadowsocks.Model.StatisticsStrategyConfiguration.datasource" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
     <None Include="Resources\ss20.png" />
     <None Include="Resources\ss16.png" />
     <None Include="Resources\ss24.png" />
