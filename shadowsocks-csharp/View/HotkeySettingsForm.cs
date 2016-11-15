@@ -24,8 +24,8 @@ namespace Shadowsocks.View
 
         private IEnumerable<TextBox> _allTextBoxes;
 
-        private static Label _lb = null;
-        private static HotKeys.HotKeyCallBackHandler _callBack = null;
+        private Label _lb = null;
+        private HotKeys.HotKeyCallBackHandler _callBack = null;
 
         public HotkeySettingsForm(ShadowsocksController controller)
         {
@@ -57,8 +57,7 @@ namespace Shadowsocks.View
         private void LoadConfiguration(HotkeyConfig config)
         {
             SwitchSystemProxyTextBox.Text = config.SwitchSystemProxy;
-            ChangeToPacTextBox.Text = config.ChangeToPac;
-            ChangeToGlobalTextBox.Text = config.ChangeToGlobal;
+            SwitchProxyModeTextBox.Text = config.SwitchSystemProxyMode;
             SwitchAllowLanTextBox.Text = config.SwitchAllowLan;
             ShowLogsTextBox.Text = config.ShowLogs;
             ServerMoveUpTextBox.Text = config.ServerMoveUp;
@@ -69,8 +68,7 @@ namespace Shadowsocks.View
         {
             // I18N stuff
             SwitchSystemProxyLabel.Text = I18N.GetString("Switch system proxy");
-            ChangeToPacLabel.Text = I18N.GetString("Switch to PAC mode");
-            ChangeToGlobalLabel.Text = I18N.GetString("Switch to Global mode");
+            SwitchProxyModeLabel.Text = I18N.GetString("Switch system proxy mode");
             SwitchAllowLanLabel.Text = I18N.GetString("Switch share over LAN");
             ShowLogsLabel.Text = I18N.GetString("Show Logs");
             ServerMoveUpLabel.Text = I18N.GetString("Switch to prev server");
@@ -237,8 +235,7 @@ namespace Shadowsocks.View
         private void SaveConfig()
         {
             _modifiedConfig.SwitchSystemProxy = SwitchSystemProxyTextBox.Text;
-            _modifiedConfig.ChangeToPac = ChangeToPacTextBox.Text;
-            _modifiedConfig.ChangeToGlobal = ChangeToGlobalTextBox.Text;
+            _modifiedConfig.SwitchSystemProxyMode = SwitchProxyModeTextBox.Text;
             _modifiedConfig.SwitchAllowLan = SwitchAllowLanTextBox.Text;
             _modifiedConfig.ShowLogs = ShowLogsTextBox.Text;
             _modifiedConfig.ServerMoveUp = ServerMoveUpTextBox.Text;
@@ -254,18 +251,12 @@ namespace Shadowsocks.View
             _controller.ToggleEnable(!enabled);
         }
 
-        private void ChangeToPacCallback()
+        private void SwitchProxyModeCallback()
         {
-            bool enabled = _controller.GetConfigurationCopy().enabled;
-            if (enabled == false) return;
-            _controller.ToggleGlobal(false);
-        }
-
-        private void ChangeToGlobalCallback()
-        {
-            bool enabled = _controller.GetConfigurationCopy().enabled;
-            if (enabled == false) return;
-            _controller.ToggleGlobal(true);
+            var config = _controller.GetConfigurationCopy();
+            if (config.enabled == false) return;
+            var currStatus = config.global;
+            _controller.ToggleGlobal(!currStatus);
         }
 
         private void SwitchAllowLanCallback()

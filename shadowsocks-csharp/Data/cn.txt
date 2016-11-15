@@ -91,8 +91,7 @@ Please input PAC Url=请输入 PAC 网址
 # HotkeySettings Form
 
 Switch system proxy=切换系统代理状态
-Switch to PAC mode=切换到PAC模式
-Switch to Global mode=切换到全局模式
+Switch system proxy mode=切换系统代理模式
 Switch share over LAN=切换局域网共享
 Show Logs=显示日志
 Switch to prev server=切换上个服务器

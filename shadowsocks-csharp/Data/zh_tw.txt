@@ -90,13 +90,12 @@ Please input PAC Url=請輸入 PAC 網址
 
 # HotkeySettings Form
 
-Switch system proxy=切换系統代理狀態
-Switch to PAC mode=切换為PAC模式
-Switch to Global mode=切换為全局模式
-Switch share over LAN=切换區域網路共享
+Switch system proxy=切換系統代理狀態
+Switch system proxy mode=切換系統代理模式
+Switch share over LAN=切換區域網路共享
 Show Logs=顯示日誌
-Switch to prev server=切换上個伺服器
-Switch to next server=切换下個伺服器
+Switch to prev server=切換上個伺服器
+Switch to next server=切換下個伺服器
 Reg All=註冊全部捷徑鍵
 
 # Messages
