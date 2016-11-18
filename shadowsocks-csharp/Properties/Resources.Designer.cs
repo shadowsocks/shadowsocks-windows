@@ -114,6 +114,16 @@ namespace Shadowsocks.Properties {
         /// <summary>
         ///   查找 System.Byte[] 类型的本地化资源。
         /// </summary>
+        internal static byte[] libsscrypto64_dll {
+            get {
+                object obj = ResourceManager.GetObject("libsscrypto64_dll", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   查找 System.Byte[] 类型的本地化资源。
+        /// </summary>
         internal static byte[] mgwz_dll {
             get {
                 object obj = ResourceManager.GetObject("mgwz_dll", resourceCulture);
@@ -249,7 +259,7 @@ namespace Shadowsocks.Properties {
         ///Update Local PAC from GFWList=從 GFWList 更新本地 PAC
         ///Edit User Rule for GFWList...=編輯 GFWList 的用戶規則...
         ///Show QRCode...=顯示 QR 碼...
-        ///Scan QRCode from Screen [字符串的其余部分被截断]&quot;; 的本地化字符串。
+        ///S [字符串的其余部分被截断]&quot;; 的本地化字符串。
         /// </summary>
         internal static string zh_tw {
             get {

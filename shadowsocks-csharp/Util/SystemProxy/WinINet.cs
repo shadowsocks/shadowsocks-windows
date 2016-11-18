@@ -93,7 +93,7 @@ namespace Shadowsocks.Util.SystemProxy
             foreach (INTERNET_PER_CONN_OPTION eachOption in _optionlist)
             {
                 Marshal.StructureToPtr(eachOption, current, false);
-                current = (IntPtr)((int)current + Marshal.SizeOf(eachOption));
+                current = (IntPtr)(current.ToInt64() + Marshal.SizeOf(eachOption));
             }
 
             // Initialize a INTERNET_PER_CONN_OPTION_LIST instance.
