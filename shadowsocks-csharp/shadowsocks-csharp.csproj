@@ -195,13 +195,8 @@
     <Compile Include="Util\Sockets\LineReader.cs" />
     <Compile Include="Util\Sockets\SocketUtil.cs" />
     <Compile Include="Util\Sockets\WrappedSocket.cs" />
-    <Compile Include="Util\SystemProxy\INTERNET_OPTION.cs" />
-    <Compile Include="Util\SystemProxy\INTERNET_PER_CONN_OPTION.cs" />
-    <Compile Include="Util\SystemProxy\INTERNET_PER_CONN_OPTION_LIST.cs" />
-    <Compile Include="Util\SystemProxy\NativeMethods.cs" />
     <Compile Include="Util\SystemProxy\ProxyException.cs" />
-    <Compile Include="Util\SystemProxy\RAS.cs" />
-    <Compile Include="Util\SystemProxy\WinINet.cs" />
+    <Compile Include="Util\SystemProxy\Sysproxy.cs" />
     <Compile Include="Util\Util.cs" />
     <Compile Include="Util\ViewUtils.cs" />
     <Compile Include="View\ConfigForm.cs">
@@ -294,6 +289,8 @@
     <None Include="Data\proxy.pac.txt.gz" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Data\sysproxy.exe.gz" />
+    <None Include="Data\sysproxy64.exe.gz" />
     <None Include="packages.config" />
     <None Include="Properties\DataSources\Shadowsocks.Model.StatisticsStrategyConfiguration.datasource" />
     <None Include="Properties\Settings.settings">
