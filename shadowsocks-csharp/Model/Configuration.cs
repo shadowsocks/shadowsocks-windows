@@ -55,6 +55,8 @@ namespace Shadowsocks.Model
                 Configuration config = JsonConvert.DeserializeObject<Configuration>(configContent);
                 config.isDefault = false;
 
+                if (config.configs == null)
+                    config.configs = new List<Server>();
                 if (config.configs.Count == 0)
                     config.configs.Add(GetDefaultServer());
                 if (config.localPort == 0)
