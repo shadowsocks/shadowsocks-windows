@@ -186,7 +186,6 @@ namespace Shadowsocks.Controller
         public void ToggleEnable(bool enabled)
         {
             _config.enabled = enabled;
-            UpdateSystemProxy();
             SaveConfig(_config);
             if (EnableStatusChanged != null)
             {
@@ -197,7 +196,6 @@ namespace Shadowsocks.Controller
         public void ToggleGlobal(bool global)
         {
             _config.global = global;
-            UpdateSystemProxy();
             SaveConfig(_config);
             if (EnableGlobalChanged != null)
             {
@@ -327,7 +325,6 @@ namespace Shadowsocks.Controller
         public void SavePACUrl(string pacUrl)
         {
             _config.pacUrl = pacUrl;
-            UpdateSystemProxy();
             SaveConfig(_config);
             if (ConfigChanged != null)
             {
@@ -338,7 +335,6 @@ namespace Shadowsocks.Controller
         public void UseOnlinePAC(bool useOnlinePac)
         {
             _config.useOnlinePac = useOnlinePac;
-            UpdateSystemProxy();
             SaveConfig(_config);
             if (ConfigChanged != null)
             {
