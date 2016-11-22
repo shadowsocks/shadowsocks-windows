@@ -6,6 +6,7 @@ using System.Windows.Forms;
 using Microsoft.Win32;
 
 using Shadowsocks.Controller;
+using Shadowsocks.Controller.Hotkeys;
 using Shadowsocks.Util;
 using Shadowsocks.View;
 

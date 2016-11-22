@@ -139,6 +139,7 @@
     <Compile Include="3rd\zxing\ResultPoint.cs" />
     <Compile Include="3rd\zxing\ResultPointCallback.cs" />
     <Compile Include="3rd\zxing\WriterException.cs" />
+    <Compile Include="Controller\System\Hotkeys\HotkeyCallbacks.cs" />
     <Compile Include="Model\HotKeyConfig.cs" />
     <Compile Include="Model\ProxyConfig.cs" />
     <Compile Include="Properties\Settings.Designer.cs">
@@ -186,7 +187,7 @@
     <Compile Include="Proxy\Socks5Proxy.cs" />
     <Compile Include="Settings.cs" />
     <Compile Include="StringEx.cs" />
-    <Compile Include="Util\Hotkeys.cs" />
+    <Compile Include="Controller\System\Hotkeys\Hotkeys.cs" />
     <Compile Include="Util\ProcessManagement\Job.cs" />
     <Compile Include="Util\ProcessManagement\ThreadUtil.cs" />
     <Compile Include="Encryption\RNG.cs" />

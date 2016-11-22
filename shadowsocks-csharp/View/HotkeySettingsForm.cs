@@ -7,6 +7,7 @@ using System.Text;
 using System.Windows.Forms;
 
 using Shadowsocks.Controller;
+using Shadowsocks.Controller.Hotkeys;
 using Shadowsocks.Model;
 using Shadowsocks.Properties;
 using Shadowsocks.Util;
@@ -243,81 +244,7 @@ namespace Shadowsocks.View
             _controller.SaveHotkeyConfig(_modifiedConfig);
         }
 
-        #region Callbacks
 
-        private void SwitchSystemProxyCallback()
-        {
-            bool enabled = _controller.GetConfigurationCopy().enabled;
-            _controller.ToggleEnable(!enabled);
-        }
-
-        private void SwitchProxyModeCallback()
-        {
-            var config = _controller.GetConfigurationCopy();
-            if (config.enabled == false) return;
-            var currStatus = config.global;
-            _controller.ToggleGlobal(!currStatus);
-        }
-
-        private void SwitchAllowLanCallback()
-        {
-            var status = _controller.GetConfigurationCopy().shareOverLan;
-            _controller.ToggleShareOverLAN(!status);
-        }
-
-        private void ShowLogsCallback()
-        {
-            // Get the current MenuViewController in this program via reflection
-            FieldInfo fi = Assembly.GetExecutingAssembly().GetType("Shadowsocks.Program")
-                .GetField("_viewController",
-                    BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.IgnoreCase);
-            // To retrieve the value of a static field, pass null here
-            var mvc = fi.GetValue(null) as MenuViewController;
-            mvc.ShowLogForm_HotKey();
-        }
-
-        private void ServerMoveUpCallback()
-        {
-            int currIndex;
-            int serverCount;
-            GetCurrServerInfo(out currIndex, out serverCount);
-            if (currIndex - 1 < 0)
-            {
-                // revert to last server
-                currIndex = serverCount - 1;
-            }
-            else
-            {
-                currIndex -= 1;
-            }
-            _controller.SelectServerIndex(currIndex);
-        }
-
-        private void ServerMoveDownCallback()
-        {
-            int currIndex;
-            int serverCount;
-            GetCurrServerInfo(out currIndex, out serverCount);
-            if (currIndex + 1 == serverCount)
-            {
-                // revert to first server
-                currIndex = 0;
-            }
-            else
-            {
-                currIndex += 1;
-            }
-            _controller.SelectServerIndex(currIndex);
-        }
-
-        private void GetCurrServerInfo(out int currIndex, out int serverCount)
-        {
-            var currConfig = _controller.GetCurrentConfiguration();
-            currIndex = currConfig.index;
-            serverCount = currConfig.configs.Count;
-        }
-
-        #endregion
 
         #region Prepare hotkey
 
@@ -343,7 +270,7 @@ namespace Shadowsocks.View
             var labelName = rawName + "Label";
             var callbackName = rawName + "Callback";
 
-            var callback = GetDelegateViaMethodName(this.GetType(), callbackName);
+            var callback = GetDelegateViaMethodName(callbackName);
             if (callback == null)
             {
                 throw new Exception($"{callbackName} not found");
@@ -381,15 +308,12 @@ namespace Shadowsocks.View
         /// <param name="type"></param>
         /// <param name="methodname"></param>
         /// <returns></returns>
-        private Delegate GetDelegateViaMethodName(Type type, string methodname)
+        private Delegate GetDelegateViaMethodName(string methodname)
         {
-            if (type == null) throw new ArgumentNullException(nameof(type));
             if (methodname.IsNullOrEmpty()) throw new ArgumentException(nameof(methodname));
-            //HotkeySettingsForm form = new HotkeySettingsForm(_controller);
-            Type delegateType = Type.GetType("Shadowsocks.Util.HotKeys").GetNestedType("HotKeyCallBackHandler");
-            MethodInfo dynMethod = type.GetMethod(methodname,
+            MethodInfo dynMethod = typeof(HotkeyCallbacks).GetMethod(methodname,
                 BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.IgnoreCase);
-            return dynMethod == null ? null : Delegate.CreateDelegate(delegateType, this, dynMethod);
+            return dynMethod == null ? null : Delegate.CreateDelegate(typeof(HotKeys.HotKeyCallBackHandler), HotkeyCallbacks.Instance, dynMethod);
         }
 
         #endregion
