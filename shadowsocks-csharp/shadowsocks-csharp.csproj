@@ -202,6 +202,7 @@
     <Compile Include="Util\SystemProxy\RAS.cs" />
     <Compile Include="Util\SystemProxy\WinINet.cs" />
     <Compile Include="Util\Util.cs" />
+    <Compile Include="Util\ViewUtils.cs" />
     <Compile Include="View\ConfigForm.cs">
       <SubType>Form</SubType>
     </Compile>

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Reflection;
-using Shadowsocks.View;
 
 namespace Shadowsocks.Controller.Hotkeys
 {
@@ -67,13 +66,7 @@ namespace Shadowsocks.Controller.Hotkeys
 
         private void ShowLogsCallback()
         {
-            // Get the current MenuViewController in this program via reflection
-            FieldInfo fi = Assembly.GetExecutingAssembly().GetType("Shadowsocks.Program")
-                .GetField("_viewController",
-                    BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.IgnoreCase);
-            // To retrieve the value of a static field, pass null here
-            var mvc = fi.GetValue(null) as MenuViewController;
-            mvc.ShowLogForm_HotKey();
+            Program.MenuController.ShowLogForm_HotKey();
         }
 
         private void ServerMoveUpCallback()

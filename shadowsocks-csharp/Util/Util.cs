@@ -23,7 +23,7 @@ namespace Shadowsocks.Util
         }
     }
 
-    public class Utils
+    public static class Utils
     {
         private static bool? _portableMode;
         private static string TempPath = null;

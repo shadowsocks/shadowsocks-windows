@@ -16,23 +16,18 @@ namespace Shadowsocks.View
 {
     public partial class HotkeySettingsForm : Form
     {
-        private ShadowsocksController _controller;
+        private readonly ShadowsocksController _controller;
 
         // this is a copy of configuration that we are working on
         private HotkeyConfig _modifiedConfig;
 
-        private StringBuilder _sb = new StringBuilder();
-
-        private IEnumerable<TextBox> _allTextBoxes;
-
-        private Label _lb = null;
-        private HotKeys.HotKeyCallBackHandler _callBack = null;
+        private readonly IEnumerable<TextBox> _allTextBoxes;
 
         public HotkeySettingsForm(ShadowsocksController controller)
         {
             InitializeComponent();
             UpdateTexts();
-            this.Icon = Icon.FromHandle(Resources.ssw128.GetHicon());
+            Icon = Icon.FromHandle(Resources.ssw128.GetHicon());
 
             _controller = controller;
             _controller.ConfigChanged += controller_ConfigChanged;
@@ -40,7 +35,7 @@ namespace Shadowsocks.View
             LoadCurrentConfiguration();
 
             // get all textboxes belong to this form
-            _allTextBoxes = HotKeys.GetChildControls<TextBox>(this.tableLayoutPanel1);
+            _allTextBoxes = tableLayoutPanel1.GetChildControls<TextBox>();
             if (!_allTextBoxes.Any()) throw new Exception("Cannot get all textboxes");
         }
 
@@ -77,7 +72,7 @@ namespace Shadowsocks.View
             btnOK.Text = I18N.GetString("OK");
             btnCancel.Text = I18N.GetString("Cancel");
             btnRegisterAll.Text = I18N.GetString("Reg All");
-            this.Text = I18N.GetString("Edit Hotkeys...");
+            Text = I18N.GetString("Edit Hotkeys...");
         }
 
         /// <summary>
@@ -85,7 +80,7 @@ namespace Shadowsocks.View
         /// </summary>
         private void HotkeyDown(object sender, KeyEventArgs e)
         {
-            _sb.Length = 0;
+            StringBuilder sb = new StringBuilder();
             //Combination key only
             if (e.Modifiers != 0)
             {
@@ -93,15 +88,15 @@ namespace Shadowsocks.View
                 // Windows key is reserved by operating system, we deny this key.
                 if (e.Control)
                 {
-                    _sb.Append("Ctrl+");
+                    sb.Append("Ctrl+");
                 }
                 if (e.Alt)
                 {
-                    _sb.Append("Alt+");
+                    sb.Append("Alt+");
                 }
                 if (e.Shift)
                 {
-                    _sb.Append("Shift+");
+                    sb.Append("Shift+");
                 }
 
                 Keys keyvalue = (Keys) e.KeyValue;
@@ -109,18 +104,18 @@ namespace Shadowsocks.View
                     (keyvalue >= Keys.A && keyvalue <= Keys.Z) ||
                     (keyvalue >= Keys.F1 && keyvalue <= Keys.F12))
                 {
-                    _sb.Append(e.KeyCode);
+                    sb.Append(e.KeyCode);
                 }
                 else if (keyvalue >= Keys.D0 && keyvalue <= Keys.D9)
                 {
-                    _sb.Append('D').Append((char) e.KeyValue);
+                    sb.Append('D').Append((char) e.KeyValue);
                 }
                 else if (keyvalue >= Keys.NumPad0 && keyvalue <= Keys.NumPad9)
                 {
-                    _sb.Append("NumPad").Append((char) (e.KeyValue - 48));
+                    sb.Append("NumPad").Append((char) (e.KeyValue - 48));
                 }
             }
-            ((TextBox) sender).Text = _sb.ToString();
+            ((TextBox) sender).Text = sb.ToString();
         }
 
         /// <summary>
@@ -128,8 +123,8 @@ namespace Shadowsocks.View
         /// </summary>
         private void HotkeyUp(object sender, KeyEventArgs e)
         {
-            TextBox tb = sender as TextBox;
-            string content = tb.Text.TrimEnd();
+            var tb = (TextBox) sender;
+            var content = tb.Text.TrimEnd();
             if (content.Length >= 1 && content[content.Length - 1] == '+')
             {
                 tb.Text = "";
@@ -138,7 +133,7 @@ namespace Shadowsocks.View
 
         private void TextBox_TextChanged(object sender, EventArgs e)
         {
-            TextBox tb = sender as TextBox;
+            var tb = (TextBox) sender;
 
             if (tb.Text == "")
             {
@@ -149,15 +144,17 @@ namespace Shadowsocks.View
 
         private void UnregHotkey(TextBox tb)
         {
+            HotKeys.HotKeyCallBackHandler callBack;
+            Label lb;
 
-            PrepareForHotkey(tb, out _callBack, out _lb);
+            PrepareForHotkey(tb, out callBack, out lb);
 
-            UnregPrevHotkey(_callBack);
+            UnregPrevHotkey(callBack);
         }
 
         private void CancelButton_Click(object sender, EventArgs e)
         {
-            this.Close();
+            Close();
         }
 
         private void OKButton_Click(object sender, EventArgs e)
@@ -178,7 +175,7 @@ namespace Shadowsocks.View
 
             // All check passed, saving
             SaveConfig();
-            this.Close();
+            Close();
         }
 
         private void RegisterAllButton_Click(object sender, EventArgs e)
@@ -203,9 +200,12 @@ namespace Shadowsocks.View
                 return false;
             }
 
-            PrepareForHotkey(tb, out _callBack, out _lb);
+            HotKeys.HotKeyCallBackHandler callBack;
+            Label lb;
 
-            UnregPrevHotkey(_callBack);
+            PrepareForHotkey(tb, out callBack, out lb);
+
+            UnregPrevHotkey(callBack);
 
             // try to register keys
             // if already registered by other progs
@@ -218,8 +218,8 @@ namespace Shadowsocks.View
             //         or change to another one
             // Transparent without color: first run or empty config
 
-            bool regResult = HotKeys.Regist(hotkey, _callBack);
-            _lb.BackColor = regResult ? Color.Green : Color.Yellow;
+            bool regResult = HotKeys.Regist(hotkey, callBack);
+            lb.BackColor = regResult ? Color.Green : Color.Yellow;
             return regResult;
         }
 
@@ -277,7 +277,7 @@ namespace Shadowsocks.View
             }
             cb = callback as HotKeys.HotKeyCallBackHandler;
 
-            object label = GetFieldViaName(this.GetType(), labelName, this);
+            var label = GetFieldViaName(GetType(), labelName, this);
             if (label == null)
             {
                 throw new Exception($"{labelName} not found");

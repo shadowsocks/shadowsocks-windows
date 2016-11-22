@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
-using System.Windows.Forms;
 using System.Windows.Input;
 using GlobalHotKey;
 
@@ -170,12 +169,6 @@ namespace Shadowsocks.Controller.Hotkeys
             _hotKeyManager.Unregister(key);
             if(_keymap.ContainsKey(key))
                 _keymap.Remove(key);
-        }
-
-        public static IEnumerable<TControl> GetChildControls<TControl>(this Control control) where TControl : Control
-        {
-            var children = control.Controls.Count > 0 ? control.Controls.OfType<TControl>() : Enumerable.Empty<TControl>();
-            return children.SelectMany(c => GetChildControls<TControl>(c)).Concat(children);
         }
     }
 }
