@@ -82,7 +82,7 @@ namespace Shadowsocks
 #endif
                 _controller = new ShadowsocksController();
                 _viewController = new MenuViewController(_controller);
-                HotKeys.Init();
+                HotKeys.Init(_controller);
                 _controller.Start();
                 Application.Run();
             }

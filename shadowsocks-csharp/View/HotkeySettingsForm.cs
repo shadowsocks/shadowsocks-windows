@@ -270,7 +270,7 @@ namespace Shadowsocks.View
             var labelName = rawName + "Label";
             var callbackName = rawName + "Callback";
 
-            var callback = GetDelegateViaMethodName(callbackName);
+            var callback = HotkeyCallbacks.GetCallback(callbackName);
             if (callback == null)
             {
                 throw new Exception($"{callbackName} not found");
@@ -300,20 +300,6 @@ namespace Shadowsocks.View
             FieldInfo fi = type.GetField(name,
                 BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.IgnoreCase | BindingFlags.Static);
             return fi == null ? null : fi.GetValue(obj);
-        }
-
-        /// <summary>
-        /// Create hotkey callback handler delegate based on callback name
-        /// </summary>
-        /// <param name="type"></param>
-        /// <param name="methodname"></param>
-        /// <returns></returns>
-        private Delegate GetDelegateViaMethodName(string methodname)
-        {
-            if (methodname.IsNullOrEmpty()) throw new ArgumentException(nameof(methodname));
-            MethodInfo dynMethod = typeof(HotkeyCallbacks).GetMethod(methodname,
-                BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.IgnoreCase);
-            return dynMethod == null ? null : Delegate.CreateDelegate(typeof(HotKeys.HotKeyCallBackHandler), HotkeyCallbacks.Instance, dynMethod);
         }
 
         #endregion

@@ -1,11 +1,11 @@
-﻿using System.Reflection;
+﻿using System;
+using System.Reflection;
 using Shadowsocks.View;
 
 namespace Shadowsocks.Controller.Hotkeys
 {
     public class HotkeyCallbacks
     {
-        public static HotkeyCallbacks Instance { get; private set; }
 
         public static void InitInstance(ShadowsocksController controller)
         {
@@ -17,12 +17,31 @@ namespace Shadowsocks.Controller.Hotkeys
             Instance = new HotkeyCallbacks(controller);
         }
 
+        /// <summary>
+        /// Create hotkey callback handler delegate based on callback name
+        /// </summary>
+        /// <param name="methodname"></param>
+        /// <returns></returns>
+        public static Delegate GetCallback(string methodname)
+        {
+            if (methodname.IsNullOrEmpty()) throw new ArgumentException(nameof(methodname));
+            MethodInfo dynMethod = typeof(HotkeyCallbacks).GetMethod(methodname,
+                BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.IgnoreCase);
+            return dynMethod == null ? null : Delegate.CreateDelegate(typeof(HotKeys.HotKeyCallBackHandler), Instance, dynMethod);
+        }
+
+        #region Singleton 
+        
+        private static HotkeyCallbacks Instance { get; set; }
+
         private readonly ShadowsocksController _controller;
 
         private HotkeyCallbacks(ShadowsocksController controller)
         {
             _controller = controller;
         }
+
+        #endregion
 
         #region Callbacks
 
