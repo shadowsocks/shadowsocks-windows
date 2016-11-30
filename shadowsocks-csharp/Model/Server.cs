@@ -1,7 +1,7 @@
 using System;
 using System.Text;
 using System.Text.RegularExpressions;
-
+using System.Web;
 using Shadowsocks.Controller;
 
 namespace Shadowsocks.Model
@@ -10,7 +10,7 @@ namespace Shadowsocks.Model
     public class Server
     {
         public static readonly Regex
-            UrlFinder = new Regex("^(?i)ss://([A-Za-z0-9+-/=_]+)(#.+)?$",
+            UrlFinder = new Regex("^(?i)ss://([A-Za-z0-9+-/=_]+)(#(.+))?$",
                                   RegexOptions.IgnoreCase | RegexOptions.Compiled),
             DetailsParser = new Regex("^((?<method>.+?)(?<auth>-auth)??:(?<password>.*)@(?<hostname>.+?)" +
                                       ":(?<port>\\d+?))$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
@@ -79,9 +79,9 @@ namespace Shadowsocks.Model
             var match = UrlFinder.Match(ssURL);
             if (!match.Success) throw new FormatException();
             var base64 = match.Groups[1].Value;
-            var tag = match.Groups[2].Value;
+            var tag = match.Groups[3].Value;
             if (!tag.IsNullOrEmpty())
-                remarks = tag.Substring(1).Trim();
+                remarks = HttpUtility.UrlDecode(tag, Encoding.UTF8);
             match = DetailsParser.Match(Encoding.UTF8.GetString(Convert.FromBase64String(
                 base64.PadRight(base64.Length + (4 - base64.Length % 4) % 4, '='))));
             method = match.Groups["method"].Value;
