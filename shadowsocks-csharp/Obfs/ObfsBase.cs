@@ -78,6 +78,8 @@ namespace Shadowsocks.Obfs
                 return 19;
             if (head_type == 3)
                 return 4 + plaindata[1];
+            if (head_type == 2)
+                return 4 + plaindata[1];
             return defaultValue;
         }
         public long getSentLength()

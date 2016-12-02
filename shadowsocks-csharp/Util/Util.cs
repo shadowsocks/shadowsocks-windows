@@ -344,6 +344,60 @@ namespace Shadowsocks.Util
             return ipAddress;
         }
 
+        public static byte[] BinarySHA512()
+        {
+            try
+            {
+                string filePath = System.Windows.Forms.Application.ExecutablePath;
+                using (FileStream fs = new FileStream(filePath, FileMode.Open, FileAccess.Read))
+                {
+                    using (BufferedStream bs = new BufferedStream(fs))
+                    {
+                        using (SHA512Managed sha = new SHA512Managed())
+                        {
+                            return sha.ComputeHash(bs);
+                        }
+                    }
+                }
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        public static string Hex(byte[] hash)
+        {
+            StringBuilder formatted = new StringBuilder(2 * hash.Length);
+            foreach (byte b in hash)
+            {
+                formatted.AppendFormat("{0:X2}", b);
+            }
+            return formatted.ToString();
+        }
+
+        public static string BinarySHA512hex()
+        {
+            try
+            {
+                string filePath = System.Windows.Forms.Application.ExecutablePath;
+                using (FileStream fs = new FileStream(filePath, FileMode.Open, FileAccess.Read))
+                {
+                    using (BufferedStream bs = new BufferedStream(fs))
+                    {
+                        using (SHA512Managed sha = new SHA512Managed())
+                        {
+                            return Hex(sha.ComputeHash(bs));
+                        }
+                    }
+                }
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
         public static int GetDpiMul()
         {
             int dpi;

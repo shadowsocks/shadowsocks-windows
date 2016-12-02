@@ -353,7 +353,7 @@
             // 
             this.RemarksTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             this.RemarksTextBox.Location = new System.Drawing.Point(108, 215);
-            this.RemarksTextBox.MaxLength = 32;
+            this.RemarksTextBox.MaxLength = 256;
             this.RemarksTextBox.Name = "RemarksTextBox";
             this.RemarksTextBox.Size = new System.Drawing.Size(233, 23);
             this.RemarksTextBox.TabIndex = 10;
@@ -514,7 +514,7 @@
             // 
             this.TextGroup.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             this.TextGroup.Location = new System.Drawing.Point(108, 244);
-            this.TextGroup.MaxLength = 32;
+            this.TextGroup.MaxLength = 64;
             this.TextGroup.Name = "TextGroup";
             this.TextGroup.Size = new System.Drawing.Size(233, 23);
             this.TextGroup.TabIndex = 12;

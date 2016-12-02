@@ -25,9 +25,12 @@ namespace Shadowsocks.View
 
         private ShadowsocksController controller;
         private UpdateChecker updateChecker;
+        private BinChecker binChecker;
 
         private NotifyIcon _notifyIcon;
         private ContextMenu contextMenu1;
+
+        private MenuItem versionItem;
 
         private MenuItem enableItem;
         private MenuItem PACModeItem;
@@ -48,6 +51,7 @@ namespace Shadowsocks.View
         private ConfigForm configForm;
         private SettingsForm settingsForm;
         private ServerLogForm serverLogForm;
+        private PortSettingsForm portMapForm;
         private string _urlToOpen;
         private System.Timers.Timer timerDelayCheckUpdate;
 
@@ -74,13 +78,15 @@ namespace Shadowsocks.View
             _notifyIcon.MouseClick += notifyIcon1_Click;
             //_notifyIcon.MouseDoubleClick += notifyIcon1_DoubleClick;
 
-            this.updateChecker = new UpdateChecker();
+            updateChecker = new UpdateChecker();
             updateChecker.NewVersionFound += updateChecker_NewVersionFound;
+            binChecker = new BinChecker();
+            binChecker.CheckCodeFound += binChecker_callback;
 
             LoadCurrentConfiguration();
 
             Configuration cfg = controller.GetConfiguration();
-            if (cfg.configs.Count == 1 && cfg.configs[0].server == Configuration.GetDefaultServer().server)
+            if (cfg.isDefaultConfig())
             {
                 ShowConfigForm(false);
             }
@@ -92,18 +98,35 @@ namespace Shadowsocks.View
 
         private void timer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
-            updateChecker.CheckUpdate(controller.GetConfiguration());
             if (timerDelayCheckUpdate != null)
             {
                 if (timerDelayCheckUpdate.Interval <= 1000.0 * 30)
                 {
                     timerDelayCheckUpdate.Interval = 1000.0 * 60 * 5;
+                    if (BinChecker.CheckBin())
+                    {
+                        versionItem.Text = "Version " + UpdateChecker.Version + " OK";
+                    }
+                    else
+                    {
+                        controller.Stop();
+                        if (timerDelayCheckUpdate != null)
+                        {
+                            timerDelayCheckUpdate.Elapsed -= timer_Elapsed;
+                            timerDelayCheckUpdate.Stop();
+                            timerDelayCheckUpdate = null;
+                        }
+                        _notifyIcon.Visible = false;
+                        Application.Exit();
+                    }
                 }
                 else
                 {
                     timerDelayCheckUpdate.Interval = 1000.0 * 60 * 60 * 2;
                 }
             }
+            updateChecker.CheckUpdate(controller.GetConfiguration());
+            binChecker.CheckUpdate(controller.GetConfiguration());
         }
 
         void controller_Errored(object sender, System.IO.ErrorEventArgs e)
@@ -117,61 +140,68 @@ namespace Shadowsocks.View
             Graphics graphics = Graphics.FromHwnd(IntPtr.Zero);
             dpi = (int)graphics.DpiX;
             graphics.Dispose();
-            Bitmap icon = null;
-            if (dpi < 97)
-            {
-                // dpi = 96;
-                icon = Resources.ss16;
-            }
-            else if (dpi < 121)
-            {
-                // dpi = 120;
-                icon = Resources.ss20;
-            }
-            else
-            {
-                icon = Resources.ss24;
-            }
             Configuration config = controller.GetConfiguration();
             bool enabled = config.sysProxyMode != (int)ProxyMode.NoModify;
             bool global = config.sysProxyMode == (int)ProxyMode.Global;
             bool random = config.random;
-            double mul_a = 1.0, mul_r = 1.0, mul_g = 1.0, mul_b = 1.0;
-            if (!enabled)
-            {
-                mul_g = 0.4;
-            }
-            else if (!global)
-            {
-                mul_b = 0.4;
-                mul_g = 0.8;
-            }
-            if (!random)
-            {
-                mul_r = 0.4;
-            }
 
+            Bitmap icon = null;
+            try
             {
-                Bitmap iconCopy = new Bitmap(icon);
-                for (int x = 0; x < iconCopy.Width; x++)
+                icon = new Bitmap("icon.png");
+            }
+            catch
+            {
+                if (dpi < 97)
                 {
-                    for (int y = 0; y < iconCopy.Height; y++)
-                    {
-                        Color color = icon.GetPixel(x, y);
-                        iconCopy.SetPixel(x, y,
-                            Color.FromArgb((byte)(color.A * mul_a),
-                            ((byte)(color.R * mul_r)),
-                            ((byte)(color.G * mul_g)),
-                            ((byte)(color.B * mul_b))));
-                    }
+                    // dpi = 96;
+                    icon = Resources.ss16;
                 }
-                icon = iconCopy;
+                else if (dpi < 121)
+                {
+                    // dpi = 120;
+                    icon = Resources.ss20;
+                }
+                else
+                {
+                    icon = Resources.ss24;
+                }
+                double mul_a = 1.0, mul_r = 1.0, mul_g = 1.0, mul_b = 1.0;
+                if (!enabled)
+                {
+                    mul_g = 0.4;
+                }
+                else if (!global)
+                {
+                    mul_b = 0.4;
+                    mul_g = 0.8;
+                }
+                if (!random)
+                {
+                    mul_r = 0.4;
+                }
+
+                {
+                    Bitmap iconCopy = new Bitmap(icon);
+                    for (int x = 0; x < iconCopy.Width; x++)
+                    {
+                        for (int y = 0; y < iconCopy.Height; y++)
+                        {
+                            Color color = icon.GetPixel(x, y);
+                            iconCopy.SetPixel(x, y,
+                                Color.FromArgb((byte)(color.A * mul_a),
+                                ((byte)(color.R * mul_r)),
+                                ((byte)(color.G * mul_g)),
+                                ((byte)(color.B * mul_b))));
+                        }
+                    }
+                    icon = iconCopy;
+                }
             }
             _notifyIcon.Icon = Icon.FromHandle(icon.GetHicon());
 
             // we want to show more details but notify icon title is limited to 63 characters
-            string text = UpdateChecker.Name + " " + UpdateChecker.FullVersion + "\n" +
-                (enabled ?
+            string text = (enabled ?
                     I18N.GetString("System Proxy On: ") + (global ? I18N.GetString("Global") : I18N.GetString("PAC")) :
                     String.Format(I18N.GetString("Running: Port {0}"), config.localPort))  // this feedback is very important because they need to know Shadowsocks is running
                 + "\n" + config.GetCurrentServer().FriendlyName();
@@ -191,6 +221,7 @@ namespace Shadowsocks.View
         private void LoadMenu()
         {
             this.contextMenu1 = new ContextMenu(new MenuItem[] {
+                versionItem = CreateMenuItem("Version checking", new EventHandler(this.VersionItem_Click)),
                 modeItem = CreateMenuGroup("Mode", new MenuItem[] {
                     enableItem = CreateMenuItem("Disable system proxy", new EventHandler(this.EnableItem_Click)),
                     PACModeItem = CreateMenuItem("PAC", new EventHandler(this.PACModeItem_Click)),
@@ -225,9 +256,9 @@ namespace Shadowsocks.View
                     sameHostForSameTargetItem = CreateMenuItem("Same host for same address", new EventHandler(this.SelectSameHostForSameTargetItem_Click)),
                     httpWhiteListItem = CreateMenuItem("Enable domain white list(http proxy only)", new EventHandler(this.HttpWhiteListItem_Click)),
                     new MenuItem("-"),
+                    CreateMenuItem("Port settings...", new EventHandler(this.ShowPortMapItem_Click)),
                     CreateMenuItem("Server statistic...", new EventHandler(this.ShowServerLogItem_Click)),
                     CreateMenuItem("Disconnect current", new EventHandler(this.DisconnectCurrent_Click)),
-                    //CreateMenuItem("Show QRCode...", new EventHandler(this.QRCodeItem_Click)),
                 }),
                 SelectRandomItem = CreateMenuItem("Load balance", new EventHandler(this.SelectRandomItem_Click)),
                 CreateMenuItem("Global settings...", new EventHandler(this.Setting_Click)),
@@ -243,6 +274,7 @@ namespace Shadowsocks.View
                     new MenuItem("-"),
                     CreateMenuItem("Feedback...", new EventHandler(this.FeedbackItem_Click)),
                     CreateMenuItem("Gen custom QRCode...", new EventHandler(this.showURLFromQRCode)),
+                    CreateMenuItem("Reset password...", new EventHandler(this.ResetPasswordItem_Click)),
                     new MenuItem("-"),
                     CreateMenuItem("About...", new EventHandler(this.AboutItem_Click)),
                     CreateMenuItem("Donate...", new EventHandler(this.DonateItem_Click)),
@@ -250,6 +282,7 @@ namespace Shadowsocks.View
                 CreateMenuItem("Quit", new EventHandler(this.Quit_Click))
             });
             this.UpdateItem.Visible = false;
+            versionItem.Enabled = false;
         }
 
         private void controller_ConfigChanged(object sender, EventArgs e)
@@ -326,6 +359,24 @@ namespace Shadowsocks.View
                 }
                 this.UpdateItem.Visible = true;
                 this.UpdateItem.Text = String.Format(I18N.GetString("New version {0} {1} available"), UpdateChecker.Name, updateChecker.LatestVersionNumber);
+            }
+        }
+
+        void binChecker_callback(object sender, EventArgs e)
+        {
+            BinChecker checker = sender as BinChecker;
+            string ver = checker.get_version();
+            if (ver != null)
+            {
+                int pos = ver.IndexOf('#');
+                if (pos > 0)
+                {
+                    versionItem.Text = ver.Substring(0, pos);
+                    versionItem.Tag = ver.Substring(pos + 1);
+                    versionItem.Enabled = true;
+                }
+                else
+                    versionItem.Text = ver;
             }
         }
 
@@ -477,6 +528,27 @@ namespace Shadowsocks.View
             }
         }
 
+        private void ShowPortMapForm()
+        {
+            if (portMapForm != null)
+            {
+                portMapForm.Activate();
+                portMapForm.Update();
+                if (portMapForm.WindowState == FormWindowState.Minimized)
+                {
+                    portMapForm.WindowState = FormWindowState.Normal;
+                }
+            }
+            else
+            {
+                portMapForm = new PortSettingsForm(controller);
+                portMapForm.Show();
+                portMapForm.Activate();
+                portMapForm.BringToFront();
+                portMapForm.FormClosed += portMapForm_FormClosed;
+            }
+        }
+
         private void ShowServerLogForm()
         {
             if (serverLogForm != null)
@@ -513,6 +585,11 @@ namespace Shadowsocks.View
         void serverLogForm_FormClosed(object sender, FormClosedEventArgs e)
         {
             serverLogForm = null;
+        }
+
+        void portMapForm_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            portMapForm = null;
         }
 
         private void Config_Click(object sender, EventArgs e)
@@ -585,6 +662,13 @@ namespace Shadowsocks.View
             Process.Start("https://github.com/breakwa11/shadowsocks-rss/issues/new");
         }
 
+        private void ResetPasswordItem_Click(object sender, EventArgs e)
+        {
+            ResetPassword dlg = new ResetPassword();
+            dlg.Show();
+            dlg.Activate();
+        }
+
         private void AboutItem_Click(object sender, EventArgs e)
         {
             Process.Start("https://bit.no.com:43110/shadowsocksr.bit");
@@ -593,8 +677,8 @@ namespace Shadowsocks.View
 
         private void DonateItem_Click(object sender, EventArgs e)
         {
-            _notifyIcon.BalloonTipTitle = I18N.GetString("Why donate?");
-            _notifyIcon.BalloonTipText = I18N.GetString("You can not donate!");
+            _notifyIcon.BalloonTipTitle = I18N.GetString("Donate");
+            _notifyIcon.BalloonTipText = I18N.GetString("Please contract to breakwa11 to get more infomation");
             _notifyIcon.BalloonTipIcon = ToolTipIcon.Info;
             _notifyIcon.ShowBalloonTip(0);
         }
@@ -608,7 +692,7 @@ namespace Shadowsocks.View
             {
                 int SCA_key = GetAsyncKeyState(Keys.ShiftKey) < 0 ? 1 : 0;
                 SCA_key |= GetAsyncKeyState(Keys.ControlKey) < 0 ? 2 : 0;
-                SCA_key |= GetAsyncKeyState(Keys.Alt) < 0 ? 4 : 0;
+                SCA_key |= GetAsyncKeyState(Keys.Menu) < 0 ? 4 : 0;
                 if (SCA_key == 2)
                 {
                     ShowServerLogForm();
@@ -616,6 +700,10 @@ namespace Shadowsocks.View
                 else if (SCA_key == 1)
                 {
                     ShowSettingForm();
+                }
+                else if (SCA_key == 4)
+                {
+                    ShowPortMapForm();
                 }
                 else
                 {
@@ -626,6 +714,11 @@ namespace Shadowsocks.View
             {
                 ShowServerLogForm();
             }
+        }
+
+        private void VersionItem_Click(object sender, EventArgs e)
+        {
+            System.Diagnostics.Process.Start(versionItem.Tag as string);
         }
 
         private void EnableItem_Click(object sender, EventArgs e)
@@ -775,6 +868,12 @@ namespace Shadowsocks.View
                 _notifyIcon.ShowBalloonTip(0);
             }
         }
+
+        private void ShowPortMapItem_Click(object sender, EventArgs e)
+        {
+            ShowPortMapForm();
+        }
+
         private void ShowServerLogItem_Click(object sender, EventArgs e)
         {
             ShowServerLogForm();
@@ -797,7 +896,7 @@ namespace Shadowsocks.View
                 IDataObject iData = Clipboard.GetDataObject();
                 if (iData.GetDataPresent(DataFormats.Text))
                 {
-                    string[] urls = ((string)iData.GetData(DataFormats.Text)).Split(new string[] { "\r", "\n", "\t", " " }, StringSplitOptions.RemoveEmptyEntries);
+                    string[] urls = ((string)iData.GetData(DataFormats.Text)).Split(new string[] { "\r", "\n", "\t", " ", "|" }, StringSplitOptions.RemoveEmptyEntries);
                     foreach (string url in urls)
                     {
                         controller.AddServerBySSURL(url);
@@ -981,7 +1080,7 @@ namespace Shadowsocks.View
                                 //if (url.StartsWith("http://") || url.StartsWith("https://"))
                                 //    splash.FormClosed += openURLFromQRCode;
                                 //else
-                                    splash.FormClosed += showURLFromQRCode;
+                                splash.FormClosed += showURLFromQRCode;
                             }
                             else
                             {

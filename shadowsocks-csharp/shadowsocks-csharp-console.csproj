@@ -104,8 +104,10 @@
     <Compile Include="Encryption\IEncryptor.cs" />
     <Compile Include="Controller\PACServer.cs" />
     <Compile Include="Model\IPRangeSet.cs" />
+    <Compile Include="Model\LRUCache.cs" />
     <Compile Include="Model\Server.cs" />
     <Compile Include="Model\Configuration.cs" />
+    <Compile Include="Model\ServerSelectStrategy.cs" />
     <Compile Include="Model\ServerSpeedLog.cs" />
     <Compile Include="Obfs\Auth.cs" />
     <Compile Include="Obfs\HttpSimpleObfs.cs" />

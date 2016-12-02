@@ -271,7 +271,7 @@ namespace Shadowsocks.Controller
                     };
 
                     int local_port = ((IPEndPoint)conn.LocalEndPoint).Port;
-                    if (!_config.GetPortMapCache().ContainsKey(local_port))
+                    if (!_config.GetPortMapCache().ContainsKey(local_port) || _config.GetPortMapCache()[local_port].type != 0)
                     {
                         conn.BeginReceive(buf, 0, buf.Length, 0,
                             new AsyncCallback(ReceiveCallback), state);

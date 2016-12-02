@@ -42,9 +42,16 @@ namespace Shadowsocks.Encryption
                 {"aes-128-cbc", new EncryptorInfo(16, 16, false, CIPHER_AES)},
                 {"aes-192-cbc", new EncryptorInfo(24, 16, false, CIPHER_AES)},
                 {"aes-256-cbc", new EncryptorInfo(32, 16, false, CIPHER_AES)},
+
                 {"aes-128-cfb", new EncryptorInfo(16, 16, true, CIPHER_AES)},
                 {"aes-192-cfb", new EncryptorInfo(24, 16, true, CIPHER_AES)},
                 {"aes-256-cfb", new EncryptorInfo(32, 16, true, CIPHER_AES)},
+                {"aes-128-cfb8", new EncryptorInfo(16, 16, true, CIPHER_AES)},
+                {"aes-192-cfb8", new EncryptorInfo(24, 16, true, CIPHER_AES)},
+                {"aes-256-cfb8", new EncryptorInfo(32, 16, true, CIPHER_AES)},
+                {"aes-128-cfb1", new EncryptorInfo(16, 16, false, CIPHER_AES)},
+                {"aes-192-cfb1", new EncryptorInfo(24, 16, false, CIPHER_AES)},
+                {"aes-256-cfb1", new EncryptorInfo(32, 16, false, CIPHER_AES)},
                 {"aes-128-ctr", new EncryptorInfo(16, 16, true, CIPHER_AES)},
                 {"aes-192-ctr", new EncryptorInfo(24, 16, true, CIPHER_AES)},
                 {"aes-256-ctr", new EncryptorInfo(32, 16, true, CIPHER_AES)},
@@ -52,15 +59,15 @@ namespace Shadowsocks.Encryption
                 {"camellia-192-cfb", new EncryptorInfo(24, 16, true, CIPHER_CAMELLIA)},
                 {"camellia-256-cfb", new EncryptorInfo(32, 16, true, CIPHER_CAMELLIA)},
                 {"bf-cfb", new EncryptorInfo(16, 8, true, CIPHER_OTHER_CFB)},
-                {"cast5-cfb", new EncryptorInfo(16, 8, true, CIPHER_OTHER_CFB)},
+                {"cast5-cfb", new EncryptorInfo(16, 8, false, CIPHER_OTHER_CFB)},
                 //{"des-cfb", new EncryptorInfo(8, 8, true, CIPHER_OTHER_CFB)}, // weak
                 //{"des-ede3-cfb", new EncryptorInfo(24, 8, true, CIPHER_OTHER_CFB)},
-                {"idea-cfb", new EncryptorInfo(16, 8, true, CIPHER_OTHER_CFB)},
-                {"rc2-cfb", new EncryptorInfo(16, 8, true, CIPHER_OTHER_CFB)},
+                {"idea-cfb", new EncryptorInfo(16, 8, false, CIPHER_OTHER_CFB)},
+                {"rc2-cfb", new EncryptorInfo(16, 8, false, CIPHER_OTHER_CFB)},
                 {"rc4", new EncryptorInfo(16, 0, false, CIPHER_RC4)}, // weak
                 {"rc4-md5", new EncryptorInfo(16, 16, true, CIPHER_RC4)}, // weak
                 {"rc4-md5-6", new EncryptorInfo(16, 6, true, CIPHER_RC4)}, // weak
-                {"seed-cfb", new EncryptorInfo(16, 16, true, CIPHER_OTHER_CFB)},
+                {"seed-cfb", new EncryptorInfo(16, 16, false, CIPHER_OTHER_CFB)},
         };
 
         public static List<string> SupportedCiphers()

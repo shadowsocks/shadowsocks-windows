@@ -21,7 +21,14 @@ namespace Shadowsocks.Controller
 
         public const string Name = "ShadowsocksR";
         public const string Copyright = "Copyright © BreakWall 2016. Fork from Shadowsocks by clowwindy";
-        public const string Version = "3.9.6.2";
+        public const string Version = "4.0.0";
+#if !_DOTNET_4_0
+        public const string NetVer = "2.0";
+#elif !_CONSOLE
+        public const string NetVer = "4.0";
+#else
+        public const string NetVer = "";
+#endif
         public const string FullVersion = Version + "";
 
         private static bool UseProxy = true;

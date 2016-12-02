@@ -38,6 +38,7 @@ namespace Shadowsocks.View
         private int updateTick = 0;
         private int updateSize = 0;
         private int pendingUpdate = 0;
+        private string title_perfix = "";
         private ServerSpeedLogShow[] ServerSpeedLogList;
         private Thread workerThread;
         private AutoResetEvent workerEvent = new AutoResetEvent(false);
@@ -45,7 +46,17 @@ namespace Shadowsocks.View
         public ServerLogForm(ShadowsocksController controller)
         {
             this.controller = controller;
-            this.Icon = Icon.FromHandle(Resources.ssw128.GetHicon());
+            try
+            {
+                this.Icon = Icon.FromHandle((new Bitmap("icon.png")).GetHicon());
+                title_perfix = System.Windows.Forms.Application.StartupPath;
+                if (title_perfix.Length > 20)
+                    title_perfix = title_perfix.Substring(0, 20);
+            }
+            catch
+            {
+                this.Icon = Icon.FromHandle(Resources.ssw128.GetHicon());
+            }
             InitializeComponent();
 
             this.Width = 810;
@@ -72,6 +83,9 @@ namespace Shadowsocks.View
                     CreateMenuItem("&Disconnect All", new EventHandler(this.Disconnect_Click)),
                     CreateMenuItem("Clear &MaxSpeed", new EventHandler(this.ClearMaxSpeed_Click)),
                     this.clearItem = CreateMenuItem("&Clear", new EventHandler(this.ClearItem_Click)),
+                    new MenuItem("-"),
+                    CreateMenuItem("Clear &Selected Total", new EventHandler(this.ClearSelectedTotal_Click)),
+                    CreateMenuItem("Clear &Total", new EventHandler(this.ClearTotal_Click)),
                 }),
                 CreateMenuGroup("C&opy", new MenuItem[] {
                     CreateMenuItem("Copy current link", new EventHandler(this.copyLinkItem_Click)),
@@ -114,7 +128,7 @@ namespace Shadowsocks.View
 
         private void UpdateTitle()
         {
-            this.Text = I18N.GetString("ServerLog") + "("
+            this.Text = title_perfix + I18N.GetString("ServerLog") + "("
                 + (controller.GetCurrentConfiguration().shareOverLan ? "any" : "local") + ":" + controller.GetCurrentConfiguration().localPort.ToString()
                 + I18N.GetString(" Version") + UpdateChecker.FullVersion
                 + ")";
@@ -722,6 +736,28 @@ namespace Shadowsocks.View
             }
         }
 
+        private void ClearSelectedTotal_Click(object sender, EventArgs e)
+        {
+            Configuration config = controller.GetCurrentConfiguration();
+            if (config.index >= 0 && config.index < config.configs.Count)
+            {
+                try
+                {
+                    controller.ClearTransferTotal(config.configs[config.index].server);
+                }
+                catch { }
+            }
+        }
+
+        private void ClearTotal_Click(object sender, EventArgs e)
+        {
+            Configuration config = controller.GetCurrentConfiguration();
+            foreach (Server server in config.configs)
+            {
+                controller.ClearTransferTotal(server.server);
+            }
+        }
+
         private void ClearItem_Click(object sender, EventArgs e)
         {
             Configuration config = controller.GetCurrentConfiguration();
@@ -882,6 +918,11 @@ namespace Shadowsocks.View
                     config.configs[id].ServerSpeedLog().ClearMaxSpeed();
                 }
                 if (ServerDataGrid.Columns[e.ColumnIndex].Name == "Upload" || ServerDataGrid.Columns[e.ColumnIndex].Name == "Download")
+                {
+                    Configuration config = controller.GetCurrentConfiguration();
+                    config.configs[id].ServerSpeedLog().ClearTrans();
+                }
+                if (ServerDataGrid.Columns[e.ColumnIndex].Name == "DownloadRaw")
                 {
                     Configuration config = controller.GetCurrentConfiguration();
                     config.configs[id].ServerSpeedLog().Clear();

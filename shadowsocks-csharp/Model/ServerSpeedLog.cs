@@ -79,8 +79,20 @@ namespace Shadowsocks.Model
 
         public ServerSpeedLog(long upload, long download)
         {
-            transUpload = upload;
-            transDownload = download;
+            lock (this)
+            {
+                transUpload = upload;
+                transDownload = download;
+            }
+        }
+
+        public void ClearTrans()
+        {
+            lock (this)
+            {
+                transUpload = 0;
+                transDownload = 0;
+            }
         }
 
         public ServerSpeedLogShow Translate()

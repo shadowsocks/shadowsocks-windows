@@ -26,6 +26,7 @@ namespace Shadowsocks.View
         {
             int dpi_mul = Util.Utils.GetDpiMul();
             int width = Math.Min(PictureQRcode.Width, PictureQRcode.Height) * 4 / 4;
+            try
             {
                 string qrText = ssconfig;
                 QRCode code = ZXing.QrCode.Internal.Encoder.encode(qrText, ErrorCorrectionLevel.M);
@@ -55,6 +56,10 @@ namespace Shadowsocks.View
                     g.DrawImage(ngnl, new Rectangle(l + blockSize, l + blockSize, r - l, r - l));
                 }
                 PictureQRcode.Image = drawArea;
+            }
+            catch
+            {
+
             }
         }
 

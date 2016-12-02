@@ -7,6 +7,7 @@ using System.IO;
 using System.Threading;
 using System.Windows.Forms;
 using Microsoft.Win32;
+using Shadowsocks.Model;
 #if !_CONSOLE
 using Shadowsocks.View;
 #endif
@@ -44,9 +45,21 @@ namespace Shadowsocks
                 }
 #endif
                 Directory.SetCurrentDirectory(Application.StartupPath);
-//#if !DEBUG
+                //#if !DEBUG
                 Logging.OpenLogFile();
-//#endif
+                //#endif
+#if !_CONSOLE
+                int try_times = 0;
+                while (Configuration.Load() == null)
+                {
+                    if (try_times >= 5)
+                        return;
+                    InputPassword dlg = new InputPassword();
+                    dlg.ShowDialog();
+                    Configuration.SetPassword(dlg.password);
+                    try_times += 1;
+                }
+#endif
                 _controller = new ShadowsocksController();
 
 #if !_CONSOLE
@@ -81,7 +94,7 @@ namespace Shadowsocks
                     }
                     break;
                 case PowerModes.Suspend:
-                    _controller?.Stop();
+                    if (_controller != null) _controller.Stop();
                     break;
             }
         }
@@ -90,7 +103,7 @@ namespace Shadowsocks
         {
             try
             {
-                _controller?.Start();
+                if (_controller != null) _controller.Start();
             }
             catch (Exception ex)
             {
@@ -114,7 +127,7 @@ namespace Shadowsocks
 
         private static void Application_ApplicationExit(object sender, EventArgs e)
         {
-            _controller?.Stop();
+            if (_controller != null) _controller.Stop();
             _controller = null;
         }
 
@@ -123,9 +136,9 @@ namespace Shadowsocks
         {
             if (Interlocked.Increment(ref exited) == 1)
             {
-                Logging.Log(LogLevel.Error, e.ExceptionObject?.ToString());
+                Logging.Log(LogLevel.Error, e.ExceptionObject != null ? e.ExceptionObject.ToString() : "");
                 MessageBox.Show(I18N.GetString("Unexpected error, ShadowsocksR will exit.") +
-                    Environment.NewLine + (e.ExceptionObject?.ToString()),
+                    Environment.NewLine + (e.ExceptionObject != null ? e.ExceptionObject.ToString() : ""),
                     "Shadowsocks Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 Application.Exit();
             }

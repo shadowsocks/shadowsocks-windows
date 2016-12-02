@@ -463,6 +463,7 @@ namespace Shadowsocks.View
                 : Configuration.GetDefaultServer();
             _modifiedConfiguration.configs.Insert(_oldSelectedIndex < 0 ? 0 : _oldSelectedIndex, server);
             LoadConfiguration(_modifiedConfiguration);
+            _SelectedID = server.id;
             ServersListBox.SelectedIndex = _oldSelectedIndex + 1;
             _oldSelectedIndex = ServersListBox.SelectedIndex;
         }

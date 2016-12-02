@@ -5,247 +5,10 @@ using System.IO;
 using System.Text;
 using System.Windows.Forms;
 using System.Threading;
+using Shadowsocks.Encryption;
 
 namespace Shadowsocks.Model
 {
-    public class ServerSelectStrategy
-    {
-        private Random randomGennarator;
-        private int lastSelectIndex;
-        private DateTime lastSelectTime;
-        private int lastUserSelectIndex;
-        private const int MAX_CHANCE = 10000;
-        private const int ERROR_PENALTY = MAX_CHANCE / 20;
-        private const int CONNECTION_PENALTY = MAX_CHANCE / 100;
-        private const int MIN_CHANCE = 10;
-
-        enum SelectAlgorithm
-        {
-            OneByOne,
-            Random,
-            LowLatency,
-            LowException,
-            SelectedFirst,
-            Timer,
-            LowExceptionInGroup,
-        }
-
-        private struct ServerIndex
-        {
-            public int index;
-            public Server server;
-            public ServerIndex(int i, Server s)
-            {
-                index = i;
-                this.server = s;
-            }
-        };
-        private int lowerBound(List<double> data, double target)
-        {
-            int left = 0;
-            int right = data.Count - 1;
-            while (left < right)
-            {
-                int mid = (left + right) / 2;
-                if (data[mid] >= target)
-                    right = mid;
-                else if (data[mid] < target)
-                    left = mid + 1;
-            }
-            return left;
-        }
-
-        private double Algorithm2(ServerSpeedLog serverSpeedLog) // perfer less delay
-        {
-            if (serverSpeedLog.ErrorContinurousTimes >= 20)
-                return 1;
-            else if (serverSpeedLog.ErrorContinurousTimes >= 10)
-                return MIN_CHANCE;
-            else if (serverSpeedLog.AvgConnectTime < 0 && serverSpeedLog.TotalConnectTimes >= 3)
-                return MIN_CHANCE;
-            else if (serverSpeedLog.TotalConnectTimes < 1)
-                return MAX_CHANCE;
-            else
-            {
-                long avgConnectTime = serverSpeedLog.AvgConnectTime <= 0 ? 1 : serverSpeedLog.AvgConnectTime;
-                if (serverSpeedLog.TotalConnectTimes >= 1 && serverSpeedLog.AvgConnectTime < 0)
-                    avgConnectTime = 5000;
-                long connections = serverSpeedLog.TotalConnectTimes - serverSpeedLog.TotalDisconnectTimes;
-                double chance = MAX_CHANCE * 10.0 / avgConnectTime - connections * CONNECTION_PENALTY;
-                if (chance > MAX_CHANCE) chance = MAX_CHANCE;
-                chance -= serverSpeedLog.ErrorContinurousTimes * ERROR_PENALTY;
-                if (chance < MIN_CHANCE) chance = MIN_CHANCE;
-                return chance;
-            }
-        }
-
-        private double Algorithm3(ServerSpeedLog serverSpeedLog) // perfer less error
-        {
-            if (serverSpeedLog.ErrorContinurousTimes >= 20)
-                return 1;
-            else if (serverSpeedLog.ErrorContinurousTimes >= 10)
-                return MIN_CHANCE;
-            else if (serverSpeedLog.AvgConnectTime < 0 && serverSpeedLog.TotalConnectTimes >= 3)
-                return MIN_CHANCE;
-            else if (serverSpeedLog.TotalConnectTimes < 1)
-                return MAX_CHANCE;
-            else
-            {
-                long avgConnectTime = serverSpeedLog.AvgConnectTime <= 0 ? 1 : serverSpeedLog.AvgConnectTime;
-                if (serverSpeedLog.TotalConnectTimes >= 1 && serverSpeedLog.AvgConnectTime < 0)
-                    avgConnectTime = 5000;
-                long connections = serverSpeedLog.TotalConnectTimes - serverSpeedLog.TotalDisconnectTimes;
-                double chance = MAX_CHANCE * 1.0 / (avgConnectTime / 500 + 1) - connections * CONNECTION_PENALTY;
-                if (chance > MAX_CHANCE) chance = MAX_CHANCE;
-                chance -= serverSpeedLog.ErrorContinurousTimes * ERROR_PENALTY;
-                if (chance < MIN_CHANCE) chance = MIN_CHANCE;
-                return chance;
-            }
-        }
-
-        public int Select(List<Server> configs, int curIndex, int algorithm, bool forceChange = false)
-        {
-            if (randomGennarator == null)
-            {
-                randomGennarator = new Random();
-                lastSelectIndex = -1;
-            }
-            if (configs.Count <= lastSelectIndex || lastSelectIndex < 0 || !configs[lastSelectIndex].isEnable())
-            {
-                lastSelectIndex = -1;
-                lastSelectTime = DateTime.Now;
-                lastUserSelectIndex = -1;
-            }
-            if (lastUserSelectIndex != curIndex)
-            {
-                if (configs.Count > curIndex && curIndex >= 0 && configs[curIndex].isEnable())
-                {
-                    lastSelectIndex = curIndex;
-                }
-                lastUserSelectIndex = curIndex;
-            }
-            if (configs.Count > 0)
-            {
-                List<ServerIndex> serverList = new List<ServerIndex>();
-                for (int i = 0; i < configs.Count; ++i)
-                {
-                    if (forceChange && lastSelectIndex == i)
-                        continue;
-                    if (configs[i].isEnable())
-                    {
-                        if (algorithm == (int)SelectAlgorithm.LowExceptionInGroup
-                            && configs.Count > lastSelectIndex && lastSelectIndex >= 0
-                            && configs[lastSelectIndex].group != configs[i].group)
-                        {
-                            continue;
-                        }
-                        serverList.Add(new ServerIndex(i, configs[i]));
-                    }
-                }
-                if (serverList.Count == 0)
-                {
-                    int i = lastSelectIndex;
-                    if (i >= 0 && i < configs.Count && configs[i].isEnable())
-                        serverList.Add(new ServerIndex(i, configs[i]));
-                }
-                int serverListIndex = -1;
-                if (serverList.Count > 0)
-                {
-                    if (algorithm == (int)SelectAlgorithm.OneByOne)
-                    {
-                        lastSelectIndex = (lastSelectIndex + 1) % configs.Count;
-                        for (int i = 0; i < configs.Count; ++i)
-                        {
-                            if (configs[lastSelectIndex].isEnable())
-                            {
-                                serverListIndex = lastSelectIndex;
-                                break;
-                            }
-                            else
-                            {
-                                lastSelectIndex = (lastSelectIndex + 1) % configs.Count;
-                            }
-                        }
-                    }
-                    else if (algorithm == (int)SelectAlgorithm.Random)
-                    {
-                        serverListIndex = randomGennarator.Next(serverList.Count);
-                        serverListIndex = serverList[serverListIndex].index;
-                    }
-                    else if (algorithm == (int)SelectAlgorithm.LowException
-                        || algorithm == (int)SelectAlgorithm.Timer
-                        || algorithm == (int)SelectAlgorithm.LowExceptionInGroup)
-                    {
-                        if (algorithm == (int)SelectAlgorithm.Timer)
-                        {
-                            if ((DateTime.Now - lastSelectTime).TotalSeconds > 60 * 10)
-                            {
-                                lastSelectTime = DateTime.Now;
-                            }
-                            else
-                            {
-                                if (configs.Count > lastSelectIndex && lastSelectIndex >= 0 && configs[lastSelectIndex].isEnable() && !forceChange)
-                                {
-                                    return lastSelectIndex;
-                                }
-                            }
-                        }
-                        List<double> chances = new List<double>();
-                        double lastBeginVal = 0;
-                        foreach (ServerIndex s in serverList)
-                        {
-                            double chance = Algorithm3(s.server.ServerSpeedLog());
-                            if (chance > 0)
-                            {
-                                chances.Add(lastBeginVal + chance);
-                                lastBeginVal += chance;
-                            }
-                        }
-                        {
-                            double target = randomGennarator.NextDouble() * lastBeginVal;
-                            serverListIndex = lowerBound(chances, target);
-                            serverListIndex = serverList[serverListIndex].index;
-                            lastSelectIndex = serverListIndex;
-                            return serverListIndex;
-                        }
-                    }
-                    else //if (algorithm == (int)SelectAlgorithm.LowLatency || algorithm == (int)SelectAlgorithm.SelectedFirst)
-                    {
-                        List<double> chances = new List<double>();
-                        double lastBeginVal = 0;
-                        foreach (ServerIndex s in serverList)
-                        {
-                            double chance = Algorithm2(s.server.ServerSpeedLog());
-                            if (chance > 0)
-                            {
-                                chances.Add(lastBeginVal + chance);
-                                lastBeginVal += chance;
-                            }
-                        }
-                        if (algorithm == (int)SelectAlgorithm.SelectedFirst && randomGennarator.Next(3) == 0 && configs[curIndex].isEnable())
-                        {
-                            lastSelectIndex = curIndex;
-                            return curIndex;
-                        }
-                        {
-                            double target = randomGennarator.NextDouble() * lastBeginVal;
-                            serverListIndex = lowerBound(chances, target);
-                            serverListIndex = serverList[serverListIndex].index;
-                            lastSelectIndex = serverListIndex;
-                            return serverListIndex;
-                        }
-                    }
-                }
-                lastSelectIndex = serverListIndex;
-                return serverListIndex;
-            }
-            else
-            {
-                return -1;
-            }
-        }
-    }
-
     public class UriVisitTime : IComparable
     {
         public DateTime visitTime;
@@ -266,20 +29,26 @@ namespace Shadowsocks.Model
     [Serializable]
     public class PortMapConfig
     {
-        public static int MemberCount = 4;
-
         public bool enable;
+        public int type;
         public string id;
         public string server_addr;
         public int server_port;
+        public string remarks;
     }
 
     public class PortMapConfigCache
     {
+        public int type;
         public string id;
         public Server server;
         public string server_addr;
         public int server_port;
+    }
+
+    public class GlobalConfiguration
+    {
+        public static string config_password = "";
     }
 
     [Serializable]
@@ -330,6 +99,18 @@ namespace Shadowsocks.Model
         private Dictionary<int, PortMapConfigCache> portMapCache = new Dictionary<int, PortMapConfigCache>();
 
         private static string CONFIG_FILE = "gui-config.json";
+
+        public static void SetPassword(string password)
+        {
+            GlobalConfiguration.config_password = password;
+        }
+
+        public static bool SetPasswordTry(string old_password, string password)
+        {
+            if (old_password != GlobalConfiguration.config_password)
+                return false;
+            return true;
+        }
 
         public bool KeepCurrentServer(string targetAddr, string id)
         {
@@ -496,6 +277,7 @@ namespace Shadowsocks.Model
                     continue;
                 }
                 portMapCache[key] = new PortMapConfigCache();
+                portMapCache[key].type = pm.type;
                 portMapCache[key].id = pm.id;
                 portMapCache[key].server = id2server[pm.id];
                 portMapCache[key].server_addr = pm.server_addr;
@@ -560,6 +342,66 @@ namespace Shadowsocks.Model
             {
                 localAuthPassword = randString(20);
             }
+
+            Dictionary<string, int> id = new Dictionary<string, int>();
+            foreach (Server server in configs)
+            {
+                if (id.ContainsKey(server.id))
+                {
+                    byte[] new_id = new byte[16];
+                    Util.Utils.RandBytes(new_id, new_id.Length);
+                    server.id = BitConverter.ToString(new_id).Replace("-", "");
+                }
+                else
+                {
+                    id[server.id] = 0;
+                }
+            }
+            bool type_err = false;
+            foreach (KeyValuePair<string, object> pair in portMap)
+            {
+                if (pair.Value.GetType() != typeof(PortMapConfig))
+                {
+                    type_err = true;
+                }
+            }
+            if (type_err)
+            {
+                Dictionary<string, object> new_portMap = new Dictionary<string, object>();
+                foreach (KeyValuePair<string, object> pair in portMap)
+                {
+                    if (pair.Value.GetType() != typeof(PortMapConfig))
+                    {
+                        PortMapConfig pm;
+                        Type type = typeof(PortMapConfig);
+                        object obj = Activator.CreateInstance(type);
+                        System.Reflection.FieldInfo[] field = null;
+                        field = type.GetFields(System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public);
+                        pm = new PortMapConfig();
+                        foreach (System.Reflection.FieldInfo fi in field)
+                        {
+                            if (((SimpleJson.JsonObject)pair.Value).ContainsKey(fi.Name))
+                            {
+                                if (fi.FieldType == typeof(int))
+                                {
+                                    int val = (int)(Int64)((SimpleJson.JsonObject)pair.Value)[fi.Name];
+                                    fi.SetValue(pm, val);
+                                }
+                                else
+                                {
+                                    fi.SetValue(pm, ((SimpleJson.JsonObject)pair.Value)[fi.Name]);
+                                }
+                            }
+                        }
+                        new_portMap[pair.Key] = pm;
+                    }
+                    else
+                    {
+                        new_portMap[pair.Key] = pair.Value;
+                    }
+                }
+                portMap = new_portMap;
+            }
         }
 
         private static string randString(int len)
@@ -579,9 +421,7 @@ namespace Shadowsocks.Model
             try
             {
                 string configContent = File.ReadAllText(filename);
-                Configuration config = SimpleJson.SimpleJson.DeserializeObject<Configuration>(configContent, new JsonSerializerStrategy());
-                config.FixConfiguration();
-                return config;
+                return Load(configContent);
             }
             catch (Exception e)
             {
@@ -613,6 +453,15 @@ namespace Shadowsocks.Model
                 using (StreamWriter sw = new StreamWriter(File.Open(CONFIG_FILE, FileMode.Create)))
                 {
                     string jsonString = SimpleJson.SimpleJson.SerializeObject(config);
+                    if (GlobalConfiguration.config_password.Length > 0)
+                    {
+                        IEncryptor encryptor = EncryptorFactory.GetEncryptor("aes-256-cfb", GlobalConfiguration.config_password);
+                        byte[] cfg_data = UTF8Encoding.UTF8.GetBytes(jsonString);
+                        byte[] cfg_encrypt = new byte[cfg_data.Length + 128];
+                        int data_len;
+                        encryptor.Encrypt(cfg_data, cfg_data.Length, cfg_encrypt, out data_len);
+                        jsonString = System.Convert.ToBase64String(cfg_encrypt, 0, data_len);
+                    }
                     sw.Write(jsonString);
                     sw.Flush();
                 }
@@ -623,8 +472,24 @@ namespace Shadowsocks.Model
             }
         }
 
-        public Configuration Load(string config_str)
+        public static Configuration Load(string config_str)
         {
+            try
+            {
+                if (GlobalConfiguration.config_password.Length > 0)
+                {
+                    byte[] cfg_encrypt = System.Convert.FromBase64String(config_str);
+                    IEncryptor encryptor = EncryptorFactory.GetEncryptor("aes-256-cfb", GlobalConfiguration.config_password);
+                    byte[] cfg_data = new byte[cfg_encrypt.Length];
+                    int data_len;
+                    encryptor.Decrypt(cfg_encrypt, cfg_encrypt.Length, cfg_data, out data_len);
+                    config_str = UTF8Encoding.UTF8.GetString(cfg_data, 0, data_len);
+                }
+            }
+            catch
+            {
+
+            }
             try
             {
                 Configuration config = SimpleJson.SimpleJson.DeserializeObject<Configuration>(config_str, new JsonSerializerStrategy());
@@ -640,6 +505,13 @@ namespace Shadowsocks.Model
         public static Server GetDefaultServer()
         {
             return new Server();
+        }
+
+        public bool isDefaultConfig()
+        {
+            if (configs.Count == 1 && configs[0].server == Configuration.GetDefaultServer().server)
+                return true;
+            return false;
         }
 
         public static Server CopyServer(Server server)
@@ -699,10 +571,6 @@ namespace Shadowsocks.Model
                 {
                     return Int32.Parse(value.ToString());
                 }
-                else if (type == typeof(object) && value.GetType() == typeof(SimpleJson.JsonObject) && ((SimpleJson.JsonObject)value).Count == PortMapConfig.MemberCount)
-                {
-                    return base.DeserializeObject(value, typeof(PortMapConfig));
-                }
                 return base.DeserializeObject(value, type);
             }
         }
@@ -743,9 +611,25 @@ namespace Shadowsocks.Model
         {
             try
             {
-                string configContent = File.ReadAllText(LOG_FILE);
+                string config_str = File.ReadAllText(LOG_FILE);
                 ServerTransferTotal config = new ServerTransferTotal();
-                config.servers = SimpleJson.SimpleJson.DeserializeObject<Dictionary<string, object>>(configContent, new JsonSerializerStrategy());
+                try
+                {
+                    if (GlobalConfiguration.config_password.Length > 0)
+                    {
+                        byte[] cfg_encrypt = System.Convert.FromBase64String(config_str);
+                        IEncryptor encryptor = EncryptorFactory.GetEncryptor("aes-256-cfb", GlobalConfiguration.config_password);
+                        byte[] cfg_data = new byte[cfg_encrypt.Length];
+                        int data_len;
+                        encryptor.Decrypt(cfg_encrypt, cfg_encrypt.Length, cfg_data, out data_len);
+                        config_str = UTF8Encoding.UTF8.GetString(cfg_data, 0, data_len);
+                    }
+                }
+                catch
+                {
+
+                }
+                config.servers = SimpleJson.SimpleJson.DeserializeObject<Dictionary<string, object>>(config_str, new JsonSerializerStrategy());
                 config.Init();
                 return config;
             }
@@ -774,6 +658,15 @@ namespace Shadowsocks.Model
                 using (StreamWriter sw = new StreamWriter(File.Open(LOG_FILE, FileMode.Create)))
                 {
                     string jsonString = SimpleJson.SimpleJson.SerializeObject(config.servers);
+                    if (GlobalConfiguration.config_password.Length > 0)
+                    {
+                        IEncryptor encryptor = EncryptorFactory.GetEncryptor("aes-256-cfb", GlobalConfiguration.config_password);
+                        byte[] cfg_data = UTF8Encoding.UTF8.GetBytes(jsonString);
+                        byte[] cfg_encrypt = new byte[cfg_data.Length + 128];
+                        int data_len;
+                        encryptor.Encrypt(cfg_data, cfg_data.Length, cfg_encrypt, out data_len);
+                        jsonString = System.Convert.ToBase64String(cfg_encrypt, 0, data_len);
+                    }
                     sw.Write(jsonString);
                     sw.Flush();
                 }
@@ -781,6 +674,18 @@ namespace Shadowsocks.Model
             catch (IOException e)
             {
                 Console.Error.WriteLine(e);
+            }
+        }
+
+        public void Clear(string server)
+        {
+            lock (servers)
+            {
+                if (servers.ContainsKey(server))
+                {
+                    ((ServerTrans)servers[server]).totalUploadBytes = 0;
+                    ((ServerTrans)servers[server]).totalDownloadBytes = 0;
+                }
             }
         }
 

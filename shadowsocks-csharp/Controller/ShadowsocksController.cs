@@ -229,7 +229,7 @@ namespace Shadowsocks.Controller
 
         public bool SaveServersConfig(string config)
         {
-            Configuration new_cfg = _config.Load(config);
+            Configuration new_cfg = Configuration.Load(config);
             if (new_cfg != null)
             {
                 SaveServersConfig(new_cfg);
@@ -274,6 +274,13 @@ namespace Shadowsocks.Controller
             SelectServerIndex(_config.index);
         }
 
+        public void SaveServersPortMap(Configuration config)
+        {
+            _config.portMap = config.portMap;
+            SelectServerIndex(_config.index);
+            _config.FlushPortMapCache();
+        }
+
         public bool AddServerBySSURL(string ssURL)
         {
             if (ssURL.StartsWith("ss://") || ssURL.StartsWith("ssr://"))
@@ -303,7 +310,6 @@ namespace Shadowsocks.Controller
         public void ToggleMode(int mode)
         {
             _config.sysProxyMode = mode;
-            UpdateSystemProxy();
             SaveConfig(_config);
             if (ToggleModeChanged != null)
             {
@@ -324,7 +330,6 @@ namespace Shadowsocks.Controller
         public void ToggleBypass(bool bypass)
         {
             _config.bypassWhiteList = bypass;
-            UpdateSystemProxy();
             SaveConfig(_config);
         }
 
@@ -377,6 +382,21 @@ namespace Shadowsocks.Controller
             }
 #endif
             ServerTransferTotal.Save(_transfer);
+        }
+
+        public void ClearTransferTotal(string server_addr)
+        {
+            _transfer.Clear(server_addr);
+            foreach (Server server in _config.configs)
+            {
+                if (server.server == server_addr)
+                {
+                    if (_transfer.servers.ContainsKey(server.server))
+                    {
+                        server.ServerSpeedLog().ClearTrans();
+                    }
+                }
+            }
         }
 
         public void TouchPACFile()

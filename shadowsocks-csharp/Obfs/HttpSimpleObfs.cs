@@ -159,8 +159,12 @@ namespace Shadowsocks.Obfs
                             custom_head = custom_heads[1];
                             param = custom_heads[0];
                         }
-                        string[] hosts = param.Split(',');
-                        host = hosts[random.Next(hosts.Length)];
+                        string[] hosts = param.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                        if (hosts != null && hosts.Length > 0)
+                        {
+                            host = hosts[random.Next(hosts.Length)];
+                            host = host.Trim(' ');
+                        }
                     }
                     string http_buf =
                         (Method == "http_post" ? "POST /" : "GET /") + _request_path[request_path_index] + data2urlencode(headdata, headdata.Length) + _request_path[request_path_index + 1] + " HTTP/1.1\r\n"
@@ -487,8 +491,12 @@ namespace Shadowsocks.Obfs
                 string host = Server.host;
                 if (Server.param.Length > 0)
                 {
-                    string[] hosts = Server.param.Split(',');
-                    host = hosts[random.Next(hosts.Length)];
+                    string[] hosts = Server.param.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                    if (hosts != null && hosts.Length > 0)
+                    {
+                        host = hosts[random.Next(hosts.Length)];
+                        host = host.Trim(' ');
+                    }
                 }
                 if (host != null && host.Length > 0 && host[host.Length - 1] >= '0' && host[host.Length - 1] <= '9' && Server.param.Length == 0)
                 {

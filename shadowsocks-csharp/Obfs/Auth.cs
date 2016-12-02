@@ -1063,8 +1063,16 @@ namespace Shadowsocks.Obfs
 
                 Encryption.IEncryptor encryptor = Encryption.EncryptorFactory.GetEncryptor("aes-128-cbc", System.Convert.ToBase64String(encrypt_key) + SALT);
                 int enc_outlen;
+
                 encryptor.SetIV(new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 });
                 encryptor.Encrypt(encrypt, 16, encrypt_data, out enc_outlen);
+                if (false)
+                {
+                    byte[] enc = new byte[16];
+                    Array.Copy(encrypt, enc, 16);
+                    encryptor.SetIV(enc);
+                    encryptor.Encrypt(new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, 16, encrypt_data, out enc_outlen);
+                }
                 encryptor.Dispose();
                 Array.Copy(encrypt_data, 16, encrypt, 4, 16);
                 uid.CopyTo(encrypt, 0);
@@ -1228,6 +1236,11 @@ namespace Shadowsocks.Obfs
 
         public override byte[] ClientUdpPostDecrypt(byte[] plaindata, int datalength, out int outlength)
         {
+            if (datalength <= 4)
+            {
+                outlength = 0;
+                return plaindata;
+            }
             HMAC sha1 = CreateHMAC(user_key);
             byte[] sha1data = sha1.ComputeHash(plaindata, 0, datalength - 4);
             if (sha1data[0] != plaindata[datalength - 4]

@@ -15,6 +15,14 @@ namespace Shadowsocks.Encryption
         {
             _registeredEncryptors = new Dictionary<string, Type>();
             _registeredEncryptorNames = new List<string>();
+            foreach (string method in NoneEncryptor.SupportedCiphers())
+            {
+                if (!_registeredEncryptorNames.Contains(method))
+                {
+                    _registeredEncryptorNames.Add(method);
+                    _registeredEncryptors.Add(method, typeof(NoneEncryptor));
+                }
+            }
 
             {
                 foreach (string method in MbedTLSEncryptor.SupportedCiphers())

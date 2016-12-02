@@ -44,7 +44,7 @@ namespace Shadowsocks.Controller
             }
             set
             {
-                lock(this)
+                lock (this)
                 {
                     status = value;
                 }
@@ -805,6 +805,11 @@ namespace Shadowsocks.Controller
             }
             else
             {
+                if (cfg.targetHost == null)
+                {
+                    cfg.targetHost = GetQueryString();
+                    cfg.targetPort = GetQueryPort();
+                }
                 server = select_server;
             }
             speedTester.server = server.server;
@@ -814,20 +819,6 @@ namespace Shadowsocks.Controller
             if (cfg.fouce_local_dns_query && cfg.targetHost != null)
             {
                 IPAddress ipAddress;
-                //if (server.DnsBuffer().isExpired(cfg.targetHost))
-                //{
-                //    ipAddress = Util.Utils.QueryDns(cfg.targetHost, cfg.dns_servers);
-                //}
-                //else
-                //{
-                //    ipAddress = server.DnsBuffer().ip;
-                //}
-                //if (ipAddress != null)
-                //{
-                //    server.DnsBuffer().UpdateDns(cfg.targetHost, ipAddress);
-                //    cfg.targetHost = ipAddress.ToString();
-                //    ResetTimeout(cfg.TTL);
-                //}
 
                 string host = cfg.targetHost;
 
@@ -877,20 +868,24 @@ namespace Shadowsocks.Controller
                     if (server.DnsBuffer().isExpired(serverURI))
                     {
                         bool dns_ok = false;
-                        if (!dns_ok)
                         {
-                            if (server.DnsBuffer().isExpired(serverURI))
+                            DnsBuffer buf = server.DnsBuffer();
+                            lock (buf)
                             {
-                                ipAddress = Util.Utils.QueryDns(serverURI, cfg.dns_servers);
-                            }
-                            else
-                            {
-                                ipAddress = server.DnsBuffer().ip;
-                            }
-                            if (ipAddress != null)
-                            {
-                                server.DnsBuffer().UpdateDns(serverURI, ipAddress);
-                                dns_ok = true;
+                                if (buf.isExpired(serverURI))
+                                {
+                                    ipAddress = Util.Utils.QueryDns(serverURI, cfg.dns_servers);
+                                    if (ipAddress != null)
+                                    {
+                                        buf.UpdateDns(serverURI, ipAddress);
+                                        dns_ok = true;
+                                    }
+                                }
+                                else
+                                {
+                                    ipAddress = buf.ip;
+                                    dns_ok = true;
+                                }
                             }
                         }
                         if (!dns_ok)
@@ -1066,8 +1061,8 @@ namespace Shadowsocks.Controller
             {
                 head_len = ObfsBase.GetHeadSize(remoteHeaderSendBuffer, 30);
             }
-            remote?.SetObfsPlugin(server, head_len);
-            remoteUDP?.SetObfsPlugin(server, head_len);
+            if (remote != null) remote.SetObfsPlugin(server, head_len);
+            if (remoteUDP != null) remoteUDP.SetObfsPlugin(server, head_len);
         }
 
         private string GetQueryString()
@@ -1466,6 +1461,7 @@ namespace Shadowsocks.Controller
             send_len = remote.Send(bytes, length, SocketFlags.None);
             server.ServerSpeedLog().AddUploadBytes(send_len, DateTime.Now);
             speedTester.AddUploadSize(send_len);
+            ResetTimeout(cfg.TTL);
 
             doConnectionRecv();
             if (lastKeepTime == null || (DateTime.Now - lastKeepTime).TotalSeconds > 5)

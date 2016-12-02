@@ -52,7 +52,7 @@ namespace Shadowsocks.Controller
             _connection = socket;
             socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, true);
 
-            if (_config.GetPortMapCache().ContainsKey(local_port))
+            if (_config.GetPortMapCache().ContainsKey(local_port) && _config.GetPortMapCache()[local_port].type == 0)
             {
                 Connect();
             }
@@ -297,6 +297,7 @@ namespace Shadowsocks.Controller
                     else
                     {
                         RspSocks5TCPHeader();
+                        Connect();
                     }
                 }
                 else
@@ -385,7 +386,6 @@ namespace Shadowsocks.Controller
                                 0, 0, 0, 0,
                                 0, 0 };
                 _connection.Send(response);
-                Connect();
             }
             else
             {
@@ -393,7 +393,6 @@ namespace Shadowsocks.Controller
                                 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                                 0, 0 };
                 _connection.Send(response);
-                Connect();
             }
         }
 
@@ -512,17 +511,26 @@ namespace Shadowsocks.Controller
                 if (cfg.id == cfg.server.id)
                 {
                     handler.select_server = cfg.server;
-                    byte[] addr = System.Text.Encoding.UTF8.GetBytes(cfg.server_addr);
-                    byte[] newFirstPacket = new byte[_firstPacketLength + addr.Length + 4];
-                    newFirstPacket[0] = 3;
-                    newFirstPacket[1] = (byte)addr.Length;
-                    Array.Copy(addr, 0, newFirstPacket, 2, addr.Length);
-                    newFirstPacket[addr.Length + 2] = (byte)(cfg.server_port / 256);
-                    newFirstPacket[addr.Length + 3] = (byte)(cfg.server_port % 256);
-                    Array.Copy(_firstPacket, 0, newFirstPacket, addr.Length + 4, _firstPacketLength);
-                    _remoteHeaderSendBuffer = newFirstPacket;
-
-                    handler.Start(_remoteHeaderSendBuffer, _remoteHeaderSendBuffer.Length);
+                    if (cfg.type == 0) // tunnel
+                    {
+                        byte[] addr = System.Text.Encoding.UTF8.GetBytes(cfg.server_addr);
+                        byte[] newFirstPacket = new byte[_firstPacketLength + addr.Length + 4];
+                        newFirstPacket[0] = 3;
+                        newFirstPacket[1] = (byte)addr.Length;
+                        Array.Copy(addr, 0, newFirstPacket, 2, addr.Length);
+                        newFirstPacket[addr.Length + 2] = (byte)(cfg.server_port / 256);
+                        newFirstPacket[addr.Length + 3] = (byte)(cfg.server_port % 256);
+                        Array.Copy(_firstPacket, 0, newFirstPacket, addr.Length + 4, _firstPacketLength);
+                        _remoteHeaderSendBuffer = newFirstPacket;
+                        handler.Start(_remoteHeaderSendBuffer, _remoteHeaderSendBuffer.Length);
+                    }
+                    else if (_connectionUDP == null && cfg.type == 2 && new Socks5Forwarder(_config, _IPRange).Handle(_remoteHeaderSendBuffer, _remoteHeaderSendBuffer.Length, _connection))
+                    {
+                    }
+                    else
+                    {
+                        handler.Start(_remoteHeaderSendBuffer, _remoteHeaderSendBuffer.Length);
+                    }
                     return;
                 }
             }
@@ -530,13 +538,12 @@ namespace Shadowsocks.Controller
             {
                 if (_connectionUDP == null && new Socks5Forwarder(_config, _IPRange).Handle(_remoteHeaderSendBuffer, _remoteHeaderSendBuffer.Length, _connection))
                 {
-                    return;
                 }
                 else
                 {
                     handler.Start(_remoteHeaderSendBuffer, _remoteHeaderSendBuffer.Length);
-                    return;
                 }
+                return;
             }
             Close();
         }

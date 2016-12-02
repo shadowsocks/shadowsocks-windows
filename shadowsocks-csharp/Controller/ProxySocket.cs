@@ -37,6 +37,7 @@ namespace Shadowsocks.Controller
         public ProxySocketTun(AddressFamily af, SocketType type, ProtocolType protocol)
         {
             _socket = new Socket(af, type, protocol);
+            _socket.SendBufferSize = 1024 * 64;
         }
 
         public Socket GetSocket()
@@ -447,14 +448,17 @@ namespace Shadowsocks.Controller
 
         protected IEncryptor _encryptor;
         protected object _encryptionLock = new object();
+        protected object _decryptionLock = new object();
+        protected string _method;
         protected string _password;
-        //protected object _decryptionLock = new object();
         public IObfs _protocol;
         public IObfs _obfs;
         //protected object obfsLock = new object();
         protected bool _proxy;
         protected string _proxy_server;
         protected int _proxy_udp_port;
+
+        //private bool header_sent = false;
 
         protected const int RecvSize = 2048;
 
@@ -466,6 +470,7 @@ namespace Shadowsocks.Controller
         public ProxyEncryptSocket(AddressFamily af, SocketType type, ProtocolType protocol)
         {
             _socket = new Socket(af, type, protocol);
+            _socket.SendBufferSize = 1024 * 64;
         }
 
         public Socket GetSocket()
@@ -547,7 +552,7 @@ namespace Shadowsocks.Controller
 
             lock (_encryptionLock)
             {
-                //lock (_decryptionLock)
+                lock (_decryptionLock)
                 {
                     if (_encryptor != null)
                         ((IDisposable)_encryptor).Dispose();
@@ -570,6 +575,7 @@ namespace Shadowsocks.Controller
         public void CreateEncryptor(string method, string password)
         {
             _encryptor = EncryptorFactory.GetEncryptor(method, password);
+            _method = method;
             _password = password;
         }
 
@@ -624,7 +630,7 @@ namespace Shadowsocks.Controller
                 CallbackState st = (CallbackState)ar.AsyncState;
                 st.size = bytesRead;
 
-                //lock (_decryptionLock)
+                lock (_decryptionLock)
                 {
                     int bytesToSend = 0;
                     int obfsRecvSize;
@@ -653,15 +659,34 @@ namespace Shadowsocks.Controller
         {
             int bytesToSend = 0;
             int obfsSendSize;
+            int sendSize;
             byte[] obfsBuffer;
+
             lock (_encryptionLock)
             {
                 int outlength;
+                //if (!header_sent)
+                //{
+                //    header_sent = true;
+                //    if (buffer[0] == 3 && _method == "none")
+                //    {
+                //        for (int i = 0; i < buffer[1]; ++i)
+                //        {
+                //            buffer[i + 2] |= 0x80;
+                //        }
+                //        buffer[0] = 2;
+                //    }
+                //}
                 byte[] bytesToEncrypt = _protocol.ClientPreEncrypt(buffer, size, out outlength);
                 Util.Utils.SetArrayMinSize(ref SendEncryptBuffer, outlength + 32);
                 _encryptor.Encrypt(bytesToEncrypt, outlength, SendEncryptBuffer, out bytesToSend);
                 obfsBuffer = _obfs.ClientEncode(SendEncryptBuffer, bytesToSend, out obfsSendSize);
-                _socket.Send(obfsBuffer, obfsSendSize, 0);
+                sendSize = _socket.Send(obfsBuffer, obfsSendSize, 0);
+            }
+            while (sendSize < obfsSendSize)
+            {
+                int new_size = _socket.Send(obfsBuffer, sendSize, obfsSendSize - sendSize, 0);
+                sendSize += new_size;
             }
             return obfsSendSize;
         }
@@ -809,7 +834,7 @@ namespace Shadowsocks.Controller
                 }
                 byte[] remoteSendBuffer = new byte[65536];
                 byte[] obfsBuffer;
-                //lock (_decryptionLock)
+                lock (_decryptionLock)
                 {
                     byte[] decryptBuffer = new byte[65536];
                     _encryptor.ResetDecrypt();
