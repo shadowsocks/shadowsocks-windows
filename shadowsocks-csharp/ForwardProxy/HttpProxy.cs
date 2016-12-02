@@ -7,9 +7,9 @@ using System.Threading;
 using Shadowsocks.Controller;
 using Shadowsocks.Util.Sockets;
 
-namespace Shadowsocks.Proxy
+namespace Shadowsocks.ForwardProxy
 {
-    public class HttpProxy : IProxy
+    public class HttpProxy : IForwardProxy
     {
         private class FakeAsyncResult : IAsyncResult
         {

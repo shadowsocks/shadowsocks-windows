@@ -148,9 +148,9 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
-    <Compile Include="Proxy\DirectConnect.cs" />
-    <Compile Include="Proxy\HttpProxy.cs" />
-    <Compile Include="Proxy\IProxy.cs" />
+    <Compile Include="ForwardProxy\DirectConnect.cs" />
+    <Compile Include="ForwardProxy\HttpProxy.cs" />
+    <Compile Include="ForwardProxy\IForwardProxy.cs" />
     <Compile Include="Controller\Service\AvailabilityStatistics.cs" />
     <Compile Include="Controller\Strategy\HighAvailabilityStrategy.cs" />
     <Compile Include="Controller\Strategy\StatisticsStrategy.cs" />
@@ -185,7 +185,7 @@
     <Compile Include="Controller\Strategy\BalancingStrategy.cs" />
     <Compile Include="Controller\Strategy\StrategyManager.cs" />
     <Compile Include="Controller\Strategy\IStrategy.cs" />
-    <Compile Include="Proxy\Socks5Proxy.cs" />
+    <Compile Include="ForwardProxy\Socks5Proxy.cs" />
     <Compile Include="Settings.cs" />
     <Compile Include="StringEx.cs" />
     <Compile Include="Controller\System\Hotkeys\Hotkeys.cs" />

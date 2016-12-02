@@ -2,10 +2,10 @@
 using System.Net;
 using System.Net.Sockets;
 
-namespace Shadowsocks.Proxy
+namespace Shadowsocks.ForwardProxy
 {
 
-    public interface IProxy
+    public interface IForwardProxy
     {
         EndPoint LocalEndPoint { get; }
 
