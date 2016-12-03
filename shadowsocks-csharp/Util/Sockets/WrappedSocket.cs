@@ -26,6 +26,14 @@ namespace Shadowsocks.Util.Sockets
         private Socket _activeSocket;
 
 
+        public WrappedSocket() { }
+
+        public WrappedSocket(Socket socket)
+        {
+            _activeSocket = socket;
+        }
+
+
         public void BeginConnect(EndPoint remoteEP, AsyncCallback callback, object state)
         {
             if (_disposed)

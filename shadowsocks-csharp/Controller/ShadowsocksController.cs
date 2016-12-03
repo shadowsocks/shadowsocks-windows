@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading;
 using System.Web;
 using Newtonsoft.Json;
-
+using Shadowsocks.Controller.Service;
 using Shadowsocks.Controller.Strategy;
 using Shadowsocks.Model;
 using Shadowsocks.Properties;
@@ -462,6 +462,7 @@ namespace Shadowsocks.Controller
                 services.Add(tcpRelay);
                 services.Add(udpRelay);
                 services.Add(_pacServer);
+                services.Add(new Http2Socks5(_config.localPort));
                 _listener = new Listener(services);
                 _listener.Start(_config);
             }
