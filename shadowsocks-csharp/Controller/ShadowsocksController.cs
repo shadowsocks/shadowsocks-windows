@@ -462,7 +462,6 @@ namespace Shadowsocks.Controller
                 services.Add(_pacServer);
                 services.Add(tcpRelay);
                 services.Add(udpRelay);
-                //services.Add(new Http2Socks5(_config.localPort));
                 _listener = new Listener(services);
                 _listener.Start(_config);
             }
