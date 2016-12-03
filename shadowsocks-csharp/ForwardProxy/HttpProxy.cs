@@ -134,7 +134,7 @@ namespace Shadowsocks.ForwardProxy
                 _remote.EndSend(ar);
 
                 // start line read
-                new LineReader(_remote, OnLineRead, OnException, OnFinish, Encoding.UTF8, HTTP_CRLF, 1024, new FakeAsyncResult(ar, state));
+                new LineReader(1024, _remote, OnLineRead, OnException, OnFinish, Encoding.UTF8, HTTP_CRLF, new FakeAsyncResult(ar, state));
             }
             catch (Exception ex)
             {

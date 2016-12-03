@@ -70,8 +70,8 @@ namespace Shadowsocks.Controller.Service
                 _socks5Port = socks5Port;
                 _localSocket = new WrappedSocket(socket);
                 _localSocket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, true);
-                new LineReader(_localSocket, firstPacket, 0, length, OnLineRead, OnException, OnFinish,
-                    Encoding.UTF8, HTTP_CRLF, 1024, null);
+                new LineReader(firstPacket, _localSocket, firstPacket, 0, length, OnLineRead, OnException, OnFinish,
+                    Encoding.UTF8, HTTP_CRLF, null);
             }
 
             private void CheckClose()
@@ -164,8 +164,8 @@ namespace Shadowsocks.Controller.Service
 
             private void SendConnectResponse()
             {
-                var b = Encoding.UTF8.GetBytes(HTTP_CONNECT_200);
-                _localSocket.BeginSend(b, 0, b.Length, SocketFlags.None, Http200SendCallback, null);
+                var len = Encoding.UTF8.GetBytes(HTTP_CONNECT_200, 0, HTTP_CONNECT_200.Length, _remoteRecvBuffer, 0);
+                _localSocket.BeginSend(_remoteRecvBuffer, 0, len, SocketFlags.None, Http200SendCallback, null);
             }
 
             private void Http200SendCallback(IAsyncResult ar)
@@ -273,7 +273,6 @@ namespace Shadowsocks.Controller.Service
                 try
                 {
                     int bytesRead = _socks5.EndReceive(ar);
-                    Logging.Debug("Read from remote: " + bytesRead);
 
                     if (bytesRead > 0)
                     {
@@ -302,7 +301,6 @@ namespace Shadowsocks.Controller.Service
                 try
                 {
                     int bytesRead = _localSocket.EndReceive(ar);
-                    Logging.Debug("Read from local: " + bytesRead);
 
                     if (bytesRead > 0)
                     {
