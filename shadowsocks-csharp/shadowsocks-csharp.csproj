@@ -140,6 +140,7 @@
     <Compile Include="3rd\zxing\ResultPoint.cs" />
     <Compile Include="3rd\zxing\ResultPointCallback.cs" />
     <Compile Include="3rd\zxing\WriterException.cs" />
+    <Compile Include="Controller\Service\Http2Socks5.cs" />
     <Compile Include="Controller\System\Hotkeys\HotkeyCallbacks.cs" />
     <Compile Include="Model\HotKeyConfig.cs" />
     <Compile Include="Model\ProxyConfig.cs" />
@@ -160,7 +161,6 @@
     <Compile Include="Controller\I18N.cs" />
     <Compile Include="Controller\Service\Listener.cs" />
     <Compile Include="Controller\Logging.cs" />
-    <Compile Include="Controller\Service\PortForwarder.cs" />
     <Compile Include="Controller\Service\UDPRelay.cs" />
     <Compile Include="Controller\Service\UpdateChecker.cs" />
     <Compile Include="Encryption\EncryptorBase.cs" />
@@ -189,8 +189,6 @@
     <Compile Include="Settings.cs" />
     <Compile Include="StringEx.cs" />
     <Compile Include="Controller\System\Hotkeys\Hotkeys.cs" />
-    <Compile Include="Util\ProcessManagement\Job.cs" />
-    <Compile Include="Util\ProcessManagement\ThreadUtil.cs" />
     <Compile Include="Encryption\RNG.cs" />
     <Compile Include="Util\Sockets\LineReader.cs" />
     <Compile Include="Util\Sockets\SocketUtil.cs" />
@@ -211,7 +209,6 @@
       <DependentUpon>ConfigForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Controller\Service\TCPRelay.cs" />
-    <Compile Include="Controller\Service\PrivoxyRunner.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Controller\ShadowsocksController.cs" />
@@ -289,8 +286,6 @@
     </None>
     <None Include="Data\abp.js.gz" />
     <None Include="Data\libsscrypto.dll.gz" />
-    <None Include="Data\mgwz.dll.gz" />
-    <None Include="Data\privoxy.exe.gz" />
     <None Include="Data\proxy.pac.txt.gz" />
   </ItemGroup>
   <ItemGroup>
@@ -305,7 +300,6 @@
     <None Include="Resources\ss24.png" />
     <None Include="Resources\ssw128.png" />
     <Content Include="Data\cn.txt" />
-    <Content Include="Data\privoxy_conf.txt" />
     <Content Include="Data\user-rule.txt" />
     <Content Include="Data\zh_tw.txt" />
     <Content Include="FodyWeavers.xml">

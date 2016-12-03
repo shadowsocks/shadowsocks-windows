@@ -29,7 +29,6 @@ namespace Shadowsocks.Controller
         private PACServer _pacServer;
         private Configuration _config;
         private StrategyManager _strategyManager;
-        private PrivoxyRunner privoxyRunner;
         private GFWListUpdater gfwListUpdater;
         public AvailabilityStatistics availabilityStatistics = AvailabilityStatistics.Instance;
         public StatisticsStrategyConfiguration StatisticsConfiguration { get; private set; }
@@ -264,10 +263,6 @@ namespace Shadowsocks.Controller
             {
                 _listener.Stop();
             }
-            if (privoxyRunner != null)
-            {
-                privoxyRunner.Stop();
-            }
             if (_config.enabled)
             {
                 SystemProxy.Update(_config, true, null);
@@ -431,11 +426,7 @@ namespace Shadowsocks.Controller
             // some logic in configuration updated the config when saving, we need to read it again
             _config = Configuration.Load();
             StatisticsConfiguration = StatisticsStrategyConfiguration.Load();
-
-            if (privoxyRunner == null)
-            {
-                privoxyRunner = new PrivoxyRunner();
-            }
+            
             if (_pacServer == null)
             {
                 _pacServer = new PACServer();
@@ -456,11 +447,7 @@ namespace Shadowsocks.Controller
             {
                 _listener.Stop();
             }
-            // don't put PrivoxyRunner.Start() before pacServer.Stop()
-            // or bind will fail when switching bind address from 0.0.0.0 to 127.0.0.1
-            // though UseShellExecute is set to true now
-            // http://stackoverflow.com/questions/10235093/socket-doesnt-close-after-application-exits-if-a-launched-process-is-open
-            privoxyRunner.Stop();
+
             try
             {
                 var strategy = GetCurrentStrategy();
@@ -469,15 +456,12 @@ namespace Shadowsocks.Controller
                     strategy.ReloadServers();
                 }
 
-                privoxyRunner.Start(_config);
-
                 TCPRelay tcpRelay = new TCPRelay(this, _config);
                 UDPRelay udpRelay = new UDPRelay(this);
                 List<Listener.IService> services = new List<Listener.IService>();
                 services.Add(tcpRelay);
                 services.Add(udpRelay);
                 services.Add(_pacServer);
-                services.Add(new PortForwarder(privoxyRunner.RunningPort));
                 _listener = new Listener(services);
                 _listener.Start(_config);
             }
