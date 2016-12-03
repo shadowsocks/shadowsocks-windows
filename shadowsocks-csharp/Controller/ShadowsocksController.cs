@@ -459,10 +459,10 @@ namespace Shadowsocks.Controller
                 TCPRelay tcpRelay = new TCPRelay(this, _config);
                 UDPRelay udpRelay = new UDPRelay(this);
                 List<Listener.IService> services = new List<Listener.IService>();
+                services.Add(_pacServer);
                 services.Add(tcpRelay);
                 services.Add(udpRelay);
-                services.Add(_pacServer);
-                services.Add(new Http2Socks5(_config.localPort));
+                //services.Add(new Http2Socks5(_config.localPort));
                 _listener = new Listener(services);
                 _listener.Start(_config);
             }

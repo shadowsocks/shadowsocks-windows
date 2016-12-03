@@ -140,7 +140,9 @@
     <Compile Include="3rd\zxing\ResultPoint.cs" />
     <Compile Include="3rd\zxing\ResultPointCallback.cs" />
     <Compile Include="3rd\zxing\WriterException.cs" />
-    <Compile Include="Controller\Service\Http2Socks5.cs" />
+    <Compile Include="Controller\Service\HttpHandler.cs" />
+    <Compile Include="Controller\Service\Socks5Handler.cs" />
+    <Compile Include="Controller\Service\TCPRelay.cs" />
     <Compile Include="Controller\System\Hotkeys\HotkeyCallbacks.cs" />
     <Compile Include="Model\HotKeyConfig.cs" />
     <Compile Include="Model\ProxyConfig.cs" />
@@ -193,6 +195,7 @@
     <Compile Include="Util\Sockets\ByteSearch.cs" />
     <Compile Include="Util\Sockets\LineReader.cs" />
     <Compile Include="Util\Sockets\SocketUtil.cs" />
+    <Compile Include="Util\Sockets\Socks5Util.cs" />
     <Compile Include="Util\Sockets\WrappedSocket.cs" />
     <Compile Include="Util\SystemProxy\INTERNET_OPTION.cs" />
     <Compile Include="Util\SystemProxy\INTERNET_PER_CONN_OPTION.cs" />
@@ -209,7 +212,6 @@
     <Compile Include="View\ConfigForm.Designer.cs">
       <DependentUpon>ConfigForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Controller\Service\TCPRelay.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Controller\ShadowsocksController.cs" />

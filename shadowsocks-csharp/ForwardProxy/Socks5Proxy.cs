@@ -73,52 +73,15 @@ namespace Shadowsocks.ForwardProxy
         {
             DestEndPoint = destEndPoint;
 
-            byte[] request = null;
-            byte atyp = 0;
-            int port;
+            int len = Socks5Util.HeaderAddrLength(destEndPoint);
 
-            var dep = destEndPoint as DnsEndPoint;
-            if (dep != null)
-            {
-                // is a domain name, we will leave it to server
-
-                atyp = 3; // DOMAINNAME
-                var enc = Encoding.UTF8;
-                var hostByteCount = enc.GetByteCount(dep.Host);
-
-                request = new byte[4 + 1/*length byte*/ + hostByteCount + 2];
-                request[4] = (byte)hostByteCount;
-                enc.GetBytes(dep.Host, 0, dep.Host.Length, request, 5);
-
-                port = dep.Port;
-            }
-            else
-            {
-                switch (DestEndPoint.AddressFamily)
-                {
-                    case AddressFamily.InterNetwork:
-                        request = new byte[4 + 4 + 2];
-                        atyp = 1; // IP V4 address
-                        break;
-                    case AddressFamily.InterNetworkV6:
-                        request = new byte[4 + 16 + 2];
-                        atyp = 4; // IP V6 address
-                        break;
-                    default:
-                        throw new Exception(I18N.GetString("Proxy request failed"));
-                }
-                port = ((IPEndPoint) DestEndPoint).Port;
-                var addr = ((IPEndPoint)DestEndPoint).Address.GetAddressBytes();
-                Array.Copy(addr, 0, request, 4, request.Length - 4 - 2);
-            }
+            byte[] request = new byte[len + 3];
+            Socks5Util.FillHeaderAddr(request, 3, destEndPoint);
 
             // 构造request包剩余部分
             request[0] = 5;
             request[1] = 1;
             request[2] = 0;
-            request[3] = atyp;
-            request[request.Length - 2] = (byte) ((port >> 8) & 0xff);
-            request[request.Length - 1] = (byte) (port & 0xff);
 
             var st = new Socks5State();
             st.Callback = callback;
