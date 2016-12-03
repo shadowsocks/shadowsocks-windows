@@ -378,6 +378,25 @@ namespace Shadowsocks.Controller.Service
             private int _targetPort;
             private readonly Queue<string> _headers = new Queue<string>();
 
+            private bool ParseHost(string host)
+            {
+                var locs = host.Split(':');
+                _targetHost = locs[0];
+                if (locs.Length > 1)
+                {
+                    if (!int.TryParse(locs[1], out _targetPort))
+                    {
+                        return false;
+                    }
+                }
+                else
+                {
+                    _targetPort = 80;
+                }
+
+                return true;
+            }
+
             private bool OnLineRead(string line, object state)
             {
                 if (_closed)
@@ -403,19 +422,9 @@ namespace Shadowsocks.Controller.Service
                         {
                             _isConnect = true;
 
-                            var location = m.Groups[2].Value;
-                            var locs = location.Split(':');
-                            _targetHost = locs[0];
-                            if (locs.Length > 1)
+                            if (!ParseHost(m.Groups[2].Value))
                             {
-                                if (!int.TryParse(locs[1], out _targetPort))
-                                {
-                                    throw new Exception("Bad http header: " + line);
-                                }
-                            }
-                            else
-                            {
-                                _targetPort = 80;
+                                throw new Exception("Bad http header: " + line);
                             }
                         }
                     }
@@ -431,19 +440,9 @@ namespace Shadowsocks.Controller.Service
                     {
                         if (line.StartsWith("Host: "))
                         {
-                            var location = line.Substring(6).Trim();
-                            var locs = location.Split(':');
-                            _targetHost = locs[0];
-                            if (locs.Length > 1)
+                            if (!ParseHost(line.Substring(6).Trim()))
                             {
-                                if (!int.TryParse(locs[1], out _targetPort))
-                                {
-                                    throw new Exception("Bad http header: " + line);
-                                }
-                            }
-                            else
-                            {
-                                _targetPort = 80;
+                                throw new Exception("Bad http header: " + line);
                             }
                         }
                     }
