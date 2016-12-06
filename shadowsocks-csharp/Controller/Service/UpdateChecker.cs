@@ -25,7 +25,6 @@ namespace Shadowsocks.Controller
         public event EventHandler CheckUpdateCompleted;
 
         public const string Version = "3.3.5";
-        public const bool PreRelease = false;
 
         private class CheckUpdateTimer : System.Timers.Timer
         {
@@ -96,7 +95,7 @@ namespace Shadowsocks.Controller
                             if (ass != null)
                             {
                                 ass.prerelease = isPreRelease;
-                                if (ass.IsNewVersion(Version, PreRelease, config.checkPreRelease))
+                                if (ass.IsNewVersion(Version, config.checkPreRelease))
                                 {
                                     asserts.Add(ass);
                                 }
@@ -188,9 +187,9 @@ namespace Shadowsocks.Controller
             public string browser_download_url;
             public string suffix;
 
-            public static Asset ParseAsset(JObject aJObject)
+            public static Asset ParseAsset(JObject assertJObject)
             {
-                var name = (string) aJObject["name"];
+                var name = (string) assertJObject["name"];
                 Match match = Regex.Match(name, @"^Shadowsocks-(?<version>\d+(?:\.\d+)*)(?:|-(?<suffix>.+))\.\w+$",
                     RegexOptions.IgnoreCase);
                 if (match.Success)
@@ -199,7 +198,7 @@ namespace Shadowsocks.Controller
 
                     var asset = new Asset
                     {
-                        browser_download_url = (string) aJObject["browser_download_url"],
+                        browser_download_url = (string) assertJObject["browser_download_url"],
                         name = name,
                         version = version
                     };
@@ -215,7 +214,7 @@ namespace Shadowsocks.Controller
                 return null;
             }
 
-            public bool IsNewVersion(string currentVersion, bool isPreRelease, bool checkPreRelease)
+            public bool IsNewVersion(string currentVersion, bool checkPreRelease)
             {
                 if (prerelease && !checkPreRelease)
                 {
@@ -226,11 +225,6 @@ namespace Shadowsocks.Controller
                     return false;
                 }
                 var cmp = CompareVersion(version, currentVersion);
-                if (cmp == 0)
-                {
-                    // If current version is pre-release and we find non-prerelease version online, then the non-prelease version is newer.
-                    return !prerelease && isPreRelease;
-                }
                 return cmp > 0;
             }
 
