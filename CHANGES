@@ -1,3 +1,14 @@
+3.3.6 2016-12-6
+- Refine system proxy mode switching logic,
+  merge 'Switch to PAC' and 'Switch to Global' into
+  'Switch system proxy mode'.
+- Don't store LogViewer window size in config file,
+  now you can sync config between devices with different
+  resolutions.
+- Add tag support for SS url
+- Add pre-release channel in update checker
+- Bug fixes and improvements
+
 3.3.5 2016-11-7
 - Improve system power mode handling
 - Update mbed TLS to 2.4.0
