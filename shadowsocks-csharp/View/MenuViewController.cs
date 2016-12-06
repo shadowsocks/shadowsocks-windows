@@ -48,6 +48,7 @@ namespace Shadowsocks.View
         private MenuItem editGFWUserRuleItem;
         private MenuItem editOnlinePACItem;
         private MenuItem autoCheckUpdatesToggleItem;
+        private MenuItem checkPreReleaseToggleItem;
         private MenuItem proxyItem;
         private MenuItem hotKeyItem;
         private MenuItem VerboseLoggingToggleItem;
@@ -283,6 +284,7 @@ namespace Shadowsocks.View
                     CreateMenuItem("Check for Updates...", new EventHandler(this.checkUpdatesItem_Click)),
                     new MenuItem("-"),
                     this.autoCheckUpdatesToggleItem = CreateMenuItem("Check for Updates at Startup", new EventHandler(this.autoCheckUpdatesToggleItem_Click)),
+                    this.checkPreReleaseToggleItem = CreateMenuItem("Check Pre-release Version", new EventHandler(this.checkPreReleaseToggleItem_Click)),
                 }),
                 CreateMenuItem("About...", new EventHandler(this.AboutItem_Click)),
                 new MenuItem("-"),
@@ -352,7 +354,7 @@ namespace Shadowsocks.View
         {
             if (updateChecker.NewVersionFound)
             {
-                ShowBalloonTip(String.Format(I18N.GetString("Shadowsocks {0} Update Found"), updateChecker.LatestVersionNumber), I18N.GetString("Click here to update"), ToolTipIcon.Info, 5000);
+                ShowBalloonTip(String.Format(I18N.GetString("Shadowsocks {0} Update Found"), updateChecker.LatestVersionNumber + updateChecker.LatestVersionSuffix), I18N.GetString("Click here to update"), ToolTipIcon.Info, 5000);
             }
             else if (!_isStartupChecking)
             {
@@ -816,12 +818,20 @@ namespace Shadowsocks.View
         {
             Configuration configuration = controller.GetConfigurationCopy();
             autoCheckUpdatesToggleItem.Checked = configuration.autoCheckUpdate;
+            checkPreReleaseToggleItem.Checked = configuration.checkPreRelease;
         }
 
         private void autoCheckUpdatesToggleItem_Click(object sender, EventArgs e)
         {
             Configuration configuration = controller.GetConfigurationCopy();
             controller.ToggleCheckingUpdate(!configuration.autoCheckUpdate);
+            UpdateUpdateMenu();
+        }
+
+        private void checkPreReleaseToggleItem_Click(object sender, EventArgs e)
+        {
+            Configuration configuration = controller.GetConfigurationCopy();
+            controller.ToggleCheckingPreRelease(!configuration.checkPreRelease);
             UpdateUpdateMenu();
         }
 

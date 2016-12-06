@@ -24,6 +24,7 @@ namespace Shadowsocks.Model
         public bool useOnlinePac;
         public bool availabilityStatistics;
         public bool autoCheckUpdate;
+        public bool checkPreRelease;
         public bool isVerboseLogging;
         public LogViewerConfig logViewer;
         public ProxyConfig proxy;

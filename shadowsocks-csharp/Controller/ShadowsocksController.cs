@@ -357,6 +357,16 @@ namespace Shadowsocks.Controller
             }
         }
 
+        public void ToggleCheckingPreRelease(bool enabled)
+        {
+            _config.checkPreRelease = enabled;
+            Configuration.Save(_config);
+            if (ConfigChanged != null)
+            {
+                ConfigChanged(this, new EventArgs());
+            }
+        }
+
         public void SaveLogViewerConfig(LogViewerConfig newConfig)
         {
             _config.logViewer = newConfig;
