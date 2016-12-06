@@ -12,11 +12,13 @@ using Shadowsocks.Util;
 
 namespace Shadowsocks.Controller
 {
-    class PACServer : Listener.Service
+    public class PACServer : Listener.Service
     {
         public const string PAC_FILE = "pac.txt";
         public const string USER_RULE_FILE = "user-rule.txt";
         public const string USER_ABP_FILE = "abp.txt";
+
+        public string PacSecret { get; private set; } = "";
 
         FileSystemWatcher PACFileWatcher;
         FileSystemWatcher UserRuleFileWatcher;
@@ -34,6 +36,17 @@ namespace Shadowsocks.Controller
         public void UpdateConfiguration(Configuration config)
         {
             this._config = config;
+
+            if (config.secureLocalPac)
+            {
+                var rd = new byte[32];
+                new Random().NextBytes(rd);
+                PacSecret = $"&secret={Convert.ToBase64String(rd)}";
+            }
+            else
+            {
+                PacSecret = "";
+            }
         }
 
         public override bool Handle(byte[] firstPacket, int length, Socket socket, object state)

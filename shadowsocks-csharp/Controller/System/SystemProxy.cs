@@ -11,7 +11,7 @@ namespace Shadowsocks.Controller
             return value.ToString("yyyyMMddHHmmssfff");
         }
 
-        public static void Update(Configuration config, bool forceDisable)
+        public static void Update(Configuration config, bool forceDisable, PACServer pacSrv)
         {
             bool global = config.global;
             bool enabled = config.enabled;
@@ -35,7 +35,7 @@ namespace Shadowsocks.Controller
                         if (config.useOnlinePac && !config.pacUrl.IsNullOrEmpty())
                             pacUrl = config.pacUrl;
                         else
-                            pacUrl = $"http://127.0.0.1:{config.localPort}/pac?t={GetTimestamp(DateTime.Now)}";
+                            pacUrl = $"http://127.0.0.1:{config.localPort}/pac?t={GetTimestamp(DateTime.Now)}{pacSrv.PacSecret}";
                         WinINet.SetIEProxy(true, false, "", pacUrl);
                     }
                 }
