@@ -60,6 +60,7 @@ namespace Shadowsocks.Controller
                 string request = Encoding.UTF8.GetString(firstPacket, 0, length);
                 string[] lines = request.Split('\r', '\n');
                 bool hostMatch = false, pathMatch = false, useSocks = false;
+                bool secretMatch = PacSecret.IsNullOrEmpty();
                 foreach (string line in lines)
                 {
                     string[] kv = line.Split(new char[] { ':' }, 2);
@@ -87,11 +88,25 @@ namespace Shadowsocks.Controller
                         {
                             pathMatch = true;
                         }
+                        if (!secretMatch)
+                        {
+                            if(line.IndexOf(PacSecret, StringComparison.Ordinal) >= 0)
+                            {
+                                secretMatch = true;
+                            }
+                        }
                     }
                 }
                 if (hostMatch && pathMatch)
                 {
-                    SendResponse(firstPacket, length, socket, useSocks);
+                    if (!secretMatch)
+                    {
+                        socket.Close(); // Close immediately
+                    }
+                    else
+                    {
+                        SendResponse(firstPacket, length, socket, useSocks);
+                    }
                     return true;
                 }
                 return false;
