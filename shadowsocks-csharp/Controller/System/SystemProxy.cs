@@ -27,21 +27,26 @@ namespace Shadowsocks.Controller
                 {
                     if (global)
                     {
-                        WinINet.SetIEProxy(true, true, "127.0.0.1:" + config.localPort.ToString(), "");
+                        Sysproxy.SetIEProxy(true, true, "127.0.0.1:" + config.localPort.ToString(), "");
                     }
                     else
                     {
                         string pacUrl;
                         if (config.useOnlinePac && !config.pacUrl.IsNullOrEmpty())
+                        {
                             pacUrl = config.pacUrl;
+                        }
                         else
-                            pacUrl = $"http://127.0.0.1:{config.localPort}/pac?t={GetTimestamp(DateTime.Now)}{pacSrv.PacSecret}";
-                        WinINet.SetIEProxy(true, false, "", pacUrl);
+                        {
+                            pacUrl =
+                                $"http://127.0.0.1:{config.localPort}/pac?t={GetTimestamp(DateTime.Now)}{pacSrv.PacSecret}";
+                        }
+                        Sysproxy.SetIEProxy(true, false, "", pacUrl);
                     }
                 }
                 else
                 {
-                    WinINet.SetIEProxy(false, false, "", "");
+                    Sysproxy.SetIEProxy(false, false, "", "");
                 }
             }
             catch (ProxyException ex)
