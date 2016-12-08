@@ -5,7 +5,7 @@ using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
-
+using Shadowsocks.Encryption;
 using Shadowsocks.Model;
 using Shadowsocks.Properties;
 using Shadowsocks.Util;
@@ -40,7 +40,7 @@ namespace Shadowsocks.Controller
             if (config.secureLocalPac)
             {
                 var rd = new byte[32];
-                new Random().NextBytes(rd);
+                RNG.GetBytes(rd);
                 PacSecret = $"&secret={Convert.ToBase64String(rd)}";
             }
             else

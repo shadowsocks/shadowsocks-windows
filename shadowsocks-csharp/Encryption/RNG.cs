@@ -26,6 +26,11 @@ namespace Shadowsocks.Encryption
             Init();
         }
 
+        public static void GetBytes(byte[] buf)
+        {
+            _rng.GetBytes(buf);
+        }
+
         public static void GetBytes(byte[] buf, int len)
         {
             try
