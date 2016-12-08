@@ -33,9 +33,14 @@ namespace Shadowsocks.Controller
                     {
                         string pacUrl;
                         if (config.useOnlinePac && !config.pacUrl.IsNullOrEmpty())
+                        {
                             pacUrl = config.pacUrl;
+                        }
                         else
-                            pacUrl = $"http://127.0.0.1:{config.localPort}/pac?t={GetTimestamp(DateTime.Now)}{pacSrv.PacSecret}";
+                        {
+                            pacUrl =
+                                $"http://127.0.0.1:{config.localPort}/pac?t={GetTimestamp(DateTime.Now)}{pacSrv.PacSecret}";
+                        }
                         Sysproxy.SetIEProxy(true, false, "", pacUrl);
                     }
                 }
