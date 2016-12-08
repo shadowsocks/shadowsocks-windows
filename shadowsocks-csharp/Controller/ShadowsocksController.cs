@@ -220,12 +220,13 @@ namespace Shadowsocks.Controller
             SaveConfig(_config);
         }
 
-        public void EnableProxy(int type, string proxy, int port)
+        public void EnableProxy(int type, string proxy, int port, int timeout)
         {
             _config.proxy.useProxy = true;
             _config.proxy.proxyType = type;
             _config.proxy.proxyServer = proxy;
             _config.proxy.proxyPort = port;
+            _config.proxy.proxyTimeout = timeout;
             SaveConfig(_config);
         }
 
@@ -381,16 +382,6 @@ namespace Shadowsocks.Controller
         {
             _config.logViewer = newConfig;
             newConfig.SaveSize();
-            Configuration.Save(_config);
-            if (ConfigChanged != null)
-            {
-                ConfigChanged(this, new EventArgs());
-            }
-        }
-
-        public void SaveProxyConfig(ProxyConfig newConfig)
-        {
-            _config.proxy = newConfig;
             Configuration.Save(_config);
             if (ConfigChanged != null)
             {

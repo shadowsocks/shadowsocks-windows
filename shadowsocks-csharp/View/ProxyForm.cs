@@ -58,35 +58,25 @@ namespace Shadowsocks.View
 
         private void OKButton_Click(object sender, EventArgs e)
         {
-            var type = ProxyTypeComboBox.SelectedIndex;
-            var proxy = ProxyServerTextBox.Text;
-            var port = 0;
-            var timeout = 3;
 
             if (UseProxyCheckBox.Checked)
             {
-                try
-                {
-                    port = int.Parse(ProxyPortTextBox.Text);
-                }
-                catch (FormatException)
+                int port;
+                int timeout;
+                if (!int.TryParse(ProxyPortTextBox.Text, out port))
                 {
                     MessageBox.Show(I18N.GetString("Illegal port number format"));
-                    ProxyPortTextBox.Clear();
                     return;
                 }
 
-                try
-                {
-                    timeout = int.Parse(ProxyTimeoutTextBox.Text);
-                }
-                catch (FormatException)
+                if (!int.TryParse(ProxyTimeoutTextBox.Text, out timeout))
                 {
                     MessageBox.Show(I18N.GetString("Illegal timeout format"));
-                    ProxyTimeoutTextBox.Clear();
                     return;
                 }
 
+                var type = ProxyTypeComboBox.SelectedIndex;
+                var proxy = ProxyServerTextBox.Text;
                 try
                 {
                     Configuration.CheckServer(proxy);
@@ -99,19 +89,12 @@ namespace Shadowsocks.View
                     return;
                 }
 
-                controller.EnableProxy(type, proxy, port);
+                controller.EnableProxy(type, proxy, port, timeout);
             }
             else
             {
                 controller.DisableProxy();
             }
-
-            _modifiedConfiguration.useProxy = UseProxyCheckBox.Checked;
-            _modifiedConfiguration.proxyType = type;
-            _modifiedConfiguration.proxyServer = proxy;
-            _modifiedConfiguration.proxyPort = port;
-            _modifiedConfiguration.proxyTimeout = timeout;
-            controller.SaveProxyConfig(_modifiedConfiguration);
 
             this.Close();
         }
@@ -142,9 +125,6 @@ namespace Shadowsocks.View
             }
             else
             {
-                ProxyServerTextBox.Clear();
-                ProxyPortTextBox.Clear();
-                ProxyTimeoutTextBox.Clear();
                 ProxyServerTextBox.Enabled = false;
                 ProxyPortTextBox.Enabled = false;
                 ProxyTimeoutTextBox.Enabled = false;
