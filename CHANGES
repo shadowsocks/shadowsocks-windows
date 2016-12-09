@@ -1,3 +1,10 @@
+3.4.0 (pre-release) 2016-12-9
+- Replace Privoxy with built-in http proxy.
+- Try fix system proxy settings on windows 10 insider preview.
+- Secure local pac.
+- Update bypass list.
+- Bug fixes and improvements.
+
 3.3.6 2016-12-6
 - Refine system proxy mode switching logic,
   merge 'Switch to PAC' and 'Switch to Global' into
