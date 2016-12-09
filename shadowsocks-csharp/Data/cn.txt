@@ -105,6 +105,7 @@ Reg All=注册全部热键
 
 Shadowsocks Error: {0}=Shadowsocks 错误: {0}
 Port already in use=端口已被占用
+Invalid server address=非法服务器地址
 Illegal port number format=非法端口格式
 Illegal timeout format=非法超时格式
 Please add at least one server=请添加至少一个服务器

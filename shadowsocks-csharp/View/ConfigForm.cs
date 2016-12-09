@@ -80,28 +80,26 @@ namespace Shadowsocks.View
                     return true;
                 }
                 Server server = new Server();
-                server.server = IPTextBox.Text.Trim();
-                try
+
+                if (Uri.CheckHostName(server.server = IPTextBox.Text.Trim()) == UriHostNameType.Unknown)
                 {
-                    server.server_port = int.Parse(ServerPortTextBox.Text);
+                    MessageBox.Show(I18N.GetString("Invalid server address"));
+                    IPTextBox.Focus();
+                    return false;
                 }
-                catch (FormatException)
+                if (!int.TryParse(ServerPortTextBox.Text, out server.server_port))
                 {
                     MessageBox.Show(I18N.GetString("Illegal port number format"));
-                    ServerPortTextBox.Clear();
+                    ServerPortTextBox.Focus();
                     return false;
                 }
                 server.password = PasswordTextBox.Text;
                 server.method = EncryptionSelect.Text;
                 server.remarks = RemarksTextBox.Text;
-                try
-                {
-                    server.timeout = int.Parse(TimeoutTextBox.Text);
-                }
-                catch (FormatException)
+                if (!int.TryParse(TimeoutTextBox.Text, out server.timeout))
                 {
                     MessageBox.Show(I18N.GetString("Illegal timeout format"));
-                    TimeoutTextBox.Clear();
+                    TimeoutTextBox.Focus();
                     return false;
                 }
                 server.auth = OneTimeAuth.Checked;
