@@ -6,6 +6,7 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using System.Web;
+using System.Windows.Forms;
 using Newtonsoft.Json;
 using Shadowsocks.Controller.Service;
 using Shadowsocks.Controller.Strategy;
@@ -573,6 +574,11 @@ namespace Shadowsocks.Controller
                 }
             }
             File.WriteAllText(PACServer.PAC_FILE, abpContent, Encoding.UTF8);
+        }
+
+        public void CopyPacUrl()
+        {
+            Clipboard.SetDataObject(_pacServer.PacUrl);
         }
 
         #region Memory Management

@@ -38,8 +38,7 @@ namespace Shadowsocks.Controller
                         }
                         else
                         {
-                            pacUrl =
-                                $"http://127.0.0.1:{config.localPort}/pac?t={GetTimestamp(DateTime.Now)}{pacSrv.PacSecret}";
+                            pacUrl = pacSrv.PacUrl;
                         }
                         Sysproxy.SetIEProxy(true, false, "", pacUrl);
                     }

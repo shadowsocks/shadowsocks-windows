@@ -18,7 +18,9 @@ namespace Shadowsocks.Controller
         public const string USER_RULE_FILE = "user-rule.txt";
         public const string USER_ABP_FILE = "abp.txt";
 
-        public string PacSecret { get; private set; } = "";
+        private string PacSecret { get; set; } = "";
+
+        public string PacUrl { get; private set; } = "";
 
         FileSystemWatcher PACFileWatcher;
         FileSystemWatcher UserRuleFileWatcher;
@@ -47,6 +49,14 @@ namespace Shadowsocks.Controller
             {
                 PacSecret = "";
             }
+
+            PacUrl = $"http://127.0.0.1:{config.localPort}/pac?t={GetTimestamp(DateTime.Now)}{PacSecret}";
+        }
+
+
+        private static string GetTimestamp(DateTime value)
+        {
+            return value.ToString("yyyyMMddHHmmssfff");
         }
 
         public override bool Handle(byte[] firstPacket, int length, Socket socket, object state)
