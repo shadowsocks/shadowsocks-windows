@@ -176,10 +176,10 @@ namespace Shadowsocks.Controller
 
         private void SortByVersions(List<Asset> asserts)
         {
-            asserts.Sort(new VersionComparer());
+            asserts.Sort();
         }
 
-        public class Asset
+        public class Asset : IComparable<Asset>
         {
             public bool prerelease;
             public string name;
@@ -243,14 +243,10 @@ namespace Shadowsocks.Controller
                 }
                 return 0;
             }
-        }
 
-        class VersionComparer : IComparer<Asset>
-        {
-            // Calls CaseInsensitiveComparer.Compare with the parameters reversed. 
-            public int Compare(Asset x, Asset y)
+            public int CompareTo(Asset other)
             {
-                return Asset.CompareVersion(x.version, y.version);
+                return CompareVersion(version, other.version);
             }
         }
     }
