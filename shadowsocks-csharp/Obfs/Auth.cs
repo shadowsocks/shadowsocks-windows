@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Shadowsocks.Controller;
 using System.Security.Cryptography;
+using Shadowsocks.Encryption;
 
 namespace Shadowsocks.Obfs
 {
@@ -963,12 +964,12 @@ namespace Shadowsocks.Obfs
             return true;
         }
 
-        protected HMAC CreateHMAC(byte[] key)
+        protected MbedTLS.HMAC CreateHMAC(byte[] key)
         {
             if (Method == "auth_aes128_md5")
-                return new HMACMD5(key);
+                return new MbedTLS.HMAC_MD5(key);
             if (Method == "auth_aes128_sha1")
-                return new HMACSHA1(key);
+                return new MbedTLS.HMAC_SHA1(key);
             return null;
         }
 
@@ -990,7 +991,7 @@ namespace Shadowsocks.Obfs
             }
 
             {
-                HMAC sha1 = CreateHMAC(key);
+                MbedTLS.HMAC sha1 = CreateHMAC(key);
                 byte[] sha1data = sha1.ComputeHash(outdata, 0, 2);
                 Array.Copy(sha1data, 0, outdata, 2, 2);
             }
@@ -1006,7 +1007,7 @@ namespace Shadowsocks.Obfs
             }
             ++pack_id;
             {
-                HMAC sha1 = CreateHMAC(key);
+                MbedTLS.HMAC sha1 = CreateHMAC(key);
                 byte[] sha1data = sha1.ComputeHash(outdata, 0, outlength - 4);
                 Array.Copy(sha1data, 0, outdata, outlength - 4, 4);
             }
@@ -1078,7 +1079,7 @@ namespace Shadowsocks.Obfs
                 uid.CopyTo(encrypt, 0);
             }
             {
-                HMAC sha1 = CreateHMAC(key);
+                MbedTLS.HMAC sha1 = CreateHMAC(key);
                 byte[] sha1data = sha1.ComputeHash(encrypt, 0, 20);
                 Array.Copy(sha1data, 0, encrypt, 20, 4);
             }
@@ -1086,7 +1087,7 @@ namespace Shadowsocks.Obfs
                 byte[] rnd = new byte[1];
                 random.NextBytes(rnd);
                 rnd.CopyTo(outdata, 0);
-                HMAC sha1 = CreateHMAC(key);
+                MbedTLS.HMAC sha1 = CreateHMAC(key);
                 byte[] sha1data = sha1.ComputeHash(rnd, 0, rnd.Length);
                 Array.Copy(sha1data, 0, outdata, rnd.Length, 7 - rnd.Length);
             }
@@ -1094,7 +1095,7 @@ namespace Shadowsocks.Obfs
             Array.Copy(data, 0, outdata, data_offset, datalength);
 
             {
-                HMAC sha1 = CreateHMAC(user_key);
+                MbedTLS.HMAC sha1 = CreateHMAC(user_key);
                 byte[] sha1data = sha1.ComputeHash(outdata, 0, outlength - 4);
                 Array.Copy(sha1data, 0, outdata, outlength - 4, 4);
             }
@@ -1163,7 +1164,7 @@ namespace Shadowsocks.Obfs
             while (recv_buf_len > 4)
             {
                 BitConverter.GetBytes(recv_id).CopyTo(key, key.Length - 4);
-                HMAC sha1 = CreateHMAC(key);
+                MbedTLS.HMAC sha1 = CreateHMAC(key);
                 {
                     byte[] sha1data = sha1.ComputeHash(recv_buf, 0, 2);
                     if (sha1data[0] != recv_buf[2] || sha1data[1] != recv_buf[3])
@@ -1227,7 +1228,7 @@ namespace Shadowsocks.Obfs
             Array.Copy(plaindata, 0, outdata, 0, datalength);
             uid.CopyTo(outdata, datalength);
             {
-                HMAC sha1 = CreateHMAC(user_key);
+                MbedTLS.HMAC sha1 = CreateHMAC(user_key);
                 byte[] sha1data = sha1.ComputeHash(outdata, 0, outlength - 4);
                 Array.Copy(sha1data, 0, outdata, outlength - 4, 4);
             }
@@ -1241,7 +1242,7 @@ namespace Shadowsocks.Obfs
                 outlength = 0;
                 return plaindata;
             }
-            HMAC sha1 = CreateHMAC(user_key);
+            MbedTLS.HMAC sha1 = CreateHMAC(user_key);
             byte[] sha1data = sha1.ComputeHash(plaindata, 0, datalength - 4);
             if (sha1data[0] != plaindata[datalength - 4]
                 || sha1data[1] != plaindata[datalength - 3]

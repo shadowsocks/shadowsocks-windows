@@ -672,7 +672,7 @@ namespace Shadowsocks.View
             {
                 try
                 {
-                    string link = controller.GetSSRRemarksLinkForServer(config.configs[config.index]);
+                    string link = config.configs[config.index].GetSSRRemarksLinkForServer();
                     Clipboard.SetText(link);
                 }
                 catch { }
@@ -687,7 +687,7 @@ namespace Shadowsocks.View
             {
                 if (!config.configs[index].enable)
                     continue;
-                link += controller.GetSSRRemarksLinkForServer(config.configs[index]) + "\r\n";
+                link += config.configs[index].GetSSRRemarksLinkForServer() + "\r\n";
             }
             try
             {
@@ -702,7 +702,7 @@ namespace Shadowsocks.View
             string link = "";
             for (int index = 0; index < config.configs.Count; ++index)
             {
-                link += controller.GetSSRRemarksLinkForServer(config.configs[index]) + "\r\n";
+                link += config.configs[index].GetSSRRemarksLinkForServer() + "\r\n";
             }
             try
             {

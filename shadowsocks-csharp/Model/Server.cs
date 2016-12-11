@@ -510,6 +510,37 @@ namespace Shadowsocks.Model
             }
         }
 
+        public string GetSSLinkForServer()
+        {
+            string parts = method + ":" + password + "@" + server + ":" + server_port;
+            string base64 = System.Convert.ToBase64String(Encoding.UTF8.GetBytes(parts)).Replace("=", "");
+            return "ss://" + base64;
+        }
+
+        public string GetSSRRemarksLinkForServer()
+        {
+            string main_part = server + ":" + server_port + ":" + protocol + ":" + method + ":" + obfs + ":" + Util.Utils.EncodeUrlSafeBase64(password).Replace("=", "");
+            string param_str = "obfsparam=" + Util.Utils.EncodeUrlSafeBase64(obfsparam ?? "").Replace("=", "");
+            if (remarks != null && remarks.Length > 0)
+            {
+                param_str += "&remarks=" + Util.Utils.EncodeUrlSafeBase64(remarks).Replace("=", "");
+            }
+            if (group != null && group.Length > 0)
+            {
+                param_str += "&group=" + Util.Utils.EncodeUrlSafeBase64(group).Replace("=", "");
+            }
+            if (udp_over_tcp)
+            {
+                param_str += "&uot=" + "1";
+            }
+            if (server_udp_port > 0)
+            {
+                param_str += "&udpport=" + server_udp_port.ToString();
+            }
+            string base64 = Util.Utils.EncodeUrlSafeBase64(main_part + "/?" + param_str).Replace("=", "");
+            return "ssr://" + base64;
+        }
+
         public bool isEnable()
         {
             return enable;

@@ -349,11 +349,11 @@ namespace Shadowsocks.View
 
                 if (checkSSRLink.Checked && ssr)
                 {
-                    TextLink.Text = controller.GetSSRRemarksLinkForServer(server);
+                    TextLink.Text = server.GetSSRRemarksLinkForServer();
                 }
                 else
                 {
-                    TextLink.Text = controller.GetSSLinkForServer(server);
+                    TextLink.Text = server.GetSSLinkForServer();
                 }
 
                 if (CheckTCPoverUDP.Checked || CheckUDPoverUDP.Checked || server.server_udp_port != 0)

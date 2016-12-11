@@ -67,22 +67,24 @@ namespace Shadowsocks.Properties {
         ///
         ///# Menu items
         ///
-        ///Enable System Proxy=启用系统代理
+        ///Disable system proxy=不修改系统(IE)代理
         ///Mode=系统代理模式
         ///PAC=PAC 模式
         ///Global=全局模式
+        ///Proxy rule=代理规则
+        ///Bypass LAN=绕过局域网
+        ///Bypass LAN &amp;&amp; China=绕过局域网和大陆
+        ///Bypass LAN &amp;&amp; not China=绕过局域网和非大陆
+        ///Disable bypass=全局
         ///Servers=服务器
-        ///Edit Servers...=编辑服务器...
-        ///Global Settings...=选项设置...
+        ///Edit servers...=编辑服务器...
+        ///Import servers from file...=从文件导入服务器...
+        ///Global settings...=选项设置...
         ///Start on Boot=开机启动
         ///Allow Clients from LAN=允许来自局域网的连接
-        ///Enable balance=服务器负载均衡
+        ///Load balance=服务器负载均衡
         ///Same host for same address=优先相同节点连接同一地址
-        ///Enable domain white list(http proxy only)=使用域名白名单(仅http代理)
-        ///Local PAC=使用本地 PAC
-        ///Online PAC=使用在线 PAC
-        ///Update Local PAC from Lan IP List=更新PAC为绕过局域网IP
-        ///Update Local PAC from Chn  [字符串的其余部分被截断]&quot;; 的本地化字符串。
+        ///Enable domai [字符串的其余部分被截断]&quot;; 的本地化字符串。
         /// </summary>
         internal static string cn {
             get {
@@ -96,6 +98,16 @@ namespace Shadowsocks.Properties {
         internal static byte[] libsscrypto_dll {
             get {
                 object obj = ResourceManager.GetObject("libsscrypto_dll", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   查找 System.Byte[] 类型的本地化资源。
+        /// </summary>
+        internal static byte[] libsscrypto64_dll {
+            get {
+                object obj = ResourceManager.GetObject("libsscrypto64_dll", resourceCulture);
                 return ((byte[])(obj));
             }
         }
@@ -126,8 +138,6 @@ namespace Shadowsocks.Properties {
         ///activity-animation 0
         ///forward-socks5 / 127.0.0.1:__SOCKS_PORT__ .
         ///hide-console
-        ///keep-alive-timeout __KEEP_ALIVE_TIMEOUT__
-        ///connection-sharing __CONNECTION_SHARING__
         ///__BYPASS_ACTION__
         ///
         /// 的本地化字符串。
@@ -216,22 +226,24 @@ namespace Shadowsocks.Properties {
         ///
         ///# Menu items
         ///
-        ///Enable System Proxy=啟用系統代理
+        ///Disable system proxy=不修改系統(IE)代理
         ///Mode=系統代理模式
         ///PAC=PAC 模式
         ///Global=全局模式
+        ///Proxy rule=代理規則
+        ///Bypass LAN=绕过區域網路
+        ///Bypass LAN &amp;&amp; China=绕过區域網路和大陸
+        ///Bypass LAN &amp;&amp; not China=绕过區域網路和非大陸
+        ///Disable bypass=全局
         ///Servers=伺服器
-        ///Edit Servers...=編輯伺服器...
-        ///Global Settings...=選項設置...
+        ///Edit servers...=編輯伺服器...
+        ///Import servers from file...=從文件導入伺服器...
+        ///Global settings...=選項設置...
         ///Start on Boot=開機啟動
-        ///Allow Clients from LAN=允許來自局域網的連接
-        ///Enable balance=伺服器負載均衡
-        ///Same host for same address=優先相同節點連接同一地址
-        ///Enable domain white list(http proxy only)=使用域名白名單(僅http代理)
-        ///Local PAC=使用本地 PAC
-        ///Online PAC=使用在線 PAC
-        ///Update Local PAC from Lan IP List=更新PAC為繞過局域網IP
-        ///Update Local PAC from Chn [字符串的其余部分被截断]&quot;; 的本地化字符串。
+        ///Allow Clients from LAN=允許來自區域網路的連接
+        ///Load balance=伺服器負載均衡
+        ///Same host for same address=優先相同節點連接同一位址
+        ///Enable  [字符串的其余部分被截断]&quot;; 的本地化字符串。
         /// </summary>
         internal static string zh_tw {
             get {

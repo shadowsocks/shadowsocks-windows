@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Text;
+using System.Windows.Forms;
 using Shadowsocks.Encryption;
 using Shadowsocks.Model;
 
@@ -35,8 +36,8 @@ namespace Shadowsocks.Controller
                 {
                 }
 
-                string filePath = System.Windows.Forms.Application.ExecutablePath + "_sign";
-                using (FileStream fs = new FileStream(filePath, FileMode.Open, FileAccess.Read))
+                string filePath = Util.Utils.GetExecutablePath() + "_sign";
+                using (FileStream fs = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
                 {
                     using (StreamReader r = new StreamReader(fs))
                     {
@@ -45,8 +46,9 @@ namespace Shadowsocks.Controller
                     }
                 }
             }
-            catch
+            catch (Exception e)
             {
+                MessageBox.Show(e != null ? e.ToString() : "", e.Message);
                 return false;
             }
         }

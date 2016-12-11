@@ -407,12 +407,12 @@ namespace Shadowsocks.Controller
             {
                 command = 1;
             }
-            if (Util.Utils.isMatchSubNet(((IPEndPoint)_connection.RemoteEndPoint).Address, "127.0.0.0/8"))
-            {
-                httpProxyState.httpAuthUser = "";
-                httpProxyState.httpAuthPass = "";
-            }
-            else
+            //if (Util.Utils.isMatchSubNet(((IPEndPoint)_connection.RemoteEndPoint).Address, "127.0.0.0/8"))
+            //{
+            //    httpProxyState.httpAuthUser = "";
+            //    httpProxyState.httpAuthPass = "";
+            //}
+            //else
             {
                 httpProxyState.httpAuthUser = _config.authUser;
                 httpProxyState.httpAuthPass = _config.authPass;

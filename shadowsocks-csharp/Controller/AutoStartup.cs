@@ -13,7 +13,7 @@ namespace Shadowsocks.Controller
             RegistryKey runKey = null;
             try
             {
-                string path = Application.ExecutablePath;
+                string path = Util.Utils.GetExecutablePath();
                 runKey = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Run", true);
                 if (enabled)
                 {
@@ -52,7 +52,7 @@ namespace Shadowsocks.Controller
             RegistryKey runKey = null;
             try
             {
-                string path = Application.ExecutablePath;
+                string path = Util.Utils.GetExecutablePath();
                 runKey = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Run");
                 string[] runList = runKey.GetValueNames();
                 runKey.Close();

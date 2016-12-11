@@ -897,6 +897,7 @@ namespace Shadowsocks.View
                 if (iData.GetDataPresent(DataFormats.Text))
                 {
                     string[] urls = ((string)iData.GetData(DataFormats.Text)).Split(new string[] { "\r", "\n", "\t", " ", "|" }, StringSplitOptions.RemoveEmptyEntries);
+                    Array.Reverse(urls);
                     foreach (string url in urls)
                     {
                         controller.AddServerBySSURL(url);

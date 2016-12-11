@@ -417,51 +417,6 @@ namespace Shadowsocks.Controller
             }
         }
 
-        protected string GetObfsPartOfSSLink(Server server)
-        {
-            string parts = server.method + ":" + server.password + "@" + server.server + ":" + server.server_port;
-            return parts;
-        }
-
-        public string GetSSLinkForCurrentServer()
-        {
-            Server server = GetCurrentServer();
-            string parts = GetObfsPartOfSSLink(server);
-            string base64 = Util.Utils.EncodeUrlSafeBase64(parts).Replace("=", "");
-            return "ss://" + base64;
-        }
-
-        public string GetSSLinkForServer(Server server)
-        {
-            string parts = GetObfsPartOfSSLink(server);
-            string base64 = Util.Utils.EncodeUrlSafeBase64(parts).Replace("=", "");
-            return "ss://" + base64;
-        }
-
-        public string GetSSRRemarksLinkForServer(Server server)
-        {
-            string main_part = server.server + ":" + server.server_port + ":" + server.protocol + ":" + server.method + ":" + server.obfs + ":" + Util.Utils.EncodeUrlSafeBase64(server.password).Replace("=", "");
-            string param_str = "obfsparam=" + Util.Utils.EncodeUrlSafeBase64(server.obfsparam??"").Replace("=", "");
-            if (server.remarks != null && server.remarks.Length > 0)
-            {
-                param_str += "&remarks=" + Util.Utils.EncodeUrlSafeBase64(server.remarks).Replace("=", "");
-            }
-            if (server.group != null && server.group.Length > 0)
-            {
-                param_str += "&group=" + Util.Utils.EncodeUrlSafeBase64(server.group).Replace("=", "");
-            }
-            if (server.udp_over_tcp)
-            {
-                param_str += "&uot=" + "1";
-            }
-            if (server.server_udp_port > 0)
-            {
-                param_str += "&udpport=" + server.server_udp_port.ToString();
-            }
-            string base64 = Util.Utils.EncodeUrlSafeBase64(main_part + "/?" + param_str).Replace("=", "");
-            return "ssr://" + base64;
-        }
-
         public void UpdatePACFromGFWList()
         {
             if (gfwListUpdater != null)

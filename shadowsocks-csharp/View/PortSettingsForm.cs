@@ -95,9 +95,12 @@ namespace Shadowsocks.View
 
         private string ServerListText2Key(string text)
         {
-            int pos = text.IndexOf(' ');
-            if (pos > 0)
-                return text.Substring(0, pos);
+            if (text != null)
+            {
+                int pos = text.IndexOf(' ');
+                if (pos > 0)
+                    return text.Substring(0, pos);
+            }
             return text;
         }
 
@@ -157,7 +160,7 @@ namespace Shadowsocks.View
         private void LoadSelectedServer()
         {
             string key = ServerListText2Key((string)listPorts.SelectedItem);
-            if (_modifiedConfiguration.portMap.ContainsKey(key))
+            if (key != null && _modifiedConfiguration.portMap.ContainsKey(key))
             {
                 PortMapConfig cfg = _modifiedConfiguration.portMap[key] as PortMapConfig;
 
@@ -191,7 +194,7 @@ namespace Shadowsocks.View
 
         private string GetDisplayText(Server s)
         {
-            return (s.group.Length > 0 ? s.group + " - " : "    - ") + s.FriendlyName() + "        #" + s.id;
+            return (s.group != null && s.group.Length > 0 ? s.group + " - " : "    - ") + s.FriendlyName() + "        #" + s.id;
         }
 
         private string GetIDText(string id)

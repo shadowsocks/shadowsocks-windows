@@ -403,7 +403,7 @@
             this.UDPoverTCPLabel.Name = "UDPoverTCPLabel";
             this.UDPoverTCPLabel.Size = new System.Drawing.Size(81, 17);
             this.UDPoverTCPLabel.TabIndex = 23;
-            this.UDPoverTCPLabel.Text = "UDPoverTCP";
+            this.UDPoverTCPLabel.Text = "UDP over TCP";
             this.UDPoverTCPLabel.Visible = false;
             // 
             // CheckUDPoverUDP
@@ -449,7 +449,7 @@
             this.TCPoverUDPLabel.Name = "TCPoverUDPLabel";
             this.TCPoverUDPLabel.Size = new System.Drawing.Size(81, 17);
             this.TCPoverUDPLabel.TabIndex = 23;
-            this.TCPoverUDPLabel.Text = "TCPoverUDP";
+            this.TCPoverUDPLabel.Text = "TCP over UDP";
             this.TCPoverUDPLabel.Visible = false;
             // 
             // CheckTCPoverUDP

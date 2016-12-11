@@ -10,7 +10,9 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
+using System.Windows.Forms;
 using OpenDNS;
+using Shadowsocks.Encryption;
 using Shadowsocks.Model;
 
 namespace Shadowsocks.Util
@@ -348,20 +350,20 @@ namespace Shadowsocks.Util
         {
             try
             {
-                string filePath = System.Windows.Forms.Application.ExecutablePath;
-                using (FileStream fs = new FileStream(filePath, FileMode.Open, FileAccess.Read))
+                string filePath = Util.Utils.GetExecutablePath();
+                using (FileStream fs = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
                 {
                     using (BufferedStream bs = new BufferedStream(fs))
                     {
-                        using (SHA512Managed sha = new SHA512Managed())
-                        {
-                            return sha.ComputeHash(bs);
-                        }
+                        byte[] buffer = new byte[bs.Length];
+                        bs.Read(buffer, 0, buffer.Length);
+                        return MbedTLS.SHA512(buffer);
                     }
                 }
             }
-            catch
+            catch (Exception e)
             {
+                MessageBox.Show(e != null ? e.ToString() : "", e.Message);
                 return null;
             }
         }
@@ -378,23 +380,18 @@ namespace Shadowsocks.Util
 
         public static string BinarySHA512hex()
         {
+            return Hex(BinarySHA512());
+        }
+
+        public static string GetExecutablePath()
+        {
             try
             {
-                string filePath = System.Windows.Forms.Application.ExecutablePath;
-                using (FileStream fs = new FileStream(filePath, FileMode.Open, FileAccess.Read))
-                {
-                    using (BufferedStream bs = new BufferedStream(fs))
-                    {
-                        using (SHA512Managed sha = new SHA512Managed())
-                        {
-                            return Hex(sha.ComputeHash(bs));
-                        }
-                    }
-                }
+                return System.Windows.Forms.Application.ExecutablePath;
             }
             catch
             {
-                return null;
+                return System.Reflection.Assembly.GetExecutingAssembly().Location;
             }
         }
 
