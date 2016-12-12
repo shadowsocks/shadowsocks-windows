@@ -64,7 +64,7 @@ namespace Shadowsocks.Controller.Service
             Close();
         }
 
-        private static readonly Regex HttpRequestHeaderRegex = new Regex(@"^(?<method>[A-Z]+?) (?<path>[^\s]+) (?<tail>HTTP/1\.\d)$");
+        private static readonly Regex HttpRequestHeaderRegex = new Regex(@"^(?<method>[A-Z]+?) (?<path>[^\s]+) (?<tail>HTTP/1\.\d)$", RegexOptions.Compiled);
 
         private int _requestLineCount = 0;
         private bool _isConnect = false;
