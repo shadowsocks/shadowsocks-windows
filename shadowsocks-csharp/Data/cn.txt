@@ -21,7 +21,7 @@ Update Local PAC from GFWList=从 GFWList 更新本地 PAC
 Edit User Rule for GFWList...=编辑 GFWList 的用户规则...
 Secure Local PAC=保护本地 PAC
 Copy Local PAC URL=复制本地 PAC 网址
-Show QRCode...=显示二维码...
+Share Server Config...=分享服务器配置...
 Scan QRCode from Screen...=扫描屏幕上的二维码...
 Availability Statistics=统计可用性
 Show Logs...=显示日志...
@@ -83,7 +83,7 @@ Outbound=出站
 
 # QRCode Form
 
-QRCode=二维码
+QRCode and URL=二维码与 URL
 
 # PAC Url Form
 

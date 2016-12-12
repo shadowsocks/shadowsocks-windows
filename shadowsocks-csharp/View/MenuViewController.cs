@@ -261,7 +261,7 @@ namespace Shadowsocks.View
                     this.SeperatorItem = new MenuItem("-"),
                     this.ConfigItem = CreateMenuItem("Edit Servers...", new EventHandler(this.Config_Click)),
                     CreateMenuItem("Statistics Config...", StatisticsConfigItem_Click),
-                    CreateMenuItem("Show QRCode...", new EventHandler(this.QRCodeItem_Click)),
+                    CreateMenuItem("Share Server Config...", new EventHandler(this.QRCodeItem_Click)),
                     CreateMenuItem("Scan QRCode from Screen...", new EventHandler(this.ScanQRCodeItem_Click))
                 }),
                 CreateMenuGroup("PAC ", new MenuItem[] {

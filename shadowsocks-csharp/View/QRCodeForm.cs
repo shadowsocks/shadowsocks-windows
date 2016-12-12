@@ -24,7 +24,7 @@ namespace Shadowsocks.View
             this.code = code;
             InitializeComponent();
             this.Icon = Icon.FromHandle(Resources.ssw128.GetHicon());
-            this.Text = I18N.GetString("QRCode");
+            this.Text = I18N.GetString("QRCode and URL");
         }
 
         private void GenQR(string ssconfig)
@@ -69,7 +69,14 @@ namespace Shadowsocks.View
 
         private void listBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
-            GenQR((sender as ListBox)?.SelectedValue.ToString());
+            var url = (sender as ListBox)?.SelectedValue.ToString();
+            GenQR(url);
+            textBoxURL.Text = url;
+        }
+
+        private void textBoxURL_Click(object sender, EventArgs e)
+        {
+            textBoxURL.SelectAll();
         }
     }
 }
