@@ -246,16 +246,21 @@ namespace Shadowsocks.Controller.Service
             {
                 Logging.LogUsefulException(e);
             }
-            try
+
+            if (_currentRemoteSession != null)
             {
-                var remote = _currentRemoteSession.Remote;
-                remote.Shutdown(SocketShutdown.Both);
-                remote.Close();
+                try
+                {
+                    var remote = _currentRemoteSession.Remote;
+                    remote.Shutdown(SocketShutdown.Both);
+                    remote.Close();
+                }
+                catch (Exception e)
+                {
+                    Logging.LogUsefulException(e);
+                }
             }
-            catch (Exception e)
-            {
-                Logging.LogUsefulException(e);
-            }
+
             lock (_encryptionLock)
             {
                 lock (_decryptionLock)
@@ -319,7 +324,16 @@ namespace Shadowsocks.Controller.Service
                 }
 
                 var session = new AsyncSession(remote);
-                _currentRemoteSession = session;
+                lock (_closeConnLock)
+                {
+                    if (Closed)
+                    {
+                        remote.Close();
+                        return;
+                    }
+
+                    _currentRemoteSession = session;
+                }
 
                 ProxyTimer proxyTimer = new ProxyTimer(_proxyTimeout);
                 proxyTimer.AutoReset = false;
