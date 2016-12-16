@@ -1,3 +1,8 @@
+3.4.2 2016-12-16
+- Fix null ref in TCPRelay. (#940)
+- Bring Privoxy back. (#948)
+- Bug fixes and improvements.
+
 3.4.1 (pre-release) 2016-12-13
 - Fix crash if user input an invaild server address. (#933)
 - Fix ERR_TOO_MANY_REDIRECTS with http proxy. (#937)
