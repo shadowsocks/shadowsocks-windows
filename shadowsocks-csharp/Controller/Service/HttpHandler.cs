@@ -66,7 +66,7 @@ namespace Shadowsocks.Controller.Service
         private static readonly Regex HttpRequestHeaderRegex = new Regex(@"^([A-Z]+?) ([^\s]+) HTTP/1\.\d$");
 
         private int _requestLineCount = 0;
-        private bool _isConnect = false;
+        private volatile bool _isConnect = false;
 
         private string _targetHost;
         private int _targetPort;
@@ -156,7 +156,7 @@ namespace Shadowsocks.Controller.Service
 
             if (_targetHost == null)
             {
-                Logging.Error("Unknown host");
+                Logging.Error("Unkonwn host");
                 Close();
             }
             else
