@@ -387,11 +387,6 @@ namespace Shadowsocks.Controller.Service
 
                 Logging.Debug(line);
 
-                if (!line.StartsWith("Proxy-"))
-                {
-                    _headers.Enqueue(line);
-                }
-
                 if (_requestLineCount == 0)
                 {
                     var m = HttpRequestHeaderRegex.Match(line);
@@ -418,13 +413,20 @@ namespace Shadowsocks.Controller.Service
                                 _targetPort = 80;
                             }
                         }
+
+                        _headers.Enqueue(line);
                     }
                 }
                 else
                 {
                     if (line.IsNullOrEmpty())
                     {
+                        _headers.Enqueue("");
                         return true;
+                    }
+                    if (!line.StartsWith("Proxy-"))
+                    {
+                        _headers.Enqueue(line);
                     }
 
                     if (!_isConnect)
