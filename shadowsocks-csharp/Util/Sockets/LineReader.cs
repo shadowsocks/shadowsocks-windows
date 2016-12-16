@@ -20,16 +20,12 @@ namespace Shadowsocks.Util.Sockets
         private int _bufferDataIndex;
         private int _bufferDataLength;
 
-        public LineReader(byte[] buffer, WrappedSocket socket, byte[] firstPackge, int index, int length,
+        public LineReader(WrappedSocket socket, byte[] firstPackge, int index, int length,
             Func<string, object, bool> onLineRead, Action<Exception, object> onException,
             Action<byte[], int, int, object> onFinish,
-            Encoding encoding, string delimiter,
+            Encoding encoding, string delimiter, int maxLineBytes,
             object state)
         {
-            if (buffer == null)
-            {
-                throw new ArgumentNullException(nameof(buffer));
-            }
             if (socket == null)
             {
                 throw new ArgumentNullException(nameof(socket));
@@ -47,9 +43,9 @@ namespace Shadowsocks.Util.Sockets
                 throw new ArgumentNullException(nameof(delimiter));
             }
 
-            if (buffer.Length < length)
+            if (maxLineBytes < length)
             {
-                throw new ArgumentException("Line buffer length can't less than first package length!", nameof(buffer));
+                throw new ArgumentException("Line buffer length can't less than first package length!", nameof(maxLineBytes));
             }
 
             if (length > 0)
@@ -76,26 +72,19 @@ namespace Shadowsocks.Util.Sockets
                 throw new ArgumentException("Too short!", nameof(delimiter));
             }
 
-            if (buffer.Length < _delimiterBytes.Length)
+            if (maxLineBytes < _delimiterBytes.Length)
             {
-                throw new ArgumentException("Too small!", nameof(buffer));
+                throw new ArgumentException("Too small!", nameof(maxLineBytes));
             }
 
             _delimiterSearch = new ByteSearch.SearchTarget(_delimiterBytes);
 
-            _lineBuffer = buffer;
+            _lineBuffer = new byte[maxLineBytes];
 
             if (length > 0)
             {
                 // process first package
-                if (buffer == firstPackge)
-                {
-                    _bufferDataIndex = index;
-                }
-                else
-                {
-                    Array.Copy(firstPackge, index, _lineBuffer, 0, length);
-                }
+                Array.Copy(firstPackge, index, _lineBuffer, 0, length);
                 _bufferDataLength = length;
 
                 try
@@ -111,16 +100,15 @@ namespace Shadowsocks.Util.Sockets
             else
             {
                 // start reading
-                socket.BeginReceive(_lineBuffer, 0, _lineBuffer.Length, 0, ReceiveCallback, 0);
+                socket.BeginReceive(_lineBuffer, 0, maxLineBytes, 0, ReceiveCallback, 0);
             }
         }
 
-        public LineReader(int maxLineBytes, WrappedSocket socket, Func<string, object, bool> onLineRead,
-            Action<Exception, object> onException, Action<byte[], int, int, object> onFinish, Encoding encoding,
-            string delimiter, object state)
-            : this(
-                new byte[maxLineBytes], socket, null, 0, 0, onLineRead, onException, onFinish, encoding, delimiter,
-                state)
+        public LineReader(WrappedSocket socket, Func<string, object, bool> onLineRead,
+            Action<Exception, object> onException,
+            Action<byte[], int, int, object> onFinish, Encoding encoding, string delimiter, int maxLineBytes,
+            object state)
+            : this(socket, null, 0, 0, onLineRead, onException, onFinish, encoding, delimiter, maxLineBytes, state)
         {
         }
 
