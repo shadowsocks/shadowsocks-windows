@@ -64,7 +64,7 @@ namespace Shadowsocks.Controller.Service
             Close();
         }
 
-        private static readonly Regex HttpRequestHeaderRegex = new Regex(@"^(?<method>[A-Z]+?) (?<path>[^\s]+) (?<tail>HTTP/1\.\d)$", RegexOptions.Compiled);
+        private static readonly Regex HttpRequestHeaderRegex = new Regex(@"^([A-Z]+?) ([^\s]+) HTTP/1\.\d$");
 
         private int _requestLineCount = 0;
         private bool _isConnect = false;
@@ -101,57 +101,31 @@ namespace Shadowsocks.Controller.Service
 
             Logging.Debug(line);
 
+            if (!line.StartsWith("Proxy-"))
+            {
+                _headers.Enqueue(line);
+            }
+
             if (_requestLineCount == 0)
             {
                 var m = HttpRequestHeaderRegex.Match(line);
                 if (m.Success)
                 {
-                    var method = m.Groups["method"].Value;
-                    var path = m.Groups["path"].Value;
+                    var method = m.Groups[1].Value;
 
                     if (method == "CONNECT")
                     {
                         _isConnect = true;
 
-                        if (!ParseHost(path))
+                        if (!ParseHost(m.Groups[2].Value))
                         {
                             throw new Exception("Bad http header: " + line);
                         }
                     }
-                    else
-                    {
-                        var targetUrl = new Uri(path);
-
-                        if (!ParseHost(targetUrl.Authority))
-                        {
-                            throw new Exception("Bad http header: " + line);
-                        }
-
-                        var newRequestLine = $"{method} {targetUrl.PathAndQuery} {m.Groups["tail"].Value}";
-                        _headers.Enqueue(newRequestLine);
-                    }
-                }
-                else
-                {
-                    throw new FormatException("Not a vaild request line");
                 }
             }
             else
             {
-                // Handle Proxy-x Headers
-
-                if (!line.StartsWith("Proxy-"))
-                {
-                    _headers.Enqueue(line);
-                }
-                else
-                {
-                    if (line.StartsWith("Proxy-Connection: "))
-                    {
-                        _headers.Enqueue(line.Substring(6));
-                    }
-                }
-
                 if (line.IsNullOrEmpty())
                 {
                     return true;
