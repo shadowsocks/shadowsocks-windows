@@ -190,7 +190,6 @@
     <Compile Include="StringEx.cs" />
     <Compile Include="Controller\System\Hotkeys\Hotkeys.cs" />
     <Compile Include="Encryption\RNG.cs" />
-    <Compile Include="Util\Sockets\ByteSearch.cs" />
     <Compile Include="Util\Sockets\LineReader.cs" />
     <Compile Include="Util\Sockets\SocketUtil.cs" />
     <Compile Include="Util\Sockets\WrappedSocket.cs" />
