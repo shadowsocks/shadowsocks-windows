@@ -60,8 +60,7 @@ namespace Shadowsocks.Controller.Service
 
         private void OnException(Exception ex, object state)
         {
-            Logging.LogUsefulException(ex);
-            Close();
+            throw ex;
         }
 
         private static readonly Regex HttpRequestHeaderRegex = new Regex(@"^([A-Z]+?) ([^\s]+) HTTP/1\.\d$");
