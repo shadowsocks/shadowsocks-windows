@@ -547,7 +547,7 @@ namespace Shadowsocks.Controller
                 var session = new AsyncSession(remote);
                 lock (_closeConnLock)
                 {
-                    if (Closed)
+                    if (_closed)
                     {
                         remote.Close();
                         return;
