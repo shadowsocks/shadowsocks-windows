@@ -4,9 +4,9 @@ using System.Net.Sockets;
 using System.Threading;
 using Shadowsocks.Util.Sockets;
 
-namespace Shadowsocks.ForwardProxy
+namespace Shadowsocks.Proxy
 {
-    public class DirectConnect : IForwardProxy
+    public class DirectConnect : IProxy
     {
         private class FakeAsyncResult : IAsyncResult
         {

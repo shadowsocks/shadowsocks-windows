@@ -7,8 +7,8 @@ using System.Timers;
 
 using Shadowsocks.Controller.Strategy;
 using Shadowsocks.Encryption;
-using Shadowsocks.ForwardProxy;
 using Shadowsocks.Model;
+using Shadowsocks.Proxy;
 using Shadowsocks.Util.Sockets;
 
 namespace Shadowsocks.Controller
@@ -97,9 +97,9 @@ namespace Shadowsocks.Controller
     {
         class AsyncSession
         {
-            public IForwardProxy Remote { get; }
+            public IProxy Remote { get; }
 
-            public AsyncSession(IForwardProxy remote)
+            public AsyncSession(IProxy remote)
             {
                 Remote = remote;
             }
@@ -109,7 +109,7 @@ namespace Shadowsocks.Controller
         {
             public T State { get; set; }
 
-            public AsyncSession(IForwardProxy remote, T state) : base(remote)
+            public AsyncSession(IProxy remote, T state) : base(remote)
             {
                 State = state;
             }
@@ -521,7 +521,7 @@ namespace Shadowsocks.Controller
                 CreateRemote();
 
                 // Setting up proxy
-                IForwardProxy remote;
+                IProxy remote;
                 EndPoint proxyEP;
                 if (_config.proxy.useProxy)
                 {
