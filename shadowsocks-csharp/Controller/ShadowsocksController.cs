@@ -560,7 +560,20 @@ namespace Shadowsocks.Controller
             List<string> lines = GFWListUpdater.ParseResult(File.ReadAllText(Utils.GetTempPath("gfwlist.txt")));
             if (File.Exists(PACServer.USER_RULE_FILE))
             {
-                string local = File.ReadAllText(PACServer.USER_RULE_FILE, Encoding.UTF8);
+                string local;
+                try {
+                    // The file has a chance to be locked in the moment of saving and can not open for read.
+                    local = File.ReadAllText(PACServer.USER_RULE_FILE, Encoding.UTF8);
+                } catch(IOException) {
+                    try {
+                        // Try to read again on failure.
+                        local = File.ReadAllText(PACServer.USER_RULE_FILE, Encoding.UTF8);
+                    } catch(IOException) {
+                        // If it still fails, logged the log and give up try.
+                        Logging.Error(I18N.GetString("Failed to update user rule"));
+                        return;
+                    }
+                }
                 using (var sr = new StringReader(local))
                 {
                     foreach (var rule in sr.NonWhiteSpaceLines())

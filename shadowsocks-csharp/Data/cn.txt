@@ -122,6 +122,7 @@ You can turn on/off Shadowsocks in the context menu=可以在右键菜单中开�
 System Proxy Enabled=系统代理已启用
 System Proxy Disabled=系统代理未启用
 Failed to update PAC file =更新 PAC 文件失败
+Failed to update user rule=更新用户规则文件失败，请确认user-rule.txt文件没有被其他程序锁定。
 PAC updated=更新 PAC 成功
 No updates found. Please report to GFWList if you have problems with it.=未发现更新。如有问题请提交给 GFWList。
 No QRCode found. Try to zoom in or move it to the center of the screen.=未发现二维码，尝试把它放大或移动到靠近屏幕中间的位置
