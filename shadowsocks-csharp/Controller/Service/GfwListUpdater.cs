@@ -36,51 +36,11 @@ namespace Shadowsocks.Controller
             try
             {
                 File.WriteAllText(Utils.GetTempPath("gfwlist.txt"), e.Result, Encoding.UTF8);
-                List<string> lines = ParseResult(e.Result);
-                if (File.Exists(PACServer.USER_RULE_FILE))
-                {
-                    string local = File.ReadAllText(PACServer.USER_RULE_FILE, Encoding.UTF8);
-                    using (var sr = new StringReader(local))
-                    {
-                        foreach (var rule in sr.NonWhiteSpaceLines())
-                        {
-                            if (rule.BeginWithAny(IgnoredLineBegins))
-                                continue;
-                            lines.Add(rule);
-                        }
-                    }
-                }
-                string abpContent;
-                if (File.Exists(PACServer.USER_ABP_FILE))
-                {
-                    abpContent = File.ReadAllText(PACServer.USER_ABP_FILE, Encoding.UTF8);
-                }
-                else
-                {
-                    abpContent = Utils.UnGzip(Resources.abp_js);
-                }
-                abpContent = abpContent.Replace("__RULES__", JsonConvert.SerializeObject(lines, Formatting.Indented));
-                if (File.Exists(PACServer.PAC_FILE))
-                {
-                    string original = File.ReadAllText(PACServer.PAC_FILE, Encoding.UTF8);
-                    if (original == abpContent)
-                    {
-                        UpdateCompleted(this, new ResultEventArgs(false));
-                        return;
-                    }
-                }
-                File.WriteAllText(PACServer.PAC_FILE, abpContent, Encoding.UTF8);
-                if (UpdateCompleted != null)
-                {
-                    UpdateCompleted(this, new ResultEventArgs(true));
-                }
+                UpdateCompleted?.Invoke(this, new ResultEventArgs(LoadUserRule(e.Result)));
             }
             catch (Exception ex)
             {
-                if (Error != null)
-                {
-                    Error(this, new ErrorEventArgs(ex));
-                }
+                Error?.Invoke(this, new ErrorEventArgs(ex));
             }
         }
 
@@ -107,6 +67,48 @@ namespace Shadowsocks.Controller
                 }
             }
             return valid_lines;
+        }
+
+        public static bool LoadUserRule(string gfwlist) {
+            List<string> lines = ParseResult(gfwlist);
+            if(File.Exists(PACServer.USER_RULE_FILE)) {
+                string local;
+                try {
+                    // The file has a chance to be locked in the moment of saving and can not open for read.
+                    local = File.ReadAllText(PACServer.USER_RULE_FILE, Encoding.UTF8);
+                } catch(IOException) {
+                    try {
+                        // Try to read again on failure.
+                        local = File.ReadAllText(PACServer.USER_RULE_FILE, Encoding.UTF8);
+                    } catch(IOException) {
+                        // If it still fails, logged the log and give up try.
+                        Logging.Error(I18N.GetString("Failed to update user rule"));
+                        return false;
+                    }
+                }
+                using(var sr = new StringReader(local)) {
+                    foreach(var rule in sr.NonWhiteSpaceLines()) {
+                        if(rule.BeginWithAny(IgnoredLineBegins))
+                            continue;
+                        lines.Add(rule);
+                    }
+                }
+            }
+            string abpContent;
+            if(File.Exists(PACServer.USER_ABP_FILE)) {
+                abpContent = File.ReadAllText(PACServer.USER_ABP_FILE, Encoding.UTF8);
+            } else {
+                abpContent = Utils.UnGzip(Resources.abp_js);
+            }
+            abpContent = abpContent.Replace("__RULES__", JsonConvert.SerializeObject(lines, Formatting.Indented));
+            if(File.Exists(PACServer.PAC_FILE)) {
+                string original = File.ReadAllText(PACServer.PAC_FILE, Encoding.UTF8);
+                if(original == abpContent) {
+                    return false;
+                }
+            }
+            File.WriteAllText(PACServer.PAC_FILE, abpContent, Encoding.UTF8);
+            return true;
         }
     }
 }

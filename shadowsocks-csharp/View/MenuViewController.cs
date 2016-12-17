@@ -13,6 +13,7 @@ using Shadowsocks.Controller;
 using Shadowsocks.Model;
 using Shadowsocks.Properties;
 using Shadowsocks.Util;
+using System.IO;
 
 namespace Shadowsocks.View
 {
@@ -46,6 +47,7 @@ namespace Shadowsocks.View
         private MenuItem editLocalPACItem;
         private MenuItem updateFromGFWListItem;
         private MenuItem editGFWUserRuleItem;
+        private MenuItem updateUserRuleItem;
         private MenuItem editOnlinePACItem;
         private MenuItem secureLocalPacUrlToggleItem;
         private MenuItem autoCheckUpdatesToggleItem;
@@ -273,6 +275,7 @@ namespace Shadowsocks.View
                     this.editLocalPACItem = CreateMenuItem("Edit Local PAC File...", new EventHandler(this.EditPACFileItem_Click)),
                     this.updateFromGFWListItem = CreateMenuItem("Update Local PAC from GFWList", new EventHandler(this.UpdatePACFromGFWListItem_Click)),
                     this.editGFWUserRuleItem = CreateMenuItem("Edit User Rule for GFWList...", new EventHandler(this.EditUserRuleFileForGFWListItem_Click)),
+                    this.updateUserRuleItem = CreateMenuItem("Update User Rule for GFWList", new EventHandler(this.UpdateUserRuleItem_Click)),
                     this.secureLocalPacUrlToggleItem = CreateMenuItem("Secure Local PAC", new EventHandler(this.SecureLocalPacUrlToggleItem_Click)),
                     CreateMenuItem("Copy Local PAC URL", new EventHandler(this.CopyLocalPacUrlItem_Click)),
                     this.editOnlinePACItem = CreateMenuItem("Edit Online PAC URL...", new EventHandler(this.UpdateOnlinePACURLItem_Click)),
@@ -624,6 +627,10 @@ namespace Shadowsocks.View
         private void EditUserRuleFileForGFWListItem_Click(object sender, EventArgs e)
         {
             controller.TouchUserRuleFile();
+        }
+
+        private void UpdateUserRuleItem_Click(object sender, EventArgs e) {
+            GFWListUpdater.LoadUserRule(File.ReadAllText(Utils.GetTempPath("gfwlist.txt")));
         }
 
         private void AServerItem_Click(object sender, EventArgs e)
