@@ -75,7 +75,11 @@ namespace Shadowsocks.Controller
                 string local;
                 try {
                     // The file has a chance to be locked in the moment of saving and can not open for read.
-                    local = File.ReadAllText(PACServer.USER_RULE_FILE, Encoding.UTF8);
+                    FileStream fs = File.Open(PACServer.USER_RULE_FILE, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+                    StreamReader reader = new StreamReader(fs, Encoding.UTF8);
+                    local = reader.ReadToEnd();
+                    reader.Close();
+                    fs.Close();
                 } catch(IOException) {
                     try {
                         // Try to read again on failure.
