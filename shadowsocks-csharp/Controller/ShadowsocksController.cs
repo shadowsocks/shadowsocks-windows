@@ -547,8 +547,7 @@ namespace Shadowsocks.Controller
             if (UpdatePACFromGFWListError != null)
                 UpdatePACFromGFWListError(this, e);
         }
-
-        private static readonly IEnumerable<char> IgnoredLineBegins = new[] { '!', '[' };
+        
         private void pacServer_UserRuleFileChanged(object sender, EventArgs e)
         {
             // TODO: this is a dirty hack. (from code GListUpdater.http_DownloadStringCompleted())
@@ -557,39 +556,7 @@ namespace Shadowsocks.Controller
                 UpdatePACFromGFWList();
                 return;
             }
-            List<string> lines = GFWListUpdater.ParseResult(File.ReadAllText(Utils.GetTempPath("gfwlist.txt")));
-            if (File.Exists(PACServer.USER_RULE_FILE))
-            {
-                string local = File.ReadAllText(PACServer.USER_RULE_FILE, Encoding.UTF8);
-                using (var sr = new StringReader(local))
-                {
-                    foreach (var rule in sr.NonWhiteSpaceLines())
-                    {
-                        if (rule.BeginWithAny(IgnoredLineBegins))
-                            continue;
-                        lines.Add(rule);
-                    }
-                }
-            }
-            string abpContent;
-            if (File.Exists(PACServer.USER_ABP_FILE))
-            {
-                abpContent = File.ReadAllText(PACServer.USER_ABP_FILE, Encoding.UTF8);
-            }
-            else
-            {
-                abpContent = Utils.UnGzip(Resources.abp_js);
-            }
-            abpContent = abpContent.Replace("__RULES__", JsonConvert.SerializeObject(lines, Formatting.Indented));
-            if (File.Exists(PACServer.PAC_FILE))
-            {
-                string original = File.ReadAllText(PACServer.PAC_FILE, Encoding.UTF8);
-                if (original == abpContent)
-                {
-                    return;
-                }
-            }
-            File.WriteAllText(PACServer.PAC_FILE, abpContent, Encoding.UTF8);
+            GFWListUpdater.LoadUserRule(File.ReadAllText(Utils.GetTempPath("gfwlist.txt")));
         }
 
         public void CopyPacUrl()
