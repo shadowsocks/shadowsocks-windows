@@ -103,8 +103,8 @@ system temp folder, create a `shadowsocks_portable_mode.txt` into shadowsocks fo
 GPLv3
 
 
-[Appveyor]:       https://ci.appveyor.com/project/Noisyfox/shadowsocks-windows
-[Build Status]:   https://ci.appveyor.com/api/projects/status/04idbevayrghcrh7/branch/master?svg=true
+[Appveyor]:       https://ci.appveyor.com/project/wongsyrone/shadowsocks-windows-pljx3
+[Build Status]:   https://ci.appveyor.com/api/projects/status/otie4km27ws1wak2/branch/master?svg=true
 [latest release]: https://github.com/shadowsocks/shadowsocks-csharp/releases
 [GFWList]:        https://github.com/gfwlist/gfwlist
 [Servers]:        https://github.com/shadowsocks/shadowsocks/wiki/Ports-and-Clients#linux--server-side
