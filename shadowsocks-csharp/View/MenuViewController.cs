@@ -180,13 +180,13 @@ namespace Shadowsocks.View
             {
                 serverInfo = config.GetCurrentServer().FriendlyName();
             }
-            // we want to show more details but notify icon title is limited to 63 characters
+            // show more info by hacking the P/Invoke declaration for NOTIFYICONDATA inside Windows Forms
             string text = I18N.GetString("Shadowsocks") + " " + UpdateChecker.Version + "\n" +
                           (enabled ?
                               I18N.GetString("System Proxy On: ") + (global ? I18N.GetString("Global") : I18N.GetString("PAC")) :
                               String.Format(I18N.GetString("Running: Port {0}"), config.localPort))  // this feedback is very important because they need to know Shadowsocks is running
                           + "\n" + serverInfo;
-            _notifyIcon.Text = text.Substring(0, Math.Min(63, text.Length));
+            ViewUtils.SetNotifyIconText(_notifyIcon, text);
         }
 
         private Bitmap getTrayIconByState(Bitmap originIcon, bool enabled, bool global)
