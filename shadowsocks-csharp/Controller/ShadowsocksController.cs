@@ -557,10 +557,10 @@ namespace Shadowsocks.Controller
                 UpdatePACFromGFWList();
                 return;
             }
-            List<string> lines = GFWListUpdater.ParseResult(File.ReadAllText(Utils.GetTempPath("gfwlist.txt")));
+            List<string> lines = GFWListUpdater.ParseResult(FileManager.NonExclusiveReadAllText(Utils.GetTempPath("gfwlist.txt")));
             if (File.Exists(PACServer.USER_RULE_FILE))
             {
-                string local = File.ReadAllText(PACServer.USER_RULE_FILE, Encoding.UTF8);
+                string local = FileManager.NonExclusiveReadAllText(PACServer.USER_RULE_FILE, Encoding.UTF8);
                 using (var sr = new StringReader(local))
                 {
                     foreach (var rule in sr.NonWhiteSpaceLines())
@@ -574,7 +574,7 @@ namespace Shadowsocks.Controller
             string abpContent;
             if (File.Exists(PACServer.USER_ABP_FILE))
             {
-                abpContent = File.ReadAllText(PACServer.USER_ABP_FILE, Encoding.UTF8);
+                abpContent = FileManager.NonExclusiveReadAllText(PACServer.USER_ABP_FILE, Encoding.UTF8);
             }
             else
             {
@@ -583,7 +583,7 @@ namespace Shadowsocks.Controller
             abpContent = abpContent.Replace("__RULES__", JsonConvert.SerializeObject(lines, Formatting.Indented));
             if (File.Exists(PACServer.PAC_FILE))
             {
-                string original = File.ReadAllText(PACServer.PAC_FILE, Encoding.UTF8);
+                string original = FileManager.NonExclusiveReadAllText(PACServer.PAC_FILE, Encoding.UTF8);
                 if (original == abpContent)
                 {
                     return;

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.IO.Compression;
+using System.Text;
 
 namespace Shadowsocks.Controller
 {
@@ -37,6 +38,20 @@ namespace Shadowsocks.Controller
                 {
                     fs.Write(buffer, 0, n);
                 }
+            }
+        }
+
+        public static string NonExclusiveReadAllText(string path)
+        {
+            return NonExclusiveReadAllText(path, Encoding.Default);
+        }
+
+        public static string NonExclusiveReadAllText(string path, Encoding encoding)
+        {
+            using (var fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            using (var sr = new StreamReader(fs, encoding))
+            {
+                return sr.ReadToEnd();
             }
         }
     }
