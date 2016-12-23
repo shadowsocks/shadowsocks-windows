@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Shadowsocks.Controller
 {
-    public class FileManager
+    public static class FileManager
     {
         public static bool ByteArrayToFile(string fileName, byte[] content)
         {
@@ -17,8 +17,7 @@ namespace Shadowsocks.Controller
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Exception caught in process: {0}",
-                                  ex.ToString());
+                Logging.Error(ex);
             }
             return false;
         }
@@ -48,10 +47,18 @@ namespace Shadowsocks.Controller
 
         public static string NonExclusiveReadAllText(string path, Encoding encoding)
         {
-            using (var fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
-            using (var sr = new StreamReader(fs, encoding))
+            try
             {
-                return sr.ReadToEnd();
+                using (var fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                using (var sr = new StreamReader(fs, encoding))
+                {
+                    return sr.ReadToEnd();
+                }
+            }
+            catch (Exception ex)
+            {
+                Logging.Error(ex);
+                throw ex;
             }
         }
     }
