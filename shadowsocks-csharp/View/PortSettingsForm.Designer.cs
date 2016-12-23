@@ -174,7 +174,7 @@
             this.checkEnable.Location = new System.Drawing.Point(80, 3);
             this.checkEnable.Name = "checkEnable";
             this.checkEnable.Size = new System.Drawing.Size(60, 16);
-            this.checkEnable.TabIndex = 1;
+            this.checkEnable.TabIndex = 3;
             this.checkEnable.Text = "Enable";
             this.checkEnable.UseVisualStyleBackColor = true;
             // 
@@ -183,14 +183,14 @@
             this.textAddr.Location = new System.Drawing.Point(80, 104);
             this.textAddr.Name = "textAddr";
             this.textAddr.Size = new System.Drawing.Size(403, 21);
-            this.textAddr.TabIndex = 2;
+            this.textAddr.TabIndex = 7;
             // 
             // textPort
             // 
             this.textPort.Location = new System.Drawing.Point(80, 131);
             this.textPort.Name = "textPort";
             this.textPort.Size = new System.Drawing.Size(403, 21);
-            this.textPort.TabIndex = 2;
+            this.textPort.TabIndex = 8;
             // 
             // comboBoxType
             // 
@@ -203,7 +203,7 @@
             this.comboBoxType.Location = new System.Drawing.Point(80, 25);
             this.comboBoxType.Name = "comboBoxType";
             this.comboBoxType.Size = new System.Drawing.Size(403, 20);
-            this.comboBoxType.TabIndex = 3;
+            this.comboBoxType.TabIndex = 4;
             this.comboBoxType.SelectedIndexChanged += new System.EventHandler(this.comboBoxType_SelectedIndexChanged);
             // 
             // comboServers
@@ -230,7 +230,7 @@
             this.textLocal.Location = new System.Drawing.Point(80, 77);
             this.textLocal.Name = "textLocal";
             this.textLocal.Size = new System.Drawing.Size(403, 21);
-            this.textLocal.TabIndex = 2;
+            this.textLocal.TabIndex = 6;
             // 
             // label1
             // 
@@ -247,7 +247,7 @@
             this.textRemarks.Location = new System.Drawing.Point(80, 158);
             this.textRemarks.Name = "textRemarks";
             this.textRemarks.Size = new System.Drawing.Size(403, 21);
-            this.textRemarks.TabIndex = 2;
+            this.textRemarks.TabIndex = 9;
             // 
             // tableLayoutPanel3
             // 
@@ -269,7 +269,7 @@
             this.OKButton.Location = new System.Drawing.Point(46, 3);
             this.OKButton.Name = "OKButton";
             this.OKButton.Size = new System.Drawing.Size(152, 35);
-            this.OKButton.TabIndex = 1;
+            this.OKButton.TabIndex = 10;
             this.OKButton.Text = "OK";
             this.OKButton.UseVisualStyleBackColor = true;
             this.OKButton.Click += new System.EventHandler(this.OKButton_Click);
@@ -280,7 +280,7 @@
             this.MyCancelButton.Location = new System.Drawing.Point(291, 3);
             this.MyCancelButton.Name = "MyCancelButton";
             this.MyCancelButton.Size = new System.Drawing.Size(152, 35);
-            this.MyCancelButton.TabIndex = 1;
+            this.MyCancelButton.TabIndex = 11;
             this.MyCancelButton.Text = "Cancel";
             this.MyCancelButton.UseVisualStyleBackColor = true;
             this.MyCancelButton.Click += new System.EventHandler(this.CancelButton_Click);
@@ -297,7 +297,7 @@
             this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.tableLayoutPanel4.Size = new System.Drawing.Size(144, 54);
-            this.tableLayoutPanel4.TabIndex = 4;
+            this.tableLayoutPanel4.TabIndex = 1;
             // 
             // Add
             // 
@@ -305,7 +305,7 @@
             this.Add.Location = new System.Drawing.Point(22, 3);
             this.Add.Name = "Add";
             this.Add.Size = new System.Drawing.Size(100, 21);
-            this.Add.TabIndex = 0;
+            this.Add.TabIndex = 1;
             this.Add.Text = "Add";
             this.Add.UseVisualStyleBackColor = true;
             this.Add.Click += new System.EventHandler(this.Add_Click);
@@ -316,12 +316,12 @@
             this.Del.Location = new System.Drawing.Point(22, 30);
             this.Del.Name = "Del";
             this.Del.Size = new System.Drawing.Size(100, 21);
-            this.Del.TabIndex = 0;
+            this.Del.TabIndex = 2;
             this.Del.Text = "Del";
             this.Del.UseVisualStyleBackColor = true;
             this.Del.Click += new System.EventHandler(this.Del_Click);
             // 
-            // PortMapForm
+            // PortSettingsForm
             // 
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
             this.AutoSize = true;
@@ -329,7 +329,7 @@
             this.ClientSize = new System.Drawing.Size(727, 489);
             this.Controls.Add(this.tableLayoutPanel1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
-            this.Name = "PortMapForm";
+            this.Name = "PortSettingsForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Port Settings";
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.PortMapForm_FormClosed);

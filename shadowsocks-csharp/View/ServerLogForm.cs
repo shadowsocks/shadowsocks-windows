@@ -804,11 +804,10 @@ namespace Shadowsocks.View
             else if (e.Button == MouseButtons.Left)
             {
                 int row_index = -1, col_index = -1;
-                for (int index = 0; index < ServerDataGrid.SelectedCells.Count; ++index)
+                if (ServerDataGrid.SelectedCells.Count > 0)
                 {
-                    row_index = ServerDataGrid.SelectedCells[index].RowIndex;
-                    col_index = ServerDataGrid.SelectedCells[index].ColumnIndex;
-                    break;
+                    row_index = ServerDataGrid.SelectedCells[0].RowIndex;
+                    col_index = ServerDataGrid.SelectedCells[0].ColumnIndex;
                 }
                 if (row_index >= 0)
                 {

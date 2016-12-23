@@ -35,8 +35,8 @@ namespace Shadowsocks.Model
 
     public class Connections
     {
-        private System.Collections.Generic.Dictionary<Socket, Int32> sockets = new Dictionary<Socket, int>();
-        public bool AddRef(Socket socket)
+        private System.Collections.Generic.Dictionary<ProxySocketTunLocal, Int32> sockets = new Dictionary<ProxySocketTunLocal, int>();
+        public bool AddRef(ProxySocketTunLocal socket)
         {
             lock (this)
             {
@@ -51,7 +51,7 @@ namespace Shadowsocks.Model
                 return true;
             }
         }
-        public bool DecRef(Socket socket)
+        public bool DecRef(ProxySocketTunLocal socket)
         {
             lock (this)
             {
@@ -72,13 +72,13 @@ namespace Shadowsocks.Model
         }
         public void CloseAll()
         {
-            Socket[] s;
+            ProxySocketTunLocal[] s;
             lock (this)
             {
-                s = new Socket[sockets.Count];
+                s = new ProxySocketTunLocal[sockets.Count];
                 sockets.Keys.CopyTo(s, 0);
             }
-            foreach (Socket socket in s)
+            foreach (ProxySocketTunLocal socket in s)
             {
                 try
                 {
@@ -252,11 +252,11 @@ namespace Shadowsocks.Model
 
         public Server(string ssURL) : this()
         {
-            if (ssURL.StartsWith("ss://"))
+            if (ssURL.StartsWith("ss://", StringComparison.OrdinalIgnoreCase))
             {
                 ServerFromSS(ssURL);
             }
-            else if (ssURL.StartsWith("ssr://"))
+            else if (ssURL.StartsWith("ssr://", StringComparison.OrdinalIgnoreCase))
             {
                 ServerFromSSR(ssURL);
             }
@@ -266,248 +266,99 @@ namespace Shadowsocks.Model
             }
         }
 
-        public static string DecodeBase64(string val)
+        private Dictionary<string, string> ParseParam(string param_str)
         {
-            if (val.LastIndexOf(':') > 0)
+            Dictionary<string, string> params_dict = new Dictionary<string, string>();
+            string[] obfs_params = param_str.Split('&');
+            foreach (string p in obfs_params)
             {
-                return val;
+                if (p.IndexOf('=') > 0)
+                {
+                    int index = p.IndexOf('=');
+                    string key, val;
+                    key = p.Substring(0, index);
+                    val = p.Substring(index + 1);
+                    params_dict[key] = val;
+                }
             }
-            else
-            {
-                return Util.Utils.DecodeBase64(val);
-            }
-        }
-
-        public static string DecodeUrlSafeBase64(string val)
-        {
-            if (val.LastIndexOf(':') > 0)
-            {
-                return val;
-            }
-            else
-            {
-                return Util.Utils.DecodeUrlSafeBase64(val);
-            }
+            return params_dict;
         }
 
         public void ServerFromSSR(string ssrURL)
         {
             // ssr://host:port:protocol:method:obfs:base64pass/?obfsparam=base64&remarks=base64&group=base64&udpport=0&uot=1
-            string[] r1 = Regex.Split(ssrURL, "ssr://", RegexOptions.IgnoreCase);
-            string base64 = r1[1].ToString();
-            string data = DecodeUrlSafeBase64(base64);
-            string param_str = "";
+            Match ssr = Regex.Match(ssrURL, "ssr://([A-Za-z0-9=_-]+)", RegexOptions.IgnoreCase);
+            if (!ssr.Success)
+                throw new FormatException();
+
+            string data = Util.Utils.DecodeUrlSafeBase64(ssr.Groups[1].Value);
             Dictionary<string, string> params_dict = new Dictionary<string, string>();
 
-            if (data.Length == 0)
-            {
-                throw new FormatException();
-            }
             int param_start_pos = data.IndexOf("?");
             if (param_start_pos > 0)
             {
-                param_str = data.Substring(param_start_pos + 1);
+                params_dict = ParseParam(data.Substring(param_start_pos + 1));
                 data = data.Substring(0, param_start_pos);
-
-                string[] obfs_params = param_str.Split('&');
-                foreach (string p in obfs_params)
-                {
-                    if (p.IndexOf('=') > 0)
-                    {
-                        int index = p.IndexOf('=');
-                        string key, val;
-                        key = p.Substring(0, index);
-                        val = p.Substring(index + 1);
-                        if (key == "obfsparam" || key == "remarks" || key == "group")
-                        {
-                            string new_val = DecodeUrlSafeBase64(val);
-                            val = new_val;
-                        }
-                        params_dict[key] = val;
-                    }
-                }
             }
             if (data.IndexOf("/") >= 0)
             {
                 data = data.Substring(0, data.LastIndexOf("/"));
             }
 
-            string[] main_info = data.Split(new char[] { ':' }, StringSplitOptions.None);
-            if (main_info.Length > 6)
-            {
-                string[] main_info_ = new string[6];
-                main_info_[5] = main_info[main_info.Length - 1];
-                main_info_[4] = main_info[main_info.Length - 2];
-                main_info_[3] = main_info[main_info.Length - 3];
-                main_info_[2] = main_info[main_info.Length - 4];
-                main_info_[1] = main_info[main_info.Length - 5];
-                main_info_[0] = main_info[main_info.Length - 6];
-                for (int i = main_info.Length - 7; i >= 0; --i)
-                {
-                    main_info_[0] = main_info[i] + ":" + main_info_[0];
-                }
-                main_info = main_info_;
-            }
-            if (main_info.Length != 6)
-            {
+            Regex UrlFinder = new Regex("(.+):([^:]*):([^:]*):([^:]*):([^:]*):([^:]*)");
+            Match match = UrlFinder.Match(data);
+            if (!match.Success)
                 throw new FormatException();
-            }
-            this.server = main_info[0];
-            this.server_port = int.Parse(main_info[1]);
-            this.protocol = main_info[2].Length == 0 ? "origin" : main_info[2];
-            this.protocol.Replace("_compatible", "");
-            this.method = main_info[3];
-            this.obfs = main_info[4].Length == 0 ? "plain" : main_info[4];
-            this.obfs.Replace("_compatible", "");
-            this.password = DecodeUrlSafeBase64(main_info[5]);
+
+            server = match.Groups[1].Value;
+            server_port = int.Parse(match.Groups[2].Value);
+            protocol = match.Groups[3].Value.Length == 0 ? "origin" : match.Groups[3].Value;
+            protocol.Replace("_compatible", "");
+            method = match.Groups[4].Value;
+            obfs = match.Groups[5].Value.Length == 0 ? "plain" : match.Groups[5].Value;
+            obfs.Replace("_compatible", "");
+            password = Util.Utils.DecodeUrlSafeBase64(match.Groups[6].Value);
 
             if (params_dict.ContainsKey("obfsparam"))
             {
-                this.obfsparam = params_dict["obfsparam"];
+                obfsparam = Util.Utils.DecodeUrlSafeBase64(params_dict["obfsparam"]);
             }
             if (params_dict.ContainsKey("remarks"))
             {
-                this.remarks = params_dict["remarks"];
+                remarks = Util.Utils.DecodeUrlSafeBase64(params_dict["remarks"]);
             }
             if (params_dict.ContainsKey("group"))
             {
-                this.group = params_dict["group"];
+                group = Util.Utils.DecodeUrlSafeBase64(params_dict["group"]);
             }
             if (params_dict.ContainsKey("uot"))
             {
-                this.udp_over_tcp = int.Parse(params_dict["uot"]) != 0;
+                udp_over_tcp = int.Parse(params_dict["uot"]) != 0;
             }
             if (params_dict.ContainsKey("udpport"))
             {
-                this.server_udp_port = int.Parse(params_dict["udpport"]);
+                server_udp_port = int.Parse(params_dict["udpport"]);
             }
         }
 
         public void ServerFromSS(string ssURL)
         {
-            // ss://obfs:protocol:method:passwd@host:port/#remarks
-            string[] r1 = Regex.Split(ssURL, "ss://", RegexOptions.IgnoreCase);
-            string base64 = r1[1].ToString();
-            string data = DecodeBase64(base64);
-            if (data.Length == 0)
-            {
-                throw new FormatException();
-            }
-            try
-            {
-                int indexLastAt = data.LastIndexOf('@');
-                int remarkIndexLastAt = data.IndexOf('#', indexLastAt);
-                if (remarkIndexLastAt > 0)
-                {
-                    if (remarkIndexLastAt + 1 < data.Length)
-                    {
-                        this.remarks_base64 = data.Substring(remarkIndexLastAt + 1);
-                    }
-                    data = data.Substring(0, remarkIndexLastAt);
-                }
-                remarkIndexLastAt = data.IndexOf('/', indexLastAt);
-                string param = "";
-                if (remarkIndexLastAt > 0)
-                {
-                    if (remarkIndexLastAt + 1 < data.Length)
-                    {
-                        param = data.Substring(remarkIndexLastAt + 1);
-                    }
-                    data = data.Substring(0, remarkIndexLastAt);
-                }
-                //int paramIndexLastAt = param.IndexOf('?', indexLastAt);
-                //Dictionary<string, string> params_dict = new Dictionary<string, string>();
-                //if (paramIndexLastAt >= 0)
-                //{
-                //    string[] obfs_params = param.Substring(paramIndexLastAt + 1).Split('&');
-                //    foreach (string p in obfs_params)
-                //    {
-                //        if (p.IndexOf('=') > 0)
-                //        {
-                //            int index = p.IndexOf('=');
-                //            string key, val;
-                //            key = p.Substring(0, index);
-                //            val = p.Substring(index + 1);
-                //            try
-                //            {
-                //                byte[] b64_bytes = System.Convert.FromBase64String(val);
-                //                if (b64_bytes != null)
-                //                {
-                //                    val = Encoding.UTF8.GetString(b64_bytes);
-                //                }
-                //            }
-                //            catch (FormatException)
-                //            {
-                //                continue;
-                //            }
-                //            params_dict[key] = val;
-                //        }
-                //    }
-                //}
+            Regex UrlFinder = new Regex("^(?i)ss://([A-Za-z0-9+-/=_]+)(#(.+))?$", RegexOptions.IgnoreCase),
+                DetailsParser = new Regex("^((?<method>.+?)(?<auth>-auth)??:(?<password>.*)@(?<hostname>.+?)" +
+                                      ":(?<port>\\d+?))$", RegexOptions.IgnoreCase);
 
-                string afterAt = data.Substring(indexLastAt + 1);
-                int indexLastColon = afterAt.LastIndexOf(':');
-                this.server_port = int.Parse(afterAt.Substring(indexLastColon + 1));
-                this.server = afterAt.Substring(0, indexLastColon);
-
-                string beforeAt = data.Substring(0, indexLastAt);
-                this.method = "";
-                for (bool next = true; next;)
-                {
-                    string[] parts = beforeAt.Split(new[] { ':' }, 2);
-                    if (parts.Length > 1)
-                    {
-                        try
-                        {
-                            Obfs.ObfsBase obfs = (Obfs.ObfsBase)Obfs.ObfsFactory.GetObfs(parts[0]);
-                            if (obfs.GetObfs().ContainsKey(parts[0]))
-                            {
-                                int[] p = obfs.GetObfs()[parts[0]];
-                                if (p[0] == 1)
-                                {
-                                    this.protocol = parts[0];
-                                }
-                                if (p[1] == 1)
-                                {
-                                    this.obfs = parts[0];
-                                }
-                            }
-                            else
-                            {
-                                next = false;
-                            }
-                        }
-                        catch
-                        {
-                            try
-                            {
-                                IEncryptor encryptor = EncryptorFactory.GetEncryptor(parts[0], "m");
-                                encryptor.Dispose();
-                                this.method = parts[0];
-                                beforeAt = parts[1];
-                            }
-                            catch
-                            {
-                            }
-                            break;
-                        }
-                        beforeAt = parts[1];
-                    }
-                    else
-                        break;
-                }
-                if (this.method.Length == 0)
-                    throw new FormatException();
-                this.password = beforeAt;
-                //if (params_dict.ContainsKey("obfs"))
-                //{
-                //    this.obfsparam = params_dict["obfs"];
-                //}
-            }
-            catch (IndexOutOfRangeException)
-            {
+            var match = UrlFinder.Match(ssURL);
+            if (!match.Success)
                 throw new FormatException();
-            }
+
+            var base64 = match.Groups[1].Value;
+            match = DetailsParser.Match(Encoding.UTF8.GetString(Convert.FromBase64String(
+                base64.PadRight(base64.Length + (4 - base64.Length % 4) % 4, '='))));
+            protocol = match.Groups["auth"].Success ? "verify_sha1" : "origin";
+            method = match.Groups["method"].Value;
+            password = match.Groups["password"].Value;
+            server = match.Groups["hostname"].Value;
+            server_port = int.Parse(match.Groups["port"].Value);
         }
 
         public string GetSSLinkForServer()

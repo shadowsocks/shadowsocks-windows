@@ -295,8 +295,7 @@ namespace Shadowsocks.Controller
                 }
                 try
                 {
-                    bool sendback;
-                    int bytesRead = _remote.EndReceive(ar, out sendback);
+                    int bytesRead = _remote.EndReceive(ar);
 
                     if (bytesRead > 0)
                     {

@@ -8,8 +8,6 @@ namespace Shadowsocks.Encryption
     public abstract class IVEncryptor
         : EncryptorBase
     {
-        protected static byte[] tempbuf = new byte[MAX_INPUT_SIZE];
-
         protected Dictionary<string, EncryptorInfo> ciphers;
 
         private static readonly Dictionary<string, byte[]> CachedKeys = new Dictionary<string, byte[]>();
@@ -27,6 +25,7 @@ namespace Shadowsocks.Encryption
         protected byte[] _iv;
         protected int ivLen;
 
+        protected byte[] tempbuf = new byte[MAX_INPUT_SIZE];
 
         public IVEncryptor(string method, string password)
             : base(method, password)
@@ -151,12 +150,10 @@ namespace Shadowsocks.Encryption
                 Buffer.BlockCopy(_iv, 0, outbuf, 0, ivLen);
                 initCipher(outbuf, true);
                 outlength = length + ivLen;
-                lock (tempbuf)
-                {
-                    cipherUpdate(true, length, buf, tempbuf);
-                    outlength = length + ivLen;
-                    Buffer.BlockCopy(tempbuf, 0, outbuf, ivLen, length);
-                }
+
+                cipherUpdate(true, length, buf, tempbuf);
+                outlength = length + ivLen;
+                Buffer.BlockCopy(tempbuf, 0, outbuf, ivLen, length);
             }
             else
             {
@@ -200,12 +197,9 @@ namespace Shadowsocks.Encryption
                 if (outlength > 0)
                 {
                     _decryptIVReceived += outlength;
-                    lock (tempbuf)
-                    {
-                        // C# could be multi-threaded
-                        Buffer.BlockCopy(buf, start_pos, tempbuf, 0, outlength);
-                        cipherUpdate(false, outlength, tempbuf, outbuf);
-                    }
+
+                    Buffer.BlockCopy(buf, start_pos, tempbuf, 0, outlength);
+                    cipherUpdate(false, outlength, tempbuf, outbuf);
                 }
             }
             else

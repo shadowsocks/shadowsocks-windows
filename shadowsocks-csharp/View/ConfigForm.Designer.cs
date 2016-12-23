@@ -102,7 +102,7 @@
             this.DeleteButton.Margin = new System.Windows.Forms.Padding(0);
             this.DeleteButton.Name = "DeleteButton";
             this.DeleteButton.Size = new System.Drawing.Size(120, 34);
-            this.DeleteButton.TabIndex = 7;
+            this.DeleteButton.TabIndex = 2;
             this.DeleteButton.Text = "&Delete";
             this.DeleteButton.UseVisualStyleBackColor = true;
             this.DeleteButton.Click += new System.EventHandler(this.DeleteButton_Click);
@@ -113,7 +113,7 @@
             this.AddButton.Margin = new System.Windows.Forms.Padding(0);
             this.AddButton.Name = "AddButton";
             this.AddButton.Size = new System.Drawing.Size(120, 34);
-            this.AddButton.TabIndex = 6;
+            this.AddButton.TabIndex = 1;
             this.AddButton.Text = "&Add";
             this.AddButton.UseVisualStyleBackColor = true;
             this.AddButton.Click += new System.EventHandler(this.AddButton_Click);
@@ -137,7 +137,7 @@
             this.ServersListBox.Margin = new System.Windows.Forms.Padding(0);
             this.ServersListBox.Name = "ServersListBox";
             this.ServersListBox.Size = new System.Drawing.Size(250, 310);
-            this.ServersListBox.TabIndex = 5;
+            this.ServersListBox.TabIndex = 0;
             this.ServersListBox.SelectedIndexChanged += new System.EventHandler(this.ServersListBox_SelectedIndexChanged);
             // 
             // tableLayoutPanel2
@@ -250,7 +250,7 @@
             this.ObfsCombo.Location = new System.Drawing.Point(108, 155);
             this.ObfsCombo.Name = "ObfsCombo";
             this.ObfsCombo.Size = new System.Drawing.Size(233, 25);
-            this.ObfsCombo.TabIndex = 34;
+            this.ObfsCombo.TabIndex = 17;
             this.ObfsCombo.TextChanged += new System.EventHandler(this.ObfsCombo_TextChanged);
             // 
             // labelObfs
@@ -261,7 +261,7 @@
             this.labelObfs.Location = new System.Drawing.Point(66, 159);
             this.labelObfs.Name = "labelObfs";
             this.labelObfs.Size = new System.Drawing.Size(36, 17);
-            this.labelObfs.TabIndex = 33;
+            this.labelObfs.TabIndex = 16;
             this.labelObfs.Text = "Obfs";
             // 
             // IPLabel
@@ -271,7 +271,7 @@
             this.IPLabel.Location = new System.Drawing.Point(42, 9);
             this.IPLabel.Name = "IPLabel";
             this.IPLabel.Size = new System.Drawing.Size(60, 17);
-            this.IPLabel.TabIndex = 0;
+            this.IPLabel.TabIndex = 6;
             this.IPLabel.Text = "Server IP";
             // 
             // ServerPortLabel
@@ -281,7 +281,7 @@
             this.ServerPortLabel.Location = new System.Drawing.Point(29, 38);
             this.ServerPortLabel.Name = "ServerPortLabel";
             this.ServerPortLabel.Size = new System.Drawing.Size(73, 17);
-            this.ServerPortLabel.TabIndex = 1;
+            this.ServerPortLabel.TabIndex = 8;
             this.ServerPortLabel.Text = "Server Port";
             // 
             // IPTextBox
@@ -292,7 +292,7 @@
             this.IPTextBox.MaxLength = 512;
             this.IPTextBox.Name = "IPTextBox";
             this.IPTextBox.Size = new System.Drawing.Size(233, 23);
-            this.IPTextBox.TabIndex = 0;
+            this.IPTextBox.TabIndex = 7;
             this.IPTextBox.WordWrap = false;
             // 
             // ServerPortTextBox
@@ -303,7 +303,7 @@
             this.ServerPortTextBox.MaxLength = 10;
             this.ServerPortTextBox.Name = "ServerPortTextBox";
             this.ServerPortTextBox.Size = new System.Drawing.Size(233, 23);
-            this.ServerPortTextBox.TabIndex = 1;
+            this.ServerPortTextBox.TabIndex = 9;
             this.ServerPortTextBox.WordWrap = false;
             // 
             // PasswordTextBox
@@ -314,7 +314,7 @@
             this.PasswordTextBox.MaxLength = 256;
             this.PasswordTextBox.Name = "PasswordTextBox";
             this.PasswordTextBox.Size = new System.Drawing.Size(233, 23);
-            this.PasswordTextBox.TabIndex = 2;
+            this.PasswordTextBox.TabIndex = 11;
             this.PasswordTextBox.UseSystemPasswordChar = true;
             this.PasswordTextBox.WordWrap = false;
             // 
@@ -325,7 +325,7 @@
             this.EncryptionLabel.Location = new System.Drawing.Point(33, 97);
             this.EncryptionLabel.Name = "EncryptionLabel";
             this.EncryptionLabel.Size = new System.Drawing.Size(69, 17);
-            this.EncryptionLabel.TabIndex = 8;
+            this.EncryptionLabel.TabIndex = 12;
             this.EncryptionLabel.Text = "Encryption";
             // 
             // EncryptionSelect
@@ -335,7 +335,7 @@
             this.EncryptionSelect.Location = new System.Drawing.Point(108, 93);
             this.EncryptionSelect.Name = "EncryptionSelect";
             this.EncryptionSelect.Size = new System.Drawing.Size(233, 25);
-            this.EncryptionSelect.TabIndex = 3;
+            this.EncryptionSelect.TabIndex = 13;
             // 
             // TextLink
             // 
@@ -344,7 +344,7 @@
             this.TextLink.Location = new System.Drawing.Point(108, 273);
             this.TextLink.Name = "TextLink";
             this.TextLink.Size = new System.Drawing.Size(233, 23);
-            this.TextLink.TabIndex = 12;
+            this.TextLink.TabIndex = 25;
             this.TextLink.WordWrap = false;
             this.TextLink.Enter += new System.EventHandler(this.TextBox_Enter);
             this.TextLink.MouseUp += new System.Windows.Forms.MouseEventHandler(this.TextBox_MouseUp);
@@ -356,7 +356,7 @@
             this.RemarksTextBox.MaxLength = 256;
             this.RemarksTextBox.Name = "RemarksTextBox";
             this.RemarksTextBox.Size = new System.Drawing.Size(233, 23);
-            this.RemarksTextBox.TabIndex = 10;
+            this.RemarksTextBox.TabIndex = 21;
             this.RemarksTextBox.WordWrap = false;
             // 
             // ObfsUDPLabel
@@ -367,7 +367,7 @@
             this.ObfsUDPLabel.Margin = new System.Windows.Forms.Padding(3, 5, 3, 5);
             this.ObfsUDPLabel.Name = "ObfsUDPLabel";
             this.ObfsUDPLabel.Size = new System.Drawing.Size(65, 17);
-            this.ObfsUDPLabel.TabIndex = 25;
+            this.ObfsUDPLabel.TabIndex = 34;
             this.ObfsUDPLabel.Text = "Obfs UDP";
             this.ObfsUDPLabel.Visible = false;
             // 
@@ -377,7 +377,7 @@
             this.CheckObfsUDP.Location = new System.Drawing.Point(108, 412);
             this.CheckObfsUDP.Name = "CheckObfsUDP";
             this.CheckObfsUDP.Size = new System.Drawing.Size(152, 21);
-            this.CheckObfsUDP.TabIndex = 28;
+            this.CheckObfsUDP.TabIndex = 35;
             this.CheckObfsUDP.Text = "Recommend checked";
             this.CheckObfsUDP.UseVisualStyleBackColor = true;
             this.CheckObfsUDP.Visible = false;
@@ -391,18 +391,18 @@
             this.TCPProtocolLabel.Margin = new System.Windows.Forms.Padding(3, 5, 3, 5);
             this.TCPProtocolLabel.Name = "TCPProtocolLabel";
             this.TCPProtocolLabel.Size = new System.Drawing.Size(57, 17);
-            this.TCPProtocolLabel.TabIndex = 24;
+            this.TCPProtocolLabel.TabIndex = 14;
             this.TCPProtocolLabel.Text = "Protocol";
             // 
             // UDPoverTCPLabel
             // 
             this.UDPoverTCPLabel.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.UDPoverTCPLabel.AutoSize = true;
-            this.UDPoverTCPLabel.Location = new System.Drawing.Point(21, 387);
+            this.UDPoverTCPLabel.Location = new System.Drawing.Point(13, 387);
             this.UDPoverTCPLabel.Margin = new System.Windows.Forms.Padding(3, 5, 3, 5);
             this.UDPoverTCPLabel.Name = "UDPoverTCPLabel";
-            this.UDPoverTCPLabel.Size = new System.Drawing.Size(81, 17);
-            this.UDPoverTCPLabel.TabIndex = 23;
+            this.UDPoverTCPLabel.Size = new System.Drawing.Size(89, 17);
+            this.UDPoverTCPLabel.TabIndex = 32;
             this.UDPoverTCPLabel.Text = "UDP over TCP";
             this.UDPoverTCPLabel.Visible = false;
             // 
@@ -412,7 +412,7 @@
             this.CheckUDPoverUDP.Location = new System.Drawing.Point(108, 385);
             this.CheckUDPoverUDP.Name = "CheckUDPoverUDP";
             this.CheckUDPoverUDP.Size = new System.Drawing.Size(197, 21);
-            this.CheckUDPoverUDP.TabIndex = 26;
+            this.CheckUDPoverUDP.TabIndex = 33;
             this.CheckUDPoverUDP.Text = "UDP over UDP if not checked";
             this.CheckUDPoverUDP.UseVisualStyleBackColor = true;
             this.CheckUDPoverUDP.Visible = false;
@@ -425,7 +425,7 @@
             this.LabelNote.Margin = new System.Windows.Forms.Padding(5);
             this.LabelNote.Name = "LabelNote";
             this.LabelNote.Size = new System.Drawing.Size(187, 17);
-            this.LabelNote.TabIndex = 29;
+            this.LabelNote.TabIndex = 27;
             this.LabelNote.Text = "NOT all server support belows";
             // 
             // PasswordLabel
@@ -435,7 +435,7 @@
             this.PasswordLabel.Location = new System.Drawing.Point(19, 65);
             this.PasswordLabel.Name = "PasswordLabel";
             this.PasswordLabel.Size = new System.Drawing.Size(83, 21);
-            this.PasswordLabel.TabIndex = 31;
+            this.PasswordLabel.TabIndex = 10;
             this.PasswordLabel.Text = "Password";
             this.PasswordLabel.UseVisualStyleBackColor = true;
             this.PasswordLabel.CheckedChanged += new System.EventHandler(this.PasswordLabel_CheckedChanged);
@@ -444,11 +444,11 @@
             // 
             this.TCPoverUDPLabel.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.TCPoverUDPLabel.AutoSize = true;
-            this.TCPoverUDPLabel.Location = new System.Drawing.Point(21, 360);
+            this.TCPoverUDPLabel.Location = new System.Drawing.Point(13, 360);
             this.TCPoverUDPLabel.Margin = new System.Windows.Forms.Padding(3, 5, 3, 5);
             this.TCPoverUDPLabel.Name = "TCPoverUDPLabel";
-            this.TCPoverUDPLabel.Size = new System.Drawing.Size(81, 17);
-            this.TCPoverUDPLabel.TabIndex = 23;
+            this.TCPoverUDPLabel.Size = new System.Drawing.Size(89, 17);
+            this.TCPoverUDPLabel.TabIndex = 30;
             this.TCPoverUDPLabel.Text = "TCP over UDP";
             this.TCPoverUDPLabel.Visible = false;
             // 
@@ -458,7 +458,7 @@
             this.CheckTCPoverUDP.Location = new System.Drawing.Point(108, 358);
             this.CheckTCPoverUDP.Name = "CheckTCPoverUDP";
             this.CheckTCPoverUDP.Size = new System.Drawing.Size(191, 21);
-            this.CheckTCPoverUDP.TabIndex = 26;
+            this.CheckTCPoverUDP.TabIndex = 31;
             this.CheckTCPoverUDP.Text = "TCP over TCP if not checked";
             this.CheckTCPoverUDP.UseVisualStyleBackColor = true;
             this.CheckTCPoverUDP.Visible = false;
@@ -478,7 +478,7 @@
             this.TCPProtocolComboBox.Location = new System.Drawing.Point(108, 124);
             this.TCPProtocolComboBox.Name = "TCPProtocolComboBox";
             this.TCPProtocolComboBox.Size = new System.Drawing.Size(233, 25);
-            this.TCPProtocolComboBox.TabIndex = 32;
+            this.TCPProtocolComboBox.TabIndex = 15;
             // 
             // labelObfsParam
             // 
@@ -488,7 +488,7 @@
             this.labelObfsParam.Location = new System.Drawing.Point(24, 189);
             this.labelObfsParam.Name = "labelObfsParam";
             this.labelObfsParam.Size = new System.Drawing.Size(78, 17);
-            this.labelObfsParam.TabIndex = 33;
+            this.labelObfsParam.TabIndex = 18;
             this.labelObfsParam.Text = "Obfs param";
             // 
             // TextObfsParam
@@ -498,7 +498,7 @@
             this.TextObfsParam.Location = new System.Drawing.Point(108, 186);
             this.TextObfsParam.Name = "TextObfsParam";
             this.TextObfsParam.Size = new System.Drawing.Size(233, 23);
-            this.TextObfsParam.TabIndex = 35;
+            this.TextObfsParam.TabIndex = 19;
             // 
             // labelGroup
             // 
@@ -507,7 +507,7 @@
             this.labelGroup.Location = new System.Drawing.Point(57, 247);
             this.labelGroup.Name = "labelGroup";
             this.labelGroup.Size = new System.Drawing.Size(45, 17);
-            this.labelGroup.TabIndex = 33;
+            this.labelGroup.TabIndex = 22;
             this.labelGroup.Text = "Group";
             // 
             // TextGroup
@@ -517,7 +517,7 @@
             this.TextGroup.MaxLength = 64;
             this.TextGroup.Name = "TextGroup";
             this.TextGroup.Size = new System.Drawing.Size(233, 23);
-            this.TextGroup.TabIndex = 12;
+            this.TextGroup.TabIndex = 23;
             this.TextGroup.WordWrap = false;
             // 
             // checkAdvSetting
@@ -526,7 +526,7 @@
             this.checkAdvSetting.Location = new System.Drawing.Point(6, 302);
             this.checkAdvSetting.Name = "checkAdvSetting";
             this.checkAdvSetting.Size = new System.Drawing.Size(96, 21);
-            this.checkAdvSetting.TabIndex = 37;
+            this.checkAdvSetting.TabIndex = 26;
             this.checkAdvSetting.Text = "Adv. Setting";
             this.checkAdvSetting.UseVisualStyleBackColor = true;
             this.checkAdvSetting.CheckedChanged += new System.EventHandler(this.checkAdvSetting_CheckedChanged);
@@ -539,7 +539,7 @@
             this.labelUDPPort.Margin = new System.Windows.Forms.Padding(3, 5, 3, 5);
             this.labelUDPPort.Name = "labelUDPPort";
             this.labelUDPPort.Size = new System.Drawing.Size(61, 17);
-            this.labelUDPPort.TabIndex = 23;
+            this.labelUDPPort.TabIndex = 28;
             this.labelUDPPort.Text = "UDP Port";
             this.labelUDPPort.Visible = false;
             // 
@@ -551,7 +551,7 @@
             this.TextUDPPort.MaxLength = 10;
             this.TextUDPPort.Name = "TextUDPPort";
             this.TextUDPPort.Size = new System.Drawing.Size(233, 23);
-            this.TextUDPPort.TabIndex = 1;
+            this.TextUDPPort.TabIndex = 29;
             this.TextUDPPort.Visible = false;
             this.TextUDPPort.WordWrap = false;
             // 
@@ -564,7 +564,7 @@
             this.checkSSRLink.Location = new System.Drawing.Point(26, 274);
             this.checkSSRLink.Name = "checkSSRLink";
             this.checkSSRLink.Size = new System.Drawing.Size(76, 21);
-            this.checkSSRLink.TabIndex = 38;
+            this.checkSSRLink.TabIndex = 24;
             this.checkSSRLink.Text = "SSR Link";
             this.checkSSRLink.UseVisualStyleBackColor = true;
             this.checkSSRLink.CheckedChanged += new System.EventHandler(this.checkSSRLink_CheckedChanged);
@@ -576,7 +576,7 @@
             this.labelRemarks.Location = new System.Drawing.Point(43, 218);
             this.labelRemarks.Name = "labelRemarks";
             this.labelRemarks.Size = new System.Drawing.Size(59, 17);
-            this.labelRemarks.TabIndex = 39;
+            this.labelRemarks.TabIndex = 20;
             this.labelRemarks.Text = "Remarks";
             // 
             // tableLayoutPanel7
@@ -606,7 +606,7 @@
             this.LinkUpdate.Margin = new System.Windows.Forms.Padding(5);
             this.LinkUpdate.Name = "LinkUpdate";
             this.LinkUpdate.Size = new System.Drawing.Size(135, 17);
-            this.LinkUpdate.TabIndex = 15;
+            this.LinkUpdate.TabIndex = 5;
             this.LinkUpdate.TabStop = true;
             this.LinkUpdate.Text = "New version available";
             this.LinkUpdate.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.LinkUpdate_LinkClicked);
@@ -639,7 +639,7 @@
             this.DownButton.Margin = new System.Windows.Forms.Padding(0);
             this.DownButton.Name = "DownButton";
             this.DownButton.Size = new System.Drawing.Size(120, 34);
-            this.DownButton.TabIndex = 9;
+            this.DownButton.TabIndex = 4;
             this.DownButton.Text = "Down";
             this.DownButton.UseVisualStyleBackColor = true;
             this.DownButton.Click += new System.EventHandler(this.DownButton_Click);
@@ -650,7 +650,7 @@
             this.UpButton.Margin = new System.Windows.Forms.Padding(0);
             this.UpButton.Name = "UpButton";
             this.UpButton.Size = new System.Drawing.Size(120, 34);
-            this.UpButton.TabIndex = 8;
+            this.UpButton.TabIndex = 3;
             this.UpButton.Text = "Up";
             this.UpButton.UseVisualStyleBackColor = true;
             this.UpButton.Click += new System.EventHandler(this.UpButton_Click);
@@ -698,7 +698,7 @@
             this.MyCancelButton.Margin = new System.Windows.Forms.Padding(3, 3, 0, 0);
             this.MyCancelButton.Name = "MyCancelButton";
             this.MyCancelButton.Size = new System.Drawing.Size(155, 33);
-            this.MyCancelButton.TabIndex = 9;
+            this.MyCancelButton.TabIndex = 37;
             this.MyCancelButton.Text = "Cancel";
             this.MyCancelButton.UseVisualStyleBackColor = true;
             this.MyCancelButton.Click += new System.EventHandler(this.CancelButton_Click);
@@ -712,7 +712,7 @@
             this.OKButton.Margin = new System.Windows.Forms.Padding(3, 3, 3, 0);
             this.OKButton.Name = "OKButton";
             this.OKButton.Size = new System.Drawing.Size(155, 33);
-            this.OKButton.TabIndex = 8;
+            this.OKButton.TabIndex = 36;
             this.OKButton.Text = "OK";
             this.OKButton.UseVisualStyleBackColor = true;
             this.OKButton.Click += new System.EventHandler(this.OKButton_Click);
@@ -723,7 +723,7 @@
             this.AutoSize = true;
             this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.BackColor = System.Drawing.SystemColors.Control;
-            this.ClientSize = new System.Drawing.Size(796, 423);
+            this.ClientSize = new System.Drawing.Size(796, 564);
             this.Controls.Add(this.tableLayoutPanel2);
             this.Controls.Add(this.panel2);
             this.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));

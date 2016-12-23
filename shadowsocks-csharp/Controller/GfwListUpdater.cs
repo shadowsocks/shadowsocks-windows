@@ -210,7 +210,6 @@ namespace Shadowsocks.Controller
                     Error(this, new ErrorEventArgs(ex));
                 }
             }
-
         }
 
         public void UpdatePACFromGFWList(Configuration config)
@@ -219,14 +218,24 @@ namespace Shadowsocks.Controller
             {
                 lastConfig = config;
                 WebClient http = new WebClient();
-                http.Proxy = new WebProxy(IPAddress.Loopback.ToString(), config.localPort);
+                WebProxy proxy = new WebProxy(IPAddress.Loopback.ToString(), config.localPort);
+                if (config.authPass != null && config.authPass.Length > 0)
+                {
+                    proxy.Credentials = new NetworkCredential(config.authUser, config.authPass);
+                }
+                http.Proxy = proxy;
                 http.DownloadStringCompleted += http_DownloadGFWTemplateCompleted;
                 http.DownloadStringAsync(new Uri(GFWLIST_TEMPLATE_URL + "?rnd=" + random.Next().ToString()));
             }
             else
             {
                 WebClient http = new WebClient();
-                http.Proxy = new WebProxy(IPAddress.Loopback.ToString(), config.localPort);
+                WebProxy proxy = new WebProxy(IPAddress.Loopback.ToString(), config.localPort);
+                if (config.authPass != null && config.authPass.Length > 0)
+                {
+                    proxy.Credentials = new NetworkCredential(config.authUser, config.authPass);
+                }
+                http.Proxy = proxy;
                 http.BaseAddress = GFWLIST_URL;
                 http.DownloadStringCompleted += http_DownloadStringCompleted;
                 http.DownloadStringAsync(new Uri(GFWLIST_URL + "?rnd=" + random.Next().ToString()));
@@ -236,7 +245,12 @@ namespace Shadowsocks.Controller
         public void UpdatePACFromGFWList(Configuration config, string url)
         {
             WebClient http = new WebClient();
-            http.Proxy = new WebProxy(IPAddress.Loopback.ToString(), config.localPort);
+            WebProxy proxy = new WebProxy(IPAddress.Loopback.ToString(), config.localPort);
+            if (config.authPass != null && config.authPass.Length > 0)
+            {
+                proxy.Credentials = new NetworkCredential(config.authUser, config.authPass);
+            }
+            http.Proxy = proxy;
             http.DownloadStringCompleted += http_DownloadPACCompleted;
             http.DownloadStringAsync(new Uri(url + "?rnd=" + random.Next().ToString()));
         }
@@ -244,7 +258,12 @@ namespace Shadowsocks.Controller
         public void UpdateBypassListFromDefault(Configuration config)
         {
             WebClient http = new WebClient();
-            http.Proxy = new WebProxy(IPAddress.Loopback.ToString(), config.localPort);
+            WebProxy proxy = new WebProxy(IPAddress.Loopback.ToString(), config.localPort);
+            if (config.authPass != null && config.authPass.Length > 0)
+            {
+                proxy.Credentials = new NetworkCredential(config.authUser, config.authPass);
+            }
+            http.Proxy = proxy;
             http.DownloadStringCompleted += http_DownloadBypassListCompleted;
             http.DownloadStringAsync(new Uri(BYPASS_LIST_URL + "?rnd=" + random.Next().ToString()));
         }

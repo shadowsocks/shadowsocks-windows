@@ -31,6 +31,7 @@ namespace Shadowsocks.Controller
 
         private Socket _connection;
         private Socket _connectionUDP;
+        private string local_sendback_protocol;
 
         protected const int RECV_SIZE = 16384;
         protected byte[] _connetionRecvBuffer = new byte[RECV_SIZE * 2];
@@ -296,7 +297,8 @@ namespace Shadowsocks.Controller
                     }
                     else
                     {
-                        RspSocks5TCPHeader();
+                        //RspSocks5TCPHeader();
+                        local_sendback_protocol = "socks5";
                         Connect();
                     }
                 }
@@ -407,12 +409,12 @@ namespace Shadowsocks.Controller
             {
                 command = 1;
             }
-            //if (Util.Utils.isMatchSubNet(((IPEndPoint)_connection.RemoteEndPoint).Address, "127.0.0.0/8"))
-            //{
-            //    httpProxyState.httpAuthUser = "";
-            //    httpProxyState.httpAuthPass = "";
-            //}
-            //else
+            if (Util.Utils.isMatchSubNet(((IPEndPoint)_connection.RemoteEndPoint).Address, "127.0.0.0/8"))
+            {
+                httpProxyState.httpAuthUser = "";
+                httpProxyState.httpAuthPass = "";
+            }
+            else
             {
                 httpProxyState.httpAuthUser = _config.authUser;
                 httpProxyState.httpAuthPass = _config.authPass;
@@ -439,9 +441,10 @@ namespace Shadowsocks.Controller
             }
             else if (err == 0)
             {
-                string dataSend = httpProxyState.Http200();
-                byte[] httpData = System.Text.Encoding.UTF8.GetBytes(dataSend);
-                _connection.Send(httpData);
+                //string dataSend = httpProxyState.Http200();
+                //byte[] httpData = System.Text.Encoding.UTF8.GetBytes(dataSend);
+                //_connection.Send(httpData);
+                local_sendback_protocol = "http";
                 Connect();
             }
             else if (err == 500)
@@ -484,7 +487,7 @@ namespace Shadowsocks.Controller
 
             handler.getCurrentServer = delegate (string targetURI, bool usingRandom, bool forceRandom) { return _config.GetCurrentServer(targetURI, usingRandom, forceRandom); };
             handler.keepCurrentServer = delegate (string targetURI, string id) { _config.KeepCurrentServer(targetURI, id); };
-            handler.connection = _connection;
+            handler.connection = new ProxySocketTunLocal(_connection);
             handler.connectionUDP = _connectionUDP;
             handler.cfg.reconnectTimesRemain = _config.reconnectTimes;
             handler.cfg.forceRandom = _config.random;
@@ -522,14 +525,14 @@ namespace Shadowsocks.Controller
                         newFirstPacket[addr.Length + 3] = (byte)(cfg.server_port % 256);
                         Array.Copy(_firstPacket, 0, newFirstPacket, addr.Length + 4, _firstPacketLength);
                         _remoteHeaderSendBuffer = newFirstPacket;
-                        handler.Start(_remoteHeaderSendBuffer, _remoteHeaderSendBuffer.Length);
+                        handler.Start(_remoteHeaderSendBuffer, _remoteHeaderSendBuffer.Length, null);
                     }
                     else if (_connectionUDP == null && cfg.type == 2 && new Socks5Forwarder(_config, _IPRange).Handle(_remoteHeaderSendBuffer, _remoteHeaderSendBuffer.Length, _connection))
                     {
                     }
                     else
                     {
-                        handler.Start(_remoteHeaderSendBuffer, _remoteHeaderSendBuffer.Length);
+                        handler.Start(_remoteHeaderSendBuffer, _remoteHeaderSendBuffer.Length, "socks5");
                     }
                     return;
                 }
@@ -541,7 +544,7 @@ namespace Shadowsocks.Controller
                 }
                 else
                 {
-                    handler.Start(_remoteHeaderSendBuffer, _remoteHeaderSendBuffer.Length);
+                    handler.Start(_remoteHeaderSendBuffer, _remoteHeaderSendBuffer.Length, local_sendback_protocol);
                 }
                 return;
             }

@@ -142,7 +142,7 @@ namespace Shadowsocks.Controller
         public Server select_server;
         public HandlerConfig cfg = new HandlerConfig();
         // Connection socket
-        public Socket connection;
+        public ProxySocketTunLocal connection;
         public Socket connectionUDP;
         protected IPEndPoint connectionUDPEndPoint;
 
@@ -469,7 +469,7 @@ namespace Shadowsocks.Controller
 
         public bool ReConnect()
         {
-            System.Diagnostics.Debug.WriteLine("[" + DateTime.Now.ToString() + "]" + "Reconnect " + cfg.targetHost + ":" + cfg.targetPort.ToString() + " " + connection.Handle.ToString());
+            System.Diagnostics.Debug.WriteLine("[" + DateTime.Now.ToString() + "]" + "Reconnect " + cfg.targetHost + ":" + cfg.targetPort.ToString() + " " + connection.GetSocket().Handle.ToString());
             {
                 Handler handler = new Handler();
                 handler.getCurrentServer = getCurrentServer;
@@ -499,13 +499,14 @@ namespace Shadowsocks.Controller
                         total_len += data.Length;
                     }
                 }
-                handler.Start(newFirstPacket, newFirstPacket.Length);
+                handler.Start(newFirstPacket, newFirstPacket.Length, connection.local_sendback_protocol);
             }
             return true;
         }
 
-        public void Start(byte[] firstPacket, int length)
+        public void Start(byte[] firstPacket, int length, string rsp_protocol)
         {
+            connection.local_sendback_protocol = rsp_protocol;
             if (cfg.socks5RemotePort > 0)
             {
                 cfg.autoSwitchOff = false;
@@ -654,6 +655,28 @@ namespace Shadowsocks.Controller
             }
         }
 
+        private void CloseSocket(ref ProxySocketTunLocal sock)
+        {
+            lock (this)
+            {
+                if (sock != null)
+                {
+                    ProxySocketTunLocal s = sock;
+                    sock = null;
+                    try
+                    {
+                        s.Shutdown(SocketShutdown.Both);
+                    }
+                    catch { }
+                    try
+                    {
+                        s.Close();
+                    }
+                    catch { }
+                }
+            }
+        }
+
         private void CloseSocket(ref ProxyEncryptSocket sock)
         {
             lock (this)
@@ -698,7 +721,7 @@ namespace Shadowsocks.Controller
                 CloseSocket(ref remote);
                 CloseSocket(ref remoteUDP);
             }
-            System.Diagnostics.Debug.WriteLine("[" + DateTime.Now.ToString() + "]" + "Close   " + cfg.targetHost + ":" + cfg.targetPort.ToString() + " " + connection.Handle.ToString());
+            System.Diagnostics.Debug.WriteLine("[" + DateTime.Now.ToString() + "]" + "Close   " + cfg.targetHost + ":" + cfg.targetPort.ToString() + " " + connection.GetSocket().Handle.ToString());
             if (lastErrCode == 0 && server != null)
             {
                 if (!local_error && speedTester.sizeProtocolRecv == 0 && speedTester.sizeUpload > 0)
@@ -738,7 +761,7 @@ namespace Shadowsocks.Controller
 
                 if (!reconnect)
                 {
-                    System.Diagnostics.Debug.WriteLine("[" + DateTime.Now.ToString() + "]" + "Disconnect " + cfg.targetHost + ":" + cfg.targetPort.ToString() + " " + connection.Handle.ToString());
+                    System.Diagnostics.Debug.WriteLine("[" + DateTime.Now.ToString() + "]" + "Disconnect " + cfg.targetHost + ":" + cfg.targetPort.ToString() + " " + connection.GetSocket().Handle.ToString());
                     CloseSocket(ref connection);
                     CloseSocket(ref connectionUDP);
                 }
@@ -816,7 +839,7 @@ namespace Shadowsocks.Controller
                 server = select_server;
             }
             speedTester.server = server.server;
-            System.Diagnostics.Debug.WriteLine("[" + DateTime.Now.ToString() + "]" + "Connect " + cfg.targetHost + ":" + cfg.targetPort.ToString() + " " + connection.Handle.ToString());
+            System.Diagnostics.Debug.WriteLine("[" + DateTime.Now.ToString() + "]" + "Connect " + cfg.targetHost + ":" + cfg.targetPort.ToString() + " " + connection.GetSocket().Handle.ToString());
 
             ResetTimeout(cfg.TTL);
             if (cfg.fouce_local_dns_query && cfg.targetHost != null)
@@ -948,8 +971,8 @@ namespace Shadowsocks.Controller
             {
                 connectionTCPIdle = false;
                 byte[] buffer = new byte[BufferSize];
-                connection.BeginReceive(buffer, 0, RecvSize, 0,
-                    new AsyncCallback(PipeConnectionReceiveCallback), buffer);
+                connection.BeginReceive(buffer, RecvSize, 0,
+                    new AsyncCallback(PipeConnectionReceiveCallback), null);
             }
         }
 
@@ -1199,6 +1222,11 @@ namespace Shadowsocks.Controller
 
                 doConnectionTCPRecv();
                 doConnectionUDPRecv();
+
+                if (connection.local_sendback_protocol != null)
+                {
+                    connection.Send(remoteUDPRecvBuffer, 0, 0);
+                }
             }
             catch (Exception e)
             {
@@ -1503,7 +1531,7 @@ namespace Shadowsocks.Controller
                         return;
                     }
                     byte[] connetionRecvBuffer = new byte[BufferSize];
-                    Array.Copy((byte[])ar.AsyncState, 0, connetionRecvBuffer, 0, bytesRead);
+                    Array.Copy((ar.AsyncState as CallbackState).buffer, 0, connetionRecvBuffer, 0, bytesRead);
                     if (connectionSendBufferList != null)
                     {
                         detector.OnSend(connetionRecvBuffer, bytesRead);

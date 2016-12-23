@@ -59,7 +59,13 @@ namespace Shadowsocks.Controller
             {
                 WebClient http = new WebClient();
                 http.Headers.Add("User-Agent", "Mozilla/5.0 (Windows NT 5.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.3319.102 Safari/537.36");
-                http.Proxy = new WebProxy(IPAddress.Loopback.ToString(), config.localPort);
+                WebProxy proxy = new WebProxy(IPAddress.Loopback.ToString(), config.localPort);
+                if (config.authPass != null && config.authPass.Length > 0)
+                {
+                    proxy.Credentials = new NetworkCredential(config.authUser, config.authPass);
+                }
+                http.Proxy = proxy;
+
                 http.DownloadStringCompleted += http_DownloadStringCompleted;
                 http.DownloadStringAsync(new Uri(UpdateURL));
             }
@@ -87,12 +93,15 @@ namespace Shadowsocks.Controller
         {
             try
             {
-                response = e.Result;
-                hash = Util.Utils.BinarySHA512hex();
-
-                if (CheckCodeFound != null)
+                if (response != e.Result)
                 {
-                    CheckCodeFound(this, new EventArgs());
+                    response = e.Result;
+                    hash = Util.Utils.BinarySHA512hex();
+
+                    if (CheckCodeFound != null)
+                    {
+                        CheckCodeFound(this, new EventArgs());
+                    }
                 }
             }
             catch (Exception ex)

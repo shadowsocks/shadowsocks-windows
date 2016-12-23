@@ -9,7 +9,7 @@ using Shadowsocks.Obfs;
 
 namespace Shadowsocks.Controller
 {
-    class CallbackState
+    public class CallbackState
     {
         public byte[] buffer;
         public int size;
@@ -17,7 +17,7 @@ namespace Shadowsocks.Controller
         public object state;
     }
 
-    class ProxySocketTun
+    public class ProxySocketTun
     {
         protected Socket _socket;
         protected EndPoint _socketEndPoint;
@@ -34,10 +34,14 @@ namespace Shadowsocks.Controller
 
         protected bool _close;
 
+        public ProxySocketTun(Socket socket)
+        {
+            _socket = socket;
+        }
+
         public ProxySocketTun(AddressFamily af, SocketType type, ProtocolType protocol)
         {
             _socket = new Socket(af, type, protocol);
-            _socket.SendBufferSize = 1024 * 64;
         }
 
         public Socket GetSocket()
@@ -104,10 +108,9 @@ namespace Shadowsocks.Controller
             return _socket.BeginReceive(buffer, 0, size, flags, callback, st);
         }
 
-        public int EndReceive(IAsyncResult ar, out bool sendback)
+        public int EndReceive(IAsyncResult ar)
         {
             int bytesRead = _socket.EndReceive(ar);
-            sendback = false;
             if (bytesRead > 0)
             {
                 CallbackState st = (CallbackState)ar.AsyncState;
@@ -121,7 +124,7 @@ namespace Shadowsocks.Controller
             return bytesRead;
         }
 
-        public int Send(byte[] buffer, int size, SocketFlags flags)
+        public virtual int Send(byte[] buffer, int size, SocketFlags flags)
         {
             _socket.Send(buffer, size, 0);
             return size;
@@ -440,6 +443,56 @@ namespace Shadowsocks.Controller
         }
     }
 
+    public class ProxySocketTunLocal : ProxySocketTun
+    {
+        public string local_sendback_protocol;
+
+        public ProxySocketTunLocal(Socket socket)
+            : base(socket)
+        {
+            _socket = socket;
+        }
+
+        public ProxySocketTunLocal(AddressFamily af, SocketType type, ProtocolType protocol)
+            : base(af, type, protocol)
+        {
+
+        }
+
+        public override int Send(byte[] buffer, int size, SocketFlags flags)
+        {
+            if (local_sendback_protocol != null)
+            {
+                if (local_sendback_protocol == "http")
+                {
+                    byte[] data = System.Text.Encoding.UTF8.GetBytes("HTTP/1.1 200 Connection Established\r\n\r\n");
+                    _socket.Send(data, data.Length, 0);
+                }
+                else if (local_sendback_protocol == "socks5")
+                {
+                    if (_socket.AddressFamily == AddressFamily.InterNetwork)
+                    {
+                        byte[] response = { 5, 0, 0, 1,
+                                0, 0, 0, 0,
+                                0, 0 };
+                        _socket.Send(response);
+                    }
+                    else
+                    {
+                        byte[] response = { 5, 0, 0, 4,
+                                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                                0, 0 };
+                        _socket.Send(response);
+                    }
+                }
+                local_sendback_protocol = null;
+            }
+            _socket.Send(buffer, size, 0);
+            return size;
+        }
+
+    }
+
     class ProxyEncryptSocket
     {
         protected Socket _socket;
@@ -470,7 +523,6 @@ namespace Shadowsocks.Controller
         public ProxyEncryptSocket(AddressFamily af, SocketType type, ProtocolType protocol)
         {
             _socket = new Socket(af, type, protocol);
-            _socket.SendBufferSize = 1024 * 64;
         }
 
         public Socket GetSocket()
@@ -642,6 +694,10 @@ namespace Shadowsocks.Controller
                         int outlength;
                         st.protocol_size = bytesToSend;
                         byte[] buffer = _protocol.ClientPostDecrypt(ReceiveDecryptBuffer, bytesToSend, out outlength);
+                        if (st.buffer.Length < outlength)
+                        {
+                            Array.Resize(ref st.buffer, outlength);
+                        }
                         Array.Copy(buffer, 0, st.buffer, 0, outlength);
                         return outlength;
                     }

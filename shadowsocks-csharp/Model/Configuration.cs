@@ -130,7 +130,7 @@ namespace Shadowsocks.Model
                                 break;
                             }
                         }
-                        if (index >= 0 && configs[index].enable)
+                        if (index >= 0 && visit.index == index && configs[index].enable)
                         {
                             time2uri.Remove(visit);
                             visit.index = index;

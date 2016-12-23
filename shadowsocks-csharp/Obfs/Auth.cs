@@ -1067,13 +1067,6 @@ namespace Shadowsocks.Obfs
 
                 encryptor.SetIV(new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 });
                 encryptor.Encrypt(encrypt, 16, encrypt_data, out enc_outlen);
-                if (false)
-                {
-                    byte[] enc = new byte[16];
-                    Array.Copy(encrypt, enc, 16);
-                    encryptor.SetIV(enc);
-                    encryptor.Encrypt(new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, 16, encrypt_data, out enc_outlen);
-                }
                 encryptor.Dispose();
                 Array.Copy(encrypt_data, 16, encrypt, 4, 16);
                 uid.CopyTo(encrypt, 0);

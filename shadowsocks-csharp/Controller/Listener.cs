@@ -115,16 +115,8 @@ namespace Shadowsocks.Controller
                 }
                 IPEndPoint localEndPoint = null;
                 IPEndPoint localEndPointV6 = null;
-                if (_shareOverLAN)
-                {
-                    localEndPoint = new IPEndPoint(IPAddress.Any, localPort);
-                    localEndPointV6 = new IPEndPoint(IPAddress.IPv6Any, localPort);
-                }
-                else
-                {
-                    localEndPoint = new IPEndPoint(IPAddress.Loopback, localPort);
-                    localEndPointV6 = new IPEndPoint(IPAddress.IPv6Loopback, localPort);
-                }
+                localEndPoint = new IPEndPoint(IPAddress.Any, localPort);
+                localEndPointV6 = new IPEndPoint(IPAddress.IPv6Any, localPort);
 
                 // Bind the socket to the local endpoint and listen for incoming connections.
                 if (_socket_v6 != null)
@@ -256,6 +248,12 @@ namespace Shadowsocks.Controller
             try
             {
                 Socket conn = listener.EndAccept(ar);
+
+                if (!_shareOverLAN && !Util.Utils.isLocal(conn))
+                {
+                    conn.Shutdown(SocketShutdown.Both);
+                    conn.Close();
+                }
 
                 if ((_authUser ?? "").Length == 0 && !Util.Utils.isLAN(conn))
                 {

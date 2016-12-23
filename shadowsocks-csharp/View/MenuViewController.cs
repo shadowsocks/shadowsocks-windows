@@ -109,15 +109,16 @@ namespace Shadowsocks.View
                     }
                     else
                     {
-                        controller.Stop();
-                        if (timerDelayCheckUpdate != null)
-                        {
-                            timerDelayCheckUpdate.Elapsed -= timer_Elapsed;
-                            timerDelayCheckUpdate.Stop();
-                            timerDelayCheckUpdate = null;
-                        }
-                        _notifyIcon.Visible = false;
-                        Application.Exit();
+                        versionItem.Text = "Version check fail";
+                        //controller.Stop();
+                        //if (timerDelayCheckUpdate != null)
+                        //{
+                        //    timerDelayCheckUpdate.Elapsed -= timer_Elapsed;
+                        //    timerDelayCheckUpdate.Stop();
+                        //    timerDelayCheckUpdate = null;
+                        //}
+                        //_notifyIcon.Visible = false;
+                        //Application.Exit();
                     }
                 }
                 else
@@ -350,7 +351,7 @@ namespace Shadowsocks.View
                 if (!this.UpdateItem.Visible)
                 {
                     ShowBalloonTip(String.Format(I18N.GetString("{0} {1} Update Found"), UpdateChecker.Name, updateChecker.LatestVersionNumber),
-                        I18N.GetString("Click menu to download"), ToolTipIcon.Info, 5000);
+                        I18N.GetString("Click menu to download"), ToolTipIcon.Info, 10000);
                     _notifyIcon.BalloonTipClicked += notifyIcon1_BalloonTipClicked;
 
                     timerDelayCheckUpdate.Elapsed -= timer_Elapsed;
@@ -377,6 +378,7 @@ namespace Shadowsocks.View
                 }
                 else
                     versionItem.Text = ver;
+                ShowBalloonTip("Notice", versionItem.Text, ToolTipIcon.Info, 10000);
             }
         }
 
@@ -671,8 +673,7 @@ namespace Shadowsocks.View
 
         private void AboutItem_Click(object sender, EventArgs e)
         {
-            Process.Start("https://bit.no.com:43110/shadowsocksr.bit");
-            //Process.Start("https://github.com/breakwa11/shadowsocks-rss");
+            Process.Start("https://github.com/breakwa11/shadowsocks-rss");
         }
 
         private void DonateItem_Click(object sender, EventArgs e)
@@ -889,6 +890,23 @@ namespace Shadowsocks.View
             }
         }
 
+        private void URL_Split(string text, ref List<string> out_urls)
+        {
+            int ss_index = text.IndexOf("ss://", 1, StringComparison.OrdinalIgnoreCase);
+            int ssr_index = text.IndexOf("ssr://", 1, StringComparison.OrdinalIgnoreCase);
+            int index = ss_index;
+            if (index == -1 || index > ssr_index) index = ssr_index;
+            if (index == -1)
+            {
+                out_urls.Insert(0, text);
+            }
+            else
+            {
+                out_urls.Insert(0, text.Substring(0, index));
+                URL_Split(text.Substring(index), ref out_urls);
+            }
+        }
+
         private void CopyAddress_Click(object sender, EventArgs e)
         {
             try
@@ -896,13 +914,16 @@ namespace Shadowsocks.View
                 IDataObject iData = Clipboard.GetDataObject();
                 if (iData.GetDataPresent(DataFormats.Text))
                 {
-                    string[] urls = ((string)iData.GetData(DataFormats.Text)).Split(new string[] { "\r", "\n", "\t", " ", "|" }, StringSplitOptions.RemoveEmptyEntries);
-                    Array.Reverse(urls);
+                    List<string> urls = new List<string>();
+                    URL_Split((string)iData.GetData(DataFormats.Text), ref urls);
+                    int count = 0;
                     foreach (string url in urls)
                     {
-                        controller.AddServerBySSURL(url);
+                        if (controller.AddServerBySSURL(url))
+                            ++count;
                     }
-                    ShowConfigForm(true);
+                    if (count > 0)
+                        ShowConfigForm(true);
                 }
             }
             catch

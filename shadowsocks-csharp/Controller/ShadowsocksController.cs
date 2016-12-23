@@ -33,12 +33,12 @@ namespace Shadowsocks.Controller
         public IPRangeSet _rangeSet;
 #if !_CONSOLE
         private HttpProxyRunner polipoRunner;
+        private bool _systemProxyIsDirty = false;
 #endif
         private GFWListUpdater gfwListUpdater;
         private bool stopped = false;
         private bool firstRun = true;
 
-        private bool _systemProxyIsDirty = false;
 
         public class PathEventArgs : EventArgs
         {
@@ -283,7 +283,7 @@ namespace Shadowsocks.Controller
 
         public bool AddServerBySSURL(string ssURL)
         {
-            if (ssURL.StartsWith("ss://") || ssURL.StartsWith("ssr://"))
+            if (ssURL.StartsWith("ss://", StringComparison.OrdinalIgnoreCase) || ssURL.StartsWith("ssr://", StringComparison.OrdinalIgnoreCase))
             {
                 try
                 {

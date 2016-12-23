@@ -23,6 +23,8 @@ namespace Shadowsocks.Util
 
         private static LRUCache<string, IPAddress> dnsBuffer = new LRUCache<string, IPAddress>();
 
+        private static byte[] BinSHA512Buffer;
+
         public static LRUCache<string, IPAddress> DnsBuffer
         {
             get
@@ -131,6 +133,44 @@ namespace Shadowsocks.Util
             {
                 return false;
             }
+        }
+
+        public static bool isLocal(IPAddress ip)
+        {
+            byte[] addr = ip.GetAddressBytes();
+            if (addr.Length == 4)
+            {
+                string[] netmasks = new string[]
+                {
+                    "127.0.0.0/8",
+                    "169.254.0.0/16",
+                };
+                foreach (string netmask in netmasks)
+                {
+                    if (isMatchSubNet(ip, netmask))
+                        return true;
+                }
+                return false;
+            }
+            else if (addr.Length == 16)
+            {
+                string[] netmasks = new string[]
+                {
+                    "::1/128",
+                };
+                foreach (string netmask in netmasks)
+                {
+                    if (isMatchSubNet(ip, netmask))
+                        return true;
+                }
+                return false;
+            }
+            return true;
+        }
+
+        public static bool isLocal(Socket socket)
+        {
+            return isLocal(((IPEndPoint)socket.RemoteEndPoint).Address);
         }
 
         public static bool isLAN(IPAddress ip)
@@ -250,23 +290,19 @@ namespace Shadowsocks.Util
         {
             byte[] bytes = null;
             string data = "";
-            data = val;
-            for (var i = 0; i < 3; i++)
+            data = val.PadRight(val.Length + (4 - val.Length % 4) % 4, '=');
+            try
             {
-                try
-                {
-                    bytes = System.Convert.FromBase64String(val.Replace('-', '+').Replace('_', '/'));
-                }
-                catch (FormatException)
-                {
-                    val += "=";
-                }
+                bytes = System.Convert.FromBase64String(data.Replace('-', '+').Replace('_', '/'));
+            }
+            catch (FormatException)
+            {
             }
             if (bytes != null)
             {
-                data = Encoding.UTF8.GetString(bytes);
+                return Encoding.UTF8.GetString(bytes);
             }
-            return data;
+            return val;
         }
 
         public static void SetArrayMinSize<T>(ref T[] array, int size)
@@ -348,6 +384,8 @@ namespace Shadowsocks.Util
 
         public static byte[] BinarySHA512()
         {
+            if (BinSHA512Buffer != null)
+                return BinSHA512Buffer;
             try
             {
                 string filePath = Util.Utils.GetExecutablePath();
@@ -357,7 +395,7 @@ namespace Shadowsocks.Util
                     {
                         byte[] buffer = new byte[bs.Length];
                         bs.Read(buffer, 0, buffer.Length);
-                        return MbedTLS.SHA512(buffer);
+                        return BinSHA512Buffer = MbedTLS.SHA512(buffer);
                     }
                 }
             }
@@ -385,14 +423,7 @@ namespace Shadowsocks.Util
 
         public static string GetExecutablePath()
         {
-            try
-            {
-                return System.Windows.Forms.Application.ExecutablePath;
-            }
-            catch
-            {
-                return System.Reflection.Assembly.GetExecutingAssembly().Location;
-            }
+            return System.Reflection.Assembly.GetExecutingAssembly().Location;
         }
 
         public static int GetDpiMul()
