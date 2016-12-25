@@ -23,16 +23,21 @@ namespace Shadowsocks.Controller
 
         public bool Handle(byte[] firstPacket, int length, Socket socket)
         {
+            return false;
+        }
+
+        public bool Handle(byte[] firstPacket, int length, Socket socket, string local_sendback_protocol)
+        {
             int handle = IsHandle(firstPacket, length, socket);
             if (handle > 0)
             {
                 if (_config.proxyEnable)
                 {
-                    new Handler().Start(_config, _IPRange, firstPacket, length, socket, handle == 2);
+                    new Handler().Start(_config, _IPRange, firstPacket, length, socket, local_sendback_protocol, handle == 2);
                 }
                 else
                 {
-                    new Handler().Start(_config, _IPRange, firstPacket, length, socket, false);
+                    new Handler().Start(_config, _IPRange, firstPacket, length, socket, local_sendback_protocol, false);
                 }
                 return true;
             }
@@ -119,7 +124,7 @@ namespace Shadowsocks.Controller
 
             private byte[] _firstPacket;
             private int _firstPacketLength;
-            private Socket _local;
+            private ProxySocketTunLocal _local;
             private ProxySocketTun _remote;
 
             private bool _closed = false;
@@ -133,12 +138,13 @@ namespace Shadowsocks.Controller
             // connection receive buffer
             private byte[] connetionRecvBuffer = new byte[RecvSize];
 
-            public void Start(Configuration config, IPRangeSet IPRange, byte[] firstPacket, int length, Socket socket, bool proxy)
+            public void Start(Configuration config, IPRangeSet IPRange, byte[] firstPacket, int length, Socket socket, string local_sendback_protocol, bool proxy)
             {
                 _IPRange = IPRange;
                 _firstPacket = firstPacket;
                 _firstPacketLength = length;
-                _local = socket;
+                _local = new ProxySocketTunLocal(socket);
+                _local.local_sendback_protocol = local_sendback_protocol;
                 _config = config;
                 _remote_go_proxy = proxy;
                 Connect();
@@ -277,8 +283,10 @@ namespace Shadowsocks.Controller
                 {
                     _remote.BeginReceive(remoteRecvBuffer, RecvSize, 0,
                         new AsyncCallback(PipeRemoteReceiveCallback), null);
-                    _local.BeginReceive(connetionRecvBuffer, 0, RecvSize, 0,
+                    _local.BeginReceive(connetionRecvBuffer, RecvSize, 0,
                         new AsyncCallback(PipeConnectionReceiveCallback), null);
+
+                    _local.Send(connetionRecvBuffer, 0, 0);
                 }
                 catch (Exception e)
                 {
@@ -299,7 +307,10 @@ namespace Shadowsocks.Controller
 
                     if (bytesRead > 0)
                     {
-                        _local.BeginSend(remoteRecvBuffer, 0, bytesRead, 0, new AsyncCallback(PipeConnectionSendCallback), null);
+                        //_local.BeginSend(remoteRecvBuffer, bytesRead, 0, new AsyncCallback(PipeConnectionSendCallback), null);
+                        _local.Send(remoteRecvBuffer, bytesRead, 0);
+                        _remote.BeginReceive(remoteRecvBuffer, RecvSize, 0,
+                            new AsyncCallback(PipeRemoteReceiveCallback), null);
                     }
                     else
                     {
@@ -325,7 +336,10 @@ namespace Shadowsocks.Controller
 
                     if (bytesRead > 0)
                     {
-                        _remote.BeginSend(connetionRecvBuffer, bytesRead, 0, new AsyncCallback(PipeRemoteSendCallback), null);
+                        //_remote.BeginSend(connetionRecvBuffer, bytesRead, 0, new AsyncCallback(PipeRemoteSendCallback), null);
+                        _remote.Send(connetionRecvBuffer, bytesRead, 0);
+                        _local.BeginReceive(connetionRecvBuffer, RecvSize, 0,
+                            new AsyncCallback(PipeConnectionReceiveCallback), null);
                     }
                     else
                     {
@@ -348,7 +362,7 @@ namespace Shadowsocks.Controller
                 try
                 {
                     _remote.EndSend(ar);
-                    _local.BeginReceive(connetionRecvBuffer, 0, RecvSize, 0,
+                    _local.BeginReceive(connetionRecvBuffer, RecvSize, 0,
                         new AsyncCallback(PipeConnectionReceiveCallback), null);
                 }
                 catch (Exception e)

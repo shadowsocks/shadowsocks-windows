@@ -25,7 +25,8 @@ namespace Shadowsocks.Encryption
         protected byte[] _iv;
         protected int ivLen;
 
-        protected byte[] tempbuf = new byte[MAX_INPUT_SIZE];
+        protected byte[] encbuf = new byte[MAX_INPUT_SIZE];
+        protected byte[] decbuf = new byte[MAX_INPUT_SIZE];
 
         public IVEncryptor(string method, string password)
             : base(method, password)
@@ -151,9 +152,9 @@ namespace Shadowsocks.Encryption
                 initCipher(outbuf, true);
                 outlength = length + ivLen;
 
-                cipherUpdate(true, length, buf, tempbuf);
+                cipherUpdate(true, length, buf, encbuf);
                 outlength = length + ivLen;
-                Buffer.BlockCopy(tempbuf, 0, outbuf, ivLen, length);
+                Buffer.BlockCopy(encbuf, 0, outbuf, ivLen, length);
             }
             else
             {
@@ -198,8 +199,8 @@ namespace Shadowsocks.Encryption
                 {
                     _decryptIVReceived += outlength;
 
-                    Buffer.BlockCopy(buf, start_pos, tempbuf, 0, outlength);
-                    cipherUpdate(false, outlength, tempbuf, outbuf);
+                    Buffer.BlockCopy(buf, start_pos, decbuf, 0, outlength);
+                    cipherUpdate(false, outlength, decbuf, outbuf);
                 }
             }
             else
