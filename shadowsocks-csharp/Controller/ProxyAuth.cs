@@ -405,10 +405,6 @@ namespace Shadowsocks.Controller
             {
                 httpProxyState = new HttpPraser();
             }
-            else
-            {
-                command = 1;
-            }
             if (Util.Utils.isMatchSubNet(((IPEndPoint)_connection.RemoteEndPoint).Address, "127.0.0.0/8"))
             {
                 httpProxyState.httpAuthUser = "";
@@ -419,44 +415,50 @@ namespace Shadowsocks.Controller
                 httpProxyState.httpAuthUser = _config.authUser;
                 httpProxyState.httpAuthPass = _config.authPass;
             }
-            int err = httpProxyState.HandshakeReceive(_firstPacket, _firstPacketLength, ref _remoteHeaderSendBuffer);
-            if (err == 1)
+            for (int i = 1; ; ++i)
             {
-                HttpHandshakeRecv();
-            }
-            else if (err == 2)
-            {
-                string dataSend = httpProxyState.Http407();
-                byte[] httpData = System.Text.Encoding.UTF8.GetBytes(dataSend);
-                _connection.Send(httpData);
-                HttpHandshakeRecv();
-            }
-            else if (err == 3)
-            {
-                Connect();
-            }
-            else if (err == 4)
-            {
-                Connect();
-            }
-            else if (err == 0)
-            {
-                //string dataSend = httpProxyState.Http200();
-                //byte[] httpData = System.Text.Encoding.UTF8.GetBytes(dataSend);
-                //_connection.Send(httpData);
-                local_sendback_protocol = "http";
-                Connect();
-            }
-            else if (err == 500)
-            {
-                string dataSend = httpProxyState.Http500();
-                byte[] httpData = System.Text.Encoding.UTF8.GetBytes(dataSend);
-                _connection.Send(httpData);
-                HttpHandshakeRecv();
+                int err = httpProxyState.HandshakeReceive(_firstPacket, _firstPacketLength, ref _remoteHeaderSendBuffer);
+                if (err == 1)
+                {
+                    if (HttpHandshakeRecv())
+                        break;
+                }
+                else if (err == 2)
+                {
+                    string dataSend = httpProxyState.Http407();
+                    byte[] httpData = System.Text.Encoding.UTF8.GetBytes(dataSend);
+                    _connection.Send(httpData);
+                    if (HttpHandshakeRecv())
+                        break;
+                }
+                else if (err == 3 || err == 4)
+                {
+                    Connect();
+                    break;
+                }
+                else if (err == 0)
+                {
+                    local_sendback_protocol = "http";
+                    Connect();
+                    break;
+                }
+                else if (err == 500)
+                {
+                    string dataSend = httpProxyState.Http500();
+                    byte[] httpData = System.Text.Encoding.UTF8.GetBytes(dataSend);
+                    _connection.Send(httpData);
+                    if (HttpHandshakeRecv())
+                        break;
+                }
+                if (i == 3)
+                {
+                    Close();
+                    break;
+                }
             }
         }
 
-        private void HttpHandshakeRecv()
+        private bool HttpHandshakeRecv()
         {
             try
             {
@@ -465,12 +467,12 @@ namespace Shadowsocks.Controller
                 {
                     Array.Copy(_connetionRecvBuffer, _firstPacket, bytesRead);
                     _firstPacketLength = bytesRead;
-                    RspHttpHandshakeReceive();
+                    return false;
                 }
                 else
                 {
                     Console.WriteLine("failed to recv data in HttpHandshakeRecv");
-                    this.Close();
+                    Close();
                 }
             }
             catch (Exception e)
@@ -478,6 +480,7 @@ namespace Shadowsocks.Controller
                 Logging.LogUsefulException(e);
                 Close();
             }
+            return true;
         }
 
         private void Connect()
