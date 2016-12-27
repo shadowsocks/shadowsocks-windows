@@ -25,7 +25,6 @@ namespace Shadowsocks.View
 
         private ShadowsocksController controller;
         private UpdateChecker updateChecker;
-        private BinChecker binChecker;
 
         private NotifyIcon _notifyIcon;
         private ContextMenu contextMenu1;
@@ -80,8 +79,6 @@ namespace Shadowsocks.View
 
             updateChecker = new UpdateChecker();
             updateChecker.NewVersionFound += updateChecker_NewVersionFound;
-            binChecker = new BinChecker();
-            binChecker.CheckCodeFound += binChecker_callback;
 
             LoadCurrentConfiguration();
 
@@ -103,23 +100,6 @@ namespace Shadowsocks.View
                 if (timerDelayCheckUpdate.Interval <= 1000.0 * 30)
                 {
                     timerDelayCheckUpdate.Interval = 1000.0 * 60 * 5;
-                    if (BinChecker.CheckBin())
-                    {
-                        versionItem.Text = "Version " + UpdateChecker.Version + " OK";
-                    }
-                    else
-                    {
-                        versionItem.Text = "Version check fail";
-                        //controller.Stop();
-                        //if (timerDelayCheckUpdate != null)
-                        //{
-                        //    timerDelayCheckUpdate.Elapsed -= timer_Elapsed;
-                        //    timerDelayCheckUpdate.Stop();
-                        //    timerDelayCheckUpdate = null;
-                        //}
-                        //_notifyIcon.Visible = false;
-                        //Application.Exit();
-                    }
                 }
                 else
                 {
@@ -127,7 +107,6 @@ namespace Shadowsocks.View
                 }
             }
             updateChecker.CheckUpdate(controller.GetConfiguration());
-            binChecker.CheckUpdate(controller.GetConfiguration());
         }
 
         void controller_Errored(object sender, System.IO.ErrorEventArgs e)
@@ -360,25 +339,6 @@ namespace Shadowsocks.View
                 }
                 this.UpdateItem.Visible = true;
                 this.UpdateItem.Text = String.Format(I18N.GetString("New version {0} {1} available"), UpdateChecker.Name, updateChecker.LatestVersionNumber);
-            }
-        }
-
-        void binChecker_callback(object sender, EventArgs e)
-        {
-            BinChecker checker = sender as BinChecker;
-            string ver = checker.get_version();
-            if (ver != null)
-            {
-                int pos = ver.IndexOf('#');
-                if (pos > 0)
-                {
-                    versionItem.Text = ver.Substring(0, pos);
-                    versionItem.Tag = ver.Substring(pos + 1);
-                    versionItem.Enabled = true;
-                }
-                else
-                    versionItem.Text = ver;
-                ShowBalloonTip("Notice", versionItem.Text, ToolTipIcon.Info, 10000);
             }
         }
 

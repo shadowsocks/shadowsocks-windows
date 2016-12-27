@@ -131,7 +131,6 @@
     <Compile Include="3rd\zxing\WriterException.cs" />
     <Compile Include="Controller\APIServer.cs" />
     <Compile Include="Controller\AutoStartup.cs" />
-    <Compile Include="Controller\BinChecker.cs" />
     <Compile Include="Controller\FileManager.cs" />
     <Compile Include="Controller\GFWListUpdater.cs" />
     <Compile Include="Controller\HttpPortForwarder.cs" />

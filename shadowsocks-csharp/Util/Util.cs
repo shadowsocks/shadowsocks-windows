@@ -23,8 +23,6 @@ namespace Shadowsocks.Util
 
         private static LRUCache<string, IPAddress> dnsBuffer = new LRUCache<string, IPAddress>();
 
-        private static byte[] BinSHA512Buffer;
-
         public static LRUCache<string, IPAddress> DnsBuffer
         {
             get
@@ -380,45 +378,6 @@ namespace Shadowsocks.Util
                 }
             }
             return ipAddress;
-        }
-
-        public static byte[] BinarySHA512()
-        {
-            if (BinSHA512Buffer != null)
-                return BinSHA512Buffer;
-            try
-            {
-                string filePath = Util.Utils.GetExecutablePath();
-                using (FileStream fs = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
-                {
-                    using (BufferedStream bs = new BufferedStream(fs))
-                    {
-                        byte[] buffer = new byte[bs.Length];
-                        bs.Read(buffer, 0, buffer.Length);
-                        return BinSHA512Buffer = MbedTLS.SHA512(buffer);
-                    }
-                }
-            }
-            catch (Exception e)
-            {
-                MessageBox.Show(e != null ? e.ToString() : "", e.Message);
-                return null;
-            }
-        }
-
-        public static string Hex(byte[] hash)
-        {
-            StringBuilder formatted = new StringBuilder(2 * hash.Length);
-            foreach (byte b in hash)
-            {
-                formatted.AppendFormat("{0:X2}", b);
-            }
-            return formatted.ToString();
-        }
-
-        public static string BinarySHA512hex()
-        {
-            return Hex(BinarySHA512());
         }
 
         public static string GetExecutablePath()
