@@ -29,8 +29,6 @@ namespace Shadowsocks.View
         private NotifyIcon _notifyIcon;
         private ContextMenu contextMenu1;
 
-        private MenuItem versionItem;
-
         private MenuItem enableItem;
         private MenuItem PACModeItem;
         private MenuItem globalModeItem;
@@ -201,7 +199,6 @@ namespace Shadowsocks.View
         private void LoadMenu()
         {
             this.contextMenu1 = new ContextMenu(new MenuItem[] {
-                versionItem = CreateMenuItem("Version checking", new EventHandler(this.VersionItem_Click)),
                 modeItem = CreateMenuGroup("Mode", new MenuItem[] {
                     enableItem = CreateMenuItem("Disable system proxy", new EventHandler(this.EnableItem_Click)),
                     PACModeItem = CreateMenuItem("PAC", new EventHandler(this.PACModeItem_Click)),
@@ -262,7 +259,6 @@ namespace Shadowsocks.View
                 CreateMenuItem("Quit", new EventHandler(this.Quit_Click))
             });
             this.UpdateItem.Visible = false;
-            versionItem.Enabled = false;
         }
 
         private void controller_ConfigChanged(object sender, EventArgs e)
@@ -675,11 +671,6 @@ namespace Shadowsocks.View
             {
                 ShowServerLogForm();
             }
-        }
-
-        private void VersionItem_Click(object sender, EventArgs e)
-        {
-            System.Diagnostics.Process.Start(versionItem.Tag as string);
         }
 
         private void EnableItem_Click(object sender, EventArgs e)
