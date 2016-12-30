@@ -46,6 +46,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
+using System.Drawing;
 #if SIMPLE_JSON_DYNAMIC
 using System.Dynamic;
 #endif
@@ -1287,6 +1288,12 @@ namespace SimpleJson
                         obj = DateTime.ParseExact(str, Iso8601Format, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal);
                     else if (type == typeof(Guid) || (ReflectionUtils.IsNullableType(type) && Nullable.GetUnderlyingType(type) == typeof(Guid)))
                         obj = new Guid(str);
+                    else if (type == typeof(Font) ||
+                             (ReflectionUtils.IsNullableType(type) && Nullable.GetUnderlyingType(type) == typeof(Font)))
+                    {
+                        var cvt = new FontConverter();
+                        obj = cvt.ConvertFromInvariantString(str);
+                    }
                     else
                         obj = str;
                 }
@@ -1439,6 +1446,11 @@ namespace SimpleJson
                 output = input.ToString();
             else if (input is Enum)
                 output = SerializeEnum((Enum)input);
+            else if (input is Font)
+            {
+                var cvt = new FontConverter();
+                output = cvt.ConvertToInvariantString((Font) input);
+            }
             else
             {
                 returnValue = false;
