@@ -1,6 +1,7 @@
 ﻿using Shadowsocks.Controller;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
 using System.Text;
 using System.Windows.Forms;
@@ -52,6 +53,24 @@ namespace Shadowsocks.Model
     }
 
     [Serializable]
+    public class LogViewerConfig
+    {
+        public bool AlwaysOnTop { get; set; } = false;
+
+        public bool WrapText { get; set; } = false;
+
+        public Font Font { get; set; }
+
+        public void FixConfiguration()
+        {
+            if (Font == null)
+            {
+                Font = new Font("Consolas", 8F);
+            }
+        }
+    }
+
+    [Serializable]
     public class Configuration
     {
         public List<Server> configs;
@@ -89,6 +108,8 @@ namespace Shadowsocks.Model
         public int keepVisitTime;
 
         public bool isHideTips;
+
+        public LogViewerConfig logViewer;
 
         public Dictionary<string, string> token = new Dictionary<string, string>();
         public Dictionary<string, object> portMap = new Dictionary<string, object>();
@@ -401,6 +422,16 @@ namespace Shadowsocks.Model
                     }
                 }
                 portMap = new_portMap;
+            }
+
+
+            if (logViewer == null)
+            {
+                logViewer = new LogViewerConfig();
+            }
+            else
+            {
+                logViewer.FixConfiguration();
             }
         }
 

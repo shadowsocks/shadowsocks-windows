@@ -143,6 +143,18 @@ Empty Response=空连
 Error Percent=出错比例
 Continuous=连错
 
+# Global Log Form
+
+&File=文件(&F)
+Clear &log=清空日志(&L)
+Show in &Explorer=在资源管理器中显示(&E)
+&Close=关闭(&C)
+&View=视图(&V)
+&Font...=字体设置(&F)...
+&Wrap Text=自动换行(&W)
+&Always on top=置于顶层(&A)
+Log Viewer=日志查看器
+
 # QRCode Form
 
 QRCode=二维码

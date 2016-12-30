@@ -193,6 +193,12 @@
     <Compile Include="View\InputPassword.Designer.cs">
       <DependentUpon>InputPassword.cs</DependentUpon>
     </Compile>
+    <Compile Include="View\LogForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="View\LogForm.Designer.cs">
+      <DependentUpon>LogForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="View\MenuViewController.cs" />
     <Compile Include="View\PortSettingsForm.cs">
       <SubType>Form</SubType>
@@ -238,6 +244,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="View\InputPassword.resx">
       <DependentUpon>InputPassword.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="View\LogForm.resx">
+      <DependentUpon>LogForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="View\PortSettingsForm.resx">
       <DependentUpon>PortSettingsForm.cs</DependentUpon>

@@ -49,6 +49,7 @@ namespace Shadowsocks.View
         private SettingsForm settingsForm;
         private ServerLogForm serverLogForm;
         private PortSettingsForm portMapForm;
+        private LogForm logForm;
         private string _urlToOpen;
         private System.Timers.Timer timerDelayCheckUpdate;
 
@@ -528,6 +529,27 @@ namespace Shadowsocks.View
             }
         }
 
+        private void ShowGlobalLogForm()
+        {
+            if (logForm != null)
+            {
+                logForm.Activate();
+                logForm.Update();
+                if (logForm.WindowState == FormWindowState.Minimized)
+                {
+                    logForm.WindowState = FormWindowState.Normal;
+                }
+            }
+            else
+            {
+                logForm = new LogForm(controller);
+                logForm.Show();
+                logForm.Activate();
+                logForm.BringToFront();
+                logForm.FormClosed += globalLogForm_FormClosed;
+            }
+        }
+
         void configForm_FormClosed(object sender, FormClosedEventArgs e)
         {
             configForm = null;
@@ -548,6 +570,12 @@ namespace Shadowsocks.View
         void portMapForm_FormClosed(object sender, FormClosedEventArgs e)
         {
             portMapForm = null;
+        }
+
+        void globalLogForm_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            logForm = null;
+            Util.Utils.ReleaseMemory();
         }
 
         private void Config_Click(object sender, EventArgs e)
@@ -798,27 +826,7 @@ namespace Shadowsocks.View
 
         private void ShowLogItem_Click(object sender, EventArgs e)
         {
-            try
-            {
-                System.Diagnostics.Process.Start("explorer.exe", Logging.LogFile);
-                return;
-            }
-            catch
-            {
-            }
-            try
-            {
-                string argument = "/n" + ",/select," + Logging.LogFile;
-                System.Diagnostics.Process.Start("explorer.exe", argument);
-                return;
-            }
-            catch
-            {
-                _notifyIcon.BalloonTipTitle = "Show log failed";
-                _notifyIcon.BalloonTipText = "try open the 'temp' directory by yourself";
-                _notifyIcon.BalloonTipIcon = ToolTipIcon.Error;
-                _notifyIcon.ShowBalloonTip(0);
-            }
+            ShowGlobalLogForm();
         }
 
         private void ShowPortMapItem_Click(object sender, EventArgs e)
