@@ -133,14 +133,14 @@ namespace Shadowsocks.Controller
                 {
                     Error(e);
 
-                    Error(ToString(new StackTrace().GetFrames()));
+                    Debug(ToString(new StackTrace().GetFrames()));
                 }
             }
             else
             {
                 Error(e);
 
-                Error(ToString(new StackTrace().GetFrames()));
+                Debug(ToString(new StackTrace().GetFrames()));
             }
         }
 
@@ -154,7 +154,7 @@ namespace Shadowsocks.Controller
             if (e is ObfsException)
             {
                 ObfsException oe = (ObfsException)e;
-                Logging.Log(LogLevel.Error, "Proxy server [" + remarks + "(" + server + ")] "
+                Error("Proxy server [" + remarks + "(" + server + ")] "
                     + oe.Message);
                 return true;
             }
@@ -227,7 +227,7 @@ namespace Shadowsocks.Controller
                     Logging.Log(LogLevel.Info, "Proxy server [" + remarks + "(" + server + ")] "
                         + Convert.ToString(se.SocketErrorCode) + ":" + se.Message);
 
-                    Error(ToString(new StackTrace().GetFrames()));
+                    Debug(ToString(new StackTrace().GetFrames()));
 
                     return true;
                 }
