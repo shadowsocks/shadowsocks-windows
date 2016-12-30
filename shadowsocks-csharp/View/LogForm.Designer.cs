@@ -68,10 +68,10 @@
             // 
             // clearLogToolStripMenuItem
             // 
-            this.clearLogToolStripMenuItem.Enabled = false;
             this.clearLogToolStripMenuItem.Name = "clearLogToolStripMenuItem";
             this.clearLogToolStripMenuItem.Size = new System.Drawing.Size(174, 22);
             this.clearLogToolStripMenuItem.Text = "Clear &log";
+            this.clearLogToolStripMenuItem.Click += new System.EventHandler(this.clearLogToolStripMenuItem_Click);
             // 
             // showInExplorerToolStripMenuItem
             // 

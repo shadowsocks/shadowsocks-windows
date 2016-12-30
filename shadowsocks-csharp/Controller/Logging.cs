@@ -24,10 +24,15 @@ namespace Shadowsocks.Controller
         public static string LogFileName;
         protected static string date;
 
+        private static FileStream _logFileStream;
+        private static StreamWriterWithTimestamp _logStreamWriter;
+
         public static bool OpenLogFile()
         {
             try
             {
+                CloseLogFile();
+
                 string curpath = Path.Combine(System.Windows.Forms.Application.StartupPath, @"temp");// Path.GetFullPath(".");//Path.GetTempPath();
                 LogFilePath = curpath;
                 if (!Directory.Exists(curpath))
@@ -37,11 +42,11 @@ namespace Shadowsocks.Controller
                 date = DateTime.Now.ToString("yyyy-MM");
                 LogFileName = "shadowsocks_" + date + ".log";
                 LogFile = Path.Combine(curpath, LogFileName);
-                FileStream fs = new FileStream(LogFile, FileMode.Append);
-                StreamWriterWithTimestamp sw = new StreamWriterWithTimestamp(fs);
-                sw.AutoFlush = true;
-                Console.SetOut(sw);
-                Console.SetError(sw);
+                _logFileStream = new FileStream(LogFile, FileMode.Append);
+                _logStreamWriter = new StreamWriterWithTimestamp(_logFileStream);
+                _logStreamWriter.AutoFlush = true;
+                Console.SetOut(_logStreamWriter);
+                Console.SetError(_logStreamWriter);
                 
                 return true;
             }
@@ -50,6 +55,25 @@ namespace Shadowsocks.Controller
                 Console.WriteLine(e.ToString());
                 return false;
             }
+        }
+
+        private static void CloseLogFile()
+        {
+            _logStreamWriter?.Dispose();
+            _logFileStream?.Dispose();
+
+            _logStreamWriter = null;
+            _logFileStream = null;
+        }
+
+        public static void Clear()
+        {
+            CloseLogFile();
+            if (LogFile != null)
+            {
+                File.Delete(LogFile);
+            }
+            OpenLogFile();
         }
 
         public static void Error(object o)

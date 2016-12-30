@@ -173,5 +173,12 @@ namespace Shadowsocks.View
 
             _controller.SaveLogViewerConfig(config);
         }
+
+        private void clearLogToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Logging.Clear();
+            _currentOffset = 0;
+            logTextBox.Clear();
+        }
     }
 }
