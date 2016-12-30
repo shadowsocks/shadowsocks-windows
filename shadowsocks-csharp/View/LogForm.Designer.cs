@@ -107,18 +107,23 @@
             this.fontToolStripMenuItem.Name = "fontToolStripMenuItem";
             this.fontToolStripMenuItem.Size = new System.Drawing.Size(158, 22);
             this.fontToolStripMenuItem.Text = "&Font";
+            this.fontToolStripMenuItem.Click += new System.EventHandler(this.fontToolStripMenuItem_Click);
             // 
             // wrapTextToolStripMenuItem
             // 
             this.wrapTextToolStripMenuItem.Name = "wrapTextToolStripMenuItem";
             this.wrapTextToolStripMenuItem.Size = new System.Drawing.Size(158, 22);
             this.wrapTextToolStripMenuItem.Text = "&Wrap text";
+            this.wrapTextToolStripMenuItem.CheckedChanged += new System.EventHandler(this.wrapTextToolStripMenuItem_CheckedChanged);
+            this.wrapTextToolStripMenuItem.Click += new System.EventHandler(this.wrapTextToolStripMenuItem_Click);
             // 
             // alwaysOnTopToolStripMenuItem
             // 
             this.alwaysOnTopToolStripMenuItem.Name = "alwaysOnTopToolStripMenuItem";
             this.alwaysOnTopToolStripMenuItem.Size = new System.Drawing.Size(158, 22);
             this.alwaysOnTopToolStripMenuItem.Text = "&Always on top";
+            this.alwaysOnTopToolStripMenuItem.CheckedChanged += new System.EventHandler(this.alwaysOnTopToolStripMenuItem_CheckedChanged);
+            this.alwaysOnTopToolStripMenuItem.Click += new System.EventHandler(this.alwaysOnTopToolStripMenuItem_Click);
             // 
             // logTextBox
             // 
@@ -150,6 +155,7 @@
             this.Name = "LogForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Log Viewer";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.LogForm_FormClosing);
             this.Load += new System.EventHandler(this.LogForm_Load);
             this.Shown += new System.EventHandler(this.LogForm_Shown);
             this.logMenu.ResumeLayout(false);

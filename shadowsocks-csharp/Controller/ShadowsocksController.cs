@@ -441,6 +441,14 @@ namespace Shadowsocks.Controller
             }
         }
 
+        public void SaveLogViewerConfig(LogViewerConfig config)
+        {
+            _config.logViewer = config;
+            Configuration.Save(_config);
+
+            ConfigChanged?.Invoke(this, new EventArgs());
+        }
+
         protected void Reload()
         {
             if (_port_map_listener != null)
@@ -584,10 +592,7 @@ namespace Shadowsocks.Controller
                 }
             }
 
-            if (ConfigChanged != null)
-            {
-                ConfigChanged(this, new EventArgs());
-            }
+            ConfigChanged?.Invoke(this, new EventArgs());
 
             UpdateSystemProxy();
             Util.Utils.ReleaseMemory();

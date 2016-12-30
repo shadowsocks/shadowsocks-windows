@@ -68,6 +68,8 @@ namespace Shadowsocks.View
         {
             var config = _controller.GetCurrentConfiguration().logViewer;
             logTextBox.Font = config.Font;
+            wrapTextToolStripMenuItem.Checked = config.WrapText;
+            alwaysOnTopToolStripMenuItem.Checked = config.AlwaysOnTop;
 
             ReadLog();
         }
@@ -128,6 +130,48 @@ namespace Shadowsocks.View
         private void LogForm_Shown(object sender, EventArgs e)
         {
             logTextBox.ScrollToCaret();
+        }
+
+        private void fontToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var fontDialog = new FontDialog();
+            fontDialog.Font = logTextBox.Font;
+            if (fontDialog.ShowDialog() == DialogResult.OK)
+            {
+                logTextBox.Font = fontDialog.Font;
+            }
+        }
+
+        private void wrapTextToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            wrapTextToolStripMenuItem.Checked = !wrapTextToolStripMenuItem.Checked;
+        }
+
+        private void alwaysOnTopToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            alwaysOnTopToolStripMenuItem.Checked = !alwaysOnTopToolStripMenuItem.Checked;
+        }
+
+        private void wrapTextToolStripMenuItem_CheckedChanged(object sender, EventArgs e)
+        {
+            logTextBox.WordWrap = wrapTextToolStripMenuItem.Checked;
+            logTextBox.ScrollToCaret();
+        }
+
+        private void alwaysOnTopToolStripMenuItem_CheckedChanged(object sender, EventArgs e)
+        {
+            TopMost = alwaysOnTopToolStripMenuItem.Checked;
+        }
+
+        private void LogForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            var config = _controller.GetConfiguration().logViewer;
+
+            config.Font = logTextBox.Font;
+            config.AlwaysOnTop = TopMost;
+            config.WrapText = logTextBox.WordWrap;
+
+            _controller.SaveLogViewerConfig(config);
         }
     }
 }
