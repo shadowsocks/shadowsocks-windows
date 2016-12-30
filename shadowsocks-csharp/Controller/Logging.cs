@@ -52,12 +52,18 @@ namespace Shadowsocks.Controller
             }
         }
 
+        public static void Error(object o)
+        {
+            Log(LogLevel.Error, o);
+        }
+
+        [Conditional("DEBUG")]
         public static void Debug(object o)
         {
-#if DEBUG
-            Console.WriteLine(o);
-#endif
+            Log(LogLevel.Debug, o);
+            System.Diagnostics.Debug.WriteLine($@"[{DateTime.Now}] {o}");
         }
+
         private static string ToString(StackFrame[] stacks)
         {
             string result = string.Empty;
@@ -101,18 +107,16 @@ namespace Shadowsocks.Controller
                 }
                 else
                 {
-                    Console.WriteLine(e);
-//#if DEBUG
-                    Console.WriteLine(ToString(new StackTrace().GetFrames()));
-//#endif
+                    Error(e);
+
+                    Error(ToString(new StackTrace().GetFrames()));
                 }
             }
             else
             {
-                Console.WriteLine(e);
-//#if DEBUG
-                Console.WriteLine(ToString(new StackTrace().GetFrames()));
-//#endif
+                Error(e);
+
+                Error(ToString(new StackTrace().GetFrames()));
             }
         }
 
@@ -198,37 +202,36 @@ namespace Shadowsocks.Controller
                 {
                     Logging.Log(LogLevel.Info, "Proxy server [" + remarks + "(" + server + ")] "
                         + Convert.ToString(se.SocketErrorCode) + ":" + se.Message);
-//#if DEBUG
-                    Console.WriteLine(ToString(new StackTrace().GetFrames()));
-//#endif
+
+                    Error(ToString(new StackTrace().GetFrames()));
+
                     return true;
                 }
             }
             return false;
         }
-        public static void Log(LogLevel level, String s)
+        public static void Log(LogLevel level, object s)
         {
-            String[] strMap = new String[5]{
+            var strMap = new []{
                 "Debug",
                 "Info",
                 "Warn",
                 "Error",
                 "Assert",
             };
-            Console.WriteLine("[" + strMap[(int)level] + "]" + s);
+            Console.WriteLine($@"[{strMap[(int)level]}] {s}");
         }
 
+        [Conditional("DEBUG")]
         public static void LogBin(LogLevel level, string info, byte[] data, int length)
         {
-#if _DEBUG
-            string s = "";
-            for (int i = 0; i < length; ++i)
-            {
-                string fs = "0" + Convert.ToString(data[i], 16);
-                s += " " + fs.Substring(fs.Length - 2, 2);
-            }
-            Log(level, info + s);
-#endif
+            //string s = "";
+            //for (int i = 0; i < length; ++i)
+            //{
+            //    string fs = "0" + Convert.ToString(data[i], 16);
+            //    s += " " + fs.Substring(fs.Length - 2, 2);
+            //}
+            //Log(level, info + s);
         }
 
     }

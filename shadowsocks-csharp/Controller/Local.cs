@@ -469,7 +469,7 @@ namespace Shadowsocks.Controller
 
         public bool ReConnect()
         {
-            System.Diagnostics.Debug.WriteLine("[" + DateTime.Now.ToString() + "]" + "Reconnect " + cfg.targetHost + ":" + cfg.targetPort.ToString() + " " + connection.GetSocket().Handle.ToString());
+            Logging.Debug("Reconnect " + cfg.targetHost + ":" + cfg.targetPort.ToString() + " " + connection.GetSocket().Handle.ToString());
             {
                 Handler handler = new Handler();
                 handler.getCurrentServer = getCurrentServer;
@@ -721,7 +721,7 @@ namespace Shadowsocks.Controller
                 CloseSocket(ref remote);
                 CloseSocket(ref remoteUDP);
             }
-            System.Diagnostics.Debug.WriteLine("[" + DateTime.Now.ToString() + "]" + "Close   " + cfg.targetHost + ":" + cfg.targetPort.ToString() + " " + connection.GetSocket().Handle.ToString());
+            Logging.Debug("Close   " + cfg.targetHost + ":" + cfg.targetPort.ToString() + " " + connection.GetSocket().Handle.ToString());
             if (lastErrCode == 0 && server != null)
             {
                 if (!local_error && speedTester.sizeProtocolRecv == 0 && speedTester.sizeUpload > 0)
@@ -761,7 +761,7 @@ namespace Shadowsocks.Controller
 
                 if (!reconnect)
                 {
-                    System.Diagnostics.Debug.WriteLine("[" + DateTime.Now.ToString() + "]" + "Disconnect " + cfg.targetHost + ":" + cfg.targetPort.ToString() + " " + connection.GetSocket().Handle.ToString());
+                    Logging.Debug("Disconnect " + cfg.targetHost + ":" + cfg.targetPort.ToString() + " " + connection.GetSocket().Handle.ToString());
                     CloseSocket(ref connection);
                     CloseSocket(ref connectionUDP);
                 }
@@ -839,7 +839,7 @@ namespace Shadowsocks.Controller
                 server = select_server;
             }
             speedTester.server = server.server;
-            System.Diagnostics.Debug.WriteLine("[" + DateTime.Now.ToString() + "]" + "Connect " + cfg.targetHost + ":" + cfg.targetPort.ToString() + " " + connection.GetSocket().Handle.ToString());
+            Logging.Debug("Connect " + cfg.targetHost + ":" + cfg.targetPort.ToString() + " " + connection.GetSocket().Handle.ToString());
 
             ResetTimeout(cfg.TTL);
             if (cfg.fouce_local_dns_query && cfg.targetHost != null)
