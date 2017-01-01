@@ -73,5 +73,15 @@ namespace Shadowsocks.View
             PictureQRcode.Height = this.ClientSize.Height - textBox.Height;
             GenQR(textBox.Text);
         }
+
+        private void textBox_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            // Use KeyPress to avoid the beep when press Ctrl + A, don't do it in KeyDown
+            if (e.KeyChar == '\x1')
+            {
+                textBox.SelectAll();
+                e.Handled = true;
+            }
+        }
     }
 }
