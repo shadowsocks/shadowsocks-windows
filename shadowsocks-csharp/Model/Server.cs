@@ -368,7 +368,7 @@ namespace Shadowsocks.Model
             return "ss://" + base64;
         }
 
-        public string GetSSRRemarksLinkForServer()
+        public string GetSSRLinkForServer()
         {
             string main_part = server + ":" + server_port + ":" + protocol + ":" + method + ":" + obfs + ":" + Util.Utils.EncodeUrlSafeBase64(password).Replace("=", "");
             string param_str = "obfsparam=" + Util.Utils.EncodeUrlSafeBase64(obfsparam ?? "").Replace("=", "");

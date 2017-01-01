@@ -347,9 +347,9 @@ namespace Shadowsocks.View
                     ssr = true;
                 }
 
-                if (checkSSRLink.Checked && ssr)
+                if (checkSSRLink.Checked)
                 {
-                    TextLink.Text = server.GetSSRRemarksLinkForServer();
+                    TextLink.Text = server.GetSSRLinkForServer();
                 }
                 else
                 {
