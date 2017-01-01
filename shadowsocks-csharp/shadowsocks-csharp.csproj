@@ -142,6 +142,7 @@
     <Compile Include="3rd\zxing\WriterException.cs" />
     <Compile Include="Controller\System\Hotkeys\HotkeyCallbacks.cs" />
     <Compile Include="Model\HotKeyConfig.cs" />
+    <Compile Include="Model\KeywordPattern.cs" />
     <Compile Include="Model\ProxyConfig.cs" />
     <Compile Include="Properties\Settings.Designer.cs">
       <AutoGen>True</AutoGen>

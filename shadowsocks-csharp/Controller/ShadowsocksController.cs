@@ -143,6 +143,9 @@ namespace Shadowsocks.Controller
 
         public Server GetAServer(IStrategyCallerType type, IPEndPoint localIPEndPoint, EndPoint destEndPoint)
         {
+            var hookServer = KeywordPatternHook(destEndPoint);
+            if (hookServer != null) return hookServer;
+
             IStrategy strategy = GetCurrentStrategy();
             if (strategy != null)
             {
@@ -153,6 +156,29 @@ namespace Shadowsocks.Controller
                 _config.index = 0;
             }
             return GetCurrentServer();
+        }
+
+        public Server KeywordPatternHook(EndPoint destEndPoint)
+        {
+            Server rtnValue = null;
+            if (_config.useKeywordPattern)
+            {
+                _config.keywordPatterns.ForEach(kp =>
+                {
+                    // use RegEx to match the pattern
+                    var regexResult = System.Text.RegularExpressions.Regex.IsMatch(destEndPoint.ToString(), kp.regex, System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+                    if (regexResult)
+                    {
+                        var candidateServers = kp.proxy.Split(',');
+                        var currentRandomIndex = new Random().Next(10, 10000) % candidateServers.Length;
+                        var randomServerRemarks = candidateServers[currentRandomIndex];
+                        var randomServer = _config.configs.Find(s => s.remarks == randomServerRemarks || s.remarks.Contains(randomServerRemarks));
+                        if (randomServer != null)
+                            rtnValue = randomServer;
+                    }
+                });
+            }
+            return rtnValue;
         }
 
         public void SaveServers(List<Server> servers, int localPort)
@@ -235,7 +261,8 @@ namespace Shadowsocks.Controller
         {
             _config.isVerboseLogging = enabled;
             SaveConfig(_config);
-            if ( VerboseLoggingStatusChanged != null ) {
+            if (VerboseLoggingStatusChanged != null)
+            {
                 VerboseLoggingStatusChanged(this, new EventArgs());
             }
         }
@@ -306,7 +333,7 @@ namespace Shadowsocks.Controller
             string auth = server.auth ? "-auth" : string.Empty;
             string parts = $"{server.method}{auth}:{server.password}@{server.server}:{server.server_port}";
             string base64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(parts));
-            if(!server.remarks.IsNullOrEmpty())
+            if (!server.remarks.IsNullOrEmpty())
             {
                 tag = $"#{HttpUtility.UrlEncode(server.remarks, Encoding.UTF8)}";
             }
@@ -367,6 +394,21 @@ namespace Shadowsocks.Controller
             {
                 ConfigChanged(this, new EventArgs());
             }
+        }
+
+        public void ToggleUserKeywordPattern(bool enabled)
+        {
+            ToggleSetting("useKeywordPattern", enabled);
+        }
+
+        void ToggleSetting(string settingName, object settingValue)
+        {
+            // Use Reflection to update the setting value and save to file.
+            Type type = _config.GetType();
+            System.Reflection.FieldInfo field = type.GetField(settingName);
+            field.SetValue(_config, settingValue);
+            Configuration.Save(_config);
+            ConfigChanged?.Invoke(this, new EventArgs());
         }
 
         public void ToggleCheckingPreRelease(bool enabled)
@@ -637,7 +679,7 @@ namespace Shadowsocks.Controller
             {
                 TrafficPerSecond previous = traffic.Last;
                 TrafficPerSecond current = new TrafficPerSecond();
-                
+
                 var inbound = current.inboundCounter = InboundCounter;
                 var outbound = current.outboundCounter = OutboundCounter;
                 current.inboundIncreasement = inbound - previous.inboundCounter;
