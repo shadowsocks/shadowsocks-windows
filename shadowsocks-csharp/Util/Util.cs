@@ -256,53 +256,6 @@ namespace Shadowsocks.Util
             return ret;
         }
 
-        public static string DecodeBase64(string val)
-        {
-            byte[] bytes = null;
-            string data = "";
-            data = val;
-            for (var i = 0; i < 3; i++)
-            {
-                try
-                {
-                    bytes = System.Convert.FromBase64String(val);
-                }
-                catch (FormatException)
-                {
-                    val += "=";
-                }
-            }
-            if (bytes != null)
-            {
-                data = Encoding.UTF8.GetString(bytes);
-            }
-            return data;
-        }
-
-        public static string EncodeUrlSafeBase64(string val)
-        {
-            return System.Convert.ToBase64String(Encoding.UTF8.GetBytes(val)).Replace('+', '-').Replace('/', '_');
-        }
-
-        public static string DecodeUrlSafeBase64(string val)
-        {
-            byte[] bytes = null;
-            string data = "";
-            data = val.PadRight(val.Length + (4 - val.Length % 4) % 4, '=');
-            try
-            {
-                bytes = System.Convert.FromBase64String(data.Replace('-', '+').Replace('_', '/'));
-            }
-            catch (FormatException)
-            {
-            }
-            if (bytes != null)
-            {
-                return Encoding.UTF8.GetString(bytes);
-            }
-            return val;
-        }
-
         public static void SetArrayMinSize<T>(ref T[] array, int size)
         {
             if (size > array.Length)

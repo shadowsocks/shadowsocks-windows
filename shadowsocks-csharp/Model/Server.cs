@@ -161,27 +161,29 @@ namespace Shadowsocks.Model
         {
             serverSpeedLog = log;
         }
+
         public string remarks
         {
             get
             {
-                if (this.remarks_base64.Length == 0)
-                    return this.remarks_base64;
-                string remarks = this.remarks_base64.Replace('-', '+').Replace('_', '/');
+                if (remarks_base64.Length == 0)
+                {
+                    return string.Empty;
+                }
                 try
                 {
-                    return Encoding.UTF8.GetString(System.Convert.FromBase64String(remarks));
+                    return Util.Base64.DecodeUrlSafeBase64(remarks_base64);
                 }
                 catch (FormatException)
                 {
+                    var old = remarks_base64;
                     remarks = remarks_base64;
-                    remarks_base64 = Util.Utils.EncodeUrlSafeBase64(remarks_base64);
-                    return remarks;
+                    return old;
                 }
             }
             set
             {
-                remarks_base64 = Util.Utils.EncodeUrlSafeBase64(value);
+                remarks_base64 = Util.Base64.EncodeUrlSafeBase64(value);
             }
         }
         public string FriendlyName()
@@ -217,14 +219,14 @@ namespace Shadowsocks.Model
         public Server Clone()
         {
             Server ret = new Server();
-            ret.server = (string)server.Clone();
+            ret.server = server;
             ret.server_port = server_port;
-            ret.password = (string)password.Clone();
-            ret.method = (string)method.Clone();
+            ret.password = password;
+            ret.method = method;
             ret.protocol = protocol;
-            ret.obfs = (string)obfs.Clone();
-            ret.obfsparam = obfsparam == null ? "" : (string)obfsparam.Clone();
-            ret.remarks_base64 = (string)remarks_base64.Clone();
+            ret.obfs = obfs;
+            ret.obfsparam = obfsparam ?? "";
+            ret.remarks_base64 = remarks_base64;
             ret.enable = enable;
             ret.udp_over_tcp = udp_over_tcp;
             ret.id = id;
@@ -291,7 +293,7 @@ namespace Shadowsocks.Model
             if (!ssr.Success)
                 throw new FormatException();
 
-            string data = Util.Utils.DecodeUrlSafeBase64(ssr.Groups[1].Value);
+            string data = Util.Base64.DecodeUrlSafeBase64(ssr.Groups[1].Value);
             Dictionary<string, string> params_dict = new Dictionary<string, string>();
 
             int param_start_pos = data.IndexOf("?");
@@ -317,19 +319,19 @@ namespace Shadowsocks.Model
             method = match.Groups[4].Value;
             obfs = match.Groups[5].Value.Length == 0 ? "plain" : match.Groups[5].Value;
             obfs.Replace("_compatible", "");
-            password = Util.Utils.DecodeUrlSafeBase64(match.Groups[6].Value);
+            password = Util.Base64.DecodeUrlSafeBase64(match.Groups[6].Value);
 
             if (params_dict.ContainsKey("obfsparam"))
             {
-                obfsparam = Util.Utils.DecodeUrlSafeBase64(params_dict["obfsparam"]);
+                obfsparam = Util.Base64.DecodeUrlSafeBase64(params_dict["obfsparam"]);
             }
             if (params_dict.ContainsKey("remarks"))
             {
-                remarks = Util.Utils.DecodeUrlSafeBase64(params_dict["remarks"]);
+                remarks = Util.Base64.DecodeUrlSafeBase64(params_dict["remarks"]);
             }
             if (params_dict.ContainsKey("group"))
             {
-                group = Util.Utils.DecodeUrlSafeBase64(params_dict["group"]);
+                group = Util.Base64.DecodeUrlSafeBase64(params_dict["group"]);
             }
             if (params_dict.ContainsKey("uot"))
             {
@@ -364,21 +366,21 @@ namespace Shadowsocks.Model
         public string GetSSLinkForServer()
         {
             string parts = method + ":" + password + "@" + server + ":" + server_port;
-            string base64 = System.Convert.ToBase64String(Encoding.UTF8.GetBytes(parts)).Replace("=", "");
+            string base64 = System.Convert.ToBase64String(Encoding.UTF8.GetBytes(parts));
             return "ss://" + base64;
         }
 
         public string GetSSRLinkForServer()
         {
-            string main_part = server + ":" + server_port + ":" + protocol + ":" + method + ":" + obfs + ":" + Util.Utils.EncodeUrlSafeBase64(password).Replace("=", "");
-            string param_str = "obfsparam=" + Util.Utils.EncodeUrlSafeBase64(obfsparam ?? "").Replace("=", "");
+            string main_part = server + ":" + server_port + ":" + protocol + ":" + method + ":" + obfs + ":" + Util.Base64.EncodeUrlSafeBase64(password);
+            string param_str = "obfsparam=" + Util.Base64.EncodeUrlSafeBase64(obfsparam ?? "");
             if (remarks != null && remarks.Length > 0)
             {
-                param_str += "&remarks=" + Util.Utils.EncodeUrlSafeBase64(remarks).Replace("=", "");
+                param_str += "&remarks=" + Util.Base64.EncodeUrlSafeBase64(remarks);
             }
             if (group != null && group.Length > 0)
             {
-                param_str += "&group=" + Util.Utils.EncodeUrlSafeBase64(group).Replace("=", "");
+                param_str += "&group=" + Util.Base64.EncodeUrlSafeBase64(group);
             }
             if (udp_over_tcp)
             {
@@ -388,7 +390,7 @@ namespace Shadowsocks.Model
             {
                 param_str += "&udpport=" + server_udp_port.ToString();
             }
-            string base64 = Util.Utils.EncodeUrlSafeBase64(main_part + "/?" + param_str).Replace("=", "");
+            string base64 = Util.Base64.EncodeUrlSafeBase64(main_part + "/?" + param_str);
             return "ssr://" + base64;
         }
 
