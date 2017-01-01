@@ -315,10 +315,10 @@ namespace Shadowsocks.Model
             server = match.Groups[1].Value;
             server_port = int.Parse(match.Groups[2].Value);
             protocol = match.Groups[3].Value.Length == 0 ? "origin" : match.Groups[3].Value;
-            protocol.Replace("_compatible", "");
+            protocol = protocol.Replace("_compatible", "");
             method = match.Groups[4].Value;
             obfs = match.Groups[5].Value.Length == 0 ? "plain" : match.Groups[5].Value;
-            obfs.Replace("_compatible", "");
+            obfs = obfs.Replace("_compatible", "");
             password = Util.Base64.DecodeUrlSafeBase64(match.Groups[6].Value);
 
             if (params_dict.ContainsKey("obfsparam"))
