@@ -359,7 +359,7 @@ namespace Shadowsocks.Util
                     {
                         GetHostEntryHandler callback = new GetHostEntryHandler(Dns.GetHostEntry);
                         IAsyncResult result = callback.BeginInvoke(host, null, null);
-                        if (result.AsyncWaitHandle.WaitOne(5, false))
+                        if (result.AsyncWaitHandle.WaitOne(5, true))
                         {
                             foreach (IPAddress ad in callback.EndInvoke(result).AddressList)
                             {

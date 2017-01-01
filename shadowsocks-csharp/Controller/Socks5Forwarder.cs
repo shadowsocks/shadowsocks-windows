@@ -4,6 +4,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
+using System.Timers;
 using OpenDNS;
 using Shadowsocks.Model;
 using Shadowsocks.Util;
@@ -137,6 +138,11 @@ namespace Shadowsocks.Controller
             private byte[] remoteRecvBuffer = new byte[RecvSize];
             // connection receive buffer
             private byte[] connetionRecvBuffer = new byte[RecvSize];
+
+            protected int TTL = 600;
+            protected System.Timers.Timer timer;
+            protected object timerLock = new object();
+            protected DateTime lastTimerSetTime;
 
             public void Start(Configuration config, IPRangeSet IPRange, byte[] firstPacket, int length, Socket socket, string local_sendback_protocol, bool proxy)
             {
@@ -273,6 +279,59 @@ namespace Shadowsocks.Controller
                 }
             }
 
+            private void ResetTimeout(Double time)
+            {
+                if (time <= 0 && timer == null)
+                    return;
+
+                if (time <= 0)
+                {
+                    if (timer != null)
+                    {
+                        lock (timerLock)
+                        {
+                            if (timer != null)
+                            {
+                                timer.Enabled = false;
+                                timer.Elapsed -= timer_Elapsed;
+                                timer.Dispose();
+                                timer = null;
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    if (lastTimerSetTime != null && (DateTime.Now - lastTimerSetTime).TotalMilliseconds > 500)
+                    {
+                        lock (timerLock)
+                        {
+                            if (timer == null)
+                            {
+                                timer = new System.Timers.Timer(time * 1000.0);
+                                timer.Elapsed += timer_Elapsed;
+                            }
+                            else
+                            {
+                                timer.Interval = time * 1000.0;
+                                timer.Stop();
+                            }
+                            timer.Start();
+                            lastTimerSetTime = DateTime.Now;
+                        }
+                    }
+                }
+            }
+
+            private void timer_Elapsed(object sender, ElapsedEventArgs e)
+            {
+                if (_closed)
+                {
+                    return;
+                }
+                Close();
+            }
+
             private void StartPipe()
             {
                 if (_closed)
@@ -287,6 +346,7 @@ namespace Shadowsocks.Controller
                         new AsyncCallback(PipeConnectionReceiveCallback), null);
 
                     _local.Send(connetionRecvBuffer, 0, 0);
+                    ResetTimeout(TTL);
                 }
                 catch (Exception e)
                 {
@@ -307,6 +367,7 @@ namespace Shadowsocks.Controller
 
                     if (bytesRead > 0)
                     {
+                        ResetTimeout(TTL);
                         //_local.BeginSend(remoteRecvBuffer, bytesRead, 0, new AsyncCallback(PipeConnectionSendCallback), null);
                         _local.Send(remoteRecvBuffer, bytesRead, 0);
                         _remote.BeginReceive(remoteRecvBuffer, RecvSize, 0,
@@ -336,6 +397,7 @@ namespace Shadowsocks.Controller
 
                     if (bytesRead > 0)
                     {
+                        ResetTimeout(TTL);
                         //_remote.BeginSend(connetionRecvBuffer, bytesRead, 0, new AsyncCallback(PipeRemoteSendCallback), null);
                         _remote.Send(connetionRecvBuffer, bytesRead, 0);
                         _local.BeginReceive(connetionRecvBuffer, RecvSize, 0,
@@ -401,6 +463,7 @@ namespace Shadowsocks.Controller
                     }
                     _closed = true;
                 }
+                ResetTimeout(0);
                 Thread.Sleep(100);
                 if (_remote != null)
                 {

@@ -365,6 +365,7 @@ namespace Shadowsocks.Model
             }
 
             Dictionary<string, int> id = new Dictionary<string, int>();
+            if (index < 0 || index >= configs.Count) index = 0;
             foreach (Server server in configs)
             {
                 if (id.ContainsKey(server.id))
