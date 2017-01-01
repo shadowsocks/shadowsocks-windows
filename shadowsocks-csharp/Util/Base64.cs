@@ -34,20 +34,8 @@ namespace Shadowsocks.Util
 
         public static string DecodeUrlSafeBase64(string val)
         {
-            byte[] bytes = null;
-            string data = val.Replace('-', '+').Replace('_', '/').PadRight(val.Length + (4 - val.Length % 4) % 4, '=');
-            try
-            {
-                bytes = Convert.FromBase64String(data);
-            }
-            catch (FormatException)
-            {
-            }
-            if (bytes != null)
-            {
-                return Encoding.UTF8.GetString(bytes);
-            }
-            return val;
+            var data = val.Replace('-', '+').Replace('_', '/').PadRight(val.Length + (4 - val.Length % 4) % 4, '=');
+            return Encoding.UTF8.GetString(Convert.FromBase64String(data));
         }
     }
 }
