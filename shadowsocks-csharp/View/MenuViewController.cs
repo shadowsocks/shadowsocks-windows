@@ -197,11 +197,16 @@ namespace Shadowsocks.View
                 for (int y = 0; y < iconCopy.Height; y++)
                 {
                     Color color = originIcon.GetPixel(x, y);
-                    if (color.A != 0 && color.R > 30)
+                    if (color.A != 0)
                     {
                         if (!enabled)
                         {
-                            iconCopy.SetPixel(x, y, Color.FromArgb((byte)(color.A / 1.25), color.R, color.G, color.B));
+                            Color flyBlue = Color.FromArgb(192, 192, 192);
+                            // Multiply with flyBlue
+                            int red = color.R * flyBlue.R / 255;
+                            int green = color.G * flyBlue.G / 255;
+                            int blue = color.B * flyBlue.B / 255;
+                            iconCopy.SetPixel(x, y, Color.FromArgb(color.A, red, green, blue));
                         }
                         else if (global)
                         {
