@@ -42,8 +42,6 @@ namespace Shadowsocks.Util
             // which is part of user experience
             GC.Collect(GC.MaxGeneration);
             GC.WaitForPendingFinalizers();
-            SetProcessWorkingSetSize(Process.GetCurrentProcess().Handle,
-                (UIntPtr)0xFFFFFFFF, (UIntPtr)0xFFFFFFFF);
 #endif
         }
 
@@ -362,11 +360,6 @@ namespace Shadowsocks.Util
 
             return new Point(PhysicalScreenWidth, PhysicalScreenHeight);
         }
-
-        [DllImport("kernel32.dll")]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        private static extern bool SetProcessWorkingSetSize(IntPtr process,
-            UIntPtr minimumWorkingSetSize, UIntPtr maximumWorkingSetSize);
 
         [DllImport("gdi32.dll")]
         static extern int GetDeviceCaps(IntPtr hdc, int nIndex);
