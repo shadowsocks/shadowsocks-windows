@@ -657,7 +657,7 @@ namespace Shadowsocks.View
 
         private void AboutItem_Click(object sender, EventArgs e)
         {
-            Process.Start("https://github.com/breakwa11/shadowsocks-rss");
+            Process.Start("https://breakwa11.github.io");
         }
 
         private void DonateItem_Click(object sender, EventArgs e)
