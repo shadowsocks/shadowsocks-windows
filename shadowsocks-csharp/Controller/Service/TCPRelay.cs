@@ -801,36 +801,6 @@ namespace Shadowsocks.Controller
             }
         }
 
-        // Handle first packet
-        private void PipeConnectionReceiveCallback_0(IAsyncResult ar)
-        {
-            if (_closed) return;
-            try
-            {
-                int bytesRead = _connection.EndReceive(ar) + _firstPacketLength;
-
-                var session = (AsyncSession)ar.AsyncState;
-                var remote = session.Remote;
-
-                if (bytesRead > 0)
-                {
-                    Logging.Debug($"_firstPacketLength = {bytesRead}");
-                    SendToServer(bytesRead, session);
-                }
-                else
-                {
-                    remote.Shutdown(SocketShutdown.Send);
-                    _remoteShutdown = true;
-                    CheckClose();
-                }
-            }
-            catch (Exception e)
-            {
-                Logging.LogUsefulException(e);
-                Close();
-            }
-        }
-
         private void PipeConnectionReceiveCallback(IAsyncResult ar)
         {
             if (_closed) return;
