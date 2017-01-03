@@ -727,6 +727,18 @@ namespace Shadowsocks.Controller
             }
         }
 
+        private void TryReadAvailableData()
+        {
+            int available = Math.Min(_connection.Available, RecvSize - _firstPacketLength);
+            if (available > 0)
+            {
+                var size = _connection.Receive(_connetionRecvBuffer, _firstPacketLength, available,
+                    SocketFlags.None);
+
+                _firstPacketLength += size;
+            }
+        }
+
         private void StartPipe(AsyncSession session)
         {
             if (_closed) return;
@@ -734,6 +746,9 @@ namespace Shadowsocks.Controller
             {
                 _startReceivingTime = DateTime.Now;
                 session.Remote.BeginReceive(_remoteRecvBuffer, 0, RecvSize, SocketFlags.None, new AsyncCallback(PipeRemoteReceiveCallback), session);
+
+                TryReadAvailableData();
+                Logging.Debug($"_firstPacketLength = {_firstPacketLength}");
                 SendToServer(_firstPacketLength, session);
             }
             catch (Exception e)
@@ -768,6 +783,36 @@ namespace Shadowsocks.Controller
                 {
                     _connection.Shutdown(SocketShutdown.Send);
                     _connectionShutdown = true;
+                    CheckClose();
+                }
+            }
+            catch (Exception e)
+            {
+                Logging.LogUsefulException(e);
+                Close();
+            }
+        }
+
+        // Handle first packet
+        private void PipeConnectionReceiveCallback_0(IAsyncResult ar)
+        {
+            if (_closed) return;
+            try
+            {
+                int bytesRead = _connection.EndReceive(ar) + _firstPacketLength;
+
+                var session = (AsyncSession)ar.AsyncState;
+                var remote = session.Remote;
+
+                if (bytesRead > 0)
+                {
+                    Logging.Debug($"_firstPacketLength = {bytesRead}");
+                    SendToServer(bytesRead, session);
+                }
+                else
+                {
+                    remote.Shutdown(SocketShutdown.Send);
+                    _remoteShutdown = true;
                     CheckClose();
                 }
             }
