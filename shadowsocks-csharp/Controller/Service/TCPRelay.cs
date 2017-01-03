@@ -727,11 +727,19 @@ namespace Shadowsocks.Controller
             }
         }
 
+        // private static readonly Random Rnd = new Random();
+
         private void TryReadAvailableData()
         {
             int available = Math.Min(_connection.Available, RecvSize - _firstPacketLength);
             if (available > 0)
             {
+                // Pick a random chunk size, or is it truly necessary? Random packet size is some sort of 'characteristic' itself.
+                //lock (Rnd)
+                //{
+                //    available = Rnd.Next(available + 1);
+                //}
+
                 var size = _connection.Receive(_connetionRecvBuffer, _firstPacketLength, available,
                     SocketFlags.None);
 
