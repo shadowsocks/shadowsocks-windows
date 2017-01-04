@@ -333,7 +333,6 @@ namespace Shadowsocks.View
                 _SelectedID = server.id;
 
                 ServerGroupBox.Visible = true;
-                bool ssr = false;
 
                 if (TCPProtocolComboBox.Text == "origin"
                     && obfs_text == "plain"
@@ -341,10 +340,6 @@ namespace Shadowsocks.View
                     )
                 {
                     checkAdvSetting.Checked = false;
-                }
-                else
-                {
-                    ssr = true;
                 }
 
                 if (checkSSRLink.Checked)
