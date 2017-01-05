@@ -553,8 +553,9 @@ namespace Shadowsocks.Model
             s.server_port = server.server_port;
             s.method = server.method;
             s.protocol = server.protocol;
+            s.protocolparam = server.protocolparam ?? "";
             s.obfs = server.obfs;
-            s.obfsparam = server.obfsparam??"";
+            s.obfsparam = server.obfsparam ?? "";
             s.password = server.password;
             s.remarks = server.remarks;
             s.group = server.group;

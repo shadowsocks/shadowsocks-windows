@@ -154,6 +154,7 @@ namespace Shadowsocks.View
             checkAdvSetting.Text = I18N.GetString(checkAdvSetting.Text);
             TCPoverUDPLabel.Text = I18N.GetString(TCPoverUDPLabel.Text);
             UDPoverTCPLabel.Text = I18N.GetString(UDPoverTCPLabel.Text);
+            labelProtocolParam.Text = I18N.GetString(labelProtocolParam.Text);
             labelObfsParam.Text = I18N.GetString(labelObfsParam.Text);
             ObfsUDPLabel.Text = I18N.GetString(ObfsUDPLabel.Text);
             LabelNote.Text = I18N.GetString(LabelNote.Text);
@@ -201,12 +202,13 @@ namespace Shadowsocks.View
                     server_udp_port = int.Parse(TextUDPPort.Text),
                     password = PasswordTextBox.Text,
                     method = EncryptionSelect.Text,
+                    protocol = TCPProtocolComboBox.Text,
+                    protocolparam = TextProtocolParam.Text,
                     obfs = ObfsCombo.Text,
                     obfsparam = TextObfsParam.Text,
                     remarks = RemarksTextBox.Text,
                     group = TextGroup.Text.Trim(),
                     udp_over_tcp = CheckUDPoverUDP.Checked,
-                    protocol = TCPProtocolComboBox.Text,
                     //obfs_udp = CheckObfsUDP.Checked,
                     id = _SelectedID
                 };
@@ -225,11 +227,14 @@ namespace Shadowsocks.View
                     && oldServer.server_port == server.server_port
                     && oldServer.password == server.password
                     && oldServer.method == server.method
-                    && oldServer.obfs == server.obfs
-                    && oldServer.obfsparam == server.obfsparam
                     )
                 {
-                    server.setObfsData(oldServer.getObfsData());
+                    if (oldServer.obfs == server.obfs
+                        && oldServer.obfsparam == server.obfsparam)
+                        server.setObfsData(oldServer.getObfsData());
+                    if (oldServer.protocol == server.protocol
+                        && oldServer.protocolparam == server.protocolparam)
+                        server.setProtocolData(oldServer.getProtocolData());
                 }
                 _modifiedConfiguration.configs[_oldSelectedIndex] = server;
 
@@ -325,6 +330,7 @@ namespace Shadowsocks.View
                 }
                 string obfs_text = server.obfs ?? "plain";
                 ObfsCombo.Text = obfs_text;
+                TextProtocolParam.Text = server.protocolparam;
                 TextObfsParam.Text = server.obfsparam;
                 RemarksTextBox.Text = server.remarks;
                 TextGroup.Text = server.group;

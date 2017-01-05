@@ -1057,8 +1057,26 @@ namespace Shadowsocks.Obfs
 
             {
                 byte[] uid = new byte[4];
-                random.NextBytes(uid);
-                user_key = Server.key;
+                int index_of_split = Server.param.IndexOf(':');
+                if (index_of_split > 0)
+                {
+                    try
+                    {
+                        uint user = uint.Parse(Server.param.Substring(0, index_of_split));
+                        user_key = System.Text.Encoding.UTF8.GetBytes(Server.param.Substring(index_of_split + 1));
+                        BitConverter.GetBytes(user).CopyTo(uid, 0);
+                    }
+                    catch
+                    {
+                        random.NextBytes(uid);
+                        user_key = Server.key;
+                    }
+                }
+                else
+                {
+                    random.NextBytes(uid);
+                    user_key = Server.key;
+                }
 
                 byte[] encrypt_key = user_key;
 
@@ -1214,9 +1232,27 @@ namespace Shadowsocks.Obfs
             byte[] uid = new byte[4];
             if (user_key == null)
             {
-                user_key = Server.key;
+                int index_of_split = Server.param.IndexOf(':');
+                if (index_of_split > 0)
+                {
+                    try
+                    {
+                        uint user = uint.Parse(Server.param.Substring(0, index_of_split));
+                        user_key = System.Text.Encoding.UTF8.GetBytes(Server.param.Substring(index_of_split + 1));
+                        BitConverter.GetBytes(user).CopyTo(uid, 0);
+                    }
+                    catch
+                    {
+                        random.NextBytes(uid);
+                        user_key = Server.key;
+                    }
+                }
+                else
+                {
+                    random.NextBytes(uid);
+                    user_key = Server.key;
+                }
             }
-            random.NextBytes(uid);
             outlength = datalength + 8;
             Array.Copy(plaindata, 0, outdata, 0, datalength);
             uid.CopyTo(outdata, datalength);
@@ -1235,7 +1271,7 @@ namespace Shadowsocks.Obfs
                 outlength = 0;
                 return plaindata;
             }
-            MbedTLS.HMAC sha1 = CreateHMAC(user_key);
+            MbedTLS.HMAC sha1 = CreateHMAC(Server.key);
             byte[] sha1data = sha1.ComputeHash(plaindata, 0, datalength - 4);
             if (sha1data[0] != plaindata[datalength - 4]
                 || sha1data[1] != plaindata[datalength - 3]

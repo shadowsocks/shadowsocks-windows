@@ -129,6 +129,7 @@ namespace Shadowsocks.Controller
                             && mergeConfig.configs[i].server_udp_port == servers[j].server_udp_port
                             && mergeConfig.configs[i].method == servers[j].method
                             && mergeConfig.configs[i].protocol == servers[j].protocol
+                            && mergeConfig.configs[i].protocolparam == servers[j].protocolparam
                             && mergeConfig.configs[i].obfs == servers[j].obfs
                             && mergeConfig.configs[i].obfsparam == servers[j].obfsparam
                             && mergeConfig.configs[i].password == servers[j].password
@@ -160,6 +161,7 @@ namespace Shadowsocks.Controller
                             && mergeConfig.configs[i].server_udp_port == servers[j].server_udp_port
                             && mergeConfig.configs[i].method == servers[j].method
                             && mergeConfig.configs[i].protocol == servers[j].protocol
+                            && mergeConfig.configs[i].protocolparam == servers[j].protocolparam
                             && mergeConfig.configs[i].obfs == servers[j].obfs
                             && mergeConfig.configs[i].obfsparam == servers[j].obfsparam
                             && mergeConfig.configs[i].password == servers[j].password
@@ -182,6 +184,7 @@ namespace Shadowsocks.Controller
                         && mergeConfig.configs[i].server_udp_port == servers[j].server_udp_port
                         && mergeConfig.configs[i].method == servers[j].method
                         && mergeConfig.configs[i].protocol == servers[j].protocol
+                        && mergeConfig.configs[i].protocolparam == servers[j].protocolparam
                         && mergeConfig.configs[i].obfs == servers[j].obfs
                         && mergeConfig.configs[i].obfsparam == servers[j].obfsparam
                         && mergeConfig.configs[i].password == servers[j].password

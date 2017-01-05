@@ -104,19 +104,20 @@ namespace Shadowsocks.Model
     [Serializable]
     public class Server
     {
+        public string id;
         public string server;
         public int server_port;
         public int server_udp_port;
         public string password;
         public string method;
+        public string protocol;
+        public string protocolparam;
         public string obfs;
         public string obfsparam;
         public string remarks_base64;
         public string group;
-        public bool udp_over_tcp;
-        public string protocol;
         public bool enable;
-        public string id;
+        public bool udp_over_tcp;
 
         private object protocoldata;
         private object obfsdata;
@@ -240,12 +241,13 @@ namespace Shadowsocks.Model
             this.server = "server ip or url";
             this.server_port = 8388;
             this.method = "aes-256-cfb";
+            this.protocol = "origin";
+            this.protocolparam = "";
             this.obfs = "plain";
             this.obfsparam = "";
             this.password = "0";
             this.remarks_base64 = "";
             this.udp_over_tcp = false;
-            this.protocol = "origin";
             this.enable = true;
             byte[] id = new byte[16];
             Util.Utils.RandBytes(id, id.Length);
@@ -321,6 +323,10 @@ namespace Shadowsocks.Model
             obfs = obfs.Replace("_compatible", "");
             password = Util.Base64.DecodeUrlSafeBase64(match.Groups[6].Value);
 
+            if (params_dict.ContainsKey("protoparam"))
+            {
+                protocolparam = Util.Base64.DecodeUrlSafeBase64(params_dict["protoparam"]);
+            }
             if (params_dict.ContainsKey("obfsparam"))
             {
                 obfsparam = Util.Base64.DecodeUrlSafeBase64(params_dict["obfsparam"]);
@@ -374,6 +380,10 @@ namespace Shadowsocks.Model
         {
             string main_part = server + ":" + server_port + ":" + protocol + ":" + method + ":" + obfs + ":" + Util.Base64.EncodeUrlSafeBase64(password);
             string param_str = "obfsparam=" + Util.Base64.EncodeUrlSafeBase64(obfsparam ?? "");
+            if (protocolparam != null && protocolparam.Length > 0)
+            {
+                param_str += "&protoparam=" + Util.Base64.EncodeUrlSafeBase64(protocolparam);
+            }
             if (remarks != null && remarks.Length > 0)
             {
                 param_str += "&remarks=" + Util.Base64.EncodeUrlSafeBase64(remarks);

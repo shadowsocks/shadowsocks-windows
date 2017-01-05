@@ -76,6 +76,7 @@ TCP over TCP if not checked=不打钩使用原生 TCP(暂不能用)
 UDP over UDP if not checked=不打钩使用原生 UDP
 Recommend checked=保留功能
 Protocol=协议
+Protocol param=协议参数
 Obfs=混淆
 Obfs param=混淆参数
 SSR Link=SSR链接

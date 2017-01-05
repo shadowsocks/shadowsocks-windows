@@ -658,7 +658,7 @@ namespace Shadowsocks.Controller
             string server_addr = server.server;
             if (_proxy_server != null)
                 server_addr = _proxy_server;
-            _protocol.SetServerInfo(new ServerInfo(server_addr, server.server_port, "", server.getProtocolData(),
+            _protocol.SetServerInfo(new ServerInfo(server_addr, server.server_port, server.protocolparam??"", server.getProtocolData(),
                 _encryptor.getIV(), _password, _encryptor.getKey(), head_len, mss));
             _obfs.SetServerInfo(new ServerInfo(server_addr, server.server_port, server.obfsparam??"", server.getObfsData(),
                 _encryptor.getIV(), _password, _encryptor.getKey(), head_len, mss));
