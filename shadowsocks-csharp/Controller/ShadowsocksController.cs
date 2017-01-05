@@ -115,20 +115,20 @@ namespace Shadowsocks.Controller
             return _config;
         }
 
-        private int FindFirstMatchServer(Server server, Configuration Config)
+        private int FindFirstMatchServer(Server server, List<Server> servers)
         {
-            for (int i = 0; i < Config.configs.Count; ++i)
+            for (int i = 0; i < servers.Count; ++i)
             {
-                if (Config.configs[i].server == server.server
-                    && Config.configs[i].server_port == server.server_port
-                    && Config.configs[i].server_udp_port == server.server_udp_port
-                    && Config.configs[i].method == server.method
-                    && Config.configs[i].protocol == server.protocol
-                    && Config.configs[i].protocolparam == server.protocolparam
-                    && Config.configs[i].obfs == server.obfs
-                    && Config.configs[i].obfsparam == server.obfsparam
-                    && Config.configs[i].password == server.password
-                    && Config.configs[i].udp_over_tcp == server.udp_over_tcp
+                if (servers[i].server == server.server
+                    && servers[i].server_port == server.server_port
+                    && servers[i].server_udp_port == server.server_udp_port
+                    && servers[i].method == server.method
+                    && servers[i].protocol == server.protocol
+                    && servers[i].protocolparam == server.protocolparam
+                    && servers[i].obfs == server.obfs
+                    && servers[i].obfsparam == server.obfsparam
+                    && servers[i].password == server.password
+                    && servers[i].udp_over_tcp == server.udp_over_tcp
                     )
                 {
                     return i;
@@ -143,7 +143,7 @@ namespace Shadowsocks.Controller
             {
                 for (int j = 0; j < servers.Count; ++j)
                 {
-                    if (FindFirstMatchServer(servers[j], mergeConfig) == -1)
+                    if (FindFirstMatchServer(servers[j], mergeConfig.configs) == -1)
                     {
                         mergeConfig.configs.Add(servers[j]);
                     }
@@ -158,7 +158,7 @@ namespace Shadowsocks.Controller
             {
                 for (int j = 0; j < servers.Count; ++j)
                 {
-                    int i = FindFirstMatchServer(servers[j], mergeConfig);
+                    int i = FindFirstMatchServer(servers[j], mergeConfig.configs);
                     if (i != -1)
                     {
                         servers[j].CopyServer(mergeConfig.configs[i]);
@@ -167,25 +167,8 @@ namespace Shadowsocks.Controller
             }
             for (int i = 0; i < mergeConfig.configs.Count; ++i)
             {
-                int j = 0;
-                for (; j < servers.Count; ++j)
-                {
-                    if (mergeConfig.configs[i].server == servers[j].server
-                        && mergeConfig.configs[i].server_port == servers[j].server_port
-                        && mergeConfig.configs[i].server_udp_port == servers[j].server_udp_port
-                        && mergeConfig.configs[i].method == servers[j].method
-                        && mergeConfig.configs[i].protocol == servers[j].protocol
-                        && mergeConfig.configs[i].protocolparam == servers[j].protocolparam
-                        && mergeConfig.configs[i].obfs == servers[j].obfs
-                        && mergeConfig.configs[i].obfsparam == servers[j].obfsparam
-                        && mergeConfig.configs[i].password == servers[j].password
-                        && mergeConfig.configs[i].udp_over_tcp == servers[j].udp_over_tcp
-                        )
-                    {
-                        break;
-                    }
-                }
-                if (j == servers.Count)
+                int j = FindFirstMatchServer(mergeConfig.configs[i], servers);
+                if (j == -1)
                 {
                     missingServers.Add(mergeConfig.configs[i]);
                 }
