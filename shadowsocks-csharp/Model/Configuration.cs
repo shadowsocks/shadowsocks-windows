@@ -334,6 +334,36 @@ namespace Shadowsocks.Model
             portMap = new Dictionary<string, object>();
         }
 
+        public void CopyFrom(Configuration config)
+        {
+            configs = config.configs;
+            index = config.index;
+            random = config.random;
+            sysProxyMode = config.sysProxyMode;
+            shareOverLan = config.shareOverLan;
+            bypassWhiteList = config.bypassWhiteList;
+            localPort = config.localPort;
+            reconnectTimes = config.reconnectTimes;
+            randomAlgorithm = config.randomAlgorithm;
+            TTL = config.TTL;
+            connect_timeout = config.connect_timeout;
+            dns_server = config.dns_server;
+            proxyEnable = config.proxyEnable;
+            pacDirectGoProxy = config.pacDirectGoProxy;
+            proxyType = config.proxyType;
+            proxyHost = config.proxyHost;
+            proxyPort = config.proxyPort;
+            proxyAuthUser = config.proxyAuthUser;
+            proxyAuthPass = config.proxyAuthPass;
+            proxyUserAgent = config.proxyUserAgent;
+            authUser = config.authUser;
+            authPass = config.authPass;
+            autoBan = config.autoBan;
+            sameHostForSameTarget = config.sameHostForSameTarget;
+            keepVisitTime = config.keepVisitTime;
+            isHideTips = config.isHideTips;
+        }
+
         public void FixConfiguration()
         {
             if (localPort == 0)

@@ -192,18 +192,6 @@ namespace Shadowsocks.Controller
             SaveConfig(_config);
         }
 
-        public void SaveServers(List<Server> servers, int localPort)
-        {
-            List<Server> missingServers = MergeConfiguration(_config, servers);
-            _config.configs = servers;
-            _config.localPort = localPort;
-            SaveConfig(_config);
-            foreach(Server s in missingServers)
-            {
-                s.GetConnections().CloseAll();
-            }
-        }
-
         public bool SaveServersConfig(string config)
         {
             Configuration new_cfg = Configuration.Load(config);
@@ -218,32 +206,7 @@ namespace Shadowsocks.Controller
         public void SaveServersConfig(Configuration config)
         {
             List<Server> missingServers = MergeConfiguration(_config, config.configs);
-            _config.configs = config.configs;
-            _config.index = config.index;
-            _config.random = config.random;
-            _config.sysProxyMode = config.sysProxyMode;
-            _config.shareOverLan = config.shareOverLan;
-            _config.bypassWhiteList = config.bypassWhiteList;
-            _config.localPort = config.localPort;
-            _config.reconnectTimes = config.reconnectTimes;
-            _config.randomAlgorithm = config.randomAlgorithm;
-            _config.TTL = config.TTL;
-            _config.connect_timeout = config.connect_timeout;
-            _config.dns_server = config.dns_server;
-            _config.proxyEnable = config.proxyEnable;
-            _config.pacDirectGoProxy = config.pacDirectGoProxy;
-            _config.proxyType = config.proxyType;
-            _config.proxyHost = config.proxyHost;
-            _config.proxyPort = config.proxyPort;
-            _config.proxyAuthUser = config.proxyAuthUser;
-            _config.proxyAuthPass = config.proxyAuthPass;
-            _config.proxyUserAgent = config.proxyUserAgent;
-            _config.authUser = config.authUser;
-            _config.authPass = config.authPass;
-            _config.autoBan = config.autoBan;
-            _config.sameHostForSameTarget = config.sameHostForSameTarget;
-            _config.keepVisitTime = config.keepVisitTime;
-            _config.isHideTips = config.isHideTips;
+            _config.CopyFrom(config);
             foreach (Server s in missingServers)
             {
                 s.GetConnections().CloseAll();
