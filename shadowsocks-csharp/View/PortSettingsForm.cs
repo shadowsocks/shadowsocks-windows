@@ -24,6 +24,16 @@ namespace Shadowsocks.View
             this.controller = controller;
             controller.ConfigChanged += controller_ConfigChanged;
 
+            comboBoxType.DisplayMember = "Text";
+            comboBoxType.ValueMember = "Value";
+            var items = new[]
+            {
+                new {Text = "Port Forward", Value = PortMapType.Forward},
+                new {Text = "Force Proxy", Value = PortMapType.ForceProxy},
+                new {Text = "Proxy With Rule", Value = PortMapType.RuleProxy}
+            };
+            comboBoxType.DataSource = items;
+
             LoadCurrentConfiguration();
         }
 
@@ -67,7 +77,7 @@ namespace Shadowsocks.View
             listPorts.Items.Clear();
             int[] list = new int[configuration.portMap.Count];
             int list_index = 0;
-            foreach (KeyValuePair<string, object> it in configuration.portMap)
+            foreach (KeyValuePair<string, PortMapConfig> it in configuration.portMap)
             {
                 try
                 {
@@ -134,7 +144,7 @@ namespace Shadowsocks.View
                 PortMapConfig cfg = _modifiedConfiguration.portMap[key] as PortMapConfig;
 
                 cfg.enable = checkEnable.Checked;
-                cfg.type = comboBoxType.SelectedIndex;
+                cfg.type = (PortMapType) comboBoxType.SelectedValue;
                 cfg.id = GetID(comboServers.Text);
                 cfg.server_addr = textAddr.Text;
                 if (cfg.remarks != textRemarks.Text)
@@ -165,7 +175,7 @@ namespace Shadowsocks.View
                 PortMapConfig cfg = _modifiedConfiguration.portMap[key] as PortMapConfig;
 
                 checkEnable.Checked = cfg.enable;
-                comboBoxType.SelectedIndex = cfg.type;
+                comboBoxType.SelectedValue = cfg.type;
                 comboServers.Text = GetIDText(cfg.id);
                 textLocal.Text = key;
                 textAddr.Text = cfg.server_addr;
@@ -225,7 +235,7 @@ namespace Shadowsocks.View
             PortMapConfig cfg = _modifiedConfiguration.portMap[key] as PortMapConfig;
 
             cfg.enable = checkEnable.Checked;
-            cfg.type = comboBoxType.SelectedIndex;
+            cfg.type = (PortMapType) comboBoxType.SelectedValue;
             cfg.id = GetID(comboServers.Text);
             cfg.server_addr = textAddr.Text;
             cfg.remarks = textRemarks.Text;

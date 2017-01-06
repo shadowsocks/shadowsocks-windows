@@ -27,11 +27,18 @@ namespace Shadowsocks.Model
 
     }
 
+    public enum PortMapType : int
+    {
+        Forward = 0,
+        ForceProxy,
+        RuleProxy
+    }
+
     [Serializable]
     public class PortMapConfig
     {
         public bool enable;
-        public int type;
+        public PortMapType type;
         public string id;
         public string server_addr;
         public int server_port;
@@ -40,7 +47,7 @@ namespace Shadowsocks.Model
 
     public class PortMapConfigCache
     {
-        public int type;
+        public PortMapType type;
         public string id;
         public Server server;
         public string server_addr;
@@ -112,7 +119,7 @@ namespace Shadowsocks.Model
         public LogViewerConfig logViewer;
 
         public Dictionary<string, string> token = new Dictionary<string, string>();
-        public Dictionary<string, object> portMap = new Dictionary<string, object>();
+        public Dictionary<string, PortMapConfig> portMap = new Dictionary<string, PortMapConfig>();
 
         private ServerSelectStrategy serverStrategy = new ServerSelectStrategy();
         private Dictionary<string, UriVisitTime> uri2time = new Dictionary<string, UriVisitTime>();
@@ -281,10 +288,10 @@ namespace Shadowsocks.Model
             {
                 id2server[s.id] = s;
             }
-            foreach (KeyValuePair<string, object> pair in portMap)
+            foreach (KeyValuePair<string, PortMapConfig> pair in portMap)
             {
                 int key = 0;
-                PortMapConfig pm = (PortMapConfig)pair.Value;
+                PortMapConfig pm = pair.Value;
                 if (!pm.enable)
                     continue;
                 if (!id2server.ContainsKey(pm.id))
@@ -297,12 +304,14 @@ namespace Shadowsocks.Model
                 {
                     continue;
                 }
-                portMapCache[key] = new PortMapConfigCache();
-                portMapCache[key].type = pm.type;
-                portMapCache[key].id = pm.id;
-                portMapCache[key].server = id2server[pm.id];
-                portMapCache[key].server_addr = pm.server_addr;
-                portMapCache[key].server_port = pm.server_port;
+                portMapCache[key] = new PortMapConfigCache
+                {
+                    type = pm.type,
+                    id = pm.id,
+                    server = id2server[pm.id],
+                    server_addr = pm.server_addr,
+                    server_port = pm.server_port
+                };
             }
         }
 
@@ -331,7 +340,6 @@ namespace Shadowsocks.Model
             {
                 GetDefaultServer()
             };
-            portMap = new Dictionary<string, object>();
         }
 
         public void CopyFrom(Configuration config)
@@ -376,7 +384,7 @@ namespace Shadowsocks.Model
             }
             if (portMap == null)
             {
-                portMap = new Dictionary<string, object>();
+                portMap = new Dictionary<string, PortMapConfig>();
             }
             if (token == null)
             {
@@ -409,52 +417,6 @@ namespace Shadowsocks.Model
                     id[server.id] = 0;
                 }
             }
-            bool type_err = false;
-            foreach (KeyValuePair<string, object> pair in portMap)
-            {
-                if (pair.Value.GetType() != typeof(PortMapConfig))
-                {
-                    type_err = true;
-                }
-            }
-            if (type_err)
-            {
-                Dictionary<string, object> new_portMap = new Dictionary<string, object>();
-                foreach (KeyValuePair<string, object> pair in portMap)
-                {
-                    if (pair.Value.GetType() != typeof(PortMapConfig))
-                    {
-                        PortMapConfig pm;
-                        Type type = typeof(PortMapConfig);
-                        object obj = Activator.CreateInstance(type);
-                        System.Reflection.FieldInfo[] field = null;
-                        field = type.GetFields(System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public);
-                        pm = new PortMapConfig();
-                        foreach (System.Reflection.FieldInfo fi in field)
-                        {
-                            if (((SimpleJson.JsonObject)pair.Value).ContainsKey(fi.Name))
-                            {
-                                if (fi.FieldType == typeof(int))
-                                {
-                                    int val = (int)(Int64)((SimpleJson.JsonObject)pair.Value)[fi.Name];
-                                    fi.SetValue(pm, val);
-                                }
-                                else
-                                {
-                                    fi.SetValue(pm, ((SimpleJson.JsonObject)pair.Value)[fi.Name]);
-                                }
-                            }
-                        }
-                        new_portMap[pair.Key] = pm;
-                    }
-                    else
-                    {
-                        new_portMap[pair.Key] = pair.Value;
-                    }
-                }
-                portMap = new_portMap;
-            }
-
 
             if (logViewer == null)
             {

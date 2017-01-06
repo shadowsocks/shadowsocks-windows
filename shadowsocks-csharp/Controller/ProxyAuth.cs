@@ -53,7 +53,7 @@ namespace Shadowsocks.Controller
             _connection = socket;
             socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, true);
 
-            if (_config.GetPortMapCache().ContainsKey(local_port) && _config.GetPortMapCache()[local_port].type == 0)
+            if (_config.GetPortMapCache().ContainsKey(local_port) && _config.GetPortMapCache()[local_port].type == PortMapType.Forward)
             {
                 Connect();
             }
@@ -517,7 +517,7 @@ namespace Shadowsocks.Controller
                 if (cfg.id == cfg.server.id)
                 {
                     handler.select_server = cfg.server;
-                    if (cfg.type == 0) // tunnel
+                    if (cfg.type == PortMapType.Forward) // tunnel
                     {
                         byte[] addr = System.Text.Encoding.UTF8.GetBytes(cfg.server_addr);
                         byte[] newFirstPacket = new byte[_firstPacketLength + addr.Length + 4];
@@ -530,7 +530,7 @@ namespace Shadowsocks.Controller
                         _remoteHeaderSendBuffer = newFirstPacket;
                         handler.Start(_remoteHeaderSendBuffer, _remoteHeaderSendBuffer.Length, null);
                     }
-                    else if (_connectionUDP == null && cfg.type == 2 && new Socks5Forwarder(_config, _IPRange).Handle(_remoteHeaderSendBuffer, _remoteHeaderSendBuffer.Length, _connection))
+                    else if (_connectionUDP == null && cfg.type == PortMapType.RuleProxy && new Socks5Forwarder(_config, _IPRange).Handle(_remoteHeaderSendBuffer, _remoteHeaderSendBuffer.Length, _connection))
                     {
                     }
                     else
