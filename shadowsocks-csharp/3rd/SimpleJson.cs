@@ -993,6 +993,11 @@ namespace SimpleJson
                 IDictionary<string, string> dict = (IDictionary<string, string>)value;
                 success = SerializeObject(jsonSerializerStrategy, dict.Keys, dict.Values, builder, indent);
             }
+            else if (value != null && ReflectionUtils.IsTypeDictionary(value.GetType()))
+            {
+                IDictionary dict = (IDictionary)value;
+                success = SerializeObject(jsonSerializerStrategy, dict.Keys, dict.Values, builder, indent);
+            }
             else if (value is IEnumerable)
                 success = SerializeArray(jsonSerializerStrategy, (IEnumerable)value, builder, indent);
             else if (IsNumeric(value))
@@ -1311,6 +1316,10 @@ namespace SimpleJson
                 obj = value;
             else if (value == null)
                 obj = null;
+            else if (value is long && typeof(Enum).IsAssignableFrom(type))
+            {
+                obj = Enum.ToObject(type, (long) value);
+            }
             else if ((value is long && type == typeof(long)) || (value is double && type == typeof(double)))
                 obj = value;
             else if ((value is double && type != typeof(double)) || (value is long && type != typeof(long)))
