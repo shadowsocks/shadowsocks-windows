@@ -1073,8 +1073,10 @@ namespace Shadowsocks.Obfs
                         user_key = hash(System.Text.Encoding.UTF8.GetBytes(Server.param.Substring(index_of_split + 1)));
                         BitConverter.GetBytes(user).CopyTo(uid, 0);
                     }
-                    catch
+                    catch (Exception ex)
                     {
+                        Logging.Log(LogLevel.Warn, $"Faild to parse auth param, fallback to basic mode. {ex}");
+
                         random.NextBytes(uid);
                         user_key = Server.key;
                     }
@@ -1248,8 +1250,10 @@ namespace Shadowsocks.Obfs
                         user_key = hash(System.Text.Encoding.UTF8.GetBytes(Server.param.Substring(index_of_split + 1)));
                         BitConverter.GetBytes(user).CopyTo(uid, 0);
                     }
-                    catch
+                    catch (Exception ex)
                     {
+                        Logging.Log(LogLevel.Warn, $"Faild to parse auth param, fallback to basic mode. {ex}");
+
                         random.NextBytes(uid);
                         user_key = Server.key;
                     }
