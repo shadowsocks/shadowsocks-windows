@@ -24,6 +24,7 @@ namespace Shadowsocks.Model
         public string remarks;
         public bool auth;
         public int timeout;
+        public bool enabled;
 
         public override int GetHashCode()
         {
@@ -69,6 +70,7 @@ namespace Shadowsocks.Model
             remarks = "";
             auth = false;
             timeout = DefaultServerTimeoutSec;
+            enabled = true;
         }
 
         public Server(string ssURL) : this()
@@ -86,6 +88,7 @@ namespace Shadowsocks.Model
             password = match.Groups["password"].Value;
             server = match.Groups["hostname"].Value;
             server_port = int.Parse(match.Groups["port"].Value);
+            enabled = true;
         }
 
         public string Identifier()

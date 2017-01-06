@@ -45,7 +45,8 @@ namespace Shadowsocks.Controller.Strategy
             {
                 index = localIPEndPoint.GetHashCode();
             }
-            return configs[index % configs.Count];
+            var enabledServer = configs.FindAll(s => s.enabled);
+            return enabledServer.Count == 0 ? null : enabledServer[index % enabledServer.Count];
         }
 
         public void UpdateLatency(Model.Server server, TimeSpan latency)

@@ -114,7 +114,8 @@ namespace Shadowsocks.Controller.Strategy
                 Logging.Debug(String.Format("server: {0} latency:{1} score: {2}", status.server.FriendlyName(), status.latency, status.score));
             }
             ServerStatus max = null;
-            foreach (var status in servers)
+            var enabledServers = servers.FindAll(s => s.server.enabled);
+            foreach (var status in enabledServers)
             {
                 if (max == null)
                 {

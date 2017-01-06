@@ -108,6 +108,7 @@ namespace Shadowsocks.View
                 Configuration.CheckLocalPort(localPort);
                 _modifiedConfiguration.configs[_lastSelectedIndex] = server;
                 _modifiedConfiguration.localPort = localPort;
+                server.enabled = Enabled.Checked;
 
                 return true;
             }
@@ -132,6 +133,7 @@ namespace Shadowsocks.View
                 RemarksTextBox.Text = server.remarks;
                 TimeoutTextBox.Text = server.timeout.ToString();
                 OneTimeAuth.Checked = server.auth;
+                Enabled.Checked = server.enabled;
             }
         }
 
