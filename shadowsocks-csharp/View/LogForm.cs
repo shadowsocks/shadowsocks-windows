@@ -66,11 +66,6 @@ namespace Shadowsocks.View
 
         private void LogForm_Load(object sender, EventArgs e)
         {
-            var config = _controller.GetCurrentConfiguration().logViewer;
-            logTextBox.Font = config.Font;
-            wrapTextToolStripMenuItem.Checked = config.WrapText;
-            alwaysOnTopToolStripMenuItem.Checked = config.AlwaysOnTop;
-
             ReadLog();
         }
 
@@ -161,17 +156,6 @@ namespace Shadowsocks.View
         private void alwaysOnTopToolStripMenuItem_CheckedChanged(object sender, EventArgs e)
         {
             TopMost = alwaysOnTopToolStripMenuItem.Checked;
-        }
-
-        private void LogForm_FormClosing(object sender, FormClosingEventArgs e)
-        {
-            var config = _controller.GetConfiguration().logViewer;
-
-            config.Font = logTextBox.Font;
-            config.AlwaysOnTop = TopMost;
-            config.WrapText = logTextBox.WordWrap;
-
-            _controller.SaveLogViewerConfig(config);
         }
 
         private void clearLogToolStripMenuItem_Click(object sender, EventArgs e)

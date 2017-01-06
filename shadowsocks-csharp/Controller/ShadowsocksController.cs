@@ -381,14 +381,6 @@ namespace Shadowsocks.Controller
             }
         }
 
-        public void SaveLogViewerConfig(LogViewerConfig config)
-        {
-            _config.logViewer = config;
-            Configuration.Save(_config);
-
-            ConfigChanged?.Invoke(this, new EventArgs());
-        }
-
         protected void Reload()
         {
             if (_port_map_listener != null)
