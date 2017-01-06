@@ -916,6 +916,8 @@ namespace Shadowsocks.Obfs
 
     public class AuthAES128SHA1 : VerifySimpleBase
     {
+        protected delegate byte[] hash_func(byte[] input);
+
         public AuthAES128SHA1(string method)
             : base(method)
         {
@@ -924,6 +926,10 @@ namespace Shadowsocks.Obfs
             pack_id = 1;
             recv_id = 1;
             SALT = method;
+            if (method == "auth_aes128_md5")
+                hash = MbedTLS.MD5;
+            else
+                hash = MbedTLS.SHA1;
         }
         private static Dictionary<string, int[]> _obfs = new Dictionary<string, int[]> {
             {"auth_aes128_md5", new int[]{1, 0, 1}},
@@ -938,6 +944,7 @@ namespace Shadowsocks.Obfs
         protected uint pack_id;
         protected uint recv_id;
         protected byte[] user_key;
+        protected hash_func hash;
 
         public static List<string> SupportedObfs()
         {
@@ -1063,7 +1070,7 @@ namespace Shadowsocks.Obfs
                     try
                     {
                         uint user = uint.Parse(Server.param.Substring(0, index_of_split));
-                        user_key = System.Text.Encoding.UTF8.GetBytes(Server.param.Substring(index_of_split + 1));
+                        user_key = hash(System.Text.Encoding.UTF8.GetBytes(Server.param.Substring(index_of_split + 1)));
                         BitConverter.GetBytes(user).CopyTo(uid, 0);
                     }
                     catch
@@ -1238,7 +1245,7 @@ namespace Shadowsocks.Obfs
                     try
                     {
                         uint user = uint.Parse(Server.param.Substring(0, index_of_split));
-                        user_key = System.Text.Encoding.UTF8.GetBytes(Server.param.Substring(index_of_split + 1));
+                        user_key = hash(System.Text.Encoding.UTF8.GetBytes(Server.param.Substring(index_of_split + 1)));
                         BitConverter.GetBytes(user).CopyTo(uid, 0);
                     }
                     catch

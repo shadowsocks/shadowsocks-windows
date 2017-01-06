@@ -99,6 +99,13 @@ namespace Shadowsocks.Encryption
             return output;
         }
 
+        public static byte[] SHA1(byte[] input)
+        {
+            byte[] output = new byte[20];
+            ss_md(MBEDTLS_MD_SHA1, input, 0, input.Length, output);
+            return output;
+        }
+
         public static byte[] SHA512(byte[] input)
         {
             byte[] output = new byte[64];
