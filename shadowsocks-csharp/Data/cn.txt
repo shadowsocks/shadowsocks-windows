@@ -33,6 +33,7 @@ Check for Updates at Startup=启动时检查更新
 Check Pre-release Version=检查测试版更新
 Edit Hotkeys...=编辑快捷键...
 About...=关于...
+Help=帮助
 Quit=退出
 Edit Servers=编辑服务器
 Load Balance=负载均衡
