@@ -944,6 +944,7 @@ namespace Shadowsocks.Obfs
         protected uint pack_id;
         protected uint recv_id;
         protected byte[] user_key;
+        protected byte[] user_id;
         protected hash_func hash;
 
         public static List<string> SupportedObfs()
@@ -1076,12 +1077,9 @@ namespace Shadowsocks.Obfs
                     catch (Exception ex)
                     {
                         Logging.Log(LogLevel.Warn, $"Faild to parse auth param, fallback to basic mode. {ex}");
-
-                        random.NextBytes(uid);
-                        user_key = Server.key;
                     }
                 }
-                else
+                if (user_key == null)
                 {
                     random.NextBytes(uid);
                     user_key = Server.key;
@@ -1238,7 +1236,7 @@ namespace Shadowsocks.Obfs
         public override byte[] ClientUdpPreEncrypt(byte[] plaindata, int datalength, out int outlength)
         {
             byte[] outdata = new byte[datalength + 8];
-            byte[] uid = new byte[4];
+            user_id = new byte[4];
             if (user_key == null)
             {
                 int index_of_split = Server.param.IndexOf(':');
@@ -1248,25 +1246,22 @@ namespace Shadowsocks.Obfs
                     {
                         uint user = uint.Parse(Server.param.Substring(0, index_of_split));
                         user_key = hash(System.Text.Encoding.UTF8.GetBytes(Server.param.Substring(index_of_split + 1)));
-                        BitConverter.GetBytes(user).CopyTo(uid, 0);
+                        BitConverter.GetBytes(user).CopyTo(user_id, 0);
                     }
                     catch (Exception ex)
                     {
                         Logging.Log(LogLevel.Warn, $"Faild to parse auth param, fallback to basic mode. {ex}");
-
-                        random.NextBytes(uid);
-                        user_key = Server.key;
                     }
                 }
-                else
+                if (user_key == null)
                 {
-                    random.NextBytes(uid);
+                    random.NextBytes(user_id);
                     user_key = Server.key;
                 }
             }
             outlength = datalength + 8;
             Array.Copy(plaindata, 0, outdata, 0, datalength);
-            uid.CopyTo(outdata, datalength);
+            user_id.CopyTo(outdata, datalength);
             {
                 MbedTLS.HMAC sha1 = CreateHMAC(user_key);
                 byte[] sha1data = sha1.ComputeHash(outdata, 0, outlength - 4);
