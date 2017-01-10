@@ -56,6 +56,14 @@ namespace Shadowsocks.Model
                     serverStr = $"{server}:{server_port}";
                     break;
             }
+            if (enabled)
+            {
+                serverStr = serverStr + "E";
+            }
+            else
+            {
+                serverStr = serverStr + "D";
+            }
             return remarks.IsNullOrEmpty()
                 ? serverStr
                 : $"{remarks} ({serverStr})";

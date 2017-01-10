@@ -56,6 +56,7 @@ namespace Shadowsocks.View
             MyCancelButton.Text = I18N.GetString("Cancel");
             MoveUpButton.Text = I18N.GetString("Move &Up");
             MoveDownButton.Text = I18N.GetString("Move D&own");
+            Enabled.Text = I18N.GetString("Enabled");
             this.Text = I18N.GetString("Edit Servers");
         }
 

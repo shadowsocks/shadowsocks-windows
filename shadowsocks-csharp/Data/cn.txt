@@ -58,6 +58,7 @@ Cancel=取消
 New server=未配置的服务器
 Move &Up=上移(&U)
 Move D&own=下移(&O)
+Enabled=启用
 
 # Proxy Form
 
