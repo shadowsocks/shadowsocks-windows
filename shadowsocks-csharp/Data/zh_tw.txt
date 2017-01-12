@@ -33,6 +33,7 @@ Check for Updates at Startup=啟動時檢查更新
 Check Pre-release Version=檢查發行前版本更新
 Edit Hotkeys...=編輯快速鍵...
 About...=關於...
+Help=幫助
 Quit=結束
 Edit Servers=編輯伺服器
 Load Balance=負載平衡

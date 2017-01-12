@@ -121,21 +121,13 @@ namespace Shadowsocks.Controller
         {
             try
             {
-                if (Utils.IsPortableMode())
-                {
-                    /*
-                     * Under PortableMode, we could identify it by the path of ss_privoxy.exe.
-                     */
-                    var path = process.MainModule.FileName;
+                /*
+                 * Under PortableMode, we could identify it by the path of ss_privoxy.exe.
+                 */
+                var path = process.MainModule.FileName;
 
-                    return Utils.GetTempPath("ss_privoxy.exe").Equals(path);
-                }
-                else
-                {
-                    var cmd = process.GetCommandLine();
+                return Utils.GetTempPath("ss_privoxy.exe").Equals(path);
 
-                    return cmd.Contains(_uniqueConfigFile);
-                }
             }
             catch (Exception ex)
             {
