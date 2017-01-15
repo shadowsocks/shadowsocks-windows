@@ -234,7 +234,7 @@ namespace Shadowsocks.Encryption
         }
 
         private static Dictionary<string, EncryptorInfo> _ciphers = new Dictionary<string, EncryptorInfo> {
-                {"none", new EncryptorInfo(16, 0, true, 1)},
+                {"none", new EncryptorInfo(16, 0, false, 1)},
         };
 
         public static List<string> SupportedCiphers()
