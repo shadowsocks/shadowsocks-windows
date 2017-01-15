@@ -916,10 +916,17 @@ namespace Shadowsocks.Controller
                         }
                         if (!dns_ok)
                         {
-                            lastErrCode = 8;
-                            server.ServerSpeedLog().AddTimeoutTimes();
-                            Close();
-                            return;
+                            if (server.DnsBuffer().ip != null)
+                            {
+                                ipAddress = server.DnsBuffer().ip;
+                            }
+                            else
+                            {
+                                lastErrCode = 8;
+                                server.ServerSpeedLog().AddTimeoutTimes();
+                                Close();
+                                return;
+                            }
                         }
                     }
                     else
