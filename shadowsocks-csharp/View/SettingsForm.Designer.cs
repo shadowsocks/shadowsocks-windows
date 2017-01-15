@@ -573,6 +573,11 @@
             // 
             this.NumReconnect.ImeMode = System.Windows.Forms.ImeMode.Off;
             this.NumReconnect.Location = new System.Drawing.Point(80, 64);
+            this.NumReconnect.Maximum = new decimal(new int[] {
+            20,
+            0,
+            0,
+            0});
             this.NumReconnect.Name = "NumReconnect";
             this.NumReconnect.Size = new System.Drawing.Size(109, 23);
             this.NumReconnect.TabIndex = 18;
@@ -591,6 +596,11 @@
             // 
             this.NumTTL.ImeMode = System.Windows.Forms.ImeMode.Off;
             this.NumTTL.Location = new System.Drawing.Point(80, 122);
+            this.NumTTL.Maximum = new decimal(new int[] {
+            600,
+            0,
+            0,
+            0});
             this.NumTTL.Name = "NumTTL";
             this.NumTTL.Size = new System.Drawing.Size(109, 23);
             this.NumTTL.TabIndex = 20;
@@ -609,6 +619,11 @@
             // 
             this.NumTimeout.ImeMode = System.Windows.Forms.ImeMode.Off;
             this.NumTimeout.Location = new System.Drawing.Point(80, 93);
+            this.NumTimeout.Maximum = new decimal(new int[] {
+            60,
+            0,
+            0,
+            0});
             this.NumTimeout.Name = "NumTimeout";
             this.NumTimeout.Size = new System.Drawing.Size(109, 23);
             this.NumTimeout.TabIndex = 19;
