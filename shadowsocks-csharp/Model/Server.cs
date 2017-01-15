@@ -228,6 +228,7 @@ namespace Shadowsocks.Model
             ret.obfs = obfs;
             ret.obfsparam = obfsparam ?? "";
             ret.remarks_base64 = remarks_base64;
+            ret.group = group;
             ret.enable = enable;
             ret.udp_over_tcp = udp_over_tcp;
             ret.id = id;
@@ -238,17 +239,18 @@ namespace Shadowsocks.Model
 
         public Server()
         {
-            this.server = "server ip or url";
-            this.server_port = 8388;
-            this.method = "aes-256-cfb";
-            this.protocol = "origin";
-            this.protocolparam = "";
-            this.obfs = "plain";
-            this.obfsparam = "";
-            this.password = "0";
-            this.remarks_base64 = "";
-            this.udp_over_tcp = false;
-            this.enable = true;
+            server = "server ip or url";
+            server_port = 8388;
+            method = "aes-256-cfb";
+            protocol = "origin";
+            protocolparam = "";
+            obfs = "plain";
+            obfsparam = "";
+            password = "0";
+            remarks_base64 = "";
+            group = "";
+            udp_over_tcp = false;
+            enable = true;
             byte[] id = new byte[16];
             Util.Utils.RandBytes(id, id.Length);
             this.id = BitConverter.ToString(id).Replace("-", "");
