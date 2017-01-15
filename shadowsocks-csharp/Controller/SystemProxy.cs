@@ -56,12 +56,16 @@ namespace Shadowsocks.Controller
         public static void Update(Configuration config, bool forceDisable)
         {
             int sysProxyMode = config.sysProxyMode;
+            if (sysProxyMode == (int)ProxyMode.NoModify)
+            {
+                return;
+            }
             if (forceDisable)
             {
-                sysProxyMode = (int)ProxyMode.NoModify;
+                sysProxyMode = (int)ProxyMode.Direct;
             }
             bool global = sysProxyMode == (int)ProxyMode.Global;
-            bool enabled = sysProxyMode != (int)ProxyMode.NoModify;
+            bool enabled = sysProxyMode != (int)ProxyMode.Direct;
             using (RegistryKey registry = OpenUserRegKey(@"Software\Microsoft\Windows\CurrentVersion\Internet Settings", true))
             {
                 try
@@ -154,7 +158,7 @@ namespace Shadowsocks.Controller
             int buffer_len = 0;
             BytePushback(buffer, ref buffer_len, 70);
             BytePushback(buffer, ref buffer_len, counter + 1);
-            if (sysProxyMode == (int)ProxyMode.NoModify)
+            if (sysProxyMode == (int)ProxyMode.Direct)
                 BytePushback(buffer, ref buffer_len, 1);
             else if (sysProxyMode == (int)ProxyMode.Pac)
                 BytePushback(buffer, ref buffer_len, 5);

@@ -12,6 +12,7 @@ namespace Shadowsocks.Controller
     public enum ProxyMode
     {
         NoModify,
+        Direct,
         Pac,
         Global,
     }
@@ -33,7 +34,6 @@ namespace Shadowsocks.Controller
         public IPRangeSet _rangeSet;
 #if !_CONSOLE
         private HttpProxyRunner polipoRunner;
-        private bool _systemProxyIsDirty = false;
 #endif
         private GFWListUpdater gfwListUpdater;
         private bool stopped = false;
@@ -247,9 +247,9 @@ namespace Shadowsocks.Controller
             }
         }
 
-        public void ToggleMode(int mode)
+        public void ToggleMode(ProxyMode mode)
         {
-            _config.sysProxyMode = mode;
+            _config.sysProxyMode = (int)mode;
             SaveConfig(_config);
             if (ToggleModeChanged != null)
             {
@@ -316,7 +316,7 @@ namespace Shadowsocks.Controller
             {
                 polipoRunner.Stop();
             }
-            if (_config.sysProxyMode != (int)ProxyMode.NoModify)
+            if (_config.sysProxyMode != (int)ProxyMode.NoModify && _config.sysProxyMode != (int)ProxyMode.Direct)
             {
                 SystemProxy.Update(_config, true);
             }
@@ -544,16 +544,6 @@ namespace Shadowsocks.Controller
             if (_config.sysProxyMode != (int)ProxyMode.NoModify)
             {
                 SystemProxy.Update(_config, false);
-                _systemProxyIsDirty = true;
-            }
-            else
-            {
-                // only switch it off if we have switched it on
-                if (_systemProxyIsDirty)
-                {
-                    SystemProxy.Update(_config, false);
-                    _systemProxyIsDirty = false;
-                }
             }
 #endif
         }

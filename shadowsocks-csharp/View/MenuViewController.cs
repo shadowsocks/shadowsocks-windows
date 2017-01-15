@@ -29,6 +29,7 @@ namespace Shadowsocks.View
         private NotifyIcon _notifyIcon;
         private ContextMenu contextMenu1;
 
+        private MenuItem noModifyItem;
         private MenuItem enableItem;
         private MenuItem PACModeItem;
         private MenuItem globalModeItem;
@@ -116,11 +117,12 @@ namespace Shadowsocks.View
         private void UpdateTrayIcon()
         {
             int dpi;
-            Graphics graphics = Graphics.FromHwnd(IntPtr.Zero);
-            dpi = (int)graphics.DpiX;
-            graphics.Dispose();
+            using (Graphics graphics = Graphics.FromHwnd(IntPtr.Zero))
+            {
+                dpi = (int)graphics.DpiX;
+            }
             Configuration config = controller.GetConfiguration();
-            bool enabled = config.sysProxyMode != (int)ProxyMode.NoModify;
+            bool enabled = config.sysProxyMode != (int)ProxyMode.NoModify && config.sysProxyMode != (int)ProxyMode.Direct;
             bool global = config.sysProxyMode == (int)ProxyMode.Global;
             bool random = config.random;
 
@@ -201,6 +203,8 @@ namespace Shadowsocks.View
         {
             this.contextMenu1 = new ContextMenu(new MenuItem[] {
                 modeItem = CreateMenuGroup("Mode", new MenuItem[] {
+                    noModifyItem = CreateMenuItem("No modify system proxy", new EventHandler(this.NoModifyItem_Click)),
+                    new MenuItem("-"),
                     enableItem = CreateMenuItem("Disable system proxy", new EventHandler(this.EnableItem_Click)),
                     PACModeItem = CreateMenuItem("PAC", new EventHandler(this.PACModeItem_Click)),
                     globalModeItem = CreateMenuItem("Global", new EventHandler(this.GlobalModeItem_Click))
@@ -352,7 +356,8 @@ namespace Shadowsocks.View
 
         private void UpdateSysProxyMode(Configuration config)
         {
-            enableItem.Checked = config.sysProxyMode == (int)ProxyMode.NoModify;
+            noModifyItem.Checked = config.sysProxyMode == (int)ProxyMode.NoModify;
+            enableItem.Checked = config.sysProxyMode == (int)ProxyMode.Direct;
             PACModeItem.Checked = config.sysProxyMode == (int)ProxyMode.Pac;
             globalModeItem.Checked = config.sysProxyMode == (int)ProxyMode.Global;
         }
@@ -645,7 +650,7 @@ namespace Shadowsocks.View
 
         private void FeedbackItem_Click(object sender, EventArgs e)
         {
-            Process.Start("https://github.com/breakwa11/shadowsocks-rss/issues/new");
+            Process.Start("https://github.com/shadowsocksr/shadowsocksr-csharp/issues/new");
         }
 
         private void ResetPasswordItem_Click(object sender, EventArgs e)
@@ -662,10 +667,7 @@ namespace Shadowsocks.View
 
         private void DonateItem_Click(object sender, EventArgs e)
         {
-            _notifyIcon.BalloonTipTitle = I18N.GetString("Donate");
-            _notifyIcon.BalloonTipText = I18N.GetString("Please contract to breakwa11 to get more infomation");
-            _notifyIcon.BalloonTipIcon = ToolTipIcon.Info;
-            _notifyIcon.ShowBalloonTip(0);
+            ShowBalloonTip(I18N.GetString("Donate"), I18N.GetString("Please contract to breakwa11 to get more infomation"), ToolTipIcon.Info, 10000);
         }
 
         [DllImport("user32.dll")]
@@ -701,19 +703,24 @@ namespace Shadowsocks.View
             }
         }
 
+        private void NoModifyItem_Click(object sender, EventArgs e)
+        {
+            controller.ToggleMode(ProxyMode.NoModify);
+        }
+
         private void EnableItem_Click(object sender, EventArgs e)
         {
-            controller.ToggleMode(0);
+            controller.ToggleMode(ProxyMode.Direct);
         }
 
         private void GlobalModeItem_Click(object sender, EventArgs e)
         {
-            controller.ToggleMode(2);
+            controller.ToggleMode(ProxyMode.Global);
         }
 
         private void PACModeItem_Click(object sender, EventArgs e)
         {
-            controller.ToggleMode(1);
+            controller.ToggleMode(ProxyMode.Pac);
         }
 
         private void RuleBypassLanItem_Click(object sender, EventArgs e)

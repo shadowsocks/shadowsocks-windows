@@ -4,8 +4,9 @@ Shadowsocks=Shadowsocks
 
 # Menu items
 
-Disable system proxy=不修改系统(IE)代理
 Mode=系统代理模式
+No modify system proxy=不修改系统(IE)代理
+Disable system proxy=不经过代理直连
 PAC=PAC 模式
 Global=全局模式
 Proxy rule=代理规则
