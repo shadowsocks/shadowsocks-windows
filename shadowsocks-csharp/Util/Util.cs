@@ -272,7 +272,7 @@ namespace Shadowsocks.Util
 
         public static IPAddress QueryDns(string host, string dns_servers, bool IPv6_first = false)
         {
-            IPAddress ipAddress = null;
+            IPAddress ret_ipAddress = null;
             {
                 if (dns_servers != null && dns_servers.Length > 0)
                 {
@@ -281,7 +281,17 @@ namespace Shadowsocks.Util
                         types = new Types[] { Types.AAAA, Types.A };
                     else
                         types = new Types[] { Types.A, Types.AAAA };
-                    string[] dns_server = dns_servers.Split(',');
+                    string[] _dns_server = dns_servers.Split(',');
+                    List<string> dns_server = new List<string>();
+                    List<string> local_dns_server = new List<string>();
+                    foreach (string ip in _dns_server)
+                    {
+                        IPAddress ipAddress = null;
+                        if (IPAddress.TryParse(ip, out ipAddress))
+                        {
+                            dns_server.Add(ip);
+                        }
+                    }
                     for (int query_i = 0; query_i < types.Length; ++query_i)
                     {
                         DnsQuery dns = new DnsQuery(host, types[query_i]);
@@ -328,7 +338,7 @@ namespace Shadowsocks.Util
                     }
                 }
             }
-            return ipAddress;
+            return ret_ipAddress;
         }
 
         public static string GetExecutablePath()
