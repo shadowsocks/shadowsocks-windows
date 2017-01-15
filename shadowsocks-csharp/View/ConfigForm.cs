@@ -5,6 +5,7 @@ using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
 using System.Diagnostics;
+using System.Net;
 using Microsoft.Win32;
 using Shadowsocks.Controller;
 using Shadowsocks.Model;
@@ -31,6 +32,11 @@ namespace Shadowsocks.View
             this.Font = System.Drawing.SystemFonts.MessageBoxFont;
             InitializeComponent();
             ServersListBox.Font = CreateFont();
+
+            NumServerPort.Minimum = IPEndPoint.MinPort;
+            NumServerPort.Maximum = IPEndPoint.MaxPort;
+            NumUDPPort.Minimum = IPEndPoint.MinPort;
+            NumUDPPort.Maximum = IPEndPoint.MaxPort;
 
             this.Icon = Icon.FromHandle(Resources.ssw128.GetHicon());
             this.controller = controller;
@@ -77,7 +83,7 @@ namespace Shadowsocks.View
             DownButton.Height = DownButton.Height * dpi_mul / 4;
 
             //IPTextBox.Width = IPTextBox.Width * dpi_mul / 4;
-            //ServerPortTextBox.Width = ServerPortTextBox.Width * dpi_mul / 4;
+            //ServerPortNumericUpDown.Width = ServerPortNumericUpDown.Width * dpi_mul / 4;
             //PasswordTextBox.Width = PasswordTextBox.Width * dpi_mul / 4;
             //EncryptionSelect.Width = EncryptionSelect.Width * dpi_mul / 4;
             //TCPProtocolComboBox.Width = TCPProtocolComboBox.Width * dpi_mul / 4;
@@ -198,8 +204,8 @@ namespace Shadowsocks.View
                 Server server = new Server
                 {
                     server = IPTextBox.Text.Trim(),
-                    server_port = int.Parse(ServerPortTextBox.Text),
-                    server_udp_port = int.Parse(TextUDPPort.Text),
+                    server_port = Convert.ToInt32(NumServerPort.Value),
+                    server_udp_port = Convert.ToInt32(NumUDPPort.Value),
                     password = PasswordTextBox.Text,
                     method = EncryptionSelect.Text,
                     protocol = TCPProtocolComboBox.Text,
@@ -316,8 +322,8 @@ namespace Shadowsocks.View
                 Server server = _modifiedConfiguration.configs[ServersListBox.SelectedIndex];
 
                 IPTextBox.Text = server.server;
-                ServerPortTextBox.Text = server.server_port.ToString();
-                TextUDPPort.Text = server.server_udp_port.ToString();
+                NumServerPort.Value = server.server_port;
+                NumUDPPort.Value = server.server_udp_port;
                 PasswordTextBox.Text = server.password;
                 EncryptionSelect.Text = server.method ?? "aes-256-cfb";
                 if (server.protocol == null || server.protocol.Length == 0)
@@ -635,14 +641,14 @@ namespace Shadowsocks.View
             if (checkAdvSetting.Checked)
             {
                 labelUDPPort.Visible = true;
-                TextUDPPort.Visible = true;
+                NumUDPPort.Visible = true;
                 //TCPoverUDPLabel.Visible = true;
                 //CheckTCPoverUDP.Visible = true;
             }
             else
             {
                 labelUDPPort.Visible = false;
-                TextUDPPort.Visible = false;
+                NumUDPPort.Visible = false;
                 //TCPoverUDPLabel.Visible = false;
                 //CheckTCPoverUDP.Visible = false;
             }

@@ -41,7 +41,7 @@
             this.IPLabel = new System.Windows.Forms.Label();
             this.ServerPortLabel = new System.Windows.Forms.Label();
             this.IPTextBox = new System.Windows.Forms.TextBox();
-            this.ServerPortTextBox = new System.Windows.Forms.TextBox();
+            this.NumServerPort = new System.Windows.Forms.NumericUpDown();
             this.PasswordTextBox = new System.Windows.Forms.TextBox();
             this.EncryptionLabel = new System.Windows.Forms.Label();
             this.EncryptionSelect = new System.Windows.Forms.ComboBox();
@@ -63,7 +63,7 @@
             this.TextGroup = new System.Windows.Forms.TextBox();
             this.checkAdvSetting = new System.Windows.Forms.CheckBox();
             this.labelUDPPort = new System.Windows.Forms.Label();
-            this.TextUDPPort = new System.Windows.Forms.TextBox();
+            this.NumUDPPort = new System.Windows.Forms.NumericUpDown();
             this.checkSSRLink = new System.Windows.Forms.CheckBox();
             this.labelRemarks = new System.Windows.Forms.Label();
             this.labelProtocolParam = new System.Windows.Forms.Label();
@@ -81,6 +81,8 @@
             this.tableLayoutPanel2.SuspendLayout();
             this.ServerGroupBox.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.NumServerPort)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.NumUDPPort)).BeginInit();
             this.tableLayoutPanel7.SuspendLayout();
             this.tableLayoutPanel4.SuspendLayout();
             this.tableLayoutPanel5.SuspendLayout();
@@ -189,7 +191,7 @@
             this.tableLayoutPanel1.Controls.Add(this.IPLabel, 0, 1);
             this.tableLayoutPanel1.Controls.Add(this.ServerPortLabel, 0, 2);
             this.tableLayoutPanel1.Controls.Add(this.IPTextBox, 1, 1);
-            this.tableLayoutPanel1.Controls.Add(this.ServerPortTextBox, 1, 2);
+            this.tableLayoutPanel1.Controls.Add(this.NumServerPort, 1, 2);
             this.tableLayoutPanel1.Controls.Add(this.PasswordTextBox, 1, 3);
             this.tableLayoutPanel1.Controls.Add(this.EncryptionLabel, 0, 4);
             this.tableLayoutPanel1.Controls.Add(this.EncryptionSelect, 1, 4);
@@ -211,7 +213,7 @@
             this.tableLayoutPanel1.Controls.Add(this.TextGroup, 1, 10);
             this.tableLayoutPanel1.Controls.Add(this.checkAdvSetting, 0, 12);
             this.tableLayoutPanel1.Controls.Add(this.labelUDPPort, 0, 13);
-            this.tableLayoutPanel1.Controls.Add(this.TextUDPPort, 1, 13);
+            this.tableLayoutPanel1.Controls.Add(this.NumUDPPort, 1, 13);
             this.tableLayoutPanel1.Controls.Add(this.checkSSRLink, 0, 11);
             this.tableLayoutPanel1.Controls.Add(this.labelRemarks, 0, 9);
             this.tableLayoutPanel1.Controls.Add(this.labelProtocolParam, 0, 6);
@@ -300,16 +302,19 @@
             this.IPTextBox.TabIndex = 7;
             this.IPTextBox.WordWrap = false;
             // 
-            // ServerPortTextBox
+            // NumServerPort
             // 
-            this.ServerPortTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.ServerPortTextBox.ImeMode = System.Windows.Forms.ImeMode.Off;
-            this.ServerPortTextBox.Location = new System.Drawing.Point(111, 35);
-            this.ServerPortTextBox.MaxLength = 10;
-            this.ServerPortTextBox.Name = "ServerPortTextBox";
-            this.ServerPortTextBox.Size = new System.Drawing.Size(233, 23);
-            this.ServerPortTextBox.TabIndex = 9;
-            this.ServerPortTextBox.WordWrap = false;
+            this.NumServerPort.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.NumServerPort.ImeMode = System.Windows.Forms.ImeMode.Off;
+            this.NumServerPort.Location = new System.Drawing.Point(111, 35);
+            this.NumServerPort.Maximum = new decimal(new int[] {
+            65535,
+            0,
+            0,
+            0});
+            this.NumServerPort.Name = "NumServerPort";
+            this.NumServerPort.Size = new System.Drawing.Size(233, 23);
+            this.NumServerPort.TabIndex = 9;
             // 
             // PasswordTextBox
             // 
@@ -549,17 +554,20 @@
             this.labelUDPPort.Text = "UDP Port";
             this.labelUDPPort.Visible = false;
             // 
-            // TextUDPPort
+            // NumUDPPort
             // 
-            this.TextUDPPort.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.TextUDPPort.ImeMode = System.Windows.Forms.ImeMode.Off;
-            this.TextUDPPort.Location = new System.Drawing.Point(111, 358);
-            this.TextUDPPort.MaxLength = 10;
-            this.TextUDPPort.Name = "TextUDPPort";
-            this.TextUDPPort.Size = new System.Drawing.Size(233, 23);
-            this.TextUDPPort.TabIndex = 31;
-            this.TextUDPPort.Visible = false;
-            this.TextUDPPort.WordWrap = false;
+            this.NumUDPPort.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.NumUDPPort.ImeMode = System.Windows.Forms.ImeMode.Off;
+            this.NumUDPPort.Location = new System.Drawing.Point(111, 358);
+            this.NumUDPPort.Maximum = new decimal(new int[] {
+            65535,
+            0,
+            0,
+            0});
+            this.NumUDPPort.Name = "NumUDPPort";
+            this.NumUDPPort.Size = new System.Drawing.Size(233, 23);
+            this.NumUDPPort.TabIndex = 31;
+            this.NumUDPPort.Visible = false;
             // 
             // checkSSRLink
             // 
@@ -769,6 +777,8 @@
             this.ServerGroupBox.PerformLayout();
             this.tableLayoutPanel1.ResumeLayout(false);
             this.tableLayoutPanel1.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.NumServerPort)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.NumUDPPort)).EndInit();
             this.tableLayoutPanel7.ResumeLayout(false);
             this.tableLayoutPanel7.PerformLayout();
             this.tableLayoutPanel4.ResumeLayout(false);
@@ -801,7 +811,7 @@
         private System.Windows.Forms.Label IPLabel;
         private System.Windows.Forms.Label ServerPortLabel;
         private System.Windows.Forms.TextBox IPTextBox;
-        private System.Windows.Forms.TextBox ServerPortTextBox;
+        private System.Windows.Forms.NumericUpDown NumServerPort;
         private System.Windows.Forms.TextBox PasswordTextBox;
         private System.Windows.Forms.Label EncryptionLabel;
         private System.Windows.Forms.ComboBox EncryptionSelect;
@@ -823,7 +833,7 @@
         private System.Windows.Forms.TextBox TextGroup;
         private System.Windows.Forms.CheckBox checkAdvSetting;
         private System.Windows.Forms.Label labelUDPPort;
-        private System.Windows.Forms.TextBox TextUDPPort;
+        private System.Windows.Forms.NumericUpDown NumUDPPort;
         private System.Windows.Forms.CheckBox checkSSRLink;
         private System.Windows.Forms.Label labelRemarks;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel3;
