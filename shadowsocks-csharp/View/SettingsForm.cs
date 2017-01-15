@@ -39,21 +39,21 @@ namespace Shadowsocks.View
             RandomComboBox.Width = RandomComboBox.Width * dpi_mul / 4;
 
             TextS5Server.Width = TextS5Server.Width * dpi_mul / 4;
-            TextS5Port.Width = TextS5Port.Width * dpi_mul / 4;
+            NumS5Port.Width = NumS5Port.Width * dpi_mul / 4;
             TextS5User.Width = TextS5User.Width * dpi_mul / 4;
             TextS5Pass.Width = TextS5Pass.Width * dpi_mul / 4;
             TextUserAgent.Width = TextUserAgent.Width * dpi_mul / 4;
 
-            ProxyPortTextBox.Width = ProxyPortTextBox.Width * dpi_mul / 4;
+            NumProxyPort.Width = NumProxyPort.Width * dpi_mul / 4;
             TextAuthUser.Width = TextAuthUser.Width * dpi_mul / 4;
             TextAuthPass.Width = TextAuthPass.Width * dpi_mul / 4;
 
             buttonDefault.Height = buttonDefault.Height * dpi_mul / 4;
             buttonDefault.Width = buttonDefault.Width * dpi_mul / 4;
             DNSText.Width = DNSText.Width * dpi_mul / 4;
-            ReconnectText.Width = ReconnectText.Width * dpi_mul / 4;
-            textTimeout.Width = textTimeout.Width * dpi_mul / 4;
-            TTLText.Width = TTLText.Width * dpi_mul / 4;
+            NumReconnect.Width = NumReconnect.Width * dpi_mul / 4;
+            NumTimeout.Width = NumTimeout.Width * dpi_mul / 4;
+            NumTTL.Width = NumTTL.Width * dpi_mul / 4;
 
             LoadCurrentConfiguration();
         }
@@ -121,12 +121,12 @@ namespace Shadowsocks.View
         {
             try
             {
-                int localPort = int.Parse(ProxyPortTextBox.Text);
+                int localPort = int.Parse(NumProxyPort.Text);
                 Configuration.CheckPort(localPort);
                 int ret = 0;
                 _modifiedConfiguration.shareOverLan = checkShareOverLan.Checked;
                 _modifiedConfiguration.localPort = localPort;
-                _modifiedConfiguration.reconnectTimes = ReconnectText.Text.Length == 0 ? 0 : int.Parse(ReconnectText.Text);
+                _modifiedConfiguration.reconnectTimes = NumReconnect.Text.Length == 0 ? 0 : int.Parse(NumReconnect.Text);
 
                 if (checkAutoStartup.Checked != AutoStartup.Check() && !AutoStartup.Set(checkAutoStartup.Checked))
                 {
@@ -134,14 +134,14 @@ namespace Shadowsocks.View
                 }
                 _modifiedConfiguration.random = checkRandom.Checked;
                 _modifiedConfiguration.randomAlgorithm = RandomComboBox.SelectedIndex;
-                _modifiedConfiguration.TTL = TTLText.Text.Length == 0 ? 0 : int.Parse(TTLText.Text);
-                _modifiedConfiguration.connect_timeout = textTimeout.Text.Length == 0 ? 0 : int.Parse(textTimeout.Text);
+                _modifiedConfiguration.TTL = Convert.ToInt32(NumTTL.Value);
+                _modifiedConfiguration.connect_timeout = Convert.ToInt32(NumTimeout.Value);
                 _modifiedConfiguration.dns_server = DNSText.Text;
                 _modifiedConfiguration.proxyEnable = CheckSockProxy.Checked;
                 _modifiedConfiguration.pacDirectGoProxy = checkBoxPacProxy.Checked;
                 _modifiedConfiguration.proxyType = comboProxyType.SelectedIndex;
                 _modifiedConfiguration.proxyHost = TextS5Server.Text;
-                _modifiedConfiguration.proxyPort = TextS5Port.Text.Length == 0 ? 0 : int.Parse(TextS5Port.Text);
+                _modifiedConfiguration.proxyPort = Convert.ToInt32(NumS5Port.Value);
                 _modifiedConfiguration.proxyAuthUser = TextS5User.Text;
                 _modifiedConfiguration.proxyAuthPass = TextS5Pass.Text;
                 _modifiedConfiguration.proxyUserAgent = TextUserAgent.Text;
@@ -162,21 +162,21 @@ namespace Shadowsocks.View
         private void LoadSelectedServer()
         {
             checkShareOverLan.Checked = _modifiedConfiguration.shareOverLan;
-            ProxyPortTextBox.Text = _modifiedConfiguration.localPort.ToString();
-            ReconnectText.Text = _modifiedConfiguration.reconnectTimes.ToString();
+            NumProxyPort.Value = _modifiedConfiguration.localPort;
+            NumReconnect.Value = _modifiedConfiguration.reconnectTimes;
 
             checkAutoStartup.Checked = AutoStartup.Check();
             checkRandom.Checked = _modifiedConfiguration.random;
             RandomComboBox.SelectedIndex = _modifiedConfiguration.randomAlgorithm;
-            TTLText.Text = _modifiedConfiguration.TTL.ToString();
-            textTimeout.Text = _modifiedConfiguration.connect_timeout.ToString();
+            NumTTL.Value = _modifiedConfiguration.TTL;
+            NumTimeout.Value = _modifiedConfiguration.connect_timeout;
             DNSText.Text = _modifiedConfiguration.dns_server;
 
             CheckSockProxy.Checked = _modifiedConfiguration.proxyEnable;
             checkBoxPacProxy.Checked = _modifiedConfiguration.pacDirectGoProxy;
             comboProxyType.SelectedIndex = _modifiedConfiguration.proxyType;
             TextS5Server.Text = _modifiedConfiguration.proxyHost;
-            TextS5Port.Text = _modifiedConfiguration.proxyPort.ToString();
+            NumS5Port.Value = _modifiedConfiguration.proxyPort;
             TextS5User.Text = _modifiedConfiguration.proxyAuthUser;
             TextS5Pass.Text = _modifiedConfiguration.proxyAuthPass;
             TextUserAgent.Text = _modifiedConfiguration.proxyUserAgent;
@@ -216,15 +216,15 @@ namespace Shadowsocks.View
         {
             if (CheckSockProxy.Checked)
             {
-                ReconnectText.Text = "4";
-                textTimeout.Text = "10";
-                TTLText.Text = "60";
+                NumReconnect.Value = 4;
+                NumTimeout.Value = 10;
+                NumTTL.Value = 60;
             }
             else
             {
-                ReconnectText.Text = "4";
-                textTimeout.Text = "5";
-                TTLText.Text = "60";
+                NumReconnect.Value = 4;
+                NumTimeout.Value = 5;
+                NumTTL.Value = 60;
             }
         }
     }

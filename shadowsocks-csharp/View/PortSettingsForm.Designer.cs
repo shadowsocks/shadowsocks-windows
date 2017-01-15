@@ -38,11 +38,11 @@
             this.labelPort = new System.Windows.Forms.Label();
             this.checkEnable = new System.Windows.Forms.CheckBox();
             this.textAddr = new System.Windows.Forms.TextBox();
-            this.textPort = new System.Windows.Forms.TextBox();
+            this.NumTargetPort = new System.Windows.Forms.NumericUpDown();
             this.comboBoxType = new System.Windows.Forms.ComboBox();
             this.comboServers = new System.Windows.Forms.ComboBox();
             this.labelLocal = new System.Windows.Forms.Label();
-            this.textLocal = new System.Windows.Forms.TextBox();
+            this.NumLocalPort = new System.Windows.Forms.NumericUpDown();
             this.label1 = new System.Windows.Forms.Label();
             this.textRemarks = new System.Windows.Forms.TextBox();
             this.tableLayoutPanel3 = new System.Windows.Forms.TableLayoutPanel();
@@ -54,6 +54,8 @@
             this.tableLayoutPanel1.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.tableLayoutPanel2.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.NumTargetPort)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.NumLocalPort)).BeginInit();
             this.tableLayoutPanel3.SuspendLayout();
             this.tableLayoutPanel4.SuspendLayout();
             this.SuspendLayout();
@@ -107,11 +109,11 @@
             this.tableLayoutPanel2.Controls.Add(this.labelPort, 0, 5);
             this.tableLayoutPanel2.Controls.Add(this.checkEnable, 1, 0);
             this.tableLayoutPanel2.Controls.Add(this.textAddr, 1, 4);
-            this.tableLayoutPanel2.Controls.Add(this.textPort, 1, 5);
+            this.tableLayoutPanel2.Controls.Add(this.NumTargetPort, 1, 5);
             this.tableLayoutPanel2.Controls.Add(this.comboBoxType, 1, 1);
             this.tableLayoutPanel2.Controls.Add(this.comboServers, 1, 2);
             this.tableLayoutPanel2.Controls.Add(this.labelLocal, 0, 3);
-            this.tableLayoutPanel2.Controls.Add(this.textLocal, 1, 3);
+            this.tableLayoutPanel2.Controls.Add(this.NumLocalPort, 1, 3);
             this.tableLayoutPanel2.Controls.Add(this.label1, 0, 6);
             this.tableLayoutPanel2.Controls.Add(this.textRemarks, 1, 6);
             this.tableLayoutPanel2.Location = new System.Drawing.Point(7, 21);
@@ -185,12 +187,17 @@
             this.textAddr.Size = new System.Drawing.Size(403, 21);
             this.textAddr.TabIndex = 7;
             // 
-            // textPort
+            // NumTargetPort
             // 
-            this.textPort.Location = new System.Drawing.Point(80, 131);
-            this.textPort.Name = "textPort";
-            this.textPort.Size = new System.Drawing.Size(403, 21);
-            this.textPort.TabIndex = 8;
+            this.NumTargetPort.Location = new System.Drawing.Point(80, 131);
+            this.NumTargetPort.Maximum = new decimal(new int[] {
+            65535,
+            0,
+            0,
+            0});
+            this.NumTargetPort.Name = "NumTargetPort";
+            this.NumTargetPort.Size = new System.Drawing.Size(403, 21);
+            this.NumTargetPort.TabIndex = 8;
             // 
             // comboBoxType
             // 
@@ -225,12 +232,17 @@
             this.labelLocal.TabIndex = 0;
             this.labelLocal.Text = "Local Port";
             // 
-            // textLocal
+            // NumLocalPort
             // 
-            this.textLocal.Location = new System.Drawing.Point(80, 77);
-            this.textLocal.Name = "textLocal";
-            this.textLocal.Size = new System.Drawing.Size(403, 21);
-            this.textLocal.TabIndex = 6;
+            this.NumLocalPort.Location = new System.Drawing.Point(80, 77);
+            this.NumLocalPort.Maximum = new decimal(new int[] {
+            65535,
+            0,
+            0,
+            0});
+            this.NumLocalPort.Name = "NumLocalPort";
+            this.NumLocalPort.Size = new System.Drawing.Size(403, 21);
+            this.NumLocalPort.TabIndex = 6;
             // 
             // label1
             // 
@@ -337,6 +349,8 @@
             this.groupBox1.ResumeLayout(false);
             this.tableLayoutPanel2.ResumeLayout(false);
             this.tableLayoutPanel2.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.NumTargetPort)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.NumLocalPort)).EndInit();
             this.tableLayoutPanel3.ResumeLayout(false);
             this.tableLayoutPanel4.ResumeLayout(false);
             this.ResumeLayout(false);
@@ -357,12 +371,12 @@
         private System.Windows.Forms.Label labelPort;
         private System.Windows.Forms.CheckBox checkEnable;
         private System.Windows.Forms.TextBox textAddr;
-        private System.Windows.Forms.TextBox textPort;
+        private System.Windows.Forms.NumericUpDown NumTargetPort;
         private System.Windows.Forms.ComboBox comboBoxType;
         private System.Windows.Forms.ComboBox comboServers;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel3;
         private System.Windows.Forms.Label labelLocal;
-        private System.Windows.Forms.TextBox textLocal;
+        private System.Windows.Forms.NumericUpDown NumLocalPort;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel4;
         private System.Windows.Forms.Button Add;
         private System.Windows.Forms.Button Del;

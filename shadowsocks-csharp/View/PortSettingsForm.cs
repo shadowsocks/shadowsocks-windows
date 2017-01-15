@@ -120,14 +120,14 @@ namespace Shadowsocks.View
             {
                 bool reflash_list = false;
                 string key = _oldSelectedIndex.ToString();
-                if (key != textLocal.Text)
+                if (key != NumLocalPort.Text)
                 {
                     if (_modifiedConfiguration.portMap.ContainsKey(key))
                     {
                         _modifiedConfiguration.portMap.Remove(key);
                     }
                     reflash_list = true;
-                    key = textLocal.Text;
+                    key = NumLocalPort.Text;
                     try
                     {
                         _oldSelectedIndex = int.Parse(key);
@@ -154,7 +154,7 @@ namespace Shadowsocks.View
                 cfg.remarks = textRemarks.Text;
                 try
                 {
-                    cfg.server_port = int.Parse(textPort.Text);
+                    cfg.server_port = int.Parse(NumTargetPort.Text);
                 }
                 catch(FormatException)
                 {
@@ -177,9 +177,9 @@ namespace Shadowsocks.View
                 checkEnable.Checked = cfg.enable;
                 comboBoxType.SelectedValue = cfg.type;
                 comboServers.Text = GetIDText(cfg.id);
-                textLocal.Text = key;
+                NumLocalPort.Text = key;
                 textAddr.Text = cfg.server_addr;
-                textPort.Text = cfg.server_port.ToString();
+                NumTargetPort.Value = cfg.server_port;
                 textRemarks.Text = cfg.remarks ?? "";
 
                 try
@@ -239,14 +239,7 @@ namespace Shadowsocks.View
             cfg.id = GetID(comboServers.Text);
             cfg.server_addr = textAddr.Text;
             cfg.remarks = textRemarks.Text;
-            try
-            {
-                cfg.server_port = int.Parse(textPort.Text);
-            }
-            catch (FormatException)
-            {
-                cfg.server_port = 0;
-            }
+            cfg.server_port = Convert.ToInt32(NumTargetPort.Value);
 
             _oldSelectedIndex = -1;
             LoadConfiguration(_modifiedConfiguration);
@@ -270,12 +263,14 @@ namespace Shadowsocks.View
             if (comboBoxType.SelectedIndex == 0)
             {
                 textAddr.ReadOnly = false;
-                textPort.ReadOnly = false;
+                NumTargetPort.ReadOnly = false;
+                NumTargetPort.Increment = 1;
             }
             else
             {
                 textAddr.ReadOnly = true;
-                textPort.ReadOnly = true;
+                NumTargetPort.ReadOnly = true;
+                NumTargetPort.Increment = 0;
             }
         }
     }

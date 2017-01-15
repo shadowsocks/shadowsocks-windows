@@ -43,7 +43,7 @@
             this.LabelS5Port = new System.Windows.Forms.Label();
             this.TextS5User = new System.Windows.Forms.TextBox();
             this.LabelS5Server = new System.Windows.Forms.Label();
-            this.TextS5Port = new System.Windows.Forms.TextBox();
+            this.NumS5Port = new System.Windows.Forms.NumericUpDown();
             this.TextS5Server = new System.Windows.Forms.TextBox();
             this.comboProxyType = new System.Windows.Forms.ComboBox();
             this.CheckSockProxy = new System.Windows.Forms.CheckBox();
@@ -57,7 +57,7 @@
             this.TextAuthUser = new System.Windows.Forms.TextBox();
             this.LabelAuthUser = new System.Windows.Forms.Label();
             this.checkShareOverLan = new System.Windows.Forms.CheckBox();
-            this.ProxyPortTextBox = new System.Windows.Forms.TextBox();
+            this.NumProxyPort = new System.Windows.Forms.NumericUpDown();
             this.ProxyPortLabel = new System.Windows.Forms.Label();
             this.tableLayoutPanel10 = new System.Windows.Forms.TableLayoutPanel();
             this.tableLayoutPanel3 = new System.Windows.Forms.TableLayoutPanel();
@@ -65,11 +65,11 @@
             this.OKButton = new System.Windows.Forms.Button();
             this.tableLayoutPanel5 = new System.Windows.Forms.TableLayoutPanel();
             this.ReconnectLabel = new System.Windows.Forms.Label();
-            this.ReconnectText = new System.Windows.Forms.TextBox();
+            this.NumReconnect = new System.Windows.Forms.NumericUpDown();
             this.TTLLabel = new System.Windows.Forms.Label();
-            this.TTLText = new System.Windows.Forms.TextBox();
+            this.NumTTL = new System.Windows.Forms.NumericUpDown();
             this.labelTimeout = new System.Windows.Forms.Label();
-            this.textTimeout = new System.Windows.Forms.TextBox();
+            this.NumTimeout = new System.Windows.Forms.NumericUpDown();
             this.DNSText = new System.Windows.Forms.TextBox();
             this.buttonDefault = new System.Windows.Forms.Button();
             this.label2 = new System.Windows.Forms.Label();
@@ -77,11 +77,16 @@
             this.tableLayoutPanel2.SuspendLayout();
             this.Socks5ProxyGroup.SuspendLayout();
             this.tableLayoutPanel9.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.NumS5Port)).BeginInit();
             this.ListenGroup.SuspendLayout();
             this.tableLayoutPanel4.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.NumProxyPort)).BeginInit();
             this.tableLayoutPanel10.SuspendLayout();
             this.tableLayoutPanel3.SuspendLayout();
             this.tableLayoutPanel5.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.NumReconnect)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.NumTTL)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.NumTimeout)).BeginInit();
             this.SuspendLayout();
             // 
             // tableLayoutPanel1
@@ -209,7 +214,7 @@
             this.tableLayoutPanel9.Controls.Add(this.LabelS5Port, 0, 3);
             this.tableLayoutPanel9.Controls.Add(this.TextS5User, 1, 4);
             this.tableLayoutPanel9.Controls.Add(this.LabelS5Server, 0, 2);
-            this.tableLayoutPanel9.Controls.Add(this.TextS5Port, 1, 3);
+            this.tableLayoutPanel9.Controls.Add(this.NumS5Port, 1, 3);
             this.tableLayoutPanel9.Controls.Add(this.TextS5Server, 1, 2);
             this.tableLayoutPanel9.Controls.Add(this.comboProxyType, 1, 1);
             this.tableLayoutPanel9.Controls.Add(this.CheckSockProxy, 0, 0);
@@ -285,13 +290,18 @@
             this.LabelS5Server.TabIndex = 0;
             this.LabelS5Server.Text = "Server IP";
             // 
-            // TextS5Port
+            // NumS5Port
             // 
-            this.TextS5Port.ImeMode = System.Windows.Forms.ImeMode.Off;
-            this.TextS5Port.Location = new System.Drawing.Point(89, 90);
-            this.TextS5Port.Name = "TextS5Port";
-            this.TextS5Port.Size = new System.Drawing.Size(236, 23);
-            this.TextS5Port.TabIndex = 4;
+            this.NumS5Port.ImeMode = System.Windows.Forms.ImeMode.Off;
+            this.NumS5Port.Location = new System.Drawing.Point(89, 90);
+            this.NumS5Port.Maximum = new decimal(new int[] {
+            65535,
+            0,
+            0,
+            0});
+            this.NumS5Port.Name = "NumS5Port";
+            this.NumS5Port.Size = new System.Drawing.Size(236, 23);
+            this.NumS5Port.TabIndex = 4;
             // 
             // TextS5Server
             // 
@@ -375,7 +385,7 @@
             this.tableLayoutPanel4.Controls.Add(this.TextAuthUser, 1, 2);
             this.tableLayoutPanel4.Controls.Add(this.LabelAuthUser, 0, 2);
             this.tableLayoutPanel4.Controls.Add(this.checkShareOverLan, 1, 0);
-            this.tableLayoutPanel4.Controls.Add(this.ProxyPortTextBox, 1, 1);
+            this.tableLayoutPanel4.Controls.Add(this.NumProxyPort, 1, 1);
             this.tableLayoutPanel4.Controls.Add(this.ProxyPortLabel, 0, 1);
             this.tableLayoutPanel4.Location = new System.Drawing.Point(5, 32);
             this.tableLayoutPanel4.Name = "tableLayoutPanel4";
@@ -433,15 +443,18 @@
             this.checkShareOverLan.Text = "Allow Clients from LAN";
             this.checkShareOverLan.UseVisualStyleBackColor = true;
             // 
-            // ProxyPortTextBox
+            // NumProxyPort
             // 
-            this.ProxyPortTextBox.ImeMode = System.Windows.Forms.ImeMode.Off;
-            this.ProxyPortTextBox.Location = new System.Drawing.Point(76, 30);
-            this.ProxyPortTextBox.MaxLength = 10;
-            this.ProxyPortTextBox.Name = "ProxyPortTextBox";
-            this.ProxyPortTextBox.Size = new System.Drawing.Size(236, 23);
-            this.ProxyPortTextBox.TabIndex = 9;
-            this.ProxyPortTextBox.WordWrap = false;
+            this.NumProxyPort.ImeMode = System.Windows.Forms.ImeMode.Off;
+            this.NumProxyPort.Location = new System.Drawing.Point(76, 30);
+            this.NumProxyPort.Maximum = new decimal(new int[] {
+            65535,
+            0,
+            0,
+            0});
+            this.NumProxyPort.Name = "NumProxyPort";
+            this.NumProxyPort.Size = new System.Drawing.Size(236, 23);
+            this.NumProxyPort.TabIndex = 9;
             // 
             // ProxyPortLabel
             // 
@@ -524,11 +537,11 @@
             this.tableLayoutPanel5.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tableLayoutPanel5.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tableLayoutPanel5.Controls.Add(this.ReconnectLabel, 0, 3);
-            this.tableLayoutPanel5.Controls.Add(this.ReconnectText, 1, 3);
+            this.tableLayoutPanel5.Controls.Add(this.NumReconnect, 1, 3);
             this.tableLayoutPanel5.Controls.Add(this.TTLLabel, 0, 5);
-            this.tableLayoutPanel5.Controls.Add(this.TTLText, 1, 5);
+            this.tableLayoutPanel5.Controls.Add(this.NumTTL, 1, 5);
             this.tableLayoutPanel5.Controls.Add(this.labelTimeout, 0, 4);
-            this.tableLayoutPanel5.Controls.Add(this.textTimeout, 1, 4);
+            this.tableLayoutPanel5.Controls.Add(this.NumTimeout, 1, 4);
             this.tableLayoutPanel5.Controls.Add(this.DNSText, 1, 1);
             this.tableLayoutPanel5.Controls.Add(this.buttonDefault, 1, 0);
             this.tableLayoutPanel5.Controls.Add(this.label2, 0, 1);
@@ -556,15 +569,13 @@
             this.ReconnectLabel.TabIndex = 3;
             this.ReconnectLabel.Text = "Reconnect";
             // 
-            // ReconnectText
+            // NumReconnect
             // 
-            this.ReconnectText.ImeMode = System.Windows.Forms.ImeMode.Off;
-            this.ReconnectText.Location = new System.Drawing.Point(80, 64);
-            this.ReconnectText.MaxLength = 10;
-            this.ReconnectText.Name = "ReconnectText";
-            this.ReconnectText.Size = new System.Drawing.Size(109, 23);
-            this.ReconnectText.TabIndex = 18;
-            this.ReconnectText.WordWrap = false;
+            this.NumReconnect.ImeMode = System.Windows.Forms.ImeMode.Off;
+            this.NumReconnect.Location = new System.Drawing.Point(80, 64);
+            this.NumReconnect.Name = "NumReconnect";
+            this.NumReconnect.Size = new System.Drawing.Size(109, 23);
+            this.NumReconnect.TabIndex = 18;
             // 
             // TTLLabel
             // 
@@ -576,15 +587,13 @@
             this.TTLLabel.TabIndex = 3;
             this.TTLLabel.Text = "TTL";
             // 
-            // TTLText
+            // NumTTL
             // 
-            this.TTLText.ImeMode = System.Windows.Forms.ImeMode.Off;
-            this.TTLText.Location = new System.Drawing.Point(80, 122);
-            this.TTLText.MaxLength = 10;
-            this.TTLText.Name = "TTLText";
-            this.TTLText.Size = new System.Drawing.Size(109, 23);
-            this.TTLText.TabIndex = 20;
-            this.TTLText.WordWrap = false;
+            this.NumTTL.ImeMode = System.Windows.Forms.ImeMode.Off;
+            this.NumTTL.Location = new System.Drawing.Point(80, 122);
+            this.NumTTL.Name = "NumTTL";
+            this.NumTTL.Size = new System.Drawing.Size(109, 23);
+            this.NumTTL.TabIndex = 20;
             // 
             // labelTimeout
             // 
@@ -596,15 +605,13 @@
             this.labelTimeout.TabIndex = 3;
             this.labelTimeout.Text = " Timeout";
             // 
-            // textTimeout
+            // NumTimeout
             // 
-            this.textTimeout.ImeMode = System.Windows.Forms.ImeMode.Off;
-            this.textTimeout.Location = new System.Drawing.Point(80, 93);
-            this.textTimeout.MaxLength = 10;
-            this.textTimeout.Name = "textTimeout";
-            this.textTimeout.Size = new System.Drawing.Size(109, 23);
-            this.textTimeout.TabIndex = 19;
-            this.textTimeout.WordWrap = false;
+            this.NumTimeout.ImeMode = System.Windows.Forms.ImeMode.Off;
+            this.NumTimeout.Location = new System.Drawing.Point(80, 93);
+            this.NumTimeout.Name = "NumTimeout";
+            this.NumTimeout.Size = new System.Drawing.Size(109, 23);
+            this.NumTimeout.TabIndex = 19;
             // 
             // DNSText
             // 
@@ -660,15 +667,20 @@
             this.Socks5ProxyGroup.PerformLayout();
             this.tableLayoutPanel9.ResumeLayout(false);
             this.tableLayoutPanel9.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.NumS5Port)).EndInit();
             this.ListenGroup.ResumeLayout(false);
             this.ListenGroup.PerformLayout();
             this.tableLayoutPanel4.ResumeLayout(false);
             this.tableLayoutPanel4.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.NumProxyPort)).EndInit();
             this.tableLayoutPanel10.ResumeLayout(false);
             this.tableLayoutPanel10.PerformLayout();
             this.tableLayoutPanel3.ResumeLayout(false);
             this.tableLayoutPanel5.ResumeLayout(false);
             this.tableLayoutPanel5.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.NumReconnect)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.NumTTL)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.NumTimeout)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -685,7 +697,7 @@
         private System.Windows.Forms.Label LabelS5Server;
         private System.Windows.Forms.Label LabelS5Port;
         private System.Windows.Forms.TextBox TextS5Server;
-        private System.Windows.Forms.TextBox TextS5Port;
+        private System.Windows.Forms.NumericUpDown NumS5Port;
         private System.Windows.Forms.Label LabelS5Username;
         private System.Windows.Forms.CheckBox CheckSockProxy;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel10;
@@ -693,12 +705,12 @@
         private System.Windows.Forms.Button MyCancelButton;
         private System.Windows.Forms.Button OKButton;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel5;
-        private System.Windows.Forms.TextBox ProxyPortTextBox;
+        private System.Windows.Forms.NumericUpDown NumProxyPort;
         private System.Windows.Forms.Label ProxyPortLabel;
         private System.Windows.Forms.Label ReconnectLabel;
-        private System.Windows.Forms.TextBox ReconnectText;
+        private System.Windows.Forms.NumericUpDown NumReconnect;
         private System.Windows.Forms.Label TTLLabel;
-        private System.Windows.Forms.TextBox TTLText;
+        private System.Windows.Forms.NumericUpDown NumTTL;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel2;
         private System.Windows.Forms.Label LabelRandom;
         private System.Windows.Forms.ComboBox RandomComboBox;
@@ -719,7 +731,7 @@
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.TextBox DNSText;
         private System.Windows.Forms.Label labelTimeout;
-        private System.Windows.Forms.TextBox textTimeout;
+        private System.Windows.Forms.NumericUpDown NumTimeout;
         private System.Windows.Forms.Button buttonDefault;
     }
 }
