@@ -152,14 +152,7 @@ namespace Shadowsocks.View
                     reflash_list = true;
                 }
                 cfg.remarks = textRemarks.Text;
-                try
-                {
-                    cfg.server_port = int.Parse(NumTargetPort.Text);
-                }
-                catch(FormatException)
-                {
-                    cfg.server_port = 0;
-                }
+                cfg.server_port = Convert.ToInt32(NumTargetPort.Value);
                 if (reflash_list)
                 {
                     LoadConfiguration(_modifiedConfiguration);
