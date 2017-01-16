@@ -488,11 +488,12 @@ namespace Shadowsocks.Controller
             int local_port = ((IPEndPoint)_connection.LocalEndPoint).Port;
             Handler handler = new Handler();
 
-            handler.getCurrentServer = delegate (string targetURI, bool usingRandom, bool forceRandom) { return _config.GetCurrentServer(targetURI, usingRandom, forceRandom); };
+            handler.getCurrentServer = delegate (ServerSelectStrategy.FilterFunc filter, string targetURI, bool cfgRandom, bool usingRandom, bool forceRandom) { return _config.GetCurrentServer(filter, targetURI, cfgRandom, usingRandom, forceRandom); };
             handler.keepCurrentServer = delegate (string targetURI, string id) { _config.KeepCurrentServer(targetURI, id); };
             handler.connection = new ProxySocketTunLocal(_connection);
             handler.connectionUDP = _connectionUDP;
             handler.cfg.reconnectTimesRemain = _config.reconnectTimes;
+            handler.cfg.random = _config.random;
             handler.cfg.forceRandom = _config.random;
             handler.setServerTransferTotal(_transfer);
             if (_config.proxyEnable)
@@ -514,9 +515,16 @@ namespace Shadowsocks.Controller
             if (_config.GetPortMapCache().ContainsKey(local_port))
             {
                 PortMapConfigCache cfg = _config.GetPortMapCache()[local_port];
-                if (cfg.id == cfg.server.id)
+                if (cfg.server == null || cfg.id == cfg.server.id)
                 {
-                    handler.select_server = cfg.server;
+                    if (cfg.server != null)
+                    {
+                        handler.select_server = delegate (Server server, Server selServer) { return server.id == cfg.server.id; };
+                    }
+                    else if (cfg.id != null && cfg.id.Length > 0)
+                    {
+                        handler.select_server = delegate (Server server, Server selServer) { return server.group == cfg.id; };
+                    }
                     if (cfg.type == PortMapType.Forward) // tunnel
                     {
                         byte[] addr = System.Text.Encoding.UTF8.GetBytes(cfg.server_addr);

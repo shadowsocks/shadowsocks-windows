@@ -88,7 +88,6 @@ namespace Shadowsocks.Controller
 
         public void Start(Configuration configuration)
         {
-            Server server = configuration.GetCurrentServer();
             if (_process == null)
             {
                 Kill();

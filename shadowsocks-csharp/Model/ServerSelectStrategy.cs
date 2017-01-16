@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Text;
 
 namespace Shadowsocks.Model
-{    public class ServerSelectStrategy
+{
+    public class ServerSelectStrategy
     {
+        public delegate bool FilterFunc(Server server, Server selServer); // return true if select the server
         private Random randomGennarator;
         private int lastSelectIndex;
         private DateTime lastSelectTime;
@@ -14,7 +16,7 @@ namespace Shadowsocks.Model
         private const int CONNECTION_PENALTY = MAX_CHANCE / 100;
         private const int MIN_CHANCE = 10;
 
-        enum SelectAlgorithm
+        public enum SelectAlgorithm
         {
             OneByOne,
             Random,
@@ -22,7 +24,6 @@ namespace Shadowsocks.Model
             LowException,
             SelectedFirst,
             Timer,
-            LowExceptionInGroup,
         }
 
         private struct ServerIndex
@@ -98,7 +99,7 @@ namespace Shadowsocks.Model
             }
         }
 
-        public int Select(List<Server> configs, int curIndex, int algorithm, bool forceChange = false)
+        public int Select(List<Server> configs, int curIndex, int algorithm, FilterFunc filter, bool forceChange = false)
         {
             if (randomGennarator == null)
             {
@@ -128,11 +129,10 @@ namespace Shadowsocks.Model
                         continue;
                     if (configs[i].isEnable())
                     {
-                        if (algorithm == (int)SelectAlgorithm.LowExceptionInGroup
-                            && configs.Count > lastSelectIndex && lastSelectIndex >= 0
-                            && configs[lastSelectIndex].group != configs[i].group)
+                        if (filter != null)
                         {
-                            continue;
+                            if (!filter(configs[i], lastSelectIndex < 0 ? null : configs[lastSelectIndex]))
+                                continue;
                         }
                         serverList.Add(new ServerIndex(i, configs[i]));
                     }
@@ -168,8 +168,7 @@ namespace Shadowsocks.Model
                         serverListIndex = serverList[serverListIndex].index;
                     }
                     else if (algorithm == (int)SelectAlgorithm.LowException
-                        || algorithm == (int)SelectAlgorithm.Timer
-                        || algorithm == (int)SelectAlgorithm.LowExceptionInGroup)
+                        || algorithm == (int)SelectAlgorithm.Timer)
                     {
                         if (algorithm == (int)SelectAlgorithm.Timer)
                         {

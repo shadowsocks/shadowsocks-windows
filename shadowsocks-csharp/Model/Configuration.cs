@@ -74,6 +74,7 @@ namespace Shadowsocks.Model
         public string dns_server;
         public int reconnectTimes;
         public int randomAlgorithm;
+        public bool randomInGroup;
         public int TTL;
         public int connect_timeout;
 
@@ -153,7 +154,7 @@ namespace Shadowsocks.Model
             return false;
         }
 
-        public Server GetCurrentServer(string targetAddr = null, bool usingRandom = false, bool forceRandom = false)
+        public Server GetCurrentServer(ServerSelectStrategy.FilterFunc filter, string targetAddr = null, bool cfgRandom = false, bool usingRandom = false, bool forceRandom = false)
         {
             lock (serverStrategy)
             {
@@ -181,26 +182,39 @@ namespace Shadowsocks.Model
                 }
                 if (forceRandom)
                 {
-                    int index = serverStrategy.Select(configs, this.index, randomAlgorithm, true);
+                    int index;
+                    if (filter == null && randomInGroup)
+                    {
+                        index = serverStrategy.Select(configs, this.index, randomAlgorithm, delegate (Server server, Server selServer)
+                        {
+                            if (selServer != null)
+                                return selServer.group == server.group;
+                            return false;
+                        } , true);
+                    }
+                    else
+                    {
+                        index = serverStrategy.Select(configs, this.index, randomAlgorithm, filter, true);
+                    }
                     if (index == -1) return GetErrorServer();
-                    //if (targetAddr != null)
-                    //{
-                    //    UriVisitTime visit = new UriVisitTime();
-                    //    visit.uri = targetAddr;
-                    //    visit.index = index;
-                    //    visit.visitTime = DateTime.Now;
-                    //    if (uri2time.ContainsKey(targetAddr))
-                    //    {
-                    //        time2uri.Remove(uri2time[targetAddr]);
-                    //    }
-                    //    uri2time[targetAddr] = visit;
-                    //    time2uri[visit] = targetAddr;
-                    //}
                     return configs[index];
                 }
-                else if (usingRandom && random)
+                else if (usingRandom && cfgRandom)
                 {
-                    int index = serverStrategy.Select(configs, this.index, randomAlgorithm);
+                    int index;
+                    if (filter == null && randomInGroup)
+                    {
+                        index = serverStrategy.Select(configs, this.index, randomAlgorithm, delegate (Server server, Server selServer)
+                        {
+                            if (selServer != null)
+                                return selServer.group == server.group;
+                            return false;
+                        });
+                    }
+                    else
+                    {
+                        index = serverStrategy.Select(configs, this.index, randomAlgorithm, filter);
+                    }
                     if (index == -1) return GetErrorServer();
                     if (targetAddr != null)
                     {
@@ -264,9 +278,14 @@ namespace Shadowsocks.Model
         {
             portMapCache = new Dictionary<int, PortMapConfigCache>();
             Dictionary<string, Server> id2server = new Dictionary<string, Server>();
+            Dictionary<string, int> server_group = new Dictionary<string, int>();
             foreach (Server s in configs)
             {
                 id2server[s.id] = s;
+                if (s.group != null && s.group.Length > 0)
+                {
+                    server_group[s.group] = 1;
+                }
             }
             foreach (KeyValuePair<string, PortMapConfig> pair in portMap)
             {
@@ -274,7 +293,9 @@ namespace Shadowsocks.Model
                 PortMapConfig pm = pair.Value;
                 if (!pm.enable)
                     continue;
-                if (!id2server.ContainsKey(pm.id))
+                if (id2server.ContainsKey(pm.id) || server_group.ContainsKey(pm.id))
+                { }
+                else
                     continue;
                 try
                 {
@@ -288,7 +309,7 @@ namespace Shadowsocks.Model
                 {
                     type = pm.type,
                     id = pm.id,
-                    server = id2server[pm.id],
+                    server = id2server.ContainsKey(pm.id) ? id2server[pm.id] : null,
                     server_addr = pm.server_addr,
                     server_port = pm.server_port
                 };
@@ -333,6 +354,7 @@ namespace Shadowsocks.Model
             localPort = config.localPort;
             reconnectTimes = config.reconnectTimes;
             randomAlgorithm = config.randomAlgorithm;
+            randomInGroup = config.randomInGroup;
             TTL = config.TTL;
             connect_timeout = config.connect_timeout;
             dns_server = config.dns_server;

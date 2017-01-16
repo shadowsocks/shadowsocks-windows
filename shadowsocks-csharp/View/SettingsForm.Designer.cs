@@ -35,6 +35,7 @@
             this.CheckAutoBan = new System.Windows.Forms.CheckBox();
             this.checkRandom = new System.Windows.Forms.CheckBox();
             this.checkAutoStartup = new System.Windows.Forms.CheckBox();
+            this.checkBalanceInGroup = new System.Windows.Forms.CheckBox();
             this.Socks5ProxyGroup = new System.Windows.Forms.GroupBox();
             this.tableLayoutPanel9 = new System.Windows.Forms.TableLayoutPanel();
             this.LabelS5Password = new System.Windows.Forms.Label();
@@ -117,17 +118,19 @@
             this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLayoutPanel2.Controls.Add(this.LabelRandom, 0, 2);
             this.tableLayoutPanel2.Controls.Add(this.RandomComboBox, 1, 2);
-            this.tableLayoutPanel2.Controls.Add(this.CheckAutoBan, 1, 3);
+            this.tableLayoutPanel2.Controls.Add(this.CheckAutoBan, 1, 4);
             this.tableLayoutPanel2.Controls.Add(this.checkRandom, 1, 1);
             this.tableLayoutPanel2.Controls.Add(this.checkAutoStartup, 1, 0);
+            this.tableLayoutPanel2.Controls.Add(this.checkBalanceInGroup, 1, 3);
             this.tableLayoutPanel2.Location = new System.Drawing.Point(372, 3);
             this.tableLayoutPanel2.Name = "tableLayoutPanel2";
-            this.tableLayoutPanel2.RowCount = 4;
+            this.tableLayoutPanel2.RowCount = 5;
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel2.Size = new System.Drawing.Size(212, 112);
+            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel2.Size = new System.Drawing.Size(212, 143);
             this.tableLayoutPanel2.TabIndex = 2;
             // 
             // LabelRandom
@@ -136,7 +139,7 @@
             this.LabelRandom.Dock = System.Windows.Forms.DockStyle.Fill;
             this.LabelRandom.Location = new System.Drawing.Point(3, 54);
             this.LabelRandom.Name = "LabelRandom";
-            this.LabelRandom.Size = new System.Drawing.Size(53, 31);
+            this.LabelRandom.Size = new System.Drawing.Size(53, 35);
             this.LabelRandom.TabIndex = 12;
             this.LabelRandom.Text = "Balance";
             this.LabelRandom.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
@@ -152,9 +155,9 @@
             "LowLatency",
             "LowException",
             "SelectedFirst",
-            "Timer",
-            "SeletedGroup"});
+            "Timer"});
             this.RandomComboBox.Location = new System.Drawing.Point(62, 57);
+            this.RandomComboBox.Margin = new System.Windows.Forms.Padding(3, 3, 3, 7);
             this.RandomComboBox.Name = "RandomComboBox";
             this.RandomComboBox.Size = new System.Drawing.Size(147, 25);
             this.RandomComboBox.TabIndex = 14;
@@ -162,7 +165,7 @@
             // CheckAutoBan
             // 
             this.CheckAutoBan.AutoSize = true;
-            this.CheckAutoBan.Location = new System.Drawing.Point(62, 88);
+            this.CheckAutoBan.Location = new System.Drawing.Point(62, 119);
             this.CheckAutoBan.Name = "CheckAutoBan";
             this.CheckAutoBan.Size = new System.Drawing.Size(76, 21);
             this.CheckAutoBan.TabIndex = 15;
@@ -188,6 +191,16 @@
             this.checkAutoStartup.TabIndex = 12;
             this.checkAutoStartup.Text = "Start on Boot";
             this.checkAutoStartup.UseVisualStyleBackColor = true;
+            // 
+            // checkBalanceInGroup
+            // 
+            this.checkBalanceInGroup.AutoSize = true;
+            this.checkBalanceInGroup.Location = new System.Drawing.Point(62, 92);
+            this.checkBalanceInGroup.Name = "checkBalanceInGroup";
+            this.checkBalanceInGroup.Size = new System.Drawing.Size(126, 21);
+            this.checkBalanceInGroup.TabIndex = 15;
+            this.checkBalanceInGroup.Text = "Balance in group";
+            this.checkBalanceInGroup.UseVisualStyleBackColor = true;
             // 
             // Socks5ProxyGroup
             // 
@@ -748,5 +761,6 @@
         private System.Windows.Forms.Label labelTimeout;
         private System.Windows.Forms.NumericUpDown NumTimeout;
         private System.Windows.Forms.Button buttonDefault;
+        private System.Windows.Forms.CheckBox checkBalanceInGroup;
     }
 }

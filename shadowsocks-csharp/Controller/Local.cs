@@ -127,6 +127,7 @@ namespace Shadowsocks.Controller
         // Reconnect
         public int reconnectTimesRemain = 0;
         public int reconnectTimes = 0;
+        public bool random = false;
         public bool forceRandom = false;
     }
 
@@ -134,12 +135,12 @@ namespace Shadowsocks.Controller
     {
         private delegate IPHostEntry GetHostEntryHandler(string ip);
 
-        public delegate Server GetCurrentServer(string targetURI = null, bool usingRandom = false, bool forceRandom = false);
+        public delegate Server GetCurrentServer(ServerSelectStrategy.FilterFunc filter, string targetURI = null, bool cfgRandom = false, bool usingRandom = false, bool forceRandom = false);
         public delegate void KeepCurrentServer(string targetURI, string id);
         public GetCurrentServer getCurrentServer;
         public KeepCurrentServer keepCurrentServer;
         public Server server;
-        public Server select_server;
+        public ServerSelectStrategy.FilterFunc select_server;
         public HandlerConfig cfg = new HandlerConfig();
         // Connection socket
         public ProxySocketTunLocal connection;
@@ -822,11 +823,11 @@ namespace Shadowsocks.Controller
                 {
                     cfg.targetHost = GetQueryString();
                     cfg.targetPort = GetQueryPort();
-                    server = this.getCurrentServer(cfg.targetHost, true);
+                    server = this.getCurrentServer(null, cfg.targetHost, cfg.random, true);
                 }
                 else
                 {
-                    server = this.getCurrentServer(cfg.targetHost, true, cfg.forceRandom);
+                    server = this.getCurrentServer(null, cfg.targetHost, cfg.random, true, cfg.forceRandom);
                 }
             }
             else
@@ -836,7 +837,7 @@ namespace Shadowsocks.Controller
                     cfg.targetHost = GetQueryString();
                     cfg.targetPort = GetQueryPort();
                 }
-                server = select_server;
+                server = this.getCurrentServer(select_server, cfg.targetHost, true, true, cfg.forceRandom);
             }
             speedTester.server = server.server;
             Logging.Debug("Connect " + cfg.targetHost + ":" + cfg.targetPort.ToString() + " " + connection.GetSocket().Handle.ToString());

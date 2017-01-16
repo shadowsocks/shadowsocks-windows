@@ -91,7 +91,7 @@ LowLatency=低延迟优先
 LowException=低错误优先
 SelectedFirst=选中优先
 Timer=定时切换
-SeletedGroup=所选组切换
+Balance in group=所选组切换
 AutoBan=自动禁用出错服务器
 
 Remote proxy=二级（前置）代理

@@ -70,7 +70,16 @@ namespace Shadowsocks.View
         {
             comboServers.Items.Clear();
             comboServers.Items.Add("");
-            foreach(Server s in configuration.configs)
+            Dictionary<string, int> server_group = new Dictionary<string, int>();
+            foreach (Server s in configuration.configs)
+            {
+                if (s.group != null && s.group.Length > 0 && !server_group.ContainsKey(s.group))
+                {
+                    comboServers.Items.Add("#" + s.group);
+                    server_group[s.group] = 1;
+                }
+            }
+            foreach (Server s in configuration.configs)
             {
                 comboServers.Items.Add(GetDisplayText(s));
             }
@@ -163,13 +172,27 @@ namespace Shadowsocks.View
         private void LoadSelectedServer()
         {
             string key = ServerListText2Key((string)listPorts.SelectedItem);
+            Dictionary<string, int> server_group = new Dictionary<string, int>();
+            foreach (Server s in _modifiedConfiguration.configs)
+            {
+                if (s.group != null && s.group.Length > 0 && !server_group.ContainsKey(s.group))
+                {
+                    comboServers.Items.Add("#" + s.group);
+                    server_group[s.group] = 1;
+                }
+            }
             if (key != null && _modifiedConfiguration.portMap.ContainsKey(key))
             {
                 PortMapConfig cfg = _modifiedConfiguration.portMap[key] as PortMapConfig;
 
                 checkEnable.Checked = cfg.enable;
                 comboBoxType.SelectedValue = cfg.type;
-                comboServers.Text = GetIDText(cfg.id);
+                string text = GetIDText(cfg.id);
+                if (text.Length == 0 && server_group.ContainsKey(cfg.id))
+                {
+                    text = "#" + cfg.id;
+                }
+                comboServers.Text = text;
                 NumLocalPort.Text = key;
                 textAddr.Text = cfg.server_addr;
                 NumTargetPort.Value = cfg.server_port;

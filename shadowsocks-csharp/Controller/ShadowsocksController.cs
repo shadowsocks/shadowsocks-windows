@@ -99,11 +99,6 @@ namespace Shadowsocks.Controller
             }
         }
 
-        public Server GetCurrentServer()
-        {
-            return _config.GetCurrentServer();
-        }
-
         // always return copy
         public Configuration GetConfiguration()
         {

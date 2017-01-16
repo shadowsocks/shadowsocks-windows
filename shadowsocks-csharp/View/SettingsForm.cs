@@ -97,6 +97,7 @@ namespace Shadowsocks.View
             {
                 comboProxyType.Items[i] = I18N.GetString(comboProxyType.Items[i].ToString());
             }
+            checkBalanceInGroup.Text = I18N.GetString("Balance in group");
             for (int i = 0; i < RandomComboBox.Items.Count; ++i)
             {
                 RandomComboBox.Items[i] = I18N.GetString(RandomComboBox.Items[i].ToString());
@@ -134,6 +135,7 @@ namespace Shadowsocks.View
                 }
                 _modifiedConfiguration.random = checkRandom.Checked;
                 _modifiedConfiguration.randomAlgorithm = RandomComboBox.SelectedIndex;
+                _modifiedConfiguration.randomInGroup = checkBalanceInGroup.Checked;
                 _modifiedConfiguration.TTL = Convert.ToInt32(NumTTL.Value);
                 _modifiedConfiguration.connect_timeout = Convert.ToInt32(NumTimeout.Value);
                 _modifiedConfiguration.dns_server = DNSText.Text;
@@ -167,7 +169,15 @@ namespace Shadowsocks.View
 
             checkAutoStartup.Checked = AutoStartup.Check();
             checkRandom.Checked = _modifiedConfiguration.random;
-            RandomComboBox.SelectedIndex = _modifiedConfiguration.randomAlgorithm;
+            if (_modifiedConfiguration.randomAlgorithm >= 0 && _modifiedConfiguration.randomAlgorithm < RandomComboBox.Items.Count)
+            {
+                RandomComboBox.SelectedIndex = _modifiedConfiguration.randomAlgorithm;
+            }
+            else
+            {
+                RandomComboBox.SelectedIndex = (int)ServerSelectStrategy.SelectAlgorithm.LowException;
+            }
+            checkBalanceInGroup.Checked = _modifiedConfiguration.randomInGroup;
             NumTTL.Value = _modifiedConfiguration.TTL;
             NumTimeout.Value = _modifiedConfiguration.connect_timeout;
             DNSText.Text = _modifiedConfiguration.dns_server;
