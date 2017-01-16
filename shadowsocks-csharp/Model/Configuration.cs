@@ -293,7 +293,7 @@ namespace Shadowsocks.Model
                 PortMapConfig pm = pair.Value;
                 if (!pm.enable)
                     continue;
-                if (id2server.ContainsKey(pm.id) || server_group.ContainsKey(pm.id))
+                if (id2server.ContainsKey(pm.id) || server_group.ContainsKey(pm.id) || pm.id == null || pm.id.Length == 0)
                 { }
                 else
                     continue;

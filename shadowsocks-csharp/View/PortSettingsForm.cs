@@ -177,7 +177,6 @@ namespace Shadowsocks.View
             {
                 if (s.group != null && s.group.Length > 0 && !server_group.ContainsKey(s.group))
                 {
-                    comboServers.Items.Add("#" + s.group);
                     server_group[s.group] = 1;
                 }
             }
