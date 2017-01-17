@@ -93,7 +93,7 @@ namespace Shadowsocks.Controller
         {
             _rangeSet = new IPRangeSet();
             _rangeSet.LoadApnic("CN");
-            if (_config.proxyRuleMode == 3)
+            if (_config.proxyRuleMode == (int)ProxyRuleMode.BypassLanAndNotChina)
             {
                 _rangeSet.Reverse();
             }

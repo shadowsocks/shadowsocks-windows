@@ -364,10 +364,10 @@ namespace Shadowsocks.View
 
         private void UpdateProxyRule(Configuration config)
         {
-            ruleDisableBypass.Checked = config.proxyRuleMode == 0;
-            ruleBypassLan.Checked = config.proxyRuleMode == 1;
-            ruleBypassChina.Checked = config.proxyRuleMode == 2;
-            ruleBypassNotChina.Checked = config.proxyRuleMode == 3;
+            ruleDisableBypass.Checked = config.proxyRuleMode == (int)ProxyRuleMode.Disable;
+            ruleBypassLan.Checked = config.proxyRuleMode == (int)ProxyRuleMode.BypassLan;
+            ruleBypassChina.Checked = config.proxyRuleMode == (int)ProxyRuleMode.BypassLanAndChina;
+            ruleBypassNotChina.Checked = config.proxyRuleMode == (int)ProxyRuleMode.BypassLanAndNotChina;
         }
 
         private void LoadCurrentConfiguration()

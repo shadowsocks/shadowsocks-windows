@@ -34,6 +34,14 @@ namespace Shadowsocks.Model
         RuleProxy
     }
 
+    public enum ProxyRuleMode : int
+    {
+        Disable = 0,
+        BypassLan,
+        BypassLanAndChina,
+        BypassLanAndNotChina,
+    }
+
     [Serializable]
     public class PortMapConfig
     {
@@ -337,6 +345,7 @@ namespace Shadowsocks.Model
             reconnectTimes = 2;
             keepVisitTime = 180;
             connect_timeout = 5;
+            dns_server = "1.2.4.8,8.8.8.8";
             configs = new List<Server>()
             {
                 GetDefaultServer()
