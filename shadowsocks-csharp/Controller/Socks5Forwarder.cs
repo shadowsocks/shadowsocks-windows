@@ -24,7 +24,7 @@ namespace Shadowsocks.Controller
 
         public bool Handle(byte[] firstPacket, int length, Socket socket)
         {
-            return false;
+            return Handle(firstPacket, length, socket, null);
         }
 
         public bool Handle(byte[] firstPacket, int length, Socket socket, string local_sendback_protocol)
@@ -70,12 +70,12 @@ namespace Shadowsocks.Controller
                         }
                         else
                         {
-                            if (_config.proxyRuleMode != 0
+                            if (_config.proxyRuleMode != (int)ProxyRuleMode.Disable
                                 && host.ToLower() == "localhost") //TODO: load system host file
                             {
                                 return 1;
                             }
-                            if (_config.proxyRuleMode == 2 && _IPRange != null)
+                            if ((_config.proxyRuleMode == (int)ProxyRuleMode.BypassLanAndChina || _config.proxyRuleMode == (int)ProxyRuleMode.BypassLanAndNotChina) && _IPRange != null)
                             {
                                 ipAddress = Utils.DnsBuffer.Get(host);
                                 if (ipAddress == null)
@@ -103,7 +103,7 @@ namespace Shadowsocks.Controller
                     {
                         return 1;
                     }
-                    if (_config.proxyRuleMode == 2 && _IPRange != null
+                    if ((_config.proxyRuleMode == (int)ProxyRuleMode.BypassLanAndChina || _config.proxyRuleMode == (int)ProxyRuleMode.BypassLanAndNotChina) && _IPRange != null
                         && ipAddress.AddressFamily == AddressFamily.InterNetwork
                         )
                     {

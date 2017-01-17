@@ -137,6 +137,17 @@ namespace Shadowsocks.Model
                         serverList.Add(new ServerIndex(i, configs[i]));
                     }
                 }
+                if (forceChange && serverList.Count > 1)
+                {
+                    for (int i = 0; i < serverList.Count; ++i)
+                    {
+                        if (serverList[i].index == lastSelectIndex)
+                        {
+                            serverList.RemoveAt(i);
+                            break;
+                        }
+                    }
+                }
                 if (serverList.Count == 0)
                 {
                     int i = lastSelectIndex;
@@ -148,18 +159,22 @@ namespace Shadowsocks.Model
                 {
                     if (algorithm == (int)SelectAlgorithm.OneByOne)
                     {
-                        lastSelectIndex = (lastSelectIndex + 1) % configs.Count;
-                        for (int i = 0; i < configs.Count; ++i)
+                        int selIndex = -1;
+                        for (int i = 0; i < serverList.Count; ++i)
                         {
-                            if (configs[lastSelectIndex].isEnable())
+                            if (serverList[i].index == lastSelectIndex)
                             {
-                                serverListIndex = lastSelectIndex;
+                                selIndex = i;
                                 break;
                             }
-                            else
-                            {
-                                lastSelectIndex = (lastSelectIndex + 1) % configs.Count;
-                            }
+                        }
+                        if (selIndex != -1)
+                        {
+                            serverListIndex = serverList[(selIndex + 1) % serverList.Count].index;
+                        }
+                        else
+                        {
+                            serverListIndex = serverList[0].index;
                         }
                     }
                     else if (algorithm == (int)SelectAlgorithm.Random)
@@ -216,10 +231,18 @@ namespace Shadowsocks.Model
                                 lastBeginVal += chance;
                             }
                         }
-                        if (algorithm == (int)SelectAlgorithm.SelectedFirst && randomGennarator.Next(3) == 0 && configs[curIndex].isEnable())
+                        if (algorithm == (int)SelectAlgorithm.SelectedFirst
+                            && randomGennarator.Next(3) == 0
+                            && configs[curIndex].isEnable())
                         {
-                            lastSelectIndex = curIndex;
-                            return curIndex;
+                            for (int i = 0; i < serverList.Count; ++i)
+                            {
+                                if (curIndex == serverList[i].index)
+                                {
+                                    lastSelectIndex = curIndex;
+                                    return curIndex;
+                                }
+                            }
                         }
                         {
                             double target = randomGennarator.NextDouble() * lastBeginVal;

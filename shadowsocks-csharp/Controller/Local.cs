@@ -836,8 +836,12 @@ namespace Shadowsocks.Controller
                 {
                     cfg.targetHost = GetQueryString();
                     cfg.targetPort = GetQueryPort();
+                    server = this.getCurrentServer(select_server, cfg.targetHost, true, true);
                 }
-                server = this.getCurrentServer(select_server, cfg.targetHost, true, true, cfg.forceRandom);
+                else
+                {
+                    server = this.getCurrentServer(select_server, cfg.targetHost, true, true, cfg.forceRandom);
+                }
             }
             speedTester.server = server.server;
             Logging.Debug("Connect " + cfg.targetHost + ":" + cfg.targetPort.ToString() + " " + connection.GetSocket().Handle.ToString());
