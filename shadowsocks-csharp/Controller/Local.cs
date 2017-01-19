@@ -863,7 +863,7 @@ namespace Shadowsocks.Controller
                 }
                 if (ipAddress != null)
                 {
-                    Utils.DnsBuffer.Set(host, ipAddress);
+                    Utils.DnsBuffer.Set(host, new IPAddress(ipAddress.GetAddressBytes()));
                     Utils.DnsBuffer.Sweep();
 
                     cfg.targetHost = ipAddress.ToString();

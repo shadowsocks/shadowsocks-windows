@@ -51,7 +51,7 @@
             this.viewToolStripMenuItem});
             this.logMenu.Location = new System.Drawing.Point(0, 0);
             this.logMenu.Name = "logMenu";
-            this.logMenu.Size = new System.Drawing.Size(560, 25);
+            this.logMenu.Size = new System.Drawing.Size(986, 25);
             this.logMenu.TabIndex = 0;
             this.logMenu.Text = "menuStrip1";
             // 
@@ -129,6 +129,7 @@
             // 
             this.logTextBox.BackColor = System.Drawing.Color.Black;
             this.logTextBox.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.logTextBox.Font = new System.Drawing.Font("Courier New", 10.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.logTextBox.ForeColor = System.Drawing.Color.White;
             this.logTextBox.Location = new System.Drawing.Point(0, 25);
             this.logTextBox.MaxLength = 2147483647;
@@ -136,7 +137,7 @@
             this.logTextBox.Name = "logTextBox";
             this.logTextBox.ReadOnly = true;
             this.logTextBox.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.logTextBox.Size = new System.Drawing.Size(560, 312);
+            this.logTextBox.Size = new System.Drawing.Size(986, 411);
             this.logTextBox.TabIndex = 1;
             this.logTextBox.WordWrap = false;
             // 
@@ -149,7 +150,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(560, 337);
+            this.ClientSize = new System.Drawing.Size(986, 436);
             this.Controls.Add(this.logTextBox);
             this.Controls.Add(this.logMenu);
             this.Name = "LogForm";

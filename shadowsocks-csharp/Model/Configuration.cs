@@ -345,7 +345,7 @@ namespace Shadowsocks.Model
             reconnectTimes = 2;
             keepVisitTime = 180;
             connect_timeout = 5;
-            dns_server = "1.2.4.8,8.8.8.8";
+            dns_server = "1.2.4.8 53,8.8.8.8 53";
             configs = new List<Server>()
             {
                 GetDefaultServer()

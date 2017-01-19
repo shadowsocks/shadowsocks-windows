@@ -284,12 +284,14 @@ namespace Shadowsocks.Util
                     string[] _dns_server = dns_servers.Split(',');
                     List<string> dns_server = new List<string>();
                     List<string> local_dns_server = new List<string>();
-                    foreach (string ip in _dns_server)
+                    foreach (string server in _dns_server)
                     {
                         IPAddress ipAddress = null;
+                        int index = server.IndexOf(' ');
+                        string ip = index >= 0 ? server.Substring(0, index) : server;
                         if (IPAddress.TryParse(ip, out ipAddress))
                         {
-                            dns_server.Add(ip);
+                            dns_server.Add(server);
                         }
                     }
                     for (int query_i = 0; query_i < types.Length; ++query_i)
@@ -320,15 +322,11 @@ namespace Shadowsocks.Util
                     {
                         GetHostEntryHandler callback = new GetHostEntryHandler(Dns.GetHostEntry);
                         IAsyncResult result = callback.BeginInvoke(host, null, null);
-                        if (result.AsyncWaitHandle.WaitOne(10, true))
+                        if (result.AsyncWaitHandle.WaitOne(10000, true))
                         {
                             foreach (IPAddress ad in callback.EndInvoke(result).AddressList)
                             {
                                 return ad;
-                                //if (ad.AddressFamily == AddressFamily.InterNetwork)
-                                //{
-                                //    return ad;
-                                //}
                             }
                         }
                     }

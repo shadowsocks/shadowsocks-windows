@@ -14,7 +14,14 @@ namespace Shadowsocks.Controller
             try
             {
                 string path = Util.Utils.GetExecutablePath();
-                runKey = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Run", true);
+                if (IntPtr.Size == 4)
+                {
+                    runKey = Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Run", true);
+                }
+                else
+                {
+                    runKey = Registry.CurrentUser.OpenSubKey(@"SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Run", true);
+                }
                 if (enabled)
                 {
                     runKey.SetValue(Key, path);
