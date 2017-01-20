@@ -155,6 +155,33 @@ Edit Online PAC URL=編輯在線 PAC 網址
 Edit Online PAC URL...=編輯在線 PAC 網址...
 Please input PAC Url=請輸入 PAC 網址
 
+# InputPassword Form
+
+InputPassword=輸入密碼
+
+# ResetPassword Form
+
+ResetPassword=重設密碼
+
+# PortSettingsForm Form
+
+Port Settings=連接埠設置
+Map Setting=映射設置
+Type=類型
+Server ID=伺服器 ID
+Target Addr=目標地址
+Target Port=目標連接埠
+Local Port=本地連接埠
+Port Forward=連接埠轉發
+Force Proxy=強制代理
+Proxy With Rule=規則代理
+#Enable=
+#Remarks=
+#OK=
+#Cancel=
+#&Add=
+#&Delete=
+
 # Messages
 
 Shadowsocks Error: {0}=Shadowsocks 錯誤: {0}
@@ -182,3 +209,4 @@ Failed to decode QRCode=無法解析 QR 碼
 Failed to update registry=無法修改註冊表\n解決方案見https://github.com/shadowsocks/shadowsocks-windows/issues/253
 System Proxy On: =系統代理已啟用：
 Running: Port {0}=正在運行：連接埠 {0}
+Password NOT match=密碼不匹配

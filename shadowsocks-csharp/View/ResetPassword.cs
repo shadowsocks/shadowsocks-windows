@@ -6,6 +6,8 @@ using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
 using Shadowsocks.Model;
+using Shadowsocks.Properties;
+using Shadowsocks.Controller;
 
 namespace Shadowsocks.View
 {
@@ -14,6 +16,8 @@ namespace Shadowsocks.View
         public ResetPassword()
         {
             InitializeComponent();
+            this.Icon = Icon.FromHandle(Resources.ssw128.GetHicon());
+            this.Text = I18N.GetString("ResetPassword");
         }
 
         private void buttonOK_Click(object sender, EventArgs e)
@@ -27,7 +31,7 @@ namespace Shadowsocks.View
             }
             else
             {
-                MessageBox.Show("Password NOT match", "SSR error", MessageBoxButtons.OK);
+                MessageBox.Show(I18N.GetString("Password NOT match"), "SSR error", MessageBoxButtons.OK);
             }
         }
 
