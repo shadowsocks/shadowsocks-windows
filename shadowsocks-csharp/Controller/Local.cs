@@ -365,7 +365,10 @@ namespace Shadowsocks.Controller
             else if (e is SocketException)
             {
                 SocketException se = (SocketException)e;
-                if (se.SocketErrorCode == SocketError.ConnectionAborted)
+                if (se.SocketErrorCode == SocketError.ConnectionAborted
+                    || se.SocketErrorCode == SocketError.ConnectionReset
+                    || se.SocketErrorCode == SocketError.NotConnected
+                    || se.SocketErrorCode == SocketError.Interrupted)
                 {
                     // closed by browser when sending
                     // normally happens when download is canceled or a tab is closed before page is loaded
@@ -460,7 +463,7 @@ namespace Shadowsocks.Controller
                         if (s != null)
                             s.ServerSpeedLog().AddNoErrorTimes(); //?
                     }
-                    return 0;
+                    return -1;
                 }
             }
             return 0;
@@ -1177,10 +1180,6 @@ namespace Shadowsocks.Controller
 
                 speedTester.BeginUpload();
 
-                //if (remoteHeaderSendBuffer[0] != 1 && remoteHeaderSendBuffer[0] != 3 && remoteHeaderSendBuffer[0] != 4)
-                //{
-                //    throw new Exception("Wrong header");
-                //}
                 // remote ready
                 if (connectionUDP == null) // TCP
                 {
@@ -1189,7 +1188,6 @@ namespace Shadowsocks.Controller
                         RemoteSend(remoteHeaderSendBuffer, remoteHeaderSendBuffer.Length);
                         remoteHeaderSendBuffer = null;
                     }
-                    //remote.GetSocket().SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, false);
 
                     is_protocol_sendback = remote.isProtocolSendback;
                     is_obfs_sendback = remote.isObfsSendback;
@@ -1794,10 +1792,10 @@ namespace Shadowsocks.Controller
 
         private void LogException(Exception e)
         {
-            LogSocketException(e);
+            int err = LogSocketException(e);
             string remarks;
             string server_url = getServerUrl(out remarks);
-            if (!Logging.LogSocketException(remarks, server_url, e))
+            if (err != 0 && !Logging.LogSocketException(remarks, server_url, e))
                 Logging.LogUsefulException(e);
         }
 

@@ -170,20 +170,7 @@ namespace Shadowsocks.Controller
             else if (e is SocketException)
             {
                 SocketException se = (SocketException)e;
-                if (se.SocketErrorCode == SocketError.ConnectionAborted)
-                {
-                    // closed by browser when sending
-                    // normally happens when download is canceled or a tab is closed before page is loaded
-                }
-                else if (se.SocketErrorCode == SocketError.ConnectionReset)
-                {
-                    // received rst
-                }
-                else if (se.SocketErrorCode == SocketError.NotConnected)
-                {
-                    // close when not connected
-                }
-                else if ((uint)se.SocketErrorCode == 0x80004005)
+                if ((uint)se.SocketErrorCode == 0x80004005)
                 {
                     // already closed
                     return true;
