@@ -7,6 +7,7 @@ namespace Shadowsocks.Controller
     class AutoStartup
     {
         static string Key = "ShadowsocksR_" + Application.StartupPath.GetHashCode();
+        static string RegistryRunPath = (IntPtr.Size == 4 ? @"Software\Microsoft\Windows\CurrentVersion\Run" : @"SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Run");
 
         public static bool Set(bool enabled)
         {
@@ -14,14 +15,47 @@ namespace Shadowsocks.Controller
             try
             {
                 string path = Util.Utils.GetExecutablePath();
-                if (IntPtr.Size == 4)
+                runKey = Registry.LocalMachine.OpenSubKey(RegistryRunPath, true);
+                if (enabled)
                 {
-                    runKey = Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Run", true);
+                    runKey.SetValue(Key, path);
                 }
                 else
                 {
-                    runKey = Registry.CurrentUser.OpenSubKey(@"SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Run", true);
+                    runKey.DeleteValue(Key);
                 }
+                runKey.Close();
+                return true;
+            }
+            catch //(Exception e)
+            {
+                //Logging.LogUsefulException(e);
+                return Util.Utils.RunAsAdmin("--setautorun") == 0;
+            }
+            finally
+            {
+                if (runKey != null)
+                {
+                    try
+                    {
+                        runKey.Close();
+                    }
+                    catch (Exception e)
+                    {
+                        Logging.LogUsefulException(e);
+                    }
+                }
+            }
+        }
+
+        public static bool Switch()
+        {
+            bool enabled = !Check();
+            RegistryKey runKey = null;
+            try
+            {
+                string path = Util.Utils.GetExecutablePath();
+                runKey = Registry.LocalMachine.OpenSubKey(RegistryRunPath, true);
                 if (enabled)
                 {
                     runKey.SetValue(Key, path);
@@ -60,7 +94,7 @@ namespace Shadowsocks.Controller
             try
             {
                 string path = Util.Utils.GetExecutablePath();
-                runKey = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Run");
+                runKey = Registry.LocalMachine.OpenSubKey(RegistryRunPath, true);
                 string[] runList = runKey.GetValueNames();
                 runKey.Close();
                 foreach (string item in runList)

@@ -344,6 +344,30 @@ namespace Shadowsocks.Util
             return System.Reflection.Assembly.GetExecutingAssembly().Location;
         }
 
+        public static int RunAsAdmin(string Arguments)
+        {
+            Process process = null;
+            ProcessStartInfo processInfo = new ProcessStartInfo();
+            processInfo.Verb = "runas";
+            processInfo.FileName = Application.ExecutablePath;
+            processInfo.Arguments = Arguments;
+            try
+            {
+                process = Process.Start(processInfo);
+            }
+            catch (System.ComponentModel.Win32Exception)
+            {
+                return -1;
+            }
+            if (process != null)
+            {
+                process.WaitForExit();
+            }
+            int ret = process.ExitCode;
+            process.Close();
+            return ret;
+        }
+
         public static int GetDpiMul()
         {
             int dpi;
