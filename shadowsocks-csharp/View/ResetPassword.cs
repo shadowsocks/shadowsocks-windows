@@ -6,6 +6,7 @@ using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
 using Shadowsocks.Model;
+using Shadowsocks.Properties;
 
 namespace Shadowsocks.View
 {
@@ -14,6 +15,7 @@ namespace Shadowsocks.View
         public ResetPassword()
         {
             InitializeComponent();
+            this.Icon = Icon.FromHandle(Resources.ssw128.GetHicon());
         }
 
         private void buttonOK_Click(object sender, EventArgs e)
