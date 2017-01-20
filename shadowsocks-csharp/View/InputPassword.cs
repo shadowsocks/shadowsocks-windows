@@ -6,6 +6,7 @@ using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
 using Shadowsocks.Properties;
+using Shadowsocks.Controller;
 
 namespace Shadowsocks.View
 {
@@ -17,6 +18,7 @@ namespace Shadowsocks.View
         {
             InitializeComponent();
             this.Icon = Icon.FromHandle(Resources.ssw128.GetHicon());
+            this.Text = I18N.GetString("InputPassword");
         }
 
         private void buttonOK_Click(object sender, EventArgs e)

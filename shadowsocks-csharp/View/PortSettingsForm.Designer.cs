@@ -318,7 +318,7 @@
             this.Add.Name = "Add";
             this.Add.Size = new System.Drawing.Size(100, 21);
             this.Add.TabIndex = 1;
-            this.Add.Text = "Add";
+            this.Add.Text = "&Add";
             this.Add.UseVisualStyleBackColor = true;
             this.Add.Click += new System.EventHandler(this.Add_Click);
             // 
@@ -329,7 +329,7 @@
             this.Del.Name = "Del";
             this.Del.Size = new System.Drawing.Size(100, 21);
             this.Del.TabIndex = 2;
-            this.Del.Text = "Del";
+            this.Del.Text = "&Delete";
             this.Del.UseVisualStyleBackColor = true;
             this.Del.Click += new System.EventHandler(this.Del_Click);
             // 

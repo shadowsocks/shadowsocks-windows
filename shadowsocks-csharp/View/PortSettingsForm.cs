@@ -24,17 +24,36 @@ namespace Shadowsocks.View
             this.controller = controller;
             controller.ConfigChanged += controller_ConfigChanged;
 
+            UpdateTexts();
+
             comboBoxType.DisplayMember = "Text";
             comboBoxType.ValueMember = "Value";
             var items = new[]
             {
-                new {Text = "Port Forward", Value = PortMapType.Forward},
-                new {Text = "Force Proxy", Value = PortMapType.ForceProxy},
-                new {Text = "Proxy With Rule", Value = PortMapType.RuleProxy}
+                new {Text = I18N.GetString("Port Forward"), Value = PortMapType.Forward},
+                new {Text = I18N.GetString("Force Proxy"), Value = PortMapType.ForceProxy},
+                new {Text = I18N.GetString("Proxy With Rule"), Value = PortMapType.RuleProxy}
             };
             comboBoxType.DataSource = items;
 
             LoadCurrentConfiguration();
+        }
+
+        private void UpdateTexts()
+        {
+            this.Text = I18N.GetString("Port Settings");
+            groupBox1.Text = I18N.GetString("Map Setting");
+            labelType.Text = I18N.GetString("Type");
+            labelID.Text = I18N.GetString("Server ID");
+            labelAddr.Text = I18N.GetString("Target Addr");
+            labelPort.Text = I18N.GetString("Target Port");
+            checkEnable.Text = I18N.GetString("Enable");
+            labelLocal.Text = I18N.GetString("Local Port");
+            label1.Text = I18N.GetString("Remarks");
+            OKButton.Text = I18N.GetString("OK");
+            MyCancelButton.Text = I18N.GetString("Cancel");
+            Add.Text = I18N.GetString("&Add");
+            Del.Text = I18N.GetString("&Delete");
         }
 
         private void controller_ConfigChanged(object sender, EventArgs e)
