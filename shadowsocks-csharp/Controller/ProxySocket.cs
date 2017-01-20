@@ -671,9 +671,8 @@ namespace Shadowsocks.Controller
 
         public int Receive(byte[] recv_buffer, int size, SocketFlags flags, out int bytesRead, out int protocolSize, out bool sendback)
         {
-            bytesRead = _socket.Receive(recv_buffer, size, SocketFlags.None);
+            bytesRead = _socket.Receive(recv_buffer, size, flags);
             protocolSize = 0;
-            sendback = false;
             if (bytesRead > 0)
             {
                 lock (_decryptionLock)
@@ -697,6 +696,7 @@ namespace Shadowsocks.Controller
             }
             else
             {
+                sendback = false;
                 _close = true;
             }
             return bytesRead;

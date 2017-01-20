@@ -1033,7 +1033,7 @@ namespace Shadowsocks.Controller
                 int bytesRead = remote.EndReceive(ar, out sendback);
                 if (sendback)
                 {
-                    RemoteSendback(new byte[0], 0);
+                    RemoteSendWithoutCallback(new byte[0], 0);
                 }
                 remoteTCPIdle = true;
                 return bytesRead;
@@ -1211,17 +1211,17 @@ namespace Shadowsocks.Controller
                 }
                 this.State = ConnectState.CONNECTED;
 
+                if (connection.local_sendback_protocol != null)
+                {
+                    connection.Send(remoteUDPRecvBuffer, 0, 0);
+                }
+
                 // remote recv first
                 doRemoteTCPRecv();
                 doRemoteUDPRecv();
 
                 doConnectionTCPRecv();
                 doConnectionUDPRecv();
-
-                if (connection.local_sendback_protocol != null)
-                {
-                    connection.Send(remoteUDPRecvBuffer, 0, 0);
-                }
             }
             catch (Exception e)
             {
@@ -1329,11 +1329,6 @@ namespace Shadowsocks.Controller
                     speedTester.AddDownloadSize(bytesRecv);
                     ResetTimeout(cfg.TTL);
 
-                    //if (bytesRead <= 0)
-                    //{
-                    //    doRemoteTCPRecv();
-                    //}
-                    //else
                     if (bytesRead > 0)
                     {
                         byte[] remoteSendBuffer = new byte[BufferSize];
@@ -1354,7 +1349,6 @@ namespace Shadowsocks.Controller
                                 server.ServerSpeedLog().ResetEmptyTimes();
                             }
                             connection.Send(remoteSendBuffer, bytesRead, 0);
-                            //doRemoteTCPRecv();
                         }
                         else
                         {
@@ -1364,7 +1358,14 @@ namespace Shadowsocks.Controller
                         server.ServerSpeedLog().AddDownloadRawBytes(bytesRead);
                         speedTester.AddRecvSize(bytesRead);
                     }
-                    PipeRemoteReceiveLoop();
+                    if (connectionUDP == null)
+                    {
+                        PipeRemoteReceiveLoop();
+                    }
+                    else
+                    {
+                        doRemoteTCPRecv();
+                    }
                 }
             }
             catch (Exception e)
@@ -1384,18 +1385,22 @@ namespace Shadowsocks.Controller
         private void PipeRemoteReceiveLoop()
         {
             bool final_close = false;
-            byte[] recv_buffer = new byte[BufferSize];
+            byte[] recv_buffer = new byte[BufferSize * 4];
             while (!closed)
             {
                 try
                 {
                     int protocolSize;
                     bool sendback;
-                    int bytesRead;
-                    int bytesRecv = remote.Receive(recv_buffer, RecvSize, SocketFlags.None, out bytesRead, out protocolSize, out sendback);
-                    if (remote.IsClose)
+                    int bytesRecv;
+                    int bytesRead = remote.Receive(recv_buffer, RecvSize, 0, out bytesRecv, out protocolSize, out sendback);
+                    if (remote != null && remote.IsClose)
                     {
                         final_close = true;
+                        break;
+                    }
+                    if (closed)
+                    {
                         break;
                     }
                     if (speedTester.BeginDownload())
@@ -1409,6 +1414,10 @@ namespace Shadowsocks.Controller
                     server.ServerSpeedLog().AddDownloadBytes(bytesRecv, DateTime.Now);
                     speedTester.AddDownloadSize(bytesRecv);
                     ResetTimeout(cfg.TTL);
+                    if (sendback)
+                    {
+                        RemoteSendWithoutCallback(new byte[0], 0);
+                    }
 
                     if (bytesRead > 0)
                     {
