@@ -99,6 +99,11 @@ namespace Shadowsocks.Controller
             _socket.EndConnect(ar);
         }
 
+        public int Receive(byte[] buffer, int size, SocketFlags flags)
+        {
+            return _socket.Receive(buffer, size, SocketFlags.None);
+        }
+
         public IAsyncResult BeginReceive(byte[] buffer, int size, SocketFlags flags, AsyncCallback callback, object state)
         {
             CallbackState st = new CallbackState();
@@ -662,6 +667,39 @@ namespace Shadowsocks.Controller
                 _encryptor.getIV(), _password, _encryptor.getKey(), head_len, mss));
             _obfs.SetServerInfo(new ServerInfo(server_addr, server.server_port, server.obfsparam??"", server.getObfsData(),
                 _encryptor.getIV(), _password, _encryptor.getKey(), head_len, mss));
+        }
+
+        public int Receive(byte[] recv_buffer, int size, SocketFlags flags, out int bytesRead, out int protocolSize, out bool sendback)
+        {
+            bytesRead = _socket.Receive(recv_buffer, size, SocketFlags.None);
+            protocolSize = 0;
+            sendback = false;
+            if (bytesRead > 0)
+            {
+                lock (_decryptionLock)
+                {
+                    int bytesToSend = 0;
+                    int obfsRecvSize;
+                    byte[] remoteRecvObfsBuffer = _obfs.ClientDecode(recv_buffer, bytesRead, out obfsRecvSize, out sendback);
+                    if (obfsRecvSize > 0)
+                    {
+                        Util.Utils.SetArrayMinSize(ref ReceiveDecryptBuffer, obfsRecvSize);
+                        _encryptor.Decrypt(remoteRecvObfsBuffer, obfsRecvSize, ReceiveDecryptBuffer, out bytesToSend);
+                        int outlength;
+                        protocolSize = bytesToSend;
+                        byte[] buffer = _protocol.ClientPostDecrypt(ReceiveDecryptBuffer, bytesToSend, out outlength);
+                        //if (recv_buffer.Length < outlength) //ASSERT
+                        Array.Copy(buffer, 0, recv_buffer, 0, outlength);
+                        return outlength;
+                    }
+                }
+                return 0;
+            }
+            else
+            {
+                _close = true;
+            }
+            return bytesRead;
         }
 
         public IAsyncResult BeginReceive(byte[] buffer, int size, SocketFlags flags, AsyncCallback callback, object state)
