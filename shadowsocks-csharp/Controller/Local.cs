@@ -1356,7 +1356,7 @@ namespace Shadowsocks.Controller
                         server.ServerSpeedLog().AddDownloadRawBytes(bytesRead);
                         speedTester.AddRecvSize(bytesRead);
                     }
-                    if (connectionUDP == null)
+                    if (connectionUDP == null && speedTester.sizeRecv > 1024 * 1024 * 2)
                     {
                         PipeRemoteReceiveLoop();
                     }
