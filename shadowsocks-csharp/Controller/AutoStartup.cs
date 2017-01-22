@@ -94,7 +94,7 @@ namespace Shadowsocks.Controller
             try
             {
                 string path = Util.Utils.GetExecutablePath();
-                runKey = Registry.LocalMachine.OpenSubKey(RegistryRunPath, true);
+                runKey = Registry.LocalMachine.OpenSubKey(RegistryRunPath, false);
                 string[] runList = runKey.GetValueNames();
                 runKey.Close();
                 foreach (string item in runList)
