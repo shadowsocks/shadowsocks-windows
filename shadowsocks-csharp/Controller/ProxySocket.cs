@@ -455,7 +455,6 @@ namespace Shadowsocks.Controller
         public ProxySocketTunLocal(Socket socket)
             : base(socket)
         {
-            _socket = socket;
         }
 
         public ProxySocketTunLocal(AddressFamily af, SocketType type, ProtocolType protocol)

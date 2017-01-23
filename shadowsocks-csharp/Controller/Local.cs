@@ -368,7 +368,9 @@ namespace Shadowsocks.Controller
                 if (se.SocketErrorCode == SocketError.ConnectionAborted
                     || se.SocketErrorCode == SocketError.ConnectionReset
                     || se.SocketErrorCode == SocketError.NotConnected
-                    || se.SocketErrorCode == SocketError.Interrupted)
+                    || se.SocketErrorCode == SocketError.Interrupted
+                    || se.SocketErrorCode == SocketError.Shutdown
+                    )
                 {
                     // closed by browser when sending
                     // normally happens when download is canceled or a tab is closed before page is loaded
