@@ -194,16 +194,32 @@ namespace Shadowsocks.Controller
                 response = new byte[] { 0, 91 };
                 Console.WriteLine("socks 4/5 protocol error");
             }
-            if ((_config.authUser != null && _config.authUser.Length > 0) && !Util.Utils.isMatchSubNet(((IPEndPoint)_connection.RemoteEndPoint).Address, "127.0.0.0/8"))
+            bool no_auth = false;
+            bool auth = false;
+            for (int index = 0; index < _firstPacket[1]; ++index)
+            {
+                if (_firstPacket[2 + index] == 0)
+                    no_auth = true;
+                else if (_firstPacket[2 + index] == 2)
+                    auth = true;
+            }
+            if ((auth && _config.authUser != null && _config.authUser.Length > 0)
+                && (!Util.Utils.isMatchSubNet(((IPEndPoint)_connection.RemoteEndPoint).Address, "127.0.0.0/8") || !no_auth)
+                )
             {
                 response[1] = 2;
                 _connection.Send(response);
                 HandshakeAuthReceiveCallback();
             }
-            else
+            else if (no_auth)
             {
                 _connection.Send(response);
                 HandshakeReceive2Callback();
+            }
+            else
+            {
+                Console.WriteLine("Socks5 Auth failed");
+                Close();
             }
         }
 
