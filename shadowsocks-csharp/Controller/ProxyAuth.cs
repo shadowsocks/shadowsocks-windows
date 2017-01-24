@@ -105,6 +105,10 @@ namespace Shadowsocks.Controller
             {
                 return true;
             }
+            if (Util.Utils.isMatchSubNet(((IPEndPoint)_connection.RemoteEndPoint).Address, "127.0.0.0/8"))
+            {
+                return true;
+            }
             return false;
         }
 
@@ -203,9 +207,7 @@ namespace Shadowsocks.Controller
                 else if (_firstPacket[2 + index] == 2)
                     auth = true;
             }
-            if ((auth && _config.authUser != null && _config.authUser.Length > 0)
-                && (!Util.Utils.isMatchSubNet(((IPEndPoint)_connection.RemoteEndPoint).Address, "127.0.0.0/8") || !no_auth)
-                )
+            if (auth || !no_auth)
             {
                 response[1] = 2;
                 _connection.Send(response);
