@@ -79,21 +79,12 @@ namespace OpenDNS
 
             CheckForServers();
 
-            foreach (string Server in Servers)
+            foreach (IPEndPoint Server in Servers)
             {
-                string[] pair = Server.Split(new char[] { ' ' }, 2);
-                int port = 53;
-                if (pair.Length == 2)
-                {
-                    try
-                    {
-                        port = Int32.Parse(pair[1]);
-                    }
-                    catch { }
-                }
+                int port = Server.Port;
                 try
                 {
-                    SendQuery2(pair[0], port);
+                    SendQuery2(Server.Address, port);
                     break;
                 }
                 catch
@@ -137,7 +128,7 @@ namespace OpenDNS
             dnsClient.Close();
         }
 
-        private void SendQuery2(string ipAddress, int port)
+        private void SendQuery2(IPAddress ipAddress, int port)
         {
             int timeout = 5000;
 
@@ -148,7 +139,7 @@ namespace OpenDNS
             byte[] QueryPacket = MakeQuery();
 
             //opening the UDP socket at DNS server
-            IPAddress serverAddress = IPAddress.Parse(ipAddress);
+            IPAddress serverAddress = ipAddress;
             EndPoint endPoint = new IPEndPoint(serverAddress, port);
             Socket socket = new Socket(serverAddress.AddressFamily, SocketType.Dgram, ProtocolType.Udp);
             socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.SendTimeout, timeout);

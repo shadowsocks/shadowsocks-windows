@@ -282,23 +282,64 @@ namespace Shadowsocks.Util
                     else
                         types = new Types[] { Types.A, Types.AAAA };
                     string[] _dns_server = dns_servers.Split(',');
-                    List<string> dns_server = new List<string>();
-                    List<string> local_dns_server = new List<string>();
-                    foreach (string server in _dns_server)
+                    List<IPEndPoint> dns_server = new List<IPEndPoint>();
+                    List<IPEndPoint> local_dns_server = new List<IPEndPoint>();
+                    foreach (string server_str in _dns_server)
                     {
                         IPAddress ipAddress = null;
-                        int index = server.IndexOf(' ');
-                        string ip = index >= 0 ? server.Substring(0, index) : server;
-                        if (IPAddress.TryParse(ip, out ipAddress))
+                        string server = server_str.Trim(' ');
+                        int index = server.IndexOf(':');
+                        string ip = null;
+                        string port = null;
+                        if (index >= 0)
                         {
-                            dns_server.Add(server);
+                            if (server.StartsWith("["))
+                            {
+                                int ipv6_end = server.IndexOf(']', 1);
+                                if (ipv6_end >= 0)
+                                {
+                                    ip = server.Substring(1, ipv6_end - 1);
+
+                                    index = server.IndexOf(':', ipv6_end);
+                                    if (index == ipv6_end + 1)
+                                    {
+                                        port = server.Substring(index + 1);
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                ip = server.Substring(0, index);
+                                port = server.Substring(index + 1);
+                            }
+                        }
+                        else
+                        {
+                            index = server.IndexOf(' ');
+                            if (index >= 0)
+                            {
+                                ip = server.Substring(0, index);
+                                port = server.Substring(index + 1);
+                            }
+                            else
+                            {
+                                ip = server;
+                            }
+                        }
+                        if (ip != null && IPAddress.TryParse(ip, out ipAddress))
+                        {
+                            int i_port = 53;
+                            if (port != null)
+                                int.TryParse(port, out i_port);
+                            dns_server.Add(new IPEndPoint(ipAddress, i_port));
+                            //dns_server.Add(port == null ? ip : ip + " " + port);
                         }
                     }
                     for (int query_i = 0; query_i < types.Length; ++query_i)
                     {
                         DnsQuery dns = new DnsQuery(host, types[query_i]);
                         dns.RecursionDesired = true;
-                        foreach (string server in dns_server)
+                        foreach (IPEndPoint server in dns_server)
                         {
                             dns.Servers.Add(server);
                         }
