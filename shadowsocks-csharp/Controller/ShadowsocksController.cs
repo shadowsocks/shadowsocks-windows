@@ -13,6 +13,7 @@ using Shadowsocks.Controller.Strategy;
 using Shadowsocks.Model;
 using Shadowsocks.Properties;
 using Shadowsocks.Util;
+using System.Linq;
 
 namespace Shadowsocks.Controller
 {
@@ -39,7 +40,7 @@ namespace Shadowsocks.Controller
         private long _outboundCounter = 0;
         public long InboundCounter => Interlocked.Read(ref _inboundCounter);
         public long OutboundCounter => Interlocked.Read(ref _outboundCounter);
-        public QueueLast<TrafficPerSecond> trafficPerSecondQueue;
+        public Queue<TrafficPerSecond> trafficPerSecondQueue;
 
         private bool stopped = false;
 
@@ -48,16 +49,6 @@ namespace Shadowsocks.Controller
         public class PathEventArgs : EventArgs
         {
             public string Path;
-        }
-
-        public class QueueLast<T> : Queue<T>
-        {
-            public T Last { get; private set; }
-            public new void Enqueue(T item)
-            {
-                Last = item;
-                base.Enqueue(item);
-            }
         }
 
         public class TrafficPerSecond
@@ -621,7 +612,7 @@ namespace Shadowsocks.Controller
 
         private void StartTrafficStatistics(int queueMaxSize)
         {
-            trafficPerSecondQueue = new QueueLast<TrafficPerSecond>();
+            trafficPerSecondQueue = new Queue<TrafficPerSecond>();
             for (int i = 0; i < queueMaxSize; i++)
             {
                 trafficPerSecondQueue.Enqueue(new TrafficPerSecond());
@@ -636,7 +627,7 @@ namespace Shadowsocks.Controller
             TrafficPerSecond previous, current;
             while (true)
             {
-                previous = trafficPerSecondQueue.Last;
+                previous = trafficPerSecondQueue.Last();
                 current = new TrafficPerSecond();
                 
                 current.inboundCounter = InboundCounter;

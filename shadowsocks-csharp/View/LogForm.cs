@@ -39,7 +39,7 @@ namespace Shadowsocks.View
 
         #region chart
         long lastMaxSpeed;
-        ShadowsocksController.QueueLast<TrafficInfo> trafficInfoQueue = new ShadowsocksController.QueueLast<TrafficInfo>();
+        Queue<TrafficInfo> trafficInfoQueue = new Queue<TrafficInfo>();
         #endregion
 
         public LogForm(ShadowsocksController controller, string filename)
@@ -125,7 +125,7 @@ namespace Shadowsocks.View
         {
             lock (_lock)
             {
-                trafficInfoQueue = new ShadowsocksController.QueueLast<TrafficInfo>();
+                trafficInfoQueue = new Queue<TrafficInfo>();
                 foreach (var trafficPerSecond in controller.trafficPerSecondQueue)
                 {
                     trafficInfoQueue.Enqueue(new TrafficInfo(trafficPerSecond.inboundIncreasement,
