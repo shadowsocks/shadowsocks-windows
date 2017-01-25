@@ -14,7 +14,7 @@ using System.Text;
 
 namespace Shadowsocks.View
 {
-    struct TrafficInfo
+    public class TrafficInfo
     {
         public long inbound;
         public long outbound;
@@ -37,9 +37,16 @@ namespace Shadowsocks.View
         // global traffic update lock, make it static
         private static readonly object _lock = new object();
 
-        #region chart
-        long lastMaxSpeed;
+        #region Traffic Chart
         Queue<TrafficInfo> trafficInfoQueue = new Queue<TrafficInfo>();
+        long lastInbound, lastOutbound;
+        long maxSpeed = 0, lastMaxSpeed = 0;
+        const long minScale = 50;
+        BandwidthScaleInfo bandwidthScale;
+        List<float> inboundPoints = new List<float>();
+        List<float> outboundPoints = new List<float>();
+        TextAnnotation inboundAnnotation = new TextAnnotation();
+        TextAnnotation outboundAnnotation = new TextAnnotation();
         #endregion
 
         public LogForm(ShadowsocksController controller, string filename)
@@ -63,26 +70,21 @@ namespace Shadowsocks.View
             UpdateTexts();
         }
 
-        private void update_TrafficChart()
+        private void UpdateTrafficChart()
         {
-            List<float> inboundPoints = new List<float>();
-            List<float> outboundPoints = new List<float>();
-            TextAnnotation inboundAnnotation = new TextAnnotation();
-            TextAnnotation outboundAnnotation = new TextAnnotation();
-            BandwidthScaleInfo bandwidthScale;
-            const long minScale = 50;
-            long maxSpeed = 0;
-            long lastInbound, lastOutbound;
-
             lock (_lock)
             {
                 if (trafficInfoQueue.Count == 0)
                     return;
-                foreach (var trafficPerSecond in trafficInfoQueue)
+
+                inboundPoints.Clear();
+                outboundPoints.Clear();
+                maxSpeed = 0;
+                foreach (var trafficInfo in trafficInfoQueue)
                 {
-                    inboundPoints.Add(trafficPerSecond.inbound);
-                    outboundPoints.Add(trafficPerSecond.outbound);
-                    maxSpeed = Math.Max(maxSpeed, Math.Max(trafficPerSecond.inbound, trafficPerSecond.outbound));
+                    inboundPoints.Add(trafficInfo.inbound);
+                    outboundPoints.Add(trafficInfo.outbound);
+                    maxSpeed = Math.Max(maxSpeed, Math.Max(trafficInfo.inbound, trafficInfo.outbound));
                 }
                 lastInbound = trafficInfoQueue.Last().inbound;
                 lastOutbound = trafficInfoQueue.Last().outbound;
@@ -101,7 +103,7 @@ namespace Shadowsocks.View
 
             bandwidthScale = Utils.GetBandwidthScale(maxSpeed);
 
-            //rescale the original data points, since it is List<float>, .ForEach does not work
+            // re-scale the original data points, since it is List<float>, .ForEach does not work
             inboundPoints = inboundPoints.Select(p => p / bandwidthScale.unit).ToList();
             outboundPoints = outboundPoints.Select(p => p / bandwidthScale.unit).ToList();
 
@@ -109,7 +111,7 @@ namespace Shadowsocks.View
             {
                 trafficChart.Series["Inbound"].Points.DataBindY(inboundPoints);
                 trafficChart.Series["Outbound"].Points.DataBindY(outboundPoints);
-                trafficChart.ChartAreas[0].AxisY.LabelStyle.Format = "{0:0.##} " + bandwidthScale.unit_name;
+                trafficChart.ChartAreas[0].AxisY.LabelStyle.Format = "{0:0.##} " + bandwidthScale.unitName;
                 trafficChart.ChartAreas[0].AxisY.Maximum = bandwidthScale.value;
                 inboundAnnotation.AnchorDataPoint = trafficChart.Series["Inbound"].Points.Last();
                 inboundAnnotation.Text = Utils.FormatBandwidth(lastInbound);
@@ -125,11 +127,11 @@ namespace Shadowsocks.View
         {
             lock (_lock)
             {
-                trafficInfoQueue = new Queue<TrafficInfo>();
+                trafficInfoQueue.Clear();
                 foreach (var trafficPerSecond in controller.trafficPerSecondQueue)
                 {
                     trafficInfoQueue.Enqueue(new TrafficInfo(trafficPerSecond.inboundIncreasement,
-                                                    trafficPerSecond.outboundIncreasement));
+                                                             trafficPerSecond.outboundIncreasement));
                 }
             }
         }
@@ -158,7 +160,7 @@ namespace Shadowsocks.View
         private void Timer_Tick(object sender, EventArgs e)
         {
             UpdateContent();
-            update_TrafficChart();
+            UpdateTrafficChart();
         }
 
         private void InitContent()
@@ -259,9 +261,9 @@ namespace Shadowsocks.View
             config.topMost = topMostTrigger;
             config.wrapText = wrapTextTrigger;
             config.toolbarShown = toolbarTrigger;
-            config.Font=LogMessageTextBox.Font;
-            config.BackgroundColor=LogMessageTextBox.BackColor;
-            config.TextColor=LogMessageTextBox.ForeColor;
+            config.Font = LogMessageTextBox.Font;
+            config.BackgroundColor = LogMessageTextBox.BackColor;
+            config.TextColor = LogMessageTextBox.ForeColor;
             if (WindowState != FormWindowState.Minimized && !(config.Maximized = WindowState == FormWindowState.Maximized))
             {
                 config.Top = Top;
