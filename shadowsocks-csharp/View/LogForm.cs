@@ -39,7 +39,7 @@ namespace Shadowsocks.View
 
         #region chart
         long lastMaxSpeed;
-        ShadowsocksController.QueueLast<TrafficInfo> traffic = new ShadowsocksController.QueueLast<TrafficInfo>();
+        ShadowsocksController.QueueLast<TrafficInfo> trafficInfoQueue = new ShadowsocksController.QueueLast<TrafficInfo>();
         #endregion
 
         public LogForm(ShadowsocksController controller, string filename)
@@ -76,16 +76,16 @@ namespace Shadowsocks.View
 
             lock (_lock)
             {
-                if (traffic.Count == 0)
+                if (trafficInfoQueue.Count == 0)
                     return;
-                foreach (var trafficPerSecond in traffic)
+                foreach (var trafficPerSecond in trafficInfoQueue)
                 {
                     inboundPoints.Add(trafficPerSecond.inbound);
                     outboundPoints.Add(trafficPerSecond.outbound);
                     maxSpeed = Math.Max(maxSpeed, Math.Max(trafficPerSecond.inbound, trafficPerSecond.outbound));
                 }
-                lastInbound = traffic.Last().inbound;
-                lastOutbound = traffic.Last().outbound;
+                lastInbound = trafficInfoQueue.Last().inbound;
+                lastOutbound = trafficInfoQueue.Last().outbound;
             }
 
             if (maxSpeed > 0)
@@ -125,10 +125,11 @@ namespace Shadowsocks.View
         {
             lock (_lock)
             {
-                traffic = new ShadowsocksController.QueueLast<TrafficInfo>();
-                foreach (var trafficPerSecond in controller.traffic)
+                trafficInfoQueue = new ShadowsocksController.QueueLast<TrafficInfo>();
+                foreach (var trafficPerSecond in controller.trafficPerSecondQueue)
                 {
-                    traffic.Enqueue(new TrafficInfo(trafficPerSecond.inboundIncreasement, trafficPerSecond.outboundIncreasement));
+                    trafficInfoQueue.Enqueue(new TrafficInfo(trafficPerSecond.inboundIncreasement,
+                                                    trafficPerSecond.outboundIncreasement));
                 }
             }
         }

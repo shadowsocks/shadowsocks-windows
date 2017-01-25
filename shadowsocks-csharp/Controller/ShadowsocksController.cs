@@ -39,7 +39,7 @@ namespace Shadowsocks.Controller
         private long _outboundCounter = 0;
         public long InboundCounter => Interlocked.Read(ref _inboundCounter);
         public long OutboundCounter => Interlocked.Read(ref _outboundCounter);
-        public QueueLast<TrafficPerSecond> traffic;
+        public QueueLast<TrafficPerSecond> trafficPerSecondQueue;
 
         private bool stopped = false;
 
@@ -621,10 +621,10 @@ namespace Shadowsocks.Controller
 
         private void StartTrafficStatistics(int queueMaxSize)
         {
-            traffic = new QueueLast<TrafficPerSecond>();
+            trafficPerSecondQueue = new QueueLast<TrafficPerSecond>();
             for (int i = 0; i < queueMaxSize; i++)
             {
-                traffic.Enqueue(new TrafficPerSecond());
+                trafficPerSecondQueue.Enqueue(new TrafficPerSecond());
             }
             _trafficThread = new Thread(new ThreadStart(() => TrafficStatistics(queueMaxSize)));
             _trafficThread.IsBackground = true;
@@ -633,19 +633,20 @@ namespace Shadowsocks.Controller
 
         private void TrafficStatistics(int queueMaxSize)
         {
+            TrafficPerSecond previous, current;
             while (true)
             {
-                TrafficPerSecond previous = traffic.Last;
-                TrafficPerSecond current = new TrafficPerSecond();
+                previous = trafficPerSecondQueue.Last;
+                current = new TrafficPerSecond();
                 
-                var inbound = current.inboundCounter = InboundCounter;
-                var outbound = current.outboundCounter = OutboundCounter;
-                current.inboundIncreasement = inbound - previous.inboundCounter;
-                current.outboundIncreasement = outbound - previous.outboundCounter;
+                current.inboundCounter = InboundCounter;
+                current.outboundCounter = OutboundCounter;
+                current.inboundIncreasement = current.inboundCounter - previous.inboundCounter;
+                current.outboundIncreasement = current.outboundCounter - previous.outboundCounter;
 
-                traffic.Enqueue(current);
-                if (traffic.Count > queueMaxSize)
-                    traffic.Dequeue();
+                trafficPerSecondQueue.Enqueue(current);
+                if (trafficPerSecondQueue.Count > queueMaxSize)
+                    trafficPerSecondQueue.Dequeue();
 
                 TrafficChanged?.Invoke(this, new EventArgs());
 

@@ -112,8 +112,8 @@ namespace Shadowsocks.View
 
             Icon newIcon;
 
-            bool hasInbound = controller.traffic.Last.inboundIncreasement > 0;
-            bool hasOutbound = controller.traffic.Last.outboundIncreasement > 0;
+            bool hasInbound = controller.trafficPerSecondQueue.Last.inboundIncreasement > 0;
+            bool hasOutbound = controller.trafficPerSecondQueue.Last.outboundIncreasement > 0;
 
             if (hasInbound && hasOutbound)
                 newIcon = icon_both;
