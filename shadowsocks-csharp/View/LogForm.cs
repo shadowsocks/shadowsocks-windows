@@ -39,6 +39,7 @@ namespace Shadowsocks.View
 
         #region Traffic Chart
         Queue<TrafficInfo> trafficInfoQueue = new Queue<TrafficInfo>();
+        const int queueMaxLength = 60;
         long lastInbound, lastOutbound;
         long maxSpeed = 0, lastMaxSpeed = 0;
         const long minScale = 50;
@@ -127,11 +128,29 @@ namespace Shadowsocks.View
         {
             lock (_lock)
             {
-                trafficInfoQueue.Clear();
-                foreach (var trafficPerSecond in controller.trafficPerSecondQueue)
+                if (trafficInfoQueue.Count == 0)
                 {
-                    trafficInfoQueue.Enqueue(new TrafficInfo(trafficPerSecond.inboundIncreasement,
-                                                             trafficPerSecond.outboundIncreasement));
+                    // Init an empty queue
+                    for (int i = 0; i < queueMaxLength; i++)
+                    {
+                        trafficInfoQueue.Enqueue(new TrafficInfo(0, 0));
+                    }
+
+                    foreach (var trafficPerSecond in controller.trafficPerSecondQueue)
+                    {
+                        trafficInfoQueue.Enqueue(new TrafficInfo(trafficPerSecond.inboundIncreasement,
+                                                                 trafficPerSecond.outboundIncreasement));
+                        if (trafficInfoQueue.Count > queueMaxLength)
+                            trafficInfoQueue.Dequeue();
+                    }
+                }
+                else
+                {
+                    var lastTraffic = controller.trafficPerSecondQueue.Last();
+                    trafficInfoQueue.Enqueue(new TrafficInfo(lastTraffic.inboundIncreasement,
+                                                             lastTraffic.outboundIncreasement));
+                    if (trafficInfoQueue.Count > queueMaxLength)
+                        trafficInfoQueue.Dequeue();
                 }
             }
         }
