@@ -153,8 +153,8 @@ namespace Shadowsocks.Controller
         protected ProxyEncryptSocket remote;
         protected ProxyEncryptSocket remoteUDP;
         // Size of receive buffer.
-        protected const int RecvSize = 4096;
-        protected const int BufferSize = 16384;
+        protected const int RecvSize = 1024 * 4;
+        protected const int BufferSize = 1024 * 16;
         protected const int AutoSwitchOffErrorTimes = 5;
         // remote header send buffer
         protected byte[] remoteHeaderSendBuffer;

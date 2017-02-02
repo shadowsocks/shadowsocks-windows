@@ -517,7 +517,7 @@ namespace Shadowsocks.Controller
 
         //private bool header_sent = false;
 
-        protected const int RecvSize = 2048;
+        protected const int RecvSize = 1024 * 4;
 
         private byte[] SendEncryptBuffer = new byte[RecvSize];
         private byte[] ReceiveDecryptBuffer = new byte[RecvSize * 2];
