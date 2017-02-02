@@ -268,6 +268,7 @@ namespace Shadowsocks.Obfs
     public class TlsAuthData
     {
         public byte[] clientID;
+        public Dictionary<string, byte[]> ticket_buf;
     }
 
     class TlsTicketAuthObfs : ObfsBase
@@ -503,11 +504,33 @@ namespace Shadowsocks.Obfs
                     host = "";
                 }
                 ext_buf.AddRange(sni(host));
-                string str_buf2 = "00170000002300d0";
+                string str_buf2 = "001700000023";
                 ext_buf.AddRange(to_bin(str_buf2));
-                byte[] ticket = new byte[208];
-                g_random.GetBytes(ticket);
-                ext_buf.AddRange(ticket);
+                {
+                    TlsAuthData authData = (TlsAuthData)this.Server.data;
+                    byte[] ticket = null;
+                    lock (authData)
+                    {
+                        if (authData.ticket_buf == null)
+                        {
+                            authData.ticket_buf = new Dictionary<string, byte[]>();
+                        }
+                        if (!authData.ticket_buf.ContainsKey(host))
+                        {
+                            int ticket_size = random.Next(8, 26) * 16;
+                            ticket = new byte[ticket_size];
+                            g_random.GetBytes(ticket);
+                            authData.ticket_buf[host] = ticket;
+                        }
+                        else
+                        {
+                            ticket = authData.ticket_buf[host];
+                        }
+                    }
+                    ext_buf.Add((byte)(ticket.Length >> 8));
+                    ext_buf.Add((byte)(ticket.Length & 0xff));
+                    ext_buf.AddRange(ticket);
+                }
                 string str_buf3 = "000d0016001406010603050105030401040303010303020102030005000501000000000012000075500000000b00020100000a0006000400170018";
                 str_buf3 += "00150066000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000";
                 ext_buf.AddRange(to_bin(str_buf3));
