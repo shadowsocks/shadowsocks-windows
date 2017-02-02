@@ -483,7 +483,6 @@
             this.TCPProtocolComboBox.Items.AddRange(new object[] {
             "origin",
             "verify_deflate",
-            "verify_sha1",
             "auth_sha1_v2",
             "auth_sha1_v4",
             "auth_aes128_md5",
