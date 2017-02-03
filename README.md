@@ -89,6 +89,12 @@ if you want to deactivate all, please clear all textboxes.
 
 Please visit [Servers] for more information.
 
+#### Use System Temp Folder		
+		
+ If you want to put all temporary files into system temp folder instead of		
+ shadowsocks/ss_win_temp folder, create a `use_system_temp_folder.txt` into shadowsocks folder.
+ You need restarting Shadowsocks to make the change effective.
+ 
 #### Develop
 
 [Visual Studio 2015] & [.NET Framework 4.6.2 Developer Pack] are required.
