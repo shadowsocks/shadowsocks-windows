@@ -354,7 +354,7 @@ namespace Shadowsocks.Model
         public void ServerFromSS(string ssURL)
         {
             Regex UrlFinder = new Regex("^(?i)ss://([A-Za-z0-9+-/=_]+)(#(.+))?$", RegexOptions.IgnoreCase),
-                DetailsParser = new Regex("^((?<method>.+?)(?<auth>-auth)??:(?<password>.*)@(?<hostname>.+?)" +
+                DetailsParser = new Regex("^((?<method>.+):(?<password>.*)@(?<hostname>.+?)" +
                                       ":(?<port>\\d+?))$", RegexOptions.IgnoreCase);
 
             var match = UrlFinder.Match(ssURL);
@@ -364,7 +364,7 @@ namespace Shadowsocks.Model
             var base64 = match.Groups[1].Value;
             match = DetailsParser.Match(Encoding.UTF8.GetString(Convert.FromBase64String(
                 base64.PadRight(base64.Length + (4 - base64.Length % 4) % 4, '='))));
-            protocol = match.Groups["auth"].Success ? "verify_sha1" : "origin";
+            protocol = "origin";
             method = match.Groups["method"].Value;
             password = match.Groups["password"].Value;
             server = match.Groups["hostname"].Value;
@@ -374,7 +374,7 @@ namespace Shadowsocks.Model
         public string GetSSLinkForServer()
         {
             string parts = method + ":" + password + "@" + server + ":" + server_port;
-            string base64 = System.Convert.ToBase64String(Encoding.UTF8.GetBytes(parts));
+            string base64 = System.Convert.ToBase64String(Encoding.UTF8.GetBytes(parts)).Replace("=", "");
             return "ss://" + base64;
         }
 
