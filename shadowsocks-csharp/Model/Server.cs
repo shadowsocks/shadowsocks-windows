@@ -187,6 +187,7 @@ namespace Shadowsocks.Model
                 remarks_base64 = Util.Base64.EncodeUrlSafeBase64(value);
             }
         }
+
         public string FriendlyName()
         {
             if (string.IsNullOrEmpty(server))
@@ -405,7 +406,7 @@ namespace Shadowsocks.Model
 
         public void ServerFromSS(string ssURL)
         {
-            Regex UrlFinder = new Regex("^(?i)ss://([A-Za-z0-9+-/=_]+)(#(.+))?$", RegexOptions.IgnoreCase),
+            Regex UrlFinder = new Regex("^(?i)ss://([A-Za-z0-9+-/=_]+)(#(.+))?", RegexOptions.IgnoreCase),
                 DetailsParser = new Regex("^((?<method>.+):(?<password>.*)@(?<hostname>.+?)" +
                                       ":(?<port>\\d+?))$", RegexOptions.IgnoreCase);
 
