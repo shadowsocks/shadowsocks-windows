@@ -57,6 +57,7 @@ namespace Shadowsocks.View
             {
                 this.Icon = Icon.FromHandle(Resources.ssw128.GetHicon());
             }
+            this.Font = System.Drawing.SystemFonts.MessageBoxFont;
             InitializeComponent();
 
             this.Width = 810;
