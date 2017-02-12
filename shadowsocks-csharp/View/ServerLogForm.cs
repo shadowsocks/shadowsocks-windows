@@ -823,7 +823,7 @@ namespace Shadowsocks.View
                         Configuration config = controller.GetCurrentConfiguration();
                         Server cur_server = config.configs[id];
                         string group = cur_server.group;
-                        if (group != null && group.Length > 0)
+                        if (!string.IsNullOrEmpty(group))
                         {
                             bool enable = !cur_server.enable;
                             foreach (Server server in config.configs)
@@ -866,7 +866,7 @@ namespace Shadowsocks.View
                     Configuration config = controller.GetCurrentConfiguration();
                     Server cur_server = config.configs[id];
                     string group = cur_server.group;
-                    if (group != null && group.Length > 0)
+                    if (!string.IsNullOrEmpty(group))
                     {
                         bool enable = !cur_server.enable;
                         foreach (Server server in config.configs)

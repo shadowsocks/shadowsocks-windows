@@ -42,7 +42,7 @@ namespace Shadowsocks.Controller
                 if (UseProxy)
                 {
                     WebProxy proxy = new WebProxy(IPAddress.Loopback.ToString(), config.localPort);
-                    if (config.authPass != null && config.authPass.Length > 0)
+                    if (!string.IsNullOrEmpty(config.authPass))
                     {
                         proxy.Credentials = new NetworkCredential(config.authUser, config.authPass);
                     }

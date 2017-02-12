@@ -219,7 +219,7 @@ namespace Shadowsocks.Controller
                 lastConfig = config;
                 WebClient http = new WebClient();
                 WebProxy proxy = new WebProxy(IPAddress.Loopback.ToString(), config.localPort);
-                if (config.authPass != null && config.authPass.Length > 0)
+                if (!string.IsNullOrEmpty(config.authPass))
                 {
                     proxy.Credentials = new NetworkCredential(config.authUser, config.authPass);
                 }
@@ -231,7 +231,7 @@ namespace Shadowsocks.Controller
             {
                 WebClient http = new WebClient();
                 WebProxy proxy = new WebProxy(IPAddress.Loopback.ToString(), config.localPort);
-                if (config.authPass != null && config.authPass.Length > 0)
+                if (!string.IsNullOrEmpty(config.authPass))
                 {
                     proxy.Credentials = new NetworkCredential(config.authUser, config.authPass);
                 }
@@ -246,7 +246,7 @@ namespace Shadowsocks.Controller
         {
             WebClient http = new WebClient();
             WebProxy proxy = new WebProxy(IPAddress.Loopback.ToString(), config.localPort);
-            if (config.authPass != null && config.authPass.Length > 0)
+            if (!string.IsNullOrEmpty(config.authPass))
             {
                 proxy.Credentials = new NetworkCredential(config.authUser, config.authPass);
             }
@@ -259,7 +259,7 @@ namespace Shadowsocks.Controller
         {
             WebClient http = new WebClient();
             WebProxy proxy = new WebProxy(IPAddress.Loopback.ToString(), config.localPort);
-            if (config.authPass != null && config.authPass.Length > 0)
+            if (!string.IsNullOrEmpty(config.authPass))
             {
                 proxy.Credentials = new NetworkCredential(config.authUser, config.authPass);
             }

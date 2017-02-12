@@ -274,7 +274,7 @@ namespace Shadowsocks.Util
         {
             IPAddress ret_ipAddress = null;
             {
-                if (dns_servers != null && dns_servers.Length > 0)
+                if (!string.IsNullOrEmpty(dns_servers))
                 {
                     OpenDNS.Types[] types;
                     if (IPv6_first)

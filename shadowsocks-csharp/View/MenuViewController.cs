@@ -322,7 +322,7 @@ namespace Shadowsocks.View
 
         void updateChecker_NewVersionFound(object sender, EventArgs e)
         {
-            if (updateChecker.LatestVersionNumber == null || updateChecker.LatestVersionNumber.Length == 0)
+            if (string.IsNullOrEmpty(updateChecker.LatestVersionNumber))
             {
                 Logging.Log(LogLevel.Error, "connect to update server error");
             }
@@ -399,7 +399,7 @@ namespace Shadowsocks.View
             {
                 string group_name;
                 Server server = configuration.configs[i];
-                if (server.group == null || server.group.Length == 0)
+                if (string.IsNullOrEmpty(server.group))
                     group_name = def_group;
                 else
                     group_name = server.group;

@@ -326,7 +326,7 @@ namespace Shadowsocks.View
                 NumUDPPort.Value = server.server_udp_port;
                 PasswordTextBox.Text = server.password;
                 EncryptionSelect.Text = server.method ?? "aes-256-cfb";
-                if (server.protocol == null || server.protocol.Length == 0)
+                if (string.IsNullOrEmpty(server.protocol))
                 {
                     TCPProtocolComboBox.Text = "origin";
                 }

@@ -120,7 +120,7 @@ namespace Shadowsocks.Controller
 
                 if (bytesRead > 1)
                 {
-                    if ((!(_config.authUser != null && _config.authUser.Length > 0) || Util.Utils.isMatchSubNet(((IPEndPoint)_connection.RemoteEndPoint).Address, "127.0.0.0/8"))
+                    if ((!string.IsNullOrEmpty(_config.authUser) || Util.Utils.isMatchSubNet(((IPEndPoint)_connection.RemoteEndPoint).Address, "127.0.0.0/8"))
                         && _firstPacket[0] == 4 && _firstPacketLength >= 9)
                     {
                         RspSocks4aHandshakeReceive();
@@ -526,7 +526,7 @@ namespace Shadowsocks.Controller
             handler.cfg.TTL = _config.TTL;
             handler.cfg.connect_timeout = _config.connect_timeout;
             handler.cfg.autoSwitchOff = _config.autoBan;
-            if (_config.dns_server != null && _config.dns_server.Length > 0)
+            if (!string.IsNullOrEmpty(_config.dns_server))
             {
                 handler.cfg.dns_servers = _config.dns_server;
             }
@@ -539,7 +539,7 @@ namespace Shadowsocks.Controller
                     {
                         handler.select_server = delegate (Server server, Server selServer) { return server.id == cfg.server.id; };
                     }
-                    else if (cfg.id != null && cfg.id.Length > 0)
+                    else if (!string.IsNullOrEmpty(cfg.id))
                     {
                         handler.select_server = delegate (Server server, Server selServer) { return server.group == cfg.id; };
                     }

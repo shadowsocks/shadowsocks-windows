@@ -499,7 +499,7 @@ namespace Shadowsocks.Obfs
                         host = host.Trim(' ');
                     }
                 }
-                if (host != null && host.Length > 0 && host[host.Length - 1] >= '0' && host[host.Length - 1] <= '9' && Server.param.Length == 0)
+                if (!string.IsNullOrEmpty(host) && host[host.Length - 1] >= '0' && host[host.Length - 1] <= '9' && Server.param.Length == 0)
                 {
                     host = "";
                 }

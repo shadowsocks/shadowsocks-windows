@@ -425,7 +425,7 @@ namespace Shadowsocks.Controller
             string authstr = System.Convert.ToBase64String(Encoding.UTF8.GetBytes(socks5RemoteUsername + ":" + socks5RemotePassword));
             string cmd = "CONNECT " + host + " HTTP/1.0\r\n"
                 + "Host: " + host + "\r\n";
-            if (proxyUserAgent != null && proxyUserAgent.Length > 0)
+            if (!string.IsNullOrEmpty(proxyUserAgent))
                 cmd += "User-Agent: " + proxyUserAgent + "\r\n";
             cmd += "Proxy-Connection: Keep-Alive\r\n";
             if (socks5RemoteUsername.Length > 0)
@@ -1298,7 +1298,7 @@ namespace Shadowsocks.Controller
             string authstr = System.Convert.ToBase64String(Encoding.UTF8.GetBytes(socks5RemoteUsername + ":" + socks5RemotePassword));
             string cmd = "CONNECT " + host + " HTTP/1.0\r\n"
                 + "Host: " + host + "\r\n";
-            if (proxyUserAgent != null && proxyUserAgent.Length > 0)
+            if (!string.IsNullOrEmpty(proxyUserAgent))
                 cmd += "User-Agent: " + proxyUserAgent + "\r\n";
             cmd += "Proxy-Connection: Keep-Alive\r\n";
             if (socks5RemoteUsername.Length > 0)

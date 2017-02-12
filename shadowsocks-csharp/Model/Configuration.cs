@@ -290,7 +290,7 @@ namespace Shadowsocks.Model
             foreach (Server s in configs)
             {
                 id2server[s.id] = s;
-                if (s.group != null && s.group.Length > 0)
+                if (!string.IsNullOrEmpty(s.group))
                 {
                     server_group[s.group] = 1;
                 }
