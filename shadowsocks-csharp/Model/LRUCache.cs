@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using Shadowsocks.Controller;
 
 namespace Shadowsocks.Model
 {
@@ -107,7 +108,8 @@ namespace Shadowsocks.Model
             lock (_lock)
             {
                 DateTime now = DateTime.Now;
-                for (int i = 0; i < 10; ++i)
+                int sweep = 0;
+                for (int i = 0; i < 100; ++i)
                 {
                     bool finish = false;
                     foreach (KeyValuePair<DateTime, K> p in _time_2_key)
@@ -120,10 +122,16 @@ namespace Shadowsocks.Model
                         _key_2_time.Remove(p.Value);
                         _time_2_key.Remove(p.Key);
                         _store.Remove(p.Value);
+                        Logging.Debug("sweep [" + p.Key.ToString() + "]: " + p.Value.ToString());
+                        sweep += 1;
                         break;
                     }
                     if (finish)
                         break;
+                }
+                if (sweep > 0)
+                {
+                    Logging.Debug("sweep " + sweep.ToString() + " items");
                 }
             }
         }
