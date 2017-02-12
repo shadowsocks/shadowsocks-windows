@@ -861,7 +861,7 @@ namespace Shadowsocks.View
             int ss_index = text.IndexOf("ss://", 1, StringComparison.OrdinalIgnoreCase);
             int ssr_index = text.IndexOf("ssr://", 1, StringComparison.OrdinalIgnoreCase);
             int index = ss_index;
-            if (index == -1 || index > ssr_index) index = ssr_index;
+            if (index == -1 || index > ssr_index && ssr_index != -1) index = ssr_index;
             if (index == -1)
             {
                 out_urls.Insert(0, text);
