@@ -369,8 +369,10 @@ namespace Shadowsocks.View
                 }
 
                 PasswordLabel.Checked = false;
+                IPLabel.Checked = false;
                 Update_SSR_controls_Visable();
                 UpdateObfsTextbox();
+                TextLink.SelectAll();
                 GenQR(TextLink.Text);
                 //IPTextBox.Focus();
             }
@@ -387,13 +389,13 @@ namespace Shadowsocks.View
                 ServersListBox.Items.Clear();
                 foreach (Server server in _modifiedConfiguration.configs)
                 {
-                    if (server.group != null && server.group.Length > 0)
+                    if (!string.IsNullOrEmpty(server.group))
                     {
-                        ServersListBox.Items.Add(server.group + " - " + server.FriendlyName());
+                        ServersListBox.Items.Add(server.group + " - " + server.HiddenName());
                     }
                     else
                     {
-                        ServersListBox.Items.Add("      " + server.FriendlyName());
+                        ServersListBox.Items.Add("      " + server.HiddenName());
                     }
                 }
             }
@@ -401,13 +403,13 @@ namespace Shadowsocks.View
             {
                 for (int i = 0; i < _modifiedConfiguration.configs.Count; ++i)
                 {
-                    if (_modifiedConfiguration.configs[i].group != null && _modifiedConfiguration.configs[i].group.Length > 0)
+                    if (!string.IsNullOrEmpty(_modifiedConfiguration.configs[i].group))
                     {
-                        ServersListBox.Items[i] = _modifiedConfiguration.configs[i].group + " - " + _modifiedConfiguration.configs[i].FriendlyName();
+                        ServersListBox.Items[i] = _modifiedConfiguration.configs[i].group + " - " + _modifiedConfiguration.configs[i].HiddenName();
                     }
                     else
                     {
-                        ServersListBox.Items[i] = "      " + _modifiedConfiguration.configs[i].FriendlyName();
+                        ServersListBox.Items[i] = "      " + _modifiedConfiguration.configs[i].HiddenName();
                     }
                 }
             }
@@ -663,6 +665,18 @@ namespace Shadowsocks.View
                 CheckUDPoverUDP.Visible = false;
             }
             ResumeLayout();
+        }
+
+        private void IPLabel_CheckedChanged(object sender, EventArgs e)
+        {
+            if (IPLabel.Checked)
+            {
+                IPTextBox.UseSystemPasswordChar = false;
+            }
+            else
+            {
+                IPTextBox.UseSystemPasswordChar = true;
+            }
         }
     }
 }

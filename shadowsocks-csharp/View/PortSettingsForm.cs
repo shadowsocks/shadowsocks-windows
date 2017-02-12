@@ -92,7 +92,7 @@ namespace Shadowsocks.View
             Dictionary<string, int> server_group = new Dictionary<string, int>();
             foreach (Server s in configuration.configs)
             {
-                if (s.group != null && s.group.Length > 0 && !server_group.ContainsKey(s.group))
+                if (!string.IsNullOrEmpty(s.group) && !server_group.ContainsKey(s.group))
                 {
                     comboServers.Items.Add("#" + s.group);
                     server_group[s.group] = 1;
@@ -194,7 +194,7 @@ namespace Shadowsocks.View
             Dictionary<string, int> server_group = new Dictionary<string, int>();
             foreach (Server s in _modifiedConfiguration.configs)
             {
-                if (s.group != null && s.group.Length > 0 && !server_group.ContainsKey(s.group))
+                if (!string.IsNullOrEmpty(s.group) && !server_group.ContainsKey(s.group))
                 {
                     server_group[s.group] = 1;
                 }
@@ -238,7 +238,7 @@ namespace Shadowsocks.View
 
         private string GetDisplayText(Server s)
         {
-            return (s.group != null && s.group.Length > 0 ? s.group + " - " : "    - ") + s.FriendlyName() + "        #" + s.id;
+            return (!string.IsNullOrEmpty(s.group) ? s.group + " - " : "    - ") + s.FriendlyName() + "        #" + s.id;
         }
 
         private string GetIDText(string id)

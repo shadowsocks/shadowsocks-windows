@@ -217,6 +217,58 @@ namespace Shadowsocks.Model
             }
         }
 
+        public string HiddenName(bool hide = true)
+        {
+            if (string.IsNullOrEmpty(server))
+            {
+                return I18N.GetString("New server");
+            }
+            string server_alter_name = server;
+            if (hide)
+            {
+                IPAddress ipAddress;
+                bool parsed = IPAddress.TryParse(server, out ipAddress);
+                if (parsed)
+                {
+                    int pos = server.LastIndexOf('.');
+                    if (pos > 0)
+                    {
+                        server_alter_name = "*" + server.Substring(pos);
+                    }
+                }
+                else
+                {
+                    int pos = server.IndexOf('.', 1);
+                    if (pos > 0)
+                    {
+                        server_alter_name = "*" + server.Substring(pos);
+                    }
+                }
+            }
+            if (string.IsNullOrEmpty(remarks_base64))
+            {
+                if (server.IndexOf(':') >= 0)
+                {
+                    return "[" + server_alter_name + "]:" + server_port;
+                }
+                else
+                {
+                    return server_alter_name + ":" + server_port;
+                }
+            }
+            else
+            {
+                if (server.IndexOf(':') >= 0)
+                {
+                    return remarks + " ([" + server_alter_name + "]:" + server_port + ")";
+                }
+                else
+                {
+                    return remarks + " (" + server_alter_name + ":" + server_port + ")";
+                }
+            }
+        }
+
         public Server Clone()
         {
             Server ret = new Server();
@@ -382,15 +434,15 @@ namespace Shadowsocks.Model
         {
             string main_part = server + ":" + server_port + ":" + protocol + ":" + method + ":" + obfs + ":" + Util.Base64.EncodeUrlSafeBase64(password);
             string param_str = "obfsparam=" + Util.Base64.EncodeUrlSafeBase64(obfsparam ?? "");
-            if (protocolparam != null && protocolparam.Length > 0)
+            if (!string.IsNullOrEmpty(protocolparam))
             {
                 param_str += "&protoparam=" + Util.Base64.EncodeUrlSafeBase64(protocolparam);
             }
-            if (remarks != null && remarks.Length > 0)
+            if (!string.IsNullOrEmpty(remarks))
             {
                 param_str += "&remarks=" + Util.Base64.EncodeUrlSafeBase64(remarks);
             }
-            if (group != null && group.Length > 0)
+            if (!string.IsNullOrEmpty(group))
             {
                 param_str += "&group=" + Util.Base64.EncodeUrlSafeBase64(group);
             }
