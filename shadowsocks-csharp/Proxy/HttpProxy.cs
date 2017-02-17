@@ -7,9 +7,9 @@ using System.Threading;
 using Shadowsocks.Controller;
 using Shadowsocks.Util.Sockets;
 
-namespace Shadowsocks.ForwardProxy
+namespace Shadowsocks.Proxy
 {
-    public class HttpProxy : IForwardProxy
+    public class HttpProxy : IProxy
     {
         private class FakeAsyncResult : IAsyncResult
         {
@@ -134,7 +134,7 @@ namespace Shadowsocks.ForwardProxy
                 _remote.EndSend(ar);
 
                 // start line read
-                new LineReader(1024, _remote, OnLineRead, OnException, OnFinish, Encoding.UTF8, HTTP_CRLF, new FakeAsyncResult(ar, state));
+                new LineReader(_remote, OnLineRead, OnException, OnFinish, Encoding.UTF8, HTTP_CRLF, 1024, new FakeAsyncResult(ar, state));
             }
             catch (Exception ex)
             {
@@ -165,7 +165,7 @@ namespace Shadowsocks.ForwardProxy
             st.innerState.ex = ex;
         }
 
-        private static readonly Regex HttpRespondHeaderRegex = new Regex(@"^(HTTP/1\.\d) (\d{3}) (.+)$");
+        private static readonly Regex HttpRespondHeaderRegex = new Regex(@"^(HTTP/1\.\d) (\d{3}) (.+)$", RegexOptions.Compiled);
         private int _respondLineCount = 0;
         private bool _established = false;
 

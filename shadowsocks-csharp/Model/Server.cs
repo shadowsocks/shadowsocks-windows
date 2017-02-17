@@ -10,10 +10,9 @@ namespace Shadowsocks.Model
     public class Server
     {
         public static readonly Regex
-            UrlFinder = new Regex("^(?i)ss://([A-Za-z0-9+-/=_]+)(#(.+))?$",
-                                  RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            UrlFinder = new Regex("^(?i)ss://([A-Za-z0-9+-/=_]+)(#(.+))?$", RegexOptions.IgnoreCase),
             DetailsParser = new Regex("^((?<method>.+?)(?<auth>-auth)??:(?<password>.*)@(?<hostname>.+?)" +
-                                      ":(?<port>\\d+?))$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+                                      ":(?<port>\\d+?))$", RegexOptions.IgnoreCase);
 
         private const int DefaultServerTimeoutSec = 5;
         public const int MaxServerTimeoutSec = 20;
@@ -46,9 +45,7 @@ namespace Shadowsocks.Model
             string serverStr;
             // CheckHostName() won't do a real DNS lookup
             var hostType = Uri.CheckHostName( server );
-            if ( hostType == UriHostNameType.Unknown ) {
-                throw new FormatException("Invalid Server Address.");
-            }
+
             switch ( hostType ) {
                 case UriHostNameType.IPv6:
                     serverStr = $"[{server}]:{server_port}";

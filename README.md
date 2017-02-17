@@ -89,11 +89,6 @@ if you want to deactivate all, please clear all textboxes.
 
 Please visit [Servers] for more information.
 
-#### Portable Mode
-
-If you want to put all temporary files into shadowsocks/temp folder instead of
-system temp folder, create a `shadowsocks_portable_mode.txt` into shadowsocks folder.
-
 #### Develop
 
 [Visual Studio 2015] & [.NET Framework 4.6.2 Developer Pack] are required.
@@ -103,8 +98,8 @@ system temp folder, create a `shadowsocks_portable_mode.txt` into shadowsocks fo
 GPLv3
 
 
-[Appveyor]:       https://ci.appveyor.com/project/Noisyfox/shadowsocks-windows
-[Build Status]:   https://ci.appveyor.com/api/projects/status/04idbevayrghcrh7/branch/master?svg=true
+[Appveyor]:       https://ci.appveyor.com/project/wongsyrone/shadowsocks-windows-pljx3
+[Build Status]:   https://ci.appveyor.com/api/projects/status/otie4km27ws1wak2/branch/master?svg=true
 [latest release]: https://github.com/shadowsocks/shadowsocks-csharp/releases
 [GFWList]:        https://github.com/gfwlist/gfwlist
 [Servers]:        https://github.com/shadowsocks/shadowsocks/wiki/Ports-and-Clients#linux--server-side

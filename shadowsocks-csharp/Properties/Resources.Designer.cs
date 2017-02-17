@@ -114,6 +114,40 @@ namespace Shadowsocks.Properties {
         /// <summary>
         ///   查找 System.Byte[] 类型的本地化资源。
         /// </summary>
+        internal static byte[] mgwz_dll {
+            get {
+                object obj = ResourceManager.GetObject("mgwz_dll", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 listen-address __PRIVOXY_BIND_IP__:__PRIVOXY_BIND_PORT__
+        ///show-on-task-bar 0
+        ///activity-animation 0
+        ///forward-socks5 / 127.0.0.1:__SOCKS_PORT__ .
+        ///hide-console
+        /// 的本地化字符串。
+        /// </summary>
+        internal static string privoxy_conf {
+            get {
+                return ResourceManager.GetString("privoxy_conf", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找 System.Byte[] 类型的本地化资源。
+        /// </summary>
+        internal static byte[] privoxy_exe {
+            get {
+                object obj = ResourceManager.GetObject("privoxy_exe", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   查找 System.Byte[] 类型的本地化资源。
+        /// </summary>
         internal static byte[] proxy_pac_txt {
             get {
                 object obj = ResourceManager.GetObject("proxy_pac_txt", resourceCulture);
@@ -235,7 +269,7 @@ namespace Shadowsocks.Properties {
         ///Update Local PAC from GFWList=從 GFWList 更新本地 PAC
         ///Edit User Rule for GFWList...=編輯 GFWList 的用戶規則...
         ///Show QRCode...=顯示 QR 碼...
-        ///S [字符串的其余部分被截断]&quot;; 的本地化字符串。
+        ///Scan QRCode from Screen [字符串的其余部分被截断]&quot;; 的本地化字符串。
         /// </summary>
         internal static string zh_tw {
             get {
