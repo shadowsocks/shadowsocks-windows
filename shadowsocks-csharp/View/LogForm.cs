@@ -14,18 +14,6 @@ using System.Text;
 
 namespace Shadowsocks.View
 {
-    public class TrafficInfo
-    {
-        public long inbound;
-        public long outbound;
-
-        public TrafficInfo(long inbound, long outbound)
-        {
-            this.inbound = inbound;
-            this.outbound = outbound;
-        }
-    }
-
     public partial class LogForm : Form
     {
         long lastOffset;
@@ -431,6 +419,18 @@ namespace Shadowsocks.View
             toolbarTrigger = !toolbarTrigger;
             ToolbarFlowLayoutPanel.Visible = toolbarTrigger;
             ShowToolbarMenuItem.Checked = toolbarTrigger;
+        }
+
+        private class TrafficInfo
+        {
+            public long inbound;
+            public long outbound;
+
+            public TrafficInfo(long inbound, long outbound)
+            {
+                this.inbound = inbound;
+                this.outbound = outbound;
+            }
         }
     }
 }
