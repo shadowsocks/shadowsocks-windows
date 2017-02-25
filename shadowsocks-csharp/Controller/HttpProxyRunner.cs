@@ -9,6 +9,7 @@ using System.Text;
 using System.Net.NetworkInformation;
 using System.Net;
 using System.Runtime.InteropServices;
+using System.Windows.Forms;
 
 namespace Shadowsocks.Controller
 {
@@ -165,15 +166,17 @@ namespace Shadowsocks.Controller
             {
                 IPGlobalProperties properties = IPGlobalProperties.GetIPGlobalProperties();
                 IPEndPoint[] tcpEndPoints = properties.GetActiveTcpListeners();
+                Random random = new Random(Util.Utils.GetExecutablePath().GetHashCode() ^ (int)DateTime.Now.Ticks);
 
                 List<int> usedPorts = new List<int>();
                 foreach (IPEndPoint endPoint in IPGlobalProperties.GetIPGlobalProperties().GetActiveTcpListeners())
                 {
                     usedPorts.Add(endPoint.Port);
                 }
+
                 for (int nTry = 0; nTry < 1000; nTry++)
                 {
-                    int port = new Random().Next(10000, 65536);
+                    int port = random.Next(10000, 65536);
                     if (!usedPorts.Contains(port))
                     {
                         return port;
