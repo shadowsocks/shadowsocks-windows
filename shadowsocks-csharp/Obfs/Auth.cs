@@ -963,9 +963,9 @@ namespace Shadowsocks.Obfs
         public override byte[] ClientUdpPreEncrypt(byte[] plaindata, int datalength, out int outlength)
         {
             byte[] outdata = new byte[datalength + 8];
-            user_id = new byte[4];
             if (user_key == null)
             {
+                user_id = new byte[4];
                 int index_of_split = Server.param.IndexOf(':');
                 if (index_of_split > 0)
                 {
