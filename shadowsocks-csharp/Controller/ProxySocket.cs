@@ -1052,12 +1052,12 @@ namespace Shadowsocks.Controller
             //构造Socks5代理服务器第一连接头(无用户名密码)
             byte[] bySock5Send = new Byte[10];
             bySock5Send[0] = 5;
-            bySock5Send[1] = 2;
+            bySock5Send[1] = (socks5RemoteUsername.Length == 0 ? (byte)1 : (byte)2);
             bySock5Send[2] = 0;
             bySock5Send[3] = 2;
 
             //发送Socks5代理第一次连接信息
-            _socket.Send(bySock5Send, 4, SocketFlags.None);
+            _socket.Send(bySock5Send, 2 + bySock5Send[1], SocketFlags.None);
 
             byte[] bySock5Receive = new byte[32];
             int iRecCount = _socket.Receive(bySock5Receive, bySock5Receive.Length, SocketFlags.None);
