@@ -353,20 +353,31 @@ namespace Shadowsocks.Model
             string data = Util.Base64.DecodeUrlSafeBase64(ssr.Groups[1].Value);
             Dictionary<string, string> params_dict = new Dictionary<string, string>();
 
-            int param_start_pos = data.IndexOf("?");
-            if (param_start_pos > 0)
+            Match match = null;
+            for (int nTry = 0; nTry < 2; ++nTry)
             {
-                params_dict = ParseParam(data.Substring(param_start_pos + 1));
-                data = data.Substring(0, param_start_pos);
-            }
-            if (data.IndexOf("/") >= 0)
-            {
-                data = data.Substring(0, data.LastIndexOf("/"));
-            }
+                int param_start_pos = data.IndexOf("?");
+                if (param_start_pos > 0)
+                {
+                    params_dict = ParseParam(data.Substring(param_start_pos + 1));
+                    data = data.Substring(0, param_start_pos);
+                }
+                if (data.IndexOf("/") >= 0)
+                {
+                    data = data.Substring(0, data.LastIndexOf("/"));
+                }
 
-            Regex UrlFinder = new Regex("(.+):([^:]*):([^:]*):([^:]*):([^:]*):([^:]*)");
-            Match match = UrlFinder.Match(data);
-            if (!match.Success)
+                Regex UrlFinder = new Regex("^(.+):([^:]+):([^:]*):([^:]+):([^:]*):([^:]+)");
+                match = UrlFinder.Match(data);
+                if (match.Success)
+                    break;
+                ssr = Regex.Match(ssrURL, @"ssr://([A-Za-z0-9-_.:=?&/\[\]]+)", RegexOptions.IgnoreCase);
+                if (ssr.Success)
+                    data = ssr.Groups[1].Value;
+                else
+                    throw new FormatException();
+            }
+            if (match == null || !match.Success)
                 throw new FormatException();
 
             server = match.Groups[1].Value;
