@@ -470,7 +470,7 @@ namespace Shadowsocks.View
             Server server = _oldSelectedIndex >=0 && _oldSelectedIndex < _modifiedConfiguration.configs.Count
                 ? Configuration.CopyServer(_modifiedConfiguration.configs[_oldSelectedIndex])
                 : Configuration.GetDefaultServer();
-            _modifiedConfiguration.configs.Insert(_oldSelectedIndex < 0 ? 0 : _oldSelectedIndex, server);
+            _modifiedConfiguration.configs.Insert(_oldSelectedIndex < 0 ? 0 : _oldSelectedIndex + 1, server);
             LoadConfiguration(_modifiedConfiguration);
             _SelectedID = server.id;
             ServersListBox.SelectedIndex = _oldSelectedIndex + 1;

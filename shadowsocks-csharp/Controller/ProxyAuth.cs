@@ -503,11 +503,14 @@ namespace Shadowsocks.Controller
 
         private void Connect()
         {
+            Handler.GetCurrentServer getCurrentServer = delegate (ServerSelectStrategy.FilterFunc filter, string targetURI, bool cfgRandom, bool usingRandom, bool forceRandom) { return _config.GetCurrentServer(filter, targetURI, cfgRandom, usingRandom, forceRandom); };
+            Handler.KeepCurrentServer keepCurrentServer = delegate (string targetURI, string id) { _config.KeepCurrentServer(targetURI, id); };
+
             int local_port = ((IPEndPoint)_connection.LocalEndPoint).Port;
             Handler handler = new Handler();
 
-            handler.getCurrentServer = delegate (ServerSelectStrategy.FilterFunc filter, string targetURI, bool cfgRandom, bool usingRandom, bool forceRandom) { return _config.GetCurrentServer(filter, targetURI, cfgRandom, usingRandom, forceRandom); };
-            handler.keepCurrentServer = delegate (string targetURI, string id) { _config.KeepCurrentServer(targetURI, id); };
+            handler.getCurrentServer = getCurrentServer;
+            handler.keepCurrentServer = keepCurrentServer;
             handler.connection = new ProxySocketTunLocal(_connection);
             handler.connectionUDP = _connectionUDP;
             handler.cfg.reconnectTimesRemain = _config.reconnectTimes;
