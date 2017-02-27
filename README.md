@@ -66,11 +66,11 @@
 	* 匆忙之中写完的说明，里面有比较详细的信息:[https://github.com/SuperHentai/Shadowsocks-Config-Server/blob/master/readme.md](https://github.com/SuperHentai/Shadowsocks-Config-Server/blob/master/readme.md)
 	[https://github.com/SuperHentai/Shadowsocks-Config-Server/wiki/%E8%AF%B4%E6%98%8E%E6%96%87%E6%A1%A3](https://github.com/SuperHentai/Shadowsocks-Config-Server/wiki/%E8%AF%B4%E6%98%8E%E6%96%87%E6%A1%A3)
 
-	* 放出的测试程序[https://github.com/SuperHentai/shadowsocks-windows/releases/tag/test](https://github.com/SuperHentai/shadowsocks-windows/releases/tag/test)
-	* 已部署的测试发布服务器URL:http://test.unwall.org/
-	* 发布服务器操作后台[http://test.unwall.org/panel](http://test.unwall.org/panel)
-		* 测试用户名：kaguya
-		* 测试密码：kaguya
+	* 放出的测试程序[https://github.com/SuperHentai/shadowsocks-windows/releases/tag/3.4.3](https://github.com/SuperHentai/shadowsocks-windows/releases/tag/3.4.3)
+	* 已部署的测试发布服务器URL:http://133.130.125.41/
+	* 发布服务器操作后台[http://133.130.125.41/panel](http://133.130.125.41/panel)
+		* 测试用户名：root		
+                * 测试密码：root
 
 		
 
