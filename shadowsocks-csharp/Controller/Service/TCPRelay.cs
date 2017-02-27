@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Timers;
@@ -7,6 +8,8 @@ using System.Timers;
 using Shadowsocks.Controller.Strategy;
 using Shadowsocks.Encryption;
 using Shadowsocks.Model;
+using Shadowsocks.Proxy;
+using Shadowsocks.Util.Sockets;
 
 namespace Shadowsocks.Controller
 {
@@ -14,36 +17,26 @@ namespace Shadowsocks.Controller
     {
         private ShadowsocksController _controller;
         private DateTime _lastSweepTime;
+        private Configuration _config;
 
-        public ISet<TCPHandler> Handlers
-        {
-            get; set;
-        }
+        public ISet<TCPHandler> Handlers { get; set; }
 
-        public TCPRelay(ShadowsocksController controller)
+        public TCPRelay(ShadowsocksController controller, Configuration conf)
         {
             _controller = controller;
+            _config = conf;
             Handlers = new HashSet<TCPHandler>();
             _lastSweepTime = DateTime.Now;
         }
 
-        public bool Handle(byte[] firstPacket, int length, Socket socket, object state)
+        public override bool Handle(byte[] firstPacket, int length, Socket socket, object state)
         {
-            if (socket.ProtocolType != ProtocolType.Tcp)
-            {
+            if (socket.ProtocolType != ProtocolType.Tcp
+                || (length < 2 || firstPacket[0] != 5))
                 return false;
-            }
-            if (length < 2 || firstPacket[0] != 5)
-            {
-                return false;
-            }
             socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, true);
-            TCPHandler handler = new TCPHandler(this);
-            handler.connection = socket;
-            handler.controller = _controller;
-            handler.relay = this;
+            TCPHandler handler = new TCPHandler(_controller, _config, this, socket);
 
-            handler.Start(firstPacket, length);
             IList<TCPHandler> handlersToClose = new List<TCPHandler>();
             lock (Handlers)
             {
@@ -53,12 +46,8 @@ namespace Shadowsocks.Controller
                 {
                     _lastSweepTime = now;
                     foreach (TCPHandler handler1 in Handlers)
-                    {
                         if (now - handler1.lastActivity > TimeSpan.FromSeconds(900))
-                        {
                             handlersToClose.Add(handler1);
-                        }
-                    }
                 }
             }
             foreach (TCPHandler handler1 in handlersToClose)
@@ -66,82 +55,146 @@ namespace Shadowsocks.Controller
                 Logging.Debug("Closing timed out TCP connection.");
                 handler1.Close();
             }
+
+            /*
+             * Start after we put it into Handlers set. Otherwise if it failed in handler.Start()
+             * then it will call handler.Close() before we add it into the set.
+             * Then the handler will never release until the next Handle call. Sometimes it will
+             * cause odd problems (especially during memory profiling).
+             */
+            handler.Start(firstPacket, length);
+
             return true;
         }
 
-        public void UpdateInboundCounter(long n)
+        public override void Stop()
         {
-            _controller.UpdateInboundCounter(n);
+            List<TCPHandler> handlersToClose = new List<TCPHandler>();
+            lock (Handlers)
+            {
+                handlersToClose.AddRange(Handlers);
+            }
+            handlersToClose.ForEach(h=>h.Close());
         }
 
-        public void UpdateOutboundCounter(long n)
+        public void UpdateInboundCounter(Server server, long n)
         {
-            _controller.UpdateOutboundCounter(n);
+            _controller.UpdateInboundCounter(server, n);
+        }
+
+        public void UpdateOutboundCounter(Server server, long n)
+        {
+            _controller.UpdateOutboundCounter(server, n);
+        }
+
+        public void UpdateLatency(Server server, TimeSpan latency)
+        {
+            _controller.UpdateLatency(server, latency);
         }
     }
 
     class TCPHandler
     {
-        // public Encryptor encryptor;
-        public IEncryptor encryptor;
-        public Server server;
-        // Client  socket.
-        public Socket remote;
-        public Socket connection;
-        public ShadowsocksController controller;
-        public TCPRelay relay;
+        class AsyncSession
+        {
+            public IProxy Remote { get; }
+
+            public AsyncSession(IProxy remote)
+            {
+                Remote = remote;
+            }
+        }
+
+        class AsyncSession<T> : AsyncSession
+        {
+            public T State { get; set; }
+
+            public AsyncSession(IProxy remote, T state) : base(remote)
+            {
+                State = state;
+            }
+
+            public AsyncSession(AsyncSession session, T state): base(session.Remote)
+            {
+                State = state;
+            }
+        }
+
+        private readonly int _serverTimeout;
+        private readonly int _proxyTimeout;
+
+        // Size of receive buffer.
+        public static readonly int RecvSize = 8192;
+        public static readonly int RecvReserveSize = IVEncryptor.ONETIMEAUTH_BYTES + IVEncryptor.AUTH_BYTES; // reserve for one-time auth
+        public static readonly int BufferSize = RecvSize + RecvReserveSize + 32;
 
         public DateTime lastActivity;
 
-        private const int maxRetry = 4;
-        private int retryCount = 0;
-        private bool connected;
+        private ShadowsocksController   _controller;
+        private Configuration           _config;
+        private TCPRelay                _tcprelay;
+        private Socket                  _connection;
 
-        private byte command;
-        private byte[] _firstPacket;
-        private int _firstPacketLength;
-        // Size of receive buffer.
-        public const int RecvSize = 8192;
-        public const int RecvReserveSize = IVEncryptor.ONETIMEAUTH_BYTES + IVEncryptor.AUTH_BYTES; // reserve for one-time auth
-        public const int BufferSize = RecvSize + RecvReserveSize + 32;
+        private IEncryptor  _encryptor;
+        private Server      _server;
 
-        private int totalRead = 0;
-        private int totalWrite = 0;
+        private AsyncSession _currentRemoteSession;
 
-        // remote receive buffer
-        private byte[] remoteRecvBuffer = new byte[BufferSize];
-        // remote send buffer
-        private byte[] remoteSendBuffer = new byte[BufferSize];
-        // connection receive buffer
-        private byte[] connetionRecvBuffer = new byte[BufferSize];
-        // connection send buffer
-        private byte[] connetionSendBuffer = new byte[BufferSize];
-        // Received data string.
+        private bool        _proxyConnected;
+        private bool        _destConnected;
 
-        private bool connectionShutdown = false;
-        private bool remoteShutdown = false;
-        private bool closed = false;
+        private byte    _command;
+        private byte[]  _firstPacket;
+        private int     _firstPacketLength;
 
-        private object encryptionLock = new object();
-        private object decryptionLock = new object();
+        private int     _totalRead = 0;
+        private int     _totalWrite = 0;
+
+        private byte[]  _remoteRecvBuffer = new byte[BufferSize];
+        private byte[]  _remoteSendBuffer = new byte[BufferSize];
+        private byte[]  _connetionRecvBuffer = new byte[BufferSize];
+        private byte[]  _connetionSendBuffer = new byte[BufferSize];
+
+        private bool    _connectionShutdown = false;
+        private bool    _remoteShutdown = false;
+        private bool    _closed = false;
+
+        // instance-based lock without static
+        private readonly object  _encryptionLock = new object();
+        private readonly object  _decryptionLock = new object();
+        private readonly object  _closeConnLock = new object();
 
         private DateTime _startConnectTime;
-        private TCPRelay tcprelay;  // TODO: tcprelay ?= relay
+        private DateTime _startReceivingTime;
+        private DateTime _startSendingTime;
 
-        public TCPHandler(TCPRelay tcprelay)
+        private EndPoint _destEndPoint = null;
+
+        public TCPHandler(ShadowsocksController controller, Configuration config, TCPRelay tcprelay, Socket socket)
         {
-            this.tcprelay = tcprelay;
+            _controller = controller;
+            _config = config;
+            _tcprelay = tcprelay;
+            _connection = socket;
+            _proxyTimeout = config.proxy.proxyTimeout * 1000;
+            _serverTimeout = config.GetCurrentServer().timeout * 1000;
+
+            lastActivity = DateTime.Now;
         }
 
         public void CreateRemote()
         {
-            Server server = controller.GetAServer(IStrategyCallerType.TCP, (IPEndPoint)connection.RemoteEndPoint);
+            Server server = _controller.GetAServer(IStrategyCallerType.TCP, (IPEndPoint)_connection.RemoteEndPoint, _destEndPoint);
             if (server == null || server.server == "")
-            {
                 throw new ArgumentException("No server configured");
+            lock (_encryptionLock)
+            {
+                lock (_decryptionLock)
+                {
+                    _encryptor = EncryptorFactory.GetEncryptor(server.method, server.password, server.auth, false);
+                }
             }
-            encryptor = EncryptorFactory.GetEncryptor(server.method, server.password, server.auth, false);
-            this.server = server;
+            this._server = server;
         }
 
         public void Start(byte[] firstPacket, int length)
@@ -149,47 +202,40 @@ namespace Shadowsocks.Controller
             _firstPacket = firstPacket;
             _firstPacketLength = length;
             HandshakeReceive();
-            lastActivity = DateTime.Now;
         }
 
         private void CheckClose()
         {
-            if (connectionShutdown && remoteShutdown)
-            {
+            if (_connectionShutdown && _remoteShutdown)
                 Close();
-            }
         }
 
         public void Close()
         {
-            lock (relay.Handlers)
+            lock (_closeConnLock)
             {
-                relay.Handlers.Remove(this);
+                if (_closed) return;
+                _closed = true;
             }
-            lock (this)
+            lock (_tcprelay.Handlers)
             {
-                if (closed)
-                {
-                    return;
-                }
-                closed = true;
+                _tcprelay.Handlers.Remove(this);
             }
-            if (connection != null)
+            try
+            {
+                _connection.Shutdown(SocketShutdown.Both);
+                _connection.Close();
+            }
+            catch (Exception e)
+            {
+                Logging.LogUsefulException(e);
+            }
+
+            if (_currentRemoteSession != null)
             {
                 try
                 {
-                    connection.Shutdown(SocketShutdown.Both);
-                    connection.Close();
-                }
-                catch (Exception e)
-                {
-                    Logging.LogUsefulException(e);
-                }
-            }
-            if (remote != null)
-            {
-                try
-                {
+                    var remote = _currentRemoteSession.Remote;
                     remote.Shutdown(SocketShutdown.Both);
                     remote.Close();
                 }
@@ -198,28 +244,22 @@ namespace Shadowsocks.Controller
                     Logging.LogUsefulException(e);
                 }
             }
-            lock (encryptionLock)
+
+            lock (_encryptionLock)
             {
-                lock (decryptionLock)
+                lock (_decryptionLock)
                 {
-                    if (encryptor != null)
-                    {
-                        ((IDisposable)encryptor).Dispose();
-                    }
+                    _encryptor?.Dispose();
                 }
             }
         }
 
         private void HandshakeReceive()
         {
-            if (closed)
-            {
-                return;
-            }
+            if (_closed) return;
             try
             {
                 int bytesRead = _firstPacketLength;
-
                 if (bytesRead > 1)
                 {
                     byte[] response = { 5, 0 };
@@ -229,12 +269,10 @@ namespace Shadowsocks.Controller
                         response = new byte[] { 0, 91 };
                         Logging.Error("socks 5 protocol error");
                     }
-                    connection.BeginSend(response, 0, response.Length, 0, new AsyncCallback(HandshakeSendCallback), null);
+                    _connection.BeginSend(response, 0, response.Length, SocketFlags.None, new AsyncCallback(HandshakeSendCallback), null);
                 }
                 else
-                {
                     Close();
-                }
             }
             catch (Exception e)
             {
@@ -245,22 +283,21 @@ namespace Shadowsocks.Controller
 
         private void HandshakeSendCallback(IAsyncResult ar)
         {
-            if (closed)
-            {
-                return;
-            }
+            if (_closed) return;
             try
             {
-                connection.EndSend(ar);
+                _connection.EndSend(ar);
 
                 // +-----+-----+-------+------+----------+----------+
                 // | VER | CMD |  RSV  | ATYP | DST.ADDR | DST.PORT |
                 // +-----+-----+-------+------+----------+----------+
                 // |  1  |  1  | X'00' |  1   | Variable |    2     |
                 // +-----+-----+-------+------+----------+----------+
-                // Skip first 3 bytes
+                // Skip first 3 bytes, and read 2 more bytes to analysis the address.
+                // 2 more bytes is designed if address is domain then we don't need to read once more to get the addr length.
                 // TODO validate
-                connection.BeginReceive(connetionRecvBuffer, 0, 3, 0, new AsyncCallback(handshakeReceive2Callback), null);
+                _connection.BeginReceive(_connetionRecvBuffer, 0, 3 + 2, SocketFlags.None,
+                    new AsyncCallback(handshakeReceive2Callback), null);
             }
             catch (Exception e)
             {
@@ -271,25 +308,30 @@ namespace Shadowsocks.Controller
 
         private void handshakeReceive2Callback(IAsyncResult ar)
         {
-            if (closed)
-            {
-                return;
-            }
+            if (_closed) return;
             try
             {
-                int bytesRead = connection.EndReceive(ar);
-
-                if (bytesRead >= 3)
+                int bytesRead = _connection.EndReceive(ar);
+                if (bytesRead >= 5)
                 {
-                    command = connetionRecvBuffer[1];
-                    if (command == 1)
+                    _command = _connetionRecvBuffer[1];
+                    if (_command != 1 && _command != 3)
                     {
-                        byte[] response = { 5, 0, 0, 1, 0, 0, 0, 0, 0, 0 };
-                        connection.BeginSend(response, 0, response.Length, 0, new AsyncCallback(ResponseCallback), null);
+                        Logging.Debug("Unsupported CMD=" + _command);
+                        Close();
                     }
-                    else if (command == 3)
+                    else
                     {
-                        HandleUDPAssociate();
+                        if (_command == 1)
+                        {
+                            byte[] response = { 5, 0, 0, 1, 0, 0, 0, 0, 0, 0 };
+                            _connection.BeginSend(response, 0, response.Length, SocketFlags.None,
+                                new AsyncCallback(ResponseCallback), null);
+                        }
+                        else if (_command == 3)
+                        {
+                            ReadAddress(HandleUDPAssociate);
+                        }
                     }
                 }
                 else
@@ -305,53 +347,104 @@ namespace Shadowsocks.Controller
             }
         }
 
-        private void HandleUDPAssociate()
+        private void ResponseCallback(IAsyncResult ar)
         {
-            IPEndPoint endPoint = (IPEndPoint)connection.LocalEndPoint;
-            byte[] address = endPoint.Address.GetAddressBytes();
-            int port = endPoint.Port;
-            byte[] response = new byte[4 + address.Length + 2];
-            response[0] = 5;
-            if (endPoint.AddressFamily == AddressFamily.InterNetwork)
-            {
-                response[3] = 1;
-            }
-            else if (endPoint.AddressFamily == AddressFamily.InterNetworkV6)
-            {
-                response[3] = 4;
-            }
-            address.CopyTo(response, 4);
-            response[response.Length - 1] = (byte)(port & 0xFF);
-            response[response.Length - 2] = (byte)((port >> 8) & 0xFF);
-            connection.BeginSend(response, 0, response.Length, 0, new AsyncCallback(ReadAll), true);
-        }
-
-        private void ReadAll(IAsyncResult ar)
-        {
-            if (closed)
-            {
-                return;
-            }
             try
             {
-                if (ar.AsyncState != null)
+                _connection.EndSend(ar);
+
+                ReadAddress(StartConnect);
+            }
+            catch (Exception e)
+            {
+                Logging.LogUsefulException(e);
+                Close();
+            }
+        }
+
+        private void ReadAddress(Action onSuccess)
+        {
+            int atyp = _connetionRecvBuffer[3];
+
+            switch (atyp)
+            {
+                case 1: // IPv4 address, 4 bytes
+                    ReadAddress(4 + 2 - 1, onSuccess);
+                    break;
+                case 3: // domain name, length + str
+                    int len = _connetionRecvBuffer[4];
+                    ReadAddress(len + 2, onSuccess);
+                    break;
+                case 4: // IPv6 address, 16 bytes
+                    ReadAddress(16 + 2 - 1, onSuccess);
+                    break;
+                default:
+                    Logging.Debug("Unsupported ATYP=" + atyp);
+                    Close();
+                    break;
+            }
+        }
+
+        private void ReadAddress(int bytesRemain, Action onSuccess)
+        {
+            Array.Copy(_connetionRecvBuffer, 3, _connetionRecvBuffer, 0, 2);
+
+            // Read the remain address bytes
+            _connection.BeginReceive(_connetionRecvBuffer, 2, RecvSize - 2, SocketFlags.None, OnAddressFullyRead, new object[] {bytesRemain, onSuccess});
+        }
+
+        private void OnAddressFullyRead(IAsyncResult ar)
+        {
+            if (_closed) return;
+            try
+            {
+                int bytesRead = _connection.EndReceive(ar);
+
+                var states = (object[]) ar.AsyncState;
+
+                int bytesRemain = (int)states[0];
+                var onSuccess = (Action) states[1];
+
+                if (bytesRead >= bytesRemain)
                 {
-                    connection.EndSend(ar);
-                    Logging.Debug(remote, RecvSize, "TCP Relay");
-                    connection.BeginReceive(connetionRecvBuffer, 0, RecvSize, 0, new AsyncCallback(ReadAll), null);
+                    _firstPacketLength = bytesRead + 2;
+
+                    int atyp = _connetionRecvBuffer[0];
+
+                    string dst_addr = "Unknown";
+                    int dst_port = -1;
+                    switch (atyp)
+                    {
+                        case 1: // IPv4 address, 4 bytes
+                            dst_addr = new IPAddress(_connetionRecvBuffer.Skip(1).Take(4).ToArray()).ToString();
+                            dst_port = (_connetionRecvBuffer[5] << 8) + _connetionRecvBuffer[6];
+
+                            break;
+                        case 3: // domain name, length + str
+                            int len = _connetionRecvBuffer[1];
+                            dst_addr = System.Text.Encoding.UTF8.GetString(_connetionRecvBuffer, 2, len);
+                            dst_port = (_connetionRecvBuffer[len + 2] << 8) + _connetionRecvBuffer[len + 3];
+
+                            break;
+                        case 4: // IPv6 address, 16 bytes
+                            dst_addr = $"[{new IPAddress(_connetionRecvBuffer.Skip(1).Take(16).ToArray())}]";
+                            dst_port = (_connetionRecvBuffer[17] << 8) + _connetionRecvBuffer[18];
+
+                            break;
+                    }
+                    if (_config.isVerboseLogging)
+                    {
+                        Logging.Info($"connect to {dst_addr}:{dst_port}");
+                    }
+
+                    _destEndPoint = SocketUtil.GetEndPoint(dst_addr, dst_port);
+
+                    onSuccess.Invoke();
                 }
                 else
                 {
-                    int bytesRead = connection.EndReceive(ar);
-                    if (bytesRead > 0)
-                    {
-                        Logging.Debug(remote, RecvSize, "TCP Relay");
-                        connection.BeginReceive(connetionRecvBuffer, 0, RecvSize, 0, new AsyncCallback(ReadAll), null);
-                    }
-                    else
-                    {
-                        Close();
-                    }
+                    Logging.Debug("failed to recv data in Shadowsocks.Controller.TCPHandler.OnAddressFullyRead()");
+                    Close();
                 }
             }
             catch (Exception e)
@@ -361,15 +454,49 @@ namespace Shadowsocks.Controller
             }
         }
 
-        private void ResponseCallback(IAsyncResult ar)
+        private void HandleUDPAssociate()
         {
+            IPEndPoint endPoint = (IPEndPoint)_connection.LocalEndPoint;
+            byte[] address = endPoint.Address.GetAddressBytes();
+            int port = endPoint.Port;
+            byte[] response = new byte[4 + address.Length + 2];
+            response[0] = 5;
+            switch (endPoint.AddressFamily)
+            {
+                case AddressFamily.InterNetwork:
+                    response[3] = 1;
+                    break;
+                case AddressFamily.InterNetworkV6:
+                    response[3] = 4;
+                    break;
+            }
+            address.CopyTo(response, 4);
+            response[response.Length - 1] = (byte)(port & 0xFF);
+            response[response.Length - 2] = (byte)((port >> 8) & 0xFF);
+            _connection.BeginSend(response, 0, response.Length, SocketFlags.None, new AsyncCallback(ReadAll), true);
+        }
+
+        private void ReadAll(IAsyncResult ar)
+        {
+            if (_closed) return;
             try
             {
-                connection.EndSend(ar);
-
-                StartConnect();
+                if (ar.AsyncState != null)
+                {
+                    _connection.EndSend(ar);
+                    _connection.BeginReceive(_connetionRecvBuffer, 0, RecvSize, SocketFlags.None, new AsyncCallback(ReadAll), null);
+                }
+                else
+                {
+                    int bytesRead = _connection.EndReceive(ar);
+                    if (bytesRead > 0)
+                    {
+                        _connection.BeginReceive(_connetionRecvBuffer, 0, RecvSize, SocketFlags.None, new AsyncCallback(ReadAll), null);
+                    }
+                    else
+                        Close();
+                }
             }
-
             catch (Exception e)
             {
                 Logging.LogUsefulException(e);
@@ -378,13 +505,24 @@ namespace Shadowsocks.Controller
         }
 
         // inner class
-        private class ServerTimer : Timer
+        private class ProxyTimer : Timer
         {
+            public AsyncSession Session;
+
+            public EndPoint DestEndPoint;
             public Server Server;
 
-            public ServerTimer(int p) : base(p)
+            public ProxyTimer(int p) : base(p)
             {
             }
+        }
+
+        private class ServerTimer : Timer
+        {
+            public AsyncSession Session;
+
+            public Server Server;
+            public ServerTimer(int p) : base(p) { }
         }
 
         private void StartConnect()
@@ -393,30 +531,55 @@ namespace Shadowsocks.Controller
             {
                 CreateRemote();
 
-                // TODO async resolving
-                IPAddress ipAddress;
-                bool parsed = IPAddress.TryParse(server.server, out ipAddress);
-                if (!parsed)
+                // Setting up proxy
+                IProxy remote;
+                EndPoint proxyEP;
+                if (_config.proxy.useProxy)
                 {
-                    IPHostEntry ipHostInfo = Dns.GetHostEntry(server.server);
-                    ipAddress = ipHostInfo.AddressList[0];
+                    switch (_config.proxy.proxyType)
+                    {
+                        case ProxyConfig.PROXY_SOCKS5:
+                            remote = new Socks5Proxy();
+                            break;
+                        case ProxyConfig.PROXY_HTTP:
+                            remote = new HttpProxy();
+                            break;
+                        default:
+                            throw new NotSupportedException("Unknown forward proxy.");
+                    }
+                    proxyEP = SocketUtil.GetEndPoint(_config.proxy.proxyServer, _config.proxy.proxyPort);
                 }
-                IPEndPoint remoteEP = new IPEndPoint(ipAddress, server.server_port);
+                else
+                {
+                    remote = new DirectConnect();
+                    proxyEP = null;
+                }
 
-                remote = new Socket(ipAddress.AddressFamily,
-                    SocketType.Stream, ProtocolType.Tcp);
-                remote.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, true);
+                var session = new AsyncSession(remote);
+                lock (_closeConnLock)
+                {
+                    if (_closed)
+                    {
+                        remote.Close();
+                        return;
+                    }
 
-                _startConnectTime = DateTime.Now;
-                ServerTimer connectTimer = new ServerTimer(3000);
-                connectTimer.AutoReset = false;
-                connectTimer.Elapsed += connectTimer_Elapsed;
-                connectTimer.Enabled = true;
-                connectTimer.Server = server;
+                    _currentRemoteSession = session;
+                }
 
-                connected = false;
-                // Connect to the remote endpoint.
-                remote.BeginConnect(remoteEP, new AsyncCallback(ConnectCallback), connectTimer);
+                ProxyTimer proxyTimer = new ProxyTimer(_proxyTimeout);
+                proxyTimer.AutoReset = false;
+                proxyTimer.Elapsed += proxyConnectTimer_Elapsed;
+                proxyTimer.Enabled = true;
+
+                proxyTimer.Session = session;
+                proxyTimer.DestEndPoint = SocketUtil.GetEndPoint(_server.server, _server.server_port);
+                proxyTimer.Server = _server;
+
+                _proxyConnected = false;
+
+                // Connect to the proxy server.
+                remote.BeginConnectProxy(proxyEP, new AsyncCallback(ProxyConnectCallback), new AsyncSession<ProxyTimer>(remote, proxyTimer));
             }
             catch (Exception e)
             {
@@ -425,96 +588,176 @@ namespace Shadowsocks.Controller
             }
         }
 
-        private void connectTimer_Elapsed(object sender, ElapsedEventArgs e)
+        private void proxyConnectTimer_Elapsed(object sender, ElapsedEventArgs e)
         {
-            if (connected)
+            var timer = (ProxyTimer) sender;
+            timer.Elapsed -= proxyConnectTimer_Elapsed;
+            timer.Enabled = false;
+            timer.Dispose();
+
+
+            if (_proxyConnected || _destConnected || _closed)
             {
                 return;
             }
-            Server server = ((ServerTimer)sender).Server;
-            IStrategy strategy = controller.GetCurrentStrategy();
-            if (strategy != null)
-            {
-                strategy.SetFailure(server);
-            }
-            Logging.Info($"{server.FriendlyName()} timed out");
-            remote.Close();
-            RetryConnect();
+            var proxy = timer.Session.Remote;
+
+            Logging.Info($"Proxy {proxy.ProxyEndPoint} timed out");
+            proxy.Close();
+            Close();
         }
 
-        private void RetryConnect()
-        {
-            if (retryCount < maxRetry)
-            {
-                Logging.Debug($"Connection failed, retry ({retryCount})");
-                StartConnect();
-                retryCount++;
-            }
-            else
-            {
-                Close();
-            }
-        }
-
-        private void ConnectCallback(IAsyncResult ar)
+        private void ProxyConnectCallback(IAsyncResult ar)
         {
             Server server = null;
-            if (closed)
+            if (_closed)
             {
                 return;
             }
             try
             {
-                ServerTimer timer = (ServerTimer)ar.AsyncState;
+                var session = (AsyncSession<ProxyTimer>) ar.AsyncState;
+                ProxyTimer timer = session.State;
+                var destEndPoint = timer.DestEndPoint;
                 server = timer.Server;
-                timer.Elapsed -= connectTimer_Elapsed;
+                timer.Elapsed -= proxyConnectTimer_Elapsed;
                 timer.Enabled = false;
                 timer.Dispose();
 
+                var remote = session.Remote;
+
                 // Complete the connection.
-                remote.EndConnect(ar);
+                remote.EndConnectProxy(ar);
 
-                connected = true;
+                _proxyConnected = true;
 
-                Logging.Debug($"Socket connected to {remote.RemoteEndPoint}");
-
-                var latency = DateTime.Now - _startConnectTime;
-                IStrategy strategy = controller.GetCurrentStrategy();
-                if (strategy != null)
+                if (_config.isVerboseLogging)
                 {
-                    strategy.UpdateLatency(server, latency);
+                    if (!(remote is DirectConnect))
+                    {
+                        Logging.Info($"Socket connected to proxy {remote.ProxyEndPoint}");
+                    }
                 }
 
-                StartPipe();
+                _startConnectTime = DateTime.Now;
+                ServerTimer connectTimer = new ServerTimer(_serverTimeout);
+                connectTimer.AutoReset = false;
+                connectTimer.Elapsed += destConnectTimer_Elapsed;
+                connectTimer.Enabled = true;
+                connectTimer.Session = session;
+                connectTimer.Server = server;
+                
+                _destConnected = false;
+                // Connect to the remote endpoint.
+                remote.BeginConnectDest(destEndPoint, new AsyncCallback(ConnectCallback), new AsyncSession<ServerTimer>(session, connectTimer));
             }
             catch (ArgumentException)
             {
             }
             catch (Exception e)
             {
-                if (server != null)
-                {
-                    IStrategy strategy = controller.GetCurrentStrategy();
-                    if (strategy != null)
-                    {
-                        strategy.SetFailure(server);
-                    }
-                }
                 Logging.LogUsefulException(e);
-                RetryConnect();
+                Close();
             }
         }
 
-        private void StartPipe()
+        private void destConnectTimer_Elapsed(object sender, ElapsedEventArgs e)
         {
-            if (closed)
+            var timer = (ServerTimer)sender;
+            timer.Elapsed -= destConnectTimer_Elapsed;
+            timer.Enabled = false;
+            timer.Dispose();
+
+            if (_destConnected || _closed)
             {
                 return;
             }
+
+            var session = timer.Session;
+            Server server = timer.Server;
+            IStrategy strategy = _controller.GetCurrentStrategy();
+            strategy?.SetFailure(server);
+            Logging.Info($"{server.FriendlyName()} timed out");
+            session.Remote.Close();
+            Close();
+        }
+
+        private void ConnectCallback(IAsyncResult ar)
+        {
+            if (_closed) return;
             try
             {
-                remote.BeginReceive(remoteRecvBuffer, 0, RecvSize, 0, new AsyncCallback(PipeRemoteReceiveCallback), null);
-                connection.BeginReceive(connetionRecvBuffer, 0, RecvSize, 0, new AsyncCallback(PipeConnectionReceiveCallback), null);
+                var session = (AsyncSession<ServerTimer>) ar.AsyncState;
+                ServerTimer timer = session.State;
+                _server = timer.Server;
+                timer.Elapsed -= destConnectTimer_Elapsed;
+                timer.Enabled = false;
+                timer.Dispose();
+
+                var remote = session.Remote;
+                // Complete the connection.
+                remote.EndConnectDest(ar);
+                
+                _destConnected = true;
+
+                if (_config.isVerboseLogging)
+                {
+                    Logging.Info($"Socket connected to ss server: {_server.FriendlyName()}");
+                }
+
+                var latency = DateTime.Now - _startConnectTime;
+                IStrategy strategy = _controller.GetCurrentStrategy();
+                strategy?.UpdateLatency(_server, latency);
+                _tcprelay.UpdateLatency(_server, latency);
+
+                StartPipe(session);
+            }
+            catch (ArgumentException)
+            {
+            }
+            catch (Exception e)
+            {
+                if (_server != null)
+                {
+                    IStrategy strategy = _controller.GetCurrentStrategy();
+                    strategy?.SetFailure(_server);
+                }
+                Logging.LogUsefulException(e);
+                Close();
+            }
+        }
+
+        // private static readonly Random Rnd = new Random();
+
+        private void TryReadAvailableData()
+        {
+            int available = Math.Min(_connection.Available, RecvSize - _firstPacketLength);
+            if (available > 0)
+            {
+                // Pick a random chunk size, or is it truly necessary? Random packet size is some sort of 'characteristic' itself.
+                //lock (Rnd)
+                //{
+                //    available = Rnd.Next(available + 1);
+                //}
+
+                var size = _connection.Receive(_connetionRecvBuffer, _firstPacketLength, available,
+                    SocketFlags.None);
+
+                _firstPacketLength += size;
+            }
+        }
+
+        private void StartPipe(AsyncSession session)
+        {
+            if (_closed) return;
+            try
+            {
+                _startReceivingTime = DateTime.Now;
+                session.Remote.BeginReceive(_remoteRecvBuffer, 0, RecvSize, SocketFlags.None, new AsyncCallback(PipeRemoteReceiveCallback), session);
+
+                TryReadAvailableData();
+                Logging.Debug($"_firstPacketLength = {_firstPacketLength}");
+                SendToServer(_firstPacketLength, session);
             }
             catch (Exception e)
             {
@@ -525,49 +768,30 @@ namespace Shadowsocks.Controller
 
         private void PipeRemoteReceiveCallback(IAsyncResult ar)
         {
-            if (closed)
-            {
-                return;
-            }
+            if (_closed) return;
             try
             {
-                int bytesRead = remote.EndReceive(ar);
-                totalRead += bytesRead;
-                tcprelay.UpdateInboundCounter(bytesRead);
-
+                var session = (AsyncSession) ar.AsyncState;
+                int bytesRead = session.Remote.EndReceive(ar);
+                _totalRead += bytesRead;
+                _tcprelay.UpdateInboundCounter(_server, bytesRead);
                 if (bytesRead > 0)
                 {
                     lastActivity = DateTime.Now;
                     int bytesToSend;
-                    lock (decryptionLock)
+                    lock (_decryptionLock)
                     {
-                        if (closed)
-                        {
-                            return;
-                        }
-                        encryptor.Decrypt(remoteRecvBuffer, bytesRead, remoteSendBuffer, out bytesToSend);
+                        _encryptor.Decrypt(_remoteRecvBuffer, bytesRead, _remoteSendBuffer, out bytesToSend);
                     }
-                    Logging.Debug(remote, bytesToSend, "TCP Relay", "@PipeRemoteReceiveCallback() (download)");
-                    connection.BeginSend(remoteSendBuffer, 0, bytesToSend, 0, new AsyncCallback(PipeConnectionSendCallback), null);
-
-                    IStrategy strategy = controller.GetCurrentStrategy();
-                    if (strategy != null)
-                    {
-                        strategy.UpdateLastRead(server);
-                    }
+                    _connection.BeginSend(_remoteSendBuffer, 0, bytesToSend, SocketFlags.None, new AsyncCallback(PipeConnectionSendCallback), session);
+                    IStrategy strategy = _controller.GetCurrentStrategy();
+                    strategy?.UpdateLastRead(_server);
                 }
                 else
                 {
-                    connection.Shutdown(SocketShutdown.Send);
-                    connectionShutdown = true;
+                    _connection.Shutdown(SocketShutdown.Send);
+                    _connectionShutdown = true;
                     CheckClose();
-
-                    //if (totalRead == 0)
-                    //{
-                    //    // closed before anything received, reports as failure
-                    //    // disable this feature
-                    //    controller.GetCurrentStrategy().SetFailure(this.server);
-                    //}
                 }
             }
             catch (Exception e)
@@ -579,40 +803,22 @@ namespace Shadowsocks.Controller
 
         private void PipeConnectionReceiveCallback(IAsyncResult ar)
         {
-            if (closed)
-            {
-                return;
-            }
+            if (_closed) return;
             try
             {
-                int bytesRead = connection.EndReceive(ar);
-                totalWrite += bytesRead;
-                tcprelay.UpdateOutboundCounter(bytesRead);
+                int bytesRead = _connection.EndReceive(ar);
+
+                var session = (AsyncSession) ar.AsyncState;
+                var remote = session.Remote;
 
                 if (bytesRead > 0)
                 {
-                    int bytesToSend;
-                    lock (encryptionLock)
-                    {
-                        if (closed)
-                        {
-                            return;
-                        }
-                        encryptor.Encrypt(connetionRecvBuffer, bytesRead, connetionSendBuffer, out bytesToSend);
-                    }
-                    Logging.Debug(remote, bytesToSend, "TCP Relay", "@PipeConnectionReceiveCallback() (upload)");
-                    remote.BeginSend(connetionSendBuffer, 0, bytesToSend, 0, new AsyncCallback(PipeRemoteSendCallback), null);
-
-                    IStrategy strategy = controller.GetCurrentStrategy();
-                    if (strategy != null)
-                    {
-                        strategy.UpdateLastWrite(server);
-                    }
+                    SendToServer(bytesRead, session);
                 }
                 else
                 {
                     remote.Shutdown(SocketShutdown.Send);
-                    remoteShutdown = true;
+                    _remoteShutdown = true;
                     CheckClose();
                 }
             }
@@ -623,16 +829,29 @@ namespace Shadowsocks.Controller
             }
         }
 
+        private void SendToServer(int length, AsyncSession session)
+        {
+            _totalWrite += length;
+            int bytesToSend;
+            lock (_encryptionLock)
+            {
+                _encryptor.Encrypt(_connetionRecvBuffer, length, _connetionSendBuffer, out bytesToSend);
+            }
+            _tcprelay.UpdateOutboundCounter(_server, bytesToSend);
+            _startSendingTime = DateTime.Now;
+            session.Remote.BeginSend(_connetionSendBuffer, 0, bytesToSend, SocketFlags.None, new AsyncCallback(PipeRemoteSendCallback), session);
+            IStrategy strategy = _controller.GetCurrentStrategy();
+            strategy?.UpdateLastWrite(_server);
+        }
+
         private void PipeRemoteSendCallback(IAsyncResult ar)
         {
-            if (closed)
-            {
-                return;
-            }
+            if (_closed) return;
             try
             {
-                remote.EndSend(ar);
-                connection.BeginReceive(connetionRecvBuffer, 0, RecvSize, 0, new AsyncCallback(PipeConnectionReceiveCallback), null);
+                var session = (AsyncSession)ar.AsyncState;
+                session.Remote.EndSend(ar);
+                _connection.BeginReceive(_connetionRecvBuffer, 0, RecvSize, SocketFlags.None, new AsyncCallback(PipeConnectionReceiveCallback), session);
             }
             catch (Exception e)
             {
@@ -643,14 +862,11 @@ namespace Shadowsocks.Controller
 
         private void PipeConnectionSendCallback(IAsyncResult ar)
         {
-            if (closed)
-            {
-                return;
-            }
             try
             {
-                connection.EndSend(ar);
-                remote.BeginReceive(remoteRecvBuffer, 0, RecvSize, 0, new AsyncCallback(PipeRemoteReceiveCallback), null);
+                var session = (AsyncSession)ar.AsyncState;
+                _connection.EndSend(ar);
+                session.Remote.BeginReceive(_remoteRecvBuffer, 0, RecvSize, SocketFlags.None, new AsyncCallback(PipeRemoteReceiveCallback), session);
             }
             catch (Exception e)
             {

@@ -145,7 +145,7 @@ namespace ZXing.Common.ReedSolomon
 
       internal GenericGFPoly addOrSubtract(GenericGFPoly other)
       {
-         if (!field.Equals(other.field))
+         if (field != other.field)
          {
             throw new ArgumentException("GenericGFPolys do not have same GenericGF field");
          }
@@ -181,7 +181,7 @@ namespace ZXing.Common.ReedSolomon
 
       internal GenericGFPoly multiply(GenericGFPoly other)
       {
-         if (!field.Equals(other.field))
+         if (field != other.field)
          {
             throw new ArgumentException("GenericGFPolys do not have same GenericGF field");
          }
@@ -246,7 +246,7 @@ namespace ZXing.Common.ReedSolomon
 
       internal GenericGFPoly[] divide(GenericGFPoly other)
       {
-         if (!field.Equals(other.field))
+         if (field != other.field)
          {
             throw new ArgumentException("GenericGFPolys do not have same GenericGF field");
          }

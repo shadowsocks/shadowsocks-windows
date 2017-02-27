@@ -13,4 +13,17 @@
       <dpiAware>True/PM</dpiAware>
     </asmv3:windowsSettings>
   </asmv3:application>
+
+  <compatibility xmlns="urn:schemas-microsoft-com:compatibility.v1">
+    <!-- We specify these, in addition to the UAC above, so we avoid Program Compatibility Assistant in Vista and Win7 -->
+    <!-- We try to avoid PCA so we can use Windows Job Objects -->
+    <!-- See http://stackoverflow.com/questions/3342941/kill-child-process-when-parent-process-is-killed -->
+
+    <application>
+      <!--The ID below indicates application support for Windows Vista -->
+      <supportedOS Id="{e2011457-1546-43c5-a5fe-008deee3d3f0}"/>
+      <!--The ID below indicates application support for Windows 7 -->
+      <supportedOS Id="{35138b9a-5d96-4fbd-8e2d-a2440225f93a}"/>
+    </application>
+  </compatibility>
 </assembly>

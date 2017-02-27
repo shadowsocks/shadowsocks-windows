@@ -30,6 +30,7 @@ namespace Shadowsocks.Controller
             }
         }
 
+        private static readonly IEnumerable<char> IgnoredLineBegins = new[] { '!', '[' };
         private void http_DownloadStringCompleted(object sender, DownloadStringCompletedEventArgs e)
         {
             try
@@ -38,19 +39,21 @@ namespace Shadowsocks.Controller
                 List<string> lines = ParseResult(e.Result);
                 if (File.Exists(PACServer.USER_RULE_FILE))
                 {
-                    string local = File.ReadAllText(PACServer.USER_RULE_FILE, Encoding.UTF8);
-                    string[] rules = local.Split(new char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
-                    foreach (string rule in rules)
+                    string local = FileManager.NonExclusiveReadAllText(PACServer.USER_RULE_FILE, Encoding.UTF8);
+                    using (var sr = new StringReader(local))
                     {
-                        if (rule.StartsWith("!") || rule.StartsWith("["))
-                            continue;
-                        lines.Add(rule);
+                        foreach (var rule in sr.NonWhiteSpaceLines())
+                        {
+                            if (rule.BeginWithAny(IgnoredLineBegins))
+                                continue;
+                            lines.Add(rule);
+                        }
                     }
                 }
                 string abpContent;
                 if (File.Exists(PACServer.USER_ABP_FILE))
                 {
-                    abpContent = File.ReadAllText(PACServer.USER_ABP_FILE, Encoding.UTF8);
+                    abpContent = FileManager.NonExclusiveReadAllText(PACServer.USER_ABP_FILE, Encoding.UTF8);
                 }
                 else
                 {
@@ -59,7 +62,7 @@ namespace Shadowsocks.Controller
                 abpContent = abpContent.Replace("__RULES__", JsonConvert.SerializeObject(lines, Formatting.Indented));
                 if (File.Exists(PACServer.PAC_FILE))
                 {
-                    string original = File.ReadAllText(PACServer.PAC_FILE, Encoding.UTF8);
+                    string original = FileManager.NonExclusiveReadAllText(PACServer.PAC_FILE, Encoding.UTF8);
                     if (original == abpContent)
                     {
                         UpdateCompleted(this, new ResultEventArgs(false));
@@ -93,13 +96,15 @@ namespace Shadowsocks.Controller
         {
             byte[] bytes = Convert.FromBase64String(response);
             string content = Encoding.ASCII.GetString(bytes);
-            string[] lines = content.Split(new char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
-            List<string> valid_lines = new List<string>(lines.Length);
-            foreach (string line in lines)
+            List<string> valid_lines = new List<string>();
+            using (var sr = new StringReader(content))
             {
-                if (line.StartsWith("!") || line.StartsWith("["))
-                    continue;
-                valid_lines.Add(line);
+                foreach (var line in sr.NonWhiteSpaceLines())
+                {
+                    if (line.BeginWithAny(IgnoredLineBegins))
+                        continue;
+                    valid_lines.Add(line);
+                }
             }
             return valid_lines;
         }

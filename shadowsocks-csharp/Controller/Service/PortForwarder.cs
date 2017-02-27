@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Net;
 using System.Net.Sockets;
+using Shadowsocks.Util.Sockets;
 
 namespace Shadowsocks.Controller
 {
@@ -13,7 +14,7 @@ namespace Shadowsocks.Controller
             this._targetPort = targetPort;
         }
 
-        public bool Handle(byte[] firstPacket, int length, Socket socket, object state)
+        public override bool Handle(byte[] firstPacket, int length, Socket socket, object state)
         {
             if (socket.ProtocolType != ProtocolType.Tcp)
             {
@@ -28,7 +29,7 @@ namespace Shadowsocks.Controller
             private byte[] _firstPacket;
             private int _firstPacketLength;
             private Socket _local;
-            private Socket _remote;
+            private WrappedSocket _remote;
             private bool _closed = false;
             private bool _localShutdown = false;
             private bool _remoteShutdown = false;
@@ -38,6 +39,9 @@ namespace Shadowsocks.Controller
             // connection receive buffer
             private byte[] connetionRecvBuffer = new byte[RecvSize];
 
+            // instance-based lock
+            private readonly object _Lock = new object();
+
             public void Start(byte[] firstPacket, int length, Socket socket, int targetPort)
             {
                 this._firstPacket = firstPacket;
@@ -45,19 +49,11 @@ namespace Shadowsocks.Controller
                 this._local = socket;
                 try
                 {
-                    // TODO async resolving
-                    IPAddress ipAddress;
-                    bool parsed = IPAddress.TryParse("127.0.0.1", out ipAddress);
-                    IPEndPoint remoteEP = new IPEndPoint(ipAddress, targetPort);
-
-
-                    _remote = new Socket(ipAddress.AddressFamily,
-                        SocketType.Stream, ProtocolType.Tcp);
-                    _remote.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, true);
+                    EndPoint remoteEP = SocketUtil.GetEndPoint("127.0.0.1", targetPort);
 
                     // Connect to the remote endpoint.
-                    _remote.BeginConnect(remoteEP,
-                        new AsyncCallback(ConnectCallback), null);
+                    _remote = new WrappedSocket();
+                    _remote.BeginConnect(remoteEP, ConnectCallback, null);
                 }
                 catch (Exception e)
                 {
@@ -75,6 +71,7 @@ namespace Shadowsocks.Controller
                 try
                 {
                     _remote.EndConnect(ar);
+                    _remote.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, true);
                     HandshakeReceive();
                 }
                 catch (Exception e)
@@ -226,7 +223,7 @@ namespace Shadowsocks.Controller
 
             public void Close()
             {
-                lock (this)
+                lock (_Lock)
                 {
                     if (_closed)
                     {
@@ -251,7 +248,7 @@ namespace Shadowsocks.Controller
                     try
                     {
                         _remote.Shutdown(SocketShutdown.Both);
-                        _remote.Close();
+                        _remote.Dispose();
                     }
                     catch (SocketException e)
                     {

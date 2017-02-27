@@ -32,7 +32,7 @@ port in `Servers -> Edit Servers`
 
 1. You can change PAC rules by editing the PAC file. When you save the PAC file
 with any editor, Shadowsocks will notify browsers about the change automatically
-2. You can also update PAC file from [GFWList] (maintained by 3rd party)
+2. You can also update PAC file from [GFWList] \(maintained by 3rd party)
 3. You can also use online PAC URL
 
 #### Server Auto Switching
@@ -54,30 +54,55 @@ If you want to manage multiple servers using other tools like SwitchyOmega,
 you can start multiple Shadowsocks instances. To avoid configuration conflicts,
 copy Shadowsocks to a new directory and choose a different local port.
 
-Also, make sure to use `SOCKS5` proxy in SwitchyOmega, since we have only
-one HTTP proxy instance.
+#### Global hotkeys
+
+Hotkeys are NOT registered automatically. You should re-register all hotkeys after
+restarting Shadowsocks. If you are using multiple instances of Shadowsocks,
+you must set different key combination for other instances.
+
+##### How to input?
+
+1. Put focus in the corresponding textbox.
+2. Press the key combination that you want to use.
+3. Release all keys when you think it is ready.
+4. Your input appears in the textbox.
+
+##### How to change?
+
+1. Put focus in the corresponding textbox.
+2. Press BackSpace key to clear content.
+3. Re-input new key combination.
+
+##### How to deactivate?
+
+1. Clear content in the textbox that you want to deactivate,
+if you want to deactivate all, please clear all textboxes.
+2. Press OK button to confirm.
+
+##### Meaning of label color
+
+- Green: This key combination is not occupied by other programs and register successfully.
+- Yellow: This key combination is occupied by other programs and you have to change to another one.
+- Transparent without color: The initial status.
 
 #### Server Configuration
 
 Please visit [Servers] for more information.
 
-#### Portable Mode
-
-If you want to put all temporary files into shadowsocks/temp folder instead of
-system temp folder, create a `shadowsocks_portable_mode.txt` into shadowsocks folder.
-
 #### Develop
 
-Visual Studio 2015 is required.
+[Visual Studio 2015] & [.NET Framework 4.6.2 Developer Pack] are required.
 
 #### License
 
 GPLv3
 
 
-[Appveyor]:       https://ci.appveyor.com/project/icylogic/shadowsocks-windows-l9mwe
-[Build Status]:   https://ci.appveyor.com/api/projects/status/ytllr9yjkbpc2tu2/branch/master
+[Appveyor]:       https://ci.appveyor.com/project/wongsyrone/shadowsocks-windows-pljx3
+[Build Status]:   https://ci.appveyor.com/api/projects/status/otie4km27ws1wak2/branch/master?svg=true
 [latest release]: https://github.com/shadowsocks/shadowsocks-csharp/releases
 [GFWList]:        https://github.com/gfwlist/gfwlist
 [Servers]:        https://github.com/shadowsocks/shadowsocks/wiki/Ports-and-Clients#linux--server-side
 [中文说明]:       https://github.com/shadowsocks/shadowsocks-windows/wiki/Shadowsocks-Windows-%E4%BD%BF%E7%94%A8%E8%AF%B4%E6%98%8E
+[Visual Studio 2015]: https://www.visualstudio.com/downloads/
+[.NET Framework 4.6.2 Developer Pack]: https://www.microsoft.com/download/details.aspx?id=53321

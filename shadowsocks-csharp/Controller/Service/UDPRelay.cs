@@ -24,7 +24,7 @@ namespace Shadowsocks.Controller
             this._cache = new LRUCache<IPEndPoint, UDPHandler>(512);  // todo: choose a smart number
         }
 
-        public bool Handle(byte[] firstPacket, int length, Socket socket, object state)
+        public override bool Handle(byte[] firstPacket, int length, Socket socket, object state)
         {
             if (socket.ProtocolType != ProtocolType.Udp)
             {
@@ -39,7 +39,7 @@ namespace Shadowsocks.Controller
             UDPHandler handler = _cache.get(remoteEndPoint);
             if (handler == null)
             {
-                handler = new UDPHandler(socket, _controller.GetAServer(IStrategyCallerType.UDP, remoteEndPoint), remoteEndPoint);
+                handler = new UDPHandler(socket, _controller.GetAServer(IStrategyCallerType.UDP, remoteEndPoint, null/*TODO: fix this*/), remoteEndPoint);
                 _cache.add(remoteEndPoint, handler);
             }
             handler.Send(firstPacket, length);
@@ -85,20 +85,21 @@ namespace Shadowsocks.Controller
                 int outlen;
                 encryptor.Encrypt(dataIn, length - 3, dataOut, out outlen);
                 Logging.Debug(_localEndPoint, _remoteEndPoint, outlen, "UDP Relay");
-                _remote.SendTo(dataOut, outlen, SocketFlags.None, _remoteEndPoint);
+                _remote?.SendTo(dataOut, outlen, SocketFlags.None, _remoteEndPoint);
             }
 
             public void Receive()
             {
                 EndPoint remoteEndPoint = new IPEndPoint(IPAddress.Any, 0);
                 Logging.Debug($"++++++Receive Server Port, size:" + _buffer.Length);
-                _remote.BeginReceiveFrom(_buffer, 0, _buffer.Length, 0, ref remoteEndPoint, new AsyncCallback(RecvFromCallback), null);
+                _remote?.BeginReceiveFrom(_buffer, 0, _buffer.Length, 0, ref remoteEndPoint, new AsyncCallback(RecvFromCallback), null);
             }
 
             public void RecvFromCallback(IAsyncResult ar)
             {
                 try
                 {
+                    if (_remote == null) return;
                     EndPoint remoteEndPoint = new IPEndPoint(IPAddress.Any, 0);
                     int bytesRead = _remote.EndReceiveFrom(ar, ref remoteEndPoint);
 
@@ -112,7 +113,7 @@ namespace Shadowsocks.Controller
                     Array.Copy(dataOut, 0, sendBuf, 3, outlen);
 
                     Logging.Debug(_localEndPoint, _remoteEndPoint, outlen, "UDP Relay");
-                    _local.SendTo(sendBuf, outlen + 3, 0, _localEndPoint);
+                    _local?.SendTo(sendBuf, outlen + 3, 0, _localEndPoint);
                     Receive();
                 }
                 catch (ObjectDisposedException)
@@ -132,7 +133,7 @@ namespace Shadowsocks.Controller
             {
                 try
                 {
-                    _remote.Close();
+                    _remote?.Close();
                 }
                 catch (ObjectDisposedException)
                 {

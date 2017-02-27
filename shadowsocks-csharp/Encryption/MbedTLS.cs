@@ -12,6 +12,9 @@ namespace Shadowsocks.Encryption
     {
         const string DLLNAME = "libsscrypto";
 
+        public const int MBEDTLS_ENCRYPT = 1;
+        public const int MBEDTLS_DECRYPT = 0;
+
         static MbedTLS()
         {
             string dllPath = Utils.GetTempPath("libsscrypto.dll");
@@ -24,42 +27,50 @@ namespace Shadowsocks.Encryption
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.ToString());
+                Logging.LogUsefulException(e);
             }
             LoadLibrary(dllPath);
+        }
+
+        public static byte[] MD5(byte[] input)
+        {
+            byte[] output = new byte[16];
+            md5(input, (uint)input.Length, output);
+            return output;
         }
 
         [DllImport("Kernel32.dll")]
         private static extern IntPtr LoadLibrary(string path);
 
-        public const int MD5_CTX_SIZE = 88;
-
-        public static byte[] MD5(byte[] input)
-        {
-            IntPtr ctx = Marshal.AllocHGlobal(MD5_CTX_SIZE);
-            byte[] output = new byte[16];
-            MbedTLS.md5_init(ctx);
-            MbedTLS.md5_starts(ctx);
-            MbedTLS.md5_update(ctx, input, (uint)input.Length);
-            MbedTLS.md5_finish(ctx, output);
-            MbedTLS.md5_free(ctx);
-            Marshal.FreeHGlobal(ctx);
-            return output;
-        }
+        [DllImport(DLLNAME, CallingConvention = CallingConvention.Cdecl)]
+        public static extern IntPtr cipher_info_from_string(string cipher_name);
 
         [DllImport(DLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        public extern static void md5_init(IntPtr ctx);
+        public static extern void cipher_init(IntPtr ctx);
 
         [DllImport(DLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        public extern static void md5_free(IntPtr ctx);
+        public static extern int cipher_setup(IntPtr ctx, IntPtr cipher_info);
+
+        // XXX: Check operation before using it
+        [DllImport(DLLNAME, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int cipher_setkey(IntPtr ctx, byte[] key, int key_bitlen, int operation);
 
         [DllImport(DLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        public extern static void md5_starts(IntPtr ctx);
+        public static extern int cipher_set_iv(IntPtr ctx, byte[] iv, int iv_len);
 
         [DllImport(DLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        public extern static void md5_update(IntPtr ctx, byte[] input, uint ilen);
+        public static extern int cipher_reset(IntPtr ctx);
 
         [DllImport(DLLNAME, CallingConvention = CallingConvention.Cdecl)]
-        public extern static void md5_finish(IntPtr ctx, byte[] output);
+        public static extern int cipher_update(IntPtr ctx, byte[] input, int ilen, byte[] output, ref int olen);
+
+        [DllImport(DLLNAME, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void cipher_free(IntPtr ctx);
+
+        [DllImport(DLLNAME, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void md5(byte[] input, uint ilen, byte[] output);
+
+        [DllImport(DLLNAME, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int cipher_get_size_ex();
     }
 }
