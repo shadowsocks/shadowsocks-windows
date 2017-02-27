@@ -86,7 +86,7 @@ namespace ZXing.QrCode.Internal
          {
             encoding = DEFAULT_BYTE_MODE_ENCODING;
          }
-         bool generateECI = !DEFAULT_BYTE_MODE_ENCODING.Equals(encoding);
+         bool generateECI = !DEFAULT_BYTE_MODE_ENCODING.Equals(encoding, StringComparison.OrdinalIgnoreCase);
 #else
          // Silverlight supports only UTF-8 and UTF-16 out-of-the-box
          const string encoding = "UTF-8";
@@ -514,7 +514,8 @@ namespace ZXing.QrCode.Internal
                               BitArray bits,
                               String encoding)
       {
-        if (mode.Equals(Mode.BYTE))
+         // TODO: check the purpose of this .Equals(obj)
+        if (mode == Mode.BYTE)
             append8BitBytes(content, bits, encoding);
             else
                 throw new WriterException("Invalid mode: " + mode);

@@ -1,10 +1,9 @@
-﻿using Shadowsocks.Controller;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Text;
-using System.Windows.Forms;
-using SimpleJson;
+
+using Shadowsocks.Controller;
+using Newtonsoft.Json;
 
 namespace Shadowsocks.Model
 {
@@ -23,22 +22,23 @@ namespace Shadowsocks.Model
         public int localPort;
         public string pacUrl;
         public bool useOnlinePac;
+        public bool secureLocalPac = true;
         public bool availabilityStatistics;
         public bool autoCheckUpdate;
+        public bool checkPreRelease;
+        public bool isVerboseLogging;
         public LogViewerConfig logViewer;
+        public ProxyConfig proxy;
+        public HotkeyConfig hotkey;
 
         private static string CONFIG_FILE = "gui-config.json";
 
         public Server GetCurrentServer()
         {
             if (index >= 0 && index < configs.Count)
-            {
                 return configs[index];
-            }
             else
-            {
                 return GetDefaultServer();
-            }
         }
 
         public static void CheckServer(Server server)
@@ -46,6 +46,7 @@ namespace Shadowsocks.Model
             CheckPort(server.server_port);
             CheckPassword(server.password);
             CheckServer(server.server);
+            CheckTimeout(server.timeout, Server.MaxServerTimeoutSec);
         }
 
         public static Configuration Load()
@@ -53,27 +54,32 @@ namespace Shadowsocks.Model
             try
             {
                 string configContent = File.ReadAllText(CONFIG_FILE);
-                Configuration config = SimpleJson.SimpleJson.DeserializeObject<Configuration>(configContent, new JsonSerializerStrategy());
+                Configuration config = JsonConvert.DeserializeObject<Configuration>(configContent);
                 config.isDefault = false;
+
+                if (config.configs == null)
+                    config.configs = new List<Server>();
+                if (config.configs.Count == 0)
+                    config.configs.Add(GetDefaultServer());
                 if (config.localPort == 0)
-                {
                     config.localPort = 1080;
-                }
-                if (config.index == -1)
-                {
-                    if (config.strategy == null)
-                    {
-                        config.index = 0;
-                    }
-                }
+                if (config.index == -1 && config.strategy == null)
+                    config.index = 0;
+                if (config.logViewer == null)
+                    config.logViewer = new LogViewerConfig();
+                if (config.proxy == null)
+                    config.proxy = new ProxyConfig();
+                if (config.hotkey == null)
+                    config.hotkey = new HotkeyConfig();
+
+                config.proxy.CheckConfig();
+
                 return config;
             }
             catch (Exception e)
             {
                 if (!(e is FileNotFoundException))
-                {
-                    Console.WriteLine(e);
-                }
+                    Logging.LogUsefulException(e);
                 return new Configuration
                 {
                     index = 0,
@@ -91,33 +97,24 @@ namespace Shadowsocks.Model
         public static void Save(Configuration config)
         {
             if (config.index >= config.configs.Count)
-            {
                 config.index = config.configs.Count - 1;
-            }
             if (config.index < -1)
-            {
                 config.index = -1;
-            }
-            if (config.index == -1)
-            {
-                if (config.strategy == null)
-                {
-                    config.index = 0;
-                }
-            }
+            if (config.index == -1 && config.strategy == null)
+                config.index = 0;
             config.isDefault = false;
             try
             {
                 using (StreamWriter sw = new StreamWriter(File.Open(CONFIG_FILE, FileMode.Create)))
                 {
-                    string jsonString = SimpleJson.SimpleJson.SerializeObject(config);
+                    string jsonString = JsonConvert.SerializeObject(config, Formatting.Indented);
                     sw.Write(jsonString);
                     sw.Flush();
                 }
             }
             catch (IOException e)
             {
-                Console.Error.WriteLine(e);
+                Logging.LogUsefulException(e);
             }
         }
 
@@ -129,55 +126,39 @@ namespace Shadowsocks.Model
         private static void Assert(bool condition)
         {
             if (!condition)
-            {
                 throw new Exception(I18N.GetString("assertion failure"));
-            }
         }
 
         public static void CheckPort(int port)
         {
             if (port <= 0 || port > 65535)
-            {
                 throw new ArgumentException(I18N.GetString("Port out of range"));
-            }
         }
 
         public static void CheckLocalPort(int port)
         {
             CheckPort(port);
             if (port == 8123)
-            {
                 throw new ArgumentException(I18N.GetString("Port can't be 8123"));
-            }
         }
 
         private static void CheckPassword(string password)
         {
-            if (string.IsNullOrEmpty(password))
-            {
+            if (password.IsNullOrEmpty())
                 throw new ArgumentException(I18N.GetString("Password can not be blank"));
-            }
         }
 
-        private static void CheckServer(string server)
+        public static void CheckServer(string server)
         {
-            if (string.IsNullOrEmpty(server))
-            {
+            if (server.IsNullOrEmpty())
                 throw new ArgumentException(I18N.GetString("Server IP can not be blank"));
-            }
         }
 
-        private class JsonSerializerStrategy : SimpleJson.PocoJsonSerializerStrategy
+        public static void CheckTimeout(int timeout, int maxTimeout)
         {
-            // convert string to int
-            public override object DeserializeObject(object value, Type type)
-            {
-                if (type == typeof(Int32) && value.GetType() == typeof(string))
-                {
-                    return Int32.Parse(value.ToString());
-                }
-                return base.DeserializeObject(value, type);
-            }
+            if (timeout <= 0 || timeout > maxTimeout)
+                throw new ArgumentException(string.Format(
+                    I18N.GetString("Timeout is invalid, it should not exceed {0}"), maxTimeout));
         }
     }
 }

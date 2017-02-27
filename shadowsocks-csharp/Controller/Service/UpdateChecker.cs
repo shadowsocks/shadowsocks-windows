@@ -1,12 +1,9 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Net;
-using System.Reflection;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.IO;
-using SimpleJson;
+
+using Newtonsoft.Json.Linq;
 
 using Shadowsocks.Model;
 using Shadowsocks.Util;
@@ -21,12 +18,41 @@ namespace Shadowsocks.Controller
         private Configuration config;
         public bool NewVersionFound;
         public string LatestVersionNumber;
+        public string LatestVersionSuffix;
         public string LatestVersionName;
         public string LatestVersionURL;
         public string LatestVersionLocalName;
         public event EventHandler CheckUpdateCompleted;
 
-        public const string Version = "2.5.8";
+        public const string Version = "3.4.3";
+
+        private class CheckUpdateTimer : System.Timers.Timer
+        {
+            public Configuration config;
+
+            public CheckUpdateTimer(int p) : base(p)
+            {
+            }
+        }
+
+        public void CheckUpdate(Configuration config, int delay)
+        {
+            CheckUpdateTimer timer = new CheckUpdateTimer(delay);
+            timer.AutoReset = false;
+            timer.Elapsed += Timer_Elapsed;
+            timer.config = config;
+            timer.Enabled = true;
+        }
+
+        private void Timer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+        {
+            CheckUpdateTimer timer = (CheckUpdateTimer)sender;
+            Configuration config = timer.config;
+            timer.Elapsed -= Timer_Elapsed;
+            timer.Enabled = false;
+            timer.Dispose();
+            CheckUpdate(config);
+        }
 
         private class CheckUpdateTimer : System.Timers.Timer
         {
@@ -79,26 +105,32 @@ namespace Shadowsocks.Controller
             {
                 string response = e.Result;
 
-                JsonArray result = (JsonArray)SimpleJson.SimpleJson.DeserializeObject(e.Result);
+                JArray result = JArray.Parse(response);
 
                 List<Asset> asserts = new List<Asset>();
-                foreach (JsonObject release in result)
+                if (result != null)
                 {
-                    if ((bool)release["prerelease"])
+                    foreach (JObject release in result)
                     {
-                        continue;
-                    }
-                    foreach (JsonObject asset in (JsonArray)release["assets"])
-                    {
-                        Asset ass = new Asset();
-                        ass.Parse(asset);
-                        if (ass.IsNewVersion(Version))
+                        var isPreRelease = (bool) release["prerelease"];
+                        if (isPreRelease && !config.checkPreRelease)
                         {
-                            asserts.Add(ass);
+                            continue;
+                        }
+                        foreach (JObject asset in (JArray)release["assets"])
+                        {
+                            Asset ass = Asset.ParseAsset(asset);
+                            if (ass != null)
+                            {
+                                ass.prerelease = isPreRelease;
+                                if (ass.IsNewVersion(Version, config.checkPreRelease))
+                                {
+                                    asserts.Add(ass);
+                                }
+                            }
                         }
                     }
                 }
-
                 if (asserts.Count != 0)
                 {
                     SortByVersions(asserts);
@@ -107,6 +139,7 @@ namespace Shadowsocks.Controller
                     LatestVersionURL = asset.browser_download_url;
                     LatestVersionNumber = asset.version;
                     LatestVersionName = asset.name;
+                    LatestVersionSuffix = asset.suffix == null ? "" : $"-{asset.suffix}";
 
                     startDownload();
                 }
@@ -129,8 +162,7 @@ namespace Shadowsocks.Controller
         {
             try
             {
-                string temppath = Utils.GetTempPath();
-                LatestVersionLocalName = Path.Combine(temppath, LatestVersionName);
+                LatestVersionLocalName = Utils.GetTempPath(LatestVersionName);
                 WebClient http = CreateWebClient();
                 http.DownloadFileCompleted += Http_DownloadFileCompleted;
                 http.DownloadFileAsync(new Uri(LatestVersionURL), LatestVersionLocalName);
@@ -145,12 +177,12 @@ namespace Shadowsocks.Controller
         {
             try
             {
-                if(e.Error != null)
+                if (e.Error != null)
                 {
                     Logging.LogUsefulException(e.Error);
                     return;
                 }
-                Logging.Debug($"New version {LatestVersionNumber} found: {LatestVersionLocalName}");
+                Logging.Debug($"New version {LatestVersionNumber}{LatestVersionSuffix} found: {LatestVersionLocalName}");
                 if (CheckUpdateCompleted != null)
                 {
                     CheckUpdateCompleted(this, new EventArgs());
@@ -172,19 +204,47 @@ namespace Shadowsocks.Controller
 
         private void SortByVersions(List<Asset> asserts)
         {
-            asserts.Sort(new VersionComparer());
+            asserts.Sort();
         }
 
-        public class Asset
+        public class Asset : IComparable<Asset>
         {
             public bool prerelease;
             public string name;
             public string version;
             public string browser_download_url;
+            public string suffix;
 
-            public bool IsNewVersion(string currentVersion)
+            public static Asset ParseAsset(JObject assertJObject)
             {
-                if (prerelease)
+                var name = (string) assertJObject["name"];
+                Match match = Regex.Match(name, @"^Shadowsocks-(?<version>\d+(?:\.\d+)*)(?:|-(?<suffix>.+))\.\w+$",
+                    RegexOptions.IgnoreCase);
+                if (match.Success)
+                {
+                    string version = match.Groups["version"].Value;
+
+                    var asset = new Asset
+                    {
+                        browser_download_url = (string) assertJObject["browser_download_url"],
+                        name = name,
+                        version = version
+                    };
+
+                    if (match.Groups["suffix"].Success)
+                    {
+                        asset.suffix = match.Groups["suffix"].Value;
+                    }
+
+                    return asset;
+                }
+
+                return null;
+            }
+
+            public bool IsNewVersion(string currentVersion, bool checkPreRelease)
+            {
+                if (prerelease && !checkPreRelease)
                 {
                     return false;
                 }
@@ -192,28 +252,8 @@ namespace Shadowsocks.Controller
                 {
                     return false;
                 }
-                return CompareVersion(version, currentVersion) > 0;
-            }
-
-            public void Parse(JsonObject asset)
-            {
-                name = (string)asset["name"];
-                browser_download_url = (string)asset["browser_download_url"];
-                version = ParseVersionFromURL(browser_download_url);
-                prerelease = browser_download_url.IndexOf("prerelease") >= 0;
-            }
-
-            private static string ParseVersionFromURL(string url)
-            {
-                Match match = Regex.Match(url, @".*Shadowsocks-win.*?-([\d\.]+)\.\w+", RegexOptions.IgnoreCase);
-                if (match.Success)
-                {
-                    if (match.Groups.Count == 2)
-                    {
-                        return match.Groups[1].Value;
-                    }
-                }
-                return null;
+                var cmp = CompareVersion(version, currentVersion);
+                return cmp > 0;
             }
 
             public static int CompareVersion(string l, string r)
@@ -231,16 +271,11 @@ namespace Shadowsocks.Controller
                 }
                 return 0;
             }
-        }
 
-        class VersionComparer : IComparer<Asset>
-        {
-            // Calls CaseInsensitiveComparer.Compare with the parameters reversed. 
-            public int Compare(Asset x, Asset y)
+            public int CompareTo(Asset other)
             {
-                return Asset.CompareVersion(x.version, y.version);
+                return CompareVersion(version, other.version);
             }
         }
-
     }
 }
