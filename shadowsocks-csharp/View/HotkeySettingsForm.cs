@@ -7,7 +7,6 @@ using System.Text;
 using System.Windows.Forms;
 
 using Shadowsocks.Controller;
-using Shadowsocks.Controller.Hotkeys;
 using Shadowsocks.Model;
 using Shadowsocks.Properties;
 using Shadowsocks.Util;
@@ -16,18 +15,23 @@ namespace Shadowsocks.View
 {
     public partial class HotkeySettingsForm : Form
     {
-        private readonly ShadowsocksController _controller;
+        private ShadowsocksController _controller;
 
         // this is a copy of configuration that we are working on
         private HotkeyConfig _modifiedConfig;
 
-        private readonly IEnumerable<TextBox> _allTextBoxes;
+        private StringBuilder _sb = new StringBuilder();
+
+        private IEnumerable<TextBox> _allTextBoxes;
+
+        private static Label _lb = null;
+        private static HotKeys.HotKeyCallBackHandler _callBack = null;
 
         public HotkeySettingsForm(ShadowsocksController controller)
         {
             InitializeComponent();
             UpdateTexts();
-            Icon = Icon.FromHandle(Resources.ssw128.GetHicon());
+            this.Icon = Icon.FromHandle(Resources.ssw128.GetHicon());
 
             _controller = controller;
             _controller.ConfigChanged += controller_ConfigChanged;
@@ -35,7 +39,7 @@ namespace Shadowsocks.View
             LoadCurrentConfiguration();
 
             // get all textboxes belong to this form
-            _allTextBoxes = tableLayoutPanel1.GetChildControls<TextBox>();
+            _allTextBoxes = HotKeys.GetChildControls<TextBox>(this.tableLayoutPanel1);
             if (!_allTextBoxes.Any()) throw new Exception("Cannot get all textboxes");
         }
 
@@ -53,7 +57,8 @@ namespace Shadowsocks.View
         private void LoadConfiguration(HotkeyConfig config)
         {
             SwitchSystemProxyTextBox.Text = config.SwitchSystemProxy;
-            SwitchProxyModeTextBox.Text = config.SwitchSystemProxyMode;
+            ChangeToPacTextBox.Text = config.ChangeToPac;
+            ChangeToGlobalTextBox.Text = config.ChangeToGlobal;
             SwitchAllowLanTextBox.Text = config.SwitchAllowLan;
             ShowLogsTextBox.Text = config.ShowLogs;
             ServerMoveUpTextBox.Text = config.ServerMoveUp;
@@ -64,7 +69,8 @@ namespace Shadowsocks.View
         {
             // I18N stuff
             SwitchSystemProxyLabel.Text = I18N.GetString("Switch system proxy");
-            SwitchProxyModeLabel.Text = I18N.GetString("Switch system proxy mode");
+            ChangeToPacLabel.Text = I18N.GetString("Switch to PAC mode");
+            ChangeToGlobalLabel.Text = I18N.GetString("Switch to Global mode");
             SwitchAllowLanLabel.Text = I18N.GetString("Switch share over LAN");
             ShowLogsLabel.Text = I18N.GetString("Show Logs");
             ServerMoveUpLabel.Text = I18N.GetString("Switch to prev server");
@@ -72,7 +78,7 @@ namespace Shadowsocks.View
             btnOK.Text = I18N.GetString("OK");
             btnCancel.Text = I18N.GetString("Cancel");
             btnRegisterAll.Text = I18N.GetString("Reg All");
-            Text = I18N.GetString("Edit Hotkeys...");
+            this.Text = I18N.GetString("Edit Hotkeys...");
         }
 
         /// <summary>
@@ -80,7 +86,7 @@ namespace Shadowsocks.View
         /// </summary>
         private void HotkeyDown(object sender, KeyEventArgs e)
         {
-            StringBuilder sb = new StringBuilder();
+            _sb.Length = 0;
             //Combination key only
             if (e.Modifiers != 0)
             {
@@ -88,15 +94,15 @@ namespace Shadowsocks.View
                 // Windows key is reserved by operating system, we deny this key.
                 if (e.Control)
                 {
-                    sb.Append("Ctrl+");
+                    _sb.Append("Ctrl+");
                 }
                 if (e.Alt)
                 {
-                    sb.Append("Alt+");
+                    _sb.Append("Alt+");
                 }
                 if (e.Shift)
                 {
-                    sb.Append("Shift+");
+                    _sb.Append("Shift+");
                 }
 
                 Keys keyvalue = (Keys) e.KeyValue;
@@ -104,18 +110,18 @@ namespace Shadowsocks.View
                     (keyvalue >= Keys.A && keyvalue <= Keys.Z) ||
                     (keyvalue >= Keys.F1 && keyvalue <= Keys.F12))
                 {
-                    sb.Append(e.KeyCode);
+                    _sb.Append(e.KeyCode);
                 }
                 else if (keyvalue >= Keys.D0 && keyvalue <= Keys.D9)
                 {
-                    sb.Append('D').Append((char) e.KeyValue);
+                    _sb.Append('D').Append((char) e.KeyValue);
                 }
                 else if (keyvalue >= Keys.NumPad0 && keyvalue <= Keys.NumPad9)
                 {
-                    sb.Append("NumPad").Append((char) (e.KeyValue - 48));
+                    _sb.Append("NumPad").Append((char) (e.KeyValue - 48));
                 }
             }
-            ((TextBox) sender).Text = sb.ToString();
+            ((TextBox) sender).Text = _sb.ToString();
         }
 
         /// <summary>
@@ -123,8 +129,8 @@ namespace Shadowsocks.View
         /// </summary>
         private void HotkeyUp(object sender, KeyEventArgs e)
         {
-            var tb = (TextBox) sender;
-            var content = tb.Text.TrimEnd();
+            TextBox tb = sender as TextBox;
+            string content = tb.Text.TrimEnd();
             if (content.Length >= 1 && content[content.Length - 1] == '+')
             {
                 tb.Text = "";
@@ -133,7 +139,7 @@ namespace Shadowsocks.View
 
         private void TextBox_TextChanged(object sender, EventArgs e)
         {
-            var tb = (TextBox) sender;
+            TextBox tb = sender as TextBox;
 
             if (tb.Text == "")
             {
@@ -144,17 +150,15 @@ namespace Shadowsocks.View
 
         private void UnregHotkey(TextBox tb)
         {
-            HotKeys.HotKeyCallBackHandler callBack;
-            Label lb;
 
-            PrepareForHotkey(tb, out callBack, out lb);
+            PrepareForHotkey(tb, out _callBack, out _lb);
 
-            UnregPrevHotkey(callBack);
+            UnregPrevHotkey(_callBack);
         }
 
         private void CancelButton_Click(object sender, EventArgs e)
         {
-            Close();
+            this.Close();
         }
 
         private void OKButton_Click(object sender, EventArgs e)
@@ -175,7 +179,7 @@ namespace Shadowsocks.View
 
             // All check passed, saving
             SaveConfig();
-            Close();
+            this.Close();
         }
 
         private void RegisterAllButton_Click(object sender, EventArgs e)
@@ -200,12 +204,9 @@ namespace Shadowsocks.View
                 return false;
             }
 
-            HotKeys.HotKeyCallBackHandler callBack;
-            Label lb;
+            PrepareForHotkey(tb, out _callBack, out _lb);
 
-            PrepareForHotkey(tb, out callBack, out lb);
-
-            UnregPrevHotkey(callBack);
+            UnregPrevHotkey(_callBack);
 
             // try to register keys
             // if already registered by other progs
@@ -218,8 +219,8 @@ namespace Shadowsocks.View
             //         or change to another one
             // Transparent without color: first run or empty config
 
-            bool regResult = HotKeys.Regist(hotkey, callBack);
-            lb.BackColor = regResult ? Color.Green : Color.Yellow;
+            bool regResult = HotKeys.Regist(hotkey, _callBack);
+            _lb.BackColor = regResult ? Color.Green : Color.Yellow;
             return regResult;
         }
 
@@ -236,7 +237,8 @@ namespace Shadowsocks.View
         private void SaveConfig()
         {
             _modifiedConfig.SwitchSystemProxy = SwitchSystemProxyTextBox.Text;
-            _modifiedConfig.SwitchSystemProxyMode = SwitchProxyModeTextBox.Text;
+            _modifiedConfig.ChangeToPac = ChangeToPacTextBox.Text;
+            _modifiedConfig.ChangeToGlobal = ChangeToGlobalTextBox.Text;
             _modifiedConfig.SwitchAllowLan = SwitchAllowLanTextBox.Text;
             _modifiedConfig.ShowLogs = ShowLogsTextBox.Text;
             _modifiedConfig.ServerMoveUp = ServerMoveUpTextBox.Text;
@@ -244,7 +246,87 @@ namespace Shadowsocks.View
             _controller.SaveHotkeyConfig(_modifiedConfig);
         }
 
+        #region Callbacks
 
+        private void SwitchSystemProxyCallback()
+        {
+            bool enabled = _controller.GetConfigurationCopy().enabled;
+            _controller.ToggleEnable(!enabled);
+        }
+
+        private void ChangeToPacCallback()
+        {
+            bool enabled = _controller.GetConfigurationCopy().enabled;
+            if (enabled == false) return;
+            _controller.ToggleGlobal(false);
+        }
+
+        private void ChangeToGlobalCallback()
+        {
+            bool enabled = _controller.GetConfigurationCopy().enabled;
+            if (enabled == false) return;
+            _controller.ToggleGlobal(true);
+        }
+
+        private void SwitchAllowLanCallback()
+        {
+            var status = _controller.GetConfigurationCopy().shareOverLan;
+            _controller.ToggleShareOverLAN(!status);
+        }
+
+        private void ShowLogsCallback()
+        {
+            // Get the current MenuViewController in this program via reflection
+            FieldInfo fi = Assembly.GetExecutingAssembly().GetType("Shadowsocks.Program")
+                .GetField("_viewController",
+                    BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.IgnoreCase);
+            // To retrieve the value of a static field, pass null here
+            var mvc = fi.GetValue(null) as MenuViewController;
+            mvc.ShowLogForm_HotKey();
+        }
+
+        private void ServerMoveUpCallback()
+        {
+            int currIndex;
+            int serverCount;
+            GetCurrServerInfo(out currIndex, out serverCount);
+            if (currIndex - 1 < 0)
+            {
+                // revert to last server
+                currIndex = serverCount - 1;
+            }
+            else
+            {
+                currIndex -= 1;
+            }
+            _controller.SelectServerIndex(currIndex);
+        }
+
+        private void ServerMoveDownCallback()
+        {
+            int currIndex;
+            int serverCount;
+            GetCurrServerInfo(out currIndex, out serverCount);
+            if (currIndex + 1 == serverCount)
+            {
+                // revert to first server
+                currIndex = 0;
+            }
+            else
+            {
+                currIndex += 1;
+            }
+            _controller.SelectServerIndex(currIndex);
+        }
+
+        private void GetCurrServerInfo(out int currIndex, out int serverCount)
+        {
+            var currConfig = _controller.GetCurrentConfiguration();
+            currIndex = currConfig.index;
+            serverCount = currConfig.configs.Count;
+        }
+
+        #endregion
 
         #region Prepare hotkey
 
@@ -270,14 +352,14 @@ namespace Shadowsocks.View
             var labelName = rawName + "Label";
             var callbackName = rawName + "Callback";
 
-            var callback = HotkeyCallbacks.GetCallback(callbackName);
+            var callback = GetDelegateViaMethodName(this.GetType(), callbackName);
             if (callback == null)
             {
                 throw new Exception($"{callbackName} not found");
             }
             cb = callback as HotKeys.HotKeyCallBackHandler;
 
-            var label = GetFieldViaName(GetType(), labelName, this);
+            object label = GetFieldViaName(this.GetType(), labelName, this);
             if (label == null)
             {
                 throw new Exception($"{labelName} not found");
@@ -300,6 +382,23 @@ namespace Shadowsocks.View
             FieldInfo fi = type.GetField(name,
                 BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.IgnoreCase | BindingFlags.Static);
             return fi == null ? null : fi.GetValue(obj);
+        }
+
+        /// <summary>
+        /// Create hotkey callback handler delegate based on callback name
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="methodname"></param>
+        /// <returns></returns>
+        private Delegate GetDelegateViaMethodName(Type type, string methodname)
+        {
+            if (type == null) throw new ArgumentNullException(nameof(type));
+            if (methodname.IsNullOrEmpty()) throw new ArgumentException(nameof(methodname));
+            //HotkeySettingsForm form = new HotkeySettingsForm(_controller);
+            Type delegateType = Type.GetType("Shadowsocks.Util.HotKeys").GetNestedType("HotKeyCallBackHandler");
+            MethodInfo dynMethod = type.GetMethod(methodname,
+                BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.IgnoreCase);
+            return dynMethod == null ? null : Delegate.CreateDelegate(delegateType, this, dynMethod);
         }
 
         #endregion

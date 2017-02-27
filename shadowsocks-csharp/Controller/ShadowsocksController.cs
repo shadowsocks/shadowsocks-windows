@@ -5,14 +5,14 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
-using System.Web;
-using System.Windows.Forms;
 using Newtonsoft.Json;
 
 using Shadowsocks.Controller.Strategy;
 using Shadowsocks.Model;
 using Shadowsocks.Properties;
 using Shadowsocks.Util;
+
+using System.Windows.Forms;
 
 namespace Shadowsocks.Controller
 {
@@ -44,6 +44,18 @@ namespace Shadowsocks.Controller
         private bool stopped = false;
 
         private bool _systemProxyIsDirty = false;
+
+/*********************************************** <Start> add by Ian.May 2016/10/15 **************************************************/
+//_configBackup is ONLY for caching "_config.configs" (the servers), since we need _config when shadowfog is closing.We need to replace fognode server infomation
+/*********************************************** <Start> add by Ian.May 2016/10/15 **************************************************/
+        // writing to _configBackup should be extremely carefull, only BackUpSSconfig() can do this;
+        // _configBackup should never be saved directly, it only contains useful server backup infomation
+        private Configuration _configBackup; 
+        private ClientUser _clientUser;
+        public bool isShadowFogMode;
+        public bool isInitialStartup;
+        public bool isShadowFogStarted;// used for display" start/restart shadowfog"
+/************************************************ <End> add by Ian.May 2016/10/15 ***************************************************/
 
         public class PathEventArgs : EventArgs
         {
@@ -87,6 +99,18 @@ namespace Shadowsocks.Controller
 
         public ShadowsocksController()
         {
+/***************************************************<Start> add by Ian.May 2016/10/15****************************************************/
+// for destructing fogNodes at closing stage, should not be handed from _config;(shallow copy)
+/***************************************************<Start> add by Ian.May 2016/10/15****************************************************/
+            _configBackup = Configuration.Load();
+            _clientUser = ClientUser.Load();
+            isShadowFogMode = true;
+            isInitialStartup = true;
+            isShadowFogStarted = false; 
+
+            SystemProxy.Update(_configBackup, true);// forcedisable = true ,means force _config.enabled = false to update(close) system proxy;
+/****************************************************<End> add by Ian.May 2016/10/15*****************************************************/
+
             _config = Configuration.Load();
             StatisticsConfiguration = StatisticsStrategyConfiguration.Load();
             _strategyManager = new StrategyManager(this);
@@ -94,9 +118,60 @@ namespace Shadowsocks.Controller
             StartTrafficStatistics(61);
         }
 
+/***************************************************<Start> add by Ian.May 2016/11/02****************************************************/
+// for destructor cancelling system proxy
+/***************************************************<Start> add by Ian.May 2016/10/02****************************************************/
+        ~ShadowsocksController() //destructor
+        {
+           SystemProxy.Update(_config, true); // forcedisable = true ,means force _config.enabled = false to update(close) system proxy;
+        }
+/****************************************************<End> add by Ian.May 2016/10/15*****************************************************/
+
+
         public void Start()
         {
-            Reload();
+/***************************************************** <Start> add by Ian.May 2016/09/26 **********************************************/
+//use FogReload() to automatically selcect Fog Nodes at initial stage.
+/***************************************************** <Start> add by Ian.May 2016/09/26 **********************************************/
+            Configuration.Save(_config);
+            Console.WriteLine("Controller Starting..._config saved to file!");
+
+            if (isShadowFogMode)
+            {
+                // for initial start up, although isShadowFog Mode is checked,
+                // we don't want to call FogReload() without pressing the "Start ShadowFog" button;
+                if (isInitialStartup)
+                {
+                    Console.WriteLine("Initial Starting...");
+                    isInitialStartup = false;
+                    Reload();
+                }
+                else
+                {
+                    Console.WriteLine("FogMode Starting...");
+                    ToggleEnableWithoutReload(true); // start system proxy automatically
+
+                    bool global_temp = false; // for some SB starting shadowfog with global mode
+                    if(_config.global)
+                    {
+                        global_temp = _config.global;
+                        ToggleGlobal(false);
+                    }
+
+                    FogReload();
+
+                    if(global_temp)
+                    {
+                        ToggleGlobal(global_temp);
+                    }
+                }
+            }
+            else
+            {
+                Console.WriteLine("Normal Starting...");
+                /**********************************************************<End> add by Ian.May 2016/09/26***********************************************/
+                Reload();
+            }
         }
 
         protected void ReportError(Exception e)
@@ -141,12 +216,12 @@ namespace Shadowsocks.Controller
             return null;
         }
 
-        public Server GetAServer(IStrategyCallerType type, IPEndPoint localIPEndPoint, EndPoint destEndPoint)
+        public Server GetAServer(IStrategyCallerType type, IPEndPoint localIPEndPoint)
         {
             IStrategy strategy = GetCurrentStrategy();
             if (strategy != null)
             {
-                return strategy.GetAServer(type, localIPEndPoint, destEndPoint);
+                return strategy.GetAServer(type, localIPEndPoint);
             }
             if (_config.index < 0)
             {
@@ -160,6 +235,9 @@ namespace Shadowsocks.Controller
             _config.configs = servers;
             _config.localPort = localPort;
             Configuration.Save(_config);
+/**********************************<Start> Added by Ian.May Oct. 19***************************************************/
+            BackUpSSConfig();//Manully editing servers list will be recorded in configBackup.configs(_config.configs ==> _configBackup.configs)
+/**********************************<End> Added by Ian.May Oct. 19****************************************************/
         }
 
         public void SaveStrategyConfigurations(StatisticsStrategyConfiguration configuration)
@@ -188,16 +266,37 @@ namespace Shadowsocks.Controller
         public void ToggleEnable(bool enabled)
         {
             _config.enabled = enabled;
-            SaveConfig(_config);
+            UpdateSystemProxy();
+            /************************<Edited by IM Nov.2th>*****************************/
+            // avoid sava fog nodes in the gui-config.json
+            _configBackup.enabled = enabled;
+            SaveConfig(_configBackup);
+            /***************************************************************************/
             if (EnableStatusChanged != null)
             {
                 EnableStatusChanged(this, new EventArgs());
             }
         }
 
+        /************************<Edited by IM Dec.20th>*****************************/
+        /********************* Potenitial bug fixes for disposed object *************/
+        public void ToggleEnableWithoutReload(bool enabled)
+        {
+            _config.enabled = enabled;
+            UpdateSystemProxy();
+            _configBackup.enabled = enabled;
+            Configuration.Save(_configBackup);
+            if (EnableStatusChanged != null)
+            {
+                EnableStatusChanged(this, new EventArgs());
+            }
+        }
+        /***************************************************************************/
+
         public void ToggleGlobal(bool global)
         {
             _config.global = global;
+            UpdateSystemProxy();
             SaveConfig(_config);
             if (EnableGlobalChanged != null)
             {
@@ -221,13 +320,12 @@ namespace Shadowsocks.Controller
             SaveConfig(_config);
         }
 
-        public void EnableProxy(int type, string proxy, int port, int timeout)
+        public void EnableProxy(int type, string proxy, int port)
         {
             _config.proxy.useProxy = true;
             _config.proxy.proxyType = type;
             _config.proxy.proxyServer = proxy;
             _config.proxy.proxyPort = port;
-            _config.proxy.proxyTimeout = timeout;
             SaveConfig(_config);
         }
 
@@ -256,6 +354,12 @@ namespace Shadowsocks.Controller
 
         public void Stop()
         {
+/*****************************************************<Start> add by Ian.May 2016/10/15******************************************************/
+//_configBackup keeps the previous _config infomation ,and use _config for recieving fognode server infomation.
+//When exit(finish connection),we should erase the shadowfog server configs and put the orignial _config back
+            RecoverSSConfig(); //_configBackup.configs ==> _config.configs, then save _config;
+            Configuration.Save(_config); // correct opertation because this save extra configuration other than server infomation
+/******************************************************<End> add by Ian.May 2016/10/15*******************************************************/
             if (stopped)
             {
                 return;
@@ -271,9 +375,8 @@ namespace Shadowsocks.Controller
             }
             if (_config.enabled)
             {
-                SystemProxy.Update(_config, true, null);
+                SystemProxy.Update(_config, true); // forcedisable = true ,means force _config.enabled = false to update(close) system proxy;
             }
-            Encryption.RNG.Close();
         }
 
         public void TouchPACFile()
@@ -302,15 +405,11 @@ namespace Shadowsocks.Controller
 
         public static string GetQRCode(Server server)
         {
-            string tag = string.Empty;
-            string auth = server.auth ? "-auth" : string.Empty;
-            string parts = $"{server.method}{auth}:{server.password}@{server.server}:{server.server_port}";
+            string parts = server.method;
+            if (server.auth) parts += "-auth";
+            parts += ":" + server.password + "@" + server.server + ":" + server.server_port;
             string base64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(parts));
-            if(!server.remarks.IsNullOrEmpty())
-            {
-                tag = $"#{HttpUtility.UrlEncode(server.remarks, Encoding.UTF8)}";
-            }
-            return $"ss://{base64}{tag}";
+            return "ss://" + base64;
         }
 
         public void UpdatePACFromGFWList()
@@ -332,6 +431,7 @@ namespace Shadowsocks.Controller
         public void SavePACUrl(string pacUrl)
         {
             _config.pacUrl = pacUrl;
+            UpdateSystemProxy();
             SaveConfig(_config);
             if (ConfigChanged != null)
             {
@@ -342,16 +442,7 @@ namespace Shadowsocks.Controller
         public void UseOnlinePAC(bool useOnlinePac)
         {
             _config.useOnlinePac = useOnlinePac;
-            SaveConfig(_config);
-            if (ConfigChanged != null)
-            {
-                ConfigChanged(this, new EventArgs());
-            }
-        }
-
-        public void ToggleSecureLocalPac(bool enabled)
-        {
-            _config.secureLocalPac = enabled;
+            UpdateSystemProxy();
             SaveConfig(_config);
             if (ConfigChanged != null)
             {
@@ -369,9 +460,9 @@ namespace Shadowsocks.Controller
             }
         }
 
-        public void ToggleCheckingPreRelease(bool enabled)
+        public void SaveLogViewerConfig(LogViewerConfig newConfig)
         {
-            _config.checkPreRelease = enabled;
+            _config.logViewer = newConfig;
             Configuration.Save(_config);
             if (ConfigChanged != null)
             {
@@ -379,10 +470,9 @@ namespace Shadowsocks.Controller
             }
         }
 
-        public void SaveLogViewerConfig(LogViewerConfig newConfig)
+        public void SaveProxyConfig(ProxyConfig newConfig)
         {
-            _config.logViewer = newConfig;
-            newConfig.SaveSize();
+            _config.proxy = newConfig;
             Configuration.Save(_config);
             if (ConfigChanged != null)
             {
@@ -428,7 +518,6 @@ namespace Shadowsocks.Controller
 
         protected void Reload()
         {
-            Encryption.RNG.Reload();
             // some logic in configuration updated the config when saving, we need to read it again
             _config = Configuration.Load();
             StatisticsConfiguration = StatisticsStrategyConfiguration.Load();
@@ -507,6 +596,130 @@ namespace Shadowsocks.Controller
             Utils.ReleaseMemory(true);
         }
 
+/***********************************************<Start> add by Ian.May 2016/09/26*********************************************************/
+        protected void FogReload() // FogReload process shouldn't change _configBackUp content
+        {
+            Console.WriteLine("FogMode Reloading......");
+            ConfigurationShadowFog _fogServerReply = new ConfigurationShadowFog();
+
+            string fogNodeList = ConfigurationShadowFog.GetFogNodeList(_clientUser, isShadowFogStarted);
+            // Bad http response such as 404 will directly jump to shadowsocks reload();
+            if (null != fogNodeList) 
+            {
+                // _fogServerReply is used to recieve all msgs including errors when http response is 200 OK
+                // handle bad scheduler reply
+                try
+                {
+                    // a better way is to use JObject or JArray, refer to UpdateChecker.cs
+                    _fogServerReply = JsonConvert.DeserializeObject<ConfigurationShadowFog>(fogNodeList);
+                    /******************************************************/
+                    Console.WriteLine("FogNode = " + _fogServerReply.configs[0].server);
+                    /******************************************************/
+                }
+                catch (Exception e)
+                {
+                    // not use msg box because of following error code will pop up again
+                    Console.WriteLine("FogNodeInfo Format: " + e.Message); 
+                }
+
+                if (Convert.ToBoolean(_fogServerReply.errorcode))
+                {
+                    MessageBox.Show(I18N.GetString("Error code : ") + _fogServerReply.errorcode + "\n\r" + I18N.GetString("Error msg : ") + _fogServerReply.errormsg);
+                    throw new Exception("Error");
+                }
+
+                Console.WriteLine("access_token=" + _fogServerReply.access_token);
+                Console.WriteLine("expires_in=" + _fogServerReply.expires_in);
+
+                // In case the scheduler reply with null, this is an bad entrance to make shadowsocks strategymode crashed;
+                if (null != _fogServerReply.configs)
+                {
+                    _config.configs = _fogServerReply.configs; //value pass proved;
+                    Configuration.Save(_config); //_config now is written into gui-config.json with FogNode IP and Ports for "Reload()" next...
+                    Console.WriteLine(I18N.GetString("Fog Node obtained. Please check connection!"));
+                }
+            } 
+               
+            Reload(); // Reload() first load the _config from local gui-config.json
+            // here should add oneline to save servers from _configBackup and the other settings from _config
+            // while NOT CHANGING _config itself
+            string _configString = JsonConvert.SerializeObject(_config, Formatting.Indented);
+            Configuration _configCache = JsonConvert.DeserializeObject<Configuration>(_configString);
+            _configCache.configs = _configBackup.configs;
+            Configuration.Save(_configCache);
+        }
+
+        public void RecordClientUser(string userName, string hashedPassword, bool isSave)
+        {
+            // if userName = "", we believe the user doesn't want to submit anything
+            if ("" != userName)
+            {
+                _clientUser.name = userName;
+                _clientUser.pswdHashed = hashedPassword;
+                _clientUser.isRemeberUser = isSave;
+            }
+            else
+            {
+                // must force username = "" because the file record the username last time
+                // and for next time load, the username won't display correctly with blank""; 
+                _clientUser.name = "";
+                _clientUser.pswdHashed = "";
+                _clientUser.isRemeberUser = isSave;
+            }
+
+            if (isSave)
+            {
+                ClientUser.Save(_clientUser);
+            }
+            else
+            {
+                // if user don't remember username and pswhashed, 
+                // we need a blank object to save with isRemember = false;
+                ClientUser _clientUserBlank = new ClientUser();
+                _clientUserBlank.isRemeberUser = isSave;
+                ClientUser.Save(_clientUserBlank);
+            }
+        }
+
+        public bool GetClientUserIsRemember()
+        {
+            return _clientUser.isRemeberUser;
+        }
+
+        public string GetClientUserName()
+        {
+            return _clientUser.name;
+        }
+
+        public string GetClientUserPasswordHashed()
+        {
+            return _clientUser.pswdHashed;
+        }
+
+        // pass _config.servers ==> _configBackup.servers, value pass only!
+        public void BackUpSSConfig()
+        {
+            if (null != _config)
+            {
+                _configBackup.configs = _config.configs;
+            }
+        }
+
+        // pass _configBackup.servers ==> _config.servers
+        public void RecoverSSConfig()
+        {
+            if (null != _configBackup)
+            {
+                _config.configs = _configBackup.configs;
+            }
+        }
+        // WARNING: this is only used for servers display on ConfigForm Panel
+        public Configuration GetBackUpConfiguration()
+        {
+            return _configBackup;
+        }
+/******************************************************<End> add by Ian.May 2016/09/26**********************************************************/
+
         protected void SaveConfig(Configuration newConfig)
         {
             Configuration.Save(newConfig);
@@ -517,7 +730,7 @@ namespace Shadowsocks.Controller
         {
             if (_config.enabled)
             {
-                SystemProxy.Update(_config, false, _pacServer);
+                SystemProxy.Update(_config, false);
                 _systemProxyIsDirty = true;
             }
             else
@@ -525,7 +738,7 @@ namespace Shadowsocks.Controller
                 // only switch it off if we have switched it on
                 if (_systemProxyIsDirty)
                 {
-                    SystemProxy.Update(_config, false, _pacServer);
+                    SystemProxy.Update(_config, false);
                     _systemProxyIsDirty = false;
                 }
             }
@@ -557,10 +770,10 @@ namespace Shadowsocks.Controller
                 UpdatePACFromGFWList();
                 return;
             }
-            List<string> lines = GFWListUpdater.ParseResult(FileManager.NonExclusiveReadAllText(Utils.GetTempPath("gfwlist.txt")));
+            List<string> lines = GFWListUpdater.ParseResult(File.ReadAllText(Utils.GetTempPath("gfwlist.txt")));
             if (File.Exists(PACServer.USER_RULE_FILE))
             {
-                string local = FileManager.NonExclusiveReadAllText(PACServer.USER_RULE_FILE, Encoding.UTF8);
+                string local = File.ReadAllText(PACServer.USER_RULE_FILE, Encoding.UTF8);
                 using (var sr = new StringReader(local))
                 {
                     foreach (var rule in sr.NonWhiteSpaceLines())
@@ -574,7 +787,7 @@ namespace Shadowsocks.Controller
             string abpContent;
             if (File.Exists(PACServer.USER_ABP_FILE))
             {
-                abpContent = FileManager.NonExclusiveReadAllText(PACServer.USER_ABP_FILE, Encoding.UTF8);
+                abpContent = File.ReadAllText(PACServer.USER_ABP_FILE, Encoding.UTF8);
             }
             else
             {
@@ -583,18 +796,13 @@ namespace Shadowsocks.Controller
             abpContent = abpContent.Replace("__RULES__", JsonConvert.SerializeObject(lines, Formatting.Indented));
             if (File.Exists(PACServer.PAC_FILE))
             {
-                string original = FileManager.NonExclusiveReadAllText(PACServer.PAC_FILE, Encoding.UTF8);
+                string original = File.ReadAllText(PACServer.PAC_FILE, Encoding.UTF8);
                 if (original == abpContent)
                 {
                     return;
                 }
             }
             File.WriteAllText(PACServer.PAC_FILE, abpContent, Encoding.UTF8);
-        }
-
-        public void CopyPacUrl()
-        {
-            Clipboard.SetDataObject(_pacServer.PacUrl);
         }
 
         #region Memory Management

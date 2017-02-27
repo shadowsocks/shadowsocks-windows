@@ -54,9 +54,9 @@ namespace Shadowsocks.View
             topMostTrigger = config.topMost;
             wrapTextTrigger = config.wrapText;
             toolbarTrigger = config.toolbarShown;
-            LogMessageTextBox.BackColor = config.BackgroundColor;
-            LogMessageTextBox.ForeColor = config.TextColor;
-            LogMessageTextBox.Font = config.Font;
+            LogMessageTextBox.BackColor = config.GetBackgroundColor();
+            LogMessageTextBox.ForeColor = config.GetTextColor();
+            LogMessageTextBox.Font = config.GetFont();
 
             controller.TrafficChanged += controller_TrafficChanged;
 
@@ -229,11 +229,11 @@ namespace Shadowsocks.View
 
             LogViewerConfig config = controller.GetConfigurationCopy().logViewer;
 
-            Height = config.Height;
-            Width = config.Width;
-            Top = config.BestTop;
-            Left = config.BestLeft;
-            if (config.Maximized)
+            Height = config.height;
+            Width = config.width;
+            Top = config.GetBestTop();
+            Left = config.GetBestLeft();
+            if (config.maximized)
             {
                 WindowState = FormWindowState.Maximized;
             }
@@ -258,15 +258,15 @@ namespace Shadowsocks.View
             config.topMost = topMostTrigger;
             config.wrapText = wrapTextTrigger;
             config.toolbarShown = toolbarTrigger;
-            config.Font=LogMessageTextBox.Font;
-            config.BackgroundColor=LogMessageTextBox.BackColor;
-            config.TextColor=LogMessageTextBox.ForeColor;
-            if (WindowState != FormWindowState.Minimized && !(config.Maximized = WindowState == FormWindowState.Maximized))
+            config.SetFont(LogMessageTextBox.Font);
+            config.SetBackgroundColor(LogMessageTextBox.BackColor);
+            config.SetTextColor(LogMessageTextBox.ForeColor);
+            if (WindowState != FormWindowState.Minimized && !(config.maximized = WindowState == FormWindowState.Maximized))
             {
-                config.Top = Top;
-                config.Left = Left;
-                config.Height = Height;
-                config.Width = Width;
+                config.top = Top;
+                config.left = Left;
+                config.height = Height;
+                config.width = Width;
             }
             controller.SaveLogViewerConfig(config);
         }

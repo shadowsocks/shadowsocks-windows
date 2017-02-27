@@ -1,0 +1,8 @@
+1. 更新软件代码，之后发布新tags 
+	例如：	$ git tag -a 0.4.5 -m "reduce probability of crashing down"
+			$ git push origin --tags
+	可以用 git tag 命令直接查看当前tags
+
+2. 在github/gitoschina上登录用户后，编辑最新tag，并release，填入相关信息，并按照标准上传二进制压缩文件，命名严格按照“版本命名规则”
+
+3.在shadowfog/download文件下更新shadowfog-latest.zip文件

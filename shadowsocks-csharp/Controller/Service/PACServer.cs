@@ -5,22 +5,18 @@ using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
-using Shadowsocks.Encryption;
+
 using Shadowsocks.Model;
 using Shadowsocks.Properties;
 using Shadowsocks.Util;
 
 namespace Shadowsocks.Controller
 {
-    public class PACServer : Listener.Service
+    class PACServer : Listener.Service
     {
-        public const string PAC_FILE = "pac.txt";
-        public const string USER_RULE_FILE = "user-rule.txt";
-        public const string USER_ABP_FILE = "abp.txt";
-
-        private string PacSecret { get; set; } = "";
-
-        public string PacUrl { get; private set; } = "";
+        public static readonly string PAC_FILE = "pac.txt";
+        public static readonly string USER_RULE_FILE = "user-rule.txt";
+        public static readonly string USER_ABP_FILE = "abp.txt";
 
         FileSystemWatcher PACFileWatcher;
         FileSystemWatcher UserRuleFileWatcher;
@@ -38,25 +34,6 @@ namespace Shadowsocks.Controller
         public void UpdateConfiguration(Configuration config)
         {
             this._config = config;
-
-            if (config.secureLocalPac)
-            {
-                var rd = new byte[32];
-                RNG.GetBytes(rd);
-                PacSecret = $"&secret={Convert.ToBase64String(rd)}";
-            }
-            else
-            {
-                PacSecret = "";
-            }
-
-            PacUrl = $"http://127.0.0.1:{config.localPort}/pac?t={GetTimestamp(DateTime.Now)}{PacSecret}";
-        }
-
-
-        private static string GetTimestamp(DateTime value)
-        {
-            return value.ToString("yyyyMMddHHmmssfff");
         }
 
         public override bool Handle(byte[] firstPacket, int length, Socket socket, object state)
@@ -70,7 +47,6 @@ namespace Shadowsocks.Controller
                 string request = Encoding.UTF8.GetString(firstPacket, 0, length);
                 string[] lines = request.Split('\r', '\n');
                 bool hostMatch = false, pathMatch = false, useSocks = false;
-                bool secretMatch = PacSecret.IsNullOrEmpty();
                 foreach (string line in lines)
                 {
                     string[] kv = line.Split(new char[] { ':' }, 2);
@@ -98,25 +74,11 @@ namespace Shadowsocks.Controller
                         {
                             pathMatch = true;
                         }
-                        if (!secretMatch)
-                        {
-                            if(line.IndexOf(PacSecret, StringComparison.Ordinal) >= 0)
-                            {
-                                secretMatch = true;
-                            }
-                        }
                     }
                 }
                 if (hostMatch && pathMatch)
                 {
-                    if (!secretMatch)
-                    {
-                        socket.Close(); // Close immediately
-                    }
-                    else
-                    {
-                        SendResponse(firstPacket, length, socket, useSocks);
-                    }
+                    SendResponse(firstPacket, length, socket, useSocks);
                     return true;
                 }
                 return false;

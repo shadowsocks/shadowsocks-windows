@@ -1,7 +1,6 @@
 ﻿using Shadowsocks.Model;
 using System;
 using System.Collections.Generic;
-using System.Net;
 using System.Text;
 
 namespace Shadowsocks.Controller.Strategy
@@ -79,7 +78,7 @@ namespace Shadowsocks.Controller.Strategy
             ChooseNewServer();
         }
 
-        public Server GetAServer(IStrategyCallerType type, System.Net.IPEndPoint localIPEndPoint, EndPoint destEndPoint)
+        public Server GetAServer(IStrategyCallerType type, System.Net.IPEndPoint localIPEndPoint)
         {
             if (type == IStrategyCallerType.TCP)
             {

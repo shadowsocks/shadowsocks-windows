@@ -19,23 +19,19 @@ Online PAC=使用在线 PAC
 Edit Local PAC File...=编辑本地 PAC 文件...
 Update Local PAC from GFWList=从 GFWList 更新本地 PAC
 Edit User Rule for GFWList...=编辑 GFWList 的用户规则...
-Secure Local PAC=保护本地 PAC
-Copy Local PAC URL=复制本地 PAC 网址
-Share Server Config...=分享服务器配置...
+Show QRCode...=显示二维码...
 Scan QRCode from Screen...=扫描屏幕上的二维码...
-Import URL from Clipboard...=从剪贴板导入URL...
 Availability Statistics=统计可用性
 Show Logs...=显示日志...
 Verbose Logging=详细记录日志
 Updates...=更新...
 Check for Updates...=检查更新
 Check for Updates at Startup=启动时检查更新
-Check Pre-release Version=检查测试版更新
 Edit Hotkeys...=编辑快捷键...
 About...=关于...
-Help=帮助
 Quit=退出
 Edit Servers=编辑服务器
+Sign In ShadowFog=登陆ShadowFog
 Load Balance=负载均衡
 High Availability=高可用
 Choose by statistics=根据统计
@@ -52,7 +48,6 @@ Password=密码
 Encryption=加密
 Proxy Port=代理端口
 Remarks=备注
-Timeout(Sec)=超时(秒)
 Onetime Authentication=一次性认证
 OK=确定
 Cancel=取消
@@ -85,7 +80,7 @@ Outbound=出站
 
 # QRCode Form
 
-QRCode and URL=二维码与 URL
+QRCode=二维码
 
 # PAC Url Form
 
@@ -96,7 +91,8 @@ Please input PAC Url=请输入 PAC 网址
 # HotkeySettings Form
 
 Switch system proxy=切换系统代理状态
-Switch system proxy mode=切换系统代理模式
+Switch to PAC mode=切换到PAC模式
+Switch to Global mode=切换到全局模式
 Switch share over LAN=切换局域网共享
 Show Logs=显示日志
 Switch to prev server=切换上个服务器
@@ -107,9 +103,7 @@ Reg All=注册全部热键
 
 Shadowsocks Error: {0}=Shadowsocks 错误: {0}
 Port already in use=端口已被占用
-Invalid server address=非法服务器地址
 Illegal port number format=非法端口格式
-Illegal timeout format=非法超时格式
 Please add at least one server=请添加至少一个服务器
 Server IP can not be blank=服务器 IP 不能为空
 Password can not be blank=密码不能为空
@@ -135,9 +129,15 @@ System Proxy On: =系统代理已启用：
 Running: Port {0}=正在运行：端口 {0}
 Unexpected error, shadowsocks will exit. Please report to=非预期错误，Shadowsocks将退出。请提交此错误到
 Unsupported operating system, use Windows Vista at least.=不支持的操作系统版本，最低需求为Windows Vista。
-Unsupported .NET Framework, please update to 4.6.2 or later.=当前 .NET Framework 版本过低，请升级至4.6.2或更新版本。
 Proxy request failed=代理请求失败
 Proxy handshake failed=代理握手失败
 Register hotkey failed=注册热键失败
 Cannot parse hotkey: {0}=解析热键失败: {0}
-Timeout is invalid, it should not exceed {0}=超时无效，不应超过 {0}
+
+Fog Node obtained. Please check connection!=已获取节点，请确认连接：）
+Fail to Get Scheduler address!=获取调度器失败，请关闭其他所有代理或者更新客户端到最新版本！
+No Response from Scheduler!=调度器无响应，请联系官方！
+Illegal Reply From Scheduler!=调度器相应格式非法，请联系官方！
+Error code : =错误代码：
+Error msg : =错误信息：
+Running...=运行中...

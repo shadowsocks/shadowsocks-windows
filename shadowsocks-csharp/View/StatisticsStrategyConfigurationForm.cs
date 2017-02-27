@@ -32,7 +32,7 @@ namespace Shadowsocks.View
             Load += (sender, args) => InitData();
 
         }
-
+        /*****************************************************************************/
         private void LoadConfiguration()
         {
             var configs = _controller.GetCurrentConfiguration().configs;
@@ -44,7 +44,7 @@ namespace Shadowsocks.View
                 _configuration = new StatisticsStrategyConfiguration();
             }
         }
-
+        /*****************************************************************************/
         private void InitData()
         {
             bindingConfiguration.Add(_configuration);

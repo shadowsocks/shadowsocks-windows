@@ -69,12 +69,13 @@
             this.LogMessageTextBox.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.LogMessageTextBox.ForeColor = System.Drawing.Color.White;
             this.LogMessageTextBox.Location = new System.Drawing.Point(0, 0);
+            this.LogMessageTextBox.Margin = new System.Windows.Forms.Padding(4);
             this.LogMessageTextBox.MaxLength = 2147483647;
             this.LogMessageTextBox.Multiline = true;
             this.LogMessageTextBox.Name = "LogMessageTextBox";
             this.LogMessageTextBox.ReadOnly = true;
             this.LogMessageTextBox.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.LogMessageTextBox.Size = new System.Drawing.Size(378, 74);
+            this.LogMessageTextBox.Size = new System.Drawing.Size(568, 108);
             this.LogMessageTextBox.TabIndex = 0;
             // 
             // MainMenu
@@ -155,9 +156,10 @@
             this.TopMostCheckBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left)));
             this.TopMostCheckBox.AutoSize = true;
-            this.TopMostCheckBox.Location = new System.Drawing.Point(249, 3);
+            this.TopMostCheckBox.Location = new System.Drawing.Point(417, 4);
+            this.TopMostCheckBox.Margin = new System.Windows.Forms.Padding(4);
             this.TopMostCheckBox.Name = "TopMostCheckBox";
-            this.TopMostCheckBox.Size = new System.Drawing.Size(72, 23);
+            this.TopMostCheckBox.Size = new System.Drawing.Size(106, 42);
             this.TopMostCheckBox.TabIndex = 3;
             this.TopMostCheckBox.Text = "&Top Most";
             this.TopMostCheckBox.UseVisualStyleBackColor = true;
@@ -166,9 +168,10 @@
             // ChangeFontButton
             // 
             this.ChangeFontButton.AutoSize = true;
-            this.ChangeFontButton.Location = new System.Drawing.Point(84, 3);
+            this.ChangeFontButton.Location = new System.Drawing.Point(174, 4);
+            this.ChangeFontButton.Margin = new System.Windows.Forms.Padding(4);
             this.ChangeFontButton.Name = "ChangeFontButton";
-            this.ChangeFontButton.Size = new System.Drawing.Size(75, 23);
+            this.ChangeFontButton.Size = new System.Drawing.Size(112, 42);
             this.ChangeFontButton.TabIndex = 2;
             this.ChangeFontButton.Text = "&Font";
             this.ChangeFontButton.UseVisualStyleBackColor = true;
@@ -177,9 +180,10 @@
             // CleanLogsButton
             // 
             this.CleanLogsButton.AutoSize = true;
-            this.CleanLogsButton.Location = new System.Drawing.Point(3, 3);
+            this.CleanLogsButton.Location = new System.Drawing.Point(4, 4);
+            this.CleanLogsButton.Margin = new System.Windows.Forms.Padding(4);
             this.CleanLogsButton.Name = "CleanLogsButton";
-            this.CleanLogsButton.Size = new System.Drawing.Size(75, 23);
+            this.CleanLogsButton.Size = new System.Drawing.Size(162, 42);
             this.CleanLogsButton.TabIndex = 1;
             this.CleanLogsButton.Text = "&Clean Logs";
             this.CleanLogsButton.UseVisualStyleBackColor = true;
@@ -190,9 +194,10 @@
             this.WrapTextCheckBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left)));
             this.WrapTextCheckBox.AutoSize = true;
-            this.WrapTextCheckBox.Location = new System.Drawing.Point(165, 3);
+            this.WrapTextCheckBox.Location = new System.Drawing.Point(294, 4);
+            this.WrapTextCheckBox.Margin = new System.Windows.Forms.Padding(4);
             this.WrapTextCheckBox.Name = "WrapTextCheckBox";
-            this.WrapTextCheckBox.Size = new System.Drawing.Size(78, 23);
+            this.WrapTextCheckBox.Size = new System.Drawing.Size(115, 42);
             this.WrapTextCheckBox.TabIndex = 0;
             this.WrapTextCheckBox.Text = "&Wrap Text";
             this.WrapTextCheckBox.UseVisualStyleBackColor = true;
@@ -206,11 +211,12 @@
             this.tableLayoutPanel1.Controls.Add(this.splitContainer1, 0, 1);
             this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 0);
+            this.tableLayoutPanel1.Margin = new System.Windows.Forms.Padding(4);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
             this.tableLayoutPanel1.RowCount = 2;
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(384, 161);
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(576, 242);
             this.tableLayoutPanel1.TabIndex = 2;
             // 
             // ToolbarFlowLayoutPanel
@@ -221,15 +227,17 @@
             this.ToolbarFlowLayoutPanel.Controls.Add(this.WrapTextCheckBox);
             this.ToolbarFlowLayoutPanel.Controls.Add(this.TopMostCheckBox);
             this.ToolbarFlowLayoutPanel.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.ToolbarFlowLayoutPanel.Location = new System.Drawing.Point(3, 3);
+            this.ToolbarFlowLayoutPanel.Location = new System.Drawing.Point(4, 4);
+            this.ToolbarFlowLayoutPanel.Margin = new System.Windows.Forms.Padding(4);
             this.ToolbarFlowLayoutPanel.Name = "ToolbarFlowLayoutPanel";
-            this.ToolbarFlowLayoutPanel.Size = new System.Drawing.Size(378, 29);
+            this.ToolbarFlowLayoutPanel.Size = new System.Drawing.Size(568, 50);
             this.ToolbarFlowLayoutPanel.TabIndex = 2;
             // 
             // splitContainer1
             // 
             this.splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.splitContainer1.Location = new System.Drawing.Point(3, 38);
+            this.splitContainer1.Location = new System.Drawing.Point(4, 62);
+            this.splitContainer1.Margin = new System.Windows.Forms.Padding(4);
             this.splitContainer1.Name = "splitContainer1";
             this.splitContainer1.Orientation = System.Windows.Forms.Orientation.Horizontal;
             // 
@@ -240,8 +248,9 @@
             // splitContainer1.Panel2
             // 
             this.splitContainer1.Panel2.Controls.Add(this.trafficChart);
-            this.splitContainer1.Size = new System.Drawing.Size(378, 120);
-            this.splitContainer1.SplitterDistance = 74;
+            this.splitContainer1.Size = new System.Drawing.Size(568, 176);
+            this.splitContainer1.SplitterDistance = 108;
+            this.splitContainer1.SplitterWidth = 6;
             this.splitContainer1.TabIndex = 3;
             // 
             // trafficChart
@@ -266,36 +275,38 @@
             legend1.Name = "Legend1";
             this.trafficChart.Legends.Add(legend1);
             this.trafficChart.Location = new System.Drawing.Point(0, 0);
+            this.trafficChart.Margin = new System.Windows.Forms.Padding(4);
             this.trafficChart.Name = "trafficChart";
             this.trafficChart.Palette = System.Windows.Forms.DataVisualization.Charting.ChartColorPalette.None;
             series1.BorderWidth = 2;
             series1.ChartArea = "ChartArea1";
             series1.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Spline;
-            series1.Color = System.Drawing.Color.FromArgb(255, 128, 0);
+            series1.Color = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(128)))), ((int)(((byte)(0)))));
             series1.IsXValueIndexed = true;
             series1.Legend = "Legend1";
             series1.Name = "Inbound";
             series2.BorderWidth = 2;
             series2.ChartArea = "ChartArea1";
             series2.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Spline;
-            series2.Color = System.Drawing.Color.FromArgb(128, 128, 255);
+            series2.Color = System.Drawing.Color.FromArgb(((int)(((byte)(128)))), ((int)(((byte)(128)))), ((int)(((byte)(255)))));
             series2.IsXValueIndexed = true;
             series2.Legend = "Legend1";
             series2.Name = "Outbound";
             this.trafficChart.Series.Add(series1);
             this.trafficChart.Series.Add(series2);
-            this.trafficChart.Size = new System.Drawing.Size(378, 42);
+            this.trafficChart.Size = new System.Drawing.Size(568, 62);
             this.trafficChart.TabIndex = 0;
             this.trafficChart.Text = "chart1";
             // 
             // LogForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(144F, 144F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
-            this.ClientSize = new System.Drawing.Size(384, 161);
+            this.ClientSize = new System.Drawing.Size(576, 242);
             this.Controls.Add(this.tableLayoutPanel1);
+            this.Margin = new System.Windows.Forms.Padding(4);
             this.Menu = this.MainMenu;
-            this.MinimumSize = new System.Drawing.Size(400, 200);
+            this.MinimumSize = new System.Drawing.Size(589, 272);
             this.Name = "LogForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Log Viewer";
