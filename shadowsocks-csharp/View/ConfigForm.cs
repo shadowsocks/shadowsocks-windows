@@ -401,5 +401,10 @@ namespace Shadowsocks.View
             }
             
         }
+
+        private void ProviderButton_Click_1(object sender, EventArgs e)
+        {
+
+        }
     }
 }

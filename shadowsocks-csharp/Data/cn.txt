@@ -74,8 +74,10 @@ URL=发布者地址
 &Remove=移除选定配置(&R)
 &Add Config=添加以上配置(&A)
 &Get=获取(&G)
-Import=从发布者获得配置
+&Import=获取配置(&I)
+Import=获取配置
 No valid configs to import!=无可用配置!
+Provider=来源
 
 # Log Form
 

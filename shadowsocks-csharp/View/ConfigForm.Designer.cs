@@ -30,6 +30,7 @@
         {
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.RemarksTextBox = new System.Windows.Forms.TextBox();
+            this.ProviderLabel = new System.Windows.Forms.Label();
             this.RemarksLabel = new System.Windows.Forms.Label();
             this.IPLabel = new System.Windows.Forms.Label();
             this.ServerPortLabel = new System.Windows.Forms.Label();
@@ -40,12 +41,16 @@
             this.EncryptionLabel = new System.Windows.Forms.Label();
             this.EncryptionSelect = new System.Windows.Forms.ComboBox();
             this.OneTimeAuth = new System.Windows.Forms.CheckBox();
+            this.TimeoutLabel = new System.Windows.Forms.Label();
+            this.TimeoutTextBox = new System.Windows.Forms.TextBox();
+            this.ProviderTextBox = new System.Windows.Forms.TextBox();
             this.panel2 = new System.Windows.Forms.Panel();
             this.OKButton = new System.Windows.Forms.Button();
             this.MyCancelButton = new System.Windows.Forms.Button();
             this.DeleteButton = new System.Windows.Forms.Button();
             this.AddButton = new System.Windows.Forms.Button();
             this.ServerGroupBox = new System.Windows.Forms.GroupBox();
+            this.FingerprintTextBox = new System.Windows.Forms.TextBox();
             this.ServersListBox = new System.Windows.Forms.ListBox();
             this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
             this.tableLayoutPanel6 = new System.Windows.Forms.TableLayoutPanel();
@@ -56,14 +61,8 @@
             this.ProxyPortLabel = new System.Windows.Forms.Label();
             this.tableLayoutPanel3 = new System.Windows.Forms.TableLayoutPanel();
             this.tableLayoutPanel4 = new System.Windows.Forms.TableLayoutPanel();
-            this.ProviderLabel = new System.Windows.Forms.Label();
-            this.ProviderTextBox = new System.Windows.Forms.TextBox();
-            this.FingerprintTextBox = new System.Windows.Forms.TextBox();
-            this.tableLayoutPanel7 = new System.Windows.Forms.TableLayoutPanel();
-            this.ProviderButton = new System.Windows.Forms.Button();
             this.DuplicateButton = new System.Windows.Forms.Button();
-            this.TimeoutLabel = new System.Windows.Forms.Label();
-            this.TimeoutTextBox = new System.Windows.Forms.TextBox();
+            this.ProviderButton = new System.Windows.Forms.Button();
             this.tableLayoutPanel1.SuspendLayout();
             this.ServerGroupBox.SuspendLayout();
             this.tableLayoutPanel2.SuspendLayout();
@@ -71,7 +70,6 @@
             this.tableLayoutPanel5.SuspendLayout();
             this.tableLayoutPanel3.SuspendLayout();
             this.tableLayoutPanel4.SuspendLayout();
-            this.tableLayoutPanel7.SuspendLayout();
             this.SuspendLayout();
             // 
             // tableLayoutPanel1
@@ -82,6 +80,7 @@
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tableLayoutPanel1.Controls.Add(this.RemarksTextBox, 1, 5);
+            this.tableLayoutPanel1.Controls.Add(this.ProviderLabel, 0, 7);
             this.tableLayoutPanel1.Controls.Add(this.RemarksLabel, 0, 5);
             this.tableLayoutPanel1.Controls.Add(this.IPLabel, 0, 0);
             this.tableLayoutPanel1.Controls.Add(this.ServerPortLabel, 0, 1);
@@ -92,11 +91,9 @@
             this.tableLayoutPanel1.Controls.Add(this.EncryptionLabel, 0, 3);
             this.tableLayoutPanel1.Controls.Add(this.EncryptionSelect, 1, 3);
             this.tableLayoutPanel1.Controls.Add(this.OneTimeAuth, 1, 8);
-            this.tableLayoutPanel1.Controls.Add(this.ProviderLabel, 0, 6);
-            this.tableLayoutPanel1.Controls.Add(this.ProviderTextBox, 1, 6);
-            this.tableLayoutPanel1.Controls.Add(this.FingerprintTextBox, 1, 7);
             this.tableLayoutPanel1.Controls.Add(this.TimeoutLabel, 0, 6);
             this.tableLayoutPanel1.Controls.Add(this.TimeoutTextBox, 1, 6);
+            this.tableLayoutPanel1.Controls.Add(this.ProviderTextBox, 1, 7);
             this.tableLayoutPanel1.Location = new System.Drawing.Point(8, 21);
             this.tableLayoutPanel1.Margin = new System.Windows.Forms.Padding(0);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
@@ -111,7 +108,7 @@
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(249, 216);
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(255, 216);
             this.tableLayoutPanel1.TabIndex = 0;
             // 
             // RemarksTextBox
@@ -123,6 +120,16 @@
             this.RemarksTextBox.Size = new System.Drawing.Size(160, 21);
             this.RemarksTextBox.TabIndex = 4;
             this.RemarksTextBox.WordWrap = false;
+            // 
+            // ProviderLabel
+            // 
+            this.ProviderLabel.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.ProviderLabel.AutoSize = true;
+            this.ProviderLabel.Location = new System.Drawing.Point(30, 171);
+            this.ProviderLabel.Name = "ProviderLabel";
+            this.ProviderLabel.Size = new System.Drawing.Size(53, 12);
+            this.ProviderLabel.TabIndex = 10;
+            this.ProviderLabel.Text = "Provider";
             // 
             // RemarksLabel
             // 
@@ -236,19 +243,47 @@
             // OneTimeAuth
             // 
             this.OneTimeAuth.AutoSize = true;
-            this.OneTimeAuth.Location = new System.Drawing.Point(83, 194);
+            this.OneTimeAuth.Location = new System.Drawing.Point(89, 194);
             this.OneTimeAuth.Name = "OneTimeAuth";
             this.OneTimeAuth.Size = new System.Drawing.Size(156, 16);
             this.OneTimeAuth.TabIndex = 5;
             this.OneTimeAuth.Text = "Onetime Authentication";
             this.OneTimeAuth.UseVisualStyleBackColor = true;
             // 
+            // TimeoutLabel
+            // 
+            this.TimeoutLabel.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.TimeoutLabel.AutoSize = true;
+            this.TimeoutLabel.Location = new System.Drawing.Point(6, 144);
+            this.TimeoutLabel.Name = "TimeoutLabel";
+            this.TimeoutLabel.RightToLeft = System.Windows.Forms.RightToLeft.No;
+            this.TimeoutLabel.Size = new System.Drawing.Size(77, 12);
+            this.TimeoutLabel.TabIndex = 10;
+            this.TimeoutLabel.Text = "Timeout(Sec)";
+            // 
+            // TimeoutTextBox
+            // 
+            this.TimeoutTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.TimeoutTextBox.Location = new System.Drawing.Point(89, 140);
+            this.TimeoutTextBox.MaxLength = 5;
+            this.TimeoutTextBox.Name = "TimeoutTextBox";
+            this.TimeoutTextBox.Size = new System.Drawing.Size(160, 21);
+            this.TimeoutTextBox.TabIndex = 11;
+            // 
+            // ProviderTextBox
+            // 
+            this.ProviderTextBox.Location = new System.Drawing.Point(89, 167);
+            this.ProviderTextBox.Name = "ProviderTextBox";
+            this.ProviderTextBox.ReadOnly = true;
+            this.ProviderTextBox.Size = new System.Drawing.Size(160, 21);
+            this.ProviderTextBox.TabIndex = 11;
+            // 
             // panel2
             // 
             this.panel2.Anchor = System.Windows.Forms.AnchorStyles.Top;
             this.panel2.AutoSize = true;
             this.panel2.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.panel2.Location = new System.Drawing.Point(207, 187);
+            this.panel2.Location = new System.Drawing.Point(158, 187);
             this.panel2.Name = "panel2";
             this.panel2.Size = new System.Drawing.Size(0, 0);
             this.panel2.TabIndex = 1;
@@ -308,13 +343,23 @@
             this.ServerGroupBox.AutoSize = true;
             this.ServerGroupBox.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.ServerGroupBox.Controls.Add(this.tableLayoutPanel1);
+            this.ServerGroupBox.Controls.Add(this.FingerprintTextBox);
             this.ServerGroupBox.Location = new System.Drawing.Point(178, 0);
             this.ServerGroupBox.Margin = new System.Windows.Forms.Padding(12, 0, 0, 0);
             this.ServerGroupBox.Name = "ServerGroupBox";
-            this.ServerGroupBox.Size = new System.Drawing.Size(260, 254);
+            this.ServerGroupBox.Size = new System.Drawing.Size(266, 280);
             this.ServerGroupBox.TabIndex = 0;
             this.ServerGroupBox.TabStop = false;
             this.ServerGroupBox.Text = "Server";
+            // 
+            // FingerprintTextBox
+            // 
+            this.FingerprintTextBox.BackColor = System.Drawing.Color.White;
+            this.FingerprintTextBox.Location = new System.Drawing.Point(8, 239);
+            this.FingerprintTextBox.Name = "FingerprintTextBox";
+            this.FingerprintTextBox.Size = new System.Drawing.Size(160, 21);
+            this.FingerprintTextBox.TabIndex = 12;
+            this.FingerprintTextBox.Visible = false;
             // 
             // ServersListBox
             // 
@@ -341,7 +386,6 @@
             this.tableLayoutPanel2.Controls.Add(this.ServersListBox, 0, 0);
             this.tableLayoutPanel2.Controls.Add(this.ServerGroupBox, 1, 0);
             this.tableLayoutPanel2.Controls.Add(this.tableLayoutPanel4, 0, 2);
-            this.tableLayoutPanel2.Controls.Add(this.tableLayoutPanel7, 0, 1);
             this.tableLayoutPanel2.Location = new System.Drawing.Point(12, 12);
             this.tableLayoutPanel2.Margin = new System.Windows.Forms.Padding(0);
             this.tableLayoutPanel2.Name = "tableLayoutPanel2";
@@ -350,7 +394,7 @@
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel2.Size = new System.Drawing.Size(438, 351);
+            this.tableLayoutPanel2.Size = new System.Drawing.Size(444, 376);
             this.tableLayoutPanel2.TabIndex = 7;
             // 
             // tableLayoutPanel6
@@ -363,7 +407,7 @@
             this.tableLayoutPanel6.Controls.Add(this.MoveDownButton, 1, 0);
             this.tableLayoutPanel6.Controls.Add(this.MoveUpButton, 0, 0);
             this.tableLayoutPanel6.Dock = System.Windows.Forms.DockStyle.Top;
-            this.tableLayoutPanel6.Location = new System.Drawing.Point(0, 319);
+            this.tableLayoutPanel6.Location = new System.Drawing.Point(0, 344);
             this.tableLayoutPanel6.Margin = new System.Windows.Forms.Padding(0);
             this.tableLayoutPanel6.Name = "tableLayoutPanel6";
             this.tableLayoutPanel6.RowCount = 1;
@@ -406,7 +450,7 @@
             this.tableLayoutPanel5.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tableLayoutPanel5.Controls.Add(this.ProxyPortTextBox, 1, 0);
             this.tableLayoutPanel5.Controls.Add(this.ProxyPortLabel, 0, 0);
-            this.tableLayoutPanel5.Location = new System.Drawing.Point(242, 286);
+            this.tableLayoutPanel5.Location = new System.Drawing.Point(248, 280);
             this.tableLayoutPanel5.Margin = new System.Windows.Forms.Padding(0);
             this.tableLayoutPanel5.Name = "tableLayoutPanel5";
             this.tableLayoutPanel5.Padding = new System.Windows.Forms.Padding(3);
@@ -450,7 +494,7 @@
             this.tableLayoutPanel3.Controls.Add(this.MyCancelButton, 1, 0);
             this.tableLayoutPanel3.Controls.Add(this.OKButton, 0, 0);
             this.tableLayoutPanel3.Dock = System.Windows.Forms.DockStyle.Right;
-            this.tableLayoutPanel3.Location = new System.Drawing.Point(279, 322);
+            this.tableLayoutPanel3.Location = new System.Drawing.Point(285, 347);
             this.tableLayoutPanel3.Margin = new System.Windows.Forms.Padding(3, 3, 0, 3);
             this.tableLayoutPanel3.Name = "tableLayoutPanel3";
             this.tableLayoutPanel3.RowCount = 1;
@@ -465,11 +509,12 @@
             this.tableLayoutPanel4.ColumnCount = 2;
             this.tableLayoutPanel4.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tableLayoutPanel4.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tableLayoutPanel4.Controls.Add(this.ProviderButton, 1, 1);
             this.tableLayoutPanel4.Controls.Add(this.DuplicateButton, 0, 1);
             this.tableLayoutPanel4.Controls.Add(this.DeleteButton, 1, 0);
             this.tableLayoutPanel4.Controls.Add(this.AddButton, 0, 0);
             this.tableLayoutPanel4.Dock = System.Windows.Forms.DockStyle.Top;
-            this.tableLayoutPanel4.Location = new System.Drawing.Point(0, 286);
+            this.tableLayoutPanel4.Location = new System.Drawing.Point(0, 280);
             this.tableLayoutPanel4.Margin = new System.Windows.Forms.Padding(0);
             this.tableLayoutPanel4.Name = "tableLayoutPanel4";
             this.tableLayoutPanel4.RowCount = 2;
@@ -478,57 +523,6 @@
             this.tableLayoutPanel4.Size = new System.Drawing.Size(166, 64);
             this.tableLayoutPanel4.TabIndex = 8;
             // 
-            // ProviderLabel
-            // 
-            this.ProviderLabel.Anchor = System.Windows.Forms.AnchorStyles.Right;
-            this.ProviderLabel.AutoSize = true;
-            this.ProviderLabel.Location = new System.Drawing.Point(24, 144);
-            this.ProviderLabel.Name = "ProviderLabel";
-            this.ProviderLabel.Size = new System.Drawing.Size(53, 12);
-            this.ProviderLabel.TabIndex = 10;
-            this.ProviderLabel.Text = "Provider";
-            // 
-            // ProviderTextBox
-            // 
-            this.ProviderTextBox.Location = new System.Drawing.Point(83, 140);
-            this.ProviderTextBox.Name = "ProviderTextBox";
-            this.ProviderTextBox.ReadOnly = true;
-            this.ProviderTextBox.Size = new System.Drawing.Size(160, 21);
-            this.ProviderTextBox.TabIndex = 11;
-            // 
-            // FingerprintTextBox
-            // 
-            this.FingerprintTextBox.Location = new System.Drawing.Point(83, 167);
-            this.FingerprintTextBox.Name = "FingerprintTextBox";
-            this.FingerprintTextBox.Size = new System.Drawing.Size(160, 21);
-            this.FingerprintTextBox.TabIndex = 12;
-            this.FingerprintTextBox.Visible = false;
-            // 
-            // tableLayoutPanel7
-            // 
-            this.tableLayoutPanel7.ColumnCount = 2;
-            this.tableLayoutPanel7.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tableLayoutPanel7.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tableLayoutPanel7.Controls.Add(this.ProviderButton, 0, 0);
-            this.tableLayoutPanel7.Location = new System.Drawing.Point(0, 254);
-            this.tableLayoutPanel7.Margin = new System.Windows.Forms.Padding(0);
-            this.tableLayoutPanel7.Name = "tableLayoutPanel7";
-            this.tableLayoutPanel7.RowCount = 1;
-            this.tableLayoutPanel7.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel7.Size = new System.Drawing.Size(166, 32);
-            this.tableLayoutPanel7.TabIndex = 11;
-            // 
-            // ProviderButton
-            // 
-            this.ProviderButton.Dock = System.Windows.Forms.DockStyle.Left;
-            this.ProviderButton.Location = new System.Drawing.Point(0, 6);
-            this.ProviderButton.Margin = new System.Windows.Forms.Padding(0, 6, 3, 3);
-            this.ProviderButton.Name = "ProviderButton";
-            this.ProviderButton.Size = new System.Drawing.Size(80, 23);
-            this.ProviderButton.TabIndex = 0;
-            this.ProviderButton.Text = "&Import";
-            this.ProviderButton.UseVisualStyleBackColor = true;
-            this.ProviderButton.Click += new System.EventHandler(this.ProviderButton_Click);
             // DuplicateButton
             // 
             this.DuplicateButton.Dock = System.Windows.Forms.DockStyle.Left;
@@ -541,25 +535,17 @@
             this.DuplicateButton.UseVisualStyleBackColor = true;
             this.DuplicateButton.Click += new System.EventHandler(this.DuplicateButton_Click);
             // 
-            // TimeoutLabel
+            // ProviderButton
             // 
-            this.TimeoutLabel.Anchor = System.Windows.Forms.AnchorStyles.Right;
-            this.TimeoutLabel.AutoSize = true;
-            this.TimeoutLabel.Location = new System.Drawing.Point(6, 144);
-            this.TimeoutLabel.Name = "TimeoutLabel";
-            this.TimeoutLabel.RightToLeft = System.Windows.Forms.RightToLeft.No;
-            this.TimeoutLabel.Size = new System.Drawing.Size(77, 12);
-            this.TimeoutLabel.TabIndex = 10;
-            this.TimeoutLabel.Text = "Timeout(Sec)";
-            // 
-            // TimeoutTextBox
-            // 
-            this.TimeoutTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.TimeoutTextBox.Location = new System.Drawing.Point(89, 140);
-            this.TimeoutTextBox.MaxLength = 5;
-            this.TimeoutTextBox.Name = "TimeoutTextBox";
-            this.TimeoutTextBox.Size = new System.Drawing.Size(160, 21);
-            this.TimeoutTextBox.TabIndex = 11;
+            this.ProviderButton.Dock = System.Windows.Forms.DockStyle.Right;
+            this.ProviderButton.Location = new System.Drawing.Point(86, 38);
+            this.ProviderButton.Margin = new System.Windows.Forms.Padding(3, 6, 0, 3);
+            this.ProviderButton.Name = "ProviderButton";
+            this.ProviderButton.Size = new System.Drawing.Size(80, 23);
+            this.ProviderButton.TabIndex = 11;
+            this.ProviderButton.Text = "&Import";
+            this.ProviderButton.UseVisualStyleBackColor = true;
+            this.ProviderButton.Click += new System.EventHandler(this.ProviderButton_Click);
             // 
             // ConfigForm
             // 
@@ -569,7 +555,7 @@
             this.AutoSize = true;
             this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.CancelButton = this.MyCancelButton;
-            this.ClientSize = new System.Drawing.Size(574, 367);
+            this.ClientSize = new System.Drawing.Size(476, 397);
             this.Controls.Add(this.tableLayoutPanel2);
             this.Controls.Add(this.panel2);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
@@ -594,7 +580,6 @@
             this.tableLayoutPanel5.PerformLayout();
             this.tableLayoutPanel3.ResumeLayout(false);
             this.tableLayoutPanel4.ResumeLayout(false);
-            this.tableLayoutPanel7.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -632,12 +617,11 @@
         private System.Windows.Forms.CheckBox OneTimeAuth;
         private System.Windows.Forms.Label ProviderLabel;
         private System.Windows.Forms.TextBox ProviderTextBox;
-        private System.Windows.Forms.TextBox FingerprintTextBox;
-        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel7;
-        private System.Windows.Forms.Button ProviderButton;
         private System.Windows.Forms.Button DuplicateButton;
         private System.Windows.Forms.Label TimeoutLabel;
         private System.Windows.Forms.TextBox TimeoutTextBox;
+        private System.Windows.Forms.TextBox FingerprintTextBox;
+        private System.Windows.Forms.Button ProviderButton;
     }
 }
 
