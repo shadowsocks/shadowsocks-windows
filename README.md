@@ -32,7 +32,7 @@ port in `Servers -> Edit Servers`
 
 1. You can change PAC rules by editing the PAC file. When you save the PAC file
 with any editor, Shadowsocks will notify browsers about the change automatically
-2. You can also update PAC file from [GFWList] \(maintained by 3rd party)
+2. You can also update PAC file from [GFWList] (maintained by 3rd party)
 3. You can also use online PAC URL
 
 #### Server Auto Switching
@@ -89,20 +89,23 @@ if you want to deactivate all, please clear all textboxes.
 
 Please visit [Servers] for more information.
 
+#### Portable Mode
+
+If you want to put all temporary files into shadowsocks/temp folder instead of
+system temp folder, create a `shadowsocks_portable_mode.txt` into shadowsocks folder.
+
 #### Develop
 
-[Visual Studio 2015] & [.NET Framework 4.6.2 Developer Pack] are required.
+Visual Studio 2015 is required.
 
 #### License
 
 GPLv3
 
 
-[Appveyor]:       https://ci.appveyor.com/project/wongsyrone/shadowsocks-windows-pljx3
-[Build Status]:   https://ci.appveyor.com/api/projects/status/otie4km27ws1wak2/branch/master?svg=true
+[Appveyor]:       https://ci.appveyor.com/project/wongsyrone/shadowsocks-windows-0cn3i
+[Build Status]:   https://ci.appveyor.com/api/projects/status/47784ryn365vw56w/branch/master?svg=true
 [latest release]: https://github.com/shadowsocks/shadowsocks-csharp/releases
 [GFWList]:        https://github.com/gfwlist/gfwlist
 [Servers]:        https://github.com/shadowsocks/shadowsocks/wiki/Ports-and-Clients#linux--server-side
 [中文说明]:       https://github.com/shadowsocks/shadowsocks-windows/wiki/Shadowsocks-Windows-%E4%BD%BF%E7%94%A8%E8%AF%B4%E6%98%8E
-[Visual Studio 2015]: https://www.visualstudio.com/downloads/
-[.NET Framework 4.6.2 Developer Pack]: https://www.microsoft.com/download/details.aspx?id=53321

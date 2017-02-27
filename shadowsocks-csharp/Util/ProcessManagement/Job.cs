@@ -11,7 +11,21 @@ namespace Shadowsocks.Util.ProcessManagement
      */
     public class Job : IDisposable
     {
+        [DllImport("kernel32.dll", CharSet = CharSet.Unicode)]
+        private static extern IntPtr CreateJobObject(IntPtr a, string lpName);
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        private static extern bool SetInformationJobObject(IntPtr hJob, JobObjectInfoType infoType, IntPtr lpJobObjectInfo, UInt32 cbJobObjectInfoLength);
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        private static extern bool AssignProcessToJobObject(IntPtr job, IntPtr process);
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static extern bool CloseHandle(IntPtr hObject);
+
         private IntPtr handle = IntPtr.Zero;
+        private bool disposed;
 
         public Job()
         {
@@ -48,6 +62,36 @@ namespace Shadowsocks.Util.ProcessManagement
             }
         }
 
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        private void Dispose(bool disposing)
+        {
+            if (disposed) return;
+            disposed = true;
+
+            if (disposing) { }
+
+            Close();
+        }
+
+        private void Close()
+        {
+            if (handle != IntPtr.Zero)
+            {
+                CloseHandle(handle);
+                handle = IntPtr.Zero;
+            }
+        }
+
+        ~Job()
+        {
+            Dispose(false);
+        }
+
         public bool AddProcess(IntPtr processHandle)
         {
             var succ = AssignProcessToJobObject(handle, processHandle);
@@ -65,56 +109,6 @@ namespace Shadowsocks.Util.ProcessManagement
             return AddProcess(Process.GetProcessById(processId).Handle);
         }
 
-        #region IDisposable
-
-        private bool disposed;
-
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (disposed) return;
-            disposed = true;
-
-            if (disposing)
-            {
-                // no managed objects to free
-            }
-
-            if (handle != IntPtr.Zero)
-            {
-                CloseHandle(handle);
-                handle = IntPtr.Zero;
-            }
-        }
-
-        ~Job()
-        {
-            Dispose(false);
-        }
-
-        #endregion
-
-        #region Interop
-
-        [DllImport("kernel32.dll", CharSet = CharSet.Unicode)]
-        private static extern IntPtr CreateJobObject(IntPtr a, string lpName);
-
-        [DllImport("kernel32.dll", SetLastError = true)]
-        private static extern bool SetInformationJobObject(IntPtr hJob, JobObjectInfoType infoType, IntPtr lpJobObjectInfo, UInt32 cbJobObjectInfoLength);
-
-        [DllImport("kernel32.dll", SetLastError = true)]
-        private static extern bool AssignProcessToJobObject(IntPtr job, IntPtr process);
-
-        [DllImport("kernel32.dll", SetLastError = true)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        private static extern bool CloseHandle(IntPtr hObject);
-
-        #endregion
     }
 
     #region Helper classes

@@ -2,11 +2,11 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Shadowsocks.Controller;
 using Shadowsocks.Encryption;
+using Shadowsocks.Util;
 using GlobalHotKey;
 using System.Windows.Input;
 using System.Threading;
 using System.Collections.Generic;
-using Shadowsocks.Controller.Hotkeys;
 
 namespace test
 {
@@ -68,7 +68,6 @@ namespace test
 
         private void RunEncryptionRound(IEncryptor encryptor, IEncryptor decryptor)
         {
-            RNG.Reload();
             byte[] plain = new byte[16384];
             byte[] cipher = new byte[plain.Length + 16 + IVEncryptor.ONETIMEAUTH_BYTES + IVEncryptor.AUTH_BYTES];
             byte[] plain2 = new byte[plain.Length + 16];
@@ -118,7 +117,6 @@ namespace test
             {
                 t.Join();
             }
-            RNG.Close();
             Assert.IsFalse(encryptionFailed);
         }
 
@@ -158,7 +156,6 @@ namespace test
             {
                 t.Join();
             }
-            RNG.Close();
             Assert.IsFalse(encryptionFailed);
         }
 
@@ -199,7 +196,6 @@ namespace test
             {
                 t.Join();
             }
-            RNG.Close();
             Assert.IsFalse(encryptionFailed);
         }
 

@@ -1,0 +1,14 @@
+0.4.3-alpha: 删除了config_form的formclosed事件里回调函数中的 关于存储user信息的语句，避免发生close时怕抛出异常的问题
+0.4.5-alpha: 修改了自动启动系统代理函数，加载时避免重复调用reload(),尝试进一步降低出现object disposed的概率。
+bug猜想：   
+reload()中有一段触发configChanged 事件代码：
+         if (ConfigChanged != null)
+            {
+                ConfigChanged(this, new EventArgs());
+            }
+猜测在shadowfog Reload中加载了两次reload()导致两次事件触发，其中可能有一次在configform销毁同时还未注销事件委托，导致第二次事件触发时无法找到configform的handler指向的对象,继而出错抛异常。
+当前也无法判明减少一次reload()是否会根除object disposed的影响，只能保持测试。
+
+0.4.6b: 第一次在debug模式下捕捉到ObjectDisposedException异常，定位抛出异常的代码为program.cs的主线程消息队列Application.Run()。异常原因根据已有信息尚不清晰，推测是鼠标左键的button触发了某些事件访问了某个被销毁的句柄(属于ConfigForm)，因此目前只对MenuViewController中的ConfigForm_closed回掉函数的中的销毁代码加上保险：用if()判断，如果ConfigForm已经被销毁了一次，就不再做第二次销毁操作。此举可以避免重复销毁对象抛出的异常，但是尚不清楚和鼠标左键关联的事件onMouseUP的具体关系。
+
+0.4.7.2: 此版本为合并到shadowsocks3.4.3前最后一个版本。在发生button.。 object disposed 错误后还能继续运行，推测为.net framework 4.5的内部冲突。

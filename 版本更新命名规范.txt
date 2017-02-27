@@ -1,0 +1,4 @@
+filename inside: ShadowFog.exe
+filename outside: ShadowFog-0.4.1.zip
+
+新release时需要上传hash等信息
