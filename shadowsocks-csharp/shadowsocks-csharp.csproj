@@ -302,6 +302,7 @@
     <None Include="Resources\ss24.png" />
     <None Include="Resources\ssw128.png" />
     <Content Include="Data\cn.txt" />
+    <Content Include="Data\jp.txt" />
     <Content Include="Data\privoxy_conf.txt" />
     <Content Include="Data\user-rule.txt" />
     <Content Include="Data\zh_tw.txt" />
