@@ -27,6 +27,8 @@ namespace Shadowsocks.Model
         public bool autoCheckUpdate;
         public bool checkPreRelease;
         public bool isVerboseLogging;
+        public bool useKeywordPattern;
+        public List<KeywordPattern> keywordPatterns;
         public LogViewerConfig logViewer;
         public ProxyConfig proxy;
         public HotkeyConfig hotkey;

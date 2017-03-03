@@ -39,6 +39,7 @@ Edit Servers=編輯伺服器
 Load Balance=負載平衡
 High Availability=高可用性
 Choose by statistics=根據統計
+Use Keyword Pattern=使用關鍵字匹配
 
 # Config Form
 
