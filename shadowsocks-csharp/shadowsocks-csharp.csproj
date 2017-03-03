@@ -308,7 +308,9 @@
   <ItemGroup>
     <None Include="Data\sysproxy.exe.gz" />
     <None Include="Data\sysproxy64.exe.gz" />
-    <None Include="packages.config" />
+    <None Include="packages.config">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="Properties\DataSources\Shadowsocks.Model.StatisticsStrategyConfiguration.datasource" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>

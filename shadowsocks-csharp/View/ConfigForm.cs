@@ -396,15 +396,25 @@ namespace Shadowsocks.View
                 {
                     _modifiedConfiguration.configs.Add(server);
                 }
+                List<Server> _tempConfigs = new List<Server>();
+                foreach (Server tempServer in _modifiedConfiguration.configs)
+                {
+                    if (tempServer.server == "")
+                    {
+                        _tempConfigs.Add(tempServer);
+                    }
+                }
+                foreach(Server tempServer in _tempConfigs)
+                {
+                    _modifiedConfiguration.configs.Remove(tempServer);
+                }
                 LoadConfiguration(_modifiedConfiguration);
+                ServersListBox.SelectedIndex = 0;
+                LoadSelectedServer();
                 controller.SaveServers(_modifiedConfiguration.configs, _modifiedConfiguration.localPort);
+                
             }
             
-        }
-
-        private void ProviderButton_Click_1(object sender, EventArgs e)
-        {
-
         }
     }
 }
