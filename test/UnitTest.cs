@@ -2,8 +2,11 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Shadowsocks.Controller;
 using Shadowsocks.Encryption;
+using GlobalHotKey;
+using System.Windows.Input;
 using System.Threading;
 using System.Collections.Generic;
+using Shadowsocks.Controller.Hotkeys;
 
 namespace test
 {
@@ -20,6 +23,32 @@ namespace test
             Assert.IsTrue(UpdateChecker.Asset.CompareVersion("1.2.1", "1.2") > 0);
             Assert.IsTrue(UpdateChecker.Asset.CompareVersion("2.3.1", "2.4") < 0);
             Assert.IsTrue(UpdateChecker.Asset.CompareVersion("1.3.2", "1.3.1") > 0);
+        }
+
+        [ TestMethod ]
+        public void TestHotKey2Str() {
+            Assert.AreEqual( "Ctrl+A", HotKeys.HotKey2Str( Key.A, ModifierKeys.Control ) );
+            Assert.AreEqual( "Ctrl+Alt+D2", HotKeys.HotKey2Str( Key.D2, (ModifierKeys.Alt | ModifierKeys.Control) ) );
+            Assert.AreEqual("Ctrl+Alt+Shift+NumPad7", HotKeys.HotKey2Str(Key.NumPad7, (ModifierKeys.Alt|ModifierKeys.Control|ModifierKeys.Shift)));
+            Assert.AreEqual( "Ctrl+Alt+Shift+F6", HotKeys.HotKey2Str( Key.F6, (ModifierKeys.Alt|ModifierKeys.Control|ModifierKeys.Shift)));
+            Assert.AreNotEqual("Ctrl+Shift+Alt+F6", HotKeys.HotKey2Str(Key.F6, (ModifierKeys.Alt | ModifierKeys.Control | ModifierKeys.Shift)));
+        }
+
+        [TestMethod]
+        public void TestStr2HotKey()
+        {
+            Assert.IsTrue(HotKeys.Str2HotKey("Ctrl+A").Equals(new HotKey(Key.A, ModifierKeys.Control)));
+            Assert.IsTrue(HotKeys.Str2HotKey("Ctrl+Alt+A").Equals(new HotKey(Key.A, (ModifierKeys.Control | ModifierKeys.Alt))));
+            Assert.IsTrue(HotKeys.Str2HotKey("Ctrl+Shift+A").Equals(new HotKey(Key.A, (ModifierKeys.Control | ModifierKeys.Shift))));
+            Assert.IsTrue(HotKeys.Str2HotKey("Ctrl+Alt+Shift+A").Equals(new HotKey(Key.A, (ModifierKeys.Control | ModifierKeys.Alt| ModifierKeys.Shift))));
+            HotKey testKey0 = HotKeys.Str2HotKey("Ctrl+Alt+Shift+A");
+            Assert.IsTrue(testKey0 != null && testKey0.Equals(new HotKey(Key.A, (ModifierKeys.Control | ModifierKeys.Alt | ModifierKeys.Shift))));
+            HotKey testKey1 = HotKeys.Str2HotKey("Ctrl+Alt+Shift+F2");
+            Assert.IsTrue(testKey1 != null && testKey1.Equals(new HotKey(Key.F2, (ModifierKeys.Control | ModifierKeys.Alt | ModifierKeys.Shift))));
+            HotKey testKey2 = HotKeys.Str2HotKey("Ctrl+Shift+Alt+D7");
+            Assert.IsTrue(testKey2 != null && testKey2.Equals(new HotKey(Key.D7, (ModifierKeys.Control | ModifierKeys.Alt | ModifierKeys.Shift))));
+            HotKey testKey3 = HotKeys.Str2HotKey("Ctrl+Shift+Alt+NumPad7");
+            Assert.IsTrue(testKey3 != null && testKey3.Equals(new HotKey(Key.NumPad7, (ModifierKeys.Control | ModifierKeys.Alt | ModifierKeys.Shift))));
         }
 
         [TestMethod]
@@ -39,6 +68,7 @@ namespace test
 
         private void RunEncryptionRound(IEncryptor encryptor, IEncryptor decryptor)
         {
+            RNG.Reload();
             byte[] plain = new byte[16384];
             byte[] cipher = new byte[plain.Length + 16 + IVEncryptor.ONETIMEAUTH_BYTES + IVEncryptor.AUTH_BYTES];
             byte[] plain2 = new byte[plain.Length + 16];
@@ -73,14 +103,14 @@ namespace test
         private static object locker = new object();
 
         [TestMethod]
-        public void TestPolarSSLEncryption()
+        public void TestMbedTLSEncryption()
         {
             // run it once before the multi-threading test to initialize global tables
-            RunSinglePolarSSLEncryptionThread();
+            RunSingleMbedTLSEncryptionThread();
             List<Thread> threads = new List<Thread>();
             for (int i = 0; i < 10; i++)
             {
-                Thread t = new Thread(new ThreadStart(RunSinglePolarSSLEncryptionThread));
+                Thread t = new Thread(new ThreadStart(RunSingleMbedTLSEncryptionThread));
                 threads.Add(t);
                 t.Start();
             }
@@ -88,10 +118,11 @@ namespace test
             {
                 t.Join();
             }
+            RNG.Close();
             Assert.IsFalse(encryptionFailed);
         }
 
-        private void RunSinglePolarSSLEncryptionThread()
+        private void RunSingleMbedTLSEncryptionThread()
         {
             try
             {
@@ -99,8 +130,8 @@ namespace test
                 {
                     IEncryptor encryptor;
                     IEncryptor decryptor;
-                    encryptor = new PolarSSLEncryptor("aes-256-cfb", "barfoo!", false, false);
-                    decryptor = new PolarSSLEncryptor("aes-256-cfb", "barfoo!", false, false);
+                    encryptor = new MbedTLSEncryptor("aes-256-cfb", "barfoo!", false, false);
+                    decryptor = new MbedTLSEncryptor("aes-256-cfb", "barfoo!", false, false);
                     RunEncryptionRound(encryptor, decryptor);
                 }
             }
@@ -127,6 +158,7 @@ namespace test
             {
                 t.Join();
             }
+            RNG.Close();
             Assert.IsFalse(encryptionFailed);
         }
 
@@ -139,8 +171,8 @@ namespace test
                     var random = new Random();
                     IEncryptor encryptor;
                     IEncryptor decryptor;
-                    encryptor = new PolarSSLEncryptor("rc4-md5", "barfoo!", false, false);
-                    decryptor = new PolarSSLEncryptor("rc4-md5", "barfoo!", false, false);
+                    encryptor = new MbedTLSEncryptor("rc4-md5", "barfoo!", false, false);
+                    decryptor = new MbedTLSEncryptor("rc4-md5", "barfoo!", false, false);
                     RunEncryptionRound(encryptor, decryptor);
                 }
             }
@@ -167,6 +199,7 @@ namespace test
             {
                 t.Join();
             }
+            RNG.Close();
             Assert.IsFalse(encryptionFailed);
         }
 

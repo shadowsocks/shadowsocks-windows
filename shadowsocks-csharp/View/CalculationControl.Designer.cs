@@ -38,13 +38,14 @@
             // factorNum
             // 
             this.factorNum.DecimalPlaces = 2;
+            this.factorNum.Dock = System.Windows.Forms.DockStyle.Right;
             this.factorNum.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.factorNum.Increment = new decimal(new int[] {
             1,
             0,
             0,
             131072});
-            this.factorNum.Location = new System.Drawing.Point(285, 5);
+            this.factorNum.Location = new System.Drawing.Point(236, 0);
             this.factorNum.Minimum = new decimal(new int[] {
             1000,
             0,
@@ -58,7 +59,7 @@
             // 
             this.multiply.AutoSize = true;
             this.multiply.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.multiply.Location = new System.Drawing.Point(251, 7);
+            this.multiply.Location = new System.Drawing.Point(202, 2);
             this.multiply.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
             this.multiply.Name = "multiply";
             this.multiply.Size = new System.Drawing.Size(26, 28);
@@ -69,7 +70,7 @@
             // 
             this.plus.AutoSize = true;
             this.plus.Font = new System.Drawing.Font("Segoe UI", 10F);
-            this.plus.Location = new System.Drawing.Point(5, 7);
+            this.plus.Location = new System.Drawing.Point(5, 2);
             this.plus.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
             this.plus.Name = "plus";
             this.plus.Size = new System.Drawing.Size(26, 28);
@@ -80,7 +81,7 @@
             // 
             this.valueLabel.AutoSize = true;
             this.valueLabel.Font = new System.Drawing.Font("Microsoft YaHei", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.valueLabel.Location = new System.Drawing.Point(39, 11);
+            this.valueLabel.Location = new System.Drawing.Point(39, 6);
             this.valueLabel.Name = "valueLabel";
             this.valueLabel.Size = new System.Drawing.Size(118, 24);
             this.valueLabel.TabIndex = 7;
@@ -88,14 +89,15 @@
             // 
             // CalculationControl
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 18F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.valueLabel);
             this.Controls.Add(this.factorNum);
             this.Controls.Add(this.multiply);
             this.Controls.Add(this.plus);
+            this.Margin = new System.Windows.Forms.Padding(0);
             this.Name = "CalculationControl";
-            this.Size = new System.Drawing.Size(380, 46);
+            this.Size = new System.Drawing.Size(322, 34);
             ((System.ComponentModel.ISupportInitialize)(this.factorNum)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();

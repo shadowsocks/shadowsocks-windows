@@ -1,4 +1,5 @@
 ### 带在线获取并同步最新Server参数的功能的一个版本
+[![Build Status]][Appveyor]
 * 现在由于干扰或一些别的原因，服务器配置会经常修改，而对于多人共享或者其他类似情境，发布和同步频繁修改的的配置就显得比较不便。我加了一个通过url较安全地获取配置的功能，即通过一个发布服务器，客户端可使用rsa加密通信从服务器获取最新的配置并与本地的配置同步，从而实现便捷获取最新配置.
 * 其实在之前已经进行过约三个月的小范围测试，累计用户约1400人，效果还算不错，所以在考虑能否加入项目本体.
 * 配置文件Server段结构如下
@@ -65,8 +66,14 @@
 	* 匆忙之中写完的说明，里面有比较详细的信息:[https://github.com/SuperHentai/Shadowsocks-Config-Server/blob/master/readme.md](https://github.com/SuperHentai/Shadowsocks-Config-Server/blob/master/readme.md)
 	[https://github.com/SuperHentai/Shadowsocks-Config-Server/wiki/%E8%AF%B4%E6%98%8E%E6%96%87%E6%A1%A3](https://github.com/SuperHentai/Shadowsocks-Config-Server/wiki/%E8%AF%B4%E6%98%8E%E6%96%87%E6%A1%A3)
 
-	* 放出的测试程序[https://github.com/SuperHentai/shadowsocks-windows/releases/tag/test](https://github.com/SuperHentai/shadowsocks-windows/releases/tag/test)
-	* 已部署的测试发布服务器URL:http://test.unwall.org/
-	* 发布服务器操作后台[http://test.unwall.org/panel](http://test.unwall.org/panel)
-		* 测试用户名：kaguya
-		* 测试密码：kaguya
+	* 放出的测试程序[https://github.com/SuperHentai/shadowsocks-windows/releases/tag/3.4.3](https://github.com/SuperHentai/shadowsocks-windows/releases/tag/3.4.3)
+	* 已部署的测试发布服务器URL:http://133.130.125.41/
+	* 发布服务器操作后台[http://133.130.125.41/panel](http://133.130.125.41/panel)
+		* 测试用户名：root		
+                * 测试密码：root
+
+		
+
+
+[Appveyor]:       https://ci.appveyor.com/project/1136358656/shadowsocks-windows
+[Build Status]:   https://ci.appveyor.com/api/projects/status/gkurto00dke10xjl/branch/with_online_config

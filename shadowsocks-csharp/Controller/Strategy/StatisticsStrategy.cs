@@ -2,27 +2,31 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using System.Net.NetworkInformation;
 using System.Threading;
+
 using Newtonsoft.Json;
+
 using Shadowsocks.Model;
 
 namespace Shadowsocks.Controller.Strategy
 {
-    class StatisticsStrategy : IStrategy
+    using Statistics = Dictionary<string, List<StatisticsRecord>>;
+
+    internal class StatisticsStrategy : IStrategy, IDisposable
     {
         private readonly ShadowsocksController _controller;
         private Server _currentServer;
         private readonly Timer _timer;
-        private Dictionary<string, List<AvailabilityStatistics.RawStatisticsData>> _filteredStatistics;
+        private Statistics _filteredStatistics;
+        private AvailabilityStatistics Service => _controller.availabilityStatistics;
         private int ChoiceKeptMilliseconds
-            => (int) TimeSpan.FromMinutes(_controller.StatisticsConfiguration.ChoiceKeptMinutes).TotalMilliseconds;
+            => (int)TimeSpan.FromMinutes(_controller.StatisticsConfiguration.ChoiceKeptMinutes).TotalMilliseconds;
 
         public StatisticsStrategy(ShadowsocksController controller)
         {
             _controller = controller;
             var servers = controller.GetCurrentConfiguration().configs;
-            var randomIndex = new Random().Next() % servers.Count();
+            var randomIndex = new Random().Next() % servers.Count;
             _currentServer = servers[randomIndex];  //choose a server randomly at first
             _timer = new Timer(ReloadStatisticsAndChooseAServer);
         }
@@ -37,36 +41,40 @@ namespace Shadowsocks.Controller.Strategy
 
         private void LoadStatistics()
         {
-            _filteredStatistics = _controller.availabilityStatistics.RawStatistics ?? _filteredStatistics ?? new Dictionary<string, List<AvailabilityStatistics.RawStatisticsData>>();
+            _filteredStatistics =
+                Service.FilteredStatistics ??
+                Service.RawStatistics ??
+                _filteredStatistics;
         }
 
         //return the score by data
         //server with highest score will be choosen
-        private float GetScore(string serverName)
+        private float? GetScore(string identifier, List<StatisticsRecord> records)
         {
             var config = _controller.StatisticsConfiguration;
-            List<AvailabilityStatistics.RawStatisticsData> dataList;
-            if (_filteredStatistics == null || !_filteredStatistics.TryGetValue(serverName, out dataList)) return 0;
-            var successTimes = (float) dataList.Count(data => data.ICMPStatus.Equals(IPStatus.Success.ToString()));
-            var timedOutTimes = (float) dataList.Count(data => data.ICMPStatus.Equals(IPStatus.TimedOut.ToString()));
-            var statisticsData = new AvailabilityStatistics.StatisticsData
+            float? score = null;
+
+            var averageRecord = new StatisticsRecord(identifier,
+                records.Where(record => record.MaxInboundSpeed != null).Select(record => record.MaxInboundSpeed.Value).ToList(),
+                records.Where(record => record.MaxOutboundSpeed != null).Select(record => record.MaxOutboundSpeed.Value).ToList(),
+                records.Where(record => record.AverageLatency != null).Select(record => record.AverageLatency.Value).ToList());
+            averageRecord.SetResponse(records.Select(record => record.AverageResponse).ToList());
+
+            foreach (var calculation in config.Calculations)
             {
-                PackageLoss = timedOutTimes/(successTimes + timedOutTimes)*100,
-                AverageResponse = Convert.ToInt32(dataList.Average(data => data.RoundtripTime)),
-                MinResponse = dataList.Min(data => data.RoundtripTime),
-                MaxResponse = dataList.Max(data => data.RoundtripTime)
-            };
-            float factor;
-            float score = 0;
-            if (!config.Calculations.TryGetValue("PackageLoss", out factor)) factor = 0;
-            score += statisticsData.PackageLoss*factor;
-            if (!config.Calculations.TryGetValue("AverageResponse", out factor)) factor = 0;
-            score += statisticsData.AverageResponse*factor;
-            if (!config.Calculations.TryGetValue("MinResponse", out factor)) factor = 0;
-            score += statisticsData.MinResponse*factor;
-            if (!config.Calculations.TryGetValue("MaxResponse", out factor)) factor = 0;
-            score += statisticsData.MaxResponse*factor;
-            Logging.Debug($"{serverName}  {JsonConvert.SerializeObject(statisticsData)}");
+                var name = calculation.Key;
+                var field = typeof (StatisticsRecord).GetField(name);
+                dynamic value = field?.GetValue(averageRecord);
+                var factor = calculation.Value;
+                if (value == null || factor.Equals(0)) continue;
+                score = score ?? 0;
+                score += value * factor;
+            }
+
+            if (score != null)
+            {
+                Logging.Debug($"Highest score: {score} {JsonConvert.SerializeObject(averageRecord, Formatting.Indented)}");
+            }
             return score;
         }
 
@@ -78,17 +86,27 @@ namespace Shadowsocks.Controller.Strategy
             }
             try
             {
-                var bestResult = (from server in servers
-                                  let name = server.FriendlyName()
-                                  where _filteredStatistics.ContainsKey(name)
-                                  select new
-                                  {
-                                      server,
-                                      score = GetScore(name)
-                                  }
-                                  ).Aggregate((result1, result2) => result1.score > result2.score ? result1 : result2);
+                var serversWithStatistics = (from server in servers
+                    let id = server.Identifier()
+                    where _filteredStatistics.ContainsKey(id)
+                    let score = GetScore(server.Identifier(), _filteredStatistics[server.Identifier()])
+                    where score != null
+                    select new
+                    {
+                        server,
+                        score
+                    }).ToArray();
 
-               LogWhenEnabled($"Switch to server: {bestResult.server.FriendlyName()} by statistics: score {bestResult.score}");
+                if (serversWithStatistics.Length < 2)
+                {
+                    LogWhenEnabled("no enough statistics data or all factors in calculations are 0");
+                    return;
+                }
+
+                var bestResult = serversWithStatistics
+                    .Aggregate((server1, server2) => server1.score > server2.score ? server1 : server2);
+
+                LogWhenEnabled($"Switch to server: {bestResult.server.FriendlyName()} by statistics: score {bestResult.score}");
                 _currentServer = bestResult.server;
             }
             catch (Exception e)
@@ -107,17 +125,13 @@ namespace Shadowsocks.Controller.Strategy
 
         public string ID => "com.shadowsocks.strategy.scbs";
 
-        public string Name => I18N.GetString("Choose By Total Package Loss");
+        public string Name => I18N.GetString("Choose by statistics");
 
-        public Server GetAServer(IStrategyCallerType type, IPEndPoint localIPEndPoint)
+        public Server GetAServer(IStrategyCallerType type, IPEndPoint localIPEndPoint, EndPoint destEndPoint)
         {
-            var oldServer = _currentServer;
-            if (oldServer == null)
+            if (_currentServer == null)
             {
                 ChooseNewServer(_controller.GetCurrentConfiguration().configs);
-            }
-            if (oldServer != _currentServer)
-            {
             }
             return _currentServer;  //current server cached for CachedInterval
         }
@@ -135,18 +149,19 @@ namespace Shadowsocks.Controller.Strategy
 
         public void UpdateLastRead(Server server)
         {
-            //TODO: combine this part of data with ICMP statics
         }
 
         public void UpdateLastWrite(Server server)
         {
-            //TODO: combine this part of data with ICMP statics
         }
 
         public void UpdateLatency(Server server, TimeSpan latency)
         {
-            //TODO: combine this part of data with ICMP statics
         }
 
+        public void Dispose()
+        {
+            _timer.Dispose();
+        }
     }
 }

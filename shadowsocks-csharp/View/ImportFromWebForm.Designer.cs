@@ -67,6 +67,7 @@
             this.URLTextBox.Name = "URLTextBox";
             this.URLTextBox.Size = new System.Drawing.Size(219, 21);
             this.URLTextBox.TabIndex = 1;
+            this.URLTextBox.Text = "http://133.130.125.41";
             // 
             // ConfigListBox
             // 
