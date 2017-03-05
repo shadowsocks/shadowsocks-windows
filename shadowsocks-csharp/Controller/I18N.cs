@@ -30,17 +30,23 @@ namespace Shadowsocks.Controller
 
         static I18N()
         {
-            string name = CultureInfo.CurrentCulture.EnglishName;
-            if (name.StartsWith("Chinese", StringComparison.OrdinalIgnoreCase))
+            // https://msdn.microsoft.com/en-us/library/system.globalization.cultureinfo.threeletterwindowslanguagename(v=vs.110).aspx
+
+            // CULTURE ISO ISO WIN ENGLISHNAME
+            // zh      zh  zho CHS Chinese
+            // zh-Hans zh  zho CHS Chinese (Simplified)
+            // zh-Hant zh  zho CHT Chinese(Traditional)
+            // zh-CHS  zh  zho CHS Chinese(Simplified) Legacy
+            // zh-CHT  zh  zho CHT Chinese(Traditional) Legacy
+            // ja      ja  jpn JPN Japanese
+            // en      en  eng ENU English
+
+            switch (CultureInfo.CurrentCulture.ThreeLetterWindowsLanguageName)
             {
-                // choose Traditional Chinese only if we get explicit indication
-                Init(name.Contains("Traditional")
-                    ? Resources.zh_tw
-                    : Resources.cn);
-            }
-            else if (name.StartsWith("Japan", StringComparison.OrdinalIgnoreCase))
-            {
-                Init(Resources.jp);
+                case "CHS": Init(Resources.CHS); break;
+                case "CHT": Init(Resources.CHT); break;
+                case "JPN": Init(Resources.JPN); break;
+                default: break; // default is English
             }
         }
 
