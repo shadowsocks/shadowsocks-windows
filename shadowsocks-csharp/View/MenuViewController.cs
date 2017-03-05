@@ -197,16 +197,11 @@ namespace Shadowsocks.View
                 for (int y = 0; y < iconCopy.Height; y++)
                 {
                     Color color = originIcon.GetPixel(x, y);
-                    if (color.A != 0)
+                    if (color.A != 0 && color.R > 30)
                     {
                         if (!enabled)
                         {
-                            Color flyBlue = Color.FromArgb(192, 192, 192);
-                            // Multiply with flyBlue
-                            int red = color.R * flyBlue.R / 255;
-                            int green = color.G * flyBlue.G / 255;
-                            int blue = color.B * flyBlue.B / 255;
-                            iconCopy.SetPixel(x, y, Color.FromArgb(color.A, red, green, blue));
+                            iconCopy.SetPixel(x, y, Color.FromArgb((byte)(color.A / 1.25), color.R, color.G, color.B));
                         }
                         else if (global)
                         {
@@ -287,18 +282,16 @@ namespace Shadowsocks.View
                 this.AutoStartupItem = CreateMenuItem("Start on Boot", new EventHandler(this.AutoStartupItem_Click)),
                 this.ShareOverLANItem = CreateMenuItem("Allow Clients from LAN", new EventHandler(this.ShareOverLANItem_Click)),
                 new MenuItem("-"),
+                CreateMenuItem("Show Logs...", new EventHandler(this.ShowLogItem_Click)),
+                this.VerboseLoggingToggleItem = CreateMenuItem( "Verbose Logging", new EventHandler(this.VerboseLoggingToggleItem_Click) ),
                 this.hotKeyItem = CreateMenuItem("Edit Hotkeys...", new EventHandler(this.hotKeyItem_Click)),
-                CreateMenuGroup("Help", new MenuItem[] {
-                    CreateMenuItem("Show Logs...", new EventHandler(this.ShowLogItem_Click)),
-                    this.VerboseLoggingToggleItem = CreateMenuItem( "Verbose Logging", new EventHandler(this.VerboseLoggingToggleItem_Click) ),
-                    CreateMenuGroup("Updates...", new MenuItem[] {
-                        CreateMenuItem("Check for Updates...", new EventHandler(this.checkUpdatesItem_Click)),
-                        new MenuItem("-"),
-                        this.autoCheckUpdatesToggleItem = CreateMenuItem("Check for Updates at Startup", new EventHandler(this.autoCheckUpdatesToggleItem_Click)),
-                        this.checkPreReleaseToggleItem = CreateMenuItem("Check Pre-release Version", new EventHandler(this.checkPreReleaseToggleItem_Click)),
-                    }),
-                    CreateMenuItem("About...", new EventHandler(this.AboutItem_Click)),
+                CreateMenuGroup("Updates...", new MenuItem[] {
+                    CreateMenuItem("Check for Updates...", new EventHandler(this.checkUpdatesItem_Click)),
+                    new MenuItem("-"),
+                    this.autoCheckUpdatesToggleItem = CreateMenuItem("Check for Updates at Startup", new EventHandler(this.autoCheckUpdatesToggleItem_Click)),
+                    this.checkPreReleaseToggleItem = CreateMenuItem("Check Pre-release Version", new EventHandler(this.checkPreReleaseToggleItem_Click)),
                 }),
+                CreateMenuItem("About...", new EventHandler(this.AboutItem_Click)),
                 new MenuItem("-"),
                 CreateMenuItem("Quit", new EventHandler(this.Quit_Click))
             });
