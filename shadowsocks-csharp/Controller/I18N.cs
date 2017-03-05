@@ -7,11 +7,11 @@ namespace Shadowsocks.Controller
 {
     using Shadowsocks.Properties;
 
-    public static class I18N
+    public class I18N
     {
-        private static Dictionary<string, string> _strings = new Dictionary<string, string>();
+        protected static Dictionary<string, string> Strings;
 
-        private static void Init(string res)
+        static void Init(string res)
         {
             using (var sr = new StringReader(res))
             {
@@ -23,32 +23,38 @@ namespace Shadowsocks.Controller
                     var pos = line.IndexOf('=');
                     if (pos < 1)
                         continue;
-                    _strings[line.Substring(0, pos)] = line.Substring(pos + 1);
+                    Strings[line.Substring(0, pos)] = line.Substring(pos + 1);
                 }
             }
         }
 
         static I18N()
         {
-            string name = CultureInfo.CurrentCulture.EnglishName;
-            if (name.StartsWith("Chinese", StringComparison.OrdinalIgnoreCase))
+            Strings = new Dictionary<string, string>();
+            string name = CultureInfo.CurrentCulture.Name;
+            if (name.StartsWith("zh"))
             {
-                // choose Traditional Chinese only if we get explicit indication
-                Init(name.Contains("Traditional")
-                    ? Resources.zh_tw
-                    : Resources.cn);
-            }
-            else if (name.StartsWith("Japan", StringComparison.OrdinalIgnoreCase))
-            {
-                Init(Resources.jp);
+                if (name == "zh" || name == "zh-CN")
+                {
+                    Init(Resources.cn);
+                }
+                else
+                {
+                    Init(Resources.zh_tw);
+                }
             }
         }
 
         public static string GetString(string key)
         {
-            return _strings.ContainsKey(key)
-                ? _strings[key]
-                : key;
+            if (Strings.ContainsKey(key))
+            {
+                return Strings[key];
+            }
+            else
+            {
+                return key;
+            }
         }
     }
 }
