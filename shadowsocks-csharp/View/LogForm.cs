@@ -11,6 +11,8 @@ using Shadowsocks.Properties;
 using Shadowsocks.Model;
 using Shadowsocks.Util;
 using System.Text;
+using Shadowsocks.Controller.Service;
+using System.Net;
 
 namespace Shadowsocks.View
 {
@@ -33,6 +35,8 @@ namespace Shadowsocks.View
         Timer timer;
         const int BACK_OFFSET = 65536;
         ShadowsocksController controller;
+        int serverIndexSpeedTest;
+        List<string> speedTestString = new List<string>();
 
         // global traffic update lock, make it static
         private static readonly object _lock = new object();
@@ -258,9 +262,9 @@ namespace Shadowsocks.View
             config.topMost = topMostTrigger;
             config.wrapText = wrapTextTrigger;
             config.toolbarShown = toolbarTrigger;
-            config.Font=LogMessageTextBox.Font;
-            config.BackgroundColor=LogMessageTextBox.BackColor;
-            config.TextColor=LogMessageTextBox.ForeColor;
+            config.Font = LogMessageTextBox.Font;
+            config.BackgroundColor = LogMessageTextBox.BackColor;
+            config.TextColor = LogMessageTextBox.ForeColor;
             if (WindowState != FormWindowState.Minimized && !(config.Maximized = WindowState == FormWindowState.Maximized))
             {
                 config.Top = Top;
@@ -409,6 +413,53 @@ namespace Shadowsocks.View
             toolbarTrigger = !toolbarTrigger;
             ToolbarFlowLayoutPanel.Visible = toolbarTrigger;
             ShowToolbarMenuItem.Checked = toolbarTrigger;
+        }
+
+        private void SpeedTestMenuItem_Click(object sender, EventArgs e)
+        {
+            serverIndexSpeedTest = 0;
+            speedTestString.Clear();
+        }
+
+        private void SpeedTest(int serverIndex)
+        {
+            lock (_lock)
+            {
+                controller.traffic.Clear();
+            }
+            var configs = controller.GetCurrentConfiguration().configs;
+            controller.SelectServerIndex(serverIndex);
+            SpeedTestWebClient http = new SpeedTestWebClient();
+            http.Proxy = new WebProxy(IPAddress.Loopback.ToString(), controller.GetCurrentConfiguration().localPort);
+            http.DownloadDataCompleted += http_DownloadDataCompleted;
+            http.DownloadDataAsyncWithTimeout(new Uri("https://www.youtube.com/"));
+        }
+
+        private void http_DownloadDataCompleted(object sender, DownloadDataCompletedEventArgs e)
+        {
+            long trafficTotal = 0;
+            long trafficAverage = 0;
+            lock (_lock)
+            {
+                if (traffic.Count > 0)
+                {
+                    foreach (var trafficPerSecond in traffic)
+                    {
+                        trafficTotal += trafficPerSecond.inbound;
+                    }
+                    trafficAverage = trafficTotal / traffic.Count;
+                }
+            }
+            speedTestString.Add(controller.GetCurrentServer().server + ":" + controller.GetCurrentServer().server_port + " -- " + trafficTotal + " / " + trafficAverage + "\n");
+            speedTestString.ForEach(s => LogMessageTextBox.AppendText(s));
+            LogMessageTextBox.ScrollToCaret();
+
+            var configs = controller.GetCurrentConfiguration().configs;
+            if (serverIndexSpeedTest < configs.Count - 1)
+            {
+                serverIndexSpeedTest++;
+                SpeedTest(serverIndexSpeedTest);
+            }
         }
     }
 }
