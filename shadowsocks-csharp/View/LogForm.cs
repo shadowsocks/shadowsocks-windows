@@ -419,6 +419,7 @@ namespace Shadowsocks.View
         {
             serverIndexSpeedTest = 0;
             speedTestString.Clear();
+            SpeedTest(serverIndexSpeedTest);
         }
 
         private void SpeedTest(int serverIndex)
