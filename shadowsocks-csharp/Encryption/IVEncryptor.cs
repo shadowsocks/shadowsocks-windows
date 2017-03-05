@@ -106,7 +106,7 @@ namespace Shadowsocks.Encryption
         #region OneTimeAuth
 
         public const int ONETIMEAUTH_FLAG = 0x10;
-        public const int ADDRTYPE_MASK = 0xF;
+        public const int ADDRTYPE_MASK = 0xEF;
 
         public const int ONETIMEAUTH_BYTES = 10;
 

@@ -1,3 +1,16 @@
+3.4.3 2017-1-11
+- Make the previous portable mode as default
+- Refine networking by Noisyfox
+- Bug fixes and improvements
+
+3.4.2.1 2016-12-30
+- Refine Traditional Chinese translation by LNDDYL
+- sysproxy: reduce false positives on virus detection
+- sysproxy: set LAN proxy settings even if RAS query fails
+- privoxy: drop obsolete tray area refreshing code
+- Fix auto startup
+- Bug fixes and improvements
+
 3.4.2 2016-12-16
 - Fix null ref in TCPRelay. (#940)
 - Bring Privoxy back. (#948)
