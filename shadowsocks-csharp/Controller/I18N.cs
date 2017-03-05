@@ -38,6 +38,10 @@ namespace Shadowsocks.Controller
                     ? Resources.zh_tw
                     : Resources.cn);
             }
+            else if (name.StartsWith("Japan", StringComparison.OrdinalIgnoreCase))
+            {
+                Init(Resources.jp);
+            }
         }
 
         public static string GetString(string key)
