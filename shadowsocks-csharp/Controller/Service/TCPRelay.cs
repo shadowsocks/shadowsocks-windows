@@ -322,15 +322,24 @@ namespace Shadowsocks.Controller
                     }
                     else
                     {
-                        if (_command == 1)
+                        int atyp = _connetionRecvBuffer[3];
+
+                        switch (atyp)
                         {
-                            byte[] response = { 5, 0, 0, 1, 0, 0, 0, 0, 0, 0 };
-                            _connection.BeginSend(response, 0, response.Length, SocketFlags.None,
-                                new AsyncCallback(ResponseCallback), null);
-                        }
-                        else if (_command == 3)
-                        {
-                            ReadAddress(HandleUDPAssociate);
+                            case 1: // IPv4 address, 4 bytes
+                                ReadAddress(4 + 2 - 1);
+                                break;
+                            case 3: // domain name, length + str
+                                int len = _connetionRecvBuffer[4];
+                                ReadAddress(len + 2);
+                                break;
+                            case 4: // IPv6 address, 16 bytes
+                                ReadAddress(16 + 2 - 1);
+                                break;
+                            default:
+                                Logging.Debug("Unsupported ATYP=" + atyp);
+                                Close();
+                                break;
                         }
                     }
                 }
@@ -347,50 +356,12 @@ namespace Shadowsocks.Controller
             }
         }
 
-        private void ResponseCallback(IAsyncResult ar)
-        {
-            try
-            {
-                _connection.EndSend(ar);
-
-                ReadAddress(StartConnect);
-            }
-            catch (Exception e)
-            {
-                Logging.LogUsefulException(e);
-                Close();
-            }
-        }
-
-        private void ReadAddress(Action onSuccess)
-        {
-            int atyp = _connetionRecvBuffer[3];
-
-            switch (atyp)
-            {
-                case 1: // IPv4 address, 4 bytes
-                    ReadAddress(4 + 2 - 1, onSuccess);
-                    break;
-                case 3: // domain name, length + str
-                    int len = _connetionRecvBuffer[4];
-                    ReadAddress(len + 2, onSuccess);
-                    break;
-                case 4: // IPv6 address, 16 bytes
-                    ReadAddress(16 + 2 - 1, onSuccess);
-                    break;
-                default:
-                    Logging.Debug("Unsupported ATYP=" + atyp);
-                    Close();
-                    break;
-            }
-        }
-
-        private void ReadAddress(int bytesRemain, Action onSuccess)
+        private void ReadAddress(int bytesRemain)
         {
             Array.Copy(_connetionRecvBuffer, 3, _connetionRecvBuffer, 0, 2);
 
             // Read the remain address bytes
-            _connection.BeginReceive(_connetionRecvBuffer, 2, RecvSize - 2, SocketFlags.None, OnAddressFullyRead, new object[] {bytesRemain, onSuccess});
+            _connection.BeginReceive(_connetionRecvBuffer, 2, RecvSize - 2, SocketFlags.None, OnAddressFullyRead, bytesRemain);
         }
 
         private void OnAddressFullyRead(IAsyncResult ar)
@@ -399,12 +370,7 @@ namespace Shadowsocks.Controller
             try
             {
                 int bytesRead = _connection.EndReceive(ar);
-
-                var states = (object[]) ar.AsyncState;
-
-                int bytesRemain = (int)states[0];
-                var onSuccess = (Action) states[1];
-
+                int bytesRemain = (int) ar.AsyncState;
                 if (bytesRead >= bytesRemain)
                 {
                     _firstPacketLength = bytesRead + 2;
@@ -439,7 +405,16 @@ namespace Shadowsocks.Controller
 
                     _destEndPoint = SocketUtil.GetEndPoint(dst_addr, dst_port);
 
-                    onSuccess.Invoke();
+                    if (_command == 1)
+                    {
+                        byte[] response = {5, 0, 0, 1, 0, 0, 0, 0, 0, 0};
+                        _connection.BeginSend(response, 0, response.Length, SocketFlags.None,
+                            new AsyncCallback(ResponseCallback), null);
+                    }
+                    else if (_command == 3)
+                    {
+                        HandleUDPAssociate();
+                    }
                 }
                 else
                 {
@@ -496,6 +471,20 @@ namespace Shadowsocks.Controller
                     else
                         Close();
                 }
+            }
+            catch (Exception e)
+            {
+                Logging.LogUsefulException(e);
+                Close();
+            }
+        }
+
+        private void ResponseCallback(IAsyncResult ar)
+        {
+            try
+            {
+                _connection.EndSend(ar);
+                StartConnect();
             }
             catch (Exception e)
             {
@@ -727,26 +716,6 @@ namespace Shadowsocks.Controller
             }
         }
 
-        // private static readonly Random Rnd = new Random();
-
-        private void TryReadAvailableData()
-        {
-            int available = Math.Min(_connection.Available, RecvSize - _firstPacketLength);
-            if (available > 0)
-            {
-                // Pick a random chunk size, or is it truly necessary? Random packet size is some sort of 'characteristic' itself.
-                //lock (Rnd)
-                //{
-                //    available = Rnd.Next(available + 1);
-                //}
-
-                var size = _connection.Receive(_connetionRecvBuffer, _firstPacketLength, available,
-                    SocketFlags.None);
-
-                _firstPacketLength += size;
-            }
-        }
-
         private void StartPipe(AsyncSession session)
         {
             if (_closed) return;
@@ -754,9 +723,6 @@ namespace Shadowsocks.Controller
             {
                 _startReceivingTime = DateTime.Now;
                 session.Remote.BeginReceive(_remoteRecvBuffer, 0, RecvSize, SocketFlags.None, new AsyncCallback(PipeRemoteReceiveCallback), session);
-
-                TryReadAvailableData();
-                Logging.Debug($"_firstPacketLength = {_firstPacketLength}");
                 SendToServer(_firstPacketLength, session);
             }
             catch (Exception e)

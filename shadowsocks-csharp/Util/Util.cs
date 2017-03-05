@@ -25,26 +25,43 @@ namespace Shadowsocks.Util
 
     public static class Utils
     {
-        private static string _tempPath = null;
+        private static bool? _portableMode;
+        private static string TempPath = null;
+
+        public static bool IsPortableMode()
+        {
+            if (!_portableMode.HasValue)
+            {
+                _portableMode = File.Exists(Path.Combine(Application.StartupPath, "shadowsocks_portable_mode.txt"));
+            }
+
+            return _portableMode.Value;
+        }
 
         // return path to store temporary files
         public static string GetTempPath()
         {
-            if (_tempPath == null)
+            if (TempPath == null)
             {
-                try
-                {
-                    Directory.CreateDirectory(Path.Combine(Application.StartupPath, "ss_win_temp"));
-                    // don't use "/", it will fail when we call explorer /select xxx/ss_win_temp\xxx.log
-                    _tempPath = Path.Combine(Application.StartupPath, "ss_win_temp");
-                }
-                catch (Exception e)
-                {
-                    Logging.Error(e);
-                    throw;
-                }
+                if (IsPortableMode())
+                    try
+                    {
+                        Directory.CreateDirectory(Path.Combine(Application.StartupPath, "temp"));
+                    }
+                    catch (Exception e)
+                    {
+                        TempPath = Path.GetTempPath();
+                        Logging.LogUsefulException(e);
+                    }
+                    finally
+                    {
+                        // don't use "/", it will fail when we call explorer /select xxx/temp\xxx.log
+                        TempPath = Path.Combine(Application.StartupPath, "temp");
+                    }
+                else
+                    TempPath = Path.GetTempPath();
             }
-            return _tempPath;
+            return TempPath;
         }
 
         // return a full path with filename combined which pointed to the temporary directory
