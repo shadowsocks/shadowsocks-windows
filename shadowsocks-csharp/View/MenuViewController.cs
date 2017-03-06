@@ -449,6 +449,11 @@ namespace Shadowsocks.View
             if (configForm != null)
             {
                 configForm.Activate();
+                if (addNode)
+                {
+                    Configuration cfg = controller.GetConfiguration();
+                    configForm.SetServerListSelectedIndex(cfg.index + 1);
+                }
             }
             else
             {

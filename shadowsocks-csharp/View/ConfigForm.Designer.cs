@@ -140,6 +140,7 @@
             this.ServersListBox.Location = new System.Drawing.Point(0, 0);
             this.ServersListBox.Margin = new System.Windows.Forms.Padding(0);
             this.ServersListBox.Name = "ServersListBox";
+            this.ServersListBox.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
             this.ServersListBox.Size = new System.Drawing.Size(250, 292);
             this.ServersListBox.TabIndex = 0;
             this.ServersListBox.SelectedIndexChanged += new System.EventHandler(this.ServersListBox_SelectedIndexChanged);
