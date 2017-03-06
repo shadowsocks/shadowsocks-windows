@@ -73,9 +73,7 @@ Proxy Port=Proxy 連接埠
 &File=檔案 (&F)
 &Open Location=在檔案總管中開啟 (&O)
 E&xit=結束 (&X)
-&View=檢視
-
-(&V)
+&View=檢視 (&V)
 &Clean Logs=清除記錄檔 (&C)
 Change &Font=變更字型 (&F)
 &Wrap Text=自動換行 (&W)

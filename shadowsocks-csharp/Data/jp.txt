@@ -73,9 +73,7 @@ Proxy Port=代理ポート
 &File=ファイル (&F)
 &Open Location=この場所を開く (&O)
 E&xit=終了 (&X)
-&View=ビュー
-
-(&V)
+&View=ビュー (&V)
 &Clean Logs=ログを削除する (&C)
 Change &Font=フォントを変更する (&F)
 &Wrap Text=文字改行 (&W)
