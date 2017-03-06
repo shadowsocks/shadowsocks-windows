@@ -213,7 +213,8 @@ namespace Shadowsocks.Controller
                 _connection.Send(response);
                 HandshakeAuthReceiveCallback();
             }
-            else if (no_auth)
+            else if (no_auth && (string.IsNullOrEmpty(_config.authUser)
+                || Util.Utils.isMatchSubNet(((IPEndPoint)_connection.RemoteEndPoint).Address, "127.0.0.0/8")))
             {
                 _connection.Send(response);
                 HandshakeReceive2Callback();
