@@ -874,6 +874,7 @@ namespace Shadowsocks.Obfs
             else if (data == send_buffer)
             {
                 datalength = send_buffer.Length;
+                send_buffer = null;
             }
             const int unit_len = 8100;
             int ogn_datalength = datalength;
@@ -895,7 +896,7 @@ namespace Shadowsocks.Obfs
                 return outdata;
             }
             bool nopadding = false;
-            if (pack_id < 16 && datalength > 256)
+            if (pack_id < 128 && datalength > 256)
             {
                 int keep = random.Next(1, datalength + 128);
                 if (keep < datalength)
@@ -905,10 +906,6 @@ namespace Shadowsocks.Obfs
                     datalength -= keep;
                     nopadding = true;
                 }
-            }
-            if (!nopadding)
-            {
-                send_buffer = null;
             }
             while (datalength > unit_len)
             {
