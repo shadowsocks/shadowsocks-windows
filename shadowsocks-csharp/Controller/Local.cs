@@ -94,7 +94,9 @@ namespace Shadowsocks.Controller
         public bool Handle(byte[] firstPacket, int length, Socket socket)
         {
             int local_port = ((IPEndPoint)socket.LocalEndPoint).Port;
-            if (!_config.GetPortMapCache().ContainsKey(local_port) && !Accept(firstPacket, length))
+            bool in_port_map = _config.GetPortMapCache().ContainsKey(local_port);
+            bool accept = Accept(firstPacket, length);
+            if (!in_port_map && !accept)
             {
                 return false;
             }
@@ -265,7 +267,7 @@ namespace Shadowsocks.Controller
                 if (cfg.try_keep_alive <= 0 && State == ConnectState.CONNECTED && remote != null && remoteUDP == null && remote.CanSendKeepAlive)
                 {
                     cfg.try_keep_alive++;
-                    RemoteSendWithoutCallback(null, -1);
+                    RemoteSendWithoutCallback(remoteUDPRecvBuffer, -1);
                 }
                 else
                 {
@@ -759,12 +761,14 @@ namespace Shadowsocks.Controller
                     Logging.Debug("Disconnect " + cfg.targetHost + ":" + cfg.targetPort.ToString() + " " + connection.GetSocket().Handle.ToString());
                     CloseSocket(ref connection);
                     CloseSocket(ref connectionUDP);
+                    Logging.Debug("Transfer " + cfg.targetHost + ":" + cfg.targetPort.ToString() + speedTester.TransferLog());
                 }
                 else
                 {
                     connection = null;
                     connectionUDP = null;
                 }
+
 
                 detector = null;
                 speedTester = null;
@@ -1038,7 +1042,7 @@ namespace Shadowsocks.Controller
                 int bytesRead = remote.EndReceive(ar, out sendback);
                 if (sendback)
                 {
-                    RemoteSendWithoutCallback(new byte[0], 0);
+                    RemoteSendWithoutCallback(remoteUDPRecvBuffer, 0);
                 }
                 remoteTCPIdle = true;
                 return bytesRead;
@@ -1416,7 +1420,7 @@ namespace Shadowsocks.Controller
                     ResetTimeout(cfg.TTL);
                     if (sendback)
                     {
-                        RemoteSendWithoutCallback(new byte[0], 0);
+                        RemoteSendWithoutCallback(remoteUDPRecvBuffer, 0);
                     }
 
                     if (bytesRead > 0)
@@ -1521,55 +1525,56 @@ namespace Shadowsocks.Controller
             }
         }
 
-        private void PipeRemoteSendbackCallback(IAsyncResult ar)
-        {
-            if (closed)
-            {
-                return;
-            }
-            try
-            {
-                remote.EndSend(ar);
-                if (lastKeepTime == null || (DateTime.Now - lastKeepTime).TotalSeconds > 5)
-                {
-                    if (keepCurrentServer != null) keepCurrentServer(cfg.targetHost, server.id);
-                    lastKeepTime = DateTime.Now;
-                }
-            }
-            catch (Exception e)
-            {
-                LogExceptionAndClose(e);
-            }
-        }
-
-        private void RemoteSendback(byte[] bytes, int length)
-        {
-            int send_len;
-            send_len = remote.BeginSend(bytes, length, SocketFlags.None, new AsyncCallback(PipeRemoteSendbackCallback), null);
-            server.ServerSpeedLog().AddUploadBytes(send_len, DateTime.Now);
-            speedTester.AddUploadSize(send_len);
-        }
-
         private void RemoteSendWithoutCallback(byte[] bytes, int length)
         {
             int send_len;
             send_len = remote.Send(bytes, length, SocketFlags.None);
-            server.ServerSpeedLog().AddUploadBytes(send_len, DateTime.Now);
-            speedTester.AddUploadSize(send_len);
+            if (send_len > 0)
+            {
+                server.ServerSpeedLog().AddUploadBytes(send_len, DateTime.Now);
+                speedTester.AddUploadSize(send_len);
+
+                while (true)
+                {
+                    send_len = remote.Send(null, 0, SocketFlags.None);
+                    if (send_len > 0)
+                    {
+                        server.ServerSpeedLog().AddUploadBytes(send_len, DateTime.Now);
+                        speedTester.AddUploadSize(send_len);
+                    }
+                    else
+                        break;
+                }
+            }
         }
 
         private void RemoteSend(byte[] bytes, int length)
         {
             int send_len;
             send_len = remote.Send(bytes, length, SocketFlags.None);
-            server.ServerSpeedLog().AddUploadBytes(send_len, DateTime.Now);
-            speedTester.AddUploadSize(send_len);
-            ResetTimeout(cfg.TTL);
-
-            if (lastKeepTime == null || (DateTime.Now - lastKeepTime).TotalSeconds > 5)
+            if (send_len > 0)
             {
-                if (keepCurrentServer != null) keepCurrentServer(cfg.targetHost, server.id);
-                lastKeepTime = DateTime.Now;
+                server.ServerSpeedLog().AddUploadBytes(send_len, DateTime.Now);
+                speedTester.AddUploadSize(send_len);
+                ResetTimeout(cfg.TTL);
+
+                if (lastKeepTime == null || (DateTime.Now - lastKeepTime).TotalSeconds > 5)
+                {
+                    if (keepCurrentServer != null) keepCurrentServer(cfg.targetHost, server.id);
+                    lastKeepTime = DateTime.Now;
+                }
+
+                while (true)
+                {
+                    send_len = remote.Send(null, 0, SocketFlags.None);
+                    if (send_len > 0)
+                    {
+                        server.ServerSpeedLog().AddUploadBytes(send_len, DateTime.Now);
+                        speedTester.AddUploadSize(send_len);
+                    }
+                    else
+                        break;
+                }
             }
         }
 

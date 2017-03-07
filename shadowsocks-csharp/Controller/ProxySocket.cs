@@ -771,43 +771,19 @@ namespace Shadowsocks.Controller
                 //    }
                 //}
                 byte[] bytesToEncrypt = _protocol.ClientPreEncrypt(buffer, size, out outlength);
+                if (bytesToEncrypt == null)
+                    return 0;
                 Util.Utils.SetArrayMinSize(ref SendEncryptBuffer, outlength + 32);
                 _encryptor.Encrypt(bytesToEncrypt, outlength, SendEncryptBuffer, out bytesToSend);
                 obfsBuffer = _obfs.ClientEncode(SendEncryptBuffer, bytesToSend, out obfsSendSize);
-                sendSize = _socket.Send(obfsBuffer, obfsSendSize, 0);
             }
+            sendSize = _socket.Send(obfsBuffer, obfsSendSize, 0);
             while (sendSize < obfsSendSize)
             {
                 int new_size = _socket.Send(obfsBuffer, sendSize, obfsSendSize - sendSize, 0);
                 sendSize += new_size;
             }
             return obfsSendSize;
-        }
-
-        public int BeginSend(byte[] buffer, int size, SocketFlags flags, AsyncCallback callback, object state)
-        {
-            CallbackState st = new CallbackState();
-            st.size = size;
-            st.state = state;
-
-            int bytesToSend = 0;
-            int obfsSendSize;
-            byte[] obfsBuffer;
-            lock (_encryptionLock)
-            {
-                int outlength;
-                byte[] bytesToEncrypt = _protocol.ClientPreEncrypt(buffer, size, out outlength);
-                Util.Utils.SetArrayMinSize(ref SendEncryptBuffer, outlength + 32);
-                _encryptor.Encrypt(bytesToEncrypt, outlength, SendEncryptBuffer, out bytesToSend);
-                obfsBuffer = _obfs.ClientEncode(SendEncryptBuffer, bytesToSend, out obfsSendSize);
-                _socket.BeginSend(obfsBuffer, 0, obfsSendSize, 0, callback, st);
-            }
-            return obfsSendSize;
-        }
-
-        public int EndSend(IAsyncResult ar)
-        {
-            return _socket.EndSend(ar);
         }
 
         public IAsyncResult BeginReceiveFrom(byte[] buffer, int size, SocketFlags flags, ref EndPoint ep, AsyncCallback callback, object state)

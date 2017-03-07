@@ -79,6 +79,11 @@ namespace Shadowsocks.Obfs
 
         public override byte[] ClientPreEncrypt(byte[] plaindata, int datalength, out int outlength)
         {
+            if (plaindata == null)
+            {
+                outlength = 0;
+                return plaindata;
+            }
             byte[] outdata = new byte[datalength + datalength / 10 + 32];
             byte[] packdata = new byte[9000];
             byte[] data = plaindata;
@@ -181,6 +186,11 @@ namespace Shadowsocks.Obfs
 
         public override byte[] ClientPreEncrypt(byte[] plaindata, int datalength, out int outlength)
         {
+            if (plaindata == null)
+            {
+                outlength = 0;
+                return plaindata;
+            }
             byte[] outdata = new byte[datalength + datalength / 10 + 32];
             byte[] packdata = new byte[32768];
             byte[] data = plaindata;
@@ -324,6 +334,11 @@ namespace Shadowsocks.Obfs
 
         public override byte[] ClientPreEncrypt(byte[] plaindata, int datalength, out int outlength)
         {
+            if (plaindata == null)
+            {
+                outlength = 0;
+                return plaindata;
+            }
             byte[] outdata = new byte[datalength + datalength / 10 + 32];
             byte[] packdata = new byte[9000];
             byte[] data = plaindata;

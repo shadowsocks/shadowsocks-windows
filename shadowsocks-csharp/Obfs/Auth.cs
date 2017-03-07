@@ -102,6 +102,11 @@ namespace Shadowsocks.Obfs
 
         public override byte[] ClientPreEncrypt(byte[] plaindata, int datalength, out int outlength)
         {
+            if (plaindata == null)
+            {
+                outlength = 0;
+                return plaindata;
+            }
             byte[] outdata = new byte[datalength + datalength / 10 + 32];
             byte[] packdata = new byte[9000];
             byte[] data = plaindata;
@@ -313,6 +318,11 @@ namespace Shadowsocks.Obfs
 
         public override byte[] ClientPreEncrypt(byte[] plaindata, int datalength, out int outlength)
         {
+            if (plaindata == null)
+            {
+                outlength = 0;
+                return plaindata;
+            }
             byte[] outdata = new byte[datalength + datalength / 10 + 32];
             byte[] packdata = new byte[9000];
             byte[] data = plaindata;
@@ -543,6 +553,11 @@ namespace Shadowsocks.Obfs
 
         public override byte[] ClientPreEncrypt(byte[] plaindata, int datalength, out int outlength)
         {
+            if (plaindata == null)
+            {
+                outlength = 0;
+                return plaindata;
+            }
             byte[] outdata = new byte[datalength + datalength / 10 + 32];
             byte[] packdata = new byte[9000];
             byte[] data = plaindata;
@@ -673,6 +688,7 @@ namespace Shadowsocks.Obfs
         protected byte[] user_key;
         protected byte[] user_id;
         protected hash_func hash;
+        protected byte[] send_buffer;
 
         public static List<string> SupportedObfs()
         {
@@ -708,9 +724,9 @@ namespace Shadowsocks.Obfs
             return null;
         }
 
-        public void PackData(byte[] data, int datalength, byte[] outdata, out int outlength)
+        public void PackData(byte[] data, int datalength, byte[] outdata, out int outlength, bool nopadding = false)
         {
-            int rand_len = (datalength > 1200 ? 0 : pack_id > 4 ? random.Next(32) : (datalength > 900 ? random.Next(128) : random.Next(512))) + 1;
+            int rand_len = (datalength > 1200 || nopadding ? 0 : pack_id >= 16 ? random.Next(32) : (datalength > 900 ? random.Next(128) : random.Next(512))) + 1;
             outlength = rand_len + datalength + 8;
             if (datalength > 0)
                 Array.Copy(data, 0, outdata, rand_len + 4, datalength);
@@ -725,8 +741,8 @@ namespace Shadowsocks.Obfs
                 rnd_data.CopyTo(outdata, 4);
             }
 
+            MbedTLS.HMAC sha1 = CreateHMAC(key);
             {
-                MbedTLS.HMAC sha1 = CreateHMAC(key);
                 byte[] sha1data = sha1.ComputeHash(outdata, 0, 2);
                 Array.Copy(sha1data, 0, outdata, 2, 2);
             }
@@ -742,7 +758,6 @@ namespace Shadowsocks.Obfs
             }
             ++pack_id;
             {
-                MbedTLS.HMAC sha1 = CreateHMAC(key);
                 byte[] sha1data = sha1.ComputeHash(outdata, 0, outlength - 4);
                 Array.Copy(sha1data, 0, outdata, outlength - 4, 4);
             }
@@ -850,15 +865,20 @@ namespace Shadowsocks.Obfs
         {
             byte[] outdata = new byte[datalength + datalength / 10 + 32];
             byte[] packdata = new byte[9000];
-            byte[] data = plaindata;
+            byte[] data = plaindata == null ? send_buffer : plaindata;
             outlength = 0;
+            if (data == null)
+            {
+                return null;
+            }
+            else if (data == send_buffer)
+            {
+                datalength = send_buffer.Length;
+            }
             const int unit_len = 8100;
             int ogn_datalength = datalength;
-            bool first_mark = false;
             if (!has_sent_header)
             {
-                first_mark = true;
-                System.Diagnostics.Debug.WriteLine("First len " + datalength.ToString());
                 int _datalength = Math.Min(1200, datalength);
                 int outlen;
                 PackAuthData(data, _datalength, packdata, out outlen);
@@ -870,11 +890,30 @@ namespace Shadowsocks.Obfs
                 byte[] newdata = new byte[datalength];
                 Array.Copy(data, _datalength, newdata, 0, newdata.Length);
                 data = newdata;
+
+                send_buffer = data.Length > 0 ? data : null;
+                return outdata;
+            }
+            bool nopadding = false;
+            if (pack_id < 16 && datalength > 256)
+            {
+                int keep = random.Next(1, datalength + 128);
+                if (keep < datalength)
+                {
+                    send_buffer = new byte[keep];
+                    Array.Copy(data, datalength - keep, send_buffer, 0, keep);
+                    datalength -= keep;
+                    nopadding = true;
+                }
+            }
+            if (!nopadding)
+            {
+                send_buffer = null;
             }
             while (datalength > unit_len)
             {
                 int outlen;
-                PackData(data, unit_len, packdata, out outlen);
+                PackData(data, unit_len, packdata, out outlen, nopadding);
                 Util.Utils.SetArrayMinSize2(ref outdata, outlength + outlen);
                 Array.Copy(packdata, 0, outdata, outlength, outlen);
                 outlength += outlen;
@@ -888,13 +927,11 @@ namespace Shadowsocks.Obfs
                 int outlen;
                 if (ogn_datalength == -1)
                     datalength = 0;
-                PackData(data, datalength, packdata, out outlen);
+                PackData(data, datalength, packdata, out outlen, nopadding);
                 Util.Utils.SetArrayMinSize2(ref outdata, outlength + outlen);
                 Array.Copy(packdata, 0, outdata, outlength, outlen);
                 outlength += outlen;
             }
-            if (first_mark)
-                System.Diagnostics.Debug.WriteLine("First outlen " + outlength.ToString());
             return outdata;
         }
 

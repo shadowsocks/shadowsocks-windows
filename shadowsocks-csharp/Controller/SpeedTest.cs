@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 using Shadowsocks.Model;
 
@@ -8,6 +9,11 @@ namespace Shadowsocks.Controller
 
     class SpeedTester
     {
+        struct TransLog
+        {
+            public int dir;
+            public int size;
+        }
         public DateTime timeConnectBegin;
         public DateTime timeConnectEnd;
         public DateTime timeBeginUpload;
@@ -16,7 +22,7 @@ namespace Shadowsocks.Controller
         public long sizeDownload = 0;
         public long sizeProtocolRecv = 0;
         public long sizeRecv = 0;
-        //private List<TransLog> sizeDownloadList = new List<TransLog>();
+        private List<TransLog> sizeTransfer = new List<TransLog>();
         public string server;
         public ServerTransferTotal transfer;
 
@@ -56,6 +62,15 @@ namespace Shadowsocks.Controller
             {
                 transfer.AddDownload(server, size);
             }
+#if DEBUG
+            if (sizeTransfer.Count < 128)
+            {
+                lock (sizeTransfer)
+                {
+                    sizeTransfer.Add(new TransLog { dir = 1, size = size });
+                }
+            }
+#endif
         }
         public void AddProtocolRecvSize(int size)
         {
@@ -74,33 +89,34 @@ namespace Shadowsocks.Controller
             {
                 transfer.AddUpload(server, size);
             }
+#if DEBUG
+            if (sizeTransfer.Count < 128)
+            {
+                lock (sizeTransfer)
+                {
+                    sizeTransfer.Add(new TransLog { dir = 0, size = size });
+                }
+            }
+#endif
         }
 
-        //public long GetAvgDownloadSpeed()
-        //{
-        //    if (sizeDownloadList == null || sizeDownloadList.Count < 2 || (sizeDownloadList[sizeDownloadList.Count - 1].recvTime - sizeDownloadList[0].recvTime).TotalSeconds <= 0.001)
-        //        return 0;
-        //    return (long)((sizeDownload - sizeDownloadList[0].size) / (sizeDownloadList[sizeDownloadList.Count - 1].recvTime - sizeDownloadList[0].recvTime).TotalSeconds);
-        //}
-
-        //public int GetActionType()
-        //{
-        //    int type = 0;
-        //    if (sizeDownload > 1024 * 1024 * 1)
-        //    {
-        //        type |= 1;
-        //    }
-        //    if (sizeUpload > 1024 * 1024 * 1)
-        //    {
-        //        type |= 2;
-        //    }
-        //    double time = (DateTime.Now - timeConnectEnd).TotalSeconds;
-        //    if (time > 5 && (sizeDownload + sizeUpload) / time > 1024 * 16)
-        //    {
-        //        type |= 4;
-        //    }
-        //    return type;
-        //}
+        public string TransferLog()
+        {
+            string ret = "";
+#if DEBUG
+            int lastdir = -1;
+            foreach (TransLog t in sizeTransfer)
+            {
+                if (t.dir != lastdir)
+                {
+                    lastdir = t.dir;
+                    ret += (t.dir == 0 ? " u" : " d");
+                }
+                ret += " " + t.size.ToString();
+            }
+#endif
+            return ret;
+        }
     }
 
     class ProtocolResponseDetector
