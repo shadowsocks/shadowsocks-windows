@@ -301,8 +301,8 @@
     <None Include="Resources\ss16.png" />
     <None Include="Resources\ss24.png" />
     <None Include="Resources\ssw128.png" />
-    <Content Include="Data\zh-CN.txt" />
-    <Content Include="Data\zh-TW.txt" />
+    <Content Include="Data\zh_CN.txt" />
+    <Content Include="Data\zh_TW.txt" />
     <Content Include="Data\ja.txt" />
     <Content Include="Data\privoxy_conf.txt" />
     <Content Include="Data\user-rule.txt" />
