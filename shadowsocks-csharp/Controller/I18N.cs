@@ -35,12 +35,12 @@ namespace Shadowsocks.Controller
             {
                 // choose Traditional Chinese only if we get explicit indication
                 Init(name.Contains("Traditional")
-                    ? Resources.zh_tw
-                    : Resources.cn);
+                    ? Resources.zh_TW
+                    : Resources.zh_CN);
             }
             else if (name.StartsWith("Japan", StringComparison.OrdinalIgnoreCase))
             {
-                Init(Resources.jp);
+                Init(Resources.ja);
             }
         }
 
