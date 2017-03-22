@@ -348,7 +348,7 @@ namespace Shadowsocks.View
             _notifyIcon.ShowBalloonTip(timeout);
         }
 
-        void ShowSaveDialog(string name, string src)
+        string ShowSaveDialog(string name, string src)
         {
             SaveFileDialog saveFileDialog = new SaveFileDialog();
             saveFileDialog.FileName = name;
@@ -356,8 +356,17 @@ namespace Shadowsocks.View
 
             if (saveFileDialog.ShowDialog() == DialogResult.OK && System.IO.File.Exists(src))
             {
-                System.IO.File.Copy(src, saveFileDialog.FileName, true);
+                try
+                {
+                    System.IO.File.Copy(src, saveFileDialog.FileName, true);
+                    return saveFileDialog.FileName;
+                }
+                catch
+                {
+                    // ignored
+                }
             }
+            return src;
         }
 
         void controller_UpdatePACFromGFWListError(object sender, System.IO.ErrorEventArgs e)
@@ -394,7 +403,9 @@ namespace Shadowsocks.View
                 updateChecker.NewVersionFound = false; /* Reset the flag */
                 if (System.IO.File.Exists(updateChecker.LatestVersionLocalName))
                 {
-                    ShowSaveDialog(updateChecker.LatestVersionName, updateChecker.LatestVersionLocalName);
+                    string dest = ShowSaveDialog(updateChecker.LatestVersionName, updateChecker.LatestVersionLocalName);
+                    string argument = "/select, \"" + dest + "\"";
+                    System.Diagnostics.Process.Start("explorer.exe", argument);
                 }
             }
         }
