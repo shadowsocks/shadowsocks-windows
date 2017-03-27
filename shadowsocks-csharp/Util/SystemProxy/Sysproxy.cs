@@ -56,6 +56,11 @@ namespace Shadowsocks.Util.SystemProxy
                 arguments = "off";
             }
 
+            SetIEProxyWithArguments(arguments);
+        }
+
+        public static void SetIEProxyWithArguments(string arguments)
+        {
             using (var process = new Process())
             {
                 // Configure the process using the StartInfo properties.

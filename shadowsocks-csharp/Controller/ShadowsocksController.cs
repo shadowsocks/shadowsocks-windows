@@ -96,6 +96,7 @@ namespace Shadowsocks.Controller
 
         public void Start()
         {
+            UserProxy.Record();
             Reload();
         }
 
@@ -269,10 +270,7 @@ namespace Shadowsocks.Controller
             {
                 privoxyRunner.Stop();
             }
-            if (_config.enabled)
-            {
-                SystemProxy.Update(_config, true, null);
-            }
+            UserProxy.Restore();
             Encryption.RNG.Close();
         }
 
