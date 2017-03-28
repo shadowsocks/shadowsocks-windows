@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -13,91 +14,66 @@ namespace Shadowsocks.Controller
     /// </summary>
     public static class UserProxy
     {
-        private static ProxyValues _proxyValues;
+        private static readonly Dictionary<string, string> ProxyValues = new Dictionary<string, string>();
 
         public static void Record()
         {
-            // read ProxyOverride, ProxyEnable, ProxyServer, AutoConfigURL from Software\Microsoft\Windows\CurrentVersion\Internet Settings and save
-            using (var regKey = Utils.OpenRegKey(@"Software\Microsoft\Windows\CurrentVersion\Internet Settings", false))
+            try
             {
-                if (regKey == null)
+                // query returns:
+                //flags=1
+                //proxy-server=(null)
+                //bypass-list=(null)
+                //pac-url=(null)
+                var query = Sysproxy.SetIEProxyWithArguments("query");
+                if (query.IsNullOrWhiteSpace())
                 {
                     return;
                 }
-                _proxyValues = new ProxyValues
-                {
-                    GlobalProxyEnable = (int) regKey.GetValue("ProxyEnable", 0),
-                    GlobalProxyOverride = (string) regKey.GetValue("ProxyOverride"),
-                    GlobalProxyServer = (string) regKey.GetValue("ProxyServer"),
-                    PACAutoConfigURL = (string) regKey.GetValue("AutoConfigURL")
-                };
-                using (var connKey = regKey.OpenSubKey("Connections"))
-                {
-                    // this value saved all proxy values as byte[] including not using "Automatically detect settings"
-                    // see http://stackoverflow.com/questions/1674119/what-key-in-windows-registry-disables-ie-connection-parameter-automatically-det
-                    // "sysproxy.exe off" will enable "Automatically detect settings"
-                    // try to restore all user's settings by writing this to registry directly, may not the best method
-                    _proxyValues.DefaultConnectionSettings = (byte[]) connKey?.GetValue("DefaultConnectionSettings");
-                }
-            }
-        }
 
-        public static void Restore()
-        {
-            if (_proxyValues == null)
-            {
-                return;
-            }
-            try
-            {
-                if (!_proxyValues.GlobalProxyServer.IsNullOrEmpty())
+                using (var sr = new StringReader(query))
                 {
-                    var arguments = $"global {_proxyValues.GlobalProxyServer} ";
-                    if (!_proxyValues.GlobalProxyOverride.IsNullOrEmpty())
+                    foreach (var line in sr.NonWhiteSpaceLines())
                     {
-                        arguments += _proxyValues.GlobalProxyOverride;
+                        if (line.Contains("(null)"))
+                        {
+                            continue;
+                        }
+
+                        var pos = line.IndexOf('=');
+                        ProxyValues[line.Substring(0, pos)] = line.Substring(pos + 1);
                     }
-
-                    // set user's global proxy even it's not enabled to make sure values are restored
-                    Sysproxy.SetIEProxyWithArguments(arguments);
-                }
-
-                // setting pac will disable global proxy but leave values
-                if (!_proxyValues.PACAutoConfigURL.IsNullOrEmpty())
-                {
-                    Sysproxy.SetIEProxy(true, false, string.Empty, _proxyValues.PACAutoConfigURL);
-                }
-                // off if neither pac nor global proxy are enabled
-                else if (_proxyValues.GlobalProxyEnable == 0)
-                {
-                    Sysproxy.SetIEProxy(false, false, string.Empty, string.Empty);
                 }
             }
             catch (ProxyException e)
             {
                 Logging.LogUsefulException(e);
             }
+        }
+
+        public static void Restore()
+        {
+            if (ProxyValues == null)
+            {
+                return;
+            }
+
             try
             {
-                // for those who don't need "Automatically detect settings", may override things have done above
-                using (var regKey = Utils.OpenRegKey(@"Software\Microsoft\Windows\CurrentVersion\Internet Settings\Connections", true))
-                {
-                    regKey?.SetValue("DefaultConnectionSettings", _proxyValues.DefaultConnectionSettings);
-                }
+                // if flags is null, set proxy to auto detect.
+                var arguments = $"set {(ProxyValues.ContainsKey("flags") ? ProxyValues["flags"] : "9")} {GetValue("proxy-server")} {GetValue("bypass-list")} {GetValue("pac-url")}";
+                Sysproxy.SetIEProxyWithArguments(arguments);
             }
-            catch (Exception e)
+            catch (ProxyException e)
             {
                 Logging.LogUsefulException(e);
             }
         }
 
-        private class ProxyValues
+        private static string GetValue(string key)
         {
-            public int GlobalProxyEnable { get; set; }
-            public string GlobalProxyOverride { get; set; }
-            public string GlobalProxyServer { get; set; }
-            public string PACAutoConfigURL { get; set; }
-            public byte[] DefaultConnectionSettings { get; set; }
+            ProxyValues.TryGetValue(key, out string value);
+            return value ?? "-";
         }
     }
 }
