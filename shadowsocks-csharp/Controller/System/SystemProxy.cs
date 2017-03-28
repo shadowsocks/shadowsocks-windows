@@ -6,6 +6,8 @@ namespace Shadowsocks.Controller
 {
     public static class SystemProxy
     {
+        private static bool _shouldRecord = true;
+
         private static string GetTimestamp(DateTime value)
         {
             return value.ToString("yyyyMMddHHmmssfff");
@@ -25,6 +27,13 @@ namespace Shadowsocks.Controller
             {
                 if (enabled)
                 {
+                    // Should record only once after enabled.
+                    if (_shouldRecord)
+                    {
+                        UserProxy.Record();
+                        _shouldRecord = false;
+                    }
+
                     if (global)
                     {
                         Sysproxy.SetIEProxy(true, true, "127.0.0.1:" + config.localPort.ToString(), "");
@@ -45,7 +54,8 @@ namespace Shadowsocks.Controller
                 }
                 else
                 {
-                    Sysproxy.SetIEProxy(false, false, "", "");
+                    UserProxy.Restore();
+                    _shouldRecord = true;
                 }
             }
             catch (ProxyException ex)

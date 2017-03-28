@@ -56,6 +56,11 @@ namespace Shadowsocks.Util.SystemProxy
                 arguments = "off";
             }
 
+            SetIEProxyWithArguments(arguments);
+        }
+
+        public static string SetIEProxyWithArguments(string arguments)
+        {
             using (var process = new Process())
             {
                 // Configure the process using the StartInfo properties.
@@ -65,9 +70,15 @@ namespace Shadowsocks.Util.SystemProxy
                 process.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
                 process.StartInfo.UseShellExecute = false;
                 process.StartInfo.RedirectStandardError = true;
+                process.StartInfo.RedirectStandardOutput = true;
+
+                // Need to provide encoding info, or output/error strings we got will be wrong.
+                process.StartInfo.StandardOutputEncoding = Encoding.Unicode;
+                process.StartInfo.StandardErrorEncoding = Encoding.Unicode;
                 process.StartInfo.CreateNoWindow = true;
                 process.Start();
 
+                var input = process.StandardOutput.ReadToEnd();
                 var error = process.StandardError.ReadToEnd();
 
                 process.WaitForExit();
@@ -77,6 +88,7 @@ namespace Shadowsocks.Util.SystemProxy
                 {
                     throw new ProxyException(error);
                 }
+                return input;
             }
         }
     }
