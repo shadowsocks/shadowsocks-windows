@@ -66,6 +66,9 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Cyotek.Collections.Generic.CircularBuffer, Version=1.0.0.0, Culture=neutral, PublicKeyToken=58daa28b0b2de221, processorArchitecture=MSIL">
+      <HintPath>3rd\Cyotek.CircularBuffer.1.0.2\lib\net20\Cyotek.Collections.Generic.CircularBuffer.dll</HintPath>
+    </Reference>
     <Reference Include="GlobalHotKey, Version=1.1.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>3rd\GlobalHotKey.1.1.0\lib\GlobalHotKey.dll</HintPath>
       <Private>True</Private>
@@ -94,6 +97,19 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Controller\System\Hotkeys\HotkeyCallbacks.cs" />
+    <Compile Include="Encryption\AEAD\AEADEncryptor.cs" />
+    <Compile Include="Encryption\AEAD\AEADMbedTLSEncryptor.cs" />
+    <Compile Include="Encryption\AEAD\AEADSodiumEncryptor.cs" />
+    <Compile Include="Encryption\EncryptorBase.cs" />
+    <Compile Include="Encryption\EncryptorFactory.cs" />
+    <Compile Include="Encryption\Exception\CryptoException.cs" />
+    <Compile Include="Encryption\IEncryptor.cs" />
+    <Compile Include="Encryption\MbedTLS.cs" />
+    <Compile Include="Encryption\RNG.cs" />
+    <Compile Include="Encryption\Sodium.cs" />
+    <Compile Include="Encryption\Stream\StreamEncryptor.cs" />
+    <Compile Include="Encryption\Stream\StreamMbedTLSEncryptor.cs" />
+    <Compile Include="Encryption\Stream\StreamSodiumEncryptor.cs" />
     <Compile Include="Model\HotKeyConfig.cs" />
     <Compile Include="Model\ProxyConfig.cs" />
     <Compile Include="Properties\Settings.Designer.cs">
@@ -116,14 +132,6 @@
     <Compile Include="Controller\Service\PortForwarder.cs" />
     <Compile Include="Controller\Service\UDPRelay.cs" />
     <Compile Include="Controller\Service\UpdateChecker.cs" />
-    <Compile Include="Encryption\EncryptorBase.cs" />
-    <Compile Include="Encryption\EncryptorFactory.cs" />
-    <Compile Include="Encryption\IVEncryptor.cs" />
-    <Compile Include="Encryption\MbedTLS.cs" />
-    <Compile Include="Encryption\MbedTLSEncryptor.cs" />
-    <Compile Include="Encryption\Sodium.cs" />
-    <Compile Include="Encryption\SodiumEncryptor.cs" />
-    <Compile Include="Encryption\IEncryptor.cs" />
     <Compile Include="Controller\Service\PACServer.cs" />
     <Compile Include="Model\LogViewerConfig.cs" />
     <Compile Include="Model\Server.cs" />
@@ -144,7 +152,6 @@
     <Compile Include="Controller\System\Hotkeys\Hotkeys.cs" />
     <Compile Include="Util\ProcessManagement\Job.cs" />
     <Compile Include="Util\ProcessManagement\ThreadUtil.cs" />
-    <Compile Include="Encryption\RNG.cs" />
     <Compile Include="Util\Sockets\LineReader.cs" />
     <Compile Include="Util\Sockets\SocketUtil.cs" />
     <Compile Include="Util\Sockets\WrappedSocket.cs" />

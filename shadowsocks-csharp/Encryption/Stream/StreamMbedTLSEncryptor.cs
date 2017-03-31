@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using Shadowsocks.Encryption.Exception;
 
-namespace Shadowsocks.Encryption
+namespace Shadowsocks.Encryption.Stream
 {
-    public class MbedTLSEncryptor
-        : IVEncryptor, IDisposable
+    public class StreamMbedTLSEncryptor
+        : StreamEncryptor, IDisposable
     {
         const int CIPHER_RC4 = 1;
         const int CIPHER_AES = 2;
@@ -15,8 +16,8 @@ namespace Shadowsocks.Encryption
         private IntPtr _encryptCtx = IntPtr.Zero;
         private IntPtr _decryptCtx = IntPtr.Zero;
 
-        public MbedTLSEncryptor(string method, string password, bool onetimeauth, bool isudp)
-            : base(method, password, onetimeauth, isudp)
+        public StreamMbedTLSEncryptor(string method, string password)
+            : base(method, password)
         {
         }
 
@@ -44,11 +45,11 @@ namespace Shadowsocks.Encryption
             return _ciphers;
         }
 
-        protected override void initCipher(byte[] iv, bool isCipher)
+        protected override void initCipher(byte[] iv, bool isEncrypt)
         {
-            base.initCipher(iv, isCipher);
+            base.initCipher(iv, isEncrypt);
             IntPtr ctx = Marshal.AllocHGlobal(MbedTLS.cipher_get_size_ex());
-            if (isCipher)
+            if (isEncrypt)
             {
                 _encryptCtx = ctx;
             }
@@ -71,7 +72,7 @@ namespace Shadowsocks.Encryption
             }
             MbedTLS.cipher_init(ctx);
             if (MbedTLS.cipher_setup( ctx, MbedTLS.cipher_info_from_string( _innerLibName ) ) != 0 )
-                throw new Exception("Cannot initialize mbed TLS cipher context");
+                throw new System.Exception("Cannot initialize mbed TLS cipher context");
             /*
              * MbedTLS takes key length by bit
              * cipher_setkey() will set the correct key schedule
@@ -84,24 +85,24 @@ namespace Shadowsocks.Encryption
              *  
              */
             if (MbedTLS.cipher_setkey(ctx, realkey, keyLen * 8,
-                isCipher ? MbedTLS.MBEDTLS_ENCRYPT : MbedTLS.MBEDTLS_DECRYPT) != 0 )
-                throw new Exception("Cannot set mbed TLS cipher key");
+                isEncrypt ? MbedTLS.MBEDTLS_ENCRYPT : MbedTLS.MBEDTLS_DECRYPT) != 0 )
+                throw new System.Exception("Cannot set mbed TLS cipher key");
             if (MbedTLS.cipher_set_iv(ctx, iv, ivLen) != 0)
-                throw new Exception("Cannot set mbed TLS cipher IV");
+                throw new System.Exception("Cannot set mbed TLS cipher IV");
             if (MbedTLS.cipher_reset(ctx) != 0)
-                throw new Exception("Cannot finalize mbed TLS cipher context");
+                throw new System.Exception("Cannot finalize mbed TLS cipher context");
         }
 
-        protected override void cipherUpdate(bool isCipher, int length, byte[] buf, byte[] outbuf)
+        protected override void cipherUpdate(bool isEncrypt, int length, byte[] buf, byte[] outbuf)
         {
             // C# could be multi-threaded
             if (_disposed)
             {
                 throw new ObjectDisposedException(this.ToString());
             }
-            if (MbedTLS.cipher_update(isCipher ? _encryptCtx : _decryptCtx,
+            if (MbedTLS.cipher_update(isEncrypt ? _encryptCtx : _decryptCtx,
                 buf, length, outbuf, ref length) != 0 )
-                throw new Exception("Cannot update mbed TLS cipher context");
+                throw new CryptoErrorException();
         }
 
         #region IDisposable
@@ -117,7 +118,7 @@ namespace Shadowsocks.Encryption
             GC.SuppressFinalize(this);
         }
 
-        ~MbedTLSEncryptor()
+        ~StreamMbedTLSEncryptor()
         {
             Dispose(false);
         }

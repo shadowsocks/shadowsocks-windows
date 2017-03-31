@@ -4,7 +4,7 @@ using System.IO;
 using System.Net.Sockets;
 using System.Net;
 using System.Diagnostics;
-
+using System.Text;
 using Shadowsocks.Util;
 
 namespace Shadowsocks.Controller
@@ -68,6 +68,18 @@ namespace Shadowsocks.Controller
         public static void Debug(object o)
         {
             WriteToLogFile("[D] " + o);
+        }
+
+        [Conditional("DEBUG")]
+        public static void Dump(string tag, byte[] arr, int length)
+        {
+            var sb = new StringBuilder($"{Environment.NewLine}{tag}: ");
+            for (int i = 0; i < length - 1; i++) {
+                sb.Append($"0x{arr[i]:X2}, ");
+            }
+            sb.Append($"0x{arr[length - 1]:X2}");
+            sb.Append(Environment.NewLine);
+            Debug(sb.ToString());
         }
 
         [Conditional("DEBUG")]
