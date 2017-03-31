@@ -53,7 +53,6 @@ Encryption=加密
 Proxy Port=Proxy 連接埠
 Remarks=註解
 Timeout(Sec)=逾時 (秒)
-Onetime Authentication=單次驗證
 OK=確定
 Cancel=取消
 New server=新伺服器

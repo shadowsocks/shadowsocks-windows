@@ -53,7 +53,6 @@ Encryption=暗号化
 Proxy Port=代理ポート
 Remarks=短評する
 Timeout(Sec)=タイムアウト (秒)
-Onetime Authentication=単回認証
 OK=はい
 Cancel=いいえ
 New server=新規サーバ
