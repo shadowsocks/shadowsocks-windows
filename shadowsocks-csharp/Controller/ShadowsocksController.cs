@@ -303,8 +303,7 @@ namespace Shadowsocks.Controller
         public static string GetQRCode(Server server)
         {
             string tag = string.Empty;
-            string auth = server.auth ? "-auth" : string.Empty;
-            string parts = $"{server.method}{auth}:{server.password}@{server.server}:{server.server_port}";
+            string parts = $"{server.method}:{server.password}@{server.server}:{server.server_port}";
             string base64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(parts));
             if(!server.remarks.IsNullOrEmpty())
             {

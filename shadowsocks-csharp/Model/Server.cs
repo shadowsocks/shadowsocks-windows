@@ -11,7 +11,7 @@ namespace Shadowsocks.Model
     {
         public static readonly Regex
             UrlFinder = new Regex("^(?i)ss://([A-Za-z0-9+-/=_]+)(#(.+))?$", RegexOptions.IgnoreCase),
-            DetailsParser = new Regex("^((?<method>.+?)(?<auth>-auth)??:(?<password>.*)@(?<hostname>.+?)" +
+            DetailsParser = new Regex("^((?<method>.+?):(?<password>.*)@(?<hostname>.+?)" +
                                       ":(?<port>\\d+?))$", RegexOptions.IgnoreCase);
 
         private const int DefaultServerTimeoutSec = 5;
@@ -22,7 +22,6 @@ namespace Shadowsocks.Model
         public string password;
         public string method;
         public string remarks;
-        public bool auth;
         public int timeout;
 
         public override int GetHashCode()
@@ -67,7 +66,6 @@ namespace Shadowsocks.Model
             method = "aes-256-cfb";
             password = "";
             remarks = "";
-            auth = false;
             timeout = DefaultServerTimeoutSec;
         }
 
@@ -82,7 +80,6 @@ namespace Shadowsocks.Model
             match = DetailsParser.Match(Encoding.UTF8.GetString(Convert.FromBase64String(
                 base64.PadRight(base64.Length + (4 - base64.Length % 4) % 4, '='))));
             method = match.Groups["method"].Value;
-            auth = match.Groups["auth"].Success;
             password = match.Groups["password"].Value;
             server = match.Groups["hostname"].Value;
             server_port = int.Parse(match.Groups["port"].Value);

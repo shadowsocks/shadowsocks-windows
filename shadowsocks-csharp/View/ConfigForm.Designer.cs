@@ -39,7 +39,8 @@
             this.PasswordTextBox = new System.Windows.Forms.TextBox();
             this.EncryptionLabel = new System.Windows.Forms.Label();
             this.EncryptionSelect = new System.Windows.Forms.ComboBox();
-            this.OneTimeAuth = new System.Windows.Forms.CheckBox();
+            this.TimeoutLabel = new System.Windows.Forms.Label();
+            this.TimeoutTextBox = new System.Windows.Forms.TextBox();
             this.panel2 = new System.Windows.Forms.Panel();
             this.OKButton = new System.Windows.Forms.Button();
             this.MyCancelButton = new System.Windows.Forms.Button();
@@ -57,8 +58,6 @@
             this.tableLayoutPanel3 = new System.Windows.Forms.TableLayoutPanel();
             this.tableLayoutPanel4 = new System.Windows.Forms.TableLayoutPanel();
             this.DuplicateButton = new System.Windows.Forms.Button();
-            this.TimeoutLabel = new System.Windows.Forms.Label();
-            this.TimeoutTextBox = new System.Windows.Forms.TextBox();
             this.tableLayoutPanel1.SuspendLayout();
             this.ServerGroupBox.SuspendLayout();
             this.tableLayoutPanel2.SuspendLayout();
@@ -85,14 +84,13 @@
             this.tableLayoutPanel1.Controls.Add(this.PasswordTextBox, 1, 2);
             this.tableLayoutPanel1.Controls.Add(this.EncryptionLabel, 0, 3);
             this.tableLayoutPanel1.Controls.Add(this.EncryptionSelect, 1, 3);
-            this.tableLayoutPanel1.Controls.Add(this.OneTimeAuth, 1, 7);
             this.tableLayoutPanel1.Controls.Add(this.TimeoutLabel, 0, 6);
             this.tableLayoutPanel1.Controls.Add(this.TimeoutTextBox, 1, 6);
             this.tableLayoutPanel1.Location = new System.Drawing.Point(8, 21);
             this.tableLayoutPanel1.Margin = new System.Windows.Forms.Padding(0);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
             this.tableLayoutPanel1.Padding = new System.Windows.Forms.Padding(3);
-            this.tableLayoutPanel1.RowCount = 8;
+            this.tableLayoutPanel1.RowCount = 7;
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
@@ -100,8 +98,7 @@
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(255, 189);
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(255, 167);
             this.tableLayoutPanel1.TabIndex = 0;
             // 
             // RemarksTextBox
@@ -217,21 +214,35 @@
             "bf-cfb",
             "camellia-128-cfb",
             "camellia-192-cfb",
-            "camellia-256-cfb"});
+            "camellia-256-cfb",
+            "aes-128-gcm",
+            "aes-192-gcm",
+            "aes-256-gcm",
+            "chacha20-ietf-poly1305"});
             this.EncryptionSelect.Location = new System.Drawing.Point(89, 87);
             this.EncryptionSelect.Name = "EncryptionSelect";
             this.EncryptionSelect.Size = new System.Drawing.Size(160, 20);
             this.EncryptionSelect.TabIndex = 3;
             // 
-            // OneTimeAuth
+            // TimeoutLabel
             // 
-            this.OneTimeAuth.AutoSize = true;
-            this.OneTimeAuth.Location = new System.Drawing.Point(89, 167);
-            this.OneTimeAuth.Name = "OneTimeAuth";
-            this.OneTimeAuth.Size = new System.Drawing.Size(156, 16);
-            this.OneTimeAuth.TabIndex = 5;
-            this.OneTimeAuth.Text = "Onetime Authentication";
-            this.OneTimeAuth.UseVisualStyleBackColor = true;
+            this.TimeoutLabel.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.TimeoutLabel.AutoSize = true;
+            this.TimeoutLabel.Location = new System.Drawing.Point(6, 144);
+            this.TimeoutLabel.Name = "TimeoutLabel";
+            this.TimeoutLabel.RightToLeft = System.Windows.Forms.RightToLeft.No;
+            this.TimeoutLabel.Size = new System.Drawing.Size(77, 12);
+            this.TimeoutLabel.TabIndex = 10;
+            this.TimeoutLabel.Text = "Timeout(Sec)";
+            // 
+            // TimeoutTextBox
+            // 
+            this.TimeoutTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.TimeoutTextBox.Location = new System.Drawing.Point(89, 140);
+            this.TimeoutTextBox.MaxLength = 5;
+            this.TimeoutTextBox.Name = "TimeoutTextBox";
+            this.TimeoutTextBox.Size = new System.Drawing.Size(160, 21);
+            this.TimeoutTextBox.TabIndex = 11;
             // 
             // panel2
             // 
@@ -301,7 +312,7 @@
             this.ServerGroupBox.Location = new System.Drawing.Point(178, 0);
             this.ServerGroupBox.Margin = new System.Windows.Forms.Padding(12, 0, 0, 0);
             this.ServerGroupBox.Name = "ServerGroupBox";
-            this.ServerGroupBox.Size = new System.Drawing.Size(266, 227);
+            this.ServerGroupBox.Size = new System.Drawing.Size(266, 205);
             this.ServerGroupBox.TabIndex = 0;
             this.ServerGroupBox.TabStop = false;
             this.ServerGroupBox.Text = "Server";
@@ -338,7 +349,7 @@
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel2.Size = new System.Drawing.Size(444, 323);
+            this.tableLayoutPanel2.Size = new System.Drawing.Size(444, 301);
             this.tableLayoutPanel2.TabIndex = 7;
             // 
             // tableLayoutPanel6
@@ -351,7 +362,7 @@
             this.tableLayoutPanel6.Controls.Add(this.MoveDownButton, 1, 0);
             this.tableLayoutPanel6.Controls.Add(this.MoveUpButton, 0, 0);
             this.tableLayoutPanel6.Dock = System.Windows.Forms.DockStyle.Top;
-            this.tableLayoutPanel6.Location = new System.Drawing.Point(0, 291);
+            this.tableLayoutPanel6.Location = new System.Drawing.Point(0, 269);
             this.tableLayoutPanel6.Margin = new System.Windows.Forms.Padding(0);
             this.tableLayoutPanel6.Name = "tableLayoutPanel6";
             this.tableLayoutPanel6.RowCount = 1;
@@ -394,7 +405,7 @@
             this.tableLayoutPanel5.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tableLayoutPanel5.Controls.Add(this.ProxyPortTextBox, 1, 0);
             this.tableLayoutPanel5.Controls.Add(this.ProxyPortLabel, 0, 0);
-            this.tableLayoutPanel5.Location = new System.Drawing.Point(248, 227);
+            this.tableLayoutPanel5.Location = new System.Drawing.Point(248, 205);
             this.tableLayoutPanel5.Margin = new System.Windows.Forms.Padding(0);
             this.tableLayoutPanel5.Name = "tableLayoutPanel5";
             this.tableLayoutPanel5.Padding = new System.Windows.Forms.Padding(3);
@@ -438,7 +449,7 @@
             this.tableLayoutPanel3.Controls.Add(this.MyCancelButton, 1, 0);
             this.tableLayoutPanel3.Controls.Add(this.OKButton, 0, 0);
             this.tableLayoutPanel3.Dock = System.Windows.Forms.DockStyle.Right;
-            this.tableLayoutPanel3.Location = new System.Drawing.Point(285, 294);
+            this.tableLayoutPanel3.Location = new System.Drawing.Point(285, 272);
             this.tableLayoutPanel3.Margin = new System.Windows.Forms.Padding(3, 3, 0, 3);
             this.tableLayoutPanel3.Name = "tableLayoutPanel3";
             this.tableLayoutPanel3.RowCount = 1;
@@ -457,7 +468,7 @@
             this.tableLayoutPanel4.Controls.Add(this.DeleteButton, 1, 0);
             this.tableLayoutPanel4.Controls.Add(this.AddButton, 0, 0);
             this.tableLayoutPanel4.Dock = System.Windows.Forms.DockStyle.Top;
-            this.tableLayoutPanel4.Location = new System.Drawing.Point(0, 227);
+            this.tableLayoutPanel4.Location = new System.Drawing.Point(0, 205);
             this.tableLayoutPanel4.Margin = new System.Windows.Forms.Padding(0);
             this.tableLayoutPanel4.Name = "tableLayoutPanel4";
             this.tableLayoutPanel4.RowCount = 2;
@@ -477,26 +488,6 @@
             this.DuplicateButton.Text = "Dupli&cate";
             this.DuplicateButton.UseVisualStyleBackColor = true;
             this.DuplicateButton.Click += new System.EventHandler(this.DuplicateButton_Click);
-            // 
-            // TimeoutLabel
-            // 
-            this.TimeoutLabel.Anchor = System.Windows.Forms.AnchorStyles.Right;
-            this.TimeoutLabel.AutoSize = true;
-            this.TimeoutLabel.Location = new System.Drawing.Point(6, 144);
-            this.TimeoutLabel.Name = "TimeoutLabel";
-            this.TimeoutLabel.RightToLeft = System.Windows.Forms.RightToLeft.No;
-            this.TimeoutLabel.Size = new System.Drawing.Size(77, 12);
-            this.TimeoutLabel.TabIndex = 10;
-            this.TimeoutLabel.Text = "Timeout(Sec)";
-            // 
-            // TimeoutTextBox
-            // 
-            this.TimeoutTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.TimeoutTextBox.Location = new System.Drawing.Point(89, 140);
-            this.TimeoutTextBox.MaxLength = 5;
-            this.TimeoutTextBox.Name = "TimeoutTextBox";
-            this.TimeoutTextBox.Size = new System.Drawing.Size(160, 21);
-            this.TimeoutTextBox.TabIndex = 11;
             // 
             // ConfigForm
             // 
@@ -565,7 +556,6 @@
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel6;
         private System.Windows.Forms.Button MoveDownButton;
         private System.Windows.Forms.Button MoveUpButton;
-        private System.Windows.Forms.CheckBox OneTimeAuth;
         private System.Windows.Forms.Button DuplicateButton;
         private System.Windows.Forms.Label TimeoutLabel;
         private System.Windows.Forms.TextBox TimeoutTextBox;
