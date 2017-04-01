@@ -13,6 +13,7 @@ using Shadowsocks.Util;
 using System.Text;
 using Shadowsocks.Controller.Service;
 using System.Net;
+using Shadowsocks.Controller.Strategy;
 
 namespace Shadowsocks.View
 {
@@ -37,6 +38,7 @@ namespace Shadowsocks.View
         ShadowsocksController controller;
         int serverIndexSpeedTest;
         List<string> speedTestString = new List<string>();
+        SortedList<long, Server> serverSpeeds = new SortedList<long, Server>();
 
         // global traffic update lock, make it static
         private static readonly object _lock = new object();
@@ -419,6 +421,7 @@ namespace Shadowsocks.View
         {
             serverIndexSpeedTest = 0;
             speedTestString.Clear();
+            serverSpeeds.Clear();
             SpeedTest(serverIndexSpeedTest);
         }
 
@@ -454,12 +457,30 @@ namespace Shadowsocks.View
             speedTestString.Add(controller.GetCurrentServer().server + ":" + controller.GetCurrentServer().server_port + " -- " + trafficTotal + " / " + trafficAverage + "\n");
             speedTestString.ForEach(s => LogMessageTextBox.AppendText(s));
             LogMessageTextBox.ScrollToCaret();
+            serverSpeeds.Add(trafficAverage, controller.GetCurrentServer());
 
             var configs = controller.GetCurrentConfiguration().configs;
             if (serverIndexSpeedTest < configs.Count - 1)
             {
                 serverIndexSpeedTest++;
                 SpeedTest(serverIndexSpeedTest);
+            }
+            else
+            {
+                for (int i = 0; i < serverSpeeds.Count; i++)
+                {
+                    if (i < serverSpeeds.Count - 5)
+                    {
+                        serverSpeeds.Values.ElementAt(i).enabled = false;
+                    }
+                    else
+                    {
+                        serverSpeeds.Values.ElementAt(i).enabled = true;
+                    }
+                }
+                controller.SaveServers(serverSpeeds.Values.ToList(), controller.GetCurrentConfiguration().localPort);
+                BalancingStrategy b = new BalancingStrategy(controller);
+                controller.SelectStrategy(b.ID);
             }
         }
     }
