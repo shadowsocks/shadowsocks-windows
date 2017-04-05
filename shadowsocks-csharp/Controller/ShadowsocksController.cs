@@ -163,8 +163,13 @@ namespace Shadowsocks.Controller
         {
             try
             {
-                var server = new Server(ssURL);
-                _config.configs.Add(server);
+                if (ssURL.IsNullOrEmpty() || ssURL.IsWhiteSpace()) return false;
+                var servers = Server.GetServers(ssURL);
+                if (servers == null) return false;
+                foreach (var server in servers)
+                {
+                    _config.configs.Add(server);
+                }
                 _config.index = _config.configs.Count - 1;
                 SaveConfig(_config);
                 return true;

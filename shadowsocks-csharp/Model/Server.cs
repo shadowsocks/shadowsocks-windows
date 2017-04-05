@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Web;
@@ -10,9 +11,8 @@ namespace Shadowsocks.Model
     public class Server
     {
         public static readonly Regex
-            UrlFinder = new Regex("^(?i)ss://([A-Za-z0-9+-/=_]+)(#(.+))?$", RegexOptions.IgnoreCase),
-            DetailsParser = new Regex("^((?<method>.+?):(?<password>.*)@(?<hostname>.+?)" +
-                                      ":(?<port>\\d+?))$", RegexOptions.IgnoreCase);
+            UrlFinder = new Regex(@"ss://(?<base64>[A-Za-z0-9+-/=_]+)(?:#(?<tag>.+))?", RegexOptions.IgnoreCase),
+            DetailsParser = new Regex(@"^((?<method>.+?):(?<password>.*)@(?<hostname>.+?):(?<port>\d+?))$", RegexOptions.IgnoreCase);
 
         private const int DefaultServerTimeoutSec = 5;
         public const int MaxServerTimeoutSec = 20;
@@ -43,9 +43,10 @@ namespace Shadowsocks.Model
             }
             string serverStr;
             // CheckHostName() won't do a real DNS lookup
-            var hostType = Uri.CheckHostName( server );
+            var hostType = Uri.CheckHostName(server);
 
-            switch ( hostType ) {
+            switch (hostType)
+            {
                 case UriHostNameType.IPv6:
                     serverStr = $"[{server}]:{server_port}";
                     break;
@@ -69,20 +70,32 @@ namespace Shadowsocks.Model
             timeout = DefaultServerTimeoutSec;
         }
 
-        public Server(string ssURL) : this()
+        public static List<Server> GetServers(string ssURL)
         {
-            var match = UrlFinder.Match(ssURL);
-            if (!match.Success) throw new FormatException();
-            var base64 = match.Groups[1].Value;
-            var tag = match.Groups[3].Value;
-            if (!tag.IsNullOrEmpty())
-                remarks = HttpUtility.UrlDecode(tag, Encoding.UTF8);
-            match = DetailsParser.Match(Encoding.UTF8.GetString(Convert.FromBase64String(
-                base64.PadRight(base64.Length + (4 - base64.Length % 4) % 4, '='))));
-            method = match.Groups["method"].Value;
-            password = match.Groups["password"].Value;
-            server = match.Groups["hostname"].Value;
-            server_port = int.Parse(match.Groups["port"].Value);
+            var matches = UrlFinder.Matches(ssURL);
+            if (matches.Count <= 0) return null;
+            List<Server> servers = new List<Server>();
+            foreach (Match match in matches)
+            {
+                Server tmp = new Server();
+                var base64 = match.Groups["base64"].Value;
+                var tag = match.Groups["tag"].Value;
+                if (!tag.IsNullOrEmpty())
+                {
+                    tmp.remarks = HttpUtility.UrlDecode(tag, Encoding.UTF8);
+                }
+                Match details = DetailsParser.Match(Encoding.UTF8.GetString(Convert.FromBase64String(
+                    base64.PadRight(base64.Length + (4 - base64.Length % 4) % 4, '='))));
+                if (!details.Success)
+                    continue;
+                tmp.method = details.Groups["method"].Value;
+                tmp.password = details.Groups["password"].Value;
+                tmp.server = details.Groups["hostname"].Value;
+                tmp.server_port = int.Parse(details.Groups["port"].Value);
+
+                servers.Add(tmp);
+            }
+            return servers;
         }
 
         public string Identifier()
