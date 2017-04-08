@@ -11,7 +11,7 @@ namespace Shadowsocks.Encryption.Stream
         : EncryptorBase
     {
         // for UDP only
-        protected static byte[] _udpTmpBuf = new byte[MAX_INPUT_SIZE];
+        protected static byte[] _udpTmpBuf = new byte[65536];
 
         // every connection should create its own buffer
         private CircularBuffer<byte> _encCircularBuffer = new CircularBuffer<byte>(TCPHandler.BufferSize * 2, false);

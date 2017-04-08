@@ -18,7 +18,7 @@ namespace Shadowsocks.Encryption.AEAD
         private static readonly byte[] InfoBytes = Encoding.ASCII.GetBytes(Info);
 
         // for UDP only
-        protected static byte[] _udpTmpBuf = new byte[MAX_INPUT_SIZE];
+        protected static byte[] _udpTmpBuf = new byte[65536];
 
         // every connection should create its own buffer
         private CircularBuffer<byte> _encCircularBuffer = new CircularBuffer<byte>(MAX_INPUT_SIZE * 2, false);
