@@ -1,16 +1,20 @@
-﻿using System.Text;
-
-namespace Shadowsocks.Encryption
+﻿namespace Shadowsocks.Encryption
 {
-    public struct EncryptorInfo
+    public class EncryptorInfo
     {
         public int KeySize;
         public int IvSize;
+        public int SaltSize;
+        public int TagSize;
+        public int NonceSize;
         public int Type;
         public string InnerLibName;
 
         // For those who make use of internal crypto method name
         // e.g. mbed TLS
+
+        #region Stream ciphers
+
         public EncryptorInfo(string innerLibName, int keySize, int ivSize, int type)
         {
             this.KeySize = keySize;
@@ -26,6 +30,32 @@ namespace Shadowsocks.Encryption
             this.Type = type;
             this.InnerLibName = string.Empty;
         }
+
+        #endregion
+
+        #region AEAD ciphers
+
+        public EncryptorInfo(string innerLibName, int keySize, int saltSize, int nonceSize, int tagSize, int type)
+        {
+            this.KeySize = keySize;
+            this.SaltSize = saltSize;
+            this.NonceSize = nonceSize;
+            this.TagSize = tagSize;
+            this.Type = type;
+            this.InnerLibName = innerLibName;
+        }
+
+        public EncryptorInfo(int keySize, int saltSize, int nonceSize, int tagSize, int type)
+        {
+            this.KeySize = keySize;
+            this.SaltSize = saltSize;
+            this.NonceSize = nonceSize;
+            this.TagSize = tagSize;
+            this.Type = type;
+            this.InnerLibName = string.Empty;
+        }
+
+        #endregion
     }
 
     public abstract class EncryptorBase
@@ -33,30 +63,33 @@ namespace Shadowsocks.Encryption
     {
         public const int MAX_INPUT_SIZE = 32768;
 
-        protected EncryptorBase(string method, string password, bool onetimeauth, bool isudp)
+        public const int MAX_DOMAIN_LEN = 255;
+        public const int ADDR_PORT_LEN = 2;
+        public const int ADDR_ATYP_LEN = 1;
+
+        public const int ATYP_IPv4 = 0x01;
+        public const int ATYP_DOMAIN = 0x03;
+        public const int ATYP_IPv6 = 0x04;
+
+        protected EncryptorBase(string method, string password)
         {
             Method = method;
             Password = password;
-            OnetimeAuth = onetimeauth;
-            IsUDP = isudp;
         }
 
         protected string Method;
         protected string Password;
-        protected bool OnetimeAuth;
-        protected bool IsUDP;
-
-        protected byte[] GetPasswordHash()
-        {
-            byte[] inputBytes = Encoding.UTF8.GetBytes(Password);
-            byte[] hash = MbedTLS.MD5(inputBytes);
-            return hash;
-        }
 
         public abstract void Encrypt(byte[] buf, int length, byte[] outbuf, out int outlength);
 
         public abstract void Decrypt(byte[] buf, int length, byte[] outbuf, out int outlength);
 
+        public abstract void EncryptUDP(byte[] buf, int length, byte[] outbuf, out int outlength);
+
+        public abstract void DecryptUDP(byte[] buf, int length, byte[] outbuf, out int outlength);
+
         public abstract void Dispose();
+
+        public int AddrBufLength { get; set; } = - 1;
     }
 }

@@ -6,6 +6,7 @@ using System.Windows.Forms;
 using Microsoft.Win32;
 
 using Shadowsocks.Controller;
+using Shadowsocks.Controller.Hotkeys;
 using Shadowsocks.Util;
 using Shadowsocks.View;
 
@@ -13,9 +14,8 @@ namespace Shadowsocks
 {
     static class Program
     {
-        private static ShadowsocksController _controller;
-        // XXX: Don't change this name
-        private static MenuViewController _viewController;
+        public static ShadowsocksController MainController { get; private set; }
+        public static MenuViewController MenuController { get; private set; }
 
         /// <summary>
         /// 应用程序的主入口点。
@@ -28,6 +28,17 @@ namespace Shadowsocks
             {
                 MessageBox.Show(I18N.GetString("Unsupported operating system, use Windows Vista at least."),
                 "Shadowsocks Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            // Check .NET Framework version
+            if (!Utils.IsSupportedRuntimeVersion())
+            {
+                MessageBox.Show(I18N.GetString("Unsupported .NET Framework, please update to 4.6.2 or later."),
+                "Shadowsocks Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+
+                Process.Start(
+                    "http://dotnetsocial.cloudapp.net/GetDotnet?tfm=.NETFramework,Version=v4.6.2");
                 return;
             }
 
@@ -68,10 +79,10 @@ namespace Shadowsocks
 #else
                 Logging.OpenLogFile();
 #endif
-                _controller = new ShadowsocksController();
-                _viewController = new MenuViewController(_controller);
-                HotKeys.Init();
-                _controller.Start();
+                MainController = new ShadowsocksController();
+                MenuController = new MenuViewController(MainController);
+                HotKeys.Init(MainController);
+                MainController.Start();
                 Application.Run();
             }
         }
@@ -81,9 +92,10 @@ namespace Shadowsocks
         {
             if (Interlocked.Increment(ref exited) == 1)
             {
-                Logging.Error(e.ExceptionObject?.ToString());
+                string errMsg = e.ExceptionObject.ToString();
+                Logging.Error(errMsg);
                 MessageBox.Show(
-                    $"{I18N.GetString("Unexpected error, shadowsocks will exit. Please report to")} https://github.com/shadowsocks/shadowsocks-windows/issues {Environment.NewLine}{e.ExceptionObject?.ToString()}",
+                    $"{I18N.GetString("Unexpected error, shadowsocks will exit. Please report to")} https://github.com/shadowsocks/shadowsocks-windows/issues {Environment.NewLine}{errMsg}",
                     "Shadowsocks non-UI Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 Application.Exit();
             }
@@ -91,12 +103,15 @@ namespace Shadowsocks
 
         private static void Application_ThreadException(object sender, ThreadExceptionEventArgs e)
         {
-            string errorMsg = $"Exception Type: {e.Exception.GetType().Name}{Environment.NewLine}Stack Trace:{Environment.NewLine}{e.Exception.StackTrace}";
-            Logging.Error(errorMsg);
-            MessageBox.Show(
-                $"{I18N.GetString("Unexpected error, shadowsocks will exit. Please report to")} https://github.com/shadowsocks/shadowsocks-windows/issues {Environment.NewLine}{errorMsg}",
-                "Shadowsocks UI Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            Application.Exit();
+            if (Interlocked.Increment(ref exited) == 1)
+            {
+                string errorMsg = $"Exception Detail: {Environment.NewLine}{e.Exception}";
+                Logging.Error(errorMsg);
+                MessageBox.Show(
+                    $"{I18N.GetString("Unexpected error, shadowsocks will exit. Please report to")} https://github.com/shadowsocks/shadowsocks-windows/issues {Environment.NewLine}{errorMsg}",
+                    "Shadowsocks UI Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Application.Exit();
+            }
         }
 
         private static void SystemEvents_PowerModeChanged(object sender, PowerModeChangedEventArgs e)
@@ -105,7 +120,7 @@ namespace Shadowsocks
             {
                 case PowerModes.Resume:
                     Logging.Info("os wake up");
-                    if (_controller != null)
+                    if (MainController != null)
                     {
                         System.Timers.Timer timer = new System.Timers.Timer(10 * 1000);
                         timer.Elapsed += Timer_Elapsed;
@@ -115,9 +130,9 @@ namespace Shadowsocks
                     }
                     break;
                 case PowerModes.Suspend:
-                    if (_controller != null)
+                    if (MainController != null)
                     {
-                        _controller.Stop();
+                        MainController.Stop();
                         Logging.Info("controller stopped");
                     }
                     Logging.Info("os suspend");
@@ -129,9 +144,9 @@ namespace Shadowsocks
         {
             try
             {
-                if (_controller != null)
+                if (MainController != null)
                 {
-                    _controller.Start();
+                    MainController.Start();
                     Logging.Info("controller started");
                 }
             }
@@ -157,12 +172,15 @@ namespace Shadowsocks
 
         private static void Application_ApplicationExit(object sender, EventArgs e)
         {
+            // detach static event handlers
+            Application.ApplicationExit -= Application_ApplicationExit;
             SystemEvents.PowerModeChanged -= SystemEvents_PowerModeChanged;
+            Application.ThreadException -= Application_ThreadException;
             HotKeys.Destroy();
-            if (_controller != null)
+            if (MainController != null)
             {
-                _controller.Stop();
-                _controller = null;
+                MainController.Stop();
+                MainController = null;
             }
         }
     }

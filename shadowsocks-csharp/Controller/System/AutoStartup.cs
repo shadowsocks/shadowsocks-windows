@@ -1,20 +1,24 @@
 ﻿using System;
+using System.Reflection;
 using System.Windows.Forms;
 using Microsoft.Win32;
 using Shadowsocks.Util;
 
 namespace Shadowsocks.Controller
 {
-    class AutoStartup
+    static class AutoStartup
     {
-        static string Key = "Shadowsocks_" + Application.StartupPath.GetHashCode();
+        // Don't use Application.ExecutablePath
+        // see https://stackoverflow.com/questions/12945805/odd-c-sharp-path-issue
+        private static readonly string ExecutablePath = Assembly.GetEntryAssembly().Location;
+
+        private static string Key = "Shadowsocks_" + Application.StartupPath.GetHashCode();
 
         public static bool Set(bool enabled)
         {
             RegistryKey runKey = null;
             try
             {
-                string path = Application.ExecutablePath;
                 runKey = Utils.OpenRegKey(@"Software\Microsoft\Windows\CurrentVersion\Run", true);
                 if ( runKey == null ) {
                     Logging.Error( @"Cannot find HKCU\Software\Microsoft\Windows\CurrentVersion\Run" );
@@ -22,7 +26,7 @@ namespace Shadowsocks.Controller
                 }
                 if (enabled)
                 {
-                    runKey.SetValue(Key, path);
+                    runKey.SetValue(Key, ExecutablePath);
                 }
                 else
                 {
@@ -53,7 +57,6 @@ namespace Shadowsocks.Controller
             RegistryKey runKey = null;
             try
             {
-                string path = Application.ExecutablePath;
                 runKey = Utils.OpenRegKey(@"Software\Microsoft\Windows\CurrentVersion\Run", true);
                 if (runKey == null) {
                     Logging.Error(@"Cannot find HKCU\Software\Microsoft\Windows\CurrentVersion\Run");
@@ -67,10 +70,10 @@ namespace Shadowsocks.Controller
                     else if (item.Equals("Shadowsocks", StringComparison.OrdinalIgnoreCase)) // Compatibility with older versions
                     {
                         string value = Convert.ToString(runKey.GetValue(item));
-                        if (path.Equals(value, StringComparison.OrdinalIgnoreCase))
+                        if (ExecutablePath.Equals(value, StringComparison.OrdinalIgnoreCase))
                         {
                             runKey.DeleteValue(item);
-                            runKey.SetValue(Key, path);
+                            runKey.SetValue(Key, ExecutablePath);
                             return true;
                         }
                     }

@@ -127,7 +127,7 @@ namespace Shadowsocks.Controller.Strategy
 
         public string Name => I18N.GetString("Choose by statistics");
 
-        public Server GetAServer(IStrategyCallerType type, IPEndPoint localIPEndPoint)
+        public Server GetAServer(IStrategyCallerType type, IPEndPoint localIPEndPoint, EndPoint destEndPoint)
         {
             if (_currentServer == null)
             {

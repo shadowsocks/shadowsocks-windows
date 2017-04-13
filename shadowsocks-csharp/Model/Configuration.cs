@@ -22,8 +22,10 @@ namespace Shadowsocks.Model
         public int localPort;
         public string pacUrl;
         public bool useOnlinePac;
+        public bool secureLocalPac = true;
         public bool availabilityStatistics;
         public bool autoCheckUpdate;
+        public bool checkPreRelease;
         public bool isVerboseLogging;
         public LogViewerConfig logViewer;
         public ProxyConfig proxy;
@@ -54,6 +56,11 @@ namespace Shadowsocks.Model
                 string configContent = File.ReadAllText(CONFIG_FILE);
                 Configuration config = JsonConvert.DeserializeObject<Configuration>(configContent);
                 config.isDefault = false;
+
+                if (config.configs == null)
+                    config.configs = new List<Server>();
+                if (config.configs.Count == 0)
+                    config.configs.Add(GetDefaultServer());
                 if (config.localPort == 0)
                     config.localPort = 1080;
                 if (config.index == -1 && config.strategy == null)
@@ -65,10 +72,8 @@ namespace Shadowsocks.Model
                 if (config.hotkey == null)
                     config.hotkey = new HotkeyConfig();
 
-                if (config.proxy.proxyType < ProxyConfig.PROXY_SOCKS5 || config.proxy.proxyType > ProxyConfig.PROXY_HTTP)
-                {
-                    config.proxy.proxyType = ProxyConfig.PROXY_SOCKS5;
-                }
+                config.proxy.CheckConfig();
+
                 return config;
             }
             catch (Exception e)

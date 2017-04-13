@@ -11,7 +11,7 @@ namespace Shadowsocks.Controller
             return value.ToString("yyyyMMddHHmmssfff");
         }
 
-        public static void Update(Configuration config, bool forceDisable)
+        public static void Update(Configuration config, bool forceDisable, PACServer pacSrv)
         {
             bool global = config.global;
             bool enabled = config.enabled;
@@ -21,25 +21,36 @@ namespace Shadowsocks.Controller
                 enabled = false;
             }
 
-            if (enabled)
+            try
             {
-                if (global)
+                if (enabled)
                 {
-                    WinINet.SetIEProxy(true, true, "127.0.0.1:" + config.localPort.ToString(), "");
+                    if (global)
+                    {
+                        Sysproxy.SetIEProxy(true, true, "127.0.0.1:" + config.localPort.ToString(), null);
+                    }
+                    else
+                    {
+                        string pacUrl;
+                        if (config.useOnlinePac && !config.pacUrl.IsNullOrEmpty())
+                        {
+                            pacUrl = config.pacUrl;
+                        }
+                        else
+                        {
+                            pacUrl = pacSrv.PacUrl;
+                        }
+                        Sysproxy.SetIEProxy(true, false, null, pacUrl);
+                    }
                 }
                 else
                 {
-                    string pacUrl;
-                    if (config.useOnlinePac && !config.pacUrl.IsNullOrEmpty())
-                        pacUrl = config.pacUrl;
-                    else
-                        pacUrl = $"http://127.0.0.1:{config.localPort}/pac?t={GetTimestamp(DateTime.Now)}";
-                    WinINet.SetIEProxy(true, false, "", pacUrl);
+                    Sysproxy.SetIEProxy(false, false, null, null);
                 }
             }
-            else
+            catch (ProxyException ex)
             {
-                WinINet.SetIEProxy(false, false, "", "");
+                Logging.LogUsefulException(ex);
             }
         }
     }

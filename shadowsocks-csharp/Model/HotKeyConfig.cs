@@ -12,8 +12,7 @@ namespace Shadowsocks.Model
     public class HotkeyConfig
     {
         public string SwitchSystemProxy;
-        public string ChangeToPac;
-        public string ChangeToGlobal;
+        public string SwitchSystemProxyMode;
         public string SwitchAllowLan;
         public string ShowLogs;
         public string ServerMoveUp;
@@ -22,8 +21,7 @@ namespace Shadowsocks.Model
         public HotkeyConfig()
         {
             SwitchSystemProxy = "";
-            ChangeToPac = "";
-            ChangeToGlobal = "";
+            SwitchSystemProxyMode = "";
             SwitchAllowLan = "";
             ShowLogs = "";
             ServerMoveUp = "";

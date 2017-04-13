@@ -50,7 +50,6 @@ namespace Shadowsocks.View
             ProxyPortLabel.Text = I18N.GetString("Proxy Port");
             RemarksLabel.Text = I18N.GetString("Remarks");
             TimeoutLabel.Text = I18N.GetString("Timeout(Sec)");
-            OneTimeAuth.Text = I18N.GetString("Onetime Authentication");
             ServerGroupBox.Text = I18N.GetString("Server");
             OKButton.Text = I18N.GetString("OK");
             MyCancelButton.Text = I18N.GetString("Cancel");
@@ -80,31 +79,28 @@ namespace Shadowsocks.View
                     return true;
                 }
                 Server server = new Server();
-                server.server = IPTextBox.Text.Trim();
-                try
+
+                if (Uri.CheckHostName(server.server = IPTextBox.Text.Trim()) == UriHostNameType.Unknown)
                 {
-                    server.server_port = int.Parse(ServerPortTextBox.Text);
+                    MessageBox.Show(I18N.GetString("Invalid server address"));
+                    IPTextBox.Focus();
+                    return false;
                 }
-                catch (FormatException)
+                if (!int.TryParse(ServerPortTextBox.Text, out server.server_port))
                 {
                     MessageBox.Show(I18N.GetString("Illegal port number format"));
-                    ServerPortTextBox.Clear();
+                    ServerPortTextBox.Focus();
                     return false;
                 }
                 server.password = PasswordTextBox.Text;
                 server.method = EncryptionSelect.Text;
                 server.remarks = RemarksTextBox.Text;
-                try
-                {
-                    server.timeout = int.Parse(TimeoutTextBox.Text);
-                }
-                catch (FormatException)
+                if (!int.TryParse(TimeoutTextBox.Text, out server.timeout))
                 {
                     MessageBox.Show(I18N.GetString("Illegal timeout format"));
-                    TimeoutTextBox.Clear();
+                    TimeoutTextBox.Focus();
                     return false;
                 }
-                server.auth = OneTimeAuth.Checked;
                 int localPort = int.Parse(ProxyPortTextBox.Text);
                 Configuration.CheckServer(server);
                 Configuration.CheckLocalPort(localPort);
@@ -133,7 +129,6 @@ namespace Shadowsocks.View
                 EncryptionSelect.Text = server.method ?? "aes-256-cfb";
                 RemarksTextBox.Text = server.remarks;
                 TimeoutTextBox.Text = server.timeout.ToString();
-                OneTimeAuth.Checked = server.auth;
             }
         }
 
@@ -151,7 +146,7 @@ namespace Shadowsocks.View
             _modifiedConfiguration = controller.GetConfigurationCopy();
             LoadConfiguration(_modifiedConfiguration);
             _lastSelectedIndex = _modifiedConfiguration.index;
-            if (_lastSelectedIndex < 0)
+            if (_lastSelectedIndex < 0 || _lastSelectedIndex >= ServersListBox.Items.Count)
             {
                 _lastSelectedIndex = 0;
             }

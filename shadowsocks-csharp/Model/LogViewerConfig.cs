@@ -1,105 +1,94 @@
-﻿using Shadowsocks.View;
-using System;
+﻿using System;
 using System.Drawing;
 using System.Windows.Forms;
+using Newtonsoft.Json;
 
 namespace Shadowsocks.Model
 {
     [Serializable]
     public class LogViewerConfig
     {
-        public string fontName;
-        public float fontSize;
-        public string bgColor;
-        public string textColor;
         public bool topMost;
         public bool wrapText;
         public bool toolbarShown;
-        public int width;
-        public int height;
-        public int top;
-        public int left;
-        public bool maximized;
+
+        public Font Font { get; set; } = new Font("Consolas", 8F);
+
+        public Color BackgroundColor { get; set; } = Color.Black;
+
+        public Color TextColor { get; set; } = Color.White;
 
         public LogViewerConfig()
         {
-            fontName = "Consolas";
-            fontSize = 8;
-            bgColor = "black";
-            textColor = "white";
             topMost = false;
             wrapText = false;
             toolbarShown = false;
-            width = 600;
-            height = 400;
-            left = GetBestLeft();
-            top = GetBestTop();
-            maximized = true;
         }
 
+
+        #region Size
+
+        public void SaveSize()
+        {
+            Properties.Settings.Default.Save();
+        }
+
+        [JsonIgnore]
+        public int Width
+        {
+            get { return Properties.Settings.Default.LogViewerWidth; }
+            set { Properties.Settings.Default.LogViewerWidth = value; }
+        }
+
+        [JsonIgnore]
+        public int Height
+        {
+            get { return Properties.Settings.Default.LogViewerHeight; }
+            set { Properties.Settings.Default.LogViewerHeight = value; }
+        }
+        [JsonIgnore]
+        public int Top
+        {
+            get { return Properties.Settings.Default.LogViewerTop; }
+            set { Properties.Settings.Default.LogViewerTop = value; }
+        }
+        [JsonIgnore]
+        public int Left
+        {
+            get { return Properties.Settings.Default.LogViewerLeft; }
+            set { Properties.Settings.Default.LogViewerLeft = value; }
+        }
+        [JsonIgnore]
+        public bool Maximized
+        {
+            get { return Properties.Settings.Default.LogViewerMaximized; }
+            set { Properties.Settings.Default.LogViewerMaximized = value; }
+        }
+
+        [JsonIgnore]
         // Use GetBestTop() and GetBestLeft() to ensure the log viwer form can be always display IN screen. 
-        public int GetBestLeft()
+        public int BestLeft
         {
-            width = (width >= 400) ? width : 400;  // set up the minimum size
-            return Screen.PrimaryScreen.WorkingArea.Width - width;
-        }
-
-        public int GetBestTop()
-        {
-            height = (height >= 200) ? height : 200;  // set up the minimum size
-            return Screen.PrimaryScreen.WorkingArea.Height - height;
-        }
-
-        public Font GetFont()
-        {
-            try
+            get
             {
-                return new Font(fontName, fontSize, FontStyle.Regular);
-            }
-            catch (Exception)
-            {
-                return new Font("Console", 8F);
+                int width = Width;
+                width = (width >= 400) ? width : 400; // set up the minimum size
+                return Screen.PrimaryScreen.WorkingArea.Width - width;
             }
         }
 
-        public void SetFont(Font font)
+        [JsonIgnore]
+        public int BestTop
         {
-            fontName = font.Name;
-            fontSize = font.Size;
-        }
-
-        public Color GetBackgroundColor()
-        {
-            try
+            get
             {
-                return ColorTranslator.FromHtml(bgColor);
-            }
-            catch (Exception)
-            {
-                return ColorTranslator.FromHtml("black");
+                int height = Height;
+                height = (height >= 200) ? height : 200; // set up the minimum size
+                return Screen.PrimaryScreen.WorkingArea.Height - height;
             }
         }
 
-        public void SetBackgroundColor(Color color)
-        {
-            bgColor = ColorTranslator.ToHtml(color);
-        }
+        #endregion
 
-        public Color GetTextColor()
-        {
-            try
-            {
-                return ColorTranslator.FromHtml(textColor);
-            }
-            catch (Exception)
-            {
-                return ColorTranslator.FromHtml("white");
-            }
-        }
-
-        public void SetTextColor(Color color)
-        {
-            textColor = ColorTranslator.ToHtml(color);
-        }
     }
 }

@@ -165,7 +165,7 @@ namespace Shadowsocks.Proxy
             st.innerState.ex = ex;
         }
 
-        private static readonly Regex HttpRespondHeaderRegex = new Regex(@"^(HTTP/1\.\d) (\d{3}) (.+)$");
+        private static readonly Regex HttpRespondHeaderRegex = new Regex(@"^(HTTP/1\.\d) (\d{3}) (.+)$", RegexOptions.Compiled);
         private int _respondLineCount = 0;
         private bool _established = false;
 
