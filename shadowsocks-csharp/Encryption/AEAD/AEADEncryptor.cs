@@ -88,15 +88,15 @@ namespace Shadowsocks.Encryption.AEAD
             byte[] passbuf = Encoding.UTF8.GetBytes(password);
             // init master key
             if (_Masterkey == null) _Masterkey = new byte[keyLen];
-            if (_Masterkey.Length < keyLen) Array.Resize(ref _Masterkey, keyLen);
-            DeriveKey(passbuf, _Masterkey);
+            if (_Masterkey.Length != keyLen) Array.Resize(ref _Masterkey, keyLen);
+            DeriveKey(passbuf, _Masterkey, keyLen);
             // init session key
             if (_sessionKey == null) _sessionKey = new byte[keyLen];
         }
 
-        public void DeriveKey(byte[] password, byte[] key)
+        public void DeriveKey(byte[] password, byte[] key, int keylen)
         {
-            StreamEncryptor.LegacyDeriveKey(password, key);
+            StreamEncryptor.LegacyDeriveKey(password, key, keylen);
         }
 
         public void DeriveSessionKey(byte[] salt, byte[] masterKey, byte[] sessionKey)
