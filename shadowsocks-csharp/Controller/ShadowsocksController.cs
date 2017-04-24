@@ -13,6 +13,7 @@ using Shadowsocks.Controller.Strategy;
 using Shadowsocks.Model;
 using Shadowsocks.Properties;
 using Shadowsocks.Util;
+using System.Linq;
 
 namespace Shadowsocks.Controller
 {
@@ -39,7 +40,7 @@ namespace Shadowsocks.Controller
         private long _outboundCounter = 0;
         public long InboundCounter => Interlocked.Read(ref _inboundCounter);
         public long OutboundCounter => Interlocked.Read(ref _outboundCounter);
-        public QueueLast<TrafficPerSecond> traffic;
+        public Queue<TrafficPerSecond> trafficPerSecondQueue;
 
         private bool stopped = false;
 
@@ -48,16 +49,6 @@ namespace Shadowsocks.Controller
         public class PathEventArgs : EventArgs
         {
             public string Path;
-        }
-
-        public class QueueLast<T> : Queue<T>
-        {
-            public T Last { get; private set; }
-            public new void Enqueue(T item)
-            {
-                Last = item;
-                base.Enqueue(item);
-            }
         }
 
         public class TrafficPerSecond
@@ -172,8 +163,13 @@ namespace Shadowsocks.Controller
         {
             try
             {
-                var server = new Server(ssURL);
-                _config.configs.Add(server);
+                if (ssURL.IsNullOrEmpty() || ssURL.IsWhiteSpace()) return false;
+                var servers = Server.GetServers(ssURL);
+                if (servers == null || servers.Count == 0) return false;
+                foreach (var server in servers)
+                {
+                    _config.configs.Add(server);
+                }
                 _config.index = _config.configs.Count - 1;
                 SaveConfig(_config);
                 return true;
@@ -303,8 +299,7 @@ namespace Shadowsocks.Controller
         public static string GetQRCode(Server server)
         {
             string tag = string.Empty;
-            string auth = server.auth ? "-auth" : string.Empty;
-            string parts = $"{server.method}{auth}:{server.password}@{server.server}:{server.server_port}";
+            string parts = $"{server.method}:{server.password}@{server.server}:{server.server_port}";
             string base64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(parts));
             if(!server.remarks.IsNullOrEmpty())
             {
@@ -621,10 +616,10 @@ namespace Shadowsocks.Controller
 
         private void StartTrafficStatistics(int queueMaxSize)
         {
-            traffic = new QueueLast<TrafficPerSecond>();
+            trafficPerSecondQueue = new Queue<TrafficPerSecond>();
             for (int i = 0; i < queueMaxSize; i++)
             {
-                traffic.Enqueue(new TrafficPerSecond());
+                trafficPerSecondQueue.Enqueue(new TrafficPerSecond());
             }
             _trafficThread = new Thread(new ThreadStart(() => TrafficStatistics(queueMaxSize)));
             _trafficThread.IsBackground = true;
@@ -633,19 +628,20 @@ namespace Shadowsocks.Controller
 
         private void TrafficStatistics(int queueMaxSize)
         {
+            TrafficPerSecond previous, current;
             while (true)
             {
-                TrafficPerSecond previous = traffic.Last;
-                TrafficPerSecond current = new TrafficPerSecond();
+                previous = trafficPerSecondQueue.Last();
+                current = new TrafficPerSecond();
                 
-                var inbound = current.inboundCounter = InboundCounter;
-                var outbound = current.outboundCounter = OutboundCounter;
-                current.inboundIncreasement = inbound - previous.inboundCounter;
-                current.outboundIncreasement = outbound - previous.outboundCounter;
+                current.inboundCounter = InboundCounter;
+                current.outboundCounter = OutboundCounter;
+                current.inboundIncreasement = current.inboundCounter - previous.inboundCounter;
+                current.outboundIncreasement = current.outboundCounter - previous.outboundCounter;
 
-                traffic.Enqueue(current);
-                if (traffic.Count > queueMaxSize)
-                    traffic.Dequeue();
+                trafficPerSecondQueue.Enqueue(current);
+                if (trafficPerSecondQueue.Count > queueMaxSize)
+                    trafficPerSecondQueue.Dequeue();
 
                 TrafficChanged?.Invoke(this, new EventArgs());
 

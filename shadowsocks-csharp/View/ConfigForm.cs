@@ -50,13 +50,11 @@ namespace Shadowsocks.View
             ProxyPortLabel.Text = I18N.GetString("Proxy Port");
             RemarksLabel.Text = I18N.GetString("Remarks");
             TimeoutLabel.Text = I18N.GetString("Timeout(Sec)");
-            OneTimeAuth.Text = I18N.GetString("Onetime Authentication");
             ServerGroupBox.Text = I18N.GetString("Server");
             OKButton.Text = I18N.GetString("OK");
             MyCancelButton.Text = I18N.GetString("Cancel");
             MoveUpButton.Text = I18N.GetString("Move &Up");
             MoveDownButton.Text = I18N.GetString("Move D&own");
-            Enabled.Text = I18N.GetString("Enabled");
             this.Text = I18N.GetString("Edit Servers");
         }
 
@@ -103,13 +101,11 @@ namespace Shadowsocks.View
                     TimeoutTextBox.Focus();
                     return false;
                 }
-                server.auth = OneTimeAuth.Checked;
                 int localPort = int.Parse(ProxyPortTextBox.Text);
                 Configuration.CheckServer(server);
                 Configuration.CheckLocalPort(localPort);
                 _modifiedConfiguration.configs[_lastSelectedIndex] = server;
                 _modifiedConfiguration.localPort = localPort;
-                server.enabled = Enabled.Checked;
 
                 return true;
             }
@@ -133,8 +129,6 @@ namespace Shadowsocks.View
                 EncryptionSelect.Text = server.method ?? "aes-256-cfb";
                 RemarksTextBox.Text = server.remarks;
                 TimeoutTextBox.Text = server.timeout.ToString();
-                OneTimeAuth.Checked = server.auth;
-                Enabled.Checked = server.enabled;
             }
         }
 

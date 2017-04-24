@@ -12,13 +12,13 @@ namespace Shadowsocks.Util
     public struct BandwidthScaleInfo
     {
         public float value;
-        public string unit_name;
+        public string unitName;
         public long unit;
 
-        public BandwidthScaleInfo(float value, string unit_name, long unit)
+        public BandwidthScaleInfo(float value, string unitName, long unit)
         {
             this.value = value;
-            this.unit_name = unit_name;
+            this.unitName = unitName;
             this.unit = unit;
         }
     }
@@ -111,7 +111,7 @@ namespace Shadowsocks.Util
         public static string FormatBandwidth(long n)
         {
             var result = GetBandwidthScale(n);
-            return $"{result.value:0.##}{result.unit_name}";
+            return $"{result.value:0.##}{result.unitName}";
         }
 
         public static string FormatBytes(long bytes)

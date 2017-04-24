@@ -39,10 +39,8 @@
             this.PasswordTextBox = new System.Windows.Forms.TextBox();
             this.EncryptionLabel = new System.Windows.Forms.Label();
             this.EncryptionSelect = new System.Windows.Forms.ComboBox();
-            this.OneTimeAuth = new System.Windows.Forms.CheckBox();
             this.TimeoutLabel = new System.Windows.Forms.Label();
             this.TimeoutTextBox = new System.Windows.Forms.TextBox();
-            this.Enabled = new System.Windows.Forms.CheckBox();
             this.panel2 = new System.Windows.Forms.Panel();
             this.OKButton = new System.Windows.Forms.Button();
             this.MyCancelButton = new System.Windows.Forms.Button();
@@ -88,13 +86,11 @@
             this.tableLayoutPanel1.Controls.Add(this.EncryptionSelect, 1, 3);
             this.tableLayoutPanel1.Controls.Add(this.TimeoutLabel, 0, 6);
             this.tableLayoutPanel1.Controls.Add(this.TimeoutTextBox, 1, 6);
-            this.tableLayoutPanel1.Controls.Add(this.OneTimeAuth, 1, 8);
-            this.tableLayoutPanel1.Controls.Add(this.Enabled, 1, 7);
             this.tableLayoutPanel1.Location = new System.Drawing.Point(8, 21);
             this.tableLayoutPanel1.Margin = new System.Windows.Forms.Padding(0);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
             this.tableLayoutPanel1.Padding = new System.Windows.Forms.Padding(3);
-            this.tableLayoutPanel1.RowCount = 9;
+            this.tableLayoutPanel1.RowCount = 7;
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
@@ -102,9 +98,7 @@
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(255, 209);
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(255, 167);
             this.tableLayoutPanel1.TabIndex = 0;
             // 
             // RemarksTextBox
@@ -220,21 +214,15 @@
             "bf-cfb",
             "camellia-128-cfb",
             "camellia-192-cfb",
-            "camellia-256-cfb"});
+            "camellia-256-cfb",
+            "aes-128-gcm",
+            "aes-192-gcm",
+            "aes-256-gcm",
+            "chacha20-ietf-poly1305"});
             this.EncryptionSelect.Location = new System.Drawing.Point(89, 87);
             this.EncryptionSelect.Name = "EncryptionSelect";
             this.EncryptionSelect.Size = new System.Drawing.Size(160, 20);
             this.EncryptionSelect.TabIndex = 3;
-            // 
-            // OneTimeAuth
-            // 
-            this.OneTimeAuth.AutoSize = true;
-            this.OneTimeAuth.Location = new System.Drawing.Point(89, 189);
-            this.OneTimeAuth.Name = "OneTimeAuth";
-            this.OneTimeAuth.Size = new System.Drawing.Size(156, 14);
-            this.OneTimeAuth.TabIndex = 5;
-            this.OneTimeAuth.Text = "Onetime Authentication";
-            this.OneTimeAuth.UseVisualStyleBackColor = true;
             // 
             // TimeoutLabel
             // 
@@ -255,18 +243,6 @@
             this.TimeoutTextBox.Name = "TimeoutTextBox";
             this.TimeoutTextBox.Size = new System.Drawing.Size(160, 21);
             this.TimeoutTextBox.TabIndex = 11;
-            // 
-            // Enabled
-            // 
-            this.Enabled.AutoSize = true;
-            this.Enabled.Checked = true;
-            this.Enabled.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.Enabled.Location = new System.Drawing.Point(89, 167);
-            this.Enabled.Name = "Enabled";
-            this.Enabled.Size = new System.Drawing.Size(66, 16);
-            this.Enabled.TabIndex = 12;
-            this.Enabled.Text = "Enabled";
-            this.Enabled.UseVisualStyleBackColor = true;
             // 
             // panel2
             // 
@@ -307,7 +283,7 @@
             // DeleteButton
             // 
             this.DeleteButton.Dock = System.Windows.Forms.DockStyle.Right;
-            this.DeleteButton.Location = new System.Drawing.Point(120, 6);
+            this.DeleteButton.Location = new System.Drawing.Point(86, 6);
             this.DeleteButton.Margin = new System.Windows.Forms.Padding(3, 6, 0, 3);
             this.DeleteButton.Name = "DeleteButton";
             this.DeleteButton.Size = new System.Drawing.Size(80, 23);
@@ -333,10 +309,10 @@
             this.ServerGroupBox.AutoSize = true;
             this.ServerGroupBox.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.ServerGroupBox.Controls.Add(this.tableLayoutPanel1);
-            this.ServerGroupBox.Location = new System.Drawing.Point(212, 0);
+            this.ServerGroupBox.Location = new System.Drawing.Point(178, 0);
             this.ServerGroupBox.Margin = new System.Windows.Forms.Padding(12, 0, 0, 0);
             this.ServerGroupBox.Name = "ServerGroupBox";
-            this.ServerGroupBox.Size = new System.Drawing.Size(266, 247);
+            this.ServerGroupBox.Size = new System.Drawing.Size(266, 205);
             this.ServerGroupBox.TabIndex = 0;
             this.ServerGroupBox.TabStop = false;
             this.ServerGroupBox.Text = "Server";
@@ -349,7 +325,7 @@
             this.ServersListBox.Location = new System.Drawing.Point(0, 0);
             this.ServersListBox.Margin = new System.Windows.Forms.Padding(0);
             this.ServersListBox.Name = "ServersListBox";
-            this.ServersListBox.Size = new System.Drawing.Size(200, 200);
+            this.ServersListBox.Size = new System.Drawing.Size(166, 148);
             this.ServersListBox.TabIndex = 7;
             this.ServersListBox.SelectedIndexChanged += new System.EventHandler(this.ServersListBox_SelectedIndexChanged);
             // 
@@ -373,7 +349,7 @@
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel2.Size = new System.Drawing.Size(478, 343);
+            this.tableLayoutPanel2.Size = new System.Drawing.Size(444, 301);
             this.tableLayoutPanel2.TabIndex = 7;
             // 
             // tableLayoutPanel6
@@ -386,18 +362,18 @@
             this.tableLayoutPanel6.Controls.Add(this.MoveDownButton, 1, 0);
             this.tableLayoutPanel6.Controls.Add(this.MoveUpButton, 0, 0);
             this.tableLayoutPanel6.Dock = System.Windows.Forms.DockStyle.Top;
-            this.tableLayoutPanel6.Location = new System.Drawing.Point(0, 311);
+            this.tableLayoutPanel6.Location = new System.Drawing.Point(0, 269);
             this.tableLayoutPanel6.Margin = new System.Windows.Forms.Padding(0);
             this.tableLayoutPanel6.Name = "tableLayoutPanel6";
             this.tableLayoutPanel6.RowCount = 1;
             this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel6.Size = new System.Drawing.Size(200, 32);
+            this.tableLayoutPanel6.Size = new System.Drawing.Size(166, 32);
             this.tableLayoutPanel6.TabIndex = 10;
             // 
             // MoveDownButton
             // 
             this.MoveDownButton.Dock = System.Windows.Forms.DockStyle.Right;
-            this.MoveDownButton.Location = new System.Drawing.Point(120, 6);
+            this.MoveDownButton.Location = new System.Drawing.Point(86, 6);
             this.MoveDownButton.Margin = new System.Windows.Forms.Padding(3, 6, 0, 3);
             this.MoveDownButton.Name = "MoveDownButton";
             this.MoveDownButton.Size = new System.Drawing.Size(80, 23);
@@ -429,7 +405,7 @@
             this.tableLayoutPanel5.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tableLayoutPanel5.Controls.Add(this.ProxyPortTextBox, 1, 0);
             this.tableLayoutPanel5.Controls.Add(this.ProxyPortLabel, 0, 0);
-            this.tableLayoutPanel5.Location = new System.Drawing.Point(282, 247);
+            this.tableLayoutPanel5.Location = new System.Drawing.Point(248, 205);
             this.tableLayoutPanel5.Margin = new System.Windows.Forms.Padding(0);
             this.tableLayoutPanel5.Name = "tableLayoutPanel5";
             this.tableLayoutPanel5.Padding = new System.Windows.Forms.Padding(3);
@@ -473,7 +449,7 @@
             this.tableLayoutPanel3.Controls.Add(this.MyCancelButton, 1, 0);
             this.tableLayoutPanel3.Controls.Add(this.OKButton, 0, 0);
             this.tableLayoutPanel3.Dock = System.Windows.Forms.DockStyle.Right;
-            this.tableLayoutPanel3.Location = new System.Drawing.Point(319, 314);
+            this.tableLayoutPanel3.Location = new System.Drawing.Point(285, 272);
             this.tableLayoutPanel3.Margin = new System.Windows.Forms.Padding(3, 3, 0, 3);
             this.tableLayoutPanel3.Name = "tableLayoutPanel3";
             this.tableLayoutPanel3.RowCount = 1;
@@ -492,13 +468,13 @@
             this.tableLayoutPanel4.Controls.Add(this.DeleteButton, 1, 0);
             this.tableLayoutPanel4.Controls.Add(this.AddButton, 0, 0);
             this.tableLayoutPanel4.Dock = System.Windows.Forms.DockStyle.Top;
-            this.tableLayoutPanel4.Location = new System.Drawing.Point(0, 247);
+            this.tableLayoutPanel4.Location = new System.Drawing.Point(0, 205);
             this.tableLayoutPanel4.Margin = new System.Windows.Forms.Padding(0);
             this.tableLayoutPanel4.Name = "tableLayoutPanel4";
             this.tableLayoutPanel4.RowCount = 2;
             this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel4.Size = new System.Drawing.Size(200, 64);
+            this.tableLayoutPanel4.Size = new System.Drawing.Size(166, 64);
             this.tableLayoutPanel4.TabIndex = 8;
             // 
             // DuplicateButton
@@ -521,7 +497,7 @@
             this.AutoSize = true;
             this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.CancelButton = this.MyCancelButton;
-            this.ClientSize = new System.Drawing.Size(574, 412);
+            this.ClientSize = new System.Drawing.Size(574, 367);
             this.Controls.Add(this.tableLayoutPanel2);
             this.Controls.Add(this.panel2);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
@@ -580,11 +556,9 @@
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel6;
         private System.Windows.Forms.Button MoveDownButton;
         private System.Windows.Forms.Button MoveUpButton;
-        private System.Windows.Forms.CheckBox OneTimeAuth;
         private System.Windows.Forms.Button DuplicateButton;
         private System.Windows.Forms.Label TimeoutLabel;
         private System.Windows.Forms.TextBox TimeoutTextBox;
-        private System.Windows.Forms.CheckBox Enabled;
     }
 }
 

@@ -11,24 +11,12 @@ using Shadowsocks.Properties;
 using Shadowsocks.Model;
 using Shadowsocks.Util;
 using System.Text;
-using Shadowsocks.Controller.Service;
 using System.Net;
 using Shadowsocks.Controller.Strategy;
+using Shadowsocks.Controller.Service;
 
 namespace Shadowsocks.View
 {
-    struct TrafficInfo
-    {
-        public long inbound;
-        public long outbound;
-
-        public TrafficInfo(long inbound, long outbound)
-        {
-            this.inbound = inbound;
-            this.outbound = outbound;
-        }
-    }
-
     public partial class LogForm : Form
     {
         long lastOffset;
@@ -43,9 +31,17 @@ namespace Shadowsocks.View
         // global traffic update lock, make it static
         private static readonly object _lock = new object();
 
-        #region chart
-        long lastMaxSpeed;
-        ShadowsocksController.QueueLast<TrafficInfo> traffic = new ShadowsocksController.QueueLast<TrafficInfo>();
+        #region Traffic Chart
+        Queue<TrafficInfo> trafficInfoQueue = new Queue<TrafficInfo>();
+        const int queueMaxLength = 60;
+        long lastInbound, lastOutbound;
+        long maxSpeed = 0, lastMaxSpeed = 0;
+        const long minScale = 50;
+        BandwidthScaleInfo bandwidthScale;
+        List<float> inboundPoints = new List<float>();
+        List<float> outboundPoints = new List<float>();
+        TextAnnotation inboundAnnotation = new TextAnnotation();
+        TextAnnotation outboundAnnotation = new TextAnnotation();
         #endregion
 
         public LogForm(ShadowsocksController controller, string filename)
@@ -69,29 +65,24 @@ namespace Shadowsocks.View
             UpdateTexts();
         }
 
-        private void update_TrafficChart()
+        private void UpdateTrafficChart()
         {
-            List<float> inboundPoints = new List<float>();
-            List<float> outboundPoints = new List<float>();
-            TextAnnotation inboundAnnotation = new TextAnnotation();
-            TextAnnotation outboundAnnotation = new TextAnnotation();
-            BandwidthScaleInfo bandwidthScale;
-            const long minScale = 50;
-            long maxSpeed = 0;
-            long lastInbound, lastOutbound;
-
             lock (_lock)
             {
-                if (traffic.Count == 0)
+                if (trafficInfoQueue.Count == 0)
                     return;
-                foreach (var trafficPerSecond in traffic)
+
+                inboundPoints.Clear();
+                outboundPoints.Clear();
+                maxSpeed = 0;
+                foreach (var trafficInfo in trafficInfoQueue)
                 {
-                    inboundPoints.Add(trafficPerSecond.inbound);
-                    outboundPoints.Add(trafficPerSecond.outbound);
-                    maxSpeed = Math.Max(maxSpeed, Math.Max(trafficPerSecond.inbound, trafficPerSecond.outbound));
+                    inboundPoints.Add(trafficInfo.inbound);
+                    outboundPoints.Add(trafficInfo.outbound);
+                    maxSpeed = Math.Max(maxSpeed, Math.Max(trafficInfo.inbound, trafficInfo.outbound));
                 }
-                lastInbound = traffic.Last().inbound;
-                lastOutbound = traffic.Last().outbound;
+                lastInbound = trafficInfoQueue.Last().inbound;
+                lastOutbound = trafficInfoQueue.Last().outbound;
             }
 
             if (maxSpeed > 0)
@@ -107,7 +98,7 @@ namespace Shadowsocks.View
 
             bandwidthScale = Utils.GetBandwidthScale(maxSpeed);
 
-            //rescale the original data points, since it is List<float>, .ForEach does not work
+            // re-scale the original data points, since it is List<float>, .ForEach does not work
             inboundPoints = inboundPoints.Select(p => p / bandwidthScale.unit).ToList();
             outboundPoints = outboundPoints.Select(p => p / bandwidthScale.unit).ToList();
 
@@ -115,7 +106,7 @@ namespace Shadowsocks.View
             {
                 trafficChart.Series["Inbound"].Points.DataBindY(inboundPoints);
                 trafficChart.Series["Outbound"].Points.DataBindY(outboundPoints);
-                trafficChart.ChartAreas[0].AxisY.LabelStyle.Format = "{0:0.##} " + bandwidthScale.unit_name;
+                trafficChart.ChartAreas[0].AxisY.LabelStyle.Format = "{0:0.##} " + bandwidthScale.unitName;
                 trafficChart.ChartAreas[0].AxisY.Maximum = bandwidthScale.value;
                 inboundAnnotation.AnchorDataPoint = trafficChart.Series["Inbound"].Points.Last();
                 inboundAnnotation.Text = Utils.FormatBandwidth(lastInbound);
@@ -131,10 +122,29 @@ namespace Shadowsocks.View
         {
             lock (_lock)
             {
-                traffic = new ShadowsocksController.QueueLast<TrafficInfo>();
-                foreach (var trafficPerSecond in controller.traffic)
+                if (trafficInfoQueue.Count == 0)
                 {
-                    traffic.Enqueue(new TrafficInfo(trafficPerSecond.inboundIncreasement, trafficPerSecond.outboundIncreasement));
+                    // Init an empty queue
+                    for (int i = 0; i < queueMaxLength; i++)
+                    {
+                        trafficInfoQueue.Enqueue(new TrafficInfo(0, 0));
+                    }
+
+                    foreach (var trafficPerSecond in controller.trafficPerSecondQueue)
+                    {
+                        trafficInfoQueue.Enqueue(new TrafficInfo(trafficPerSecond.inboundIncreasement,
+                                                                 trafficPerSecond.outboundIncreasement));
+                        if (trafficInfoQueue.Count > queueMaxLength)
+                            trafficInfoQueue.Dequeue();
+                    }
+                }
+                else
+                {
+                    var lastTraffic = controller.trafficPerSecondQueue.Last();
+                    trafficInfoQueue.Enqueue(new TrafficInfo(lastTraffic.inboundIncreasement,
+                                                             lastTraffic.outboundIncreasement));
+                    if (trafficInfoQueue.Count > queueMaxLength)
+                        trafficInfoQueue.Dequeue();
                 }
             }
         }
@@ -163,7 +173,7 @@ namespace Shadowsocks.View
         private void Timer_Tick(object sender, EventArgs e)
         {
             UpdateContent();
-            update_TrafficChart();
+            UpdateTrafficChart();
         }
 
         private void InitContent()
@@ -429,7 +439,7 @@ namespace Shadowsocks.View
         {
             lock (_lock)
             {
-                controller.traffic.Clear();
+                trafficInfoQueue.Clear();
             }
             var configs = controller.GetCurrentConfiguration().configs;
             controller.SelectServerIndex(serverIndex);
@@ -445,13 +455,13 @@ namespace Shadowsocks.View
             long trafficAverage = 0;
             lock (_lock)
             {
-                if (traffic.Count > 0)
+                if (trafficInfoQueue.Count > 0)
                 {
-                    foreach (var trafficPerSecond in traffic)
+                    foreach (var trafficPerSecond in trafficInfoQueue)
                     {
                         trafficTotal += trafficPerSecond.inbound;
                     }
-                    trafficAverage = trafficTotal / traffic.Count;
+                    trafficAverage = trafficTotal / trafficInfoQueue.Count;
                 }
             }
             speedTestString.Add(controller.GetCurrentServer().server + ":" + controller.GetCurrentServer().server_port + " -- " + trafficTotal + " / " + trafficAverage + "\n");
@@ -481,6 +491,18 @@ namespace Shadowsocks.View
                 controller.SaveServers(serverSpeeds.Values.ToList(), controller.GetCurrentConfiguration().localPort);
                 BalancingStrategy b = new BalancingStrategy(controller);
                 controller.SelectStrategy(b.ID);
+            }
+        }
+
+        private class TrafficInfo
+        {
+            public long inbound;
+            public long outbound;
+
+            public TrafficInfo(long inbound, long outbound)
+            {
+                this.inbound = inbound;
+                this.outbound = outbound;
             }
         }
     }

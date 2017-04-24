@@ -1,0 +1,22 @@
+version: 1.0.{build}
+image: Visual Studio 2015
+environment:
+  matrix:
+    - platform: x86
+      configuration: Debug
+    - platform: x86
+      configuration: Release
+matrix:
+  fast_finish: false
+nuget:
+  project_feed: true
+before_build:
+- cmd: nuget restore
+build:
+  parallel: true
+  verbosity: normal
+artifacts:
+- path: shadowsocks-csharp\bin\x86\Release\Shadowsocks.exe
+  name: Shadowsocks-release.exe
+- path: shadowsocks-csharp\bin\x86\Debug\Shadowsocks.exe
+  name: Shadowsocks-debug.exe

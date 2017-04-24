@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System.Runtime.CompilerServices;
-
 using Shadowsocks.Controller.Strategy;
 using Shadowsocks.Encryption;
 using Shadowsocks.Model;
@@ -13,7 +12,9 @@ namespace Shadowsocks.Controller
     class UDPRelay : Listener.Service
     {
         private ShadowsocksController _controller;
-        private LRUCache<IPEndPoint, UDPHandler> _cache;
+
+        // TODO: choose a smart number
+        private LRUCache<IPEndPoint, UDPHandler> _cache = new LRUCache<IPEndPoint, UDPHandler>(512);
 
         public long outbound = 0;
         public long inbound = 0;
@@ -21,7 +22,6 @@ namespace Shadowsocks.Controller
         public UDPRelay(ShadowsocksController controller)
         {
             this._controller = controller;
-            this._cache = new LRUCache<IPEndPoint, UDPHandler>(512);  // todo: choose a smart number
         }
 
         public override bool Handle(byte[] firstPacket, int length, Socket socket, object state)
@@ -53,7 +53,7 @@ namespace Shadowsocks.Controller
             private Socket _remote;
 
             private Server _server;
-            private byte[] _buffer = new byte[1500];
+            private byte[] _buffer = new byte[65536];
 
             private IPEndPoint _localEndPoint;
             private IPEndPoint _remoteEndPoint;
@@ -78,12 +78,12 @@ namespace Shadowsocks.Controller
 
             public void Send(byte[] data, int length)
             {
-                IEncryptor encryptor = EncryptorFactory.GetEncryptor(_server.method, _server.password, _server.auth, true);
-                byte[] dataIn = new byte[length - 3 + IVEncryptor.ONETIMEAUTH_BYTES];
+                IEncryptor encryptor = EncryptorFactory.GetEncryptor(_server.method, _server.password);
+                byte[] dataIn = new byte[length - 3];
                 Array.Copy(data, 3, dataIn, 0, length - 3);
-                byte[] dataOut = new byte[length - 3 + 16 + IVEncryptor.ONETIMEAUTH_BYTES];
+                byte[] dataOut = new byte[65536];  // enough space for AEAD ciphers
                 int outlen;
-                encryptor.Encrypt(dataIn, length - 3, dataOut, out outlen);
+                encryptor.EncryptUDP(dataIn, length - 3, dataOut, out outlen);
                 Logging.Debug(_localEndPoint, _remoteEndPoint, outlen, "UDP Relay");
                 _remote?.SendTo(dataOut, outlen, SocketFlags.None, _remoteEndPoint);
             }
@@ -106,14 +106,15 @@ namespace Shadowsocks.Controller
                     byte[] dataOut = new byte[bytesRead];
                     int outlen;
 
-                    IEncryptor encryptor = EncryptorFactory.GetEncryptor(_server.method, _server.password, _server.auth, true);
-                    encryptor.Decrypt(_buffer, bytesRead, dataOut, out outlen);
+                    IEncryptor encryptor = EncryptorFactory.GetEncryptor(_server.method, _server.password);
+                    encryptor.DecryptUDP(_buffer, bytesRead, dataOut, out outlen);
 
                     byte[] sendBuf = new byte[outlen + 3];
                     Array.Copy(dataOut, 0, sendBuf, 3, outlen);
 
                     Logging.Debug(_localEndPoint, _remoteEndPoint, outlen, "UDP Relay");
                     _local?.SendTo(sendBuf, outlen + 3, 0, _localEndPoint);
+
                     Receive();
                 }
                 catch (ObjectDisposedException)
@@ -126,6 +127,8 @@ namespace Shadowsocks.Controller
                 }
                 finally
                 {
+                    // No matter success or failed, we keep receiving
+
                 }
             }
 
@@ -143,12 +146,11 @@ namespace Shadowsocks.Controller
                 {
                     // TODO: need more think about handle other Exceptions, or should remove this catch().
                 }
-                finally
-                {
-                }
             }
         }
     }
+
+    #region LRU cache
 
     // cc by-sa 3.0 http://stackoverflow.com/a/3719378/1124054
     class LRUCache<K, V> where V : UDPRelay.UDPHandler
@@ -212,4 +214,6 @@ namespace Shadowsocks.Controller
         public K key;
         public V value;
     }
+
+    #endregion
 }

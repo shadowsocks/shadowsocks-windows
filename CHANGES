@@ -1,3 +1,14 @@
+4.0.1 2017-04-08
+- Fix UDP relay
+- Allow to add multiple servers via Shadowsocks URL
+- Bug fixes and improvements
+
+4.0 2017-04-04
+- Add AEAD ciphers support, removed OTA
+- I18N: add Japanese support, update Traditional Chinese strings
+- sysproxy: restore user settings when system proxy is turned off
+- Bug fixes and improvements
+
 3.4.3 2017-1-11
 - Make the previous portable mode as default
 - Refine networking by Noisyfox

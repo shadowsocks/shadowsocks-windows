@@ -1,0 +1,142 @@
+# translation for Traditional Chinese
+
+Shadowsocks=Shadowsocks
+
+# Menu items
+
+Enable System Proxy=啟用系統代理
+Mode=系統代理模式
+PAC=PAC 模式
+Global=全局模式
+Servers=伺服器
+Edit Servers...=編輯伺服器...
+Statistics Config...=統計設定檔...
+Start on Boot=開機啟動
+Forward Proxy...=正向 Proxy 設定...
+Allow Clients from LAN=允許來自區域網路的連線
+Local PAC=使用本機 PAC
+Online PAC=使用線上 PAC
+Edit Local PAC File...=編輯本機 PAC 檔案...
+Update Local PAC from GFWList=從 GFWList 更新本機 PAC
+Edit User Rule for GFWList...=編輯 GFWList 的使用者規則...
+Secure Local PAC=安全本機 PAC
+Copy Local PAC URL=複製本機 PAC 網址
+Share Server Config...=分享伺服器設定檔...
+Scan QRCode from Screen...=掃描螢幕上的 QR 碼...
+Import URL from Clipboard...=從剪貼簿匯入 URL...
+Availability Statistics=統計可用性
+Show Logs...=顯示記錄檔...
+Verbose Logging=詳細資訊記錄
+Updates...=更新...
+Check for Updates...=檢查更新
+Check for Updates at Startup=啟動時檢查更新
+Check Pre-release Version=檢查發行前版本更新
+Edit Hotkeys...=編輯快速鍵...
+About...=關於...
+Help=說明
+Quit=結束
+Edit Servers=編輯伺服器
+Load Balance=負載平衡
+High Availability=高可用性
+Choose by statistics=根據統計
+
+# Config Form
+
+&Add=新增 (&A)
+&Delete=移除 (&D)
+Dupli&cate=複製 (&C)
+Server=伺服器
+Server Addr=伺服器位址
+Server Port=伺服器連接埠
+Password=密碼
+Encryption=加密
+Proxy Port=Proxy 連接埠
+Remarks=註解
+Timeout(Sec)=逾時 (秒)
+OK=確定
+Cancel=取消
+New server=新伺服器
+Move &Up=上移 (&U)
+Move D&own=下移 (&O)
+
+# Proxy Form
+
+Edit Proxy=編輯 Proxy
+Use Proxy=使用 Proxy
+Proxy Type=Proxy 類型
+Proxy Addr=Proxy 位址
+Proxy Port=Proxy 連接埠
+
+# Log Form
+
+&File=檔案 (&F)
+&Open Location=在檔案總管中開啟 (&O)
+E&xit=結束 (&X)
+&View=檢視 (&V)
+&Clean Logs=清除記錄檔 (&C)
+Change &Font=變更字型 (&F)
+&Wrap Text=自動換行 (&W)
+&Top Most=置頂 (&T)
+&Show Toolbar=顯示工具列 (&S)
+Log Viewer=記錄檔檢視器
+Inbound=輸入
+Outbound=輸出
+
+# QRCode Form
+
+QRCode and URL=QR 碼與 URL
+
+# PAC Url Form
+
+Edit Online PAC URL=編輯線上 PAC 網址
+Edit Online PAC URL...=編輯線上 PAC 網址...
+Please input PAC Url=請輸入 PAC 網址
+
+# HotkeySettings Form
+
+Switch system proxy=切換系統 Proxy 狀態
+Switch system proxy mode=切換系統 Proxy 模式
+Switch share over LAN=切換區域網路共用
+Show Logs=顯示記錄檔
+Switch to prev server=切換上一個伺服器
+Switch to next server=切換下一個伺服器
+Reg All=註冊所有快速鍵
+
+# Messages
+
+Shadowsocks Error: {0}=Shadowsocks 錯誤: {0}
+Port already in use=連接埠號碼已被使用
+Invalid server address=無效伺服器位址
+Illegal port number format=無效連接埠號碼格式
+Illegal timeout format=無效逾時格式
+Please add at least one server=請新增至少一個伺服器
+Server IP can not be blank=伺服器 IP 不能為空
+Password can not be blank=密碼不能為空
+Port out of range=連接埠號碼超出範圍
+Port can't be 8123=連接埠號碼不能為 8123
+Shadowsocks {0} Update Found=Shadowsocks {0} 更新
+No update is available=沒有可用的更新
+Click here to update=點按此處升級
+Shadowsocks is here=Shadowsocks 在這裡
+You can turn on/off Shadowsocks in the context menu=可以在右鍵選項單中開關 Shadowsocks
+System Proxy Enabled=系統 Proxy 已啟用
+System Proxy Disabled=系統 Proxy 未啟用
+Failed to update PAC file =更新 PAC 檔案失敗
+PAC updated=更新 PAC 成功
+No updates found. Please report to GFWList if you have problems with it.=未發現更新。如有問題請報告至 GFWList。
+No QRCode found. Try to zoom in or move it to the center of the screen.=未發現 QR 碼，嘗試把它放大或移動到靠近熒幕中間的位置
+Shadowsocks is already running.=Shadowsocks 已經在執行。
+Find Shadowsocks icon in your notify tray.=請在工作列裡尋找 Shadowsocks 圖示。
+If you want to start multiple Shadowsocks, make a copy in another directory.=如果想同時啟動多個，可以另外複製一份至別的目錄。
+Failed to decode QRCode=QR 碼解碼失敗
+Failed to update registry=無法修改登錄檔
+System Proxy On: =系統 Proxy 已啟用：
+Running: Port {0}=正在執行：連接埠號碼 {0}
+Unexpected error, shadowsocks will exit. Please report to=非預期錯誤，Shadowsocks 將結束。請報告此錯誤至
+Unsupported operating system, use Windows Vista at least.=不支援的作業系統版本，最低需求為 Windows Vista。
+Unsupported .NET Framework, please update to 4.6.2 or later.=目前 .NET Framework 版本過低，最低需求為4.6.2。
+Proxy request failed=Proxy 要求失敗
+Proxy handshake failed=Proxy 交握失敗
+Register hotkey failed=註冊快速鍵失敗
+Cannot parse hotkey: {0}=剖析快速鍵失敗: {0}
+Timeout is invalid, it should not exceed {0}=逾時無效，不應超過 {0}

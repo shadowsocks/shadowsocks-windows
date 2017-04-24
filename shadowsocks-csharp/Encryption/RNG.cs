@@ -28,16 +28,17 @@ namespace Shadowsocks.Encryption
 
         public static void GetBytes(byte[] buf)
         {
-            _rng.GetBytes(buf);
+            GetBytes(buf, buf.Length);
         }
 
         public static void GetBytes(byte[] buf, int len)
         {
+            if (_rng == null) Reload();
             try
             {
                 _rng.GetBytes(buf, 0, len);
             }
-            catch (Exception)
+            catch (System.Exception)
             {
                 // the backup way
                 byte[] tmp = new byte[len];

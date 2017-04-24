@@ -66,15 +66,17 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Cyotek.Collections.Generic.CircularBuffer, Version=1.0.0.0, Culture=neutral, PublicKeyToken=58daa28b0b2de221, processorArchitecture=MSIL">
+      <HintPath>3rd\Cyotek.CircularBuffer.1.0.2\lib\net20\Cyotek.Collections.Generic.CircularBuffer.dll</HintPath>
+    </Reference>
     <Reference Include="GlobalHotKey, Version=1.1.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>3rd\GlobalHotKey.1.1.0\lib\GlobalHotKey.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="Microsoft.VisualBasic" />
-    <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>3rd\Newtonsoft.Json.9.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>3rd\Newtonsoft.Json.10.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
@@ -86,65 +88,32 @@
     <Reference Include="System.Windows.Forms.DataVisualization" />
     <Reference Include="System.XML" />
     <Reference Include="WindowsBase" />
+    <Reference Include="zxing, Version=0.15.0.0, Culture=neutral, PublicKeyToken=4e88037ac681fe60, processorArchitecture=MSIL">
+      <HintPath>3rd\ZXing.Net.0.15.0\lib\net461\zxing.dll</HintPath>
+    </Reference>
+    <Reference Include="zxing.presentation, Version=0.15.0.0, Culture=neutral, PublicKeyToken=4e88037ac681fe60, processorArchitecture=MSIL">
+      <HintPath>3rd\ZXing.Net.0.15.0\lib\net461\zxing.presentation.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="3rd\zxing\BarcodeFormat.cs" />
-    <Compile Include="3rd\zxing\BaseLuminanceSource.cs" />
-    <Compile Include="3rd\zxing\Binarizer.cs" />
-    <Compile Include="3rd\zxing\BinaryBitmap.cs" />
-    <Compile Include="3rd\zxing\BitmapLuminanceSource.cs" />
-    <Compile Include="3rd\zxing\common\BitArray.cs" />
-    <Compile Include="3rd\zxing\common\BitMatrix.cs" />
-    <Compile Include="3rd\zxing\common\BitSource.cs" />
-    <Compile Include="3rd\zxing\common\DecoderResult.cs" />
-    <Compile Include="3rd\zxing\common\DefaultGridSampler.cs" />
-    <Compile Include="3rd\zxing\common\DetectorResult.cs" />
-    <Compile Include="3rd\zxing\common\detector\MathUtils.cs" />
-    <Compile Include="3rd\zxing\common\GlobalHistogramBinarizer.cs" />
-    <Compile Include="3rd\zxing\common\GridSampler.cs" />
-    <Compile Include="3rd\zxing\common\HybridBinarizer.cs" />
-    <Compile Include="3rd\zxing\common\PerspectiveTransform.cs" />
-    <Compile Include="3rd\zxing\common\reedsolomon\GenericGF.cs" />
-    <Compile Include="3rd\zxing\common\reedsolomon\GenericGFPoly.cs" />
-    <Compile Include="3rd\zxing\common\reedsolomon\ReedSolomonDecoder.cs" />
-    <Compile Include="3rd\zxing\common\reedsolomon\ReedSolomonEncoder.cs" />
-    <Compile Include="3rd\zxing\common\StringUtils.cs" />
-    <Compile Include="3rd\zxing\DecodeHintType.cs" />
-    <Compile Include="3rd\zxing\EncodeHintType.cs" />
-    <Compile Include="3rd\zxing\LuminanceSource.cs" />
-    <Compile Include="3rd\zxing\qrcode\decoder\BitMatrixParser.cs" />
-    <Compile Include="3rd\zxing\qrcode\decoder\DataBlock.cs" />
-    <Compile Include="3rd\zxing\qrcode\decoder\DataMask.cs" />
-    <Compile Include="3rd\zxing\qrcode\decoder\DecodedBitStreamParser.cs" />
-    <Compile Include="3rd\zxing\qrcode\decoder\Decoder.cs" />
-    <Compile Include="3rd\zxing\qrcode\decoder\ErrorCorrectionLevel.cs" />
-    <Compile Include="3rd\zxing\qrcode\decoder\FormatInformation.cs" />
-    <Compile Include="3rd\zxing\qrcode\decoder\Mode.cs" />
-    <Compile Include="3rd\zxing\qrcode\decoder\QRCodeDecoderMetaData.cs" />
-    <Compile Include="3rd\zxing\qrcode\decoder\Version.cs" />
-    <Compile Include="3rd\zxing\qrcode\detector\AlignmentPattern.cs" />
-    <Compile Include="3rd\zxing\qrcode\detector\AlignmentPatternFinder.cs" />
-    <Compile Include="3rd\zxing\qrcode\detector\Detector.cs" />
-    <Compile Include="3rd\zxing\qrcode\detector\FinderPattern.cs" />
-    <Compile Include="3rd\zxing\qrcode\detector\FinderPatternFinder.cs" />
-    <Compile Include="3rd\zxing\qrcode\detector\FinderPatternInfo.cs" />
-    <Compile Include="3rd\zxing\qrcode\encoder\BlockPair.cs" />
-    <Compile Include="3rd\zxing\qrcode\encoder\ByteMatrix.cs" />
-    <Compile Include="3rd\zxing\qrcode\encoder\Encoder.cs" />
-    <Compile Include="3rd\zxing\qrcode\encoder\MaskUtil.cs" />
-    <Compile Include="3rd\zxing\qrcode\encoder\MatrixUtil.cs" />
-    <Compile Include="3rd\zxing\qrcode\encoder\QRCode.cs" />
-    <Compile Include="3rd\zxing\qrcode\QRCodeReader.cs" />
-    <Compile Include="3rd\zxing\Result.cs" />
-    <Compile Include="3rd\zxing\ResultMetadataType.cs" />
-    <Compile Include="3rd\zxing\ResultPoint.cs" />
-    <Compile Include="3rd\zxing\ResultPointCallback.cs" />
-    <Compile Include="3rd\zxing\WriterException.cs" />
     <Compile Include="Controller\Service\Calculagraph.cs" />
     <Compile Include="Controller\Service\SpeedTestWebClient.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Controller\System\Hotkeys\HotkeyCallbacks.cs" />
+    <Compile Include="Encryption\AEAD\AEADEncryptor.cs" />
+    <Compile Include="Encryption\AEAD\AEADMbedTLSEncryptor.cs" />
+    <Compile Include="Encryption\AEAD\AEADSodiumEncryptor.cs" />
+    <Compile Include="Encryption\EncryptorBase.cs" />
+    <Compile Include="Encryption\EncryptorFactory.cs" />
+    <Compile Include="Encryption\Exception\CryptoException.cs" />
+    <Compile Include="Encryption\IEncryptor.cs" />
+    <Compile Include="Encryption\MbedTLS.cs" />
+    <Compile Include="Encryption\RNG.cs" />
+    <Compile Include="Encryption\Sodium.cs" />
+    <Compile Include="Encryption\Stream\StreamEncryptor.cs" />
+    <Compile Include="Encryption\Stream\StreamMbedTLSEncryptor.cs" />
+    <Compile Include="Encryption\Stream\StreamSodiumEncryptor.cs" />
     <Compile Include="Model\HotKeyConfig.cs" />
     <Compile Include="Model\ProxyConfig.cs" />
     <Compile Include="Properties\Settings.Designer.cs">
@@ -167,14 +136,6 @@
     <Compile Include="Controller\Service\PortForwarder.cs" />
     <Compile Include="Controller\Service\UDPRelay.cs" />
     <Compile Include="Controller\Service\UpdateChecker.cs" />
-    <Compile Include="Encryption\EncryptorBase.cs" />
-    <Compile Include="Encryption\EncryptorFactory.cs" />
-    <Compile Include="Encryption\IVEncryptor.cs" />
-    <Compile Include="Encryption\MbedTLS.cs" />
-    <Compile Include="Encryption\MbedTLSEncryptor.cs" />
-    <Compile Include="Encryption\Sodium.cs" />
-    <Compile Include="Encryption\SodiumEncryptor.cs" />
-    <Compile Include="Encryption\IEncryptor.cs" />
     <Compile Include="Controller\Service\PACServer.cs" />
     <Compile Include="Model\LogViewerConfig.cs" />
     <Compile Include="Model\Server.cs" />
@@ -195,7 +156,6 @@
     <Compile Include="Controller\System\Hotkeys\Hotkeys.cs" />
     <Compile Include="Util\ProcessManagement\Job.cs" />
     <Compile Include="Util\ProcessManagement\ThreadUtil.cs" />
-    <Compile Include="Encryption\RNG.cs" />
     <Compile Include="Util\Sockets\LineReader.cs" />
     <Compile Include="Util\Sockets\SocketUtil.cs" />
     <Compile Include="Util\Sockets\WrappedSocket.cs" />
@@ -305,11 +265,11 @@
     <None Include="Resources\ss16.png" />
     <None Include="Resources\ss24.png" />
     <None Include="Resources\ssw128.png" />
-    <Content Include="Data\cn.txt" />
-    <Content Include="Data\jp.txt" />
+    <Content Include="Data\zh_CN.txt" />
+    <Content Include="Data\zh_TW.txt" />
+    <Content Include="Data\ja.txt" />
     <Content Include="Data\privoxy_conf.txt" />
     <Content Include="Data\user-rule.txt" />
-    <Content Include="Data\zh_tw.txt" />
     <Content Include="FodyWeavers.xml">
       <SubType>Designer</SubType>
     </Content>
