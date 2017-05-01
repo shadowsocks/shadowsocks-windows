@@ -58,6 +58,7 @@ namespace Shadowsocks.View
             ShowLogsTextBox.Text = config.ShowLogs;
             ServerMoveUpTextBox.Text = config.ServerMoveUp;
             ServerMoveDownTextBox.Text = config.ServerMoveDown;
+            RegAllAtStartupCheckbox.Checked = config.RegAllAtStartup;
         }
 
         private void UpdateTexts()
@@ -69,10 +70,12 @@ namespace Shadowsocks.View
             ShowLogsLabel.Text = I18N.GetString("Show Logs");
             ServerMoveUpLabel.Text = I18N.GetString("Switch to prev server");
             ServerMoveDownLabel.Text = I18N.GetString("Switch to next server");
+            RegAllAtStartupLabel.Text = I18N.GetString("Reg All At Startup");
             btnOK.Text = I18N.GetString("OK");
             btnCancel.Text = I18N.GetString("Cancel");
             btnRegisterAll.Text = I18N.GetString("Reg All");
             Text = I18N.GetString("Edit Hotkeys...");
+
         }
 
         /// <summary>
@@ -241,6 +244,7 @@ namespace Shadowsocks.View
             _modifiedConfig.ShowLogs = ShowLogsTextBox.Text;
             _modifiedConfig.ServerMoveUp = ServerMoveUpTextBox.Text;
             _modifiedConfig.ServerMoveDown = ServerMoveDownTextBox.Text;
+            _modifiedConfig.RegAllAtStartup = RegAllAtStartupCheckbox.Checked;
             _controller.SaveHotkeyConfig(_modifiedConfig);
         }
 

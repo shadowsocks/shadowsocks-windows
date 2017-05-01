@@ -101,6 +101,7 @@ Show Logs=显示日志
 Switch to prev server=切换上个服务器
 Switch to next server=切换下个服务器
 Reg All=注册全部热键
+Reg All At Startup=启动时注册热键
 
 # Messages
 

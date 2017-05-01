@@ -83,6 +83,7 @@ namespace Shadowsocks
                 MenuController = new MenuViewController(MainController);
                 HotKeys.Init(MainController);
                 MainController.Start();
+                StartupHotkeyReg.Init();
                 Application.Run();
             }
         }
