@@ -38,13 +38,13 @@
             this.SwitchAllowLanLabel = new System.Windows.Forms.Label();
             this.ShowLogsLabel = new System.Windows.Forms.Label();
             this.ServerMoveUpLabel = new System.Windows.Forms.Label();
-            this.ServerMoveDownLabel = new System.Windows.Forms.Label();
             this.SwitchSystemProxyTextBox = new System.Windows.Forms.TextBox();
             this.SwitchProxyModeTextBox = new System.Windows.Forms.TextBox();
             this.SwitchAllowLanTextBox = new System.Windows.Forms.TextBox();
             this.ShowLogsTextBox = new System.Windows.Forms.TextBox();
             this.ServerMoveUpTextBox = new System.Windows.Forms.TextBox();
             this.ServerMoveDownTextBox = new System.Windows.Forms.TextBox();
+            this.ServerMoveDownLabel = new System.Windows.Forms.Label();
             this.RegAllAtStartupCheckbox = new System.Windows.Forms.CheckBox();
             this.RegAllAtStartupLabel = new System.Windows.Forms.Label();
             flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
@@ -198,18 +198,6 @@
             this.ServerMoveUpLabel.Text = "Move up";
             this.ServerMoveUpLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
-            // ServerMoveDownLabel
-            // 
-            this.ServerMoveDownLabel.AutoSize = true;
-            this.ServerMoveDownLabel.Dock = System.Windows.Forms.DockStyle.Right;
-            this.ServerMoveDownLabel.Location = new System.Drawing.Point(106, 146);
-            this.ServerMoveDownLabel.Margin = new System.Windows.Forms.Padding(8, 0, 8, 0);
-            this.ServerMoveDownLabel.Name = "ServerMoveDownLabel";
-            this.ServerMoveDownLabel.Size = new System.Drawing.Size(91, 29);
-            this.ServerMoveDownLabel.TabIndex = 4;
-            this.ServerMoveDownLabel.Text = "Move Down";
-            this.ServerMoveDownLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            // 
             // SwitchSystemProxyTextBox
             // 
             this.SwitchSystemProxyTextBox.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -287,6 +275,18 @@
             this.ServerMoveDownTextBox.TextChanged += new System.EventHandler(this.TextBox_TextChanged);
             this.ServerMoveDownTextBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.HotkeyDown);
             this.ServerMoveDownTextBox.KeyUp += new System.Windows.Forms.KeyEventHandler(this.HotkeyUp);
+            // 
+            // ServerMoveDownLabel
+            // 
+            this.ServerMoveDownLabel.AutoSize = true;
+            this.ServerMoveDownLabel.Dock = System.Windows.Forms.DockStyle.Right;
+            this.ServerMoveDownLabel.Location = new System.Drawing.Point(106, 146);
+            this.ServerMoveDownLabel.Margin = new System.Windows.Forms.Padding(8, 0, 8, 0);
+            this.ServerMoveDownLabel.Name = "ServerMoveDownLabel";
+            this.ServerMoveDownLabel.Size = new System.Drawing.Size(91, 29);
+            this.ServerMoveDownLabel.TabIndex = 4;
+            this.ServerMoveDownLabel.Text = "Move Down";
+            this.ServerMoveDownLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // RegAllAtStartupCheckbox
             // 

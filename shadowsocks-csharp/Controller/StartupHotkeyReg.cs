@@ -11,68 +11,61 @@ namespace Shadowsocks.Controller
 {
     static class StartupHotkeyReg
     {
-        public static Dictionary<HotKey, HotKeys.HotKeyCallBackHandler> hotKeyDic;
-        public static void Init()
+        public static void RegHotkey()
         {
-            if (Configuration.Load().hotkey == null || !Configuration.Load().hotkey.RegAllAtStartup)
+            var _hotKeyConf = Configuration.Load().hotkey;
+
+            if (_hotKeyConf == null || !_hotKeyConf.RegAllAtStartup)
                 return;
+
+            var _hotKeyDic = new Dictionary<HotKey, HotKeys.HotKeyCallBackHandler>();
+
             try
             {
-                InitDic();
-                Reg();
+                if (!_hotKeyConf.SwitchSystemProxy.IsNullOrEmpty())
+                {
+                    _hotKeyDic.Add(HotKeys.Str2HotKey(_hotKeyConf.SwitchSystemProxy)
+                        , HotkeyCallbacks.GetCallback("SwitchSystemProxyCallback") as HotKeys.HotKeyCallBackHandler);
+                }
+
+                if (!_hotKeyConf.SwitchSystemProxyMode.IsNullOrEmpty())
+                {
+                    _hotKeyDic.Add(HotKeys.Str2HotKey(_hotKeyConf.SwitchSystemProxyMode)
+                        , HotkeyCallbacks.GetCallback("SwitchProxyModeCallback") as HotKeys.HotKeyCallBackHandler);
+                }
+
+                if (!_hotKeyConf.SwitchAllowLan.IsNullOrEmpty())
+                {
+                    _hotKeyDic.Add(HotKeys.Str2HotKey(_hotKeyConf.SwitchAllowLan)
+                        , HotkeyCallbacks.GetCallback("SwitchAllowLanCallback") as HotKeys.HotKeyCallBackHandler);
+                }
+
+                if (!_hotKeyConf.ShowLogs.IsNullOrEmpty())
+                {
+                    _hotKeyDic.Add(HotKeys.Str2HotKey(_hotKeyConf.ShowLogs)
+                        , HotkeyCallbacks.GetCallback("ShowLogsCallback") as HotKeys.HotKeyCallBackHandler);
+                }
+
+                if (!_hotKeyConf.ServerMoveUp.IsNullOrEmpty())
+                {
+                    _hotKeyDic.Add(HotKeys.Str2HotKey(_hotKeyConf.ServerMoveUp)
+                        , HotkeyCallbacks.GetCallback("ServerMoveUpCallback") as HotKeys.HotKeyCallBackHandler);
+                }
+
+                if (!_hotKeyConf.ServerMoveDown.IsNullOrEmpty())
+                {
+                    _hotKeyDic.Add(HotKeys.Str2HotKey(_hotKeyConf.ServerMoveDown)
+                        , HotkeyCallbacks.GetCallback("ServerMoveDownCallback") as HotKeys.HotKeyCallBackHandler);
+                }
+
+                foreach (var v in _hotKeyDic)
+                {
+                    HotKeys.Regist(v.Key, v.Value);
+                }
             }
             catch (Exception e)
             {
                 Logging.Error(e);
-            }
-        }
-        private static void InitDic()
-        {
-            hotKeyDic = new Dictionary<HotKey, HotKeys.HotKeyCallBackHandler>();
-            var _hotKeyConf = Configuration.Load().hotkey;
-
-            if (!_hotKeyConf.SwitchSystemProxy.IsNullOrEmpty())
-            {
-                hotKeyDic.Add(HotKeys.Str2HotKey(_hotKeyConf.SwitchSystemProxy)
-                    , HotkeyCallbacks.GetCallback("SwitchSystemProxyCallback") as HotKeys.HotKeyCallBackHandler);
-            }
-
-            if (!_hotKeyConf.SwitchSystemProxyMode.IsNullOrEmpty())
-            {
-                hotKeyDic.Add(HotKeys.Str2HotKey(_hotKeyConf.SwitchSystemProxyMode)
-                    , HotkeyCallbacks.GetCallback("SwitchProxyModeCallback") as HotKeys.HotKeyCallBackHandler);
-            }
-
-            if (!_hotKeyConf.SwitchAllowLan.IsNullOrEmpty())
-            {
-                hotKeyDic.Add(HotKeys.Str2HotKey(_hotKeyConf.SwitchAllowLan)
-                    , HotkeyCallbacks.GetCallback("SwitchAllowLanCallback") as HotKeys.HotKeyCallBackHandler);
-            }
-
-            if (!_hotKeyConf.ShowLogs.IsNullOrEmpty())
-            {
-                hotKeyDic.Add(HotKeys.Str2HotKey(_hotKeyConf.ShowLogs)
-                    , HotkeyCallbacks.GetCallback("ShowLogsCallback") as HotKeys.HotKeyCallBackHandler);
-            }
-
-            if (!_hotKeyConf.ServerMoveUp.IsNullOrEmpty())
-            {
-                hotKeyDic.Add(HotKeys.Str2HotKey(_hotKeyConf.ServerMoveUp)
-                    , HotkeyCallbacks.GetCallback("ServerMoveUpCallback") as HotKeys.HotKeyCallBackHandler);
-            }
-
-            if (!_hotKeyConf.ServerMoveDown.IsNullOrEmpty())
-            {
-                hotKeyDic.Add(HotKeys.Str2HotKey(_hotKeyConf.ServerMoveDown)
-                    , HotkeyCallbacks.GetCallback("ServerMoveDownCallback") as HotKeys.HotKeyCallBackHandler);
-            }
-        }
-
-        private static void Reg()
-        {
-            foreach (var v in hotKeyDic)
-            {
-                HotKeys.Regist(v.Key, v.Value);
             }
         }
     }
