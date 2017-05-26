@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net;
 using System.Text;
-using Cyotek.Collections.Generic;
+using Shadowsocks.Encryption.CircularBuffer;
 using Shadowsocks.Controller;
 using Shadowsocks.Encryption.Exception;
 using Shadowsocks.Encryption.Stream;
@@ -21,8 +21,8 @@ namespace Shadowsocks.Encryption.AEAD
         protected static byte[] _udpTmpBuf = new byte[65536];
 
         // every connection should create its own buffer
-        private CircularBuffer<byte> _encCircularBuffer = new CircularBuffer<byte>(MAX_INPUT_SIZE * 2, false);
-        private CircularBuffer<byte> _decCircularBuffer = new CircularBuffer<byte>(MAX_INPUT_SIZE * 2, false);
+        private ByteCircularBuffer _encCircularBuffer = new ByteCircularBuffer(MAX_INPUT_SIZE * 2);
+        private ByteCircularBuffer _decCircularBuffer = new ByteCircularBuffer(MAX_INPUT_SIZE * 2);
 
         public const int CHUNK_LEN_BYTES = 2;
         public const uint CHUNK_LEN_MASK = 0x3FFFu;
@@ -88,15 +88,15 @@ namespace Shadowsocks.Encryption.AEAD
             byte[] passbuf = Encoding.UTF8.GetBytes(password);
             // init master key
             if (_Masterkey == null) _Masterkey = new byte[keyLen];
-            if (_Masterkey.Length < keyLen) Array.Resize(ref _Masterkey, keyLen);
-            DeriveKey(passbuf, _Masterkey);
+            if (_Masterkey.Length != keyLen) Array.Resize(ref _Masterkey, keyLen);
+            DeriveKey(passbuf, _Masterkey, keyLen);
             // init session key
             if (_sessionKey == null) _sessionKey = new byte[keyLen];
         }
 
-        public void DeriveKey(byte[] password, byte[] key)
+        public void DeriveKey(byte[] password, byte[] key, int keylen)
         {
-            StreamEncryptor.LegacyDeriveKey(password, key);
+            StreamEncryptor.LegacyDeriveKey(password, key, keylen);
         }
 
         public void DeriveSessionKey(byte[] salt, byte[] masterKey, byte[] sessionKey)
@@ -254,7 +254,7 @@ namespace Shadowsocks.Encryption.AEAD
 
                 // we have enough data to decrypt one chunk
                 // drop chunk len and its tag from buffer
-                _decCircularBuffer.Get(CHUNK_LEN_BYTES + tagLen);
+                _decCircularBuffer.Skip(CHUNK_LEN_BYTES + tagLen);
                 byte[] encChunkBytes = _decCircularBuffer.Get(chunkLen + tagLen);
                 byte[] decChunkBytes = new byte[chunkLen];
                 uint decChunkLen = 0;

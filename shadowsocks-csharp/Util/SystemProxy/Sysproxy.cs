@@ -1,15 +1,19 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
-using System.Text;
 using Shadowsocks.Controller;
 using Shadowsocks.Properties;
+using Shadowsocks.Model;
+using System.Text;
+using Newtonsoft.Json;
 
 namespace Shadowsocks.Util.SystemProxy
 {
     public static class Sysproxy
     {
-        private static bool _userSettingsRecorded = false;
+        private const string _userWininetConfigFile = "user-wininet.json";
+
+        private static string _queryStr;
 
         // In general, this won't change
         // format:
@@ -17,7 +21,7 @@ namespace Shadowsocks.Util.SystemProxy
         //  <proxy-server><CR-LF>
         //  <bypass-list><CR-LF>
         //  <pac-url>
-        private static string[] _userSettings = new string[4];
+        private static SysproxyConfig _userSettings = null;
 
         enum RET_ERRORS : int
         {
@@ -31,8 +35,7 @@ namespace Shadowsocks.Util.SystemProxy
 
         static Sysproxy()
         {
-            try
-            {
+            try {
                 FileManager.UncompressFile(Utils.GetTempPath("sysproxy.exe"),
                     Environment.Is64BitOperatingSystem ? Resources.sysproxy64_exe : Resources.sysproxy_exe);
             }
@@ -44,13 +47,12 @@ namespace Shadowsocks.Util.SystemProxy
 
         public static void SetIEProxy(bool enable, bool global, string proxyServer, string pacURL)
         {
-            string str;
-            if (_userSettingsRecorded == false)
+            Read();
+            if (!_userSettings.UserSettingsRecorded)
             {
                 // record user settings
-                ExecSysproxy("query", out str);
-                ParseQueryStr(str);
-                _userSettingsRecorded = true;
+                ExecSysproxy("query");
+                ParseQueryStr(_queryStr);
             }
             string arguments;
 
@@ -63,20 +65,21 @@ namespace Shadowsocks.Util.SystemProxy
             else
             {
                 // restore user settings
-                var flags = _userSettings[0];
-                var proxy_server = _userSettings[1] ?? "-";
-                var bypass_list = _userSettings[2] ?? "-";
-                var pac_url = _userSettings[3] ?? "-";
+                var flags = _userSettings.Flags;
+                var proxy_server = _userSettings.ProxyServer ?? "-";
+                var bypass_list = _userSettings.BypassList ?? "-";
+                var pac_url = _userSettings.PacUrl ?? "-";
                 arguments = $"set {flags} {proxy_server} {bypass_list} {pac_url}";
 
                 // have to get new settings
-                _userSettingsRecorded = false;
+                _userSettings.UserSettingsRecorded = false;
             }
 
-            ExecSysproxy(arguments, out str);
+            Save();
+            ExecSysproxy(arguments);
         }
 
-        private static void ExecSysproxy(string arguments, out string queryStr)
+        private static void ExecSysproxy(string arguments)
         {
             using (var process = new Process())
             {
@@ -107,24 +110,53 @@ namespace Shadowsocks.Util.SystemProxy
                     throw new ProxyException(stderr);
                 }
 
-                if (arguments == "query" && stdout.IsNullOrWhiteSpace())
-                {
-                    // we cannot get user settings
-                    throw new ProxyException("failed to query wininet settings");
+                if (arguments == "query") {
+                    if (stdout.IsNullOrWhiteSpace() || stdout.IsNullOrEmpty()) {
+                        // we cannot get user settings
+                        throw new ProxyException("failed to query wininet settings");
+                    }
+                    _queryStr = stdout;
                 }
-                queryStr = stdout;
+            }
+        }
+
+        private static void Save()
+        {
+            try {
+                using (StreamWriter sw = new StreamWriter(File.Open(_userWininetConfigFile, FileMode.Create))) {
+                    string jsonString = JsonConvert.SerializeObject(_userSettings, Formatting.Indented);
+                    sw.Write(jsonString);
+                    sw.Flush();
+                }
+            } catch (IOException e) {
+                Logging.LogUsefulException(e);
+            }
+        }
+
+        private static void Read()
+        {
+            try {
+                string configContent = File.ReadAllText(_userWininetConfigFile);
+                _userSettings = JsonConvert.DeserializeObject<SysproxyConfig>(configContent);
+            } catch (FileNotFoundException) {
+                _userSettings = new SysproxyConfig();
             }
         }
 
         private static void ParseQueryStr(string str)
         {
-            _userSettings = str.Split(new string[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
-            for (var i = 0; i < 4; i++)
-            {
-                // handle output from WinINET
-                if (_userSettings[i] == "(null)")
-                    _userSettings[i] = null;
-            }
+            string[] userSettingsArr = str.Split(new string[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
+            _userSettings.Flags = userSettingsArr[0];
+
+            // handle output from WinINET
+            if (userSettingsArr[1] == "(null)") _userSettings.ProxyServer = null;
+            else _userSettings.ProxyServer = userSettingsArr[1];
+            if (userSettingsArr[2] == "(null)") _userSettings.BypassList = null;
+            else _userSettings.BypassList = userSettingsArr[2];
+            if (userSettingsArr[3] == "(null)") _userSettings.PacUrl = null;
+            else _userSettings.PacUrl = userSettingsArr[3];
+
+            _userSettings.UserSettingsRecorded = true;
         }
     }
 }

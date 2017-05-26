@@ -4,40 +4,40 @@ Shadowsocks=Shadowsocks
 
 # Menu items
 
-Enable System Proxy=システムの代理を有効にする
+Enable System Proxy=システム プロキシを有効にする
 Mode=モード
 PAC=PAC
 Global=全般
-Servers=サーバ
-Edit Servers...=サーバーを編集する...
+Servers=サーバー
+Edit Servers...=サーバーの編集...
 Statistics Config...=統計情報の設定...
 Start on Boot=システムと同時に起動
-Forward Proxy...=代理を転送する...
-Allow Clients from LAN=LANからのクライアントを許可する
+Forward Proxy...=フォワードプロキシの設定...
+Allow Clients from LAN=LAN からのアクセスを許可
 Local PAC=ローカル PAC
 Online PAC=オンライン PAC
-Edit Local PAC File...=ローカル PAC ファイルを編集する...
-Update Local PAC from GFWList=GFWList から、ローカル PACを更新する
-Edit User Rule for GFWList...=利用者規則を編集する...
-Secure Local PAC=安全なローカル PAC
-Copy Local PAC URL=ローカルのPAC URLをコピー
-Share Server Config...=サーバーの設定を共有する...
-Scan QRCode from Screen...=画面からの QRコードをスキャン...
-Import URL from Clipboard...=クリップボードからの URLを貼り付け...
+Edit Local PAC File...=ローカル PAC ファイルの編集...
+Update Local PAC from GFWList=GFWList からローカル PAC を更新
+Edit User Rule for GFWList...=ユーザールールの編集...
+Secure Local PAC=ローカル PAC を保護
+Copy Local PAC URL=ローカル PAC URL をコピー
+Share Server Config...=サーバーの設定を共有...
+Scan QRCode from Screen...=画面から QR コードをスキャン...
+Import URL from Clipboard...=クリップボードから URL をインポート...
 Availability Statistics=可用性の統計
-Show Logs...=ログを表示する...
-Verbose Logging=詳細なログ
+Show Logs...=ログの表示...
+Verbose Logging=詳細なログを記録
 Updates...=更新...
-Check for Updates...=更新プログラムを確認しています...
-Check for Updates at Startup=起動と同時に更新プログラムを確認しています
-Check Pre-release Version=先行開発版の更新を確認しています...
-Edit Hotkeys...=ホットキーを編集する...
-About...=について...
+Check for Updates...=更新プログラムの確認...
+Check for Updates at Startup=起動時に更新プログラムを確認
+Check Pre-release Version=先行開発版も確認
+Edit Hotkeys...=ホットキーの編集...
+About...=Shadowsocks について...
 Help=ヘルプ
 Quit=終了
-Edit Servers=サーバを編集する
-Load Balance=バランス
-High Availability=高パフォーマンス
+Edit Servers=サーバーの編集
+Load Balance=負荷分散
+High Availability=高可用性
 Choose by statistics=統計で選ぶ
 
 # Config Form
@@ -45,42 +45,42 @@ Choose by statistics=統計で選ぶ
 &Add=新規 (&A)
 &Delete=削除 (&D)
 Dupli&cate=コピー (&C)
-Server=サーバ
+Server=サーバー
 Server Addr=サーバーアドレス
-Server Port=サーバポート
-Password=暗証番号
+Server Port=サーバーポート
+Password=パスワード
 Encryption=暗号化
-Proxy Port=代理ポート
-Remarks=短評する
+Proxy Port=プロキシポート
+Remarks=付記
 Timeout(Sec)=タイムアウト (秒)
-OK=はい
-Cancel=いいえ
-New server=新規サーバ
+OK=OK
+Cancel=キャンセル
+New server=新規サーバー
 Move &Up=上に移動 (&U)
 Move D&own=下に移動 (&O)
 
 # Proxy Form
 
-Edit Proxy=代理を編集する
-Use Proxy=代理を利用する
-Proxy Type=代理類型
-Proxy Addr=代理アドレス
-Proxy Port=代理ポート
+Edit Proxy=プロキシの編集
+Use Proxy=プロキシを利用する
+Proxy Type=プロキシの種類
+Proxy Addr=プロキシアドレス
+Proxy Port=プロキシポート
 
 # Log Form
 
 &File=ファイル (&F)
-&Open Location=この場所を開く (&O)
+&Open Location=ファイルの場所を開く (&O)
 E&xit=終了 (&X)
-&View=ビュー (&V)
-&Clean Logs=ログを削除する (&C)
-Change &Font=フォントを変更する (&F)
-&Wrap Text=文字改行 (&W)
-&Top Most=一番上 (&T)
-&Show Toolbar=ツールバーを表示する (&S)
+&View=表示 (&V)
+&Clean Logs=ログの削除 (&C)
+Change &Font=フォント (&F)
+&Wrap Text=右端で折り返す (&W)
+&Top Most=常に最前面に表示 (&T)
+&Show Toolbar=ツールバーの表示 (&S)
 Log Viewer=ログビューア
-Inbound=輸入
-Outbound=輸出
+Inbound=受信
+Outbound=送信
 
 # QRCode Form
 
@@ -88,16 +88,16 @@ QRCode and URL=QR コードと URL
 
 # PAC Url Form
 
-Edit Online PAC URL=オンライン PAC URLを編集する
-Edit Online PAC URL...=オンライン PAC URLを編集する...
+Edit Online PAC URL=オンライン PAC URL の編集
+Edit Online PAC URL...=オンライン PAC URL の編集...
 Please input PAC Url=PAC URLを入力して下さい
 
 # HotkeySettings Form
 
-Switch system proxy=代理を切換える
-Switch system proxy mode=代理モードを切換える
-Switch share over LAN=LAN経由でシェアを切換える
-Show Logs=ログを表示する
+Switch system proxy=システム プロキシの状態を切り替える
+Switch system proxy mode=プロキシモードを切り替える
+Switch share over LAN=LAN からのアクセスの許可を切り替える
+Show Logs=ログの表示
 Switch to prev server=前のサーバーに切り替える
 Switch to next server=次のサーバーに切り替える
 Reg All=全部登録する
@@ -105,38 +105,38 @@ Reg All=全部登録する
 # Messages
 
 Shadowsocks Error: {0}=Shadowsocks エラー: {0}
-Port already in use=既に使用中のポート
-Invalid server address=違法なサーバアドレス
-Illegal port number format=不法なポート番号形式
-Illegal timeout format=不法なタイムアウト形式
-Please add at least one server=少なくとも一つのサーバーを追加して下さい
-Server IP can not be blank=サーバ IP は空欄にできない
-Password can not be blank=暗証番号は空欄にできない
-Port out of range=ポートが範囲外
-Port can't be 8123=ポート8123できない
-Shadowsocks {0} Update Found=Shadowsocks {0} 更新プログラムを利用できます
-No update is available=お使いのソフトウェアは最新です
-Click here to update=プログラムの更新
-Shadowsocks is here=Shadowsocks 此処です
-You can turn on/off Shadowsocks in the context menu=コンテキストメニューにshadowsocksを有効化または無効化
-System Proxy Enabled=システム 代理を有効にする
-System Proxy Disabled=システム 代理を無効にする
-Failed to update PAC file =PAC の更新に失敗しました
-PAC updated=PAC の更新に正しくインストールされました
-No updates found. Please report to GFWList if you have problems with it.=お使いのソフトウェアは最新です。もし貴方は問題がある、GFWListに報告して下さい。
-No QRCode found. Try to zoom in or move it to the center of the screen.=QR コードを探し当てていません。ズームインまたはそれが画面の中心に移動して下さい。
-Shadowsocks is already running.=Shadowsocks 実行中。
-Find Shadowsocks icon in your notify tray.=shadowsocks通知トレイにアイコンを見つけて下さい。
-If you want to start multiple Shadowsocks, make a copy in another directory.=同時に起動したい場合は、別のディレクトリにコピーしてもいいと思ってます。
-Failed to decode QRCode=QR コードの復号化に失敗しました
-Failed to update registry=登錄の更新に失敗しました
-System Proxy On: =システム代理をオンにする：
+Port already in use=ポートは既に使用されています。
+Invalid server address=サーバーアドレスが無効です。
+Illegal port number format=ポート番号のフォーマットが無効です。
+Illegal timeout format=タイムアウト値のフォーマットが無効です。
+Please add at least one server=少なくとも一つのサーバーを指定して下さい。
+Server IP can not be blank=サーバー IP が指定されていません。
+Password can not be blank=パスワードが指定されていません。
+Port out of range=ポート番号は範囲外です。
+Port can't be 8123=8123 番以外のポート番号を指定して下さい。
+Shadowsocks {0} Update Found=Shadowsocks バージョン {0} は利用できます。
+No update is available=お使いのバージョンは最新です。
+Click here to update=クリックしてアップデートします。
+Shadowsocks is here=Shadowsocks はここです。
+You can turn on/off Shadowsocks in the context menu=コンテキストメニューを使って、Shadowsocks を有効または無効にすることができます。
+System Proxy Enabled=システム プロキシが有効です。
+System Proxy Disabled=システム プロキシが無効です。
+Failed to update PAC file =PAC の更新に失敗しました。
+PAC updated=PAC を更新しました。
+No updates found. Please report to GFWList if you have problems with it.=お使いのバージョンは最新です。問題がある場合は、GFWList に報告して下さい。
+No QRCode found. Try to zoom in or move it to the center of the screen.=QR コードが見つかりませんでした。コードを大きくするか、画面の中央に移動して下さい。
+Shadowsocks is already running.=Shadowsocks 実行中
+Find Shadowsocks icon in your notify tray.=通知領域には Shadowsocks のアイコンがあります。
+If you want to start multiple Shadowsocks, make a copy in another directory.=複数起動したい場合は、プログラムファイルを別のフォルダーにコピーしてから、もう一度実行して下さい。
+Failed to decode QRCode=QR コードの読み取りに失敗しました。
+Failed to update registry=レジストリの更新に失敗しました。
+System Proxy On: =システム プロキシが有効：
 Running: Port {0}=実行中：ポート {0}
-Unexpected error, shadowsocks will exit. Please report to=予想外のエラー、Shadowsocks を終了する。この場所を報告して下さい。
-Unsupported operating system, use Windows Vista at least.=サポートしていないのOS、Windows Vista 以降のOSを利用して下さい。
-Unsupported .NET Framework, please update to 4.6.2 or later.=サポートしていないの .NET Framework、4.6.2 以降のバンジョーを利用して下さい。
-Proxy request failed=代理要求が失敗した。
-Proxy handshake failed=代理の握手に失敗しました
-Register hotkey failed=ホットキーの登錄に失敗しました
+Unexpected error, shadowsocks will exit. Please report to=予想外のエラーが発生したため、Shadowsocks を終了します。詳しくは下記までお問い合わせ下さい：
+Unsupported operating system, use Windows Vista at least.=お使いの OS はサポートされていません。Windows Vista 以降の OS で実行して下さい。
+Unsupported .NET Framework, please update to 4.6.2 or later.=お使いの .NET Framework はサポートされていません。4.6.2 以降のバンジョーをインストールして下さい。
+Proxy request failed=プロキシ要求が失敗しました。
+Proxy handshake failed=プロキシ ハンドシェイクに失敗しました。
+Register hotkey failed=ホットキーの登錄に失敗しました。
 Cannot parse hotkey: {0}=ホットキーを解析できません: {0}
-Timeout is invalid, it should not exceed {0}=タイムアウトが無効であるか、それを超えてはならない {0}
+Timeout is invalid, it should not exceed {0}=タイムアウト値が無効です。{0} 以下の値を指定して下さい。

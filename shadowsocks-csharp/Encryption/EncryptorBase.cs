@@ -71,6 +71,8 @@
         public const int ATYP_DOMAIN = 0x03;
         public const int ATYP_IPv6 = 0x04;
 
+        public const int MD5_LEN = 16;
+
         protected EncryptorBase(string method, string password)
         {
             Method = method;
