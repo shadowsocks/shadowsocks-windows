@@ -14,6 +14,8 @@ namespace Shadowsocks.Encryption
         private static bool _initialized = false;
         private static readonly object _initLock = new object();
 
+        public static bool AES256GCMAvailable { get; private set; } = false;
+
         static Sodium()
         {
             string dllPath = Utils.GetTempPath(DLLNAME);
@@ -42,6 +44,9 @@ namespace Shadowsocks.Encryption
                     {
                         _initialized = true;
                     }
+
+                    AES256GCMAvailable = crypto_aead_aes256gcm_is_available() == 1;
+                    Logging.Debug($"sodium: AES256GCMAvailable is {AES256GCMAvailable}");
                 }
             }
         }
@@ -51,6 +56,9 @@ namespace Shadowsocks.Encryption
 
         [DllImport(DLLNAME, CallingConvention = CallingConvention.Cdecl)]
         private static extern int sodium_init();
+
+        [DllImport(DLLNAME, CallingConvention = CallingConvention.Cdecl)]
+        private static extern int crypto_aead_aes256gcm_is_available();
 
         #region AEAD
 
@@ -64,6 +72,14 @@ namespace Shadowsocks.Encryption
         [DllImport(DLLNAME, CallingConvention = CallingConvention.Cdecl)]
         public static extern int crypto_aead_chacha20poly1305_ietf_decrypt(byte[] m, ref ulong mlen_p,
             byte[] nsec, byte[] c, ulong clen, byte[] ad, ulong adlen, byte[] npub, byte[] k);
+
+        [DllImport(DLLNAME, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int crypto_aead_aes256gcm_encrypt(byte[] c, ref ulong clen_p, byte[] m, ulong mlen,
+            byte[] ad, ulong adlen, byte[] nsec, byte[] npub, byte[] k);
+
+        [DllImport(DLLNAME, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int crypto_aead_aes256gcm_decrypt(byte[] m, ref ulong mlen_p, byte[] nsec, byte[] c,
+            ulong clen, byte[] ad, ulong adlen, byte[] npub, byte[] k);
 
         #endregion
 
