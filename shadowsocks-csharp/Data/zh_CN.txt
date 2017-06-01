@@ -8,6 +8,7 @@ Enable System Proxy=启用系统代理
 Mode=系统代理模式
 PAC=PAC 模式
 Global=全局模式
+Privoxy Setting...=Privoxy设置
 Servers=服务器
 Edit Servers...=编辑服务器...
 Statistics Config...=统计配置...
@@ -66,6 +67,10 @@ Use Proxy=使用代理
 Proxy Type=代理类型
 Proxy Addr=代理地址
 Proxy Port=代理端口
+
+# Privoxy Form
+Custom listen port=自定义监听端口
+Privoxy Setting=Privoxy设置
 
 # Log Form
 

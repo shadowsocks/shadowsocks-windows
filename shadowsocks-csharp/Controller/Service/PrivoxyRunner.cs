@@ -50,7 +50,14 @@ namespace Shadowsocks.Controller
                     KillProcess(p);
                 }
                 string privoxyConfig = Resources.privoxy_conf;
-                _runningPort = GetFreePort();
+                if (configuration.privoxyConfig.enableCustomPort && configuration.privoxyConfig.listenPort > 0)
+                {
+                    _runningPort = configuration.privoxyConfig.listenPort;
+                }
+                else
+                {
+                    _runningPort = GetFreePort();
+                }
                 privoxyConfig = privoxyConfig.Replace("__SOCKS_PORT__", configuration.localPort.ToString());
                 privoxyConfig = privoxyConfig.Replace("__PRIVOXY_BIND_PORT__", _runningPort.ToString());
                 privoxyConfig = privoxyConfig.Replace("__PRIVOXY_BIND_IP__", configuration.shareOverLan ? "0.0.0.0" : "127.0.0.1");

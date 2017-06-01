@@ -225,6 +225,13 @@ namespace Shadowsocks.Controller
             SaveConfig(_config);
         }
 
+        public void SavePrivoxyConfig(bool enableCustomPort, int listenPort)
+        {
+            _config.privoxyConfig.enableCustomPort = enableCustomPort;
+            _config.privoxyConfig.listenPort = listenPort;
+            SaveConfig(_config);
+        }
+
         public void ToggleVerboseLogging(bool enabled)
         {
             _config.isVerboseLogging = enabled;

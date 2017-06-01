@@ -52,10 +52,12 @@ namespace Shadowsocks.View
         private MenuItem autoCheckUpdatesToggleItem;
         private MenuItem checkPreReleaseToggleItem;
         private MenuItem proxyItem;
+        private MenuItem privoxyItem;
         private MenuItem hotKeyItem;
         private MenuItem VerboseLoggingToggleItem;
         private ConfigForm configForm;
         private ProxyForm proxyForm;
+        private PrivoxyForm privoxyForm;
         private LogForm logForm;
         private HotkeySettingsForm hotkeySettingsForm;
         private string _urlToOpen;
@@ -261,7 +263,9 @@ namespace Shadowsocks.View
                 this.enableItem = CreateMenuItem("Enable System Proxy", new EventHandler(this.EnableItem_Click)),
                 this.modeItem = CreateMenuGroup("Mode", new MenuItem[] {
                     this.PACModeItem = CreateMenuItem("PAC", new EventHandler(this.PACModeItem_Click)),
-                    this.globalModeItem = CreateMenuItem("Global", new EventHandler(this.GlobalModeItem_Click))
+                    this.globalModeItem = CreateMenuItem("Global", new EventHandler(this.GlobalModeItem_Click)),
+                    new MenuItem("-"),
+                    this.privoxyItem = CreateMenuItem("Privoxy Setting...", new EventHandler(this.PrivoxyItem_Click))
                 }),
                 this.ServersItem = CreateMenuGroup("Servers", new MenuItem[] {
                     this.SeperatorItem = new MenuItem("-"),
@@ -485,6 +489,21 @@ namespace Shadowsocks.View
             }
         }
 
+        private void ShowPrivoxyForm()
+        {
+            if (privoxyForm != null)
+            {
+                privoxyForm.Activate();
+            }
+            else
+            {
+                privoxyForm = new PrivoxyForm(controller);
+                privoxyForm.Show();
+                privoxyForm.Activate();
+                privoxyForm.FormClosed += privoxyForm_FormClosed;
+            }
+        }
+
         private void ShowHotKeySettingsForm()
         {
             if (hotkeySettingsForm != null)
@@ -539,6 +558,13 @@ namespace Shadowsocks.View
         {
             proxyForm.Dispose();
             proxyForm = null;
+            Utils.ReleaseMemory(true);
+        }
+
+        void privoxyForm_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            privoxyForm.Dispose();
+            privoxyForm = null;
             Utils.ReleaseMemory(true);
         }
 
@@ -880,7 +906,12 @@ namespace Shadowsocks.View
             ShowProxyForm();
         }
 
-        private void hotKeyItem_Click(object sender, EventArgs e)
+        private void PrivoxyItem_Click(object sender, EventArgs e)
+        {
+            ShowPrivoxyForm();
+        }
+
+    private void hotKeyItem_Click(object sender, EventArgs e)
         {
             ShowHotKeySettingsForm();
         }
