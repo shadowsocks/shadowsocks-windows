@@ -349,6 +349,27 @@ namespace Shadowsocks.View
             _notifyIcon.ShowBalloonTip(timeout);
         }
 
+        string ShowSaveDialog(string name, string src)
+        {
+            SaveFileDialog saveFileDialog = new SaveFileDialog();
+            saveFileDialog.FileName = name;
+            saveFileDialog.Filter = "*.*|*.*";
+
+            if (saveFileDialog.ShowDialog() == DialogResult.OK && System.IO.File.Exists(src))
+            {
+                try
+                {
+                    System.IO.File.Copy(src, saveFileDialog.FileName, true);
+                    return saveFileDialog.FileName;
+                }
+                catch
+                {
+                    // ignored
+                }
+            }
+            return src;
+        }
+
         void controller_UpdatePACFromGFWListError(object sender, System.IO.ErrorEventArgs e)
         {
             ShowBalloonTip(I18N.GetString("Failed to update PAC file"), e.GetException().Message, ToolTipIcon.Error, 5000);
@@ -383,7 +404,8 @@ namespace Shadowsocks.View
                 updateChecker.NewVersionFound = false; /* Reset the flag */
                 if (System.IO.File.Exists(updateChecker.LatestVersionLocalName))
                 {
-                    string argument = "/select, \"" + updateChecker.LatestVersionLocalName + "\"";
+                    string dest = ShowSaveDialog(updateChecker.LatestVersionName, updateChecker.LatestVersionLocalName);
+                    string argument = "/select, \"" + dest + "\"";
                     System.Diagnostics.Process.Start("explorer.exe", argument);
                 }
             }
