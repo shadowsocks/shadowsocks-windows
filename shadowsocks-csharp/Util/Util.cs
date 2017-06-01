@@ -34,9 +34,17 @@ namespace Shadowsocks.Util
             {
                 try
                 {
-                    Directory.CreateDirectory(Path.Combine(Application.StartupPath, "ss_win_temp"));
-                    // don't use "/", it will fail when we call explorer /select xxx/ss_win_temp\xxx.log
-                    _tempPath = Path.Combine(Application.StartupPath, "ss_win_temp");
+                    bool nonportable = File.Exists(Path.Combine(Application.StartupPath, "use_system_temp_folder.txt"));
+                    if (nonportable)
+                    {
+                        _tempPath = Path.GetTempPath();
+                    }
+                    else
+                    {
+                        Directory.CreateDirectory(Path.Combine(Application.StartupPath, "ss_win_temp"));
+                        // don't use "/", it will fail when we call explorer /select xxx/ss_win_temp\xxx.log
+                        _tempPath = Path.Combine(Application.StartupPath, "ss_win_temp");
+                    }
                 }
                 catch (Exception e)
                 {
