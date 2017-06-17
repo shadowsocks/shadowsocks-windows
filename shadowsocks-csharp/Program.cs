@@ -51,6 +51,7 @@ namespace Shadowsocks
                 // handle non-UI exceptions
                 AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
                 Application.ApplicationExit += Application_ApplicationExit;
+                SystemEvents.SessionEnding += Application_ExitWhenSessionEnding;
                 SystemEvents.PowerModeChanged += SystemEvents_PowerModeChanged;
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
@@ -182,6 +183,20 @@ namespace Shadowsocks
                 MainController.Stop();
                 MainController = null;
             }
+        }
+
+        private static void Application_ExitWhenSessionEnding(object sender, EventArgs e)
+        {
+            // Force disable proxy before exiting 
+            // We can't use Sysproxy here since it won't work when session is ending.
+            RegistryKey registryKey = Registry.CurrentUser.OpenSubKey("Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings", true);
+            registryKey.SetValue("ProxyEnable", 0);
+
+            // Remove other event in case something goes wrong in the next boot later on
+            Application.ApplicationExit -= Application_ApplicationExit;
+            SystemEvents.PowerModeChanged -= SystemEvents_PowerModeChanged;
+            Application.ThreadException -= Application_ThreadException;
+            HotKeys.Destroy();
         }
     }
 }
