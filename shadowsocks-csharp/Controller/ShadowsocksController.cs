@@ -222,6 +222,20 @@ namespace Shadowsocks.Controller
             _config.proxy.proxyServer = proxy;
             _config.proxy.proxyPort = port;
             _config.proxy.proxyTimeout = timeout;
+            _config.proxy.useAuth = false;
+            SaveConfig(_config);
+        }
+
+        public void EnableProxyWithAuth(int type, string proxy, int port, int timeout, string user, string pwd)
+        {
+            _config.proxy.useProxy = true;
+            _config.proxy.proxyType = type;
+            _config.proxy.proxyServer = proxy;
+            _config.proxy.proxyPort = port;
+            _config.proxy.proxyTimeout = timeout;
+            _config.proxy.useAuth = true;
+            _config.proxy.authUser = user;
+            _config.proxy.authPwd = pwd;
             SaveConfig(_config);
         }
 

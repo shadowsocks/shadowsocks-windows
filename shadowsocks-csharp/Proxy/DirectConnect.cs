@@ -51,7 +51,7 @@ namespace Shadowsocks.Proxy
             // do nothing
         }
 
-        public void BeginConnectDest(EndPoint destEndPoint, AsyncCallback callback, object state)
+        public void BeginConnectDest(EndPoint destEndPoint, AsyncCallback callback, object state, NetworkCredential auth = null)
         {
             DestEndPoint = destEndPoint;
 

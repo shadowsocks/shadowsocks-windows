@@ -43,10 +43,17 @@
             this.ProxyTypeComboBox = new System.Windows.Forms.ComboBox();
             this.ProxyTimeoutTextBox = new System.Windows.Forms.TextBox();
             this.ProxyTimeoutLabel = new System.Windows.Forms.Label();
+            this.tableLayoutPanel5 = new System.Windows.Forms.TableLayoutPanel();
+            this.AuthUserLabel = new System.Windows.Forms.Label();
+            this.AuthUserTextBox = new System.Windows.Forms.TextBox();
+            this.AuthPwdLabel = new System.Windows.Forms.Label();
+            this.AuthPwdTextBox = new System.Windows.Forms.TextBox();
+            this.UseAuthCheckBox = new System.Windows.Forms.CheckBox();
             this.tableLayoutPanel1.SuspendLayout();
             this.tableLayoutPanel3.SuspendLayout();
             this.tableLayoutPanel2.SuspendLayout();
             this.tableLayoutPanel4.SuspendLayout();
+            this.tableLayoutPanel5.SuspendLayout();
             this.SuspendLayout();
             // 
             // tableLayoutPanel1
@@ -55,18 +62,22 @@
             this.tableLayoutPanel1.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.tableLayoutPanel1.ColumnCount = 1;
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
-            this.tableLayoutPanel1.Controls.Add(this.tableLayoutPanel3, 0, 3);
+            this.tableLayoutPanel1.Controls.Add(this.tableLayoutPanel3, 0, 5);
             this.tableLayoutPanel1.Controls.Add(this.UseProxyCheckBox, 0, 0);
             this.tableLayoutPanel1.Controls.Add(this.tableLayoutPanel2, 0, 2);
             this.tableLayoutPanel1.Controls.Add(this.tableLayoutPanel4, 0, 1);
+            this.tableLayoutPanel1.Controls.Add(this.tableLayoutPanel5, 0, 4);
+            this.tableLayoutPanel1.Controls.Add(this.UseAuthCheckBox, 0, 3);
             this.tableLayoutPanel1.Location = new System.Drawing.Point(15, 15);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
-            this.tableLayoutPanel1.RowCount = 4;
+            this.tableLayoutPanel1.RowCount = 6;
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(395, 123);
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(442, 178);
             this.tableLayoutPanel1.TabIndex = 0;
             // 
             // tableLayoutPanel3
@@ -80,7 +91,7 @@
             this.tableLayoutPanel3.Controls.Add(this.MyCancelButton, 1, 0);
             this.tableLayoutPanel3.Controls.Add(this.OKButton, 0, 0);
             this.tableLayoutPanel3.Dock = System.Windows.Forms.DockStyle.Right;
-            this.tableLayoutPanel3.Location = new System.Drawing.Point(236, 94);
+            this.tableLayoutPanel3.Location = new System.Drawing.Point(283, 149);
             this.tableLayoutPanel3.Margin = new System.Windows.Forms.Padding(3, 3, 0, 3);
             this.tableLayoutPanel3.Name = "tableLayoutPanel3";
             this.tableLayoutPanel3.RowCount = 1;
@@ -142,7 +153,7 @@
             this.tableLayoutPanel2.RowCount = 1;
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 27F));
-            this.tableLayoutPanel2.Size = new System.Drawing.Size(389, 27);
+            this.tableLayoutPanel2.Size = new System.Drawing.Size(424, 27);
             this.tableLayoutPanel2.TabIndex = 1;
             // 
             // ProxyAddrLabel
@@ -181,7 +192,7 @@
             this.ProxyPortTextBox.Location = new System.Drawing.Point(286, 3);
             this.ProxyPortTextBox.MaxLength = 10;
             this.ProxyPortTextBox.Name = "ProxyPortTextBox";
-            this.ProxyPortTextBox.Size = new System.Drawing.Size(100, 21);
+            this.ProxyPortTextBox.Size = new System.Drawing.Size(135, 21);
             this.ProxyPortTextBox.TabIndex = 3;
             this.ProxyPortTextBox.WordWrap = false;
             // 
@@ -201,7 +212,7 @@
             this.tableLayoutPanel4.Name = "tableLayoutPanel4";
             this.tableLayoutPanel4.RowCount = 1;
             this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel4.Size = new System.Drawing.Size(387, 30);
+            this.tableLayoutPanel4.Size = new System.Drawing.Size(436, 30);
             this.tableLayoutPanel4.TabIndex = 10;
             // 
             // ProxyTypeLabel
@@ -225,26 +236,99 @@
             this.ProxyTypeComboBox.Location = new System.Drawing.Point(74, 5);
             this.ProxyTypeComboBox.Margin = new System.Windows.Forms.Padding(3, 5, 3, 5);
             this.ProxyTypeComboBox.Name = "ProxyTypeComboBox";
-            this.ProxyTypeComboBox.Size = new System.Drawing.Size(121, 20);
+            this.ProxyTypeComboBox.Size = new System.Drawing.Size(135, 20);
             this.ProxyTypeComboBox.TabIndex = 2;
+            this.ProxyTypeComboBox.SelectedIndexChanged += new System.EventHandler(this.ProxyTypeComboBox_SelectedIndexChanged);
             // 
             // ProxyTimeoutTextBox
             // 
             this.ProxyTimeoutTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.ProxyTimeoutTextBox.Location = new System.Drawing.Point(284, 4);
+            this.ProxyTimeoutTextBox.Location = new System.Drawing.Point(298, 4);
             this.ProxyTimeoutTextBox.Name = "ProxyTimeoutTextBox";
-            this.ProxyTimeoutTextBox.Size = new System.Drawing.Size(100, 21);
+            this.ProxyTimeoutTextBox.Size = new System.Drawing.Size(135, 21);
             this.ProxyTimeoutTextBox.TabIndex = 3;
             // 
             // ProxyTimeoutLabel
             // 
             this.ProxyTimeoutLabel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             this.ProxyTimeoutLabel.AutoSize = true;
-            this.ProxyTimeoutLabel.Location = new System.Drawing.Point(201, 9);
+            this.ProxyTimeoutLabel.Location = new System.Drawing.Point(215, 9);
             this.ProxyTimeoutLabel.Name = "ProxyTimeoutLabel";
             this.ProxyTimeoutLabel.Size = new System.Drawing.Size(77, 12);
             this.ProxyTimeoutLabel.TabIndex = 4;
             this.ProxyTimeoutLabel.Text = "Timeout(Sec)";
+            // 
+            // tableLayoutPanel5
+            // 
+            this.tableLayoutPanel5.AutoSize = true;
+            this.tableLayoutPanel5.ColumnCount = 4;
+            this.tableLayoutPanel5.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tableLayoutPanel5.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tableLayoutPanel5.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tableLayoutPanel5.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tableLayoutPanel5.Controls.Add(this.AuthUserLabel, 0, 0);
+            this.tableLayoutPanel5.Controls.Add(this.AuthUserTextBox, 1, 0);
+            this.tableLayoutPanel5.Controls.Add(this.AuthPwdLabel, 2, 0);
+            this.tableLayoutPanel5.Controls.Add(this.AuthPwdTextBox, 3, 0);
+            this.tableLayoutPanel5.Location = new System.Drawing.Point(3, 116);
+            this.tableLayoutPanel5.Name = "tableLayoutPanel5";
+            this.tableLayoutPanel5.RowCount = 1;
+            this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 27F));
+            this.tableLayoutPanel5.Size = new System.Drawing.Size(406, 27);
+            this.tableLayoutPanel5.TabIndex = 1;
+            // 
+            // AuthUserLabel
+            // 
+            this.AuthUserLabel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.AuthUserLabel.AutoSize = true;
+            this.AuthUserLabel.Location = new System.Drawing.Point(3, 7);
+            this.AuthUserLabel.Name = "AuthUserLabel";
+            this.AuthUserLabel.Size = new System.Drawing.Size(59, 12);
+            this.AuthUserLabel.TabIndex = 0;
+            this.AuthUserLabel.Text = "Auth User";
+            // 
+            // AuthUserTextBox
+            // 
+            this.AuthUserTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.AuthUserTextBox.Location = new System.Drawing.Point(68, 3);
+            this.AuthUserTextBox.MaxLength = 512;
+            this.AuthUserTextBox.Name = "AuthUserTextBox";
+            this.AuthUserTextBox.Size = new System.Drawing.Size(135, 21);
+            this.AuthUserTextBox.TabIndex = 1;
+            this.AuthUserTextBox.WordWrap = false;
+            // 
+            // AuthPwdLabel
+            // 
+            this.AuthPwdLabel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.AuthPwdLabel.AutoSize = true;
+            this.AuthPwdLabel.Location = new System.Drawing.Point(209, 7);
+            this.AuthPwdLabel.Name = "AuthPwdLabel";
+            this.AuthPwdLabel.Size = new System.Drawing.Size(53, 12);
+            this.AuthPwdLabel.TabIndex = 2;
+            this.AuthPwdLabel.Text = "Auth Pwd";
+            // 
+            // AuthPwdTextBox
+            // 
+            this.AuthPwdTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.AuthPwdTextBox.Location = new System.Drawing.Point(268, 3);
+            this.AuthPwdTextBox.MaxLength = 512;
+            this.AuthPwdTextBox.Name = "AuthPwdTextBox";
+            this.AuthPwdTextBox.Size = new System.Drawing.Size(135, 21);
+            this.AuthPwdTextBox.TabIndex = 3;
+            this.AuthPwdTextBox.UseSystemPasswordChar = true;
+            this.AuthPwdTextBox.WordWrap = false;
+            // 
+            // UseAuthCheckBox
+            // 
+            this.UseAuthCheckBox.AutoSize = true;
+            this.UseAuthCheckBox.Location = new System.Drawing.Point(3, 94);
+            this.UseAuthCheckBox.Name = "UseAuthCheckBox";
+            this.UseAuthCheckBox.Size = new System.Drawing.Size(72, 16);
+            this.UseAuthCheckBox.TabIndex = 0;
+            this.UseAuthCheckBox.Text = "Use Auth";
+            this.UseAuthCheckBox.UseVisualStyleBackColor = true;
+            this.UseAuthCheckBox.CheckedChanged += new System.EventHandler(this.UseAuthCheckBox_CheckedChanged);
             // 
             // ProxyForm
             // 
@@ -254,7 +338,7 @@
             this.AutoSize = true;
             this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.CancelButton = this.MyCancelButton;
-            this.ClientSize = new System.Drawing.Size(441, 165);
+            this.ClientSize = new System.Drawing.Size(472, 211);
             this.Controls.Add(this.tableLayoutPanel1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.MaximizeBox = false;
@@ -271,6 +355,8 @@
             this.tableLayoutPanel2.PerformLayout();
             this.tableLayoutPanel4.ResumeLayout(false);
             this.tableLayoutPanel4.PerformLayout();
+            this.tableLayoutPanel5.ResumeLayout(false);
+            this.tableLayoutPanel5.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -293,5 +379,11 @@
         private System.Windows.Forms.ComboBox ProxyTypeComboBox;
         private System.Windows.Forms.TextBox ProxyTimeoutTextBox;
         private System.Windows.Forms.Label ProxyTimeoutLabel;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel5;
+        private System.Windows.Forms.Label AuthUserLabel;
+        private System.Windows.Forms.TextBox AuthUserTextBox;
+        private System.Windows.Forms.Label AuthPwdLabel;
+        private System.Windows.Forms.TextBox AuthPwdTextBox;
+        private System.Windows.Forms.CheckBox UseAuthCheckBox;
     }
 }

@@ -66,6 +66,9 @@ Use Proxy=プロキシを利用する
 Proxy Type=プロキシの種類
 Proxy Addr=プロキシアドレス
 Proxy Port=プロキシポート
+Use Auth=認証を利用する
+Auth User=認証ユーザ
+Auth Pwd=認証パスワード
 
 # Log Form
 
@@ -140,3 +143,5 @@ Proxy handshake failed=プロキシ ハンドシェイクに失敗しました�
 Register hotkey failed=ホットキーの登錄に失敗しました。
 Cannot parse hotkey: {0}=ホットキーを解析できません: {0}
 Timeout is invalid, it should not exceed {0}=タイムアウト値が無効です。{0} 以下の値を指定して下さい。
+Auth user can not be blank=認証ユーザが指定されていません。
+Auth pwd can not be blank=認証パスワードが指定されていません。
