@@ -59,13 +59,23 @@ namespace Shadowsocks.Controller
                         , HotkeyCallbacks.GetCallback("ServerMoveDownCallback") as HotKeys.HotKeyCallBackHandler);
                 }
 
+                int regCount = 0;
                 foreach (var v in _hotKeyDic)
                 {
                     if (!HotKeys.Regist(v.Key, v.Value))
                     {
+                        foreach (var k in _hotKeyDic)
+                        {
+                            if (regCount > 0)
+                            {
+                                HotKeys.UnRegist(k.Key);
+                                regCount--;
+                            }
+                        }
                         MessageBox.Show(I18N.GetString("Register hotkey failed"), I18N.GetString("Shadowsocks"));
                         return;
                     }
+                    regCount++;
                 }
             }
             catch (Exception e)
