@@ -63,7 +63,7 @@ namespace Shadowsocks.Controller
                 {
                     if (!HotKeys.Regist(v.Key, v.Value))
                     {
-                        MessageBox.Show(I18N.GetString("Register hotkey failed"), "Shadowsocks");
+                        MessageBox.Show(I18N.GetString("Register hotkey failed"), I18N.GetString("Shadowsocks"));
                         return;
                     }
                 }
