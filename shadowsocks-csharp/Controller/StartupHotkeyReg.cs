@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 using GlobalHotKey;
 using Shadowsocks.Controller.Hotkeys;
 using Shadowsocks.Model;
@@ -60,7 +61,11 @@ namespace Shadowsocks.Controller
 
                 foreach (var v in _hotKeyDic)
                 {
-                    HotKeys.Regist(v.Key, v.Value);
+                    if (!HotKeys.Regist(v.Key, v.Value))
+                    {
+                        MessageBox.Show(I18N.GetString("Register hotkey failed"), "Shadowsocks");
+                        return;
+                    }
                 }
             }
             catch (Exception e)
