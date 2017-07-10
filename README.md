@@ -18,6 +18,10 @@ Shadowsocks for Windows
 
 Download the [latest release].
 
+#### Requirements
+
+If you use Windows 7, you need Microsoft [.NET Framework 4.6.2](https://www.microsoft.com/en-US/download/details.aspx?id=53344) or higher. 
+
 #### Basic
 
 1. Find Shadowsocks icon in the notification tray
