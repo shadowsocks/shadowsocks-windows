@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using GlobalHotKey;
 using Shadowsocks.Controller.Hotkeys;
 using Shadowsocks.Model;
+using System.Reflection;
 
 namespace Shadowsocks.Controller
 {
@@ -23,40 +21,20 @@ namespace Shadowsocks.Controller
 
             try
             {
-                if (!_hotKeyConf.SwitchSystemProxy.IsNullOrEmpty())
+                MethodInfo[] fis = typeof(HotkeyCallbacks).GetMethods(BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly);
+                Type ht = _hotKeyConf.GetType();
+                string callbackName;
+                string fieldName;
+                for (int i = 0; i < fis.Length; i++)
                 {
-                    _hotKeyDic.Add(HotKeys.Str2HotKey(_hotKeyConf.SwitchSystemProxy)
-                        , HotkeyCallbacks.GetCallback("SwitchSystemProxyCallback") as HotKeys.HotKeyCallBackHandler);
-                }
+                    if (fis[i].Name.EndsWith("Callback"))
+                    {
+                        callbackName = fis[i].Name;
+                        fieldName = callbackName.Replace("Callback", "");
 
-                if (!_hotKeyConf.SwitchSystemProxyMode.IsNullOrEmpty())
-                {
-                    _hotKeyDic.Add(HotKeys.Str2HotKey(_hotKeyConf.SwitchSystemProxyMode)
-                        , HotkeyCallbacks.GetCallback("SwitchProxyModeCallback") as HotKeys.HotKeyCallBackHandler);
-                }
-
-                if (!_hotKeyConf.SwitchAllowLan.IsNullOrEmpty())
-                {
-                    _hotKeyDic.Add(HotKeys.Str2HotKey(_hotKeyConf.SwitchAllowLan)
-                        , HotkeyCallbacks.GetCallback("SwitchAllowLanCallback") as HotKeys.HotKeyCallBackHandler);
-                }
-
-                if (!_hotKeyConf.ShowLogs.IsNullOrEmpty())
-                {
-                    _hotKeyDic.Add(HotKeys.Str2HotKey(_hotKeyConf.ShowLogs)
-                        , HotkeyCallbacks.GetCallback("ShowLogsCallback") as HotKeys.HotKeyCallBackHandler);
-                }
-
-                if (!_hotKeyConf.ServerMoveUp.IsNullOrEmpty())
-                {
-                    _hotKeyDic.Add(HotKeys.Str2HotKey(_hotKeyConf.ServerMoveUp)
-                        , HotkeyCallbacks.GetCallback("ServerMoveUpCallback") as HotKeys.HotKeyCallBackHandler);
-                }
-
-                if (!_hotKeyConf.ServerMoveDown.IsNullOrEmpty())
-                {
-                    _hotKeyDic.Add(HotKeys.Str2HotKey(_hotKeyConf.ServerMoveDown)
-                        , HotkeyCallbacks.GetCallback("ServerMoveDownCallback") as HotKeys.HotKeyCallBackHandler);
+                        _hotKeyDic.Add(HotKeys.Str2HotKey(ht.GetField(fieldName).GetValue(_hotKeyConf) as string)
+                        , HotkeyCallbacks.GetCallback(callbackName) as HotKeys.HotKeyCallBackHandler);
+                    }
                 }
 
                 int regCount = 0;

@@ -53,7 +53,7 @@ namespace Shadowsocks.View
         private void LoadConfiguration(HotkeyConfig config)
         {
             SwitchSystemProxyTextBox.Text = config.SwitchSystemProxy;
-            SwitchProxyModeTextBox.Text = config.SwitchSystemProxyMode;
+            SwitchSystemProxyModeTextBox.Text = config.SwitchSystemProxyMode;
             SwitchAllowLanTextBox.Text = config.SwitchAllowLan;
             ShowLogsTextBox.Text = config.ShowLogs;
             ServerMoveUpTextBox.Text = config.ServerMoveUp;
@@ -65,7 +65,7 @@ namespace Shadowsocks.View
         {
             // I18N stuff
             SwitchSystemProxyLabel.Text = I18N.GetString("Switch system proxy");
-            SwitchProxyModeLabel.Text = I18N.GetString("Switch system proxy mode");
+            SwitchSystemProxyModeLabel.Text = I18N.GetString("Switch system proxy mode");
             SwitchAllowLanLabel.Text = I18N.GetString("Switch share over LAN");
             ShowLogsLabel.Text = I18N.GetString("Show Logs");
             ServerMoveUpLabel.Text = I18N.GetString("Switch to prev server");
@@ -239,7 +239,7 @@ namespace Shadowsocks.View
         private void SaveConfig()
         {
             _modifiedConfig.SwitchSystemProxy = SwitchSystemProxyTextBox.Text;
-            _modifiedConfig.SwitchSystemProxyMode = SwitchProxyModeTextBox.Text;
+            _modifiedConfig.SwitchSystemProxyMode = SwitchSystemProxyModeTextBox.Text;
             _modifiedConfig.SwitchAllowLan = SwitchAllowLanTextBox.Text;
             _modifiedConfig.ShowLogs = ShowLogsTextBox.Text;
             _modifiedConfig.ServerMoveUp = ServerMoveUpTextBox.Text;

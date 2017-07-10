@@ -34,12 +34,12 @@
             this.btnRegisterAll = new System.Windows.Forms.Button();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.SwitchSystemProxyLabel = new System.Windows.Forms.Label();
-            this.SwitchProxyModeLabel = new System.Windows.Forms.Label();
+            this.SwitchSystemProxyModeLabel = new System.Windows.Forms.Label();
             this.SwitchAllowLanLabel = new System.Windows.Forms.Label();
             this.ShowLogsLabel = new System.Windows.Forms.Label();
             this.ServerMoveUpLabel = new System.Windows.Forms.Label();
             this.SwitchSystemProxyTextBox = new System.Windows.Forms.TextBox();
-            this.SwitchProxyModeTextBox = new System.Windows.Forms.TextBox();
+            this.SwitchSystemProxyModeTextBox = new System.Windows.Forms.TextBox();
             this.SwitchAllowLanTextBox = new System.Windows.Forms.TextBox();
             this.ShowLogsTextBox = new System.Windows.Forms.TextBox();
             this.ServerMoveUpTextBox = new System.Windows.Forms.TextBox();
@@ -109,12 +109,12 @@
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 20F));
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 740F));
             this.tableLayoutPanel1.Controls.Add(this.SwitchSystemProxyLabel, 0, 0);
-            this.tableLayoutPanel1.Controls.Add(this.SwitchProxyModeLabel, 0, 1);
+            this.tableLayoutPanel1.Controls.Add(this.SwitchSystemProxyModeLabel, 0, 1);
             this.tableLayoutPanel1.Controls.Add(this.SwitchAllowLanLabel, 0, 2);
             this.tableLayoutPanel1.Controls.Add(this.ShowLogsLabel, 0, 3);
             this.tableLayoutPanel1.Controls.Add(this.ServerMoveUpLabel, 0, 4);
             this.tableLayoutPanel1.Controls.Add(this.SwitchSystemProxyTextBox, 1, 0);
-            this.tableLayoutPanel1.Controls.Add(this.SwitchProxyModeTextBox, 1, 1);
+            this.tableLayoutPanel1.Controls.Add(this.SwitchSystemProxyModeTextBox, 1, 1);
             this.tableLayoutPanel1.Controls.Add(this.SwitchAllowLanTextBox, 1, 2);
             this.tableLayoutPanel1.Controls.Add(this.ShowLogsTextBox, 1, 3);
             this.tableLayoutPanel1.Controls.Add(this.ServerMoveUpTextBox, 1, 4);
@@ -150,17 +150,17 @@
             this.SwitchSystemProxyLabel.Text = "Enable System Proxy";
             this.SwitchSystemProxyLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
-            // SwitchProxyModeLabel
+            // SwitchSystemProxyModeLabel
             // 
-            this.SwitchProxyModeLabel.AutoSize = true;
-            this.SwitchProxyModeLabel.Dock = System.Windows.Forms.DockStyle.Right;
-            this.SwitchProxyModeLabel.Location = new System.Drawing.Point(8, 29);
-            this.SwitchProxyModeLabel.Margin = new System.Windows.Forms.Padding(8, 0, 8, 0);
-            this.SwitchProxyModeLabel.Name = "SwitchProxyModeLabel";
-            this.SwitchProxyModeLabel.Size = new System.Drawing.Size(189, 29);
-            this.SwitchProxyModeLabel.TabIndex = 1;
-            this.SwitchProxyModeLabel.Text = "Switch System Proxy Mode";
-            this.SwitchProxyModeLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.SwitchSystemProxyModeLabel.AutoSize = true;
+            this.SwitchSystemProxyModeLabel.Dock = System.Windows.Forms.DockStyle.Right;
+            this.SwitchSystemProxyModeLabel.Location = new System.Drawing.Point(8, 29);
+            this.SwitchSystemProxyModeLabel.Margin = new System.Windows.Forms.Padding(8, 0, 8, 0);
+            this.SwitchSystemProxyModeLabel.Name = "SwitchSystemProxyModeLabel";
+            this.SwitchSystemProxyModeLabel.Size = new System.Drawing.Size(189, 29);
+            this.SwitchSystemProxyModeLabel.TabIndex = 1;
+            this.SwitchSystemProxyModeLabel.Text = "Switch System Proxy Mode";
+            this.SwitchSystemProxyModeLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // SwitchAllowLanLabel
             // 
@@ -211,18 +211,18 @@
             this.SwitchSystemProxyTextBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.HotkeyDown);
             this.SwitchSystemProxyTextBox.KeyUp += new System.Windows.Forms.KeyEventHandler(this.HotkeyUp);
             // 
-            // SwitchProxyModeTextBox
+            // SwitchSystemProxyModeTextBox
             // 
-            this.SwitchProxyModeTextBox.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.SwitchProxyModeTextBox.Location = new System.Drawing.Point(208, 32);
-            this.SwitchProxyModeTextBox.Margin = new System.Windows.Forms.Padding(3, 3, 16, 3);
-            this.SwitchProxyModeTextBox.Name = "SwitchProxyModeTextBox";
-            this.SwitchProxyModeTextBox.ReadOnly = true;
-            this.SwitchProxyModeTextBox.Size = new System.Drawing.Size(276, 25);
-            this.SwitchProxyModeTextBox.TabIndex = 8;
-            this.SwitchProxyModeTextBox.TextChanged += new System.EventHandler(this.TextBox_TextChanged);
-            this.SwitchProxyModeTextBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.HotkeyDown);
-            this.SwitchProxyModeTextBox.KeyUp += new System.Windows.Forms.KeyEventHandler(this.HotkeyUp);
+            this.SwitchSystemProxyModeTextBox.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.SwitchSystemProxyModeTextBox.Location = new System.Drawing.Point(208, 32);
+            this.SwitchSystemProxyModeTextBox.Margin = new System.Windows.Forms.Padding(3, 3, 16, 3);
+            this.SwitchSystemProxyModeTextBox.Name = "SwitchSystemProxyModeTextBox";
+            this.SwitchSystemProxyModeTextBox.ReadOnly = true;
+            this.SwitchSystemProxyModeTextBox.Size = new System.Drawing.Size(276, 25);
+            this.SwitchSystemProxyModeTextBox.TabIndex = 8;
+            this.SwitchSystemProxyModeTextBox.TextChanged += new System.EventHandler(this.TextBox_TextChanged);
+            this.SwitchSystemProxyModeTextBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.HotkeyDown);
+            this.SwitchSystemProxyModeTextBox.KeyUp += new System.Windows.Forms.KeyEventHandler(this.HotkeyUp);
             // 
             // SwitchAllowLanTextBox
             // 
@@ -292,7 +292,7 @@
             // 
             this.RegAllAtStartupCheckbox.AutoSize = true;
             this.RegAllAtStartupCheckbox.CheckAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            this.RegAllAtStartupCheckbox.Font = new System.Drawing.Font("微软雅黑", 21.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.RegAllAtStartupCheckbox.Font = new System.Drawing.Font("Microsoft YaHei", 21.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.RegAllAtStartupCheckbox.Location = new System.Drawing.Point(208, 183);
             this.RegAllAtStartupCheckbox.Margin = new System.Windows.Forms.Padding(3, 8, 0, 8);
             this.RegAllAtStartupCheckbox.Name = "RegAllAtStartupCheckbox";
@@ -319,7 +319,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.ClientSize = new System.Drawing.Size(491, 248);
             this.Controls.Add(this.tableLayoutPanel1);
-            this.Font = new System.Drawing.Font("微软雅黑", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.Font = new System.Drawing.Font("Microsoft YaHei", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.MaximizeBox = false;
             this.MinimizeBox = false;
@@ -336,7 +336,7 @@
 
         #endregion
         private System.Windows.Forms.Label SwitchSystemProxyLabel;
-        private System.Windows.Forms.Label SwitchProxyModeLabel;
+        private System.Windows.Forms.Label SwitchSystemProxyModeLabel;
         private System.Windows.Forms.Label SwitchAllowLanLabel;
         private System.Windows.Forms.Label ShowLogsLabel;
         private System.Windows.Forms.Label ServerMoveUpLabel;
@@ -345,7 +345,7 @@
         private System.Windows.Forms.Button btnCancel;
         private System.Windows.Forms.TextBox ShowLogsTextBox;
         private System.Windows.Forms.TextBox SwitchAllowLanTextBox;
-        private System.Windows.Forms.TextBox SwitchProxyModeTextBox;
+        private System.Windows.Forms.TextBox SwitchSystemProxyModeTextBox;
         private System.Windows.Forms.TextBox SwitchSystemProxyTextBox;
         private System.Windows.Forms.TextBox ServerMoveUpTextBox;
         private System.Windows.Forms.TextBox ServerMoveDownTextBox;
