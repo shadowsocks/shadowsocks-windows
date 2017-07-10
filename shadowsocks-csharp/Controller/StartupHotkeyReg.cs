@@ -23,17 +23,20 @@ namespace Shadowsocks.Controller
             {
                 MethodInfo[] fis = typeof(HotkeyCallbacks).GetMethods(BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly);
                 Type ht = _hotKeyConf.GetType();
-                string callbackName;
-                string fieldName;
                 for (int i = 0; i < fis.Length; i++)
                 {
                     if (fis[i].Name.EndsWith("Callback"))
                     {
-                        callbackName = fis[i].Name;
-                        fieldName = callbackName.Replace("Callback", "");
+                        var callbackName = fis[i].Name;
+                        var fieldName = callbackName.Replace("Callback", "");
 
-                        _hotKeyDic.Add(HotKeys.Str2HotKey(ht.GetField(fieldName).GetValue(_hotKeyConf) as string)
-                        , HotkeyCallbacks.GetCallback(callbackName) as HotKeys.HotKeyCallBackHandler);
+                        var hk = HotKeys.Str2HotKey(ht.GetField(fieldName).GetValue(_hotKeyConf) as string);
+                        var cb = HotkeyCallbacks.GetCallback(callbackName) as HotKeys.HotKeyCallBackHandler;
+
+                        if (hk != null && cb != null)
+                        {
+                            _hotKeyDic.Add(hk, cb);
+                        }
                     }
                 }
 
