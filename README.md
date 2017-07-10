@@ -18,6 +18,10 @@ Shadowsocks for Windows
 
 Download the [latest release].
 
+#### Requirements
+
+Microsoft [.NET Framework 4.6.2] or higher. 
+
 #### Basic
 
 1. Find Shadowsocks icon in the notification tray
@@ -104,5 +108,6 @@ GPLv3
 [GFWList]:        https://github.com/gfwlist/gfwlist
 [Servers]:        https://github.com/shadowsocks/shadowsocks/wiki/Ports-and-Clients#linux--server-side
 [中文说明]:       https://github.com/shadowsocks/shadowsocks-windows/wiki/Shadowsocks-Windows-%E4%BD%BF%E7%94%A8%E8%AF%B4%E6%98%8E
+[.NET Framework 4.6.2]: https://www.microsoft.com/en-US/download/details.aspx?id=53344
 [Visual Studio 2015]: https://www.visualstudio.com/downloads/
 [.NET Framework 4.6.2 Developer Pack]: https://www.microsoft.com/download/details.aspx?id=53321
