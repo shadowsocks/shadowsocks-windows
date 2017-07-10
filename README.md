@@ -93,6 +93,10 @@ if you want to deactivate all, please clear all textboxes.
 
 Please visit [Servers] for more information.
 
+#### Note
+
+The password of your server is saved in clear text in gui-config.json file in the same folder as shadowsocks.exe. 
+
 #### Develop
 
 [Visual Studio 2015] & [.NET Framework 4.6.2 Developer Pack] are required.
