@@ -48,7 +48,12 @@ namespace Shadowsocks.Util.SystemProxy
         public static void SetIEProxy(bool enable, bool global, string proxyServer, string pacURL)
         {
             Read();
-            if (_userSettings == null || !_userSettings.UserSettingsRecorded)
+            if (_userSettings == null)
+            {
+              _userSettings = new SysproxyConfig();
+            }
+
+            if (!_userSettings.UserSettingsRecorded)
             {
                 // record user settings
                 ExecSysproxy("query");
