@@ -75,7 +75,6 @@ namespace Shadowsocks.View
             btnCancel.Text = I18N.GetString("Cancel");
             btnRegisterAll.Text = I18N.GetString("Reg All");
             Text = I18N.GetString("Edit Hotkeys...");
-
         }
 
         /// <summary>

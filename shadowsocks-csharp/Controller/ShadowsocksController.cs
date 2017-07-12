@@ -88,6 +88,7 @@ namespace Shadowsocks.Controller
         public void Start()
         {
             Reload();
+            StartupHotkeyReg.RegHotkey();
         }
 
         protected void ReportError(Exception e)
