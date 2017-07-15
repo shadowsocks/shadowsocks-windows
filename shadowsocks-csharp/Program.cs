@@ -189,8 +189,12 @@ namespace Shadowsocks
         {
             // Force disable proxy before exiting 
             // We can't use Sysproxy here since it won't work when session is ending.
-            RegistryKey registryKey = Registry.CurrentUser.OpenSubKey("Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings", true);
-            registryKey.SetValue("ProxyEnable", 0);
+            var proxyRegistryKey 
+                = Registry.CurrentUser.OpenSubKey("Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings", true);
+
+            // Disable proxy by setting ProxyEnable to 0 and deleting PAC.
+            proxyRegistryKey?.SetValue("ProxyEnable", 0);
+            proxyRegistryKey?.DeleteValue("AutoConfigURL");
 
             // Remove other event in case something goes wrong in the next boot later on
             Application.ApplicationExit -= Application_ApplicationExit;
