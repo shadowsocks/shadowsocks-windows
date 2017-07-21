@@ -27,6 +27,7 @@ namespace Shadowsocks.Model
         public bool autoCheckUpdate;
         public bool checkPreRelease;
         public bool isVerboseLogging;
+        public bool autoSpeedTest;
         public LogViewerConfig logViewer;
         public ProxyConfig proxy;
         public HotkeyConfig hotkey;
@@ -86,6 +87,7 @@ namespace Shadowsocks.Model
                     isDefault = true,
                     localPort = 1080,
                     autoCheckUpdate = true,
+                    autoSpeedTest = true,
                     configs = new List<Server>()
                     {
                         GetDefaultServer()
