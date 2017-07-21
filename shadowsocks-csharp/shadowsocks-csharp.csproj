@@ -93,7 +93,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Controller\Service\Calculagraph.cs" />
+    <Compile Include="Controller\Service\SpeedTestTimer.cs" />
     <Compile Include="Controller\Service\SpeedTestWebClient.cs">
       <SubType>Component</SubType>
     </Compile>

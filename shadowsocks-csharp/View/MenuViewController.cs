@@ -101,8 +101,8 @@ namespace Shadowsocks.View
             }
             else if(config.autoCheckUpdate)
             {
-                _isStartupChecking = true;
-                updateChecker.CheckUpdate(config, 3000);
+                //_isStartupChecking = true;
+                //updateChecker.CheckUpdate(config, 3000);
             }
         }
 
