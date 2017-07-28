@@ -1,4 +1,4 @@
-Shadowsocks for Windows
+sstest Shadowsocks for Windows
 =======================
 
 [![Build Status]][Appveyor]
