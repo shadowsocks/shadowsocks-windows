@@ -43,6 +43,7 @@ namespace Shadowsocks.Proxy
 
         private const int Socks5PktMaxSize = 4 + 16 + 2;
         private readonly byte[] _receiveBuffer = new byte[Socks5PktMaxSize];
+        private static readonly byte[] Handshake = {5, 1, 0};
 
         public EndPoint LocalEndPoint => _remote.LocalEndPoint;
         public EndPoint ProxyEndPoint { get; private set; }
@@ -172,31 +173,32 @@ namespace Shadowsocks.Proxy
 
         private void ConnectCallback(IAsyncResult ar)
         {
-            var state = (Socks5State) ar.AsyncState;
-            try
+            ProceedCommunicationAndUseFakeResultIfExceptionRaised(ar, state =>
             {
                 _remote.EndConnect(ar);
 
                 _remote.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, true);
 
-                byte[] handshake = {5, 1, 0};
-                _remote.BeginSend(handshake, 0, handshake.Length, 0, Socks5HandshakeSendCallback, state);
-            }
-            catch (Exception ex)
-            {
-                state.ex = ex;
-                state.Callback?.Invoke(new FakeAsyncResult(ar, state));
-            }
+                _remote.BeginSend(Handshake, 0, Handshake.Length, 0, Socks5HandshakeSendCallback, state);
+            });
         }
 
         private void Socks5HandshakeSendCallback(IAsyncResult ar)
         {
-            var state = (Socks5State)ar.AsyncState;
-            try
+            ProceedCommunicationAndUseFakeResultIfExceptionRaised(ar, state =>
             {
                 _remote.EndSend(ar);
 
                 _remote.BeginReceive(_receiveBuffer, 0, 2, 0, Socks5HandshakeReceiveCallback, state);
+            });
+        }
+
+        private void ProceedCommunicationAndUseFakeResultIfExceptionRaised(IAsyncResult ar, Action<Socks5State> action)
+        {
+            var state = (Socks5State)ar.AsyncState;
+            try
+            {
+                action(state);
             }
             catch (Exception ex)
             {
@@ -235,18 +237,12 @@ namespace Shadowsocks.Proxy
 
         private void Socks5RequestSendCallback(IAsyncResult ar)
         {
-            var state = (Socks5State)ar.AsyncState;
-            try
+            ProceedCommunicationAndUseFakeResultIfExceptionRaised(ar, state =>
             {
                 _remote.EndSend(ar);
 
                 _remote.BeginReceive(_receiveBuffer, 0, 4, 0, Socks5ReplyReceiveCallback, state);
-            }
-            catch (Exception ex)
-            {
-                state.ex = ex;
-                state.Callback?.Invoke(new FakeAsyncResult(ar, state));
-            }
+            });
         }
 
         private void Socks5ReplyReceiveCallback(IAsyncResult ar)
