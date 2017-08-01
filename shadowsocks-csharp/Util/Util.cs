@@ -91,14 +91,16 @@ namespace Shadowsocks.Util
 
         public static string UnGzip(byte[] buf)
         {
-            MemoryStream sb = new MemoryStream();
-            using (GZipStream input = new GZipStream(new MemoryStream(buf),
-                CompressionMode.Decompress,
-                false))
+            using (MemoryStream sb = new MemoryStream())
             {
-                input.CopyTo(sb);
+                using (GZipStream input = new GZipStream(new MemoryStream(buf),
+                                                         CompressionMode.Decompress,
+                                                         false))
+                {
+                    input.CopyTo(sb);
+                }
+                return System.Text.Encoding.UTF8.GetString(sb.ToArray());
             }
-            return System.Text.Encoding.UTF8.GetString(sb.ToArray());
         }
 
         public static string FormatBandwidth(long n)

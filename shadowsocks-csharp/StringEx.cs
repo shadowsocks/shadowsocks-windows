@@ -32,7 +32,13 @@ static partial class StringEx
 
     public static bool IsWhiteSpace(this string value)
     {
-        return value.All(c => char.IsWhiteSpace(c));
+        foreach (var c in value)
+        {
+            if (char.IsWhiteSpace(c)) continue;
+
+            return false;
+        }
+        return true;
     }
 
 #if !PCL
