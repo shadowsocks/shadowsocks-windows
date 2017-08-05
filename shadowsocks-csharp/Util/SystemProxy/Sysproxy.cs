@@ -48,10 +48,6 @@ namespace Shadowsocks.Util.SystemProxy
         public static void SetIEProxy(bool enable, bool global, string proxyServer, string pacURL)
         {
             Read();
-            if (_userSettings == null)
-            {
-              _userSettings = new SysproxyConfig();
-            }
 
             if (!_userSettings.UserSettingsRecorded)
             {
@@ -143,10 +139,10 @@ namespace Shadowsocks.Util.SystemProxy
             try {
                 string configContent = File.ReadAllText(_userWininetConfigFile);
                 _userSettings = JsonConvert.DeserializeObject<SysproxyConfig>(configContent);
-            } catch (FileNotFoundException) {
-                _userSettings = new SysproxyConfig();
+            } catch(Exception) {
+               // Suppress all exceptions. finally block will initialize new user config settings.
             } finally {
-                _userSettings = (_userSettings == null) ? new SysproxyConfig() : _userSettings;
+                if (_userSettings == null) _userSettings = new SysproxyConfig();
             }
         }
 
