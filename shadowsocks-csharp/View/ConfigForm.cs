@@ -135,7 +135,7 @@ namespace Shadowsocks.View
         private void LoadConfiguration(Configuration configuration)
         {
             ServersListBox.Items.Clear();
-            foreach (Server server in _modifiedConfiguration.configs)
+            foreach (Server server in configuration.configs)
             {
                 ServersListBox.Items.Add(server.FriendlyName());
             }
