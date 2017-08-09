@@ -1,3 +1,7 @@
+4.0.5 2017-08-09
+- Fix crash when user-wininet.json fail to parse. (#1178)
+- Bug fixes and improvements.
+
 4.0.4 2017-06-01
 - Save user wininet settings as user-wininet.json
 - Improve performance of aes-256-gcm
