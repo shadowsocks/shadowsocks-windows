@@ -6,7 +6,7 @@ using System.Net.Sockets;
 using System.Reflection;
 using Shadowsocks.Model;
 
-namespace Shadowsocks.Proxy
+namespace Shadowsocks.Controller.Service
 {
     // https://github.com/shadowsocks/shadowsocks-org/wiki/Plugin
     public sealed class Sip003Plugin : IDisposable
@@ -41,7 +41,7 @@ namespace Shadowsocks.Proxy
             {
                 throw new ArgumentException("Value cannot be null or whitespace.", nameof(serverAddress));
             }
-            if ((uint)serverPort != serverPort)
+            if ((ushort)serverPort != serverPort)
             {
                 throw new ArgumentOutOfRangeException("serverPort");
             }

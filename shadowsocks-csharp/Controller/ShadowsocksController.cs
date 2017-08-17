@@ -15,6 +15,7 @@ using Shadowsocks.Model;
 using Shadowsocks.Properties;
 using Shadowsocks.Util;
 using System.Linq;
+using Shadowsocks.Controller.Service;
 using Shadowsocks.Proxy;
 
 namespace Shadowsocks.Controller
