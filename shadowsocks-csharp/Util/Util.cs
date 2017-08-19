@@ -255,5 +255,30 @@ namespace Shadowsocks.Util
             }
             return false;
         }
+
+        public static bool IsTcpFastOpenSupported()
+        {
+#if ZERO
+            const string subkey = @"SOFTWARE\Microsoft\Windows NT\CurrentVersion";
+            using (var ndpKey = OpenRegKey(subkey, false, RegistryHive.LocalMachine))
+            {
+                try
+                {
+                    if (ndpKey == null) return false;
+                    var currentVersion = double.Parse(ndpKey.GetValue("CurrentVersion").ToString());
+                    var currentBuild = int.Parse(ndpKey.GetValue("CurrentBuild").ToString());
+                    if (currentVersion >= 6.3 && currentBuild >= 14393) return true;
+                    else return false;
+                }
+                catch (Exception e)
+                {
+                    return false;
+                }
+            }
+#else
+            return Environment.OSVersion.Version.Major >= 10
+                && Environment.OSVersion.Version.Build >= 14393;
+#endif
+        }
     }
 }

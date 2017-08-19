@@ -109,16 +109,12 @@
     <Compile Include="Encryption\Stream\StreamMbedTLSEncryptor.cs" />
     <Compile Include="Encryption\Stream\StreamSodiumEncryptor.cs" />
     <Compile Include="Model\HotKeyConfig.cs" />
-    <Compile Include="Model\ProxyConfig.cs" />
     <Compile Include="Model\SysproxyConfig.cs" />
     <Compile Include="Properties\Settings.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
-    <Compile Include="Proxy\DirectConnect.cs" />
-    <Compile Include="Proxy\HttpProxy.cs" />
-    <Compile Include="Proxy\IProxy.cs" />
     <Compile Include="Controller\Service\AvailabilityStatistics.cs" />
     <Compile Include="Controller\Strategy\HighAvailabilityStrategy.cs" />
     <Compile Include="Controller\Strategy\StatisticsStrategy.cs" />
@@ -145,15 +141,12 @@
     <Compile Include="Controller\Strategy\BalancingStrategy.cs" />
     <Compile Include="Controller\Strategy\StrategyManager.cs" />
     <Compile Include="Controller\Strategy\IStrategy.cs" />
-    <Compile Include="Proxy\Socks5Proxy.cs" />
     <Compile Include="Settings.cs" />
     <Compile Include="StringEx.cs" />
     <Compile Include="Controller\System\Hotkeys\Hotkeys.cs" />
     <Compile Include="Util\ProcessManagement\Job.cs" />
     <Compile Include="Util\ProcessManagement\ThreadUtil.cs" />
-    <Compile Include="Util\Sockets\LineReader.cs" />
     <Compile Include="Util\Sockets\SocketUtil.cs" />
-    <Compile Include="Util\Sockets\WrappedSocket.cs" />
     <Compile Include="Util\SystemProxy\ProxyException.cs" />
     <Compile Include="Util\SystemProxy\Sysproxy.cs" />
     <Compile Include="Util\Util.cs" />
@@ -189,12 +182,6 @@
       <DependentUpon>LogForm.cs</DependentUpon>
     </Compile>
     <Compile Include="View\MenuViewController.cs" />
-    <Compile Include="View\ProxyForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="View\ProxyForm.Designer.cs">
-      <DependentUpon>ProxyForm.cs</DependentUpon>
-    </Compile>
     <Compile Include="View\QRCodeForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -227,9 +214,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="View\LogForm.resx">
       <DependentUpon>LogForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="View\ProxyForm.resx">
-      <DependentUpon>ProxyForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="View\QRCodeForm.resx">
       <DependentUpon>QRCodeForm.cs</DependentUpon>

@@ -12,7 +12,6 @@ Servers=伺服器
 Edit Servers...=編輯伺服器...
 Statistics Config...=統計設定檔...
 Start on Boot=開機啟動
-Forward Proxy...=正向 Proxy 設定...
 Allow Clients from LAN=允許來自區域網路的連線
 Local PAC=使用本機 PAC
 Online PAC=使用線上 PAC
@@ -58,14 +57,6 @@ Cancel=取消
 New server=新伺服器
 Move &Up=上移 (&U)
 Move D&own=下移 (&O)
-
-# Proxy Form
-
-Edit Proxy=編輯 Proxy
-Use Proxy=使用 Proxy
-Proxy Type=Proxy 類型
-Proxy Addr=Proxy 位址
-Proxy Port=Proxy 連接埠
 
 # Log Form
 
@@ -135,8 +126,6 @@ Running: Port {0}=正在執行：連接埠號碼 {0}
 Unexpected error, shadowsocks will exit. Please report to=非預期錯誤，Shadowsocks 將結束。請報告此錯誤至
 Unsupported operating system, use Windows Vista at least.=不支援的作業系統版本，最低需求為 Windows Vista。
 Unsupported .NET Framework, please update to 4.6.2 or later.=目前 .NET Framework 版本過低，最低需求為4.6.2。
-Proxy request failed=Proxy 要求失敗
-Proxy handshake failed=Proxy 交握失敗
 Register hotkey failed=註冊快速鍵失敗
 Cannot parse hotkey: {0}=剖析快速鍵失敗: {0}
 Timeout is invalid, it should not exceed {0}=逾時無效，不應超過 {0}
