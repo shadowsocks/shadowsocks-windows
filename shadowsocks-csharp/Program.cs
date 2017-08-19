@@ -16,6 +16,7 @@ namespace Shadowsocks
     {
         public static ShadowsocksController MainController { get; private set; }
         public static MenuViewController MenuController { get; private set; }
+        public static bool TFOSupported { get; private set; }
 
         /// <summary>
         /// 应用程序的主入口点。
@@ -41,6 +42,8 @@ namespace Shadowsocks
                     "http://dotnetsocial.cloudapp.net/GetDotnet?tfm=.NETFramework,Version=v4.6.2");
                 return;
             }
+
+            TFOSupported = Utils.IsTcpFastOpenSupported();
 
             Utils.ReleaseMemory(true);
             using (Mutex mutex = new Mutex(false, $"Global\\Shadowsocks_{Application.StartupPath.GetHashCode()}"))

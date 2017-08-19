@@ -12,7 +12,6 @@ Servers=サーバー
 Edit Servers...=サーバーの編集...
 Statistics Config...=統計情報の設定...
 Start on Boot=システムと同時に起動
-Forward Proxy...=フォワードプロキシの設定...
 Allow Clients from LAN=LAN からのアクセスを許可
 Local PAC=ローカル PAC
 Online PAC=オンライン PAC
@@ -58,14 +57,6 @@ Cancel=キャンセル
 New server=新規サーバー
 Move &Up=上に移動 (&U)
 Move D&own=下に移動 (&O)
-
-# Proxy Form
-
-Edit Proxy=プロキシの編集
-Use Proxy=プロキシを利用する
-Proxy Type=プロキシの種類
-Proxy Addr=プロキシアドレス
-Proxy Port=プロキシポート
 
 # Log Form
 
@@ -135,8 +126,6 @@ Running: Port {0}=実行中：ポート {0}
 Unexpected error, shadowsocks will exit. Please report to=予想外のエラーが発生したため、Shadowsocks を終了します。詳しくは下記までお問い合わせ下さい：
 Unsupported operating system, use Windows Vista at least.=お使いの OS はサポートされていません。Windows Vista 以降の OS で実行して下さい。
 Unsupported .NET Framework, please update to 4.6.2 or later.=お使いの .NET Framework はサポートされていません。4.6.2 以降のバンジョーをインストールして下さい。
-Proxy request failed=プロキシ要求が失敗しました。
-Proxy handshake failed=プロキシ ハンドシェイクに失敗しました。
 Register hotkey failed=ホットキーの登錄に失敗しました。
 Cannot parse hotkey: {0}=ホットキーを解析できません: {0}
 Timeout is invalid, it should not exceed {0}=タイムアウト値が無効です。{0} 以下の値を指定して下さい。

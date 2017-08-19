@@ -12,7 +12,6 @@ Servers=服务器
 Edit Servers...=编辑服务器...
 Statistics Config...=统计配置...
 Start on Boot=开机启动
-Forward Proxy...=正向代理设置...
 Allow Clients from LAN=允许来自局域网的连接
 Local PAC=使用本地 PAC
 Online PAC=使用在线 PAC
@@ -58,14 +57,6 @@ Cancel=取消
 New server=未配置的服务器
 Move &Up=上移(&U)
 Move D&own=下移(&O)
-
-# Proxy Form
-
-Edit Proxy=代理设置
-Use Proxy=使用代理
-Proxy Type=代理类型
-Proxy Addr=代理地址
-Proxy Port=代理端口
 
 # Log Form
 
@@ -135,8 +126,6 @@ Running: Port {0}=正在运行：端口 {0}
 Unexpected error, shadowsocks will exit. Please report to=非预期错误，Shadowsocks将退出。请提交此错误到
 Unsupported operating system, use Windows Vista at least.=不支持的操作系统版本，最低需求为Windows Vista。
 Unsupported .NET Framework, please update to 4.6.2 or later.=当前 .NET Framework 版本过低，请升级至4.6.2或更新版本。
-Proxy request failed=代理请求失败
-Proxy handshake failed=代理握手失败
 Register hotkey failed=注册热键失败
 Cannot parse hotkey: {0}=解析热键失败: {0}
 Timeout is invalid, it should not exceed {0}=超时无效，不应超过 {0}
