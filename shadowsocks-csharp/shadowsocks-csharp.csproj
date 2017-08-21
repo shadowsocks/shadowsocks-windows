@@ -145,6 +145,7 @@
     <Compile Include="Controller\Strategy\BalancingStrategy.cs" />
     <Compile Include="Controller\Strategy\StrategyManager.cs" />
     <Compile Include="Controller\Strategy\IStrategy.cs" />
+    <Compile Include="Controller\Service\Sip003Plugin.cs" />
     <Compile Include="Proxy\Socks5Proxy.cs" />
     <Compile Include="Settings.cs" />
     <Compile Include="StringEx.cs" />
