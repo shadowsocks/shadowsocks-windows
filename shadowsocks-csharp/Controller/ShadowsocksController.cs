@@ -158,10 +158,18 @@ namespace Shadowsocks.Controller
                 return null;
             }
 
-            if (plugin.StartIfNeeded())
+            try
             {
-                Logging.Info(
-                    $"Started SIP003 plugin for {server.Identifier()} on {plugin.LocalEndPoint} - PID: {plugin.ProcessId}");
+                if (plugin.StartIfNeeded())
+                {
+                    Logging.Info(
+                        $"Started SIP003 plugin for {server.Identifier()} on {plugin.LocalEndPoint} - PID: {plugin.ProcessId}");
+                }
+            }
+            catch (Exception ex)
+            {
+                Logging.Error("Failed to start SIP003 plugin: " + ex.Message);
+                throw;
             }
 
             return plugin.LocalEndPoint;
