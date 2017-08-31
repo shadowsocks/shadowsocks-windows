@@ -14,6 +14,18 @@ namespace Shadowsocks.Encryption
 
         static EncryptorFactory()
         {
+            var AEADMbedTLSEncryptorSupportedCiphers = AEADMbedTLSEncryptor.SupportedCiphers();
+            var AEADSodiumEncryptorSupportedCiphers = AEADSodiumEncryptor.SupportedCiphers();
+            if (Sodium.AES256GCMAvailable)
+            {
+                // prefer to aes-256-gcm in libsodium
+                AEADMbedTLSEncryptorSupportedCiphers.Remove("aes-256-gcm");
+            }
+            else
+            {
+                AEADSodiumEncryptorSupportedCiphers.Remove("aes-256-gcm");
+            }
+
             foreach (string method in StreamMbedTLSEncryptor.SupportedCiphers())
             {
                 _registeredEncryptors.Add(method, typeof(StreamMbedTLSEncryptor));
@@ -22,11 +34,11 @@ namespace Shadowsocks.Encryption
             {
                 _registeredEncryptors.Add(method, typeof(StreamSodiumEncryptor));
             }
-            foreach (string method in AEADMbedTLSEncryptor.SupportedCiphers())
+            foreach (string method in AEADMbedTLSEncryptorSupportedCiphers)
             {
                 _registeredEncryptors.Add(method, typeof(AEADMbedTLSEncryptor));
             }
-            foreach (string method in AEADSodiumEncryptor.SupportedCiphers())
+            foreach (string method in AEADSodiumEncryptorSupportedCiphers)
             {
                 _registeredEncryptors.Add(method, typeof(AEADSodiumEncryptor));
             }

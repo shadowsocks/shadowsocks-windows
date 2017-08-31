@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
-using Cyotek.Collections.Generic;
+using Shadowsocks.Encryption.CircularBuffer;
 using Shadowsocks.Controller;
 
 namespace Shadowsocks.Encryption.Stream
@@ -14,8 +14,8 @@ namespace Shadowsocks.Encryption.Stream
         protected static byte[] _udpTmpBuf = new byte[65536];
 
         // every connection should create its own buffer
-        private CircularBuffer<byte> _encCircularBuffer = new CircularBuffer<byte>(TCPHandler.BufferSize * 2, false);
-        private CircularBuffer<byte> _decCircularBuffer = new CircularBuffer<byte>(TCPHandler.BufferSize * 2, false);
+        private ByteCircularBuffer _encCircularBuffer = new ByteCircularBuffer(TCPHandler.BufferSize * 2);
+        private ByteCircularBuffer _decCircularBuffer = new ByteCircularBuffer(TCPHandler.BufferSize * 2);
 
         protected Dictionary<string, EncryptorInfo> ciphers;
 
@@ -143,7 +143,8 @@ namespace Shadowsocks.Encryption.Stream
             }
             byte[] cipher = _decCircularBuffer.ToArray();
             cipherUpdate(false, cipher.Length, cipher, outbuf);
-            _decCircularBuffer.Clear();
+            // move pointer only
+            _decCircularBuffer.Skip(_decCircularBuffer.Size);
             outlength = cipher.Length;
             // done the decryption
         }

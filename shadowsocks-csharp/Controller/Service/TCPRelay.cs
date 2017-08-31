@@ -570,7 +570,15 @@ namespace Shadowsocks.Controller
                 // Setting up proxy
                 IProxy remote;
                 EndPoint proxyEP = null;
-                if (_config.proxy.useProxy)
+                EndPoint serverEP = SocketUtil.GetEndPoint(_server.server, _server.server_port);
+                EndPoint pluginEP = _controller.GetPluginLocalEndPointIfConfigured(_server);
+
+                if (pluginEP != null)
+                {
+                    serverEP = pluginEP;
+                    remote = new DirectConnect();
+                }
+                else if (_config.proxy.useProxy)
                 {
                     switch (_config.proxy.proxyType)
                     {
@@ -607,7 +615,7 @@ namespace Shadowsocks.Controller
                 proxyTimer.Enabled = true;
 
                 proxyTimer.Session = session;
-                proxyTimer.DestEndPoint = SocketUtil.GetEndPoint(_server.server, _server.server_port);
+                proxyTimer.DestEndPoint = serverEP;
                 proxyTimer.Server = _server;
 
                 _proxyConnected = false;

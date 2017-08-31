@@ -89,7 +89,10 @@ namespace Shadowsocks.Model
                     configs = new List<Server>()
                     {
                         GetDefaultServer()
-                    }
+                    },
+                    logViewer = new LogViewerConfig(),
+                    proxy = new ProxyConfig(),
+                    hotkey = new HotkeyConfig()
                 };
             }
         }
