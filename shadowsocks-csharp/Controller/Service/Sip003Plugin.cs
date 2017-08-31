@@ -5,6 +5,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Reflection;
 using Shadowsocks.Model;
+using Shadowsocks.Util.ProcessManagement;
 
 namespace Shadowsocks.Controller.Service
 {
@@ -15,6 +16,7 @@ namespace Shadowsocks.Controller.Service
         public int ProcessId => _started ? _pluginProcess.Id : 0;
 
         private readonly object _startProcessLock = new object();
+        private readonly Job _pluginJob;
         private readonly Process _pluginProcess;
         private bool _started;
         private bool _disposed;
@@ -66,6 +68,8 @@ namespace Shadowsocks.Controller.Service
                     }
                 }
             };
+
+            _pluginJob = new Job();
         }
 
         public bool StartIfNeeded()
@@ -88,6 +92,7 @@ namespace Shadowsocks.Controller.Service
                 _pluginProcess.StartInfo.Environment["SS_LOCAL_HOST"] = LocalEndPoint.Address.ToString();
                 _pluginProcess.StartInfo.Environment["SS_LOCAL_PORT"] = LocalEndPoint.Port.ToString();
                 _pluginProcess.Start();
+                _pluginJob.AddProcess(_pluginProcess.Handle);
                 _started = true;
             }
 
@@ -124,6 +129,7 @@ namespace Shadowsocks.Controller.Service
                 try
                 {
                     _pluginProcess.Dispose();
+                    _pluginJob.Dispose();
                 }
                 catch (Exception) { }
 
