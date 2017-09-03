@@ -42,7 +42,10 @@ namespace Shadowsocks.Util.Sockets
             arg.Completed += OnTcpConnectCompleted;
             arg.UserToken = new TcpUserToken(callback, state);
 
-            Socket.ConnectAsync(SocketType.Stream, ProtocolType.Tcp, arg);
+            if(!Socket.ConnectAsync(SocketType.Stream, ProtocolType.Tcp, arg))
+            {
+                OnTcpConnectCompleted(this, arg);
+            }
         }
 
         private class FakeAsyncResult : IAsyncResult
