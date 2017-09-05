@@ -68,6 +68,7 @@ Use Proxy=使用 Proxy
 Proxy Type=Proxy 類型
 Proxy Addr=Proxy 位址
 Proxy Port=Proxy 連接埠
+If server has a plugin, proxy will not be used=若伺服器含有插件，Proxy 將不被使用
 
 # Log Form
 

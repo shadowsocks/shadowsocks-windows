@@ -68,6 +68,7 @@ Use Proxy=プロキシを利用する
 Proxy Type=プロキシの種類
 Proxy Addr=プロキシアドレス
 Proxy Port=プロキシポート
+If server has a plugin, proxy will not be used=サーバーにプラグインがある場合、プロキシは利用されません
 
 # Log Form
 

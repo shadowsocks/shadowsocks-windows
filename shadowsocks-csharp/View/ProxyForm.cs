@@ -36,6 +36,7 @@ namespace Shadowsocks.View
             ProxyAddrLabel.Text = I18N.GetString("Proxy Addr");
             ProxyPortLabel.Text = I18N.GetString("Proxy Port");
             ProxyTimeoutLabel.Text = I18N.GetString("Timeout(Sec)");
+            ProxyNotificationLabel.Text = I18N.GetString("If server has a plugin, proxy will not be used");
             OKButton.Text = I18N.GetString("OK");
             MyCancelButton.Text = I18N.GetString("Cancel");
             this.Text = I18N.GetString("Edit Proxy");
