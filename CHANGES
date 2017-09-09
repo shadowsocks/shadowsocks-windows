@@ -1,3 +1,7 @@
+4.0.6 2017-09-09
+- SIP002 support
+- SIP003 support
+
 4.0.5 2017-08-09
 - Fix crash when user-wininet.json fail to parse. (#1178)
 - Bug fixes and improvements.
