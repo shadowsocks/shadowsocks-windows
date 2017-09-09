@@ -72,20 +72,35 @@ namespace Shadowsocks.Model
 
         public static List<Server> GetServers(string ssURL)
         {
+            int prefixLength = "ss://".Length;
             var serverUrls = ssURL.Split('\r', '\n');
 
             List<Server> servers = new List<Server>();
             foreach (string serverUrl in serverUrls)
             {
-                if (string.IsNullOrWhiteSpace(serverUrl))
+                string _serverUrl = serverUrl.Trim();
+
+                if (!_serverUrl.BeginWith("ss://", StringComparison.InvariantCultureIgnoreCase))
                 {
                     continue;
                 }
 
+                // Decode the Base64 part of Uri
+                int indexOfHashOrSlash = _serverUrl.IndexOfAny(new[] { '@', '/', '#' }, 
+                                                               prefixLength, _serverUrl.Length - prefixLength);
+                string webSafeBase64Str = indexOfHashOrSlash == -1 ?
+                    _serverUrl.Substring(prefixLength) :
+                    _serverUrl.Substring(prefixLength, indexOfHashOrSlash - prefixLength);
+
+                string base64Str = webSafeBase64Str.Replace('-', '+').Replace('_', '/');
+                string base64 = base64Str.PadRight(base64Str.Length + (4 - base64Str.Length % 4) % 4, '=');
+                string decodedBase64 = Encoding.UTF8.GetString(Convert.FromBase64String(base64));
+                string decodedServerUrl = serverUrl.Replace(webSafeBase64Str, decodedBase64);
+
                 Uri parsedUrl;
                 try
                 {
-                    parsedUrl = new Uri(serverUrl);
+                    parsedUrl = new Uri(decodedServerUrl);
                 }
                 catch (UriFormatException)
                 {
@@ -97,49 +112,9 @@ namespace Shadowsocks.Model
                     remarks = parsedUrl.GetComponents(UriComponents.Fragment, UriFormat.Unescaped)
                 };
 
-                string possiblyUnpaddedBase64 = parsedUrl.GetComponents(UriComponents.UserInfo, UriFormat.Unescaped);
-                bool isOldFormatUrl = possiblyUnpaddedBase64.Length == 0;
-                if (isOldFormatUrl)
-                {
-                    int prefixLength = "ss://".Length;
-                    int indexOfHashOrSlash = serverUrl.LastIndexOfAny(
-                        new[] { '/', '#' },
-                        serverUrl.Length - 1,
-                        serverUrl.Length - prefixLength);
-
-                    int substringLength = serverUrl.Length - prefixLength;
-                    if (indexOfHashOrSlash >= 0)
-                    {
-                        substringLength = indexOfHashOrSlash - prefixLength;
-                    }
-
-                    possiblyUnpaddedBase64 = serverUrl.Substring(prefixLength, substringLength).TrimEnd('/');
-                }
-                else
-                {
-                    // Web-safe base64 to normal base64
-                    possiblyUnpaddedBase64 = possiblyUnpaddedBase64.Replace('-', '+').Replace('_', '/');
-                }
-
-                string base64 = possiblyUnpaddedBase64.PadRight(
-                    possiblyUnpaddedBase64.Length + (4 - possiblyUnpaddedBase64.Length % 4) % 4,
-                    '=');
-
-                string innerUserInfoOrUrl = Encoding.UTF8.GetString(Convert.FromBase64String(base64));
-                string userInfo;
-                if (isOldFormatUrl)
-                {
-                    Uri innerUrl = new Uri("inner://" + innerUserInfoOrUrl);
-                    userInfo = innerUrl.GetComponents(UriComponents.UserInfo, UriFormat.Unescaped);
-                    tmp.server = innerUrl.GetComponents(UriComponents.Host, UriFormat.Unescaped);
-                    tmp.server_port = innerUrl.Port;
-                }
-                else
-                {
-                    userInfo = innerUserInfoOrUrl;
-                    tmp.server = parsedUrl.GetComponents(UriComponents.Host, UriFormat.Unescaped);
-                    tmp.server_port = parsedUrl.Port;
-                }
+                string userInfo = parsedUrl.GetComponents(UriComponents.UserInfo, UriFormat.Unescaped);
+                tmp.server = parsedUrl.GetComponents(UriComponents.Host, UriFormat.Unescaped);
+                tmp.server_port = parsedUrl.Port;
 
                 string[] userInfoParts = userInfo.Split(new[] { ':' }, 2);
                 if (userInfoParts.Length != 2)
