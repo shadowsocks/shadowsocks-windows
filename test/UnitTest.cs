@@ -27,12 +27,13 @@ namespace test
             Assert.IsTrue(UpdateChecker.Asset.CompareVersion("1.3.2", "1.3.1") > 0);
         }
 
-        [ TestMethod ]
-        public void TestHotKey2Str() {
-            Assert.AreEqual( "Ctrl+A", HotKeys.HotKey2Str( Key.A, ModifierKeys.Control ) );
-            Assert.AreEqual( "Ctrl+Alt+D2", HotKeys.HotKey2Str( Key.D2, (ModifierKeys.Alt | ModifierKeys.Control) ) );
-            Assert.AreEqual("Ctrl+Alt+Shift+NumPad7", HotKeys.HotKey2Str(Key.NumPad7, (ModifierKeys.Alt|ModifierKeys.Control|ModifierKeys.Shift)));
-            Assert.AreEqual( "Ctrl+Alt+Shift+F6", HotKeys.HotKey2Str( Key.F6, (ModifierKeys.Alt|ModifierKeys.Control|ModifierKeys.Shift)));
+        [TestMethod]
+        public void TestHotKey2Str()
+        {
+            Assert.AreEqual("Ctrl+A", HotKeys.HotKey2Str(Key.A, ModifierKeys.Control));
+            Assert.AreEqual("Ctrl+Alt+D2", HotKeys.HotKey2Str(Key.D2, (ModifierKeys.Alt | ModifierKeys.Control)));
+            Assert.AreEqual("Ctrl+Alt+Shift+NumPad7", HotKeys.HotKey2Str(Key.NumPad7, (ModifierKeys.Alt | ModifierKeys.Control | ModifierKeys.Shift)));
+            Assert.AreEqual("Ctrl+Alt+Shift+F6", HotKeys.HotKey2Str(Key.F6, (ModifierKeys.Alt | ModifierKeys.Control | ModifierKeys.Shift)));
             Assert.AreNotEqual("Ctrl+Shift+Alt+F6", HotKeys.HotKey2Str(Key.F6, (ModifierKeys.Alt | ModifierKeys.Control | ModifierKeys.Shift)));
         }
 
@@ -42,7 +43,7 @@ namespace test
             Assert.IsTrue(HotKeys.Str2HotKey("Ctrl+A").Equals(new HotKey(Key.A, ModifierKeys.Control)));
             Assert.IsTrue(HotKeys.Str2HotKey("Ctrl+Alt+A").Equals(new HotKey(Key.A, (ModifierKeys.Control | ModifierKeys.Alt))));
             Assert.IsTrue(HotKeys.Str2HotKey("Ctrl+Shift+A").Equals(new HotKey(Key.A, (ModifierKeys.Control | ModifierKeys.Shift))));
-            Assert.IsTrue(HotKeys.Str2HotKey("Ctrl+Alt+Shift+A").Equals(new HotKey(Key.A, (ModifierKeys.Control | ModifierKeys.Alt| ModifierKeys.Shift))));
+            Assert.IsTrue(HotKeys.Str2HotKey("Ctrl+Alt+Shift+A").Equals(new HotKey(Key.A, (ModifierKeys.Control | ModifierKeys.Alt | ModifierKeys.Shift))));
             HotKey testKey0 = HotKeys.Str2HotKey("Ctrl+Alt+Shift+A");
             Assert.IsTrue(testKey0 != null && testKey0.Equals(new HotKey(Key.A, (ModifierKeys.Control | ModifierKeys.Alt | ModifierKeys.Shift))));
             HotKey testKey1 = HotKeys.Str2HotKey("Ctrl+Alt+Shift+F2");
@@ -238,6 +239,15 @@ namespace test
             };
             var serverCanonUrl = "ss://YmYtY2ZiOnRlc3RAMTkyLjE2OC4xMDAuMTo4ODg4";
 
+            var server2 = new Server
+            {
+                server = "192.168.1.1",
+                server_port = 8388,
+                password = "test",
+                method = "bf-cfb"
+            };
+            var server2CanonUrl = "ss://YmYtY2ZiOnRlc3RAMTkyLjE2OC4xLjE6ODM4OA==";
+
             var serverWithRemark = new Server
             {
                 server = server.server,
@@ -247,6 +257,16 @@ namespace test
                 remarks = "example-server"
             };
             var serverWithRemarkCanonUrl = "ss://YmYtY2ZiOnRlc3RAMTkyLjE2OC4xMDAuMTo4ODg4#example-server";
+
+            var server2WithRemark = new Server
+            {
+                server = server2.server,
+                server_port = server2.server_port,
+                password = server2.password,
+                method = server2.method,
+                remarks = "example-server"
+            };
+            var server2WithRemarkCanonUrl = "ss://YmYtY2ZiOnRlc3RAMTkyLjE2OC4xLjE6ODM4OA==#example-server";
 
             var serverWithPlugin = new Server
             {
@@ -260,6 +280,18 @@ namespace test
             var serverWithPluginCanonUrl =
                 "ss://YmYtY2ZiOnRlc3Q@192.168.100.1:8888/?plugin=obfs-local%3bobfs%3dhttp%3bobfs-host%3dgoogle.com";
 
+            var server2WithPlugin = new Server
+            {
+                server = server2.server,
+                server_port = server2.server_port,
+                password = server2.password,
+                method = server2.method,
+                plugin = "obfs-local",
+                plugin_opts = "obfs=http;obfs-host=google.com"
+            };
+            var server2WithPluginCanonUrl =
+                "ss://YmYtY2ZiOnRlc3Q@192.168.1.1:8388/?plugin=obfs-local%3bobfs%3dhttp%3bobfs-host%3dgoogle.com";
+
             var serverWithPluginAndRemark = new Server
             {
                 server = server.server,
@@ -272,6 +304,20 @@ namespace test
             };
             var serverWithPluginAndRemarkCanonUrl =
                 "ss://YmYtY2ZiOnRlc3Q@192.168.100.1:8888/?plugin=obfs-local%3bobfs%3dhttp%3bobfs-host%3dgoogle.com#example-server";
+
+            var server2WithPluginAndRemark = new Server
+            {
+                server = server2.server,
+                server_port = server2.server_port,
+                password = server2.password,
+                method = server2.method,
+                plugin = server2WithPlugin.plugin,
+                plugin_opts = server2WithPlugin.plugin_opts,
+                remarks = server2WithRemark.remarks
+            };
+            var server2WithPluginAndRemarkCanonUrl =
+                "ss://YmYtY2ZiOnRlc3Q@192.168.1.1:8388/?plugin=obfs-local%3bobfs%3dhttp%3bobfs-host%3dgoogle.com#example-server";
+
 
             RunParseShadowsocksUrlTest(
                 string.Join(
@@ -287,6 +333,22 @@ namespace test
                     server,
                     serverWithRemark,
                     serverWithRemark
+                });
+
+            RunParseShadowsocksUrlTest(
+                string.Join(
+                    "\r\n",
+                    server2CanonUrl,
+                    "\r\n",
+                    "ss://YmYtY2ZiOnRlc3RAMTkyLjE2OC4xLjE6ODM4OA==/",
+                    server2WithRemarkCanonUrl,
+                    "ss://YmYtY2ZiOnRlc3RAMTkyLjE2OC4xLjE6ODM4OA==/#example-server"),
+                new[]
+                {
+                    server2,
+                    server2,
+                    server2WithRemark,
+                    server2WithRemark
                 });
 
             RunParseShadowsocksUrlTest(
@@ -309,6 +371,28 @@ namespace test
                     serverWithPlugin,
                     serverWithPluginAndRemark,
                     serverWithPluginAndRemark
+                });
+
+            RunParseShadowsocksUrlTest(
+                string.Join(
+                    "\r\n",
+                    "ss://YmYtY2ZiOnRlc3Q@192.168.1.1:8388",
+                    "\r\n",
+                    "ss://YmYtY2ZiOnRlc3Q@192.168.1.1:8388/",
+                    "ss://YmYtY2ZiOnRlc3Q@192.168.1.1:8388#example-server",
+                    "ss://YmYtY2ZiOnRlc3Q@192.168.1.1:8388/#example-server",
+                    server2WithPluginCanonUrl,
+                    server2WithPluginAndRemarkCanonUrl,
+                    "ss://YmYtY2ZiOnRlc3Q@192.168.1.1:8388/?plugin=obfs-local%3bobfs%3dhttp%3bobfs-host%3dgoogle.com&unsupported=1#example-server"),
+                new[]
+                {
+                    server2,
+                    server2,
+                    server2WithRemark,
+                    server2WithRemark,
+                    server2WithPlugin,
+                    server2WithPluginAndRemark,
+                    server2WithPluginAndRemark
                 });
 
             var generateUrlCases = new Dictionary<string, Server>
