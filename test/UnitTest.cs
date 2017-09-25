@@ -436,7 +436,7 @@ namespace test
                 string expected = testCase.Key;
                 Server config = testCase.Value;
 
-                var actual = ShadowsocksController.GetQRCode(config);
+                var actual = ShadowsocksController.GetServerURL(config);
                 Assert.AreEqual(expected, actual);
             }
         }

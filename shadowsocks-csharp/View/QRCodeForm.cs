@@ -67,7 +67,7 @@ namespace Shadowsocks.View
             var servers = Configuration.Load();
             var serverDatas = servers.configs.Select(
                 server =>
-                    new KeyValuePair<string, string>(ShadowsocksController.GetQRCode(server), server.FriendlyName())
+                    new KeyValuePair<string, string>(ShadowsocksController.GetServerURL(server), server.FriendlyName())
                 ).ToList();
             listBox1.DataSource = serverDatas;
 

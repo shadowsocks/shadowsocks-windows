@@ -329,13 +329,13 @@ namespace Shadowsocks.Controller
             }
         }
 
-        public string GetQRCodeForCurrentServer()
+        public string GetServerURLForCurrentServer()
         {
             Server server = GetCurrentServer();
-            return GetQRCode(server);
+            return GetServerURL(server);
         }
 
-        public static string GetQRCode(Server server)
+        public static string GetServerURL(Server server)
         {
             string tag = string.Empty;
             string url = string.Empty;
