@@ -431,6 +431,16 @@ namespace Shadowsocks.Controller
             }
         }
 
+        public void ToggleAutoSpeedTest(bool enabled)
+        {
+            _config.autoSpeedTest = enabled;
+            Configuration.Save(_config);
+            if (ConfigChanged != null)
+            {
+                ConfigChanged(this, new EventArgs());
+            }
+        }
+
         public void ToggleCheckingPreRelease(bool enabled)
         {
             _config.checkPreRelease = enabled;

@@ -28,6 +28,7 @@ namespace Shadowsocks.Model
         public string plugin_opts;
         public string remarks;
         public int timeout;
+        public bool enabled;
 
         public override int GetHashCode()
         {
@@ -60,6 +61,14 @@ namespace Shadowsocks.Model
                     serverStr = $"{server}:{server_port}";
                     break;
             }
+            if (enabled)
+            {
+                serverStr = serverStr + "E";
+            }
+            else
+            {
+                serverStr = serverStr + "D";
+            }
             return remarks.IsNullOrEmpty()
                 ? serverStr
                 : $"{remarks} ({serverStr})";
@@ -75,6 +84,7 @@ namespace Shadowsocks.Model
             password = "";
             remarks = "";
             timeout = DefaultServerTimeoutSec;
+            enabled = true;
         }
 
         private static Server ParseLegacyURL(string ssURL)

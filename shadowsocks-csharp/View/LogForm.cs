@@ -11,6 +11,9 @@ using Shadowsocks.Properties;
 using Shadowsocks.Model;
 using Shadowsocks.Util;
 using System.Text;
+using System.Net;
+using Shadowsocks.Controller.Strategy;
+using Shadowsocks.Controller.Service;
 
 namespace Shadowsocks.View
 {
@@ -19,8 +22,12 @@ namespace Shadowsocks.View
         long lastOffset;
         string filename;
         Timer timer;
+        Timer autoSpeedTestTimer;
         const int BACK_OFFSET = 65536;
         ShadowsocksController controller;
+        int serverIndexSpeedTest;
+        List<string> speedTestString = new List<string>();
+        SortedList<long, Server> serverSpeeds = new SortedList<long, Server>();
 
         // global traffic update lock, make it static
         private static readonly object _lock = new object();
@@ -57,6 +64,8 @@ namespace Shadowsocks.View
             controller.TrafficChanged += controller_TrafficChanged;
 
             UpdateTexts();
+
+            AutoSpeedTestCheckBox.Checked = controller.GetCurrentConfiguration().autoSpeedTest;
         }
 
         private void UpdateTrafficChart()
@@ -170,6 +179,16 @@ namespace Shadowsocks.View
             UpdateTrafficChart();
         }
 
+        private void AutoSpeedTest_Tick(object sender, EventArgs e)
+        {
+            if (controller.GetCurrentConfiguration().autoSpeedTest)
+            {
+                LogMessageTextBox.AppendText("Start auto speed test\n");
+                LogMessageTextBox.ScrollToCaret();
+                SpeedTestMenuItem_Click(null, null);
+            }
+        }
+
         private void InitContent()
         {
             using (StreamReader reader = new StreamReader(new FileStream(filename,
@@ -237,6 +256,11 @@ namespace Shadowsocks.View
             timer.Tick += Timer_Tick;
             timer.Start();
 
+            autoSpeedTestTimer = new Timer();
+            autoSpeedTestTimer.Interval = 1 * 3600 * 1000;
+            autoSpeedTestTimer.Tick += AutoSpeedTest_Tick;
+            autoSpeedTestTimer.Start();
+
             LogViewerConfig config = controller.GetConfigurationCopy().logViewer;
 
             Height = config.Height;
@@ -262,6 +286,7 @@ namespace Shadowsocks.View
         private void LogForm_FormClosing(object sender, FormClosingEventArgs e)
         {
             timer.Stop();
+            autoSpeedTestTimer.Stop();
             controller.TrafficChanged -= controller_TrafficChanged;
             LogViewerConfig config = controller.GetConfigurationCopy().logViewer;
 
@@ -419,6 +444,90 @@ namespace Shadowsocks.View
             toolbarTrigger = !toolbarTrigger;
             ToolbarFlowLayoutPanel.Visible = toolbarTrigger;
             ShowToolbarMenuItem.Checked = toolbarTrigger;
+        }
+
+        private void SpeedTestMenuItem_Click(object sender, EventArgs e)
+        {
+            autoSpeedTestTimer.Stop();
+
+            serverIndexSpeedTest = 0;
+            speedTestString.Clear();
+            serverSpeeds.Clear();
+            SpeedTest(serverIndexSpeedTest);
+        }
+
+        private void SpeedTest(int serverIndex)
+        {
+            lock (_lock)
+            {
+                trafficInfoQueue.Clear();
+            }
+            var configs = controller.GetCurrentConfiguration().configs;
+            controller.SelectServerIndex(serverIndex);
+            SpeedTestWebClient http = new SpeedTestWebClient();
+            http.Proxy = new WebProxy(IPAddress.Loopback.ToString(), controller.GetCurrentConfiguration().localPort);
+            http.DownloadDataCompleted += http_DownloadDataCompleted;
+            http.DownloadDataAsyncWithTimeout(new Uri("https://www.youtube.com/"));
+        }
+
+        private void AutoSpeedTestCheckBox_CheckedChanged(object sender, EventArgs e)
+        {
+            controller.ToggleAutoSpeedTest(AutoSpeedTestCheckBox.Checked);
+        }
+
+        private void http_DownloadDataCompleted(object sender, DownloadDataCompletedEventArgs e)
+        {
+            try
+            {
+                long trafficTotal = 0;
+                long trafficAverage = 0;
+                lock (_lock)
+                {
+                    if (trafficInfoQueue.Count > 0)
+                    {
+                        foreach (var trafficPerSecond in trafficInfoQueue)
+                        {
+                            trafficTotal += trafficPerSecond.inbound;
+                        }
+                        trafficAverage = trafficTotal / trafficInfoQueue.Count;
+                    }
+                }
+                speedTestString.Add(controller.GetCurrentServer().server + ":" + controller.GetCurrentServer().server_port + " -- " + trafficTotal + " / " + trafficAverage + "\n");
+                speedTestString.ForEach(s => LogMessageTextBox.AppendText(s));
+                LogMessageTextBox.ScrollToCaret();
+                serverSpeeds.Add(trafficAverage, controller.GetCurrentServer());
+
+                var configs = controller.GetCurrentConfiguration().configs;
+                if (serverIndexSpeedTest < configs.Count - 1)
+                {
+                    serverIndexSpeedTest++;
+                    SpeedTest(serverIndexSpeedTest);
+                }
+                else
+                {
+                    for (int i = 0; i < serverSpeeds.Count; i++)
+                    {
+                        if (i < serverSpeeds.Count - 5)
+                        {
+                            serverSpeeds.Values.ElementAt(i).enabled = false;
+                        }
+                        else
+                        {
+                            serverSpeeds.Values.ElementAt(i).enabled = true;
+                        }
+                    }
+                    controller.SaveServers(serverSpeeds.Values.ToList(), controller.GetCurrentConfiguration().localPort);
+                    BalancingStrategy b = new BalancingStrategy(controller);
+                    controller.SelectStrategy(b.ID);
+
+                    autoSpeedTestTimer.Start();
+                }
+            }
+            catch (Exception)
+            {
+                BalancingStrategy b = new BalancingStrategy(controller);
+                controller.SelectStrategy(b.ID);
+            }
         }
 
         private class TrafficInfo

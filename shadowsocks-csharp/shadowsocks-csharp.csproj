@@ -93,6 +93,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Controller\Service\SpeedTestTimer.cs" />
+    <Compile Include="Controller\Service\SpeedTestWebClient.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Controller\System\Hotkeys\HotkeyCallbacks.cs" />
     <Compile Include="Encryption\AEAD\AEADEncryptor.cs" />
     <Compile Include="Encryption\AEAD\AEADMbedTLSEncryptor.cs" />

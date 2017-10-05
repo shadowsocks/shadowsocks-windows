@@ -45,12 +45,14 @@
             this.TopMostMenuItem = new System.Windows.Forms.MenuItem();
             this.MenuItemSeparater = new System.Windows.Forms.MenuItem();
             this.ShowToolbarMenuItem = new System.Windows.Forms.MenuItem();
+            this.SpeedTestMenuItem = new System.Windows.Forms.MenuItem();
             this.TopMostCheckBox = new System.Windows.Forms.CheckBox();
             this.ChangeFontButton = new System.Windows.Forms.Button();
             this.CleanLogsButton = new System.Windows.Forms.Button();
             this.WrapTextCheckBox = new System.Windows.Forms.CheckBox();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.ToolbarFlowLayoutPanel = new System.Windows.Forms.FlowLayoutPanel();
+            this.AutoSpeedTestCheckBox = new System.Windows.Forms.CheckBox();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.trafficChart = new System.Windows.Forms.DataVisualization.Charting.Chart();
             this.tableLayoutPanel1.SuspendLayout();
@@ -74,14 +76,15 @@
             this.LogMessageTextBox.Name = "LogMessageTextBox";
             this.LogMessageTextBox.ReadOnly = true;
             this.LogMessageTextBox.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.LogMessageTextBox.Size = new System.Drawing.Size(378, 74);
+            this.LogMessageTextBox.Size = new System.Drawing.Size(378, 59);
             this.LogMessageTextBox.TabIndex = 0;
             // 
             // MainMenu
             // 
             this.MainMenu.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
             this.FileMenuItem,
-            this.ViewMenuItem});
+            this.ViewMenuItem,
+            this.SpeedTestMenuItem});
             // 
             // FileMenuItem
             // 
@@ -150,14 +153,20 @@
             this.ShowToolbarMenuItem.Text = "&Show Toolbar";
             this.ShowToolbarMenuItem.Click += new System.EventHandler(this.ShowToolbarMenuItem_Click);
             // 
+            // SpeedTestMenuItem
+            // 
+            this.SpeedTestMenuItem.Index = 2;
+            this.SpeedTestMenuItem.Text = "SpeedTest";
+            this.SpeedTestMenuItem.Click += new System.EventHandler(this.SpeedTestMenuItem_Click);
+            // 
             // TopMostCheckBox
             // 
             this.TopMostCheckBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left)));
             this.TopMostCheckBox.AutoSize = true;
-            this.TopMostCheckBox.Location = new System.Drawing.Point(249, 3);
+            this.TopMostCheckBox.Location = new System.Drawing.Point(247, 3);
             this.TopMostCheckBox.Name = "TopMostCheckBox";
-            this.TopMostCheckBox.Size = new System.Drawing.Size(72, 23);
+            this.TopMostCheckBox.Size = new System.Drawing.Size(71, 23);
             this.TopMostCheckBox.TabIndex = 3;
             this.TopMostCheckBox.Text = "&Top Most";
             this.TopMostCheckBox.UseVisualStyleBackColor = true;
@@ -192,7 +201,7 @@
             this.WrapTextCheckBox.AutoSize = true;
             this.WrapTextCheckBox.Location = new System.Drawing.Point(165, 3);
             this.WrapTextCheckBox.Name = "WrapTextCheckBox";
-            this.WrapTextCheckBox.Size = new System.Drawing.Size(78, 23);
+            this.WrapTextCheckBox.Size = new System.Drawing.Size(76, 23);
             this.WrapTextCheckBox.TabIndex = 0;
             this.WrapTextCheckBox.Text = "&Wrap Text";
             this.WrapTextCheckBox.UseVisualStyleBackColor = true;
@@ -210,7 +219,7 @@
             this.tableLayoutPanel1.RowCount = 2;
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(384, 161);
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(384, 162);
             this.tableLayoutPanel1.TabIndex = 2;
             // 
             // ToolbarFlowLayoutPanel
@@ -220,16 +229,30 @@
             this.ToolbarFlowLayoutPanel.Controls.Add(this.ChangeFontButton);
             this.ToolbarFlowLayoutPanel.Controls.Add(this.WrapTextCheckBox);
             this.ToolbarFlowLayoutPanel.Controls.Add(this.TopMostCheckBox);
+            this.ToolbarFlowLayoutPanel.Controls.Add(this.AutoSpeedTestCheckBox);
             this.ToolbarFlowLayoutPanel.Dock = System.Windows.Forms.DockStyle.Fill;
             this.ToolbarFlowLayoutPanel.Location = new System.Drawing.Point(3, 3);
             this.ToolbarFlowLayoutPanel.Name = "ToolbarFlowLayoutPanel";
-            this.ToolbarFlowLayoutPanel.Size = new System.Drawing.Size(378, 29);
+            this.ToolbarFlowLayoutPanel.Size = new System.Drawing.Size(378, 52);
             this.ToolbarFlowLayoutPanel.TabIndex = 2;
+            // 
+            // AutoSpeedTestCheckBox
+            // 
+            this.AutoSpeedTestCheckBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left)));
+            this.AutoSpeedTestCheckBox.AutoSize = true;
+            this.AutoSpeedTestCheckBox.Location = new System.Drawing.Point(3, 32);
+            this.AutoSpeedTestCheckBox.Name = "AutoSpeedTestCheckBox";
+            this.AutoSpeedTestCheckBox.Size = new System.Drawing.Size(106, 17);
+            this.AutoSpeedTestCheckBox.TabIndex = 4;
+            this.AutoSpeedTestCheckBox.Text = "&Auto Speed Test";
+            this.AutoSpeedTestCheckBox.UseVisualStyleBackColor = true;
+            this.AutoSpeedTestCheckBox.CheckedChanged += new System.EventHandler(this.AutoSpeedTestCheckBox_CheckedChanged);
             // 
             // splitContainer1
             // 
             this.splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.splitContainer1.Location = new System.Drawing.Point(3, 38);
+            this.splitContainer1.Location = new System.Drawing.Point(3, 61);
             this.splitContainer1.Name = "splitContainer1";
             this.splitContainer1.Orientation = System.Windows.Forms.Orientation.Horizontal;
             // 
@@ -240,8 +263,8 @@
             // splitContainer1.Panel2
             // 
             this.splitContainer1.Panel2.Controls.Add(this.trafficChart);
-            this.splitContainer1.Size = new System.Drawing.Size(378, 120);
-            this.splitContainer1.SplitterDistance = 74;
+            this.splitContainer1.Size = new System.Drawing.Size(378, 98);
+            this.splitContainer1.SplitterDistance = 59;
             this.splitContainer1.TabIndex = 3;
             // 
             // trafficChart
@@ -271,20 +294,20 @@
             series1.BorderWidth = 2;
             series1.ChartArea = "ChartArea1";
             series1.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Spline;
-            series1.Color = System.Drawing.Color.FromArgb(255, 128, 0);
+            series1.Color = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(128)))), ((int)(((byte)(0)))));
             series1.IsXValueIndexed = true;
             series1.Legend = "Legend1";
             series1.Name = "Inbound";
             series2.BorderWidth = 2;
             series2.ChartArea = "ChartArea1";
             series2.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Spline;
-            series2.Color = System.Drawing.Color.FromArgb(128, 128, 255);
+            series2.Color = System.Drawing.Color.FromArgb(((int)(((byte)(128)))), ((int)(((byte)(128)))), ((int)(((byte)(255)))));
             series2.IsXValueIndexed = true;
             series2.Legend = "Legend1";
             series2.Name = "Outbound";
             this.trafficChart.Series.Add(series1);
             this.trafficChart.Series.Add(series2);
-            this.trafficChart.Size = new System.Drawing.Size(378, 42);
+            this.trafficChart.Size = new System.Drawing.Size(378, 35);
             this.trafficChart.TabIndex = 0;
             this.trafficChart.Text = "chart1";
             // 
@@ -292,7 +315,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
-            this.ClientSize = new System.Drawing.Size(384, 161);
+            this.ClientSize = new System.Drawing.Size(384, 162);
             this.Controls.Add(this.tableLayoutPanel1);
             this.Menu = this.MainMenu;
             this.MinimumSize = new System.Drawing.Size(400, 200);
@@ -338,5 +361,7 @@
         private System.Windows.Forms.MenuItem ShowToolbarMenuItem;
         private System.Windows.Forms.SplitContainer splitContainer1;
         private System.Windows.Forms.DataVisualization.Charting.Chart trafficChart;
+        private System.Windows.Forms.MenuItem SpeedTestMenuItem;
+        private System.Windows.Forms.CheckBox AutoSpeedTestCheckBox;
     }
 }
