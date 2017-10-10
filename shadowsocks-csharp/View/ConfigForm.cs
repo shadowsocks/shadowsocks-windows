@@ -362,9 +362,7 @@ namespace Shadowsocks.View
 
         private void ShowPasswdCheckBox_CheckedChanged(object sender, EventArgs e)
         {
-            //this.ShowPasswdCheckBox.Checked = !this.ShowPasswdCheckBox.Checked;
             this.PasswordTextBox.UseSystemPasswordChar = !this.ShowPasswdCheckBox.Checked;
-
         }
     }
 }
