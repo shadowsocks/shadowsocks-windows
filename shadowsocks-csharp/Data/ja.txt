@@ -49,6 +49,7 @@ Server=サーバー
 Server Addr=サーバーアドレス
 Server Port=サーバーポート
 Password=パスワード
+Show Password=パスワードを表示する
 Encryption=暗号化
 Plugin=プラグイン
 Plugin Options=プラグインのオプション
