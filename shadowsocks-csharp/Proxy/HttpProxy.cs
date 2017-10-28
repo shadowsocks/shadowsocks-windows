@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -11,7 +11,7 @@ namespace Shadowsocks.Proxy
 {
     public class HttpProxy : IProxy
     {
-        private class FakeAsyncResult : IAsyncResult
+         private class FakeAsyncResult : IAsyncResult
         {
             public readonly HttpState innerState;
 
@@ -36,7 +36,7 @@ namespace Shadowsocks.Proxy
 
             public object AsyncState { get; set; }
 
-            public int BytesToRead;
+            public int BytesToRead { get; set; }
 
             public Exception ex { get; set; }
         }
