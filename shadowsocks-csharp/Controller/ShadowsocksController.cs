@@ -159,10 +159,18 @@ namespace Shadowsocks.Controller
                 return null;
             }
 
-            if (plugin.StartIfNeeded())
+            try
             {
-                Logging.Info(
-                    $"Started SIP003 plugin for {server.Identifier()} on {plugin.LocalEndPoint} - PID: {plugin.ProcessId}");
+                if (plugin.StartIfNeeded())
+                {
+                    Logging.Info(
+                        $"Started SIP003 plugin for {server.Identifier()} on {plugin.LocalEndPoint} - PID: {plugin.ProcessId}");
+                }
+            }
+            catch (Exception ex)
+            {
+                Logging.Error("Failed to start SIP003 plugin: " + ex.Message);
+                throw;
             }
 
             return plugin.LocalEndPoint;
@@ -322,13 +330,13 @@ namespace Shadowsocks.Controller
             }
         }
 
-        public string GetQRCodeForCurrentServer()
+        public string GetServerURLForCurrentServer()
         {
             Server server = GetCurrentServer();
-            return GetQRCode(server);
+            return GetServerURL(server);
         }
 
-        public static string GetQRCode(Server server)
+        public static string GetServerURL(Server server)
         {
             string tag = string.Empty;
             string url = string.Empty;
@@ -527,6 +535,7 @@ namespace Shadowsocks.Controller
                     strategy.ReloadServers();
                 }
 
+                StartPlugins();
                 privoxyRunner.Start(_config);
 
                 TCPRelay tcpRelay = new TCPRelay(this, _config);
@@ -562,6 +571,15 @@ namespace Shadowsocks.Controller
 
             UpdateSystemProxy();
             Utils.ReleaseMemory(true);
+        }
+
+        private void StartPlugins()
+        {
+            foreach (var server in _config.configs)
+            {
+                // Early start plugin processes
+                GetPluginLocalEndPointIfConfigured(server);
+            }
         }
 
         protected void SaveConfig(Configuration newConfig)
