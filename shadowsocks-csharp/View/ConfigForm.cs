@@ -233,6 +233,14 @@ namespace Shadowsocks.View
             {
                 return;
             }
+            if (_modifiedConfiguration.configs.Count <= 0)
+            {
+                return;
+            }
+            if (_lastSelectedIndex < 0 && _lastSelectedIndex >= _modifiedConfiguration.configs.Count)
+            {
+                return;
+            }
             Server currServer = _modifiedConfiguration.configs[_lastSelectedIndex];
             var currIndex = _modifiedConfiguration.configs.IndexOf( currServer );
             _modifiedConfiguration.configs.Insert(currIndex + 1, currServer);
