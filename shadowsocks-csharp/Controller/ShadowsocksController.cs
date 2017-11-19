@@ -618,7 +618,7 @@ namespace Shadowsocks.Controller
                 UpdatePACFromGFWList();
                 return;
             }
-            List<string> lines = GFWListUpdater.ParseResult(FileManager.NonExclusiveReadAllText(Utils.GetTempPath("gfwlist.txt")));
+            List<string> lines = new List<string>();
             if (File.Exists(PACServer.USER_RULE_FILE))
             {
                 string local = FileManager.NonExclusiveReadAllText(PACServer.USER_RULE_FILE, Encoding.UTF8);
@@ -632,6 +632,7 @@ namespace Shadowsocks.Controller
                     }
                 }
             }
+            lines.AddRange(GFWListUpdater.ParseResult(FileManager.NonExclusiveReadAllText(Utils.GetTempPath("gfwlist.txt"))));
             string abpContent;
             if (File.Exists(PACServer.USER_ABP_FILE))
             {
