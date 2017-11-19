@@ -49,6 +49,7 @@ Server=服务器
 Server Addr=服务器地址
 Server Port=服务器端口
 Password=密码
+Show Password=显示密码
 Encryption=加密
 Plugin=插件
 Plugin Options=插件选项

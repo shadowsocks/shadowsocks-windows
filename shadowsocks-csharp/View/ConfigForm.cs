@@ -46,6 +46,7 @@ namespace Shadowsocks.View
             IPLabel.Text = I18N.GetString("Server Addr");
             ServerPortLabel.Text = I18N.GetString("Server Port");
             PasswordLabel.Text = I18N.GetString("Password");
+            ShowPasswdCheckBox.Text = I18N.GetString("Show Password");
             EncryptionLabel.Text = I18N.GetString("Encryption");
             PluginLabel.Text = I18N.GetString("Plugin");
             PluginOptionsLabel.Text = I18N.GetString("Plugin Options");
@@ -357,6 +358,11 @@ namespace Shadowsocks.View
             {
                 MoveConfigItem(+1);  // +1 means move forward
             }
+        }
+
+        private void ShowPasswdCheckBox_CheckedChanged(object sender, EventArgs e)
+        {
+            this.PasswordTextBox.UseSystemPasswordChar = !this.ShowPasswdCheckBox.Checked;
         }
     }
 }
