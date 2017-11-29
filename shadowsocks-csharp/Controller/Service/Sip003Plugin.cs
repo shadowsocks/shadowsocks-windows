@@ -33,12 +33,20 @@ namespace Shadowsocks.Controller.Service
                 return null;
             }
 
-            return new Sip003Plugin(server.plugin, server.plugin_opts);
+            return new Sip003Plugin(server.plugin, server.plugin_opts, server.server, server.server_port);
         }
 
-        private Sip003Plugin(string plugin, string pluginOpts)
+        private Sip003Plugin(string plugin, string pluginOpts, string serverAddress, int serverPort)
         {
             if (plugin == null) throw new ArgumentNullException(nameof(plugin));
+            if (string.IsNullOrWhiteSpace(serverAddress))
+            {
+                throw new ArgumentException("Value cannot be null or whitespace.", nameof(serverAddress));
+            }
+            if ((ushort)serverPort != serverPort)
+            {
+                throw new ArgumentOutOfRangeException("serverPort");
+            }
 
             var appPath = Path.GetDirectoryName(new Uri(Assembly.GetExecutingAssembly().GetName().CodeBase).LocalPath);
 
@@ -52,7 +60,13 @@ namespace Shadowsocks.Controller.Service
                     ErrorDialog = false,
                     WindowStyle = ProcessWindowStyle.Hidden,
                     WorkingDirectory = appPath ?? Environment.CurrentDirectory,
-                    Arguments = pluginOpts
+                    Arguments = pluginOpts,
+                    Environment =
+                    {
+                        ["SS_REMOTE_HOST"] = serverAddress,
+                        ["SS_REMOTE_PORT"] = serverPort.ToString(),
+                        ["SS_PLUGIN_OPTIONS"] = pluginOpts
+                    }
                 }
             };
 
@@ -73,6 +87,11 @@ namespace Shadowsocks.Controller.Service
                     return false;
                 }
 
+                //var localPort = GetNextFreeTcpPort();
+                //LocalEndPoint = new IPEndPoint(IPAddress.Loopback, localPort);    //cause shadowsocks-kcp cannot work,don't know reason
+                //
+                //_pluginProcess.StartInfo.Environment["SS_LOCAL_HOST"] = LocalEndPoint.Address.ToString();
+                //_pluginProcess.StartInfo.Environment["SS_LOCAL_PORT"] = LocalEndPoint.Port.ToString();
                 _pluginProcess.Start();
                 _pluginJob.AddProcess(_pluginProcess.Handle);
                 _started = true;
