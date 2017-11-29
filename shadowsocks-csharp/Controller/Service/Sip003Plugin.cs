@@ -60,6 +60,7 @@ namespace Shadowsocks.Controller.Service
                     ErrorDialog = false,
                     WindowStyle = ProcessWindowStyle.Hidden,
                     WorkingDirectory = appPath ?? Environment.CurrentDirectory,
+                    Arguments = pluginOpts,
                     Environment =
                     {
                         ["SS_REMOTE_HOST"] = serverAddress,
@@ -86,11 +87,11 @@ namespace Shadowsocks.Controller.Service
                     return false;
                 }
 
-                var localPort = GetNextFreeTcpPort();
-                LocalEndPoint = new IPEndPoint(IPAddress.Loopback, localPort);
-
-                _pluginProcess.StartInfo.Environment["SS_LOCAL_HOST"] = LocalEndPoint.Address.ToString();
-                _pluginProcess.StartInfo.Environment["SS_LOCAL_PORT"] = LocalEndPoint.Port.ToString();
+                //var localPort = GetNextFreeTcpPort();
+                //LocalEndPoint = new IPEndPoint(IPAddress.Loopback, localPort);    //cause shadowsocks-kcp cannot work,don't know reason
+                //
+                //_pluginProcess.StartInfo.Environment["SS_LOCAL_HOST"] = LocalEndPoint.Address.ToString();
+                //_pluginProcess.StartInfo.Environment["SS_LOCAL_PORT"] = LocalEndPoint.Port.ToString();
                 _pluginProcess.Start();
                 _pluginJob.AddProcess(_pluginProcess.Handle);
                 _started = true;
