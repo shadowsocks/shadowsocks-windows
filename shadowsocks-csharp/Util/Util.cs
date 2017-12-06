@@ -123,33 +123,34 @@ namespace Shadowsocks.Util
             const long P = T * 1024L;
             const long E = P * 1024L;
 
-            if (bytes >= P * 990)
-                return (bytes / (double)E).ToString("F5") + "EiB";
-            if (bytes >= T * 990)
-                return (bytes / (double)P).ToString("F5") + "PiB";
-            if (bytes >= G * 990)
-                return (bytes / (double)T).ToString("F5") + "TiB";
-            if (bytes >= M * 990)
+            Func<long, string, string, string> f;
+            Func<Func<bool>, Func<string>, Tuple<Func<bool>, Func<string>>> g;
+
+            f = (a, b, c) => (bytes / (double)a).ToString(b) + c;
+            g = (a, b) => new Tuple<Func<bool>, Func<string>>(a, b);
+
+            var branches = new Tuple<Func<bool>, Func<string>>[]
             {
-                return (bytes / (double)G).ToString("F4") + "GiB";
-            }
-            if (bytes >= M * 100)
+                g(() => bytes >= P * 990, () => f(E,"F5","EiB")),
+                g(() => bytes >= T * 990, () => f(P,"F5","PiB")),
+                g(() => bytes >= G * 990, () => f(T,"F5","TiB")),
+                g(() => bytes >= M * 990, () => f(G,"F4","GiB")),
+                g(() => bytes >= M * 100, () => f(M,"F1","MiB")),
+                g(() => bytes >= M * 10,  () => f(M,"F2","MiB")),
+                g(() => bytes >= K * 990, () => f(M,"F3","MiB")),
+                g(() => bytes >  K * 2  , () => f(K,"F1","KiB")),
+                g(() => true            , () => bytes.ToString() + "B")
+            };
+
+            foreach (var branch in branches)
             {
-                return (bytes / (double)M).ToString("F1") + "MiB";
+                if (branch.Item1())
+                {
+                    return branch.Item2();
+                }
             }
-            if (bytes >= M * 10)
-            {
-                return (bytes / (double)M).ToString("F2") + "MiB";
-            }
-            if (bytes >= K * 990)
-            {
-                return (bytes / (double)M).ToString("F3") + "MiB";
-            }
-            if (bytes > K * 2)
-            {
-                return (bytes / (double)K).ToString("F1") + "KiB";
-            }
-            return bytes.ToString() + "B";
+
+            throw new InvalidOperationException("Unexpected conditional branching!");
         }
 
         /// <summary>
@@ -164,30 +165,19 @@ namespace Shadowsocks.Util
             long scale = 1;
             float f = n;
             string unit = "B";
-            if (f > 1024)
+
+            string[] units = new string[] { "KiB", "MiB", "GiB", "TiB" };
+
+            for (int i = 0; i < 4; i++)
             {
-                f = f / 1024;
-                scale <<= 10;
-                unit = "KiB";
+                if (f > 1024)
+                {
+                    f = f / 1024;
+                    scale <<= 10;
+                    unit = units[i];
+                }
             }
-            if (f > 1024)
-            {
-                f = f / 1024;
-                scale <<= 10;
-                unit = "MiB";
-            }
-            if (f > 1024)
-            {
-                f = f / 1024;
-                scale <<= 10;
-                unit = "GiB";
-            }
-            if (f > 1024)
-            {
-                f = f / 1024;
-                scale <<= 10;
-                unit = "TiB";
-            }
+
             return new BandwidthScaleInfo(f, unit, scale);
         }
 
