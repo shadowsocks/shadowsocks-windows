@@ -1,3 +1,9 @@
+4.0.7 2017-12-09
+- Fix QR code and ss:// protocol import issue
+- Add an option to show password
+- User rules have higher priority in PAC file
+- Bug fixes and improvements
+
 4.0.6 2017-09-09
 - SIP002 support
 - SIP003 support
