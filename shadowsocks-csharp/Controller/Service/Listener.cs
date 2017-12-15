@@ -202,6 +202,7 @@ namespace Shadowsocks.Controller
             try
             {
                 int bytesRead = conn.EndReceive(ar);
+                if (bytesRead <= 0) goto Shutdown;
                 foreach (IService service in _services)
                 {
                     if (service.Handle(buf, bytesRead, conn, null))
@@ -209,6 +210,7 @@ namespace Shadowsocks.Controller
                         return;
                     }
                 }
+                Shutdown:
                 // no service found for this
                 if (conn.ProtocolType == ProtocolType.Tcp)
                 {
