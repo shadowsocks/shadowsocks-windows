@@ -612,46 +612,14 @@ namespace Shadowsocks.Controller
         private static readonly IEnumerable<char> IgnoredLineBegins = new[] { '!', '[' };
         private void pacServer_UserRuleFileChanged(object sender, EventArgs e)
         {
-            // TODO: this is a dirty hack. (from code GListUpdater.http_DownloadStringCompleted())
             if (!File.Exists(Utils.GetTempPath("gfwlist.txt")))
             {
                 UpdatePACFromGFWList();
-                return;
-            }
-            List<string> lines = new List<string>();
-            if (File.Exists(PACServer.USER_RULE_FILE))
-            {
-                string local = FileManager.NonExclusiveReadAllText(PACServer.USER_RULE_FILE, Encoding.UTF8);
-                using (var sr = new StringReader(local))
-                {
-                    foreach (var rule in sr.NonWhiteSpaceLines())
-                    {
-                        if (rule.BeginWithAny(IgnoredLineBegins))
-                            continue;
-                        lines.Add(rule);
-                    }
-                }
-            }
-            lines.AddRange(GFWListUpdater.ParseResult(FileManager.NonExclusiveReadAllText(Utils.GetTempPath("gfwlist.txt"))));
-            string abpContent;
-            if (File.Exists(PACServer.USER_ABP_FILE))
-            {
-                abpContent = FileManager.NonExclusiveReadAllText(PACServer.USER_ABP_FILE, Encoding.UTF8);
             }
             else
             {
-                abpContent = Utils.UnGzip(Resources.abp_js);
+                GFWListUpdater.MergeAndWritePACFile(FileManager.NonExclusiveReadAllText(Utils.GetTempPath("gfwlist.txt")));
             }
-            abpContent = abpContent.Replace("__RULES__", JsonConvert.SerializeObject(lines, Formatting.Indented));
-            if (File.Exists(PACServer.PAC_FILE))
-            {
-                string original = FileManager.NonExclusiveReadAllText(PACServer.PAC_FILE, Encoding.UTF8);
-                if (original == abpContent)
-                {
-                    return;
-                }
-            }
-            File.WriteAllText(PACServer.PAC_FILE, abpContent, Encoding.UTF8);
         }
 
         public void CopyPacUrl()

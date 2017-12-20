@@ -36,47 +36,52 @@ namespace Shadowsocks.Controller
             try
             {
                 File.WriteAllText(Utils.GetTempPath("gfwlist.txt"), e.Result, Encoding.UTF8);
-                List<string> lines = new List<string>();
-                if (File.Exists(PACServer.USER_RULE_FILE))
-                {
-                    string local = FileManager.NonExclusiveReadAllText(PACServer.USER_RULE_FILE, Encoding.UTF8);
-                    using (var sr = new StringReader(local))
-                    {
-                        foreach (var rule in sr.NonWhiteSpaceLines())
-                        {
-                            if (rule.BeginWithAny(IgnoredLineBegins))
-                                continue;
-                            lines.Add(rule);
-                        }
-                    }
-                }
-                lines.AddRange(ParseResult(e.Result));
-                string abpContent;
-                if (File.Exists(PACServer.USER_ABP_FILE))
-                {
-                    abpContent = FileManager.NonExclusiveReadAllText(PACServer.USER_ABP_FILE, Encoding.UTF8);
-                }
-                else
-                {
-                    abpContent = Utils.UnGzip(Resources.abp_js);
-                }
-                abpContent = abpContent.Replace("__RULES__", JsonConvert.SerializeObject(lines, Formatting.Indented));
-                if (File.Exists(PACServer.PAC_FILE))
-                {
-                    string original = FileManager.NonExclusiveReadAllText(PACServer.PAC_FILE, Encoding.UTF8);
-                    if (original == abpContent)
-                    {
-                        UpdateCompleted(this, new ResultEventArgs(false));
-                        return;
-                    }
-                }
-                File.WriteAllText(PACServer.PAC_FILE, abpContent, Encoding.UTF8);
-                UpdateCompleted?.Invoke(this, new ResultEventArgs(true));
+                bool pacFileChanged = MergeAndWritePACFile(e.Result);
+                UpdateCompleted?.Invoke(this, new ResultEventArgs(pacFileChanged));
             }
             catch (Exception ex)
             {
                 Error?.Invoke(this, new ErrorEventArgs(ex));
             }
+        }
+
+        public static bool MergeAndWritePACFile(string gfwListResult)
+        {
+            List<string> lines = new List<string>();
+            if (File.Exists(PACServer.USER_RULE_FILE))
+            {
+                string local = FileManager.NonExclusiveReadAllText(PACServer.USER_RULE_FILE, Encoding.UTF8);
+                using (var sr = new StringReader(local))
+                {
+                    foreach (var rule in sr.NonWhiteSpaceLines())
+                    {
+                        if (rule.BeginWithAny(IgnoredLineBegins))
+                            continue;
+                        lines.Add(rule);
+                    }
+                }
+            }
+            lines.AddRange(ParseResult(gfwListResult));
+            string abpContent;
+            if (File.Exists(PACServer.USER_ABP_FILE))
+            {
+                abpContent = FileManager.NonExclusiveReadAllText(PACServer.USER_ABP_FILE, Encoding.UTF8);
+            }
+            else
+            {
+                abpContent = Utils.UnGzip(Resources.abp_js);
+            }
+            abpContent = abpContent.Replace("__RULES__", JsonConvert.SerializeObject(lines, Formatting.Indented));
+            if (File.Exists(PACServer.PAC_FILE))
+            {
+                string original = FileManager.NonExclusiveReadAllText(PACServer.PAC_FILE, Encoding.UTF8);
+                if (original == abpContent)
+                {
+                    return false;
+                }
+            }
+            File.WriteAllText(PACServer.PAC_FILE, abpContent, Encoding.UTF8);
+            return true;
         }
 
         public void UpdatePACFromGFWList(Configuration config)
