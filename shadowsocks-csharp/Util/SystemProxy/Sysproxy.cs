@@ -156,7 +156,7 @@ namespace Shadowsocks.Util.SystemProxy
             else _userSettings.ProxyServer = userSettingsArr[1];
             if (userSettingsArr[2] == "(null)") _userSettings.BypassList = null;
             else _userSettings.BypassList = userSettingsArr[2];
-            if (userSettingsArr[3] == "(null)") _userSettings.PacUrl = null;
+            if (userSettingsArr.Length <= 3 || userSettingsArr[3] == "(null)") _userSettings.PacUrl = null;
             else _userSettings.PacUrl = userSettingsArr[3];
 
             _userSettings.UserSettingsRecorded = true;
