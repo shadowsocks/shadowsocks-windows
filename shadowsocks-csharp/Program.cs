@@ -122,11 +122,19 @@ namespace Shadowsocks
                     Logging.Info("os wake up");
                     if (MainController != null)
                     {
-                        System.Timers.Timer timer = new System.Timers.Timer(10 * 1000);
-                        timer.Elapsed += Timer_Elapsed;
-                        timer.AutoReset = false;
-                        timer.Enabled = true;
-                        timer.Start();
+                        System.Threading.Tasks.Task.Factory.StartNew(() =>
+                        {
+                            Thread.Sleep(10 * 1000);
+                            try
+                            {
+                                MainController.Start();
+                                Logging.Info("controller started");
+                            }
+                            catch (Exception ex)
+                            {
+                                Logging.LogUsefulException(ex);
+                            }
+                        });
                     }
                     break;
                 case PowerModes.Suspend:
@@ -137,36 +145,6 @@ namespace Shadowsocks
                     }
                     Logging.Info("os suspend");
                     break;
-            }
-        }
-
-        private static void Timer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
-        {
-            try
-            {
-                if (MainController != null)
-                {
-                    MainController.Start();
-                    Logging.Info("controller started");
-                }
-            }
-            catch (Exception ex)
-            {
-                Logging.LogUsefulException(ex);
-            }
-            finally
-            {
-                try
-                {
-                    System.Timers.Timer timer = (System.Timers.Timer)sender;
-                    timer.Enabled = false;
-                    timer.Stop();
-                    timer.Dispose();
-                }
-                catch (Exception ex)
-                {
-                    Logging.LogUsefulException(ex);
-                }
             }
         }
 

@@ -46,7 +46,10 @@ namespace Shadowsocks.View
             IPLabel.Text = I18N.GetString("Server Addr");
             ServerPortLabel.Text = I18N.GetString("Server Port");
             PasswordLabel.Text = I18N.GetString("Password");
+            ShowPasswdCheckBox.Text = I18N.GetString("Show Password");
             EncryptionLabel.Text = I18N.GetString("Encryption");
+            PluginLabel.Text = I18N.GetString("Plugin");
+            PluginOptionsLabel.Text = I18N.GetString("Plugin Options");
             ProxyPortLabel.Text = I18N.GetString("Proxy Port");
             RemarksLabel.Text = I18N.GetString("Remarks");
             TimeoutLabel.Text = I18N.GetString("Timeout(Sec)");
@@ -94,6 +97,8 @@ namespace Shadowsocks.View
                 }
                 server.password = PasswordTextBox.Text;
                 server.method = EncryptionSelect.Text;
+                server.plugin = PluginTextBox.Text;
+                server.plugin_opts = PluginOptionsTextBox.Text;
                 server.remarks = RemarksTextBox.Text;
                 if (!int.TryParse(TimeoutTextBox.Text, out server.timeout))
                 {
@@ -127,6 +132,8 @@ namespace Shadowsocks.View
                 PasswordTextBox.Text = server.password;
                 ProxyPortTextBox.Text = _modifiedConfiguration.localPort.ToString();
                 EncryptionSelect.Text = server.method ?? "aes-256-cfb";
+                PluginTextBox.Text = server.plugin;
+                PluginOptionsTextBox.Text = server.plugin_opts;
                 RemarksTextBox.Text = server.remarks;
                 TimeoutTextBox.Text = server.timeout.ToString();
             }
@@ -351,6 +358,11 @@ namespace Shadowsocks.View
             {
                 MoveConfigItem(+1);  // +1 means move forward
             }
+        }
+
+        private void ShowPasswdCheckBox_CheckedChanged(object sender, EventArgs e)
+        {
+            this.PasswordTextBox.UseSystemPasswordChar = !this.ShowPasswdCheckBox.Checked;
         }
     }
 }

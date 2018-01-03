@@ -36,7 +36,7 @@ namespace Shadowsocks.Controller
             try
             {
                 File.WriteAllText(Utils.GetTempPath("gfwlist.txt"), e.Result, Encoding.UTF8);
-                List<string> lines = ParseResult(e.Result);
+                List<string> lines = new List<string>();
                 if (File.Exists(PACServer.USER_RULE_FILE))
                 {
                     string local = FileManager.NonExclusiveReadAllText(PACServer.USER_RULE_FILE, Encoding.UTF8);
@@ -50,6 +50,7 @@ namespace Shadowsocks.Controller
                         }
                     }
                 }
+                lines.AddRange(ParseResult(e.Result));
                 string abpContent;
                 if (File.Exists(PACServer.USER_ABP_FILE))
                 {
@@ -70,17 +71,11 @@ namespace Shadowsocks.Controller
                     }
                 }
                 File.WriteAllText(PACServer.PAC_FILE, abpContent, Encoding.UTF8);
-                if (UpdateCompleted != null)
-                {
-                    UpdateCompleted(this, new ResultEventArgs(true));
-                }
+                UpdateCompleted?.Invoke(this, new ResultEventArgs(true));
             }
             catch (Exception ex)
             {
-                if (Error != null)
-                {
-                    Error(this, new ErrorEventArgs(ex));
-                }
+                Error?.Invoke(this, new ErrorEventArgs(ex));
             }
         }
 
