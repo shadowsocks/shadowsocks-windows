@@ -490,8 +490,6 @@ namespace Shadowsocks.Controller
 
         protected void Reload()
         {
-            StopPlugins();
-
             Encryption.RNG.Reload();
             // some logic in configuration updated the config when saving, we need to read it again
             _config = Configuration.Load();
@@ -521,6 +519,10 @@ namespace Shadowsocks.Controller
             {
                 _listener.Stop();
             }
+
+            // 
+            StopPlugins();
+
             // don't put PrivoxyRunner.Start() before pacServer.Stop()
             // or bind will fail when switching bind address from 0.0.0.0 to 127.0.0.1
             // though UseShellExecute is set to true now
@@ -554,7 +556,8 @@ namespace Shadowsocks.Controller
                 if (e is SocketException)
                 {
                     SocketException se = (SocketException)e;
-                    if (se.SocketErrorCode == SocketError.AccessDenied)
+                    if (se.SocketErrorCode == SocketError.AccessDenied || 
+                        se.SocketErrorCode == SocketError.AddressAlreadyInUse)
                     {
                         e = new Exception(I18N.GetString("Port already in use"), e);
                     }
