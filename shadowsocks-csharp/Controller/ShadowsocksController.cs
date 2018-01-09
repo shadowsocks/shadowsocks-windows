@@ -520,7 +520,6 @@ namespace Shadowsocks.Controller
                 _listener.Stop();
             }
 
-            // 
             StopPlugins();
 
             // don't put PrivoxyRunner.Start() before pacServer.Stop()
@@ -536,7 +535,7 @@ namespace Shadowsocks.Controller
                     strategy.ReloadServers();
                 }
 
-                StartPlugins();
+                StartPlugin();
                 privoxyRunner.Start(_config);
 
                 TCPRelay tcpRelay = new TCPRelay(this, _config);
@@ -556,8 +555,7 @@ namespace Shadowsocks.Controller
                 if (e is SocketException)
                 {
                     SocketException se = (SocketException)e;
-                    if (se.SocketErrorCode == SocketError.AccessDenied || 
-                        se.SocketErrorCode == SocketError.AddressAlreadyInUse)
+                    if (se.SocketErrorCode == SocketError.AccessDenied)
                     {
                         e = new Exception(I18N.GetString("Port already in use"), e);
                     }
@@ -575,13 +573,10 @@ namespace Shadowsocks.Controller
             Utils.ReleaseMemory(true);
         }
 
-        private void StartPlugins()
+        private void StartPlugin()
         {
-            foreach (var server in _config.configs)
-            {
-                // Early start plugin processes
-                GetPluginLocalEndPointIfConfigured(server);
-            }
+            var server = _config.GetCurrentServer();
+            GetPluginLocalEndPointIfConfigured(server);
         }
 
         protected void SaveConfig(Configuration newConfig)
