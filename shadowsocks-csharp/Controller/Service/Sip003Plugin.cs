@@ -43,7 +43,7 @@ namespace Shadowsocks.Controller.Service
             {
                 throw new ArgumentException("Value cannot be null or whitespace.", nameof(serverAddress));
             }
-            if ((ushort)serverPort != serverPort)
+            if (serverPort <= 0 || serverPort > 65535)
             {
                 throw new ArgumentOutOfRangeException("serverPort");
             }
