@@ -228,6 +228,47 @@ namespace test
         }
 
         [TestMethod]
+        public void TestOpenSSLEncryption()
+        {
+            // run it once before the multi-threading test to initialize global tables
+            RunSingleOpenSSLEncryptionThread();
+            List<Thread> threads = new List<Thread>();
+            for (int i = 0; i < 10; i++)
+            {
+                Thread t = new Thread(new ThreadStart(RunSingleOpenSSLEncryptionThread));
+                threads.Add(t);
+                t.Start();
+            }
+            foreach (Thread t in threads)
+            {
+                t.Join();
+            }
+            RNG.Close();
+            Assert.IsFalse(encryptionFailed);
+        }
+
+        private void RunSingleOpenSSLEncryptionThread()
+        {
+            try
+            {
+                for (int i = 0; i < 100; i++)
+                {
+                    var random = new Random();
+                    IEncryptor encryptor;
+                    IEncryptor decryptor;
+                    encryptor = new StreamOpenSSLEncryptor("aes-256-cfb", "barfoo!");
+                    decryptor = new StreamOpenSSLEncryptor("aes-256-cfb", "barfoo!");
+                    RunEncryptionRound(encryptor, decryptor);
+                }
+            }
+            catch
+            {
+                encryptionFailed = true;
+                throw;
+            }
+        }
+
+        [TestMethod]
         public void ParseAndGenerateShadowsocksUrl()
         {
             var server = new Server
