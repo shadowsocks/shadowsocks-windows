@@ -127,9 +127,9 @@ namespace Shadowsocks.Encryption.AEAD
 
         public static void randBytes(byte[] buf, int length) { RNG.GetBytes(buf, length); }
 
-        public abstract int cipherEncrypt(byte[] plaintext, uint plen, byte[] ciphertext, ref uint clen);
+        public abstract void cipherEncrypt(byte[] plaintext, uint plen, byte[] ciphertext, ref uint clen);
 
-        public abstract int cipherDecrypt(byte[] ciphertext, uint clen, byte[] plaintext, ref uint plen);
+        public abstract void cipherDecrypt(byte[] ciphertext, uint clen, byte[] plaintext, ref uint plen);
 
         #region TCP
 

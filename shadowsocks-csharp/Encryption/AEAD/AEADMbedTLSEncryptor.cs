@@ -19,7 +19,7 @@ namespace Shadowsocks.Encryption.AEAD
         {
         }
 
-        private static Dictionary<string, EncryptorInfo> _ciphers = new Dictionary<string, EncryptorInfo>
+        private static readonly Dictionary<string, EncryptorInfo> _ciphers = new Dictionary<string, EncryptorInfo>
         {
             {"aes-128-gcm", new EncryptorInfo("AES-128-GCM", 16, 16, 12, 16, CIPHER_AES)},
             {"aes-192-gcm", new EncryptorInfo("AES-192-GCM", 24, 24, 12, 16, CIPHER_AES)},
@@ -48,6 +48,7 @@ namespace Shadowsocks.Encryption.AEAD
             {
                 _decryptCtx = ctx;
             }
+
             MbedTLS.cipher_init(ctx);
             if (MbedTLS.cipher_setup(ctx, MbedTLS.cipher_info_from_string(_innerLibName)) != 0)
                 throw new System.Exception("Cannot initialize mbed TLS cipher context");
@@ -67,7 +68,7 @@ namespace Shadowsocks.Encryption.AEAD
             if (ret != 0) throw new System.Exception("failed to finish preparation");
         }
 
-        public override int cipherEncrypt(byte[] plaintext, uint plen, byte[] ciphertext, ref uint clen)
+        public override void cipherEncrypt(byte[] plaintext, uint plen, byte[] ciphertext, ref uint clen)
         {
             // buf: all plaintext
             // outbuf: ciphertext + tag
@@ -87,18 +88,18 @@ namespace Shadowsocks.Encryption.AEAD
                         /* cipher */
                         ciphertext, ref olen,
                         tagbuf, (uint) tagLen);
-                    if (ret != 0) throw new CryptoErrorException();
+                    if (ret != 0) throw new CryptoErrorException(String.Format("ret is {0}", ret));
                     Debug.Assert(olen == plen);
                     // attach tag to ciphertext
                     Array.Copy(tagbuf, 0, ciphertext, (int) plen, tagLen);
                     clen = olen + (uint) tagLen;
-                    return ret;
+                    break;
                 default:
                     throw new System.Exception("not implemented");
             }
         }
 
-        public override int cipherDecrypt(byte[] ciphertext, uint clen, byte[] plaintext, ref uint plen)
+        public override void cipherDecrypt(byte[] ciphertext, uint clen, byte[] plaintext, ref uint plen)
         {
             // buf: ciphertext + tag
             // outbuf: plaintext
@@ -116,10 +117,10 @@ namespace Shadowsocks.Encryption.AEAD
                         ciphertext, (uint) (clen - tagLen),
                         plaintext, ref olen,
                         tagbuf, (uint) tagLen);
-                    if (ret != 0) throw new CryptoErrorException();
+                    if (ret != 0) throw new CryptoErrorException(String.Format("ret is {0}", ret));
                     Debug.Assert(olen == clen - tagLen);
                     plen = olen;
-                    return ret;
+                    break;
                 default:
                     throw new System.Exception("not implemented");
             }
@@ -163,6 +164,7 @@ namespace Shadowsocks.Encryption.AEAD
                 Marshal.FreeHGlobal(_encryptCtx);
                 _encryptCtx = IntPtr.Zero;
             }
+
             if (_decryptCtx != IntPtr.Zero)
             {
                 MbedTLS.cipher_free(_decryptCtx);

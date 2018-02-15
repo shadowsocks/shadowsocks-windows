@@ -27,7 +27,7 @@ namespace Shadowsocks.Encryption.Stream
             _decryptBuf = new byte[MAX_INPUT_SIZE + SODIUM_BLOCK_SIZE];
         }
 
-        private static Dictionary<string, EncryptorInfo> _ciphers = new Dictionary<string, EncryptorInfo> {
+        private static readonly Dictionary<string, EncryptorInfo> _ciphers = new Dictionary<string, EncryptorInfo> {
             { "salsa20", new EncryptorInfo(32, 8, CIPHER_SALSA20) },
             { "chacha20", new EncryptorInfo(32, 8, CIPHER_CHACHA20) },
             { "chacha20-ietf", new EncryptorInfo(32, 12, CIPHER_CHACHA20_IETF) }
