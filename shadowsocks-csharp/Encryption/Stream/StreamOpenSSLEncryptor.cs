@@ -32,7 +32,7 @@ namespace Shadowsocks.Encryption.Stream
             { "aes-128-ctr", new EncryptorInfo("aes-128-ctr", 16, 16, CIPHER_AES) },
             { "aes-192-ctr", new EncryptorInfo("aes-192-ctr", 24, 16, CIPHER_AES) },
             { "aes-256-ctr", new EncryptorInfo("aes-256-ctr", 32, 16, CIPHER_AES) },
-            { "bf-cfb", new EncryptorInfo("bf-cfb64", 16, 8, CIPHER_BLOWFISH) },
+            { "bf-cfb", new EncryptorInfo("bf-cfb", 16, 8, CIPHER_BLOWFISH) },
             { "camellia-128-cfb", new EncryptorInfo("CAMELLIA-128-CFB", 16, 16, CIPHER_CAMELLIA) },
             { "camellia-192-cfb", new EncryptorInfo("CAMELLIA-192-CFB", 24, 16, CIPHER_CAMELLIA) },
             { "camellia-256-cfb", new EncryptorInfo("CAMELLIA-256-CFB", 32, 16, CIPHER_CAMELLIA) },
