@@ -21,7 +21,7 @@ Download the [latest release].
 
 #### Requirements
 
-Microsoft [.NET Framework 4.6.2] or higher. 
+Microsoft [.NET Framework 4.6.2] or higher, [Microsoft Visual C++ 2015 Redistributable] (x86) .
 
 #### Basic
 
@@ -118,3 +118,4 @@ GPLv3
 [.NET Framework 4.6.2]: https://www.microsoft.com/en-US/download/details.aspx?id=53344
 [Visual Studio 2015]: https://www.visualstudio.com/downloads/
 [.NET Framework 4.6.2 Developer Pack]: https://www.microsoft.com/download/details.aspx?id=53321
+[Microsoft Visual C++ 2015 Redistributable]: https://www.microsoft.com/en-us/download/details.aspx?id=53840
