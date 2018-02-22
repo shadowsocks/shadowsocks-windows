@@ -55,6 +55,7 @@ namespace Shadowsocks.Controller.Service
                 StartInfo = new ProcessStartInfo
                 {
                     FileName = plugin,
+                    Arguments = pluginOpts,
                     UseShellExecute = false,
                     CreateNoWindow = true,
                     ErrorDialog = false,
@@ -86,7 +87,7 @@ namespace Shadowsocks.Controller.Service
                     return false;
                 }
 
-                var localPort = GetNextFreeTcpPort();
+                var localPort = int.Parse(_pluginProcess.StartInfo.Environment["SS_REMOTE_PORT"]);
                 LocalEndPoint = new IPEndPoint(IPAddress.Loopback, localPort);
 
                 _pluginProcess.StartInfo.Environment["SS_LOCAL_HOST"] = LocalEndPoint.Address.ToString();
