@@ -4,8 +4,10 @@ using System.IO;
 using System.IO.Compression;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
+using System.Net.NetworkInformation;
 using Microsoft.Win32;
 using Shadowsocks.Controller;
+
 
 namespace Shadowsocks.Util
 {
@@ -254,6 +256,29 @@ namespace Shadowsocks.Util
                 }
             }
             return false;
+        }
+
+        public static int RandomLocalPort()
+        {
+            bool isUsed = false;
+
+            Random rnd = new Random();
+            int port = rnd.Next(1024, 49151);
+
+            do
+            {
+                foreach (var ipEndPoint in IPGlobalProperties.GetIPGlobalProperties().GetActiveTcpListeners())
+                {
+                    if (ipEndPoint.Port == port)
+                    {
+                        isUsed = true;
+                        port = rnd.Next(1024, 49151);
+                        break;
+                    }
+                }
+            } while (isUsed);
+
+            return port;
         }
     }
 }

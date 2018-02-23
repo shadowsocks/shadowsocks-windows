@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-
 using Shadowsocks.Controller;
+using Shadowsocks.Util;
 using Newtonsoft.Json;
 
 namespace Shadowsocks.Model
@@ -51,6 +51,7 @@ namespace Shadowsocks.Model
 
         public static Configuration Load()
         {
+            Random rnd = new Random();
             try
             {
                 string configContent = File.ReadAllText(CONFIG_FILE);
@@ -62,7 +63,7 @@ namespace Shadowsocks.Model
                 if (config.configs.Count == 0)
                     config.configs.Add(GetDefaultServer());
                 if (config.localPort == 0)
-                    config.localPort = 1080;
+                    config.localPort = Utils.RandomLocalPort();
                 if (config.index == -1 && config.strategy == null)
                     config.index = 0;
                 if (config.logViewer == null)
@@ -84,7 +85,7 @@ namespace Shadowsocks.Model
                 {
                     index = 0,
                     isDefault = true,
-                    localPort = 1080,
+                    localPort = Utils.RandomLocalPort(),
                     autoCheckUpdate = true,
                     configs = new List<Server>()
                     {
