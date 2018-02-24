@@ -252,7 +252,8 @@
             "aes-128-gcm",
             "aes-192-gcm",
             "aes-256-gcm",
-            "chacha20-ietf-poly1305"});
+            "chacha20-ietf-poly1305",
+            "xchacha20-ietf-poly1305"});
             this.EncryptionSelect.Location = new System.Drawing.Point(101, 109);
             this.EncryptionSelect.Name = "EncryptionSelect";
             this.EncryptionSelect.Size = new System.Drawing.Size(160, 20);
