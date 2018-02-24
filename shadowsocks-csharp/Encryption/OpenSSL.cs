@@ -13,7 +13,7 @@ namespace Shadowsocks.Encryption
     // XXX: only for OpenSSL 1.1.0 and higher
     public static class OpenSSL
     {
-        private const string DLLNAME = "libcrypto-1_1.dll";
+        private const string DLLNAME = "libsscrypto.dll";
 
         public const int OPENSSL_ENCRYPT = 1;
         public const int OPENSSL_DECRYPT = 0;
@@ -27,7 +27,7 @@ namespace Shadowsocks.Encryption
             string dllPath = Utils.GetTempPath(DLLNAME);
             try
             {
-                FileManager.UncompressFile(dllPath, Resources.libcrypto_1_1_dll);
+                FileManager.UncompressFile(dllPath, Resources.libsscrypto_dll);
             }
             catch (IOException)
             {
