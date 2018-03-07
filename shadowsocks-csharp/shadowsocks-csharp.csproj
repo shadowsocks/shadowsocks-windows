@@ -253,7 +253,6 @@
       <SubType>Designer</SubType>
     </None>
     <None Include="Data\abp.js.gz" />
-    <None Include="Data\libcrypto-1_1.dll.gz" />
     <None Include="Data\libsscrypto.dll.gz" />
     <None Include="Data\mgwz.dll.gz" />
     <None Include="Data\privoxy.exe.gz" />
