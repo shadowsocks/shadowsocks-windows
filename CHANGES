@@ -1,3 +1,9 @@
+4.0.9 2018-03-14
+- Fix port occupied issue
+- Add xchacha20-ietf-poly1305
+- Update cryptographic libraries
+- Bug fixes and improvements
+
 4.0.8 2018-02-16
 - Add OpenSSL 1.1.0g support #1671
 - Update nuget packages
