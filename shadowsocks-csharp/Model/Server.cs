@@ -46,23 +46,23 @@ namespace Shadowsocks.Model
             {
                 return I18N.GetString("New server");
             }
-            string serverStr;
-            // CheckHostName() won't do a real DNS lookup
-            var hostType = Uri.CheckHostName(server);
 
-            switch (hostType)
-            {
-                case UriHostNameType.IPv6:
-                    serverStr = $"[{server}]:{server_port}";
-                    break;
-                default:
-                    // IPv4 and domain name
-                    serverStr = $"{server}:{server_port}";
-                    break;
-            }
+            string serverStr = $"{FormatHostName(server)}:{server_port}";
             return remarks.IsNullOrEmpty()
                 ? serverStr
                 : $"{remarks} ({serverStr})";
+        }
+
+        public string FormatHostName(string hostName)
+        {
+            // CheckHostName() won't do a real DNS lookup
+            switch (Uri.CheckHostName(hostName))
+            {
+                case UriHostNameType.IPv6:  // Add square bracket when IPv6 (RFC3986)
+                    return $"[{hostName}]";
+                default:    // IPv4 or domain name
+                    return hostName;
+            }
         }
 
         public Server()
@@ -141,7 +141,7 @@ namespace Shadowsocks.Model
                     Server server = new Server
                     {
                         remarks = parsedUrl.GetComponents(UriComponents.Fragment, UriFormat.Unescaped),
-                        server = parsedUrl.GetComponents(UriComponents.Host, UriFormat.Unescaped),
+                        server = parsedUrl.IdnHost,
                         server_port = parsedUrl.Port,
                     };
 

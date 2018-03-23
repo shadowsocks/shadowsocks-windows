@@ -353,7 +353,7 @@ namespace Shadowsocks.Controller
                 url = string.Format(
                     "{0}@{1}:{2}/?plugin={3}",
                     websafeBase64,
-                    server.server,
+                    server.FormatHostName(server.server),
                     server.server_port,
                     HttpUtility.UrlEncode(pluginPart, Encoding.UTF8));
             }
