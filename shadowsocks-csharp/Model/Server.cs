@@ -13,6 +13,7 @@ namespace Shadowsocks.Model
     {
         #region ParseLegacyURL
         public static readonly Regex
+            OutlineFinder = new Regex(@"ss://(?<base64>[A-Za-z0-9+-/=_]+)@(?<hostname>.+?):(?<port>\d+?)/\?outline=1$", RegexOptions.IgnoreCase),
             UrlFinder = new Regex(@"ss://(?<base64>[A-Za-z0-9+-/=_]+)(?:#(?<tag>\S+))?", RegexOptions.IgnoreCase),
             DetailsParser = new Regex(@"^((?<method>.+?):(?<password>.*)@(?<hostname>.+?):(?<port>\d+?))$", RegexOptions.IgnoreCase);
         #endregion ParseLegacyURL
@@ -79,10 +80,30 @@ namespace Shadowsocks.Model
 
         private static Server ParseLegacyURL(string ssURL)
         {
+            if (ssURL.EndsWith("/?outline=1", StringComparison.OrdinalIgnoreCase))
+            {
+                var outline = OutlineFinder.Match(ssURL);
+                if (outline.Success)
+                {
+                    var outlineBase64 = outline.Groups["base64"].Value.TrimEnd('/');
+                    var spl = Encoding.UTF8.GetString(Convert.FromBase64String(outlineBase64.PadRight(outlineBase64.Length + ((4 - (outlineBase64.Length % 4)) % 4), '='))).Split(':');
+                    if (spl.Length == 2)
+                    {
+                        return new Server
+                        {
+                            method = spl[0],
+                            password = spl[1],
+                            server = outline.Groups["hostname"].Value,
+                            server_port = int.Parse(outline.Groups["port"].Value),
+                            timeout = DefaultServerTimeoutSec
+                        };
+                    }
+                }
+            }
+
             var match = UrlFinder.Match(ssURL);
             if (!match.Success)
                 return null;
-
             Server server = new Server();
             var base64 = match.Groups["base64"].Value.TrimEnd('/');
             var tag = match.Groups["tag"].Value;
