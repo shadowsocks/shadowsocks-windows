@@ -51,8 +51,8 @@ Server Port=伺服器連接埠
 Password=密碼
 Show Password=顯示密碼
 Encryption=加密
-Plugin=插件
-Plugin Options=插件選項
+Plugin=外掛程式
+Plugin Options=外掛程式選項
 Proxy Port=Proxy 連接埠
 Remarks=註解
 Timeout(Sec)=逾時 (秒)
@@ -69,7 +69,7 @@ Use Proxy=使用 Proxy
 Proxy Type=Proxy 類型
 Proxy Addr=Proxy 位址
 Proxy Port=Proxy 連接埠
-If server has a plugin, proxy will not be used=若伺服器含有插件，Proxy 將不被使用
+If server has a plugin, proxy will not be used=若伺服器含有外掛程式，Proxy 將不被使用
 
 # Log Form
 
