@@ -269,6 +269,61 @@ namespace test
         }
 
         [TestMethod]
+        public void ParseOutlineUrl()
+        {
+            /*
+             * They only have one format currently:
+             * ss://{Base64(method:password)}@{server ip}:{server port}/?outline=1
+             */
+            var server = new Server
+            {
+                server = "127.0.0.1",
+                server_port = 36723,
+                password = "ufqUFIFdwq",
+                method = "chacha20-ietf-poly1305"
+            };
+            var serverOutlineUrl = "ss://Y2hhY2hhMjAtaWV0Zi1wb2x5MTMwNTp1ZnFVRklGZHdx@127.0.0.1:36723/?outline=1";
+            var serverCanonUrl = "ss://Y2hhY2hhMjAtaWV0Zi1wb2x5MTMwNTp1ZnFVRklGZHdxQDEyNy4wLjAuMTozNjcyMw";
+            var serverWithRemark = new Server
+            {
+                server = server.server,
+                server_port = server.server_port,
+                password = server.password,
+                method = server.method,
+                remarks = "outline"
+            };
+            var serverWithRemarkCanonUrl = "ss://Y2hhY2hhMjAtaWV0Zi1wb2x5MTMwNTp1ZnFVRklGZHdxQDEyNy4wLjAuMTozNjcyMw==#outline";
+            RunParseShadowsocksUrlTest(
+                string.Join(
+                    "\r\n",
+                    serverOutlineUrl,
+                    "\r\n",
+                    serverCanonUrl,
+                    serverWithRemarkCanonUrl,
+                    "ss://Y2hhY2hhMjAtaWV0Zi1wb2x5MTMwNTp1ZnFVRklGZHdx@google.com:6666/"),
+                new[]
+                {
+                    server,
+                    server,
+                    serverWithRemark,
+                    new Server
+                    {
+                        server = "google.com",
+                        server_port = 6666,
+                        password = "ufqUFIFdwq",
+                        method = "chacha20-ietf-poly1305"
+                    }
+                });
+
+            // wrong format test : give nothing
+            Assert.AreEqual(Server.GetServers(string.Join(
+                "\r\n\n\n\n\r",
+                "ss://hahahaha@127.0.0.1:36723/?outline=1",
+                "outline://Y2hhY2hhMjAtaWV0Zi1wb2x5MTMwNTp1ZnFVRklGZHdx@google.com:36723",
+                "ss://Y2hhY2hhMjAtaWV0Zi1wb2x5MTMwNTp1ZnFVRklGZHdx@127.0.0.1:oops/?outline=1")).Count, 0);
+        }
+
+        [TestMethod]
         public void ParseAndGenerateShadowsocksUrl()
         {
             var server = new Server

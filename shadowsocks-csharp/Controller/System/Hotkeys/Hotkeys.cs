@@ -15,12 +15,36 @@ namespace Shadowsocks.Controller.Hotkeys
         // map key and corresponding handler function
         private static Dictionary<HotKey, HotKeyCallBackHandler> _keymap = new Dictionary<HotKey, HotKeyCallBackHandler>();
 
+        private static void LoadConfiguration(Model.HotkeyConfig config)
+        {
+            if (config == null) return;
+            foreach (var fieldInfo in config.GetType().GetFields())
+            {
+                var fValue = fieldInfo.GetValue(config);
+                if (!(fValue is string)) continue;
+                var str = fValue as string;
+                var hotkey = Str2HotKey(str);
+                if (hotkey == null) continue;
+                //SwitchSystemProxyMode=>SwitchProxyModeCallback()
+                var callbackName = fieldInfo.Name == "SwitchSystemProxyMode" ? "SwitchProxyModeCallback" : fieldInfo.Name + "Callback";
+                if (!(HotkeyCallbacks.GetCallback(callbackName) is HotKeyCallBackHandler)) continue;
+                var callback = HotkeyCallbacks.GetCallback(callbackName) as HotKeyCallBackHandler;
+                HotKey prevHotKey;
+                if (IsCallbackExists(callback, out prevHotKey))
+                    UnRegist(prevHotKey);
+                var regResult = Regist(hotkey, callback);
+                Logging.Info(string.Format("HotKey : {0} -> {1} - {2}", str, fieldInfo.Name, regResult ? "Success" : "Failed"));
+            }
+        }
+
         public static void Init(ShadowsocksController controller)
         {
             _hotKeyManager = new HotKeyManager();
             _hotKeyManager.KeyPressed += HotKeyManagerPressed;
 
             HotkeyCallbacks.InitInstance(controller);
+
+            LoadConfiguration(controller.GetConfigurationCopy().hotkey);
         }
 
         public static void Destroy()
