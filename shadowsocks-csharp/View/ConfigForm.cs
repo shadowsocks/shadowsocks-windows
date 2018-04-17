@@ -48,8 +48,9 @@ namespace Shadowsocks.View
             PasswordLabel.Text = I18N.GetString("Password");
             ShowPasswdCheckBox.Text = I18N.GetString("Show Password");
             EncryptionLabel.Text = I18N.GetString("Encryption");
-            PluginLabel.Text = I18N.GetString("Plugin");
+            PluginLabel.Text = I18N.GetString("Plugin Program");
             PluginOptionsLabel.Text = I18N.GetString("Plugin Options");
+            PluginArgumentsLabel.Text = I18N.GetString("Plugin Arguments");
             ProxyPortLabel.Text = I18N.GetString("Proxy Port");
             RemarksLabel.Text = I18N.GetString("Remarks");
             TimeoutLabel.Text = I18N.GetString("Timeout(Sec)");

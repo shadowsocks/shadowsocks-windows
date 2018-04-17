@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.PluginOptionsLabel = new System.Windows.Forms.Label();
             this.PluginTextBox = new System.Windows.Forms.TextBox();
@@ -65,6 +66,7 @@
             this.tableLayoutPanel3 = new System.Windows.Forms.TableLayoutPanel();
             this.tableLayoutPanel4 = new System.Windows.Forms.TableLayoutPanel();
             this.DuplicateButton = new System.Windows.Forms.Button();
+            this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             this.tableLayoutPanel1.SuspendLayout();
             this.ServerGroupBox.SuspendLayout();
             this.tableLayoutPanel2.SuspendLayout();
@@ -128,6 +130,7 @@
             this.PluginOptionsLabel.Size = new System.Drawing.Size(89, 12);
             this.PluginOptionsLabel.TabIndex = 6;
             this.PluginOptionsLabel.Text = "Plugin Options";
+            this.toolTip1.SetToolTip(this.PluginOptionsLabel, "Environment variables");
             // 
             // PluginTextBox
             // 
@@ -278,11 +281,11 @@
             // 
             this.PluginLabel.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.PluginLabel.AutoSize = true;
-            this.PluginLabel.Location = new System.Drawing.Point(66, 139);
+            this.PluginLabel.Location = new System.Drawing.Point(18, 139);
             this.PluginLabel.Name = "PluginLabel";
-            this.PluginLabel.Size = new System.Drawing.Size(41, 12);
+            this.PluginLabel.Size = new System.Drawing.Size(89, 12);
             this.PluginLabel.TabIndex = 5;
-            this.PluginLabel.Text = "Plugin";
+            this.PluginLabel.Text = "Plugin Program";
             // 
             // PluginOptionsTextBox
             // 
@@ -337,6 +340,8 @@
             this.PluginArgumentsLabel.Size = new System.Drawing.Size(101, 12);
             this.PluginArgumentsLabel.TabIndex = 7;
             this.PluginArgumentsLabel.Text = "Plugin Arguments";
+            this.toolTip1.SetToolTip(this.PluginArgumentsLabel, "Not SIP003 standard. Used as CLI arguments.\r\nMandatory:\r\n%SS_LOCAL_HOST%, %SS_LOC" +
+        "SL_PORT%, %SS_REMOTE_HOST%, %SS_REMOTE_PORT%\r\nOptional:\r\n%SS_PLUGIN_OPTIONS%");
             // 
             // panel2
             // 
@@ -660,6 +665,7 @@
         private System.Windows.Forms.TextBox PasswordTextBox;
         private System.Windows.Forms.TextBox PluginArgumentsTextBox;
         private System.Windows.Forms.Label PluginArgumentsLabel;
+        private System.Windows.Forms.ToolTip toolTip1;
     }
 }
 
