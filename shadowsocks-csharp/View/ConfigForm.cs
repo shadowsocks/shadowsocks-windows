@@ -99,6 +99,7 @@ namespace Shadowsocks.View
                 server.method = EncryptionSelect.Text;
                 server.plugin = PluginTextBox.Text;
                 server.plugin_opts = PluginOptionsTextBox.Text;
+                server.plugin_args = PluginArgumentsTextBox.Text;
                 server.remarks = RemarksTextBox.Text;
                 if (!int.TryParse(TimeoutTextBox.Text, out server.timeout))
                 {
@@ -134,6 +135,7 @@ namespace Shadowsocks.View
                 EncryptionSelect.Text = server.method ?? "aes-256-cfb";
                 PluginTextBox.Text = server.plugin;
                 PluginOptionsTextBox.Text = server.plugin_opts;
+                PluginArgumentsTextBox.Text = server.plugin_args;
                 RemarksTextBox.Text = server.remarks;
                 TimeoutTextBox.Text = server.timeout.ToString();
             }
