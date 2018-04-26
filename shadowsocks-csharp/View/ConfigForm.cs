@@ -48,8 +48,9 @@ namespace Shadowsocks.View
             PasswordLabel.Text = I18N.GetString("Password");
             ShowPasswdCheckBox.Text = I18N.GetString("Show Password");
             EncryptionLabel.Text = I18N.GetString("Encryption");
-            PluginLabel.Text = I18N.GetString("Plugin");
+            PluginLabel.Text = I18N.GetString("Plugin Program");
             PluginOptionsLabel.Text = I18N.GetString("Plugin Options");
+            PluginArgumentsLabel.Text = I18N.GetString("Plugin Arguments");
             ProxyPortLabel.Text = I18N.GetString("Proxy Port");
             RemarksLabel.Text = I18N.GetString("Remarks");
             TimeoutLabel.Text = I18N.GetString("Timeout(Sec)");
@@ -99,6 +100,7 @@ namespace Shadowsocks.View
                 server.method = EncryptionSelect.Text;
                 server.plugin = PluginTextBox.Text;
                 server.plugin_opts = PluginOptionsTextBox.Text;
+                server.plugin_args = PluginArgumentsTextBox.Text;
                 server.remarks = RemarksTextBox.Text;
                 if (!int.TryParse(TimeoutTextBox.Text, out server.timeout))
                 {
@@ -134,6 +136,7 @@ namespace Shadowsocks.View
                 EncryptionSelect.Text = server.method ?? "aes-256-cfb";
                 PluginTextBox.Text = server.plugin;
                 PluginOptionsTextBox.Text = server.plugin_opts;
+                PluginArgumentsTextBox.Text = server.plugin_args;
                 RemarksTextBox.Text = server.remarks;
                 TimeoutTextBox.Text = server.timeout.ToString();
             }
