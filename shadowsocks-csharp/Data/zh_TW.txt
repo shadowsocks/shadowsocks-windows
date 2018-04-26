@@ -70,6 +70,14 @@ Proxy Type=Proxy 類型
 Proxy Addr=Proxy 位址
 Proxy Port=Proxy 連接埠
 If server has a plugin, proxy will not be used=若伺服器含有外掛程式，Proxy 將不被使用
+Select...=選擇...
+Temp Folder=臨時資料夾
+Select temp folder=選擇臨時資料夾
+<Startup Folder>=<Shadowsocks 所在資料夾>
+<ProgramData Folder>=<ProgramData 資料夾>
+<AppData Local Folder>=<AppData/Local 資料夾>
+<AppData Roaming Folder>=<AppData/Roaming 資料夾>
+<Temp Folder>=<使用者臨時資料夾>
 
 # Log Form
 
@@ -144,3 +152,4 @@ Proxy handshake failed=Proxy 交握失敗
 Register hotkey failed=註冊快速鍵失敗
 Cannot parse hotkey: {0}=剖析快速鍵失敗: {0}
 Timeout is invalid, it should not exceed {0}=逾時無效，不應超過 {0}
+Invalid temp folder path=臨時資料夾路徑無效

@@ -468,7 +468,8 @@
             // 
             // tableLayoutPanel5
             // 
-            this.tableLayoutPanel5.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            this.tableLayoutPanel5.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.tableLayoutPanel5.AutoSize = true;
             this.tableLayoutPanel5.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
@@ -479,7 +480,7 @@
             this.tableLayoutPanel5.Controls.Add(this.ProxyPortLabel, 0, 0);
             this.tableLayoutPanel5.Controls.Add(this.TempFolderLabel, 0, 1);
             this.tableLayoutPanel5.Controls.Add(this.TempFolderComboBox, 1, 1);
-            this.tableLayoutPanel5.Location = new System.Drawing.Point(254, 281);
+            this.tableLayoutPanel5.Location = new System.Drawing.Point(166, 281);
             this.tableLayoutPanel5.Margin = new System.Windows.Forms.Padding(0);
             this.tableLayoutPanel5.Name = "tableLayoutPanel5";
             this.tableLayoutPanel5.Padding = new System.Windows.Forms.Padding(3);
@@ -490,7 +491,7 @@
             this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 58F));
             this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 58F));
             this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 58F));
-            this.tableLayoutPanel5.Size = new System.Drawing.Size(202, 64);
+            this.tableLayoutPanel5.Size = new System.Drawing.Size(290, 64);
             this.tableLayoutPanel5.TabIndex = 9;
             // 
             // ProxyPortTextBox
@@ -525,12 +526,12 @@
             // 
             // TempFolderComboBox
             // 
-            this.TempFolderComboBox.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.TempFolderComboBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             this.TempFolderComboBox.FormattingEnabled = true;
             this.TempFolderComboBox.ImeMode = System.Windows.Forms.ImeMode.Alpha;
             this.TempFolderComboBox.Location = new System.Drawing.Point(83, 35);
             this.TempFolderComboBox.Name = "TempFolderComboBox";
-            this.TempFolderComboBox.Size = new System.Drawing.Size(113, 20);
+            this.TempFolderComboBox.Size = new System.Drawing.Size(201, 20);
             this.TempFolderComboBox.TabIndex = 10;
             this.TempFolderComboBox.SelectedIndexChanged += new System.EventHandler(this.TempFolderComboBox_SelectedIndexChanged);
             this.TempFolderComboBox.TextChanged += new System.EventHandler(this.TempFolderComboBox_TextChanged);
