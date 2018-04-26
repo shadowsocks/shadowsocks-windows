@@ -6,6 +6,7 @@ using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using Microsoft.Win32;
 using Shadowsocks.Controller;
+using Shadowsocks.Model;
 
 namespace Shadowsocks.Util
 {
@@ -34,9 +35,30 @@ namespace Shadowsocks.Util
             {
                 try
                 {
-                    Directory.CreateDirectory(Path.Combine(Application.StartupPath, "ss_win_temp"));
+                    var config = Configuration.Load().tempFolder;
+                    if (string.IsNullOrWhiteSpace(config))
+                        config = Configuration.KnownTempFolder.Default;
+
+                    var tempRoot = Application.StartupPath;
+                    switch (config)
+                    {
+                    case Configuration.KnownTempFolder.EXECUTABLE:
+                        tempRoot = Application.StartupPath; break;
+                    case Configuration.KnownTempFolder.PROGRAM_DATA:
+                        tempRoot = Application.CommonAppDataPath; break;
+                    case Configuration.KnownTempFolder.TEMP:
+                        tempRoot = Path.GetTempPath(); break;
+                    case Configuration.KnownTempFolder.LOCAL:
+                        tempRoot = Application.LocalUserAppDataPath; break;
+                    case Configuration.KnownTempFolder.ROAMING:
+                        tempRoot = Application.UserAppDataPath; break;
+                    default:
+                        tempRoot = config; break;
+                    }
+                    // Use Application.ExecutablePath.GetHashCode() to generate per executable specific path in case of multi-instance.
+                    var tempDirectory = Directory.CreateDirectory(Path.Combine(tempRoot, "ss_win_temp_" + Application.ExecutablePath.GetHashCode()));
                     // don't use "/", it will fail when we call explorer /select xxx/ss_win_temp\xxx.log
-                    _tempPath = Path.Combine(Application.StartupPath, "ss_win_temp");
+                    _tempPath = tempDirectory.FullName;
                 }
                 catch (Exception e)
                 {

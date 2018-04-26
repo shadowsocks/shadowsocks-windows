@@ -30,6 +30,27 @@ namespace Shadowsocks.Model
         public LogViewerConfig logViewer;
         public ProxyConfig proxy;
         public HotkeyConfig hotkey;
+        public string tempFolder;
+
+        public static class KnownTempFolder
+        {
+            public static string Default => EXECUTABLE;
+
+            public const string EXECUTABLE = "<Executable>";
+            public const string PROGRAM_DATA = "<ProgramData>";
+            public const string TEMP = "<Temp>";
+            public const string LOCAL = "<Local>";
+            public const string ROAMING = "<Roaming>";
+
+            public static string[] Folders = new[]
+            {
+                 EXECUTABLE,
+                 PROGRAM_DATA,
+                 LOCAL,
+                 ROAMING,
+                 TEMP,
+            };
+        }
 
         private static string CONFIG_FILE = "gui-config.json";
 
@@ -71,6 +92,8 @@ namespace Shadowsocks.Model
                     config.proxy = new ProxyConfig();
                 if (config.hotkey == null)
                     config.hotkey = new HotkeyConfig();
+                if (string.IsNullOrWhiteSpace(config.tempFolder))
+                    config.tempFolder = KnownTempFolder.Default;
 
                 config.proxy.CheckConfig();
 
@@ -143,6 +166,25 @@ namespace Shadowsocks.Model
             CheckPort(port);
             if (port == 8123)
                 throw new ArgumentException(I18N.GetString("Port can't be 8123"));
+        }
+
+        public static void CheckTempFolder(string tempPath)
+        {
+            if (string.IsNullOrWhiteSpace(tempPath))
+                return;
+            switch (tempPath)
+            {
+            case KnownTempFolder.EXECUTABLE:
+            case KnownTempFolder.PROGRAM_DATA:
+            case KnownTempFolder.TEMP:
+            case KnownTempFolder.LOCAL:
+            case KnownTempFolder.ROAMING:
+                return;
+            default:
+                if (tempPath.IndexOfAny(Path.GetInvalidPathChars()) >= 0)
+                    throw new ArgumentException(I18N.GetString("Invalid temp folder path"));
+                return;
+            }
         }
 
         private static void CheckPassword(string password)
