@@ -394,9 +394,10 @@ namespace Shadowsocks.View
         {
             if (TempFolderComboBox.SelectedIndex == TempFolderComboBox.Items.Count - 1)
             {
-                if (TempFolderBrowserDialog.ShowDialog() == DialogResult.OK)
+                var dialogResult = TempFolderBrowserDialog.ShowDialog();
+                await Task.Yield();
+                if (dialogResult == DialogResult.OK)
                 {
-                    await Task.Yield();
                     TempFolderComboBox.SelectedIndex = -1;
                     TempFolderComboBox.Text = TempFolderBrowserDialog.SelectedPath;
                 }
