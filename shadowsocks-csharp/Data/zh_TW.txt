@@ -62,14 +62,7 @@ Cancel=取消
 New server=新伺服器
 Move &Up=上移 (&U)
 Move D&own=下移 (&O)
-Select...=選擇...
 Temp Folder=臨時資料夾
-Select temp folder=選擇臨時資料夾
-<Startup Folder>=<Shadowsocks 所在資料夾>
-<ProgramData Folder>=<ProgramData 資料夾>
-<AppData Local Folder>=<AppData/Local 資料夾>
-<AppData Roaming Folder>=<AppData/Roaming 資料夾>
-<Temp Folder>=<使用者臨時資料夾>
 
 # Proxy Form
 
@@ -153,4 +146,3 @@ Proxy handshake failed=Proxy 交握失敗
 Register hotkey failed=註冊快速鍵失敗
 Cannot parse hotkey: {0}=剖析快速鍵失敗: {0}
 Timeout is invalid, it should not exceed {0}=逾時無效，不應超過 {0}
-Invalid temp folder path=臨時資料夾路徑無效

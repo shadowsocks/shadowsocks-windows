@@ -54,14 +54,6 @@ namespace Shadowsocks.View
             PluginArgumentsLabel.Text = I18N.GetString("Plugin Arguments");
             ProxyPortLabel.Text = I18N.GetString("Proxy Port");
             TempFolderLabel.Text = I18N.GetString("Temp Folder");
-            TempFolderComboBox.Items.Clear();
-            TempFolderComboBox.Items.Add(I18N.GetString("<Startup Folder>"));
-            TempFolderComboBox.Items.Add(I18N.GetString("<ProgramData Folder>"));
-            TempFolderComboBox.Items.Add(I18N.GetString("<AppData Local Folder>"));
-            TempFolderComboBox.Items.Add(I18N.GetString("<AppData Roaming Folder>"));
-            TempFolderComboBox.Items.Add(I18N.GetString("<Temp Folder>"));
-            TempFolderComboBox.Items.Add(I18N.GetString("Select..."));
-            TempFolderBrowserDialog.Description = I18N.GetString("Select temp folder");
             RemarksLabel.Text = I18N.GetString("Remarks");
             TimeoutLabel.Text = I18N.GetString("Timeout(Sec)");
             ServerGroupBox.Text = I18N.GetString("Server");
@@ -119,7 +111,7 @@ namespace Shadowsocks.View
                     return false;
                 }
                 int localPort = int.Parse(ProxyPortTextBox.Text);
-                Configuration.CheckTempFolder(_modifiedConfiguration.tempFolder);
+                Configuration.CheckTempFolder(TempFolderTextBox.Text);
                 Configuration.CheckServer(server);
                 Configuration.CheckLocalPort(localPort);
                 _modifiedConfiguration.configs[_lastSelectedIndex] = server;
@@ -174,9 +166,7 @@ namespace Shadowsocks.View
             ServersListBox.SelectedIndex = _lastSelectedIndex;
             UpdateMoveUpAndDownButton();
             LoadSelectedServer();
-            TempFolderComboBox.SelectedIndex = Array.IndexOf(Configuration.KnownTempFolder.Folders, _modifiedConfiguration.tempFolder);
-            if (TempFolderComboBox.SelectedIndex < 0)
-                TempFolderComboBox.Text = _modifiedConfiguration.tempFolder;
+            TempFolderTextBox.Text = _modifiedConfiguration.tempFolder;
         }
 
         private void ConfigForm_Load(object sender, EventArgs e)
@@ -289,7 +279,7 @@ namespace Shadowsocks.View
                 return;
             }
             controller.SaveServers(_modifiedConfiguration.configs, _modifiedConfiguration.localPort);
-            controller.SaveTempFolder(_modifiedConfiguration.tempFolder);
+            controller.SaveTempFolder(TempFolderTextBox.Text);
             // SelectedIndex remains valid
             // We handled this in event handlers, e.g. Add/DeleteButton, SelectedIndexChanged
             // and move operations
@@ -381,35 +371,6 @@ namespace Shadowsocks.View
         private void ShowPasswdCheckBox_CheckedChanged(object sender, EventArgs e)
         {
             this.PasswordTextBox.UseSystemPasswordChar = !this.ShowPasswdCheckBox.Checked;
-        }
-
-        private void TempFolderComboBox_TextChanged(object sender, EventArgs e)
-        {
-            if (TempFolderComboBox.SelectedIndex >= 0 || string.IsNullOrWhiteSpace(TempFolderComboBox.Text))
-                return;
-            _modifiedConfiguration.tempFolder = TempFolderComboBox.Text;
-        }
-
-        private async void TempFolderComboBox_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            if (TempFolderComboBox.SelectedIndex == TempFolderComboBox.Items.Count - 1)
-            {
-                var dialogResult = TempFolderBrowserDialog.ShowDialog();
-                await Task.Yield();
-                if (dialogResult == DialogResult.OK)
-                {
-                    TempFolderComboBox.SelectedIndex = -1;
-                    TempFolderComboBox.Text = TempFolderBrowserDialog.SelectedPath;
-                }
-                else
-                {
-                    LoadCurrentConfiguration();
-                }
-            }
-            else if (TempFolderComboBox.SelectedIndex >= 0)
-            {
-                _modifiedConfiguration.tempFolder = Configuration.KnownTempFolder.Folders[TempFolderComboBox.SelectedIndex];
-            }
         }
     }
 }

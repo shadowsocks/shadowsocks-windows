@@ -46,9 +46,9 @@
             this.PluginLabel = new System.Windows.Forms.Label();
             this.PluginOptionsTextBox = new System.Windows.Forms.TextBox();
             this.ShowPasswdCheckBox = new System.Windows.Forms.CheckBox();
-            this.RemarksLabel = new System.Windows.Forms.Label();
             this.PluginArgumentsTextBox = new System.Windows.Forms.TextBox();
             this.PluginArgumentsLabel = new System.Windows.Forms.Label();
+            this.RemarksLabel = new System.Windows.Forms.Label();
             this.panel2 = new System.Windows.Forms.Panel();
             this.OKButton = new System.Windows.Forms.Button();
             this.MyCancelButton = new System.Windows.Forms.Button();
@@ -64,12 +64,11 @@
             this.ProxyPortTextBox = new System.Windows.Forms.TextBox();
             this.ProxyPortLabel = new System.Windows.Forms.Label();
             this.TempFolderLabel = new System.Windows.Forms.Label();
-            this.TempFolderComboBox = new System.Windows.Forms.ComboBox();
             this.tableLayoutPanel3 = new System.Windows.Forms.TableLayoutPanel();
             this.tableLayoutPanel4 = new System.Windows.Forms.TableLayoutPanel();
             this.DuplicateButton = new System.Windows.Forms.Button();
-            this.TempFolderBrowserDialog = new System.Windows.Forms.FolderBrowserDialog();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
+            this.TempFolderTextBox = new System.Windows.Forms.TextBox();
             this.tableLayoutPanel1.SuspendLayout();
             this.ServerGroupBox.SuspendLayout();
             this.tableLayoutPanel2.SuspendLayout();
@@ -314,16 +313,6 @@
             this.ShowPasswdCheckBox.UseVisualStyleBackColor = true;
             this.ShowPasswdCheckBox.CheckedChanged += new System.EventHandler(this.ShowPasswdCheckBox_CheckedChanged);
             // 
-            // RemarksLabel
-            // 
-            this.RemarksLabel.Anchor = System.Windows.Forms.AnchorStyles.Right;
-            this.RemarksLabel.AutoSize = true;
-            this.RemarksLabel.Location = new System.Drawing.Point(60, 220);
-            this.RemarksLabel.Name = "RemarksLabel";
-            this.RemarksLabel.Size = new System.Drawing.Size(47, 12);
-            this.RemarksLabel.TabIndex = 8;
-            this.RemarksLabel.Text = "Remarks";
-            // 
             // PluginArgumentsTextBox
             // 
             this.PluginArgumentsTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
@@ -345,6 +334,16 @@
             this.PluginArgumentsLabel.Text = "Plugin Arguments";
             this.toolTip1.SetToolTip(this.PluginArgumentsLabel, "Not SIP003 standard. Used as CLI arguments.\r\nMandatory:\r\n%SS_LOCAL_HOST%, %SS_LOC" +
         "SL_PORT%, %SS_REMOTE_HOST%, %SS_REMOTE_PORT%\r\nOptional:\r\n%SS_PLUGIN_OPTIONS%");
+            // 
+            // RemarksLabel
+            // 
+            this.RemarksLabel.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.RemarksLabel.AutoSize = true;
+            this.RemarksLabel.Location = new System.Drawing.Point(60, 220);
+            this.RemarksLabel.Name = "RemarksLabel";
+            this.RemarksLabel.Size = new System.Drawing.Size(47, 12);
+            this.RemarksLabel.TabIndex = 8;
+            this.RemarksLabel.Text = "Remarks";
             // 
             // panel2
             // 
@@ -509,8 +508,8 @@
             this.tableLayoutPanel5.Controls.Add(this.ProxyPortTextBox, 1, 0);
             this.tableLayoutPanel5.Controls.Add(this.ProxyPortLabel, 0, 0);
             this.tableLayoutPanel5.Controls.Add(this.TempFolderLabel, 0, 1);
-            this.tableLayoutPanel5.Controls.Add(this.TempFolderComboBox, 1, 1);
-            this.tableLayoutPanel5.Location = new System.Drawing.Point(166, 281);
+            this.tableLayoutPanel5.Controls.Add(this.TempFolderTextBox, 1, 1);
+            this.tableLayoutPanel5.Location = new System.Drawing.Point(166, 308);
             this.tableLayoutPanel5.Margin = new System.Windows.Forms.Padding(0);
             this.tableLayoutPanel5.Name = "tableLayoutPanel5";
             this.tableLayoutPanel5.Padding = new System.Windows.Forms.Padding(3);
@@ -521,7 +520,7 @@
             this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 58F));
             this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 58F));
             this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 58F));
-            this.tableLayoutPanel5.Size = new System.Drawing.Size(290, 64);
+            this.tableLayoutPanel5.Size = new System.Drawing.Size(302, 64);
             this.tableLayoutPanel5.TabIndex = 9;
             // 
             // ProxyPortTextBox
@@ -553,18 +552,6 @@
             this.TempFolderLabel.Size = new System.Drawing.Size(71, 12);
             this.TempFolderLabel.TabIndex = 9;
             this.TempFolderLabel.Text = "Temp Folder";
-            // 
-            // TempFolderComboBox
-            // 
-            this.TempFolderComboBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.TempFolderComboBox.FormattingEnabled = true;
-            this.TempFolderComboBox.ImeMode = System.Windows.Forms.ImeMode.Alpha;
-            this.TempFolderComboBox.Location = new System.Drawing.Point(83, 35);
-            this.TempFolderComboBox.Name = "TempFolderComboBox";
-            this.TempFolderComboBox.Size = new System.Drawing.Size(201, 20);
-            this.TempFolderComboBox.TabIndex = 10;
-            this.TempFolderComboBox.SelectedIndexChanged += new System.EventHandler(this.TempFolderComboBox_SelectedIndexChanged);
-            this.TempFolderComboBox.TextChanged += new System.EventHandler(this.TempFolderComboBox_TextChanged);
             // 
             // tableLayoutPanel3
             // 
@@ -617,10 +604,13 @@
             this.DuplicateButton.UseVisualStyleBackColor = true;
             this.DuplicateButton.Click += new System.EventHandler(this.DuplicateButton_Click);
             // 
-            // TempFolderBrowserDialog
+            // TempFolderTextBox
             // 
-            this.TempFolderBrowserDialog.Description = "Select temp folder";
-            this.TempFolderBrowserDialog.RootFolder = System.Environment.SpecialFolder.MyComputer;
+            this.TempFolderTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.TempFolderTextBox.Location = new System.Drawing.Point(83, 35);
+            this.TempFolderTextBox.Name = "TempFolderTextBox";
+            this.TempFolderTextBox.Size = new System.Drawing.Size(213, 21);
+            this.TempFolderTextBox.TabIndex = 11;
             // 
             // ConfigForm
             // 
@@ -698,11 +688,10 @@
         private System.Windows.Forms.CheckBox ShowPasswdCheckBox;
         private System.Windows.Forms.TextBox PasswordTextBox;
         private System.Windows.Forms.Label TempFolderLabel;
-        private System.Windows.Forms.ComboBox TempFolderComboBox;
-        private System.Windows.Forms.FolderBrowserDialog TempFolderBrowserDialog;
         private System.Windows.Forms.TextBox PluginArgumentsTextBox;
         private System.Windows.Forms.Label PluginArgumentsLabel;
         private System.Windows.Forms.ToolTip toolTip1;
+        private System.Windows.Forms.TextBox TempFolderTextBox;
     }
 }
 

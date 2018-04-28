@@ -27,6 +27,7 @@ namespace Shadowsocks.Util
     public static class Utils
     {
         private static string _tempPath = null;
+        private const string TEMP_LOG = "temp.log";
 
         // return path to store temporary files
         public static string GetTempPath()
@@ -35,30 +36,22 @@ namespace Shadowsocks.Util
             {
                 try
                 {
-                    var config = Configuration.Load().tempFolder;
-                    if (string.IsNullOrWhiteSpace(config))
-                        config = Configuration.KnownTempFolder.Default;
-
-                    var tempRoot = Application.StartupPath;
-                    switch (config)
-                    {
-                    case Configuration.KnownTempFolder.EXECUTABLE:
-                        tempRoot = Application.StartupPath; break;
-                    case Configuration.KnownTempFolder.PROGRAM_DATA:
-                        tempRoot = Application.CommonAppDataPath; break;
-                    case Configuration.KnownTempFolder.TEMP:
-                        tempRoot = Path.GetTempPath(); break;
-                    case Configuration.KnownTempFolder.LOCAL:
-                        tempRoot = Application.LocalUserAppDataPath; break;
-                    case Configuration.KnownTempFolder.ROAMING:
-                        tempRoot = Application.UserAppDataPath; break;
-                    default:
-                        tempRoot = config; break;
-                    }
-                    // Use Application.ExecutablePath.GetHashCode() to generate per executable specific path in case of multi-instance.
-                    var tempDirectory = Directory.CreateDirectory(Path.Combine(tempRoot, "ss_win_temp_" + Application.ExecutablePath.GetHashCode()));
+                    var tempFolder = Configuration.Load().tempFolder;
+                    if (string.IsNullOrWhiteSpace(tempFolder))
+                        tempFolder = "ss_win_temp";
+                    else if (string.Equals(tempFolder, "%TEMP%", StringComparison.OrdinalIgnoreCase)
+                        || string.Equals(tempFolder, "%TMP%", StringComparison.OrdinalIgnoreCase)
+                        || string.Equals(tempFolder, "%APPDATA%", StringComparison.OrdinalIgnoreCase)
+                        || string.Equals(tempFolder, "%LOCALAPPDATA%", StringComparison.OrdinalIgnoreCase)
+                        || string.Equals(tempFolder, "%ProgramData%", StringComparison.OrdinalIgnoreCase))
+                        // add subfolder for these common folders
+                        tempFolder += (@"\Shadowsocks\ss_win_temp_" + Application.ExecutablePath.GetHashCode());
+                    tempFolder = Environment.ExpandEnvironmentVariables(tempFolder);
+                    // If `tempFolder` is an absolute path, `Application.StartupPath` will be ignored.
+                    var tempDirectory = Directory.CreateDirectory(Path.Combine(Application.StartupPath, tempFolder));
                     // don't use "/", it will fail when we call explorer /select xxx/ss_win_temp\xxx.log
                     _tempPath = tempDirectory.FullName;
+                    File.AppendAllText(Path.Combine(_tempPath, TEMP_LOG), $"[{DateTimeOffset.Now.ToString("u")}] Temp folder used by \"{Application.ExecutablePath}\"{Environment.NewLine}");
                 }
                 catch (Exception e)
                 {
