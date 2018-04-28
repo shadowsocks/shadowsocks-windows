@@ -64,11 +64,11 @@
             this.ProxyPortTextBox = new System.Windows.Forms.TextBox();
             this.ProxyPortLabel = new System.Windows.Forms.Label();
             this.TempFolderLabel = new System.Windows.Forms.Label();
+            this.TempFolderTextBox = new System.Windows.Forms.TextBox();
             this.tableLayoutPanel3 = new System.Windows.Forms.TableLayoutPanel();
             this.tableLayoutPanel4 = new System.Windows.Forms.TableLayoutPanel();
             this.DuplicateButton = new System.Windows.Forms.Button();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
-            this.TempFolderTextBox = new System.Windows.Forms.TextBox();
             this.tableLayoutPanel1.SuspendLayout();
             this.ServerGroupBox.SuspendLayout();
             this.tableLayoutPanel2.SuspendLayout();
@@ -350,7 +350,7 @@
             this.panel2.Anchor = System.Windows.Forms.AnchorStyles.Top;
             this.panel2.AutoSize = true;
             this.panel2.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.panel2.Location = new System.Drawing.Point(207, 187);
+            this.panel2.Location = new System.Drawing.Point(165, 187);
             this.panel2.Name = "panel2";
             this.panel2.Size = new System.Drawing.Size(0, 0);
             this.panel2.TabIndex = 1;
@@ -497,9 +497,8 @@
             // 
             // tableLayoutPanel5
             // 
-            this.tableLayoutPanel5.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
+            this.tableLayoutPanel5.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left)));
             this.tableLayoutPanel5.AutoSize = true;
             this.tableLayoutPanel5.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.tableLayoutPanel5.ColumnCount = 2;
@@ -520,7 +519,7 @@
             this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 58F));
             this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 58F));
             this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 58F));
-            this.tableLayoutPanel5.Size = new System.Drawing.Size(302, 64);
+            this.tableLayoutPanel5.Size = new System.Drawing.Size(202, 64);
             this.tableLayoutPanel5.TabIndex = 9;
             // 
             // ProxyPortTextBox
@@ -552,6 +551,14 @@
             this.TempFolderLabel.Size = new System.Drawing.Size(71, 12);
             this.TempFolderLabel.TabIndex = 9;
             this.TempFolderLabel.Text = "Temp Folder";
+            // 
+            // TempFolderTextBox
+            // 
+            this.TempFolderTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.TempFolderTextBox.Location = new System.Drawing.Point(83, 35);
+            this.TempFolderTextBox.Name = "TempFolderTextBox";
+            this.TempFolderTextBox.Size = new System.Drawing.Size(113, 21);
+            this.TempFolderTextBox.TabIndex = 11;
             // 
             // tableLayoutPanel3
             // 
@@ -604,14 +611,6 @@
             this.DuplicateButton.UseVisualStyleBackColor = true;
             this.DuplicateButton.Click += new System.EventHandler(this.DuplicateButton_Click);
             // 
-            // TempFolderTextBox
-            // 
-            this.TempFolderTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.TempFolderTextBox.Location = new System.Drawing.Point(83, 35);
-            this.TempFolderTextBox.Name = "TempFolderTextBox";
-            this.TempFolderTextBox.Size = new System.Drawing.Size(213, 21);
-            this.TempFolderTextBox.TabIndex = 11;
-            // 
             // ConfigForm
             // 
             this.AcceptButton = this.OKButton;
@@ -620,7 +619,7 @@
             this.AutoSize = true;
             this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.CancelButton = this.MyCancelButton;
-            this.ClientSize = new System.Drawing.Size(574, 438);
+            this.ClientSize = new System.Drawing.Size(491, 438);
             this.Controls.Add(this.tableLayoutPanel2);
             this.Controls.Add(this.panel2);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;

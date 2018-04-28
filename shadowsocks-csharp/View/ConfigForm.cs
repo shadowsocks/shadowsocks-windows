@@ -23,11 +23,12 @@ namespace Shadowsocks.View
 
         public ConfigForm(ShadowsocksController controller)
         {
-            this.Font = System.Drawing.SystemFonts.MessageBoxFont;
+            this.Font = SystemFonts.MessageBoxFont;
             InitializeComponent();
 
             // a dirty hack
-            this.ServersListBox.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.ServersListBox.Dock = DockStyle.Fill;
+            this.tableLayoutPanel5.Dock = DockStyle.Fill;
             this.PerformLayout();
 
             UpdateTexts();
