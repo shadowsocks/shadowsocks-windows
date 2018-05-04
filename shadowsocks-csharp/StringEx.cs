@@ -69,12 +69,12 @@ static partial class StringEx
         fixed (char* low = value)
         {
             var end = low + value.Length;
-            for (var p = low; p < end; p++)
+            for (var p = low; p < end; ++p)
             {
                 var c = *p;
                 if (c < 'A' || c > 'Z')
                     continue;
-                *p = (char)(c + 0x20);
+                *p = c - 'A' + 'a';
             }
         }
         return value;
@@ -89,12 +89,12 @@ static partial class StringEx
         fixed (char* low = value)
         {
             var end = low + value.Length;
-            for (var p = low; p < end; p++)
+            for (var p = low; p < end; ++p)
             {
                 var c = *p;
                 if (c < 'a' || c > 'z')
                     continue;
-                *p = (char)(c - 0x20);
+                *p = c - 'a' + 'A';
             }
         }
         return value;
@@ -111,7 +111,7 @@ static partial class StringEx
             if (c < 'A' || c > 'Z')
                 sb.Append(c);
             else
-                sb.Append((char)(c + 0x20));
+                sb.Append(c - 'A' + 'a');
         }
         return sb.ToString();
     }
@@ -127,7 +127,7 @@ static partial class StringEx
             if (c < 'a' || c > 'z')
                 sb.Append(c);
             else
-                sb.Append((char)(c - 0x20));
+                sb.Append(c - 'a' + 'A');
         }
         return sb.ToString();
     }
