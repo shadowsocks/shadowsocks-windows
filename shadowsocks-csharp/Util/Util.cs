@@ -34,9 +34,11 @@ namespace Shadowsocks.Util
             {
                 try
                 {
-                    Directory.CreateDirectory(Path.Combine(Application.StartupPath, "ss_win_temp"));
+                    // #1495 Set the temp path to system %TEMP% so the unit test could run successfully
+                    var systemTmpPath = Environment.GetEnvironmentVariable("TEMP");
+                    Directory.CreateDirectory(Path.Combine(systemTmpPath, "ss_win_temp"));
                     // don't use "/", it will fail when we call explorer /select xxx/ss_win_temp\xxx.log
-                    _tempPath = Path.Combine(Application.StartupPath, "ss_win_temp");
+                    _tempPath = Path.Combine(systemTmpPath, "ss_win_temp");
                 }
                 catch (Exception e)
                 {
