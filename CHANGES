@@ -1,3 +1,11 @@
+4.0.10 2018-05-10
+- Add square bracket for SIP002 IPv6 (RFC3986)
+- Add plugin CLI arguments support
+- Bug fix: Server address should not be encoded (#1758)
+- Bug fix: Wrong splash on multi display (#1729)
+- Fix PerPixelAlphaForm's issue in disigner
+- Other minor bug fixes and improvements
+
 4.0.9 2018-03-14
 - Fix port occupied issue
 - Add xchacha20-ietf-poly1305
