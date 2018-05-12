@@ -9,6 +9,7 @@ using Microsoft.Win32;
 using Shadowsocks.Controller;
 using Shadowsocks.Model;
 using Shadowsocks.Properties;
+using System.Threading.Tasks;
 
 namespace Shadowsocks.View
 {
@@ -22,11 +23,12 @@ namespace Shadowsocks.View
 
         public ConfigForm(ShadowsocksController controller)
         {
-            this.Font = System.Drawing.SystemFonts.MessageBoxFont;
+            this.Font = SystemFonts.MessageBoxFont;
             InitializeComponent();
 
             // a dirty hack
-            this.ServersListBox.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.ServersListBox.Dock = DockStyle.Fill;
+            this.tableLayoutPanel5.Dock = DockStyle.Fill;
             this.PerformLayout();
 
             UpdateTexts();
@@ -52,6 +54,7 @@ namespace Shadowsocks.View
             PluginOptionsLabel.Text = I18N.GetString("Plugin Options");
             PluginArgumentsLabel.Text = I18N.GetString("Plugin Arguments");
             ProxyPortLabel.Text = I18N.GetString("Proxy Port");
+            TempFolderLabel.Text = I18N.GetString("Temp Folder");
             RemarksLabel.Text = I18N.GetString("Remarks");
             TimeoutLabel.Text = I18N.GetString("Timeout(Sec)");
             ServerGroupBox.Text = I18N.GetString("Server");
@@ -109,6 +112,7 @@ namespace Shadowsocks.View
                     return false;
                 }
                 int localPort = int.Parse(ProxyPortTextBox.Text);
+                Configuration.CheckTempFolder(TempFolderTextBox.Text);
                 Configuration.CheckServer(server);
                 Configuration.CheckLocalPort(localPort);
                 _modifiedConfiguration.configs[_lastSelectedIndex] = server;
@@ -163,6 +167,7 @@ namespace Shadowsocks.View
             ServersListBox.SelectedIndex = _lastSelectedIndex;
             UpdateMoveUpAndDownButton();
             LoadSelectedServer();
+            TempFolderTextBox.Text = _modifiedConfiguration.tempFolder;
         }
 
         private void ConfigForm_Load(object sender, EventArgs e)
@@ -231,14 +236,14 @@ namespace Shadowsocks.View
             _lastSelectedIndex = ServersListBox.SelectedIndex;
         }
 
-        private void DuplicateButton_Click( object sender, EventArgs e )
+        private void DuplicateButton_Click(object sender, EventArgs e)
         {
             if (!SaveOldSelectedServer())
             {
                 return;
             }
             Server currServer = _modifiedConfiguration.configs[_lastSelectedIndex];
-            var currIndex = _modifiedConfiguration.configs.IndexOf( currServer );
+            var currIndex = _modifiedConfiguration.configs.IndexOf(currServer);
             _modifiedConfiguration.configs.Insert(currIndex + 1, currServer);
             LoadConfiguration(_modifiedConfiguration);
             ServersListBox.SelectedIndex = currIndex + 1;
@@ -275,6 +280,7 @@ namespace Shadowsocks.View
                 return;
             }
             controller.SaveServers(_modifiedConfiguration.configs, _modifiedConfiguration.localPort);
+            controller.SaveTempFolder(TempFolderTextBox.Text);
             // SelectedIndex remains valid
             // We handled this in event handlers, e.g. Add/DeleteButton, SelectedIndexChanged
             // and move operations

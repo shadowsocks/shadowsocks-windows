@@ -182,6 +182,12 @@ namespace Shadowsocks.Controller
             Configuration.Save(_config);
         }
 
+        public void SaveTempFolder(string tempFolder)
+        {
+            _config.tempFolder = tempFolder;
+            Configuration.Save(_config);
+        }
+
         public void SaveStrategyConfigurations(StatisticsStrategyConfiguration configuration)
         {
             StatisticsConfiguration = configuration;
@@ -250,7 +256,8 @@ namespace Shadowsocks.Controller
         {
             _config.isVerboseLogging = enabled;
             SaveConfig(_config);
-            if ( VerboseLoggingStatusChanged != null ) {
+            if (VerboseLoggingStatusChanged != null)
+            {
                 VerboseLoggingStatusChanged(this, new EventArgs());
             }
         }
@@ -656,7 +663,7 @@ namespace Shadowsocks.Controller
             {
                 previous = trafficPerSecondQueue.Last();
                 current = new TrafficPerSecond();
-                
+
                 current.inboundCounter = InboundCounter;
                 current.outboundCounter = OutboundCounter;
                 current.inboundIncreasement = current.inboundCounter - previous.inboundCounter;

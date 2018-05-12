@@ -35,7 +35,8 @@ namespace Shadowsocks.Util.SystemProxy
 
         static Sysproxy()
         {
-            try {
+            try
+            {
                 FileManager.UncompressFile(Utils.GetTempPath("sysproxy.exe"),
                     Environment.Is64BitOperatingSystem ? Resources.sysproxy64_exe : Resources.sysproxy_exe);
             }
@@ -111,8 +112,10 @@ namespace Shadowsocks.Util.SystemProxy
                     throw new ProxyException(stderr);
                 }
 
-                if (arguments == "query") {
-                    if (stdout.IsNullOrWhiteSpace() || stdout.IsNullOrEmpty()) {
+                if (arguments == "query")
+                {
+                    if (stdout.IsNullOrWhiteSpace() || stdout.IsNullOrEmpty())
+                    {
                         // we cannot get user settings
                         throw new ProxyException("failed to query wininet settings");
                     }
@@ -123,25 +126,34 @@ namespace Shadowsocks.Util.SystemProxy
 
         private static void Save()
         {
-            try {
-                using (StreamWriter sw = new StreamWriter(File.Open(_userWininetConfigFile, FileMode.Create))) {
+            try
+            {
+                using (StreamWriter sw = new StreamWriter(File.Open(Utils.GetTempPath(_userWininetConfigFile), FileMode.Create)))
+                {
                     string jsonString = JsonConvert.SerializeObject(_userSettings, Formatting.Indented);
                     sw.Write(jsonString);
                     sw.Flush();
                 }
-            } catch (IOException e) {
+            }
+            catch (IOException e)
+            {
                 Logging.LogUsefulException(e);
             }
         }
 
         private static void Read()
         {
-            try {
-                string configContent = File.ReadAllText(_userWininetConfigFile);
+            try
+            {
+                string configContent = File.ReadAllText(Utils.GetTempPath(_userWininetConfigFile));
                 _userSettings = JsonConvert.DeserializeObject<SysproxyConfig>(configContent);
-            } catch(Exception) {
-               // Suppress all exceptions. finally block will initialize new user config settings.
-            } finally {
+            }
+            catch (Exception)
+            {
+                // Suppress all exceptions. finally block will initialize new user config settings.
+            }
+            finally
+            {
                 if (_userSettings == null) _userSettings = new SysproxyConfig();
             }
         }

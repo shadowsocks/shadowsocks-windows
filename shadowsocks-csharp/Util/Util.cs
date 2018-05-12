@@ -2,10 +2,12 @@
 using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using Microsoft.Win32;
 using Shadowsocks.Controller;
+using Shadowsocks.Model;
 
 namespace Shadowsocks.Util
 {
@@ -26,6 +28,24 @@ namespace Shadowsocks.Util
     public static class Utils
     {
         private static string _tempPath = null;
+        private const string TEMP_LOG = "temp.log";
+        private static readonly string[] COMMON_ENV =
+        {
+             "%Tmp%",
+             "%Temp%",
+             "%AppData%",
+             "%LocalAppData%",
+             "%Home%",
+             "%UserProfile%",
+             "%Public%",
+             "%CommonProgramFiles%",
+             "%CommonProgramFiles(x86)%",
+             "%CommonProgramW6432%",
+             "%ProgramFiles%",
+             "%ProgramFiles(x86)%",
+             "%ProgramW6432%",
+             "%ProgramData%",
+        };
 
         // return path to store temporary files
         public static string GetTempPath()
@@ -34,9 +54,19 @@ namespace Shadowsocks.Util
             {
                 try
                 {
-                    Directory.CreateDirectory(Path.Combine(Application.StartupPath, "ss_win_temp"));
-                    // don't use "/", it will fail when we call explorer /select xxx/ss_win_temp\xxx.log
-                    _tempPath = Path.Combine(Application.StartupPath, "ss_win_temp");
+                    var tempFolder = Configuration.Load().tempFolder;
+                    if (string.IsNullOrWhiteSpace(tempFolder))
+                        // don't use "/", it will fail when we call explorer /select xxx/ss_win_temp\xxx.log
+                        tempFolder = "ss_win_temp";
+                    else if (COMMON_ENV.Contains(tempFolder, StringComparer.OrdinalIgnoreCase))
+                        // add subfolder for these common folders
+                        tempFolder += (@"\Shadowsocks\ss_win_temp_" + Application.ExecutablePath.GetHashCode());
+
+                    tempFolder = Environment.ExpandEnvironmentVariables(tempFolder);
+                    // If `tempFolder` is an absolute path, `Application.StartupPath` will be ignored.
+                    var tempDirectory = Directory.CreateDirectory(Path.Combine(Application.StartupPath, tempFolder));
+                    _tempPath = tempDirectory.FullName;
+                    File.AppendAllText(Path.Combine(_tempPath, TEMP_LOG), $"[{DateTimeOffset.Now.ToString("u")}] Temp folder used by \"{Application.ExecutablePath}\"{Environment.NewLine}");
                 }
                 catch (Exception e)
                 {

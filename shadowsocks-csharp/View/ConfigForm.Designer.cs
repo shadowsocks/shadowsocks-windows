@@ -46,9 +46,9 @@
             this.PluginLabel = new System.Windows.Forms.Label();
             this.PluginOptionsTextBox = new System.Windows.Forms.TextBox();
             this.ShowPasswdCheckBox = new System.Windows.Forms.CheckBox();
-            this.RemarksLabel = new System.Windows.Forms.Label();
             this.PluginArgumentsTextBox = new System.Windows.Forms.TextBox();
             this.PluginArgumentsLabel = new System.Windows.Forms.Label();
+            this.RemarksLabel = new System.Windows.Forms.Label();
             this.panel2 = new System.Windows.Forms.Panel();
             this.OKButton = new System.Windows.Forms.Button();
             this.MyCancelButton = new System.Windows.Forms.Button();
@@ -63,6 +63,8 @@
             this.tableLayoutPanel5 = new System.Windows.Forms.TableLayoutPanel();
             this.ProxyPortTextBox = new System.Windows.Forms.TextBox();
             this.ProxyPortLabel = new System.Windows.Forms.Label();
+            this.TempFolderLabel = new System.Windows.Forms.Label();
+            this.TempFolderTextBox = new System.Windows.Forms.TextBox();
             this.tableLayoutPanel3 = new System.Windows.Forms.TableLayoutPanel();
             this.tableLayoutPanel4 = new System.Windows.Forms.TableLayoutPanel();
             this.DuplicateButton = new System.Windows.Forms.Button();
@@ -311,16 +313,6 @@
             this.ShowPasswdCheckBox.UseVisualStyleBackColor = true;
             this.ShowPasswdCheckBox.CheckedChanged += new System.EventHandler(this.ShowPasswdCheckBox_CheckedChanged);
             // 
-            // RemarksLabel
-            // 
-            this.RemarksLabel.Anchor = System.Windows.Forms.AnchorStyles.Right;
-            this.RemarksLabel.AutoSize = true;
-            this.RemarksLabel.Location = new System.Drawing.Point(60, 220);
-            this.RemarksLabel.Name = "RemarksLabel";
-            this.RemarksLabel.Size = new System.Drawing.Size(47, 12);
-            this.RemarksLabel.TabIndex = 8;
-            this.RemarksLabel.Text = "Remarks";
-            // 
             // PluginArgumentsTextBox
             // 
             this.PluginArgumentsTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
@@ -343,12 +335,22 @@
             this.toolTip1.SetToolTip(this.PluginArgumentsLabel, "Not SIP003 standard. Used as CLI arguments.\r\nMandatory:\r\n%SS_LOCAL_HOST%, %SS_LOC" +
         "SL_PORT%, %SS_REMOTE_HOST%, %SS_REMOTE_PORT%\r\nOptional:\r\n%SS_PLUGIN_OPTIONS%");
             // 
+            // RemarksLabel
+            // 
+            this.RemarksLabel.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.RemarksLabel.AutoSize = true;
+            this.RemarksLabel.Location = new System.Drawing.Point(60, 220);
+            this.RemarksLabel.Name = "RemarksLabel";
+            this.RemarksLabel.Size = new System.Drawing.Size(47, 12);
+            this.RemarksLabel.TabIndex = 8;
+            this.RemarksLabel.Text = "Remarks";
+            // 
             // panel2
             // 
             this.panel2.Anchor = System.Windows.Forms.AnchorStyles.Top;
             this.panel2.AutoSize = true;
             this.panel2.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.panel2.Location = new System.Drawing.Point(207, 187);
+            this.panel2.Location = new System.Drawing.Point(165, 187);
             this.panel2.Name = "panel2";
             this.panel2.Size = new System.Drawing.Size(0, 0);
             this.panel2.TabIndex = 1;
@@ -496,7 +498,7 @@
             // tableLayoutPanel5
             // 
             this.tableLayoutPanel5.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Right)));
+            | System.Windows.Forms.AnchorStyles.Left)));
             this.tableLayoutPanel5.AutoSize = true;
             this.tableLayoutPanel5.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.tableLayoutPanel5.ColumnCount = 2;
@@ -504,23 +506,26 @@
             this.tableLayoutPanel5.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tableLayoutPanel5.Controls.Add(this.ProxyPortTextBox, 1, 0);
             this.tableLayoutPanel5.Controls.Add(this.ProxyPortLabel, 0, 0);
-            this.tableLayoutPanel5.Location = new System.Drawing.Point(272, 308);
+            this.tableLayoutPanel5.Controls.Add(this.TempFolderLabel, 0, 1);
+            this.tableLayoutPanel5.Controls.Add(this.TempFolderTextBox, 1, 1);
+            this.tableLayoutPanel5.Location = new System.Drawing.Point(166, 308);
             this.tableLayoutPanel5.Margin = new System.Windows.Forms.Padding(0);
             this.tableLayoutPanel5.Name = "tableLayoutPanel5";
             this.tableLayoutPanel5.Padding = new System.Windows.Forms.Padding(3);
-            this.tableLayoutPanel5.RowCount = 1;
+            this.tableLayoutPanel5.RowCount = 2;
             this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
             this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 58F));
             this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 58F));
             this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 58F));
             this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 58F));
-            this.tableLayoutPanel5.Size = new System.Drawing.Size(196, 64);
+            this.tableLayoutPanel5.Size = new System.Drawing.Size(202, 64);
             this.tableLayoutPanel5.TabIndex = 9;
             // 
             // ProxyPortTextBox
             // 
             this.ProxyPortTextBox.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.ProxyPortTextBox.Location = new System.Drawing.Point(77, 21);
+            this.ProxyPortTextBox.Location = new System.Drawing.Point(83, 6);
             this.ProxyPortTextBox.MaxLength = 10;
             this.ProxyPortTextBox.Name = "ProxyPortTextBox";
             this.ProxyPortTextBox.Size = new System.Drawing.Size(113, 21);
@@ -531,11 +536,29 @@
             // 
             this.ProxyPortLabel.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.ProxyPortLabel.AutoSize = true;
-            this.ProxyPortLabel.Location = new System.Drawing.Point(6, 26);
+            this.ProxyPortLabel.Location = new System.Drawing.Point(12, 10);
             this.ProxyPortLabel.Name = "ProxyPortLabel";
             this.ProxyPortLabel.Size = new System.Drawing.Size(65, 12);
             this.ProxyPortLabel.TabIndex = 10;
             this.ProxyPortLabel.Text = "Proxy Port";
+            // 
+            // TempFolderLabel
+            // 
+            this.TempFolderLabel.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.TempFolderLabel.AutoSize = true;
+            this.TempFolderLabel.Location = new System.Drawing.Point(6, 39);
+            this.TempFolderLabel.Name = "TempFolderLabel";
+            this.TempFolderLabel.Size = new System.Drawing.Size(71, 12);
+            this.TempFolderLabel.TabIndex = 9;
+            this.TempFolderLabel.Text = "Temp Folder";
+            // 
+            // TempFolderTextBox
+            // 
+            this.TempFolderTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.TempFolderTextBox.Location = new System.Drawing.Point(83, 35);
+            this.TempFolderTextBox.Name = "TempFolderTextBox";
+            this.TempFolderTextBox.Size = new System.Drawing.Size(113, 21);
+            this.TempFolderTextBox.TabIndex = 11;
             // 
             // tableLayoutPanel3
             // 
@@ -596,7 +619,7 @@
             this.AutoSize = true;
             this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.CancelButton = this.MyCancelButton;
-            this.ClientSize = new System.Drawing.Size(574, 438);
+            this.ClientSize = new System.Drawing.Size(491, 438);
             this.Controls.Add(this.tableLayoutPanel2);
             this.Controls.Add(this.panel2);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
@@ -663,9 +686,11 @@
         private System.Windows.Forms.TextBox PluginOptionsTextBox;
         private System.Windows.Forms.CheckBox ShowPasswdCheckBox;
         private System.Windows.Forms.TextBox PasswordTextBox;
+        private System.Windows.Forms.Label TempFolderLabel;
         private System.Windows.Forms.TextBox PluginArgumentsTextBox;
         private System.Windows.Forms.Label PluginArgumentsLabel;
         private System.Windows.Forms.ToolTip toolTip1;
+        private System.Windows.Forms.TextBox TempFolderTextBox;
     }
 }
 
