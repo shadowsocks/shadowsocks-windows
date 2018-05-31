@@ -20,6 +20,7 @@ namespace Shadowsocks.Model
         public bool shareOverLan;
         public bool isDefault;
         public int localPort;
+        public bool portableMode = true;
         public string pacUrl;
         public bool useOnlinePac;
         public bool secureLocalPac = true;
@@ -30,7 +31,6 @@ namespace Shadowsocks.Model
         public LogViewerConfig logViewer;
         public ProxyConfig proxy;
         public HotkeyConfig hotkey;
-        public string tempFolder;
 
         private static string CONFIG_FILE = "gui-config.json";
 
@@ -144,13 +144,6 @@ namespace Shadowsocks.Model
             CheckPort(port);
             if (port == 8123)
                 throw new ArgumentException(I18N.GetString("Port can't be 8123"));
-        }
-
-        public static void CheckTempFolder(string tempPath)
-        {
-            if (string.IsNullOrWhiteSpace(tempPath))
-                return;
-            Path.GetFullPath(tempPath);
         }
 
         private static void CheckPassword(string password)

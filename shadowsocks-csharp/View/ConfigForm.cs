@@ -54,7 +54,8 @@ namespace Shadowsocks.View
             PluginOptionsLabel.Text = I18N.GetString("Plugin Options");
             PluginArgumentsLabel.Text = I18N.GetString("Plugin Arguments");
             ProxyPortLabel.Text = I18N.GetString("Proxy Port");
-            TempFolderLabel.Text = I18N.GetString("Temp Folder");
+            PortableModeCheckBox.Text = I18N.GetString("Portable Mode");
+            toolTip1.SetToolTip(this.PortableModeCheckBox, I18N.GetString("Restart required"));
             RemarksLabel.Text = I18N.GetString("Remarks");
             TimeoutLabel.Text = I18N.GetString("Timeout(Sec)");
             ServerGroupBox.Text = I18N.GetString("Server");
@@ -112,11 +113,11 @@ namespace Shadowsocks.View
                     return false;
                 }
                 int localPort = int.Parse(ProxyPortTextBox.Text);
-                Configuration.CheckTempFolder(TempFolderTextBox.Text);
                 Configuration.CheckServer(server);
                 Configuration.CheckLocalPort(localPort);
                 _modifiedConfiguration.configs[_lastSelectedIndex] = server;
                 _modifiedConfiguration.localPort = localPort;
+                _modifiedConfiguration.portableMode = PortableModeCheckBox.Checked;
 
                 return true;
             }
@@ -167,7 +168,7 @@ namespace Shadowsocks.View
             ServersListBox.SelectedIndex = _lastSelectedIndex;
             UpdateMoveUpAndDownButton();
             LoadSelectedServer();
-            TempFolderTextBox.Text = _modifiedConfiguration.tempFolder;
+            PortableModeCheckBox.Checked = _modifiedConfiguration.portableMode;
         }
 
         private void ConfigForm_Load(object sender, EventArgs e)
@@ -191,7 +192,7 @@ namespace Shadowsocks.View
                     MessageBox.Show(I18N.GetString("Please add at least one server"));
                     return;
                 }
-                controller.SaveServers(_modifiedConfiguration.configs, _modifiedConfiguration.localPort);
+                controller.SaveServers(_modifiedConfiguration.configs, _modifiedConfiguration.localPort, _modifiedConfiguration.portableMode);
                 controller.SelectServerIndex(_modifiedConfiguration.configs.IndexOf(server));
             }
 
@@ -279,8 +280,7 @@ namespace Shadowsocks.View
                 MessageBox.Show(I18N.GetString("Please add at least one server"));
                 return;
             }
-            controller.SaveServers(_modifiedConfiguration.configs, _modifiedConfiguration.localPort);
-            controller.SaveTempFolder(TempFolderTextBox.Text);
+            controller.SaveServers(_modifiedConfiguration.configs, _modifiedConfiguration.localPort, _modifiedConfiguration.portableMode);
             // SelectedIndex remains valid
             // We handled this in event handlers, e.g. Add/DeleteButton, SelectedIndexChanged
             // and move operations

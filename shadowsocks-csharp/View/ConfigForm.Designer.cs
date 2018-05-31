@@ -63,8 +63,7 @@
             this.tableLayoutPanel5 = new System.Windows.Forms.TableLayoutPanel();
             this.ProxyPortTextBox = new System.Windows.Forms.TextBox();
             this.ProxyPortLabel = new System.Windows.Forms.Label();
-            this.TempFolderLabel = new System.Windows.Forms.Label();
-            this.TempFolderTextBox = new System.Windows.Forms.TextBox();
+            this.PortableModeCheckBox = new System.Windows.Forms.CheckBox();
             this.tableLayoutPanel3 = new System.Windows.Forms.TableLayoutPanel();
             this.tableLayoutPanel4 = new System.Windows.Forms.TableLayoutPanel();
             this.DuplicateButton = new System.Windows.Forms.Button();
@@ -506,26 +505,21 @@
             this.tableLayoutPanel5.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tableLayoutPanel5.Controls.Add(this.ProxyPortTextBox, 1, 0);
             this.tableLayoutPanel5.Controls.Add(this.ProxyPortLabel, 0, 0);
-            this.tableLayoutPanel5.Controls.Add(this.TempFolderLabel, 0, 1);
-            this.tableLayoutPanel5.Controls.Add(this.TempFolderTextBox, 1, 1);
+            this.tableLayoutPanel5.Controls.Add(this.PortableModeCheckBox, 0, 1);
             this.tableLayoutPanel5.Location = new System.Drawing.Point(166, 308);
             this.tableLayoutPanel5.Margin = new System.Windows.Forms.Padding(0);
             this.tableLayoutPanel5.Name = "tableLayoutPanel5";
             this.tableLayoutPanel5.Padding = new System.Windows.Forms.Padding(3);
             this.tableLayoutPanel5.RowCount = 2;
             this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
-            this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 58F));
-            this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 58F));
-            this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 58F));
-            this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 58F));
-            this.tableLayoutPanel5.Size = new System.Drawing.Size(202, 64);
+            this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel5.Size = new System.Drawing.Size(196, 64);
             this.tableLayoutPanel5.TabIndex = 9;
             // 
             // ProxyPortTextBox
             // 
             this.ProxyPortTextBox.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.ProxyPortTextBox.Location = new System.Drawing.Point(83, 6);
+            this.ProxyPortTextBox.Location = new System.Drawing.Point(77, 6);
             this.ProxyPortTextBox.MaxLength = 10;
             this.ProxyPortTextBox.Name = "ProxyPortTextBox";
             this.ProxyPortTextBox.Size = new System.Drawing.Size(113, 21);
@@ -536,29 +530,24 @@
             // 
             this.ProxyPortLabel.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.ProxyPortLabel.AutoSize = true;
-            this.ProxyPortLabel.Location = new System.Drawing.Point(12, 10);
+            this.ProxyPortLabel.Location = new System.Drawing.Point(6, 10);
             this.ProxyPortLabel.Name = "ProxyPortLabel";
             this.ProxyPortLabel.Size = new System.Drawing.Size(65, 12);
             this.ProxyPortLabel.TabIndex = 10;
             this.ProxyPortLabel.Text = "Proxy Port";
             // 
-            // TempFolderLabel
+            // PortableModeCheckBox
             // 
-            this.TempFolderLabel.Anchor = System.Windows.Forms.AnchorStyles.Right;
-            this.TempFolderLabel.AutoSize = true;
-            this.TempFolderLabel.Location = new System.Drawing.Point(6, 39);
-            this.TempFolderLabel.Name = "TempFolderLabel";
-            this.TempFolderLabel.Size = new System.Drawing.Size(71, 12);
-            this.TempFolderLabel.TabIndex = 9;
-            this.TempFolderLabel.Text = "Temp Folder";
-            // 
-            // TempFolderTextBox
-            // 
-            this.TempFolderTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.TempFolderTextBox.Location = new System.Drawing.Point(83, 35);
-            this.TempFolderTextBox.Name = "TempFolderTextBox";
-            this.TempFolderTextBox.Size = new System.Drawing.Size(113, 21);
-            this.TempFolderTextBox.TabIndex = 11;
+            this.PortableModeCheckBox.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.PortableModeCheckBox.AutoSize = true;
+            this.tableLayoutPanel5.SetColumnSpan(this.PortableModeCheckBox, 2);
+            this.PortableModeCheckBox.Location = new System.Drawing.Point(6, 37);
+            this.PortableModeCheckBox.Name = "PortableModeCheckBox";
+            this.PortableModeCheckBox.Size = new System.Drawing.Size(102, 16);
+            this.PortableModeCheckBox.TabIndex = 11;
+            this.PortableModeCheckBox.Text = "Portable Mode";
+            this.toolTip1.SetToolTip(this.PortableModeCheckBox, "restart required");
+            this.PortableModeCheckBox.UseVisualStyleBackColor = true;
             // 
             // tableLayoutPanel3
             // 
@@ -686,11 +675,10 @@
         private System.Windows.Forms.TextBox PluginOptionsTextBox;
         private System.Windows.Forms.CheckBox ShowPasswdCheckBox;
         private System.Windows.Forms.TextBox PasswordTextBox;
-        private System.Windows.Forms.Label TempFolderLabel;
         private System.Windows.Forms.TextBox PluginArgumentsTextBox;
         private System.Windows.Forms.Label PluginArgumentsLabel;
         private System.Windows.Forms.ToolTip toolTip1;
-        private System.Windows.Forms.TextBox TempFolderTextBox;
+        private System.Windows.Forms.CheckBox PortableModeCheckBox;
     }
 }
 

@@ -55,6 +55,8 @@ Plugin Program=外掛程式
 Plugin Options=外掛程式選項
 Plugin Arguments=外掛程式參數
 Proxy Port=Proxy 連接埠
+Portable Mode=便攜模式
+Restart required=需要重新啟動SS
 Remarks=註解
 Timeout(Sec)=逾時 (秒)
 OK=確定
@@ -62,7 +64,6 @@ Cancel=取消
 New server=新伺服器
 Move &Up=上移 (&U)
 Move D&own=下移 (&O)
-Temp Folder=臨時資料夾
 
 # Proxy Form
 
