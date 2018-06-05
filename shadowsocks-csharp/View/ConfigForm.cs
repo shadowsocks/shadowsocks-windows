@@ -158,11 +158,13 @@ namespace Shadowsocks.View
         {
             _modifiedConfiguration = controller.GetConfigurationCopy();
             LoadServerNameListToUI(_modifiedConfiguration);
+
             _lastSelectedIndex = _modifiedConfiguration.index;
             if (_lastSelectedIndex < 0 || _lastSelectedIndex >= ServersListBox.Items.Count)
             {
                 _lastSelectedIndex = 0;
             }
+
             ServersListBox.SelectedIndex = _lastSelectedIndex;
             UpdateButtons();
             LoadSelectedServerDetails();

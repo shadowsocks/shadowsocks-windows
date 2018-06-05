@@ -112,7 +112,7 @@ namespace Shadowsocks.Controller.Hotkeys
             }
         }
 
-        public static bool Regist( HotKey key, HotKeyCallBackHandler callBack )
+        public static bool Register(HotKey key, HotKeyCallBackHandler callBack)
         {
             if (key == null)
                 throw new ArgumentNullException(nameof(key));
@@ -138,31 +138,7 @@ namespace Shadowsocks.Controller.Hotkeys
             }
         }
 
-        public static bool Regist(Key key, ModifierKeys modifiers, HotKeyCallBackHandler callBack)
-        {
-            if (!Enum.IsDefined(typeof(Key), key))
-                throw new InvalidEnumArgumentException(nameof(key), (int) key, typeof(Key));
-            try
-            {
-                var hotkey = _hotKeyManager.Register(key, modifiers);
-                _keymap[hotkey] = callBack;
-                return true;
-            }
-            catch (ArgumentException)
-            {
-                // already called this method with the specific hotkey
-                // return success silently
-                return true;
-            }
-            catch (Win32Exception)
-            {
-                // already registered by other programs
-                // notify user to change key
-                return false;
-            }
-        }
-
-        public static void UnRegist(HotKey key)
+        public static void Unregister(HotKey key)
         {
             if (key == null)
                 throw new ArgumentNullException(nameof(key));

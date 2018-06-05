@@ -18,8 +18,8 @@ namespace Shadowsocks.View
     {
         private readonly ShadowsocksController _controller;
 
-        // this is a copy of configuration that we are working on
-        private HotkeyConfig _modifiedConfig;
+        // this is a copy of hotkey configuration that we are working on
+        private HotkeyConfig _modifiedHotkeyConfig;
 
         private readonly IEnumerable<TextBox> _allTextBoxes;
 
@@ -39,27 +39,6 @@ namespace Shadowsocks.View
             if (!_allTextBoxes.Any()) throw new Exception("Cannot get all textboxes");
         }
 
-        private void controller_ConfigChanged(object sender, EventArgs e)
-        {
-            LoadCurrentConfiguration();
-        }
-
-        private void LoadCurrentConfiguration()
-        {
-            _modifiedConfig = _controller.GetConfigurationCopy().hotkey;
-            LoadConfiguration(_modifiedConfig);
-        }
-
-        private void LoadConfiguration(HotkeyConfig config)
-        {
-            SwitchSystemProxyTextBox.Text = config.SwitchSystemProxy;
-            SwitchProxyModeTextBox.Text = config.SwitchSystemProxyMode;
-            SwitchAllowLanTextBox.Text = config.SwitchAllowLan;
-            ShowLogsTextBox.Text = config.ShowLogs;
-            ServerMoveUpTextBox.Text = config.ServerMoveUp;
-            ServerMoveDownTextBox.Text = config.ServerMoveDown;
-        }
-
         private void UpdateTexts()
         {
             // I18N stuff
@@ -72,7 +51,28 @@ namespace Shadowsocks.View
             btnOK.Text = I18N.GetString("OK");
             btnCancel.Text = I18N.GetString("Cancel");
             btnRegisterAll.Text = I18N.GetString("Reg All");
-            Text = I18N.GetString("Edit Hotkeys...");
+            this.Text = I18N.GetString("Edit Hotkeys...");
+        }
+
+        private void controller_ConfigChanged(object sender, EventArgs e)
+        {
+            LoadCurrentConfiguration();
+        }
+
+        private void LoadCurrentConfiguration()
+        {
+            _modifiedHotkeyConfig = _controller.GetConfigurationCopy().hotkey;
+            LoadConfiguration(_modifiedHotkeyConfig);
+        }
+
+        private void LoadConfiguration(HotkeyConfig config)
+        {
+            SwitchSystemProxyTextBox.Text = config.SwitchSystemProxy;
+            SwitchProxyModeTextBox.Text = config.SwitchSystemProxyMode;
+            SwitchAllowLanTextBox.Text = config.SwitchAllowLan;
+            ShowLogsTextBox.Text = config.ShowLogs;
+            ServerMoveUpTextBox.Text = config.ServerMoveUp;
+            ServerMoveDownTextBox.Text = config.ServerMoveDown;
         }
 
         /// <summary>
@@ -154,12 +154,31 @@ namespace Shadowsocks.View
 
         private void CancelButton_Click(object sender, EventArgs e)
         {
-            Close();
+            this.Close();
         }
 
         private void OKButton_Click(object sender, EventArgs e)
         {
             // try to register, notify to change settings if failed
+            if (!RegisterAllHotkeys(out _)) // declare out as an inline discard variable
+            {
+                MessageBox.Show(I18N.GetString("Register hotkey failed"));
+            }
+
+            // All check passed, saving
+            SaveConfig();
+            this.Close();
+        }
+
+        private void RegisterAllButton_Click(object sender, EventArgs e)
+        {
+            RegisterAllHotkeys(out _);  // declare out as an inline discard variable
+        }
+
+        private bool RegisterAllHotkeys(out string failureInfoStr)
+        {
+            bool isSuccess = true;
+            StringBuilder failureInfo = new StringBuilder();
             foreach (var tb in _allTextBoxes)
             {
                 if (tb.Text.IsNullOrEmpty())
@@ -168,26 +187,12 @@ namespace Shadowsocks.View
                 }
                 if (!TryRegHotkey(tb))
                 {
-                    MessageBox.Show(I18N.GetString("Register hotkey failed"));
-                    return;
+                    isSuccess = false;
+                    failureInfo.AppendLine(tb.Text);
                 }
             }
-
-            // All check passed, saving
-            SaveConfig();
-            Close();
-        }
-
-        private void RegisterAllButton_Click(object sender, EventArgs e)
-        {
-            foreach (var tb in _allTextBoxes)
-            {
-                if (tb.Text.IsNullOrEmpty())
-                {
-                    continue;
-                }
-                TryRegHotkey(tb);
-            }
+            failureInfoStr = failureInfo.ToString();
+            return isSuccess;
         }
 
         private bool TryRegHotkey(TextBox tb)
@@ -218,7 +223,7 @@ namespace Shadowsocks.View
             //         or change to another one
             // Transparent without color: first run or empty config
 
-            bool regResult = HotKeys.Regist(hotkey, callBack);
+            bool regResult = HotKeys.Register(hotkey, callBack);
             lb.BackColor = regResult ? Color.Green : Color.Yellow;
             return regResult;
         }
@@ -229,19 +234,19 @@ namespace Shadowsocks.View
             if (HotKeys.IsCallbackExists(cb, out prevHotKey))
             {
                 // unregister previous one
-                HotKeys.UnRegist(prevHotKey);
+                HotKeys.Unregister(prevHotKey);
             }
         }
 
         private void SaveConfig()
         {
-            _modifiedConfig.SwitchSystemProxy = SwitchSystemProxyTextBox.Text;
-            _modifiedConfig.SwitchSystemProxyMode = SwitchProxyModeTextBox.Text;
-            _modifiedConfig.SwitchAllowLan = SwitchAllowLanTextBox.Text;
-            _modifiedConfig.ShowLogs = ShowLogsTextBox.Text;
-            _modifiedConfig.ServerMoveUp = ServerMoveUpTextBox.Text;
-            _modifiedConfig.ServerMoveDown = ServerMoveDownTextBox.Text;
-            _controller.SaveHotkeyConfig(_modifiedConfig);
+            _modifiedHotkeyConfig.SwitchSystemProxy = SwitchSystemProxyTextBox.Text;
+            _modifiedHotkeyConfig.SwitchSystemProxyMode = SwitchProxyModeTextBox.Text;
+            _modifiedHotkeyConfig.SwitchAllowLan = SwitchAllowLanTextBox.Text;
+            _modifiedHotkeyConfig.ShowLogs = ShowLogsTextBox.Text;
+            _modifiedHotkeyConfig.ServerMoveUp = ServerMoveUpTextBox.Text;
+            _modifiedHotkeyConfig.ServerMoveDown = ServerMoveDownTextBox.Text;
+            _controller.SaveHotkeyConfig(_modifiedHotkeyConfig);
         }
 
 
