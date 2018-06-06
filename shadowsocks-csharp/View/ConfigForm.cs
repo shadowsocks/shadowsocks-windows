@@ -80,7 +80,10 @@ namespace Shadowsocks.View
                     return true;
                 }
                 Server server = GetServerDetailsFromUI();
-
+                if (server == null)
+                {
+                    return false;
+                }
                 Configuration.CheckServer(server);
                 _modifiedConfiguration.configs[_lastSelectedIndex] = server;
 
@@ -172,32 +175,40 @@ namespace Shadowsocks.View
             PortableModeCheckBox.Checked = _modifiedConfiguration.portableMode;
         }
 
+        private bool SaveValidConfiguration()
+        {
+            if (!ValidateAndSaveSelectedServerDetails())
+            {
+                return false;
+            }
+            if (_modifiedConfiguration.configs.Count == 0)
+            {
+                MessageBox.Show(I18N.GetString("Please add at least one server"));
+                return false;
+            }
+
+            int localPort = int.Parse(ProxyPortTextBox.Text);
+            Configuration.CheckLocalPort(localPort);
+            _modifiedConfiguration.localPort = localPort;
+
+            _modifiedConfiguration.portableMode = PortableModeCheckBox.Checked;
+
+            controller.SaveServers(_modifiedConfiguration.configs, _modifiedConfiguration.localPort, _modifiedConfiguration.portableMode);
+            // SelectedIndex remains valid
+            // We handled this in event handlers, e.g. Add/DeleteButton, SelectedIndexChanged
+            // and move operations
+            controller.SelectServerIndex(ServersListBox.SelectedIndex);
+            return true;
+        }
+
         private void ConfigForm_KeyDown(object sender, KeyEventArgs e)
         {
             // Sometimes the users may hit enter key by mistake, and the form will close without saving entries.
 
             if (e.KeyCode == Keys.Enter)
             {
-                Server server = controller.GetCurrentServer();
-                if (!ValidateAndSaveSelectedServerDetails())
-                {
-                    return;
-                }
-                if (_modifiedConfiguration.configs.Count == 0)
-                {
-                    MessageBox.Show(I18N.GetString("Please add at least one server"));
-                    return;
-                }
-                int localPort = int.Parse(ProxyPortTextBox.Text);
-                Configuration.CheckLocalPort(localPort);
-                _modifiedConfiguration.localPort = localPort;
-
-                _modifiedConfiguration.portableMode = PortableModeCheckBox.Checked;
-
-                controller.SaveServers(_modifiedConfiguration.configs, _modifiedConfiguration.localPort, _modifiedConfiguration.portableMode);
-                controller.SelectServerIndex(_modifiedConfiguration.configs.IndexOf(server));
+                SaveValidConfiguration();
             }
-
         }
 
         private void ServersListBox_SelectedIndexChanged(object sender, EventArgs e)
@@ -273,28 +284,10 @@ namespace Shadowsocks.View
 
         private void OKButton_Click(object sender, EventArgs e)
         {
-            if (!ValidateAndSaveSelectedServerDetails())
+            if (SaveValidConfiguration())
             {
-                return;
+                this.Close();
             }
-            if (_modifiedConfiguration.configs.Count == 0)
-            {
-                MessageBox.Show(I18N.GetString("Please add at least one server"));
-                return;
-            }
-
-            int localPort = int.Parse(ProxyPortTextBox.Text);
-            Configuration.CheckLocalPort(localPort);
-            _modifiedConfiguration.localPort = localPort;
-
-            _modifiedConfiguration.portableMode = PortableModeCheckBox.Checked;
-
-            controller.SaveServers(_modifiedConfiguration.configs, _modifiedConfiguration.localPort, _modifiedConfiguration.portableMode);
-            // SelectedIndex remains valid
-            // We handled this in event handlers, e.g. Add/DeleteButton, SelectedIndexChanged
-            // and move operations
-            controller.SelectServerIndex(ServersListBox.SelectedIndex);
-            this.Close();
         }
 
         private void CancelButton_Click(object sender, EventArgs e)
