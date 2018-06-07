@@ -62,10 +62,10 @@ namespace Shadowsocks.View
         private void LoadCurrentConfiguration()
         {
             _modifiedHotkeyConfig = _controller.GetConfigurationCopy().hotkey;
-            LoadConfiguration(_modifiedHotkeyConfig);
+            SetConfigToUI(_modifiedHotkeyConfig);
         }
 
-        private void LoadConfiguration(HotkeyConfig config)
+        private void SetConfigToUI(HotkeyConfig config)
         {
             SwitchSystemProxyTextBox.Text = config.SwitchSystemProxy;
             SwitchProxyModeTextBox.Text = config.SwitchSystemProxyMode;
@@ -73,6 +73,25 @@ namespace Shadowsocks.View
             ShowLogsTextBox.Text = config.ShowLogs;
             ServerMoveUpTextBox.Text = config.ServerMoveUp;
             ServerMoveDownTextBox.Text = config.ServerMoveDown;
+        }
+
+        private void SaveConfig()
+        {
+            _modifiedHotkeyConfig = GetConfigFromUI();
+            _controller.SaveHotkeyConfig(_modifiedHotkeyConfig);
+        }
+
+        private HotkeyConfig GetConfigFromUI()
+        {
+            return new HotkeyConfig
+            {
+                SwitchSystemProxy = SwitchSystemProxyTextBox.Text,
+                SwitchSystemProxyMode = SwitchProxyModeTextBox.Text,
+                SwitchAllowLan = SwitchAllowLanTextBox.Text,
+                ShowLogs = ShowLogsTextBox.Text,
+                ServerMoveUp = ServerMoveUpTextBox.Text,
+                ServerMoveDown = ServerMoveDownTextBox.Text
+            };
         }
 
         /// <summary>
@@ -160,7 +179,7 @@ namespace Shadowsocks.View
         private void OKButton_Click(object sender, EventArgs e)
         {
             // try to register, notify to change settings if failed
-            if (!RegisterAllHotkeys(out _)) // declare out as an inline discard variable
+            if (!RegisterAllHotkeys())
             {
                 MessageBox.Show(I18N.GetString("Register hotkey failed"));
             }
@@ -172,13 +191,12 @@ namespace Shadowsocks.View
 
         private void RegisterAllButton_Click(object sender, EventArgs e)
         {
-            RegisterAllHotkeys(out _);  // declare out as an inline discard variable
+            RegisterAllHotkeys();
         }
 
-        private bool RegisterAllHotkeys(out string failureInfoStr)
+        private bool RegisterAllHotkeys()
         {
             bool isSuccess = true;
-            StringBuilder failureInfo = new StringBuilder();
             foreach (var tb in _allTextBoxes)
             {
                 if (tb.Text.IsNullOrEmpty())
@@ -188,10 +206,8 @@ namespace Shadowsocks.View
                 if (!TryRegHotkey(tb))
                 {
                     isSuccess = false;
-                    failureInfo.AppendLine(tb.Text);
                 }
             }
-            failureInfoStr = failureInfo.ToString();
             return isSuccess;
         }
 
@@ -238,23 +254,10 @@ namespace Shadowsocks.View
             }
         }
 
-        private void SaveConfig()
-        {
-            _modifiedHotkeyConfig.SwitchSystemProxy = SwitchSystemProxyTextBox.Text;
-            _modifiedHotkeyConfig.SwitchSystemProxyMode = SwitchProxyModeTextBox.Text;
-            _modifiedHotkeyConfig.SwitchAllowLan = SwitchAllowLanTextBox.Text;
-            _modifiedHotkeyConfig.ShowLogs = ShowLogsTextBox.Text;
-            _modifiedHotkeyConfig.ServerMoveUp = ServerMoveUpTextBox.Text;
-            _modifiedHotkeyConfig.ServerMoveDown = ServerMoveDownTextBox.Text;
-            _controller.SaveHotkeyConfig(_modifiedHotkeyConfig);
-        }
-
-
-
         #region Prepare hotkey
 
         /// <summary>
-        /// Find correct callback and corresponding label
+        /// Find correct callback and corresponding label by textBox
         /// </summary>
         /// <param name="tb"></param>
         /// <param name="cb"></param>

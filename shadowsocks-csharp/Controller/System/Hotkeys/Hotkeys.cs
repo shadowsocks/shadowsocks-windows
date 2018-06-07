@@ -59,6 +59,9 @@ namespace Shadowsocks.Controller.Hotkeys
                 return false;
             }
         }
+
+        #region Converters
+
         public static string HotKey2Str( HotKey key )
         {
             if (key == null) throw new ArgumentNullException(nameof(key));
@@ -111,6 +114,8 @@ namespace Shadowsocks.Controller.Hotkeys
                 return null;
             }
         }
+
+        #endregion
 
         public static bool Register(HotKey key, HotKeyCallBackHandler callBack)
         {
