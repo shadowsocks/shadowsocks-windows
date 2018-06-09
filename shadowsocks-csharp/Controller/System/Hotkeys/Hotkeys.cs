@@ -46,15 +46,13 @@ namespace Shadowsocks.Controller.Hotkeys
         public static bool IsCallbackExists( HotKeyCallBackHandler cb, out HotKey hotkey)
         {
             if (cb == null) throw new ArgumentNullException(nameof(cb));
-            try
+            if (_keymap.Any(v => v.Value == cb))
             {
-                var key = _keymap.First(x => x.Value == cb).Key;
-                hotkey = key;
+                hotkey = _keymap.First(v => v.Value == cb).Key;
                 return true;
             }
-            catch (InvalidOperationException)
+            else
             {
-                // not found
                 hotkey = null;
                 return false;
             }

@@ -212,7 +212,6 @@
             this.SwitchSystemProxyTextBox.ReadOnly = true;
             this.SwitchSystemProxyTextBox.Size = new System.Drawing.Size(276, 25);
             this.SwitchSystemProxyTextBox.TabIndex = 7;
-            this.SwitchSystemProxyTextBox.TextChanged += new System.EventHandler(this.TextBox_TextChanged);
             this.SwitchSystemProxyTextBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.HotkeyDown);
             this.SwitchSystemProxyTextBox.KeyUp += new System.Windows.Forms.KeyEventHandler(this.HotkeyUp);
             // 
@@ -225,7 +224,6 @@
             this.SwitchProxyModeTextBox.ReadOnly = true;
             this.SwitchProxyModeTextBox.Size = new System.Drawing.Size(276, 25);
             this.SwitchProxyModeTextBox.TabIndex = 8;
-            this.SwitchProxyModeTextBox.TextChanged += new System.EventHandler(this.TextBox_TextChanged);
             this.SwitchProxyModeTextBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.HotkeyDown);
             this.SwitchProxyModeTextBox.KeyUp += new System.Windows.Forms.KeyEventHandler(this.HotkeyUp);
             // 
@@ -238,7 +236,6 @@
             this.SwitchAllowLanTextBox.ReadOnly = true;
             this.SwitchAllowLanTextBox.Size = new System.Drawing.Size(276, 25);
             this.SwitchAllowLanTextBox.TabIndex = 10;
-            this.SwitchAllowLanTextBox.TextChanged += new System.EventHandler(this.TextBox_TextChanged);
             this.SwitchAllowLanTextBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.HotkeyDown);
             this.SwitchAllowLanTextBox.KeyUp += new System.Windows.Forms.KeyEventHandler(this.HotkeyUp);
             // 
@@ -251,7 +248,6 @@
             this.ShowLogsTextBox.ReadOnly = true;
             this.ShowLogsTextBox.Size = new System.Drawing.Size(276, 25);
             this.ShowLogsTextBox.TabIndex = 11;
-            this.ShowLogsTextBox.TextChanged += new System.EventHandler(this.TextBox_TextChanged);
             this.ShowLogsTextBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.HotkeyDown);
             this.ShowLogsTextBox.KeyUp += new System.Windows.Forms.KeyEventHandler(this.HotkeyUp);
             // 
@@ -264,7 +260,6 @@
             this.ServerMoveUpTextBox.ReadOnly = true;
             this.ServerMoveUpTextBox.Size = new System.Drawing.Size(276, 25);
             this.ServerMoveUpTextBox.TabIndex = 12;
-            this.ServerMoveUpTextBox.TextChanged += new System.EventHandler(this.TextBox_TextChanged);
             this.ServerMoveUpTextBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.HotkeyDown);
             this.ServerMoveUpTextBox.KeyUp += new System.Windows.Forms.KeyEventHandler(this.HotkeyUp);
             // 
@@ -277,7 +272,6 @@
             this.ServerMoveDownTextBox.ReadOnly = true;
             this.ServerMoveDownTextBox.Size = new System.Drawing.Size(276, 25);
             this.ServerMoveDownTextBox.TabIndex = 13;
-            this.ServerMoveDownTextBox.TextChanged += new System.EventHandler(this.TextBox_TextChanged);
             this.ServerMoveDownTextBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.HotkeyDown);
             this.ServerMoveDownTextBox.KeyUp += new System.Windows.Forms.KeyEventHandler(this.HotkeyUp);
             // 

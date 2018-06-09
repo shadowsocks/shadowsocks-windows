@@ -77,7 +77,6 @@ namespace Shadowsocks.View
 
         private void SaveConfig()
         {
-            _modifiedHotkeyConfig = GetConfigFromUI();
             _controller.SaveHotkeyConfig(_modifiedHotkeyConfig);
         }
 
@@ -150,27 +149,6 @@ namespace Shadowsocks.View
             }
         }
 
-        private void TextBox_TextChanged(object sender, EventArgs e)
-        {
-            var tb = (TextBox) sender;
-
-            if (tb.Text == "")
-            {
-                // unreg
-                UnregHotkey(tb);
-            }
-        }
-
-        private void UnregHotkey(TextBox tb)
-        {
-            HotKeys.HotKeyCallBackHandler callBack;
-            Label lb;
-
-            PrepareForHotkey(tb, out callBack, out lb);
-
-            UnregPrevHotkey(callBack);
-        }
-
         private void CancelButton_Click(object sender, EventArgs e)
         {
             this.Close();
@@ -178,8 +156,9 @@ namespace Shadowsocks.View
 
         private void OKButton_Click(object sender, EventArgs e)
         {
+            _modifiedHotkeyConfig = GetConfigFromUI();
             // try to register, notify to change settings if failed
-            if (!RegisterAllHotkeys())
+            if (!RegisterAllHotkeys(_modifiedHotkeyConfig))
             {
                 MessageBox.Show(I18N.GetString("Register hotkey failed"));
             }
@@ -191,57 +170,61 @@ namespace Shadowsocks.View
 
         private void RegisterAllButton_Click(object sender, EventArgs e)
         {
-            RegisterAllHotkeys();
+            _modifiedHotkeyConfig = GetConfigFromUI();
+            RegisterAllHotkeys(_modifiedHotkeyConfig);
         }
 
-        private bool RegisterAllHotkeys()
+        private bool RegisterAllHotkeys(HotkeyConfig hotkeyConfig)
         {
-            bool isSuccess = true;
-            foreach (var tb in _allTextBoxes)
-            {
-                if (tb.Text.IsNullOrEmpty())
-                {
-                    continue;
-                }
-                if (!TryRegHotkey(tb))
-                {
-                    isSuccess = false;
-                }
-            }
-            return isSuccess;
+            return
+                TryRegHotkeyFromString(hotkeyConfig.SwitchSystemProxy, "SwitchSystemProxyCallback", SwitchSystemProxyLabel)
+                && TryRegHotkeyFromString(hotkeyConfig.SwitchSystemProxyMode, "SwitchProxyModeCallback", SwitchProxyModeLabel)
+                && TryRegHotkeyFromString(hotkeyConfig.SwitchAllowLan, "SwitchAllowLanCallback", SwitchAllowLanLabel)
+                && TryRegHotkeyFromString(hotkeyConfig.ShowLogs, "ShowLogsCallback", ShowLogsLabel)
+                && TryRegHotkeyFromString(hotkeyConfig.ServerMoveUp, "ServerMoveUpCallback", ServerMoveUpLabel)
+                && TryRegHotkeyFromString(hotkeyConfig.ServerMoveDown, "ServerMoveDownCallback", ServerMoveDownLabel);
         }
 
-        private bool TryRegHotkey(TextBox tb)
+        private bool TryRegHotkeyFromString(string hotkeyStr, string callbackName, Label indicator = null)
         {
-            var hotkey = HotKeys.Str2HotKey(tb.Text);
-            if (hotkey == null)
+            var _callback = HotkeyCallbacks.GetCallback(callbackName);
+            if (_callback == null)
             {
-                MessageBox.Show(string.Format(I18N.GetString("Cannot parse hotkey: {0}"), tb.Text));
-                tb.Clear();
-                return false;
+                throw new Exception($"{callbackName} not found");
             }
 
-            HotKeys.HotKeyCallBackHandler callBack;
-            Label lb;
+            var callback = _callback as HotKeys.HotKeyCallBackHandler;
 
-            PrepareForHotkey(tb, out callBack, out lb);
+            if (hotkeyStr.IsNullOrEmpty())
+            {
+                UnregPrevHotkey(callback);
+                return true;
+            }
+            else
+            {
+                var hotkey = HotKeys.Str2HotKey(hotkeyStr);
+                if (hotkey == null)
+                {
+                    MessageBox.Show(string.Format(I18N.GetString("Cannot parse hotkey: {0}"), hotkeyStr));
+                    return false;
+                }
+                else
+                {
+                    bool regResult = (TryRegHotkey(hotkey, callback));
+                    if (indicator != null)
+                    {
+                        indicator.BackColor = regResult ? Color.Green : Color.Yellow;
+                    }
+                    return regResult;
+                }
+            }
 
-            UnregPrevHotkey(callBack);
+        }
 
-            // try to register keys
-            // if already registered by other progs
-            // notify to change
-
-            // use the corresponding label color to indicate
-            // reg result.
-            // Green: not occupied by others and operation succeed
-            // Yellow: already registered by other program and need action: disable by clear the content
-            //         or change to another one
-            // Transparent without color: first run or empty config
-
-            bool regResult = HotKeys.Register(hotkey, callBack);
-            lb.BackColor = regResult ? Color.Green : Color.Yellow;
-            return regResult;
+        private bool TryRegHotkey(GlobalHotKey.HotKey hotkey, HotKeys.HotKeyCallBackHandler callback)
+        {
+            UnregPrevHotkey(callback);
+            return HotKeys.Register(hotkey, callback);
         }
 
         private static void UnregPrevHotkey(HotKeys.HotKeyCallBackHandler cb)
@@ -254,62 +237,5 @@ namespace Shadowsocks.View
             }
         }
 
-        #region Prepare hotkey
-
-        /// <summary>
-        /// Find correct callback and corresponding label by textBox
-        /// </summary>
-        /// <param name="tb"></param>
-        /// <param name="cb"></param>
-        /// <param name="lb"></param>
-        private void PrepareForHotkey(TextBox tb, out HotKeys.HotKeyCallBackHandler cb, out Label lb)
-        {
-            /*
-             * XXX: The labelName, TextBoxName and callbackName
-             *      must follow this rule to make use of reflection
-             *
-             *      <BaseName><Control-Type-Name>
-             */
-            if (tb == null)
-                throw new ArgumentNullException(nameof(tb));
-
-            var pos = tb.Name.LastIndexOf("TextBox", StringComparison.OrdinalIgnoreCase);
-            var rawName = tb.Name.Substring(0, pos);
-            var labelName = rawName + "Label";
-            var callbackName = rawName + "Callback";
-
-            var callback = HotkeyCallbacks.GetCallback(callbackName);
-            if (callback == null)
-            {
-                throw new Exception($"{callbackName} not found");
-            }
-            cb = callback as HotKeys.HotKeyCallBackHandler;
-
-            var label = GetFieldViaName(GetType(), labelName, this);
-            if (label == null)
-            {
-                throw new Exception($"{labelName} not found");
-            }
-            lb = label as Label;
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        /// <param name="type">from which type</param>
-        /// <param name="name">field name</param>
-        /// <param name="obj">pass null if static field</param>
-        /// <returns></returns>
-        private static object GetFieldViaName(Type type, string name, object obj)
-        {
-            if (type == null) throw new ArgumentNullException(nameof(type));
-            if (name.IsNullOrEmpty()) throw new ArgumentException(nameof(name));
-            // In general, TextBoxes and Labels are private
-            FieldInfo fi = type.GetField(name,
-                BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.IgnoreCase | BindingFlags.Static);
-            return fi == null ? null : fi.GetValue(obj);
-        }
-
-        #endregion
     }
 }
