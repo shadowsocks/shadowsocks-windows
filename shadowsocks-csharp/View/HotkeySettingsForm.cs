@@ -21,8 +21,6 @@ namespace Shadowsocks.View
         // this is a copy of hotkey configuration that we are working on
         private HotkeyConfig _modifiedHotkeyConfig;
 
-        private readonly IEnumerable<TextBox> _allTextBoxes;
-
         public HotkeySettingsForm(ShadowsocksController controller)
         {
             InitializeComponent();
@@ -33,10 +31,6 @@ namespace Shadowsocks.View
             _controller.ConfigChanged += controller_ConfigChanged;
 
             LoadCurrentConfiguration();
-
-            // get all textboxes belong to this form
-            _allTextBoxes = tableLayoutPanel1.GetChildControls<TextBox>();
-            if (!_allTextBoxes.Any()) throw new Exception("Cannot get all textboxes");
         }
 
         private void UpdateTexts()
@@ -117,7 +111,7 @@ namespace Shadowsocks.View
                     sb.Append("Shift+");
                 }
 
-                Keys keyvalue = (Keys) e.KeyValue;
+                Keys keyvalue = (Keys)e.KeyValue;
                 if ((keyvalue >= Keys.PageUp && keyvalue <= Keys.Down) ||
                     (keyvalue >= Keys.A && keyvalue <= Keys.Z) ||
                     (keyvalue >= Keys.F1 && keyvalue <= Keys.F12))
@@ -126,14 +120,14 @@ namespace Shadowsocks.View
                 }
                 else if (keyvalue >= Keys.D0 && keyvalue <= Keys.D9)
                 {
-                    sb.Append('D').Append((char) e.KeyValue);
+                    sb.Append('D').Append((char)e.KeyValue);
                 }
                 else if (keyvalue >= Keys.NumPad0 && keyvalue <= Keys.NumPad9)
                 {
-                    sb.Append("NumPad").Append((char) (e.KeyValue - 48));
+                    sb.Append("NumPad").Append((char)(e.KeyValue - 48));
                 }
             }
-            ((TextBox) sender).Text = sb.ToString();
+            ((TextBox)sender).Text = sb.ToString();
         }
 
         /// <summary>
@@ -141,7 +135,7 @@ namespace Shadowsocks.View
         /// </summary>
         private void HotkeyUp(object sender, KeyEventArgs e)
         {
-            var tb = (TextBox) sender;
+            var tb = (TextBox)sender;
             var content = tb.Text.TrimEnd();
             if (content.Length >= 1 && content[content.Length - 1] == '+')
             {
@@ -177,15 +171,15 @@ namespace Shadowsocks.View
         private bool RegisterAllHotkeys(HotkeyConfig hotkeyConfig)
         {
             return
-                TryRegHotkeyFromString(hotkeyConfig.SwitchSystemProxy, "SwitchSystemProxyCallback", SwitchSystemProxyLabel)
-                && TryRegHotkeyFromString(hotkeyConfig.SwitchSystemProxyMode, "SwitchProxyModeCallback", SwitchProxyModeLabel)
-                && TryRegHotkeyFromString(hotkeyConfig.SwitchAllowLan, "SwitchAllowLanCallback", SwitchAllowLanLabel)
-                && TryRegHotkeyFromString(hotkeyConfig.ShowLogs, "ShowLogsCallback", ShowLogsLabel)
-                && TryRegHotkeyFromString(hotkeyConfig.ServerMoveUp, "ServerMoveUpCallback", ServerMoveUpLabel)
-                && TryRegHotkeyFromString(hotkeyConfig.ServerMoveDown, "ServerMoveDownCallback", ServerMoveDownLabel);
+                RegHotkeyFromString(hotkeyConfig.SwitchSystemProxy, "SwitchSystemProxyCallback", SwitchSystemProxyLabel)
+                && RegHotkeyFromString(hotkeyConfig.SwitchSystemProxyMode, "SwitchProxyModeCallback", SwitchProxyModeLabel)
+                && RegHotkeyFromString(hotkeyConfig.SwitchAllowLan, "SwitchAllowLanCallback", SwitchAllowLanLabel)
+                && RegHotkeyFromString(hotkeyConfig.ShowLogs, "ShowLogsCallback", ShowLogsLabel)
+                && RegHotkeyFromString(hotkeyConfig.ServerMoveUp, "ServerMoveUpCallback", ServerMoveUpLabel)
+                && RegHotkeyFromString(hotkeyConfig.ServerMoveDown, "ServerMoveDownCallback", ServerMoveDownLabel);
         }
 
-        private bool TryRegHotkeyFromString(string hotkeyStr, string callbackName, Label indicator = null)
+        private bool RegHotkeyFromString(string hotkeyStr, string callbackName, Label indicator = null)
         {
             var _callback = HotkeyCallbacks.GetCallback(callbackName);
             if (_callback == null)
@@ -197,7 +191,11 @@ namespace Shadowsocks.View
 
             if (hotkeyStr.IsNullOrEmpty())
             {
-                UnregPrevHotkey(callback);
+                HotKeys.UnregExistingHotkey(callback);
+                if (indicator != null)
+                {
+                    indicator.ResetBackColor();
+                }
                 return true;
             }
             else
@@ -210,7 +208,7 @@ namespace Shadowsocks.View
                 }
                 else
                 {
-                    bool regResult = (TryRegHotkey(hotkey, callback));
+                    bool regResult = (HotKeys.RegHotkey(hotkey, callback));
                     if (indicator != null)
                     {
                         indicator.BackColor = regResult ? Color.Green : Color.Yellow;
@@ -220,22 +218,5 @@ namespace Shadowsocks.View
             }
 
         }
-
-        private bool TryRegHotkey(GlobalHotKey.HotKey hotkey, HotKeys.HotKeyCallBackHandler callback)
-        {
-            UnregPrevHotkey(callback);
-            return HotKeys.Register(hotkey, callback);
-        }
-
-        private static void UnregPrevHotkey(HotKeys.HotKeyCallBackHandler cb)
-        {
-            GlobalHotKey.HotKey prevHotKey;
-            if (HotKeys.IsCallbackExists(cb, out prevHotKey))
-            {
-                // unregister previous one
-                HotKeys.Unregister(prevHotKey);
-            }
-        }
-
     }
 }

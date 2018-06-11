@@ -36,7 +36,28 @@ namespace Shadowsocks.Controller.Hotkeys
             if (_keymap.TryGetValue(hotkey, out callback))
                 callback();
         }
-        
+
+        public static bool RegHotkey(HotKey hotkey, HotKeyCallBackHandler callback)
+        {
+            UnregExistingHotkey(callback);
+            return Register(hotkey, callback);
+        }
+
+        public static bool UnregExistingHotkey(HotKeys.HotKeyCallBackHandler cb)
+        {
+            HotKey existingHotKey;
+            if (IsCallbackExists(cb, out existingHotKey))
+            {
+                // unregister existing one
+                Unregister(existingHotKey);
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
         public static bool IsHotkeyExists( HotKey hotKey )
         {
             if (hotKey == null) throw new ArgumentNullException(nameof(hotKey));
@@ -115,7 +136,7 @@ namespace Shadowsocks.Controller.Hotkeys
 
         #endregion
 
-        public static bool Register(HotKey key, HotKeyCallBackHandler callBack)
+        private static bool Register(HotKey key, HotKeyCallBackHandler callBack)
         {
             if (key == null)
                 throw new ArgumentNullException(nameof(key));
@@ -141,7 +162,7 @@ namespace Shadowsocks.Controller.Hotkeys
             }
         }
 
-        public static void Unregister(HotKey key)
+        private static void Unregister(HotKey key)
         {
             if (key == null)
                 throw new ArgumentNullException(nameof(key));
