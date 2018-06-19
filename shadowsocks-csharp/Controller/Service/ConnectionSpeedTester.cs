@@ -25,8 +25,9 @@ namespace Shadowsocks.Controller.Service
 
             private void Process()
             {
-                var proxy = new WebProxy(new Uri("http://localhost:" + Controller.polipoRunner.RunningPort));
-                var servers = Controller.GetCurrentConfiguration().configs;
+                var proxy = new WebProxy(new Uri("http://localhost:" + Controller.privoxyRunner.RunningPort));
+                var config = Controller.GetCurrentConfiguration();
+                var servers = config.configs;
                 int i = 0, max = 0, count = servers.Count;
                 var maxSpeed = 0.0;
                 while (i < count) if (!Stopped)
@@ -70,7 +71,7 @@ namespace Shadowsocks.Controller.Service
                     {
                         ++i;
                     }
-                Controller.SaveServers(servers, Controller.GetCurrentConfiguration().localPort);
+                Controller.SaveServers(servers, config.localPort, config.portableMode);
                 Controller.SelectServerIndex(max);
                 Stopped = true;
                 Writer.Dispose();

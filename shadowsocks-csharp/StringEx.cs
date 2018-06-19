@@ -5,6 +5,9 @@ using System.IO;
 using System.Linq;
 using System.Text;
 
+#if EXPOSE_EVERYTHING || EXPOSE_STRINGEX
+public
+#endif
 static partial class StringEx
 {
 #pragma warning disable 1591
@@ -29,7 +32,7 @@ static partial class StringEx
 
     public static bool IsWhiteSpace(this string value)
     {
-        foreach(var c in value)
+        foreach (var c in value)
         {
             if (char.IsWhiteSpace(c)) continue;
 
@@ -53,6 +56,80 @@ static partial class StringEx
             throw new ArgumentNullException(nameof(value));
 
         return string.Intern(value);
+    }
+#endif
+
+#if UNSAFE
+    public static unsafe string ToLowerForASCII(this string value)
+    {
+        if (value.IsNullOrWhiteSpace())
+            return value;
+
+        value = string.Copy(value);
+        fixed (char* low = value)
+        {
+            var end = low + value.Length;
+            for (var p = low; p < end; p++)
+            {
+                var c = *p;
+                if (c < 'A' || c > 'Z')
+                    continue;
+                *p = (char)(c + 0x20);
+            }
+        }
+        return value;
+    }
+
+    public static unsafe string ToUpperForASCII(this string value)
+    {
+        if (value.IsNullOrWhiteSpace())
+            return value;
+
+        value = string.Copy(value);
+        fixed (char* low = value)
+        {
+            var end = low + value.Length;
+            for (var p = low; p < end; p++)
+            {
+                var c = *p;
+                if (c < 'a' || c > 'z')
+                    continue;
+                *p = (char)(c - 0x20);
+            }
+        }
+        return value;
+    }
+#else
+    public static string ToLowerForASCII(this string value)
+    {
+        if (value.IsNullOrWhiteSpace())
+            return value;
+
+        var sb = new StringBuilder(value.Length);
+        foreach (var c in value)
+        {
+            if (c < 'A' || c > 'Z')
+                sb.Append(c);
+            else
+                sb.Append((char)(c + 0x20));
+        }
+        return sb.ToString();
+    }
+
+    public static string ToUpperForASCII(this string value)
+    {
+        if (value.IsNullOrWhiteSpace())
+            return value;
+
+        var sb = new StringBuilder(value.Length);
+        foreach (var c in value)
+        {
+            if (c < 'a' || c > 'z')
+                sb.Append(c);
+            else
+                sb.Append((char)(c - 0x20));
+        }
+        return sb.ToString();
     }
 #endif
 

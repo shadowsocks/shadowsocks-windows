@@ -1,21 +1,27 @@
 ﻿using System;
 using System.Collections;
+using System.Globalization;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
-
+using Shadowsocks.Encryption;
 using Shadowsocks.Model;
 using Shadowsocks.Properties;
 using Shadowsocks.Util;
+using System.Threading.Tasks;
 
 namespace Shadowsocks.Controller
 {
-    class PACServer : Listener.Service
+    public class PACServer : Listener.Service
     {
-        public static readonly string PAC_FILE = "pac.txt";
-        public static readonly string USER_RULE_FILE = "user-rule.txt";
-        public static readonly string USER_ABP_FILE = "abp.txt";
+        public const string PAC_FILE = "pac.txt";
+        public const string USER_RULE_FILE = "user-rule.txt";
+        public const string USER_ABP_FILE = "abp.txt";
+
+        private string PacSecret { get; set; } = "";
+
+        public string PacUrl { get; private set; } = "";
 
         FileSystemWatcher PACFileWatcher;
         FileSystemWatcher UserRuleFileWatcher;
@@ -33,9 +39,28 @@ namespace Shadowsocks.Controller
         public void UpdateConfiguration(Configuration config)
         {
             this._config = config;
+
+            if (config.secureLocalPac)
+            {
+                var rd = new byte[32];
+                RNG.GetBytes(rd);
+                PacSecret = $"&secret={Convert.ToBase64String(rd)}";
+            }
+            else
+            {
+                PacSecret = "";
+            }
+
+            PacUrl = $"http://127.0.0.1:{config.localPort}/pac?t={GetTimestamp(DateTime.Now)}{PacSecret}";
         }
 
-        public bool Handle(byte[] firstPacket, int length, Socket socket, object state)
+
+        private static string GetTimestamp(DateTime value)
+        {
+            return value.ToString("yyyyMMddHHmmssfff");
+        }
+
+        public override bool Handle(byte[] firstPacket, int length, Socket socket, object state)
         {
             if (socket.ProtocolType != ProtocolType.Tcp)
             {
@@ -46,6 +71,7 @@ namespace Shadowsocks.Controller
                 string request = Encoding.UTF8.GetString(firstPacket, 0, length);
                 string[] lines = request.Split('\r', '\n');
                 bool hostMatch = false, pathMatch = false, useSocks = false;
+                bool secretMatch = PacSecret.IsNullOrEmpty();
                 foreach (string line in lines)
                 {
                     string[] kv = line.Split(new char[] { ':' }, 2);
@@ -69,15 +95,29 @@ namespace Shadowsocks.Controller
                     }
                     else if (kv.Length == 1)
                     {
-                        if (line.IndexOf("pac") >= 0)
+                        if (line.IndexOf("pac", StringComparison.Ordinal) >= 0)
                         {
                             pathMatch = true;
+                        }
+                        if (!secretMatch)
+                        {
+                            if(line.IndexOf(PacSecret, StringComparison.Ordinal) >= 0)
+                            {
+                                secretMatch = true;
+                            }
                         }
                     }
                 }
                 if (hostMatch && pathMatch)
                 {
-                    SendResponse(firstPacket, length, socket, useSocks);
+                    if (!secretMatch)
+                    {
+                        socket.Close(); // Close immediately
+                    }
+                    else
+                    {
+                        SendResponse(firstPacket, length, socket, useSocks);
+                    }
                     return true;
                 }
                 return false;
@@ -202,42 +242,34 @@ Connection: Close
         #region FileSystemWatcher.OnChanged()
         // FileSystemWatcher Changed event is raised twice
         // http://stackoverflow.com/questions/1764809/filesystemwatcher-changed-event-is-raised-twice
-        private static Hashtable fileChangedTime = new Hashtable();
-
+        // Add a short delay to avoid raise event twice in a short period
         private void PACFileWatcher_Changed(object sender, FileSystemEventArgs e)
         {
-            string path = e.FullPath.ToString();
-            string currentLastWriteTime = File.GetLastWriteTime(e.FullPath).ToString();
-
-            // if there is no path info stored yet or stored path has different time of write then the one now is inspected
-            if (!fileChangedTime.ContainsKey(path) || fileChangedTime[path].ToString() != currentLastWriteTime)
+            if (PACFileChanged != null)
             {
-                if (PACFileChanged != null)
+                Logging.Info($"Detected: PAC file '{e.Name}' was {e.ChangeType.ToString().ToLower()}.");
+                Task.Factory.StartNew(() =>
                 {
-                    Logging.Info($"Detected: PAC file '{e.Name}' was {e.ChangeType.ToString().ToLower()}.");
+                    ((FileSystemWatcher)sender).EnableRaisingEvents = false;
+                    System.Threading.Thread.Sleep(10);
                     PACFileChanged(this, new EventArgs());
-                }
-
-                // lastly we update the last write time in the hashtable
-                fileChangedTime[path] = currentLastWriteTime;
+                    ((FileSystemWatcher)sender).EnableRaisingEvents = true;
+                });
             }
         }
 
         private void UserRuleFileWatcher_Changed(object sender, FileSystemEventArgs e)
         {
-            string path = e.FullPath.ToString();
-            string currentLastWriteTime = File.GetLastWriteTime(e.FullPath).ToString();
-
-            // if there is no path info stored yet or stored path has different time of write then the one now is inspected
-            if (!fileChangedTime.ContainsKey(path) || fileChangedTime[path].ToString() != currentLastWriteTime)
+            if (UserRuleFileChanged != null)
             {
-                if (UserRuleFileChanged != null)
+                Logging.Info($"Detected: User Rule file '{e.Name}' was {e.ChangeType.ToString().ToLower()}.");
+                Task.Factory.StartNew(()=>
                 {
-                    Logging.Info($"Detected: User Rule file '{e.Name}' was {e.ChangeType.ToString().ToLower()}.");
+                    ((FileSystemWatcher)sender).EnableRaisingEvents = false;
+                    System.Threading.Thread.Sleep(10);
                     UserRuleFileChanged(this, new EventArgs());
-                }
-                // lastly we update the last write time in the hashtable
-                fileChangedTime[path] = currentLastWriteTime;
+                    ((FileSystemWatcher)sender).EnableRaisingEvents = true;
+                });
             }
         }
         #endregion

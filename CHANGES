@@ -1,3 +1,159 @@
+4.0.10 2018-05-10
+- Add square bracket for SIP002 IPv6 (RFC3986)
+- Add plugin CLI arguments support
+- Bug fix: Server address should not be encoded (#1758)
+- Bug fix: Wrong splash on multi display (#1729)
+- Fix PerPixelAlphaForm's issue in designer
+- Other minor bug fixes and improvements
+
+4.0.9 2018-03-14
+- Fix port occupied issue
+- Add xchacha20-ietf-poly1305
+- Update cryptographic libraries
+- Bug fixes and improvements
+
+4.0.8 2018-02-16
+- Add OpenSSL 1.1.0g support #1671
+- Update nuget packages
+- Bug fixes and improvements
+
+4.0.7 2017-12-09
+- Fix QR code and ss:// protocol import issue
+- Add an option to show password
+- User rules have higher priority in PAC file
+- Bug fixes and improvements
+
+4.0.6 2017-09-09
+- SIP002 support
+- SIP003 support
+
+4.0.5 2017-08-09
+- Fix crash when user-wininet.json fail to parse. (#1178)
+- Bug fixes and improvements.
+
+4.0.4 2017-06-01
+- Save user wininet settings as user-wininet.json
+- Improve performance of aes-256-gcm
+
+4.0.2 2017-05-19
+- Fix legacy key derivation
+- Bug fixes and improvements
+
+4.0.1 2017-04-08
+- Fix UDP relay
+- Allow to add multiple servers via Shadowsocks URL
+- Bug fixes and improvements
+
+4.0 2017-04-04
+- Add AEAD ciphers support, removed OTA
+- I18N: add Japanese support, update Traditional Chinese strings
+- sysproxy: restore user settings when system proxy is turned off
+- Bug fixes and improvements
+
+3.4.3 2017-1-11
+- Make the previous portable mode as default
+- Refine networking by Noisyfox
+- Bug fixes and improvements
+
+3.4.2.1 2016-12-30
+- Refine Traditional Chinese translation by LNDDYL
+- sysproxy: reduce false positives on virus detection
+- sysproxy: set LAN proxy settings even if RAS query fails
+- privoxy: drop obsolete tray area refreshing code
+- Fix auto startup
+- Bug fixes and improvements
+
+3.4.2 2016-12-16
+- Fix null ref in TCPRelay. (#940)
+- Bring Privoxy back. (#948)
+- Bug fixes and improvements.
+
+3.4.1 (pre-release) 2016-12-13
+- Fix crash if user input an invaild server address. (#933)
+- Fix ERR_TOO_MANY_REDIRECTS with http proxy. (#937)
+- Show SS URL in QRCode form.
+- Add import URL from clipboard.
+- Bug fixes and improvements.
+
+3.4.0 (pre-release) 2016-12-9
+- Replace Privoxy with built-in http proxy.
+- Try fix system proxy settings on windows 10 insider preview.
+- Secure local pac.
+- Update bypass list.
+- Bug fixes and improvements.
+
+3.3.6 2016-12-6
+- Refine system proxy mode switching logic,
+  merge 'Switch to PAC' and 'Switch to Global' into
+  'Switch system proxy mode'.
+- Don't store LogViewer window size in config file,
+  now you can sync config between devices with different
+  resolutions.
+- Add tag support for SS url
+- Add pre-release channel in update checker
+- Bug fixes and improvements
+
+3.3.5 2016-11-7
+- Improve system power mode handling
+- Update mbed TLS to 2.4.0
+- Check .NET Framework version on startup
+
+3.3.4 2016-10-21
+- Fix IE dial-up and VPN connection proxy settings
+  not changed since release 3.3.3.
+- Fix a UI bug
+
+3.3.3 2016-10-10
+- Add timeout support for server and forward proxy,
+  only integer is allowed
+- Use wininet API to setup system proxy
+- Upgrade to .NET Framework 4.6.2
+
+3.3.2 2016-10-03
+- Add HTTP forward proxy support
+- Bug fixes and improvements
+
+3.3.1 2016-09-20
+- Add global hotkey support
+- Bug fixes and improvements
+
+3.3 2016-09-09
+- Update Privoxy to 3.0.26
+- Change minimum system version explicitly to Windows Vista
+  since we are using dual-mode socket
+- Support running multiple instances of Privoxy for system proxy
+- Improve networking
+- New traffic chart and icon style
+- I18N: Traditional Chinese support
+- Bug fixes and improvements
+
+3.2 2016-08-13
+- Add AES-CTR, blowfish and camellia ciphers support,
+  including aes-256-ctr, aes-192-ctr, aes-128-ctr,
+  bf-cfb, camellia-128-cfb, camellia-192-cfb
+  and camellia-256-cfb.
+- Support one-time authentication in ss urls for sharing
+- Support traffic chart and traffic icon
+- Add proxy support
+- Add verbose logging
+- Improve LogForm
+- Delete log file when clicking "Clean Logs" in the LogForm
+- Bug fixes and improvements
+
+3.1 2016-05-01
+- Disable StatisticsStrategy by default
+
+3.0 2016-03-02
+- Update Privoxy to 3.0.24
+- Replace Choose by Total Packet Loss with Choose by Statistics
+- Support chacha20-ietf
+- Support Onetime Authentication
+- Optional checking updates
+- Download updates automatically
+- Improve log viewer
+- Minor fixes
+- Other improvements
+
 2.5.8 2015-09-20
 - Update GFWList url
 
