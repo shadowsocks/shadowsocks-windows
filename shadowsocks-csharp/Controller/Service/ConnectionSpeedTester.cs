@@ -25,8 +25,8 @@ namespace Shadowsocks.Controller.Service
 
             private void Process()
             {
-                var proxy = new WebProxy(new Uri("http://localhost:" + Controller.privoxyRunner.RunningPort));
                 var config = Controller.GetCurrentConfiguration();
+                var proxy = new WebProxy(new Uri("http://localhost:" + config.localPort));
                 var servers = config.configs;
                 int i = 0, max = 0, count = servers.Count;
                 var maxSpeed = 0.0;

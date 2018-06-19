@@ -34,7 +34,7 @@ namespace Shadowsocks.Controller
         private PACServer _pacServer;
         private Configuration _config;
         private StrategyManager _strategyManager;
-        internal PrivoxyRunner privoxyRunner;
+        private PrivoxyRunner privoxyRunner;
         private GFWListUpdater gfwListUpdater;
         private readonly ConcurrentDictionary<Server, Sip003Plugin> _pluginsByServer;
 
