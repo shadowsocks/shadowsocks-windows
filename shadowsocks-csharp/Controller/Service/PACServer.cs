@@ -9,6 +9,7 @@ using Shadowsocks.Encryption;
 using Shadowsocks.Model;
 using Shadowsocks.Properties;
 using Shadowsocks.Util;
+using System.Threading.Tasks;
 
 namespace Shadowsocks.Controller
 {
@@ -241,42 +242,34 @@ Connection: Close
         #region FileSystemWatcher.OnChanged()
         // FileSystemWatcher Changed event is raised twice
         // http://stackoverflow.com/questions/1764809/filesystemwatcher-changed-event-is-raised-twice
-        private static Hashtable fileChangedTime = new Hashtable();
-
+        // Add a short delay to avoid raise event twice in a short period
         private void PACFileWatcher_Changed(object sender, FileSystemEventArgs e)
         {
-            string path = e.FullPath.ToString();
-            string currentLastWriteTime = File.GetLastWriteTime(e.FullPath).ToString(CultureInfo.InvariantCulture);
-
-            // if there is no path info stored yet or stored path has different time of write then the one now is inspected
-            if (!fileChangedTime.ContainsKey(path) || fileChangedTime[path].ToString() != currentLastWriteTime)
+            if (PACFileChanged != null)
             {
-                if (PACFileChanged != null)
+                Logging.Info($"Detected: PAC file '{e.Name}' was {e.ChangeType.ToString().ToLower()}.");
+                Task.Factory.StartNew(() =>
                 {
-                    Logging.Info($"Detected: PAC file '{e.Name}' was {e.ChangeType.ToString().ToLower()}.");
+                    ((FileSystemWatcher)sender).EnableRaisingEvents = false;
+                    System.Threading.Thread.Sleep(10);
                     PACFileChanged(this, new EventArgs());
-                }
-
-                // lastly we update the last write time in the hashtable
-                fileChangedTime[path] = currentLastWriteTime;
+                    ((FileSystemWatcher)sender).EnableRaisingEvents = true;
+                });
             }
         }
 
         private void UserRuleFileWatcher_Changed(object sender, FileSystemEventArgs e)
         {
-            string path = e.FullPath.ToString();
-            string currentLastWriteTime = File.GetLastWriteTime(e.FullPath).ToString(CultureInfo.InvariantCulture);
-
-            // if there is no path info stored yet or stored path has different time of write then the one now is inspected
-            if (!fileChangedTime.ContainsKey(path) || fileChangedTime[path].ToString() != currentLastWriteTime)
+            if (UserRuleFileChanged != null)
             {
-                if (UserRuleFileChanged != null)
+                Logging.Info($"Detected: User Rule file '{e.Name}' was {e.ChangeType.ToString().ToLower()}.");
+                Task.Factory.StartNew(()=>
                 {
-                    Logging.Info($"Detected: User Rule file '{e.Name}' was {e.ChangeType.ToString().ToLower()}.");
+                    ((FileSystemWatcher)sender).EnableRaisingEvents = false;
+                    System.Threading.Thread.Sleep(10);
                     UserRuleFileChanged(this, new EventArgs());
-                }
-                // lastly we update the last write time in the hashtable
-                fileChangedTime[path] = currentLastWriteTime;
+                    ((FileSystemWatcher)sender).EnableRaisingEvents = true;
+                });
             }
         }
         #endregion

@@ -84,7 +84,8 @@ namespace Shadowsocks.Controller
                 _tcpSocket.Listen(1024);
 
                 // Start an asynchronous socket to listen for connections.
-                Logging.Info("Shadowsocks started");
+                Logging.Info($"Shadowsocks started ({UpdateChecker.Version})");
+                Logging.Info(Encryption.EncryptorFactory.DumpRegisteredEncryptor());
                 _tcpSocket.BeginAccept(new AsyncCallback(AcceptCallback), _tcpSocket);
                 UDPState udpState = new UDPState();
                 udpState.socket = _udpSocket;
@@ -202,6 +203,7 @@ namespace Shadowsocks.Controller
             try
             {
                 int bytesRead = conn.EndReceive(ar);
+                if (bytesRead <= 0) goto Shutdown;
                 foreach (IService service in _services)
                 {
                     if (service.Handle(buf, bytesRead, conn, null))
@@ -209,6 +211,7 @@ namespace Shadowsocks.Controller
                         return;
                     }
                 }
+                Shutdown:
                 // no service found for this
                 if (conn.ProtocolType == ProtocolType.Tcp)
                 {

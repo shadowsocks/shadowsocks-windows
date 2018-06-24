@@ -33,17 +33,17 @@ namespace Shadowsocks.Controller.Service
                 return null;
             }
 
-            return new Sip003Plugin(server.plugin, server.plugin_opts, server.server, server.server_port);
+            return new Sip003Plugin(server.plugin, server.plugin_opts, server.plugin_args, server.server, server.server_port);
         }
 
-        private Sip003Plugin(string plugin, string pluginOpts, string serverAddress, int serverPort)
+        private Sip003Plugin(string plugin, string pluginOpts, string pluginArgs, string serverAddress, int serverPort)
         {
             if (plugin == null) throw new ArgumentNullException(nameof(plugin));
             if (string.IsNullOrWhiteSpace(serverAddress))
             {
                 throw new ArgumentException("Value cannot be null or whitespace.", nameof(serverAddress));
             }
-            if ((ushort)serverPort != serverPort)
+            if (serverPort <= 0 || serverPort > 65535)
             {
                 throw new ArgumentOutOfRangeException("serverPort");
             }
@@ -55,6 +55,7 @@ namespace Shadowsocks.Controller.Service
                 StartInfo = new ProcessStartInfo
                 {
                     FileName = plugin,
+                    Arguments = pluginArgs,
                     UseShellExecute = false,
                     CreateNoWindow = true,
                     ErrorDialog = false,

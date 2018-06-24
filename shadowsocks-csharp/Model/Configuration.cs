@@ -20,6 +20,7 @@ namespace Shadowsocks.Model
         public bool shareOverLan;
         public bool isDefault;
         public int localPort;
+        public bool portableMode = true;
         public string pacUrl;
         public bool useOnlinePac;
         public bool secureLocalPac = true;

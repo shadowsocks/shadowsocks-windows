@@ -1,0 +1,15 @@
+OpenSSL library guide for VS2017
+
+# Read NOTES.WIN and NOTES.PERL
+
+# use Visual Studio native tools command prompt
+# use activeperl, install NASM assembler
+ppm install dmake
+
+# Win32 x86
+set PATH=D:\NASM-32;%PATH%
+perl Configure VC-WIN32 --release --prefix=C:\Users\home\Downloads\openssl-1.1.0g\x86-build --openssldir=C:\Users\home\Downloads\openssl-1.1.0g\x86-install
+nmake
+nmake test
+# to rebuild
+nmake distclean
