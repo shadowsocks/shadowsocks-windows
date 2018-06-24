@@ -14,7 +14,7 @@ namespace Shadowsocks.Controller
         {
             var _hotKeyConf = Configuration.Load().hotkey;
 
-            if (_hotKeyConf == null || !_hotKeyConf.RegAllAtStartup)
+            if (_hotKeyConf == null || !_hotKeyConf.RegHotkeysAtStartup)
                 return;
 
             var _hotKeyDic = new Dictionary<HotKey, HotKeys.HotKeyCallBackHandler>();
@@ -43,13 +43,13 @@ namespace Shadowsocks.Controller
                 int regCount = 0;
                 foreach (var v in _hotKeyDic)
                 {
-                    if (!HotKeys.Regist(v.Key, v.Value))
+                    if (!HotKeys.RegHotkey(v.Key, v.Value))
                     {
                         foreach (var k in _hotKeyDic)
                         {
                             if (regCount > 0)
                             {
-                                HotKeys.UnRegist(k.Key);
+                                HotKeys.UnregExistingHotkey(k.Value);
                                 regCount--;
                             }
                         }

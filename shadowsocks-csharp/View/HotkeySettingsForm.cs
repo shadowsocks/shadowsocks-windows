@@ -42,6 +42,7 @@ namespace Shadowsocks.View
             ShowLogsLabel.Text = I18N.GetString("Show Logs");
             ServerMoveUpLabel.Text = I18N.GetString("Switch to prev server");
             ServerMoveDownLabel.Text = I18N.GetString("Switch to next server");
+            RegHotkeysAtStartupLabel.Text = I18N.GetString("Reg Hotkeys At Startup");
             btnOK.Text = I18N.GetString("OK");
             btnCancel.Text = I18N.GetString("Cancel");
             btnRegisterAll.Text = I18N.GetString("Reg All");
@@ -67,6 +68,7 @@ namespace Shadowsocks.View
             ShowLogsTextBox.Text = config.ShowLogs;
             ServerMoveUpTextBox.Text = config.ServerMoveUp;
             ServerMoveDownTextBox.Text = config.ServerMoveDown;
+            RegHotkeysAtStartupCheckBox.Checked = config.RegHotkeysAtStartup;
         }
 
         private void SaveConfig()
@@ -83,7 +85,8 @@ namespace Shadowsocks.View
                 SwitchAllowLan = SwitchAllowLanTextBox.Text,
                 ShowLogs = ShowLogsTextBox.Text,
                 ServerMoveUp = ServerMoveUpTextBox.Text,
-                ServerMoveDown = ServerMoveDownTextBox.Text
+                ServerMoveDown = ServerMoveDownTextBox.Text,
+                RegHotkeysAtStartup = RegHotkeysAtStartupCheckBox.Checked
             };
         }
 
@@ -172,7 +175,7 @@ namespace Shadowsocks.View
         {
             return
                 RegHotkeyFromString(hotkeyConfig.SwitchSystemProxy, "SwitchSystemProxyCallback", SwitchSystemProxyLabel)
-                && RegHotkeyFromString(hotkeyConfig.SwitchSystemProxyMode, "SwitchProxyModeCallback", SwitchProxyModeLabel)
+                && RegHotkeyFromString(hotkeyConfig.SwitchSystemProxyMode, "SwitchSystemProxyModeCallback", SwitchProxyModeLabel)
                 && RegHotkeyFromString(hotkeyConfig.SwitchAllowLan, "SwitchAllowLanCallback", SwitchAllowLanLabel)
                 && RegHotkeyFromString(hotkeyConfig.ShowLogs, "ShowLogsCallback", ShowLogsLabel)
                 && RegHotkeyFromString(hotkeyConfig.ServerMoveUp, "ServerMoveUpCallback", ServerMoveUpLabel)
