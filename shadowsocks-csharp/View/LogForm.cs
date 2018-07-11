@@ -148,12 +148,12 @@ namespace Shadowsocks.View
             FileMenuItem.Text = I18N.GetString("&File");
             OpenLocationMenuItem.Text = I18N.GetString("&Open Location");
             ExitMenuItem.Text = I18N.GetString("E&xit");
-            CleanLogsButton.Text = I18N.GetString("&Clean Logs");
+            CleanLogsButton.Text = I18N.GetString("&Clear Logs");
             ChangeFontButton.Text = I18N.GetString("Change &Font");
             WrapTextCheckBox.Text = I18N.GetString("&Wrap Text");
             TopMostCheckBox.Text = I18N.GetString("&Top Most");
             ViewMenuItem.Text = I18N.GetString("&View");
-            CleanLogsMenuItem.Text = I18N.GetString("&Clean Logs");
+            CleanLogsMenuItem.Text = I18N.GetString("&Clear Logs");
             ChangeFontMenuItem.Text = I18N.GetString("Change &Font");
             WrapTextMenuItem.Text = I18N.GetString("&Wrap Text");
             TopMostMenuItem.Text = I18N.GetString("&Top Most");
