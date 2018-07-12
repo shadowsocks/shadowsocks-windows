@@ -17,6 +17,7 @@ namespace Shadowsocks.Model
         public string ShowLogs;
         public string ServerMoveUp;
         public string ServerMoveDown;
+        public bool RegHotkeysAtStartup;
 
         public HotkeyConfig()
         {
@@ -26,6 +27,7 @@ namespace Shadowsocks.Model
             ShowLogs = "";
             ServerMoveUp = "";
             ServerMoveDown = "";
+            RegHotkeysAtStartup = false;
         }
     }
 }
