@@ -108,6 +108,7 @@ Show Logs=顯示記錄檔
 Switch to prev server=切換上一個伺服器
 Switch to next server=切換下一個伺服器
 Reg All=註冊所有快速鍵
+Reg Hotkeys At Startup=啟動時註冊快速鍵
 
 # Messages
 
