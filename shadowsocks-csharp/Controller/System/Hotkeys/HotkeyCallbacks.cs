@@ -50,7 +50,7 @@ namespace Shadowsocks.Controller.Hotkeys
             _controller.ToggleEnable(!enabled);
         }
 
-        private void SwitchProxyModeCallback()
+        private void SwitchSystemProxyModeCallback()
         {
             var config = _controller.GetConfigurationCopy();
             if (config.enabled == false) return;

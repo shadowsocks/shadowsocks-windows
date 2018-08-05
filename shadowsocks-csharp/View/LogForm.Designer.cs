@@ -39,7 +39,7 @@
             this.OpenLocationMenuItem = new System.Windows.Forms.MenuItem();
             this.ExitMenuItem = new System.Windows.Forms.MenuItem();
             this.ViewMenuItem = new System.Windows.Forms.MenuItem();
-            this.CleanLogsMenuItem = new System.Windows.Forms.MenuItem();
+            this.ClearLogsMenuItem = new System.Windows.Forms.MenuItem();
             this.ChangeFontMenuItem = new System.Windows.Forms.MenuItem();
             this.WrapTextMenuItem = new System.Windows.Forms.MenuItem();
             this.TopMostMenuItem = new System.Windows.Forms.MenuItem();
@@ -47,7 +47,7 @@
             this.ShowToolbarMenuItem = new System.Windows.Forms.MenuItem();
             this.TopMostCheckBox = new System.Windows.Forms.CheckBox();
             this.ChangeFontButton = new System.Windows.Forms.Button();
-            this.CleanLogsButton = new System.Windows.Forms.Button();
+            this.ClearLogsButton = new System.Windows.Forms.Button();
             this.WrapTextCheckBox = new System.Windows.Forms.CheckBox();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.ToolbarFlowLayoutPanel = new System.Windows.Forms.FlowLayoutPanel();
@@ -107,7 +107,7 @@
             // 
             this.ViewMenuItem.Index = 1;
             this.ViewMenuItem.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
-            this.CleanLogsMenuItem,
+            this.ClearLogsMenuItem,
             this.ChangeFontMenuItem,
             this.WrapTextMenuItem,
             this.TopMostMenuItem,
@@ -115,11 +115,11 @@
             this.ShowToolbarMenuItem});
             this.ViewMenuItem.Text = "&View";
             // 
-            // CleanLogsMenuItem
+            // ClearLogsMenuItem
             // 
-            this.CleanLogsMenuItem.Index = 0;
-            this.CleanLogsMenuItem.Text = "&Clean Logs";
-            this.CleanLogsMenuItem.Click += new System.EventHandler(this.CleanLogsMenuItem_Click);
+            this.ClearLogsMenuItem.Index = 0;
+            this.ClearLogsMenuItem.Text = "&Clear Logs";
+            this.ClearLogsMenuItem.Click += new System.EventHandler(this.ClearLogsMenuItem_Click);
             // 
             // ChangeFontMenuItem
             // 
@@ -174,16 +174,16 @@
             this.ChangeFontButton.UseVisualStyleBackColor = true;
             this.ChangeFontButton.Click += new System.EventHandler(this.ChangeFontButton_Click);
             // 
-            // CleanLogsButton
+            // ClearLogsButton
             // 
-            this.CleanLogsButton.AutoSize = true;
-            this.CleanLogsButton.Location = new System.Drawing.Point(3, 3);
-            this.CleanLogsButton.Name = "CleanLogsButton";
-            this.CleanLogsButton.Size = new System.Drawing.Size(75, 23);
-            this.CleanLogsButton.TabIndex = 1;
-            this.CleanLogsButton.Text = "&Clean Logs";
-            this.CleanLogsButton.UseVisualStyleBackColor = true;
-            this.CleanLogsButton.Click += new System.EventHandler(this.CleanLogsButton_Click);
+            this.ClearLogsButton.AutoSize = true;
+            this.ClearLogsButton.Location = new System.Drawing.Point(3, 3);
+            this.ClearLogsButton.Name = "ClearLogsButton";
+            this.ClearLogsButton.Size = new System.Drawing.Size(75, 23);
+            this.ClearLogsButton.TabIndex = 1;
+            this.ClearLogsButton.Text = "&Clear Logs";
+            this.ClearLogsButton.UseVisualStyleBackColor = true;
+            this.ClearLogsButton.Click += new System.EventHandler(this.ClearLogsButton_Click);
             // 
             // WrapTextCheckBox
             // 
@@ -216,7 +216,7 @@
             // ToolbarFlowLayoutPanel
             // 
             this.ToolbarFlowLayoutPanel.AutoSize = true;
-            this.ToolbarFlowLayoutPanel.Controls.Add(this.CleanLogsButton);
+            this.ToolbarFlowLayoutPanel.Controls.Add(this.ClearLogsButton);
             this.ToolbarFlowLayoutPanel.Controls.Add(this.ChangeFontButton);
             this.ToolbarFlowLayoutPanel.Controls.Add(this.WrapTextCheckBox);
             this.ToolbarFlowLayoutPanel.Controls.Add(this.TopMostCheckBox);
@@ -324,12 +324,12 @@
         private System.Windows.Forms.MenuItem OpenLocationMenuItem;
         private System.Windows.Forms.MenuItem ExitMenuItem;
         private System.Windows.Forms.CheckBox WrapTextCheckBox;
-        private System.Windows.Forms.Button CleanLogsButton;
+        private System.Windows.Forms.Button ClearLogsButton;
         private System.Windows.Forms.Button ChangeFontButton;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
         private System.Windows.Forms.CheckBox TopMostCheckBox;
         private System.Windows.Forms.MenuItem ViewMenuItem;
-        private System.Windows.Forms.MenuItem CleanLogsMenuItem;
+        private System.Windows.Forms.MenuItem ClearLogsMenuItem;
         private System.Windows.Forms.MenuItem ChangeFontMenuItem;
         private System.Windows.Forms.MenuItem WrapTextMenuItem;
         private System.Windows.Forms.MenuItem TopMostMenuItem;

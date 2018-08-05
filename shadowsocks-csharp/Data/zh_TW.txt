@@ -51,9 +51,12 @@ Server Port=伺服器連接埠
 Password=密碼
 Show Password=顯示密碼
 Encryption=加密
-Plugin=插件
-Plugin Options=插件選項
+Plugin Program=外掛程式
+Plugin Options=外掛程式選項
+Plugin Arguments=外掛程式參數
 Proxy Port=Proxy 連接埠
+Portable Mode=便攜模式
+Restart required=需要重新啟動SS
 Remarks=註解
 Timeout(Sec)=逾時 (秒)
 OK=確定
@@ -69,7 +72,7 @@ Use Proxy=使用 Proxy
 Proxy Type=Proxy 類型
 Proxy Addr=Proxy 位址
 Proxy Port=Proxy 連接埠
-If server has a plugin, proxy will not be used=若伺服器含有插件，Proxy 將不被使用
+If server has a plugin, proxy will not be used=若伺服器含有外掛程式，Proxy 將不被使用
 
 # Log Form
 
@@ -77,7 +80,7 @@ If server has a plugin, proxy will not be used=若伺服器含有插件，Proxy 
 &Open Location=在檔案總管中開啟 (&O)
 E&xit=結束 (&X)
 &View=檢視 (&V)
-&Clean Logs=清除記錄檔 (&C)
+&Clear Logs=清除記錄檔 (&C)
 Change &Font=變更字型 (&F)
 &Wrap Text=自動換行 (&W)
 &Top Most=置頂 (&T)
@@ -105,6 +108,7 @@ Show Logs=顯示記錄檔
 Switch to prev server=切換上一個伺服器
 Switch to next server=切換下一個伺服器
 Reg All=註冊所有快速鍵
+Reg Hotkeys At Startup=啟動時註冊快速鍵
 
 # Messages
 

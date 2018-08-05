@@ -45,6 +45,8 @@
             this.ShowLogsTextBox = new System.Windows.Forms.TextBox();
             this.ServerMoveUpTextBox = new System.Windows.Forms.TextBox();
             this.ServerMoveDownTextBox = new System.Windows.Forms.TextBox();
+            this.RegHotkeysAtStartupLabel = new System.Windows.Forms.Label();
+            this.RegHotkeysAtStartupCheckBox = new System.Windows.Forms.CheckBox();
             flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
             flowLayoutPanel1.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
@@ -57,7 +59,7 @@
             flowLayoutPanel1.Controls.Add(this.btnCancel);
             flowLayoutPanel1.Controls.Add(this.btnRegisterAll);
             flowLayoutPanel1.FlowDirection = System.Windows.Forms.FlowDirection.BottomUp;
-            flowLayoutPanel1.Location = new System.Drawing.Point(0, 205);
+            flowLayoutPanel1.Location = new System.Drawing.Point(0, 218);
             flowLayoutPanel1.Margin = new System.Windows.Forms.Padding(0);
             flowLayoutPanel1.Name = "flowLayoutPanel1";
             flowLayoutPanel1.Padding = new System.Windows.Forms.Padding(0, 0, 16, 0);
@@ -103,32 +105,36 @@
             this.tableLayoutPanel1.ColumnCount = 2;
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tableLayoutPanel1.Controls.Add(this.RegHotkeysAtStartupLabel, 0, 6);
             this.tableLayoutPanel1.Controls.Add(this.SwitchSystemProxyLabel, 0, 0);
             this.tableLayoutPanel1.Controls.Add(this.SwitchProxyModeLabel, 0, 1);
             this.tableLayoutPanel1.Controls.Add(this.SwitchAllowLanLabel, 0, 2);
             this.tableLayoutPanel1.Controls.Add(this.ShowLogsLabel, 0, 3);
             this.tableLayoutPanel1.Controls.Add(this.ServerMoveUpLabel, 0, 4);
             this.tableLayoutPanel1.Controls.Add(this.ServerMoveDownLabel, 0, 5);
-            this.tableLayoutPanel1.Controls.Add(flowLayoutPanel1, 0, 6);
+            this.tableLayoutPanel1.Controls.Add(flowLayoutPanel1, 0, 7);
             this.tableLayoutPanel1.Controls.Add(this.SwitchSystemProxyTextBox, 1, 0);
             this.tableLayoutPanel1.Controls.Add(this.SwitchProxyModeTextBox, 1, 1);
             this.tableLayoutPanel1.Controls.Add(this.SwitchAllowLanTextBox, 1, 2);
             this.tableLayoutPanel1.Controls.Add(this.ShowLogsTextBox, 1, 3);
             this.tableLayoutPanel1.Controls.Add(this.ServerMoveUpTextBox, 1, 4);
             this.tableLayoutPanel1.Controls.Add(this.ServerMoveDownTextBox, 1, 5);
+            this.tableLayoutPanel1.Controls.Add(this.RegHotkeysAtStartupCheckBox, 1, 6);
             this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 0);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
-            this.tableLayoutPanel1.RowCount = 7;
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 16.50485F));
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 16.50485F));
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 16.50485F));
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 16.50485F));
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 17.21683F));
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 16.76375F));
+            this.tableLayoutPanel1.RowCount = 8;
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 14.16726F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 14.16726F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 14.16726F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 14.16726F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 14.7784F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 14.38949F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 14.16309F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 40F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(491, 248);
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(491, 261);
             this.tableLayoutPanel1.TabIndex = 0;
             // 
             // SwitchSystemProxyLabel
@@ -138,7 +144,7 @@
             this.SwitchSystemProxyLabel.Location = new System.Drawing.Point(50, 0);
             this.SwitchSystemProxyLabel.Margin = new System.Windows.Forms.Padding(8, 0, 8, 0);
             this.SwitchSystemProxyLabel.Name = "SwitchSystemProxyLabel";
-            this.SwitchSystemProxyLabel.Size = new System.Drawing.Size(147, 34);
+            this.SwitchSystemProxyLabel.Size = new System.Drawing.Size(147, 31);
             this.SwitchSystemProxyLabel.TabIndex = 0;
             this.SwitchSystemProxyLabel.Text = "Enable System Proxy";
             this.SwitchSystemProxyLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -147,10 +153,10 @@
             // 
             this.SwitchProxyModeLabel.AutoSize = true;
             this.SwitchProxyModeLabel.Dock = System.Windows.Forms.DockStyle.Right;
-            this.SwitchProxyModeLabel.Location = new System.Drawing.Point(8, 34);
+            this.SwitchProxyModeLabel.Location = new System.Drawing.Point(8, 31);
             this.SwitchProxyModeLabel.Margin = new System.Windows.Forms.Padding(8, 0, 8, 0);
             this.SwitchProxyModeLabel.Name = "SwitchProxyModeLabel";
-            this.SwitchProxyModeLabel.Size = new System.Drawing.Size(189, 34);
+            this.SwitchProxyModeLabel.Size = new System.Drawing.Size(189, 31);
             this.SwitchProxyModeLabel.TabIndex = 1;
             this.SwitchProxyModeLabel.Text = "Switch System Proxy Mode";
             this.SwitchProxyModeLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -159,10 +165,10 @@
             // 
             this.SwitchAllowLanLabel.AutoSize = true;
             this.SwitchAllowLanLabel.Dock = System.Windows.Forms.DockStyle.Right;
-            this.SwitchAllowLanLabel.Location = new System.Drawing.Point(33, 68);
+            this.SwitchAllowLanLabel.Location = new System.Drawing.Point(33, 62);
             this.SwitchAllowLanLabel.Margin = new System.Windows.Forms.Padding(8, 0, 8, 0);
             this.SwitchAllowLanLabel.Name = "SwitchAllowLanLabel";
-            this.SwitchAllowLanLabel.Size = new System.Drawing.Size(164, 34);
+            this.SwitchAllowLanLabel.Size = new System.Drawing.Size(164, 31);
             this.SwitchAllowLanLabel.TabIndex = 3;
             this.SwitchAllowLanLabel.Text = "Allow Clients from LAN";
             this.SwitchAllowLanLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -171,10 +177,10 @@
             // 
             this.ShowLogsLabel.AutoSize = true;
             this.ShowLogsLabel.Dock = System.Windows.Forms.DockStyle.Right;
-            this.ShowLogsLabel.Location = new System.Drawing.Point(107, 102);
+            this.ShowLogsLabel.Location = new System.Drawing.Point(107, 93);
             this.ShowLogsLabel.Margin = new System.Windows.Forms.Padding(8, 0, 8, 0);
             this.ShowLogsLabel.Name = "ShowLogsLabel";
-            this.ShowLogsLabel.Size = new System.Drawing.Size(90, 34);
+            this.ShowLogsLabel.Size = new System.Drawing.Size(90, 31);
             this.ShowLogsLabel.TabIndex = 4;
             this.ShowLogsLabel.Text = "Show Logs...";
             this.ShowLogsLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -183,10 +189,10 @@
             // 
             this.ServerMoveUpLabel.AutoSize = true;
             this.ServerMoveUpLabel.Dock = System.Windows.Forms.DockStyle.Right;
-            this.ServerMoveUpLabel.Location = new System.Drawing.Point(128, 136);
+            this.ServerMoveUpLabel.Location = new System.Drawing.Point(128, 124);
             this.ServerMoveUpLabel.Margin = new System.Windows.Forms.Padding(8, 0, 8, 0);
             this.ServerMoveUpLabel.Name = "ServerMoveUpLabel";
-            this.ServerMoveUpLabel.Size = new System.Drawing.Size(69, 35);
+            this.ServerMoveUpLabel.Size = new System.Drawing.Size(69, 32);
             this.ServerMoveUpLabel.TabIndex = 4;
             this.ServerMoveUpLabel.Text = "Move up";
             this.ServerMoveUpLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -195,10 +201,10 @@
             // 
             this.ServerMoveDownLabel.AutoSize = true;
             this.ServerMoveDownLabel.Dock = System.Windows.Forms.DockStyle.Right;
-            this.ServerMoveDownLabel.Location = new System.Drawing.Point(106, 171);
+            this.ServerMoveDownLabel.Location = new System.Drawing.Point(106, 156);
             this.ServerMoveDownLabel.Margin = new System.Windows.Forms.Padding(8, 0, 8, 0);
             this.ServerMoveDownLabel.Name = "ServerMoveDownLabel";
-            this.ServerMoveDownLabel.Size = new System.Drawing.Size(91, 34);
+            this.ServerMoveDownLabel.Size = new System.Drawing.Size(91, 31);
             this.ServerMoveDownLabel.TabIndex = 4;
             this.ServerMoveDownLabel.Text = "Move Down";
             this.ServerMoveDownLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -212,80 +218,96 @@
             this.SwitchSystemProxyTextBox.ReadOnly = true;
             this.SwitchSystemProxyTextBox.Size = new System.Drawing.Size(276, 25);
             this.SwitchSystemProxyTextBox.TabIndex = 7;
-            this.SwitchSystemProxyTextBox.TextChanged += new System.EventHandler(this.TextBox_TextChanged);
             this.SwitchSystemProxyTextBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.HotkeyDown);
             this.SwitchSystemProxyTextBox.KeyUp += new System.Windows.Forms.KeyEventHandler(this.HotkeyUp);
             // 
             // SwitchProxyModeTextBox
             // 
             this.SwitchProxyModeTextBox.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.SwitchProxyModeTextBox.Location = new System.Drawing.Point(208, 37);
+            this.SwitchProxyModeTextBox.Location = new System.Drawing.Point(208, 34);
             this.SwitchProxyModeTextBox.Margin = new System.Windows.Forms.Padding(3, 3, 16, 3);
             this.SwitchProxyModeTextBox.Name = "SwitchProxyModeTextBox";
             this.SwitchProxyModeTextBox.ReadOnly = true;
             this.SwitchProxyModeTextBox.Size = new System.Drawing.Size(276, 25);
             this.SwitchProxyModeTextBox.TabIndex = 8;
-            this.SwitchProxyModeTextBox.TextChanged += new System.EventHandler(this.TextBox_TextChanged);
             this.SwitchProxyModeTextBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.HotkeyDown);
             this.SwitchProxyModeTextBox.KeyUp += new System.Windows.Forms.KeyEventHandler(this.HotkeyUp);
             // 
             // SwitchAllowLanTextBox
             // 
             this.SwitchAllowLanTextBox.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.SwitchAllowLanTextBox.Location = new System.Drawing.Point(208, 71);
+            this.SwitchAllowLanTextBox.Location = new System.Drawing.Point(208, 65);
             this.SwitchAllowLanTextBox.Margin = new System.Windows.Forms.Padding(3, 3, 16, 3);
             this.SwitchAllowLanTextBox.Name = "SwitchAllowLanTextBox";
             this.SwitchAllowLanTextBox.ReadOnly = true;
             this.SwitchAllowLanTextBox.Size = new System.Drawing.Size(276, 25);
             this.SwitchAllowLanTextBox.TabIndex = 10;
-            this.SwitchAllowLanTextBox.TextChanged += new System.EventHandler(this.TextBox_TextChanged);
             this.SwitchAllowLanTextBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.HotkeyDown);
             this.SwitchAllowLanTextBox.KeyUp += new System.Windows.Forms.KeyEventHandler(this.HotkeyUp);
             // 
             // ShowLogsTextBox
             // 
             this.ShowLogsTextBox.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.ShowLogsTextBox.Location = new System.Drawing.Point(208, 105);
+            this.ShowLogsTextBox.Location = new System.Drawing.Point(208, 96);
             this.ShowLogsTextBox.Margin = new System.Windows.Forms.Padding(3, 3, 16, 3);
             this.ShowLogsTextBox.Name = "ShowLogsTextBox";
             this.ShowLogsTextBox.ReadOnly = true;
             this.ShowLogsTextBox.Size = new System.Drawing.Size(276, 25);
             this.ShowLogsTextBox.TabIndex = 11;
-            this.ShowLogsTextBox.TextChanged += new System.EventHandler(this.TextBox_TextChanged);
             this.ShowLogsTextBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.HotkeyDown);
             this.ShowLogsTextBox.KeyUp += new System.Windows.Forms.KeyEventHandler(this.HotkeyUp);
             // 
             // ServerMoveUpTextBox
             // 
             this.ServerMoveUpTextBox.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.ServerMoveUpTextBox.Location = new System.Drawing.Point(208, 139);
+            this.ServerMoveUpTextBox.Location = new System.Drawing.Point(208, 127);
             this.ServerMoveUpTextBox.Margin = new System.Windows.Forms.Padding(3, 3, 16, 3);
             this.ServerMoveUpTextBox.Name = "ServerMoveUpTextBox";
             this.ServerMoveUpTextBox.ReadOnly = true;
             this.ServerMoveUpTextBox.Size = new System.Drawing.Size(276, 25);
             this.ServerMoveUpTextBox.TabIndex = 12;
-            this.ServerMoveUpTextBox.TextChanged += new System.EventHandler(this.TextBox_TextChanged);
             this.ServerMoveUpTextBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.HotkeyDown);
             this.ServerMoveUpTextBox.KeyUp += new System.Windows.Forms.KeyEventHandler(this.HotkeyUp);
             // 
             // ServerMoveDownTextBox
             // 
             this.ServerMoveDownTextBox.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.ServerMoveDownTextBox.Location = new System.Drawing.Point(208, 174);
+            this.ServerMoveDownTextBox.Location = new System.Drawing.Point(208, 159);
             this.ServerMoveDownTextBox.Margin = new System.Windows.Forms.Padding(3, 3, 16, 3);
             this.ServerMoveDownTextBox.Name = "ServerMoveDownTextBox";
             this.ServerMoveDownTextBox.ReadOnly = true;
             this.ServerMoveDownTextBox.Size = new System.Drawing.Size(276, 25);
             this.ServerMoveDownTextBox.TabIndex = 13;
-            this.ServerMoveDownTextBox.TextChanged += new System.EventHandler(this.TextBox_TextChanged);
             this.ServerMoveDownTextBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.HotkeyDown);
             this.ServerMoveDownTextBox.KeyUp += new System.Windows.Forms.KeyEventHandler(this.HotkeyUp);
+            // 
+            // RegHotkeysAtStartupLabel
+            // 
+            this.RegHotkeysAtStartupLabel.AutoSize = true;
+            this.RegHotkeysAtStartupLabel.Dock = System.Windows.Forms.DockStyle.Right;
+            this.RegHotkeysAtStartupLabel.Location = new System.Drawing.Point(32, 187);
+            this.RegHotkeysAtStartupLabel.Margin = new System.Windows.Forms.Padding(8, 0, 8, 0);
+            this.RegHotkeysAtStartupLabel.Name = "RegHotkeysAtStartupLabel";
+            this.RegHotkeysAtStartupLabel.Size = new System.Drawing.Size(165, 31);
+            this.RegHotkeysAtStartupLabel.TabIndex = 16;
+            this.RegHotkeysAtStartupLabel.Text = "Reg Hotkeys At Startup";
+            this.RegHotkeysAtStartupLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // RegHotkeysAtStartupCheckBox
+            // 
+            this.RegHotkeysAtStartupCheckBox.AutoSize = true;
+            this.RegHotkeysAtStartupCheckBox.Location = new System.Drawing.Point(208, 196);
+            this.RegHotkeysAtStartupCheckBox.Margin = new System.Windows.Forms.Padding(3, 9, 9, 9);
+            this.RegHotkeysAtStartupCheckBox.Name = "RegHotkeysAtStartupCheckBox";
+            this.RegHotkeysAtStartupCheckBox.Size = new System.Drawing.Size(15, 13);
+            this.RegHotkeysAtStartupCheckBox.TabIndex = 17;
+            this.RegHotkeysAtStartupCheckBox.UseVisualStyleBackColor = true;
             // 
             // HotkeySettingsForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
-            this.ClientSize = new System.Drawing.Size(491, 248);
+            this.ClientSize = new System.Drawing.Size(491, 261);
             this.Controls.Add(this.tableLayoutPanel1);
             this.Font = new System.Drawing.Font("微软雅黑", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
@@ -319,5 +341,7 @@
         private System.Windows.Forms.TextBox ServerMoveDownTextBox;
         private System.Windows.Forms.Button btnRegisterAll;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
+        private System.Windows.Forms.Label RegHotkeysAtStartupLabel;
+        private System.Windows.Forms.CheckBox RegHotkeysAtStartupCheckBox;
     }
 }

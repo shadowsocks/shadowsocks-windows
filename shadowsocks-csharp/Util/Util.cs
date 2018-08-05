@@ -6,6 +6,7 @@ using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using Microsoft.Win32;
 using Shadowsocks.Controller;
+using Shadowsocks.Model;
 
 namespace Shadowsocks.Util
 {
@@ -32,11 +33,18 @@ namespace Shadowsocks.Util
         {
             if (_tempPath == null)
             {
+                bool isPortableMode = Configuration.Load().portableMode;
                 try
                 {
-                    Directory.CreateDirectory(Path.Combine(Application.StartupPath, "ss_win_temp"));
-                    // don't use "/", it will fail when we call explorer /select xxx/ss_win_temp\xxx.log
-                    _tempPath = Path.Combine(Application.StartupPath, "ss_win_temp");
+                    if (isPortableMode)
+                    {
+                        _tempPath = Directory.CreateDirectory(Path.Combine(Application.StartupPath, "ss_win_temp")).FullName;
+                        // don't use "/", it will fail when we call explorer /select xxx/ss_win_temp\xxx.log
+                    }
+                    else
+                    {
+                        _tempPath = Directory.CreateDirectory(Path.Combine(Path.GetTempPath(), @"Shadowsocks\ss_win_temp_" + Application.ExecutablePath.GetHashCode())).FullName;
+                    }
                 }
                 catch (Exception e)
                 {

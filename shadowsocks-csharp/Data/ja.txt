@@ -51,9 +51,12 @@ Server Port=サーバーポート
 Password=パスワード
 Show Password=パスワードを表示する
 Encryption=暗号化
-Plugin=プラグイン
+Plugin Program=プラグインプログラム
 Plugin Options=プラグインのオプション
+Plugin Arguments=プラグインの引数
 Proxy Port=プロキシポート
+Portable Mode=ポータブルモード
+Restart required=再起動SSが必要
 Remarks=付記
 Timeout(Sec)=タイムアウト (秒)
 OK=OK
@@ -77,7 +80,7 @@ If server has a plugin, proxy will not be used=サーバーにプラグインが
 &Open Location=ファイルの場所を開く (&O)
 E&xit=終了 (&X)
 &View=表示 (&V)
-&Clean Logs=ログの削除 (&C)
+&Clear Logs=ログの削除 (&C)
 Change &Font=フォント (&F)
 &Wrap Text=右端で折り返す (&W)
 &Top Most=常に最前面に表示 (&T)
@@ -105,6 +108,7 @@ Show Logs=ログの表示
 Switch to prev server=前のサーバーに切り替える
 Switch to next server=次のサーバーに切り替える
 Reg All=全部登録する
+Reg Hotkeys At Startup=起動時にホットキーを登録する
 
 # Messages
 

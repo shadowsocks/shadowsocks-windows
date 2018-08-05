@@ -17,7 +17,7 @@ Shadowsocks for Windows
 
 #### Download
 
-Download the [latest release].
+Download the latest release from [release page].
 
 #### Requirements
 
@@ -63,7 +63,7 @@ copy Shadowsocks to a new directory and choose a different local port.
 
 If you would like to connect to server via a plugin, please set the plugin's
 path (relative or absolute) on Edit Servers form.
-Note: Forward Proxy will not be used while a plugin is enabled.
+_Note_: Forward Proxy will not be used while a plugin is enabled.
 
 #### Global hotkeys
 
@@ -100,22 +100,42 @@ if you want to deactivate all, please clear all textboxes.
 
 Please visit [Servers] for more information.
 
-#### Develop
+#### Development
 
-[Visual Studio 2015] & [.NET Framework 4.6.2 Developer Pack] are required.
+1. [Visual Studio 2015] & [.NET Framework 4.6.2 Developer Pack] are required.
+2. It is recommended to share your idea on the Issue Board before you start to work,
+especially for feature development.
 
 #### License
 
-GPLv3
+[GPLv3]
+
+#### Open Source Components / Libraries
+
+```
+Caseless.Fody (MIT)    https://github.com/Fody/Caseless
+Costura.Fody (MIT)     https://github.com/Fody/Costura
+Fody (MIT)             https://github.com/Fody/Fody
+GlobalHotKey (GPLv3)   https://github.com/kirmir/GlobalHotKey
+Newtonsoft.Json (MIT)  https://www.newtonsoft.com/json
+StringEx.CS ()         https://github.com/LazyMode/StringEx
+ZXing.Net (Apache 2.0) https://github.com/micjahn/ZXing.Net
+
+libsscrypto (GPLv2)    https://github.com/shadowsocks/libsscrypto
+Privoxy (GPLv2)        https://www.privoxy.org
+Sysproxy ()            https://github.com/Noisyfox/sysproxy
+```
 
 
-[Appveyor]:       https://ci.appveyor.com/project/celeron533/shadowsocks-windows
-[Build Status]:   https://ci.appveyor.com/api/projects/status/tfw57q6eecippsl5/branch/master?svg=true
-[latest release]: https://github.com/shadowsocks/shadowsocks-csharp/releases
-[GFWList]:        https://github.com/gfwlist/gfwlist
-[Servers]:        https://github.com/shadowsocks/shadowsocks/wiki/Ports-and-Clients#linux--server-side
-[中文说明]:       https://github.com/shadowsocks/shadowsocks-windows/wiki/Shadowsocks-Windows-%E4%BD%BF%E7%94%A8%E8%AF%B4%E6%98%8E
+
+[Appveyor]:     https://ci.appveyor.com/project/celeron533/shadowsocks-windows
+[Build Status]: https://ci.appveyor.com/api/projects/status/tfw57q6eecippsl5/branch/master?svg=true
+[release page]: https://github.com/shadowsocks/shadowsocks-csharp/releases
+[GFWList]:      https://github.com/gfwlist/gfwlist
+[Servers]:      https://github.com/shadowsocks/shadowsocks/wiki/Ports-and-Clients#linux--server-side
+[中文说明]:     https://github.com/shadowsocks/shadowsocks-windows/wiki/Shadowsocks-Windows-%E4%BD%BF%E7%94%A8%E8%AF%B4%E6%98%8E
+[Visual Studio 2015]:   https://www.visualstudio.com/downloads/
 [.NET Framework 4.6.2]: https://www.microsoft.com/en-US/download/details.aspx?id=53344
-[Visual Studio 2015]: https://www.visualstudio.com/downloads/
 [.NET Framework 4.6.2 Developer Pack]: https://www.microsoft.com/download/details.aspx?id=53321
-[Visual C++ 2015 Redistributable]: https://www.microsoft.com/en-us/download/details.aspx?id=53840
+[Visual C++ 2015 Redistributable]:     https://www.microsoft.com/en-us/download/details.aspx?id=53840
+[GPLv3]:        https://github.com/shadowsocks/shadowsocks-windows/blob/master/LICENSE.txt

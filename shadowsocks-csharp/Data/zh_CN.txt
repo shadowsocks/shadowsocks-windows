@@ -51,9 +51,12 @@ Server Port=服务器端口
 Password=密码
 Show Password=显示密码
 Encryption=加密
-Plugin=插件
+Plugin Program=插件程序
 Plugin Options=插件选项
+Plugin Arguments=插件参数
 Proxy Port=代理端口
+Portable Mode=便携模式
+Restart required=需要重新启动SS
 Remarks=备注
 Timeout(Sec)=超时(秒)
 OK=确定
@@ -77,7 +80,7 @@ If server has a plugin, proxy will not be used=若服务器含有插件，代理
 &Open Location=在资源管理器中打开(&O)
 E&xit=退出(&X)
 &View=视图(&V)
-&Clean Logs=清空日志(&C)
+&Clear Logs=清空日志(&C)
 Change &Font=设置字体(&F)
 &Wrap Text=自动换行(&W)
 &Top Most=置顶(&T)
@@ -105,6 +108,7 @@ Show Logs=显示日志
 Switch to prev server=切换上个服务器
 Switch to next server=切换下个服务器
 Reg All=注册全部热键
+Reg Hotkeys At Startup=启动时注册热键
 
 # Messages
 

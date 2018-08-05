@@ -187,6 +187,10 @@ namespace Shadowsocks.View
                               I18N.GetString("System Proxy On: ") + (global ? I18N.GetString("Global") : I18N.GetString("PAC")) :
                               String.Format(I18N.GetString("Running: Port {0}"), config.localPort))  // this feedback is very important because they need to know Shadowsocks is running
                           + "\n" + serverInfo;
+            if (text.Length > 127)
+            {
+                text = text.Substring(0, 126 - 3) + "...";
+            }
             ViewUtils.SetNotifyIconText(_notifyIcon, text);
         }
 
@@ -707,7 +711,7 @@ namespace Shadowsocks.View
                             {
                                 splash.FormClosed += splash_FormClosed;
                             }
-                            else if (result.Text.StartsWith("http://") || result.Text.StartsWith("https://"))
+                            else if (result.Text.ToLower().StartsWith("http://") || result.Text.ToLower().StartsWith("https://"))
                             {
                                 _urlToOpen = result.Text;
                                 splash.FormClosed += openURLFromQRCode;
@@ -738,7 +742,7 @@ namespace Shadowsocks.View
                             splash.Location = new Point(screen.Bounds.X, screen.Bounds.Y);
                             // we need a panel because a window has a minimal size
                             // TODO: test on high DPI
-                            splash.TargetRect = new Rectangle((int)minX + screen.Bounds.X, (int)minY + screen.Bounds.Y, (int)maxX - (int)minX, (int)maxY - (int)minY);
+                            splash.TargetRect = new Rectangle((int)minX, (int)minY, (int)maxX - (int)minX, (int)maxY - (int)minY);
                             splash.Size = new Size(fullImage.Width, fullImage.Height);
                             splash.Show();
                             return;
