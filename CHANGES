@@ -1,3 +1,9 @@
+4.1.0 2018-08-15
+- Support portable mode Temp folder
+- Register hotkeys on startup
+- Fix sysproxy hanging issue
+- Minor improvements
+
 4.0.10 2018-05-10
 - Add square bracket for SIP002 IPv6 (RFC3986)
 - Add plugin CLI arguments support
