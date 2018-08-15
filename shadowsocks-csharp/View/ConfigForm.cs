@@ -228,7 +228,7 @@ namespace Shadowsocks.View
                 ServersListBox.SelectedIndex = _lastSelectedIndex;
                 return;
             }
-            if (_lastSelectedIndex >= 0)
+            if (_lastSelectedIndex >= 0 && _lastSelectedIndex < _modifiedConfiguration.configs.Count)
             {
                 ServersListBox.Items[_lastSelectedIndex] = _modifiedConfiguration.configs[_lastSelectedIndex].FriendlyName();
             }
