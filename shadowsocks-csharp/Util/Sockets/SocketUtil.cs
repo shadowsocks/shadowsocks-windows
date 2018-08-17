@@ -59,13 +59,6 @@ namespace Shadowsocks.Util.Sockets
             catch (Exception)
             {
             }
-            try
-            {
-                s.Dispose();
-            }
-            catch (Exception)
-            {
-            }
         }
         
     }
