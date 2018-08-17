@@ -107,8 +107,8 @@ Switch share over LAN=切换局域网共享
 Show Logs=显示日志
 Switch to prev server=切换上个服务器
 Switch to next server=切换下个服务器
-Reg All=注册全部热键
-Reg Hotkeys At Startup=启动时注册热键
+Reg All=注册全部快捷键
+Reg Hotkeys At Startup=启动时注册快捷键
 
 # Messages
 
@@ -145,6 +145,6 @@ Unsupported operating system, use Windows Vista at least.=不支持的操作系�
 Unsupported .NET Framework, please update to 4.6.2 or later.=当前 .NET Framework 版本过低，请升级至4.6.2或更新版本。
 Proxy request failed=代理请求失败
 Proxy handshake failed=代理握手失败
-Register hotkey failed=注册热键失败
-Cannot parse hotkey: {0}=解析热键失败: {0}
+Register hotkey failed=注册快捷键失败
+Cannot parse hotkey: {0}=解析快捷键失败: {0}
 Timeout is invalid, it should not exceed {0}=超时无效，不应超过 {0}

@@ -113,7 +113,7 @@ namespace Shadowsocks.Model
 
         public static List<Server> GetServers(string ssURL)
         {
-            var serverUrls = ssURL.Split('\r', '\n');
+            var serverUrls = ssURL.Split('\r', '\n', ' ');
 
             List<Server> servers = new List<Server>();
             foreach (string serverUrl in serverUrls)
