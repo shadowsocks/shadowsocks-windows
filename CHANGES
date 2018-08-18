@@ -1,4 +1,8 @@
-4.1.0 2018-08-15
+4.1.1 2018-08-18
+- Fix auto hotkey reg issue when OS wakeup
+- Other minor bug fixes and improvements
+
+4.1.0 2018-08-05
 - Support portable mode Temp folder
 - Register hotkeys on startup
 - Fix sysproxy hanging issue
