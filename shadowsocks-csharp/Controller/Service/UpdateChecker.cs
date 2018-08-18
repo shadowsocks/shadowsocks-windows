@@ -230,18 +230,9 @@ namespace Shadowsocks.Controller
 
             public static int CompareVersion(string l, string r)
             {
-                var ls = l.Split('.');
-                var rs = r.Split('.');
-                for (int i = 0; i < Math.Max(ls.Length, rs.Length); i++)
-                {
-                    int lp = (i < ls.Length) ? int.Parse(ls[i]) : 0;
-                    int rp = (i < rs.Length) ? int.Parse(rs[i]) : 0;
-                    if (lp != rp)
-                    {
-                        return lp - rp;
-                    }
-                }
-                return 0;
+                var vl = new Version(vl);
+                var vr = new Version(vr);
+                return vl.CompareTo(vr);
             }
 
             public int CompareTo(Asset other)
