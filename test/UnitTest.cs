@@ -629,7 +629,9 @@ namespace test
             Assert.AreEqual(penv["SS_REMOTE_HOST"], serverAddress);
             Assert.AreEqual(penv["SS_REMOTE_PORT"], serverPort.ToString());
             Assert.AreEqual(penv["SS_LOCAL_HOST"], IPAddress.Loopback.ToString());
-            Assert.IsTrue(int.TryParse(penv["SS_LOCAL_PORT"], out int _ignored));
+            
+            int _ignored;
+            Assert.IsTrue(int.TryParse(penv["SS_LOCAL_PORT"], out _ignored));
             
             Assert.AreEqual(penv["SS_PLUGIN_OPTIONS"], pluginOpts);
             Assert.AreEqual(pcmd, pluginArgs);
