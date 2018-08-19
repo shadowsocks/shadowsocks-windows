@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Specialized;
 using System.Diagnostics;
 using System.IO;
 using System.Net;
@@ -92,12 +93,28 @@ namespace Shadowsocks.Controller.Service
 
                 _pluginProcess.StartInfo.Environment["SS_LOCAL_HOST"] = LocalEndPoint.Address.ToString();
                 _pluginProcess.StartInfo.Environment["SS_LOCAL_PORT"] = LocalEndPoint.Port.ToString();
+                _pluginProcess.StartInfo.Arguments = ExpandEnvironmentVariables(_pluginProcess.StartInfo.Arguments, _pluginProcess.StartInfo.EnvironmentVariables);
                 _pluginProcess.Start();
                 _pluginJob.AddProcess(_pluginProcess.Handle);
                 _started = true;
             }
 
             return true;
+        }
+
+        public string ExpandEnvironmentVariables(string name, StringDictionary environmentVariables = null)
+        {
+            // Expand the environment variables from the new process itself
+            if (environmentVariables != null)
+            {
+                foreach(string key in environmentVariables.Keys)
+                {
+                    name = name.Replace($"%{key}%", environmentVariables[key], StringComparison.OrdinalIgnoreCase);
+                }
+            }
+            // Also expand the environment variables from current main process (system)
+            name = Environment.ExpandEnvironmentVariables(name);
+            return name;
         }
 
         static int GetNextFreeTcpPort()
