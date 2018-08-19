@@ -599,13 +599,13 @@ namespace test
                 method = "bf-cfb",
                 plugin = fake_plugin,
                 plugin_opts = "_option",
-                plugin_args = "_test,%SS_REMOTE_HOST%"
+                plugin_args = "_test,%SS_REMOTE_HOST%,%SS_PLUGIN_OPTIONS%"
             });
             RunPluginSupportTest(
                 PluginWithOptsAndArgsReplaced,
                 fake_plugin,
                 "_option",
-                "_test,%SS_REMOTE_HOST%",
+                "_test,192.168.100.1,_option",
                 "192.168.100.1",
                 8888);
         }

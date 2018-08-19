@@ -50,11 +50,9 @@ namespace Shadowsocks.Controller.Service
 
             var appPath = Path.GetDirectoryName(new Uri(Assembly.GetExecutingAssembly().GetName().CodeBase).LocalPath);
 
-            if (string.IsNullOrWhiteSpace(pluginOpts))
-            {
-                pluginArgs = pluginArgs.Replace("%SS_REMOTE_HOST%", serverAddress);
-                pluginArgs = pluginArgs.Replace("%SS_REMOTE_PORT%", serverPort.ToString());
-            }
+            pluginArgs = pluginArgs.Replace("%SS_REMOTE_HOST%", serverAddress);
+            pluginArgs = pluginArgs.Replace("%SS_REMOTE_PORT%", serverPort.ToString());
+            pluginArgs = pluginArgs.Replace("%SS_PLUGIN_OPTIONS%", pluginOpts);
 
             _pluginProcess = new Process
             {
@@ -95,13 +93,10 @@ namespace Shadowsocks.Controller.Service
 
                 var localPort = GetNextFreeTcpPort();
                 LocalEndPoint = new IPEndPoint(IPAddress.Loopback, localPort);
-
-                // ["SS_PLUGIN_OPTIONS"] = pluginOpts
-                if (string.IsNullOrWhiteSpace(_pluginProcess.StartInfo.Environment["SS_PLUGIN_OPTIONS"]))
-                {
-                    _pluginProcess.StartInfo.Arguments = _pluginProcess.StartInfo.Arguments.Replace("%SS_LOCAL_HOST%", LocalEndPoint.Address.ToString());
-                    _pluginProcess.StartInfo.Arguments = _pluginProcess.StartInfo.Arguments.Replace("%SS_LOCAL_PORT%", LocalEndPoint.Port.ToString());
-                }
+                
+                _pluginProcess.StartInfo.Arguments = _pluginProcess.StartInfo.Arguments.Replace("%SS_LOCAL_HOST%", LocalEndPoint.Address.ToString());
+                _pluginProcess.StartInfo.Arguments = _pluginProcess.StartInfo.Arguments.Replace("%SS_LOCAL_PORT%", LocalEndPoint.Port.ToString());
+                
                 _pluginProcess.StartInfo.Environment["SS_LOCAL_HOST"] = LocalEndPoint.Address.ToString();
                 _pluginProcess.StartInfo.Environment["SS_LOCAL_PORT"] = LocalEndPoint.Port.ToString();
                 _pluginProcess.Start();
