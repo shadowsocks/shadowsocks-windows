@@ -51,6 +51,10 @@ namespace Shadowsocks.Controller.Service
 
             var appPath = Path.GetDirectoryName(new Uri(Assembly.GetExecutingAssembly().GetName().CodeBase).LocalPath);
 
+            pluginArgs = pluginArgs.Replace("%SS_REMOTE_HOST%", serverAddress);
+            pluginArgs = pluginArgs.Replace("%SS_REMOTE_PORT%", serverPort.ToString());
+            pluginArgs = pluginArgs.Replace("%SS_PLUGIN_OPTIONS%", pluginOpts);
+
             _pluginProcess = new Process
             {
                 StartInfo = new ProcessStartInfo
@@ -90,7 +94,10 @@ namespace Shadowsocks.Controller.Service
 
                 var localPort = GetNextFreeTcpPort();
                 LocalEndPoint = new IPEndPoint(IPAddress.Loopback, localPort);
-
+                
+                _pluginProcess.StartInfo.Arguments = _pluginProcess.StartInfo.Arguments.Replace("%SS_LOCAL_HOST%", LocalEndPoint.Address.ToString());
+                _pluginProcess.StartInfo.Arguments = _pluginProcess.StartInfo.Arguments.Replace("%SS_LOCAL_PORT%", LocalEndPoint.Port.ToString());
+                
                 _pluginProcess.StartInfo.Environment["SS_LOCAL_HOST"] = LocalEndPoint.Address.ToString();
                 _pluginProcess.StartInfo.Environment["SS_LOCAL_PORT"] = LocalEndPoint.Port.ToString();
                 _pluginProcess.StartInfo.Arguments = ExpandEnvironmentVariables(_pluginProcess.StartInfo.Arguments, _pluginProcess.StartInfo.EnvironmentVariables);

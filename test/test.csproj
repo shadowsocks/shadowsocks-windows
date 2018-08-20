@@ -39,6 +39,7 @@
       <HintPath>..\shadowsocks-csharp\3rd\GlobalHotKey.1.1.0\lib\GlobalHotKey.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Management" />
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <Choose>
@@ -54,6 +55,7 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="ProcessEnvironment.cs" />
     <Compile Include="UnitTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
