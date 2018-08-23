@@ -2,15 +2,13 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
-using System.Reflection;
 using System.Text;
 using System.Windows.Forms;
 
 using Shadowsocks.Controller;
-using Shadowsocks.Controller.Hotkeys;
 using Shadowsocks.Model;
 using Shadowsocks.Properties;
-using Shadowsocks.Util;
+using static Shadowsocks.Controller.HotkeyReg;
 
 namespace Shadowsocks.View
 {
@@ -42,6 +40,7 @@ namespace Shadowsocks.View
             ShowLogsLabel.Text = I18N.GetString("Show Logs");
             ServerMoveUpLabel.Text = I18N.GetString("Switch to prev server");
             ServerMoveDownLabel.Text = I18N.GetString("Switch to next server");
+            RegHotkeysAtStartupLabel.Text = I18N.GetString("Reg Hotkeys At Startup");
             btnOK.Text = I18N.GetString("OK");
             btnCancel.Text = I18N.GetString("Cancel");
             btnRegisterAll.Text = I18N.GetString("Reg All");
@@ -67,6 +66,7 @@ namespace Shadowsocks.View
             ShowLogsTextBox.Text = config.ShowLogs;
             ServerMoveUpTextBox.Text = config.ServerMoveUp;
             ServerMoveDownTextBox.Text = config.ServerMoveDown;
+            RegHotkeysAtStartupCheckBox.Checked = config.RegHotkeysAtStartup;
         }
 
         private void SaveConfig()
@@ -83,7 +83,8 @@ namespace Shadowsocks.View
                 SwitchAllowLan = SwitchAllowLanTextBox.Text,
                 ShowLogs = ShowLogsTextBox.Text,
                 ServerMoveUp = ServerMoveUpTextBox.Text,
-                ServerMoveDown = ServerMoveDownTextBox.Text
+                ServerMoveDown = ServerMoveDownTextBox.Text,
+                RegHotkeysAtStartup = RegHotkeysAtStartupCheckBox.Checked
             };
         }
 
@@ -171,52 +172,33 @@ namespace Shadowsocks.View
         private bool RegisterAllHotkeys(HotkeyConfig hotkeyConfig)
         {
             return
-                RegHotkeyFromString(hotkeyConfig.SwitchSystemProxy, "SwitchSystemProxyCallback", SwitchSystemProxyLabel)
-                && RegHotkeyFromString(hotkeyConfig.SwitchSystemProxyMode, "SwitchProxyModeCallback", SwitchProxyModeLabel)
-                && RegHotkeyFromString(hotkeyConfig.SwitchAllowLan, "SwitchAllowLanCallback", SwitchAllowLanLabel)
-                && RegHotkeyFromString(hotkeyConfig.ShowLogs, "ShowLogsCallback", ShowLogsLabel)
-                && RegHotkeyFromString(hotkeyConfig.ServerMoveUp, "ServerMoveUpCallback", ServerMoveUpLabel)
-                && RegHotkeyFromString(hotkeyConfig.ServerMoveDown, "ServerMoveDownCallback", ServerMoveDownLabel);
+                RegHotkeyFromString(hotkeyConfig.SwitchSystemProxy, "SwitchSystemProxyCallback", result => HandleRegResult(hotkeyConfig.SwitchSystemProxy, SwitchSystemProxyLabel, result))
+                && RegHotkeyFromString(hotkeyConfig.SwitchSystemProxyMode, "SwitchSystemProxyModeCallback", result => HandleRegResult(hotkeyConfig.SwitchSystemProxyMode, SwitchProxyModeLabel, result))
+                && RegHotkeyFromString(hotkeyConfig.SwitchAllowLan, "SwitchAllowLanCallback", result => HandleRegResult(hotkeyConfig.SwitchAllowLan, SwitchAllowLanLabel, result))
+                && RegHotkeyFromString(hotkeyConfig.ShowLogs, "ShowLogsCallback", result => HandleRegResult(hotkeyConfig.ShowLogs, ShowLogsLabel, result))
+                && RegHotkeyFromString(hotkeyConfig.ServerMoveUp, "ServerMoveUpCallback", result => HandleRegResult(hotkeyConfig.ServerMoveUp, ServerMoveUpLabel, result))
+                && RegHotkeyFromString(hotkeyConfig.ServerMoveDown, "ServerMoveDownCallback", result => HandleRegResult(hotkeyConfig.ServerMoveDown, ServerMoveDownLabel, result));
         }
 
-        private bool RegHotkeyFromString(string hotkeyStr, string callbackName, Label indicator = null)
+        private void HandleRegResult(string hotkeyStr, Label label, RegResult result)
         {
-            var _callback = HotkeyCallbacks.GetCallback(callbackName);
-            if (_callback == null)
+            switch (result)
             {
-                throw new Exception($"{callbackName} not found");
-            }
-
-            var callback = _callback as HotKeys.HotKeyCallBackHandler;
-
-            if (hotkeyStr.IsNullOrEmpty())
-            {
-                HotKeys.UnregExistingHotkey(callback);
-                if (indicator != null)
-                {
-                    indicator.ResetBackColor();
-                }
-                return true;
-            }
-            else
-            {
-                var hotkey = HotKeys.Str2HotKey(hotkeyStr);
-                if (hotkey == null)
-                {
+                case RegResult.ParseError:
                     MessageBox.Show(string.Format(I18N.GetString("Cannot parse hotkey: {0}"), hotkeyStr));
-                    return false;
-                }
-                else
-                {
-                    bool regResult = (HotKeys.RegHotkey(hotkey, callback));
-                    if (indicator != null)
-                    {
-                        indicator.BackColor = regResult ? Color.Green : Color.Yellow;
-                    }
-                    return regResult;
-                }
+                    break;
+                case RegResult.UnregSuccess:
+                    label.ResetBackColor();
+                    break;
+                case RegResult.RegSuccess:
+                    label.BackColor = Color.Green;
+                    break;
+                case RegResult.RegFailure:
+                    label.BackColor = Color.Red;
+                    break;
+                default:
+                    break;
             }
-
         }
     }
 }

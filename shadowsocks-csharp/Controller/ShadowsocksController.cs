@@ -89,9 +89,13 @@ namespace Shadowsocks.Controller
             StartTrafficStatistics(61);
         }
 
-        public void Start()
+        public void Start(bool regHotkeys = true)
         {
             Reload();
+            if (regHotkeys)
+            {
+                HotkeyReg.RegAllHotkeys();
+            }
         }
 
         protected void ReportError(Exception e)

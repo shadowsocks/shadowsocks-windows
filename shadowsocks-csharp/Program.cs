@@ -127,7 +127,7 @@ namespace Shadowsocks
                             Thread.Sleep(10 * 1000);
                             try
                             {
-                                MainController.Start();
+                                MainController.Start(false);
                                 Logging.Info("controller started");
                             }
                             catch (Exception ex)

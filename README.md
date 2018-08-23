@@ -67,8 +67,8 @@ _Note_: Forward Proxy will not be used while a plugin is enabled.
 
 #### Global hotkeys
 
-Hotkeys are NOT registered automatically. You should re-register all hotkeys after
-restarting Shadowsocks. If you are using multiple instances of Shadowsocks,
+Hotkeys could be registered automatically on startup.
+If you are using multiple instances of Shadowsocks,
 you must set different key combination for each instance.
 
 ##### How to input?

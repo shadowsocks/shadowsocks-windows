@@ -108,6 +108,7 @@ Show Logs=ログの表示
 Switch to prev server=前のサーバーに切り替える
 Switch to next server=次のサーバーに切り替える
 Reg All=全部登録する
+Reg Hotkeys At Startup=起動時にホットキーを登録する
 
 # Messages
 

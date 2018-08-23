@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
+using System.Text;
+using System.Threading;
 using Shadowsocks.Controller;
 using Shadowsocks.Properties;
 using Shadowsocks.Model;
-using System.Text;
 using Newtonsoft.Json;
 
 namespace Shadowsocks.Util.SystemProxy
@@ -83,43 +84,78 @@ namespace Shadowsocks.Util.SystemProxy
 
         private static void ExecSysproxy(string arguments)
         {
-            using (var process = new Process())
+            // using event to avoid hanging when redirect standard output/error
+            // ref: https://stackoverflow.com/questions/139593/processstartinfo-hanging-on-waitforexit-why
+            // and http://blog.csdn.net/zhangweixing0/article/details/7356841
+            using (AutoResetEvent outputWaitHandle = new AutoResetEvent(false))
+            using (AutoResetEvent errorWaitHandle = new AutoResetEvent(false))
             {
-                // Configure the process using the StartInfo properties.
-                process.StartInfo.FileName = Utils.GetTempPath("sysproxy.exe");
-                process.StartInfo.Arguments = arguments;
-                process.StartInfo.WorkingDirectory = Utils.GetTempPath();
-                process.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
-                process.StartInfo.UseShellExecute = false;
-                process.StartInfo.RedirectStandardError = true;
-                process.StartInfo.RedirectStandardOutput = true;
-
-                // Need to provide encoding info, or output/error strings we got will be wrong.
-                process.StartInfo.StandardOutputEncoding = Encoding.Unicode;
-                process.StartInfo.StandardErrorEncoding = Encoding.Unicode;
-
-                process.StartInfo.CreateNoWindow = true;
-                process.Start();
-
-                var stderr = process.StandardError.ReadToEnd();
-                var stdout = process.StandardOutput.ReadToEnd();
-
-                process.WaitForExit();
-
-                var exitCode = process.ExitCode;
-                if (exitCode != (int)RET_ERRORS.RET_NO_ERROR)
+                using (var process = new Process())
                 {
-                    throw new ProxyException(stderr);
-                }
+                    // Configure the process using the StartInfo properties.
+                    process.StartInfo.FileName = Utils.GetTempPath("sysproxy.exe");
+                    process.StartInfo.Arguments = arguments;
+                    process.StartInfo.WorkingDirectory = Utils.GetTempPath();
+                    process.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
+                    process.StartInfo.UseShellExecute = false;
+                    process.StartInfo.RedirectStandardError = true;
+                    process.StartInfo.RedirectStandardOutput = true;
 
-                if (arguments == "query")
-                {
-                    if (stdout.IsNullOrWhiteSpace() || stdout.IsNullOrEmpty())
+                    // Need to provide encoding info, or output/error strings we got will be wrong.
+                    process.StartInfo.StandardOutputEncoding = Encoding.Unicode;
+                    process.StartInfo.StandardErrorEncoding = Encoding.Unicode;
+
+                    process.StartInfo.CreateNoWindow = true;
+
+                    StringBuilder output = new StringBuilder();
+                    StringBuilder error = new StringBuilder();
+
+                    process.OutputDataReceived += (sender, e) =>
                     {
-                        // we cannot get user settings
-                        throw new ProxyException("failed to query wininet settings");
+                        if (e.Data == null)
+                        {
+                            outputWaitHandle.Set();
+                        }
+                        else
+                        {
+                            output.AppendLine(e.Data);
+                        }
+                    };
+                    process.ErrorDataReceived += (sender, e) =>
+                    {
+                        if (e.Data == null)
+                        {
+                            errorWaitHandle.Set();
+                        }
+                        else
+                        {
+                            error.AppendLine(e.Data);
+                        }
+                    };
+
+                    process.Start();
+
+                    process.BeginErrorReadLine();
+                    process.BeginOutputReadLine();
+
+                    process.WaitForExit();
+
+                    var stderr = error.ToString();
+                    var stdout = output.ToString();
+
+                    var exitCode = process.ExitCode;
+                    if (exitCode != (int)RET_ERRORS.RET_NO_ERROR)
+                    {
+                        throw new ProxyException(stderr);
                     }
-                    _queryStr = stdout;
+
+                    if (arguments == "query") {
+                        if (stdout.IsNullOrWhiteSpace() || stdout.IsNullOrEmpty()) {
+                            // we cannot get user settings
+                            throw new ProxyException("failed to query wininet settings");
+                        }
+                        _queryStr = stdout;
+                    }
                 }
             }
         }
@@ -147,13 +183,9 @@ namespace Shadowsocks.Util.SystemProxy
             {
                 string configContent = File.ReadAllText(Utils.GetTempPath(_userWininetConfigFile));
                 _userSettings = JsonConvert.DeserializeObject<SysproxyConfig>(configContent);
-            }
-            catch (Exception)
-            {
+            } catch(Exception) {
                 // Suppress all exceptions. finally block will initialize new user config settings.
-            }
-            finally
-            {
+            } finally {
                 if (_userSettings == null) _userSettings = new SysproxyConfig();
             }
         }
