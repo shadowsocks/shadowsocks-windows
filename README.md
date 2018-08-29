@@ -1,4 +1,4 @@
-Shadowsocks for Windows
+<img src="shadowsocks-csharp/Resources/ssw128.png" alt="[logo]" width="48"/> Shadowsocks for Windows
 =======================
 
 [![Build Status]][Appveyor]
