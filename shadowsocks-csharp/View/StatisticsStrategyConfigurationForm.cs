@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Drawing;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -6,6 +7,7 @@ using System.Windows.Forms;
 using System.Windows.Forms.DataVisualization.Charting;
 using Shadowsocks.Controller;
 using Shadowsocks.Model;
+using Shadowsocks.Properties;
 
 namespace Shadowsocks.View
 {
@@ -23,6 +25,7 @@ namespace Shadowsocks.View
         {
             if (controller == null) return;
             InitializeComponent();
+            Icon = Icon.FromHandle(Resources.ssw128.GetHicon());
             _speedSeries = StatisticsChart.Series["Speed"];
             _packageLossSeries = StatisticsChart.Series["Package Loss"];
             _pingSeries = StatisticsChart.Series["Ping"];
