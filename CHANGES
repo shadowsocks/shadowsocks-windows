@@ -1,3 +1,7 @@
+4.1.2 2018-09-13
+- Fix plugin CLI argument environment variable issue (#1969 #1818)
+- Other minor bug fixes and improvements (#1978 #1968 #1993)
+
 4.1.1 2018-08-18
 - Fix auto hotkey reg issue when OS wakeup
 - Other minor bug fixes and improvements
