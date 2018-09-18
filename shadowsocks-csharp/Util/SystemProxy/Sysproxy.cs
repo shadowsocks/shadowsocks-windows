@@ -193,6 +193,16 @@ namespace Shadowsocks.Util.SystemProxy
         private static void ParseQueryStr(string str)
         {
             string[] userSettingsArr = str.Split(new string[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
+
+            // sometimes sysproxy output in utf16le instead of ascii
+            // manually translate it
+            if (userSettingsArr.Length == 1)
+            {
+                byte[] strByte = Encoding.ASCII.GetBytes(str);
+                str = Encoding.Unicode.GetString(strByte);
+                userSettingsArr = str.Split(new string[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
+            }
+
             _userSettings.Flags = userSettingsArr[0];
 
             // handle output from WinINET
