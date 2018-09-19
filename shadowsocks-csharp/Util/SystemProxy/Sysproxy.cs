@@ -149,8 +149,10 @@ namespace Shadowsocks.Util.SystemProxy
                         throw new ProxyException(stderr);
                     }
 
-                    if (arguments == "query") {
-                        if (stdout.IsNullOrWhiteSpace() || stdout.IsNullOrEmpty()) {
+                    if (arguments == "query")
+                    {
+                        if (stdout.IsNullOrWhiteSpace() || stdout.IsNullOrEmpty())
+                        {
                             // we cannot get user settings
                             throw new ProxyException("failed to query wininet settings");
                         }
@@ -183,9 +185,13 @@ namespace Shadowsocks.Util.SystemProxy
             {
                 string configContent = File.ReadAllText(Utils.GetTempPath(_userWininetConfigFile));
                 _userSettings = JsonConvert.DeserializeObject<SysproxyConfig>(configContent);
-            } catch(Exception) {
+            }
+            catch (Exception)
+            {
                 // Suppress all exceptions. finally block will initialize new user config settings.
-            } finally {
+            }
+            finally
+            {
                 if (_userSettings == null) _userSettings = new SysproxyConfig();
             }
         }
@@ -196,13 +202,18 @@ namespace Shadowsocks.Util.SystemProxy
 
             // sometimes sysproxy output in utf16le instead of ascii
             // manually translate it
-            if (userSettingsArr.Length == 1)
+            if (userSettingsArr.Length != 4)
             {
                 byte[] strByte = Encoding.ASCII.GetBytes(str);
                 str = Encoding.Unicode.GetString(strByte);
                 userSettingsArr = str.Split(new string[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
+                // still fail, throw exception with string hexdump
+                if (userSettingsArr.Length != 4)
+                {
+                    throw new ProxyException("Unexpected sysproxy output:" + BitConverter.ToString(strByte));
+                }
             }
-
+            
             _userSettings.Flags = userSettingsArr[0];
 
             // handle output from WinINET
