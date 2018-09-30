@@ -1,12 +1,12 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using Shadowsocks.Controller;
+using Shadowsocks.Model;
+using Shadowsocks.Properties;
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Threading;
-using Shadowsocks.Controller;
-using Shadowsocks.Properties;
-using Shadowsocks.Model;
-using Newtonsoft.Json;
 
 namespace Shadowsocks.Util.SystemProxy
 {
@@ -132,13 +132,21 @@ namespace Shadowsocks.Util.SystemProxy
                             error.AppendLine(e.Data);
                         }
                     };
+                    try
+                    {
+                        process.Start();
 
-                    process.Start();
+                        process.BeginErrorReadLine();
+                        process.BeginOutputReadLine();
 
-                    process.BeginErrorReadLine();
-                    process.BeginOutputReadLine();
+                        process.WaitForExit();
+                    }
+                    catch (System.ComponentModel.Win32Exception e)
+                    {
+                        // log the arguements
+                        throw new ProxyException(ProxyExceptionType.FailToRun, process.StartInfo.Arguments, e);
+                    }
 
-                    process.WaitForExit();
 
                     var stderr = error.ToString();
                     var stdout = output.ToString();
@@ -146,7 +154,7 @@ namespace Shadowsocks.Util.SystemProxy
                     var exitCode = process.ExitCode;
                     if (exitCode != (int)RET_ERRORS.RET_NO_ERROR)
                     {
-                        throw new ProxyException(stderr);
+                        throw new ProxyException(ProxyExceptionType.SysproxyExitError, stderr);
                     }
 
                     if (arguments == "query")
@@ -154,7 +162,7 @@ namespace Shadowsocks.Util.SystemProxy
                         if (stdout.IsNullOrWhiteSpace() || stdout.IsNullOrEmpty())
                         {
                             // we cannot get user settings
-                            throw new ProxyException("failed to query wininet settings");
+                            throw new ProxyException(ProxyExceptionType.QueryReturnEmpty);
                         }
                         _queryStr = stdout;
                     }
@@ -210,10 +218,10 @@ namespace Shadowsocks.Util.SystemProxy
                 // still fail, throw exception with string hexdump
                 if (userSettingsArr.Length != 4)
                 {
-                    throw new ProxyException("Unexpected sysproxy output:" + BitConverter.ToString(strByte));
+                    throw new ProxyException(ProxyExceptionType.QueryReturnMalformed, BitConverter.ToString(strByte));
                 }
             }
-            
+
             _userSettings.Flags = userSettingsArr[0];
 
             // handle output from WinINET

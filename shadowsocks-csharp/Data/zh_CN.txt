@@ -148,3 +148,7 @@ Proxy handshake failed=代理握手失败
 Register hotkey failed=注册快捷键失败
 Cannot parse hotkey: {0}=解析快捷键失败: {0}
 Timeout is invalid, it should not exceed {0}=超时无效，不应超过 {0}
+
+Error when running sysproxy, check your proxy config=执行sysproxy时发生错误，请检查你的系统代理设置
+Can't query proxy config, check your proxy config=无法解析代理配置，请检查你的系统代理设置
+Sysproxy return a error:=sysproxy报告了一个错误：
