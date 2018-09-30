@@ -149,6 +149,5 @@ Register hotkey failed=ホットキーの登錄に失敗しました。
 Cannot parse hotkey: {0}=ホットキーを解析できません: {0}
 Timeout is invalid, it should not exceed {0}=タイムアウト値が無効です。{0} 以下の値を指定して下さい。
 
-Error when running sysproxy, check your proxy config=执行sysproxy时发生错误，请检查你的系统代理设置
-Can't query proxy config, check your proxy config=无法解析代理配置，请检查你的系统代理设置
-Sysproxy return a error:=sysproxy报告了一个错误：
+Error occured when process proxy setting, do you want reset current setting and retry?=处理代理设置时发生错误，是否重置当前代理设置并重试？
+Unrecoverable proxy setting error occured, see log for detail=发生不可恢复的代理设置错误，查看日志以取得详情

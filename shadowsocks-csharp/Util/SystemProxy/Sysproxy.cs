@@ -82,6 +82,26 @@ namespace Shadowsocks.Util.SystemProxy
             ExecSysproxy(arguments);
         }
 
+
+        // set system proxy to 1 (null) (null) (null)
+        public static bool ResetIEProxy()
+        {
+            try
+            {
+            // clear user-wininet.json
+            _userSettings = new SysproxyConfig();
+            Save();
+            // clear system setting
+            ExecSysproxy("set 1 - - -");
+            }
+            catch (Exception e)
+            {
+                return false;
+            }
+
+            return true;
+        }
+
         private static void ExecSysproxy(string arguments)
         {
             // using event to avoid hanging when redirect standard output/error
@@ -146,8 +166,6 @@ namespace Shadowsocks.Util.SystemProxy
                         // log the arguements
                         throw new ProxyException(ProxyExceptionType.FailToRun, process.StartInfo.Arguments, e);
                     }
-
-
                     var stderr = error.ToString();
                     var stdout = output.ToString();
 
