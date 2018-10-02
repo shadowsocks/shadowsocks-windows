@@ -148,6 +148,3 @@ Proxy handshake failed=Proxy 交握失敗
 Register hotkey failed=註冊快速鍵失敗
 Cannot parse hotkey: {0}=剖析快速鍵失敗: {0}
 Timeout is invalid, it should not exceed {0}=逾時無效，不應超過 {0}
-
-Error occured when process proxy setting, do you want reset current setting and retry?=处理代理设置时发生错误，是否重置当前代理设置并重试？
-Unrecoverable proxy setting error occured, see log for detail=发生不可恢复的代理设置错误，查看日志以取得详情
