@@ -148,3 +148,6 @@ Proxy handshake failed=代理握手失败
 Register hotkey failed=注册快捷键失败
 Cannot parse hotkey: {0}=解析快捷键失败: {0}
 Timeout is invalid, it should not exceed {0}=超时无效，不应超过 {0}
+
+Error occured when process proxy setting, do you want reset current setting and retry?=处理代理设置时发生错误，是否重置当前代理设置并重试？
+Unrecoverable proxy setting error occured, see log for detail=发生不可恢复的代理设置错误，查看日志以取得详情
