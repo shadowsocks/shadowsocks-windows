@@ -50,7 +50,7 @@ namespace Shadowsocks.Controller
                     KillProcess(p);
                 }
                 string privoxyConfig = Resources.privoxy_conf;
-                _runningPort = GetFreePort();
+                _runningPort = GetFreePort(configuration.shareOverLan);
                 privoxyConfig = privoxyConfig.Replace("__SOCKS_PORT__", configuration.localPort.ToString());
                 privoxyConfig = privoxyConfig.Replace("__PRIVOXY_BIND_PORT__", _runningPort.ToString());
                 privoxyConfig = privoxyConfig.Replace("__PRIVOXY_BIND_IP__", configuration.shareOverLan ? "0.0.0.0" : "127.0.0.1");
@@ -141,24 +141,30 @@ namespace Shadowsocks.Controller
             }
         }
 
-        private int GetFreePort()
+        private int GetFreePort(bool shareOverLan)
         {
             int defaultPort = 8123;
-            try
+            while (defaultPort < 65535)
             {
-                // TCP stack please do me a favor
-                TcpListener l = new TcpListener(IPAddress.Loopback, 0);
-                l.Start();
-                var port = ((IPEndPoint)l.LocalEndpoint).Port;
-                l.Stop();
-                return port;
+                try
+                {
+                    TcpListener l = new TcpListener(shareOverLan ? IPAddress.Any : IPAddress.Loopback, defaultPort);
+                    l.Start();
+                    var port = ((IPEndPoint)l.LocalEndpoint).Port;
+                    l.Stop();
+                    // got valid port number
+                    return port;
+                }
+                catch (Exception e)
+                {
+                    // in case access denied
+                    Logging.LogUsefulException(e);
+                    // try next port number
+                    defaultPort += 1;
+                }
             }
-            catch (Exception e)
-            {
-                // in case access denied
-                Logging.LogUsefulException(e);
-                return defaultPort;
-            }
+
+            return 0;
         }
     }
 }

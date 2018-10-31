@@ -123,6 +123,15 @@ namespace Shadowsocks.Controller
             return _config;
         }
 
+        public int GetPrivoxyRunningPort()
+        {
+            if (privoxyRunner != null)
+            {
+                return privoxyRunner.RunningPort;
+            }
+            return 0;
+        }
+
         public IList<IStrategy> GetStrategies()
         {
             return _strategyManager.GetStrategies();
