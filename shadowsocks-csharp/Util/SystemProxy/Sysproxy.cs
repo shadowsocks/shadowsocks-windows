@@ -3,8 +3,10 @@ using Shadowsocks.Controller;
 using Shadowsocks.Model;
 using Shadowsocks.Properties;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Threading;
 
@@ -13,6 +15,31 @@ namespace Shadowsocks.Util.SystemProxy
     public static class Sysproxy
     {
         private const string _userWininetConfigFile = "user-wininet.json";
+
+        private static string[] _lanIP = {
+            "<local>",
+            "localhost",
+            "127.*",
+            "10.*",
+            "172.16.*",
+            "172.17.*",
+            "172.18.*",
+            "172.19.*",
+            "172.20.*",
+            "172.21.*",
+            "172.22.*",
+            "172.23.*",
+            "172.24.*",
+            "172.25.*",
+            "172.26.*",
+            "172.27.*",
+            "172.28.*",
+            "172.29.*",
+            "172.30.*",
+            "172.31.*",
+            "192.168.*"
+            };
+
 
         private static string _queryStr;
 
@@ -61,8 +88,13 @@ namespace Shadowsocks.Util.SystemProxy
             string arguments;
             if (enable)
             {
+                List<string> customBypass = new List<string>(_userSettings.BypassList.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries));
+                customBypass.AddRange(_lanIP);
+                string[] realBypassStrings = customBypass.Distinct().ToArray();
+                string realBypassString = string.Join(";", realBypassStrings);
+
                 arguments = global
-                    ? $"global {proxyServer} <local>;localhost;127.*;10.*;172.16.*;172.17.*;172.18.*;172.19.*;172.20.*;172.21.*;172.22.*;172.23.*;172.24.*;172.25.*;172.26.*;172.27.*;172.28.*;172.29.*;172.30.*;172.31.*;192.168.*"
+                    ? $"global {proxyServer} {realBypassString}"
                     : $"pac {pacURL}";
             }
             else
@@ -88,11 +120,11 @@ namespace Shadowsocks.Util.SystemProxy
         {
             try
             {
-            // clear user-wininet.json
-            _userSettings = new SysproxyConfig();
-            Save();
-            // clear system setting
-            ExecSysproxy("set 1 - - -");
+                // clear user-wininet.json
+                _userSettings = new SysproxyConfig();
+                Save();
+                // clear system setting
+                ExecSysproxy("set 1 - - -");
             }
             catch (Exception e)
             {
