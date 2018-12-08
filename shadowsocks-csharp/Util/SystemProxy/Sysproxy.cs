@@ -16,7 +16,7 @@ namespace Shadowsocks.Util.SystemProxy
     {
         private const string _userWininetConfigFile = "user-wininet.json";
 
-        private static string[] _lanIP = {
+        private readonly static string[] _lanIP = {
             "<local>",
             "localhost",
             "127.*",
@@ -88,10 +88,11 @@ namespace Shadowsocks.Util.SystemProxy
             string arguments;
             if (enable)
             {
-                List<string> customBypass = new List<string>(_userSettings.BypassList.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries));
-                customBypass.AddRange(_lanIP);
-                string[] realBypassStrings = customBypass.Distinct().ToArray();
-                string realBypassString = string.Join(";", realBypassStrings);
+                string customBypassString = _userSettings.BypassList ?? "";
+                List<string> customBypassList = new List<string>(customBypassString.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries));
+                customBypassList.AddRange(_lanIP);
+                string[] realBypassList = customBypassList.Distinct().ToArray();
+                string realBypassString = string.Join(";", realBypassList);
 
                 arguments = global
                     ? $"global {proxyServer} {realBypassString}"
@@ -114,7 +115,6 @@ namespace Shadowsocks.Util.SystemProxy
             ExecSysproxy(arguments);
         }
 
-
         // set system proxy to 1 (null) (null) (null)
         public static bool ResetIEProxy()
         {
@@ -126,7 +126,7 @@ namespace Shadowsocks.Util.SystemProxy
                 // clear system setting
                 ExecSysproxy("set 1 - - -");
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 return false;
             }

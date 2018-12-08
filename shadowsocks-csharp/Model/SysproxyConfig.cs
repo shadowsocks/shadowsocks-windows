@@ -19,6 +19,7 @@ namespace Shadowsocks.Model
         {
             UserSettingsRecorded = false;
             Flags = "1";
+            // Watchout, Nullable! See #2100
             ProxyServer = "";
             BypassList = "";
             PacUrl = "";
