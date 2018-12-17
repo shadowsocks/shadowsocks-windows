@@ -12,6 +12,7 @@ namespace Shadowsocks.Model
     {
         public string version;
 
+        public string serverConfigFile;
         public List<Server> configs;
 
         // when strategy is set, index is ignored
@@ -60,6 +61,10 @@ namespace Shadowsocks.Model
                 Configuration config = JsonConvert.DeserializeObject<Configuration>(configContent);
                 config.isDefault = false;
 
+                if (config.serverConfigFile != null) {
+                    string serverConfigContent = File.ReadAllText(config.serverConfigFile);
+                    config.configs = JsonConvert.DeserializeObject<List<Server>>(serverConfigContent);
+                }
                 if (config.configs == null)
                     config.configs = new List<Server>();
                 if (config.configs.Count == 0)
@@ -112,12 +117,23 @@ namespace Shadowsocks.Model
             config.isDefault = false;
             try
             {
+                var configs = config.configs;
+                if (config.serverConfigFile != null) {
+                    using (StreamWriter sw = new StreamWriter(File.Open(config.serverConfigFile, FileMode.Create)))
+                    {
+                        string jsonString = JsonConvert.SerializeObject(config.configs, Formatting.Indented);
+                        sw.Write(jsonString);
+                        sw.Flush();
+                    }
+                    config.configs = null;
+                }
                 using (StreamWriter sw = new StreamWriter(File.Open(CONFIG_FILE, FileMode.Create)))
                 {
                     string jsonString = JsonConvert.SerializeObject(config, Formatting.Indented);
                     sw.Write(jsonString);
                     sw.Flush();
                 }
+                config.configs = configs;
             }
             catch (IOException e)
             {
