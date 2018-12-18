@@ -56,7 +56,7 @@ namespace Shadowsocks.Model
         {
             try
             {
-                string configContent = File.ReadAllText(CONFIG_FILE);
+                string configContent = File.ReadAllText(ConfigPath.Load() + CONFIG_FILE);
                 Configuration config = JsonConvert.DeserializeObject<Configuration>(configContent);
                 config.isDefault = false;
 
@@ -112,7 +112,7 @@ namespace Shadowsocks.Model
             config.isDefault = false;
             try
             {
-                using (StreamWriter sw = new StreamWriter(File.Open(CONFIG_FILE, FileMode.Create)))
+                using (StreamWriter sw = new StreamWriter(File.Open(ConfigPath.Load() + CONFIG_FILE, FileMode.Create)))
                 {
                     string jsonString = JsonConvert.SerializeObject(config, Formatting.Indented);
                     sw.Write(jsonString);

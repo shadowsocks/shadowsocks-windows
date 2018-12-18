@@ -27,7 +27,7 @@ namespace Shadowsocks.Model
         {
             try
             {
-                var content = File.ReadAllText(ConfigFile);
+                var content = File.ReadAllText(ConfigPath.Load() + ConfigFile);
                 var configuration = JsonConvert.DeserializeObject<StatisticsStrategyConfiguration>(content);
                 return configuration;
             }
@@ -49,7 +49,7 @@ namespace Shadowsocks.Model
             try
             {
                 var content = JsonConvert.SerializeObject(configuration, Formatting.Indented);
-                File.WriteAllText(ConfigFile, content);
+                File.WriteAllText(ConfigPath.Load() + ConfigFile, content);
             }
             catch (Exception e)
             {
