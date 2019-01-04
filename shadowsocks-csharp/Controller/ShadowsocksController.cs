@@ -225,6 +225,13 @@ namespace Shadowsocks.Controller
             }
         }
 
+        public void ReEnable()
+        {
+            bool currentEnableStatus = _config.enabled;
+            ToggleEnable(!currentEnableStatus);
+            ToggleEnable(currentEnableStatus);
+        }
+
         public void ToggleGlobal(bool global)
         {
             _config.global = global;
@@ -497,7 +504,7 @@ namespace Shadowsocks.Controller
             }
             if (_pacServer == null)
             {
-                _pacServer = new PACServer();
+                _pacServer = new PACServer(this);
                 _pacServer.PACFileChanged += pacServer_PACFileChanged;
                 _pacServer.UserRuleFileChanged += pacServer_UserRuleFileChanged;
             }

@@ -18,6 +18,7 @@ namespace Shadowsocks.Controller
         public const string PAC_FILE = "pac.txt";
         public const string USER_RULE_FILE = "user-rule.txt";
         public const string USER_ABP_FILE = "abp.txt";
+        private readonly ShadowsocksController shadowsocksController;
 
         private string PacSecret { get; set; } = "";
 
@@ -30,10 +31,11 @@ namespace Shadowsocks.Controller
         public event EventHandler PACFileChanged;
         public event EventHandler UserRuleFileChanged;
 
-        public PACServer()
+        public PACServer(ShadowsocksController shadowsocksController)
         {
             this.WatchPacFile();
             this.WatchUserRuleFile();
+            this.shadowsocksController = shadowsocksController;
         }
 
         public void UpdateConfiguration(Configuration config)
@@ -240,6 +242,7 @@ Connection: Close
             if (PACFileChanged != null)
             {
                 Logging.Info($"Detected: PAC file '{e.Name}' was {e.ChangeType.ToString().ToLower()}.");
+                shadowsocksController.ReEnable();
                 Task.Factory.StartNew(() =>
                 {
                     ((FileSystemWatcher)sender).EnableRaisingEvents = false;
