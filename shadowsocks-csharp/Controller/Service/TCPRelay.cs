@@ -831,7 +831,7 @@ namespace Shadowsocks.Controller
                     {
                         // need more to decrypt
                         Logging.Debug("Need more to decrypt");
-                        session.Remote.BeginReceive(_remoteRecvBuffer, 0, RecvSize, SocketFlags.None,
+                        session.Remote.BeginReceive(_remoteRecvBuffer, bytesRead, RecvSize - bytesRead, SocketFlags.None,
                             PipeRemoteReceiveCallback, session);
                         return;
                     }
