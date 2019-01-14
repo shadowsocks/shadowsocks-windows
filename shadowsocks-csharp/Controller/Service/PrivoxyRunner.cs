@@ -30,7 +30,6 @@ namespace Shadowsocks.Controller
                 _privoxyJob = new Job();
 
                 FileManager.UncompressFile(Utils.GetTempPath("ss_privoxy.exe"), Resources.privoxy_exe);
-                FileManager.UncompressFile(Utils.GetTempPath("mgwz.dll"), Resources.mgwz_dll);
             }
             catch (IOException e)
             {
