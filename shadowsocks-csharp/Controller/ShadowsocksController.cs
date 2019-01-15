@@ -614,6 +614,7 @@ namespace Shadowsocks.Controller
             {
                 GFWListUpdater.MergeAndWritePACFile(FileManager.NonExclusiveReadAllText(Utils.GetTempPath("gfwlist.txt")));
             }
+            UpdateSystemProxy();
         }
 
         public void CopyPacUrl()
