@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
@@ -127,11 +129,16 @@ namespace Shadowsocks.Controller
             // requested register and not autostartup
             if (register && !Check())
             {
+                // escape command line parameter
+                string[] args = new List<string>(Program.Args)
+                    .Select(p => p.Replace("\"", "\\\""))                   // escape " to \"
+                    .Select(p => p.IndexOf(" ") >= 0 ? "\"" + p + "\"" : p) // encapsule with "
+                    .ToArray();
+                string cmdline = string.Join(" ", args);
                 // first parameter is process command line parameter
-                // if ss-windows use it in future, remember pass it
                 // needn't include the name of the executable in the command line
-                RegisterApplicationRestart(null, (int)ApplicationRestartFlags.RESTART_NO_CRASH | (int)ApplicationRestartFlags.RESTART_NO_HANG);
-                Logging.Debug("Register restart after system reboot");
+                RegisterApplicationRestart(cmdline, (int)ApplicationRestartFlags.RESTART_NO_CRASH | (int)ApplicationRestartFlags.RESTART_NO_HANG);
+                Logging.Debug("Register restart after system reboot, command line:" + cmdline);
             }
             // requested unregister, which has no side effect
             else if (!register)
