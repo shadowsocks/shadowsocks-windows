@@ -121,18 +121,20 @@ namespace Shadowsocks.Controller
             RESTART_NO_REBOOT = 8,
         }
 
-        // regist restart after system reboot/update
-        public static void RegisterForRestart(bool regist)
+        // register restart after system reboot/update
+        public static void RegisterForRestart(bool register)
         {
-            // requested regist and not autostart
-            if (regist && !Check())
+            // requested register and not autostartup
+            if (register && !Check())
             {
-                // param 1 is process command param
+                // first parameter is process command line parameter
+                // if ss-windows use it in future, remember pass it
+                // needn't include the name of the executable in the command line
                 RegisterApplicationRestart(null, (int)ApplicationRestartFlags.RESTART_NO_CRASH | (int)ApplicationRestartFlags.RESTART_NO_HANG);
                 Logging.Debug("Register restart after system reboot");
             }
-            // request unregist, unregist has no side effect
-            else if (!regist)
+            // requested unregister, which has no side effect
+            else if (!register)
             {
                 UnregisterApplicationRestart();
                 Logging.Debug("Unregister restart after system reboot");
