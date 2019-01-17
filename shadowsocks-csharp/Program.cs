@@ -54,6 +54,7 @@ namespace Shadowsocks
                 SystemEvents.PowerModeChanged += SystemEvents_PowerModeChanged;
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
+                AutoStartup.RegisterForRestart(true);
 
                 if (!mutex.WaitOne(0, false))
                 {
