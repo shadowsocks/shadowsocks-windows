@@ -46,16 +46,7 @@ namespace Shadowsocks.Controller
         private bool CheckIfPortInUse(int port)
         {
             IPGlobalProperties ipProperties = IPGlobalProperties.GetIPGlobalProperties();
-            IPEndPoint[] ipEndPoints = ipProperties.GetActiveTcpListeners();
-
-            foreach (IPEndPoint endPoint in ipEndPoints)
-            {
-                if (endPoint.Port == port)
-                {
-                    return true;
-                }
-            }
-            return false;
+            return ipProperties.GetActiveTcpListeners().Any(endPoint => endPoint.Port == port);
         }
 
         public void Start(Configuration config)
@@ -64,7 +55,7 @@ namespace Shadowsocks.Controller
             this._shareOverLAN = config.shareOverLan;
 
             if (CheckIfPortInUse(_config.localPort))
-                throw new Exception(I18N.GetString("Port already in use"));
+                throw new Exception(I18N.GetString("Port {0} already in use", _config.localPort));
 
             try
             {

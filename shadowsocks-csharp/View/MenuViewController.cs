@@ -134,7 +134,7 @@ namespace Shadowsocks.View
 
         void controller_Errored(object sender, System.IO.ErrorEventArgs e)
         {
-            MessageBox.Show(e.GetException().ToString(), String.Format(I18N.GetString("Shadowsocks Error: {0}"), e.GetException().Message));
+            MessageBox.Show(e.GetException().ToString(), I18N.GetString("Shadowsocks Error: {0}", e.GetException().Message));
         }
 
         #region Tray Icon
@@ -185,7 +185,7 @@ namespace Shadowsocks.View
             string text = I18N.GetString("Shadowsocks") + " " + UpdateChecker.Version + "\n" +
                           (enabled ?
                               I18N.GetString("System Proxy On: ") + (global ? I18N.GetString("Global") : I18N.GetString("PAC")) :
-                              String.Format(I18N.GetString("Running: Port {0}"), config.localPort))  // this feedback is very important because they need to know Shadowsocks is running
+                              I18N.GetString("Running: Port {0}", config.localPort))  // this feedback is very important because they need to know Shadowsocks is running
                           + "\n" + serverInfo;
             if (text.Length > 127)
             {
@@ -371,7 +371,7 @@ namespace Shadowsocks.View
         {
             if (updateChecker.NewVersionFound)
             {
-                ShowBalloonTip(String.Format(I18N.GetString("Shadowsocks {0} Update Found"), updateChecker.LatestVersionNumber + updateChecker.LatestVersionSuffix), I18N.GetString("Click here to update"), ToolTipIcon.Info, 5000);
+                ShowBalloonTip(I18N.GetString("Shadowsocks {0} Update Found", updateChecker.LatestVersionNumber + updateChecker.LatestVersionSuffix), I18N.GetString("Click here to update"), ToolTipIcon.Info, 5000);
             }
             else if (!_isStartupChecking)
             {

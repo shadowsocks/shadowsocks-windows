@@ -113,7 +113,7 @@ Reg Hotkeys At Startup=启动时注册快捷键
 # Messages
 
 Shadowsocks Error: {0}=Shadowsocks 错误: {0}
-Port already in use=端口已被占用
+Port {0} already in use=端口 {0} 已被占用
 Invalid server address=非法服务器地址
 Illegal port number format=非法端口格式
 Illegal timeout format=非法超时格式

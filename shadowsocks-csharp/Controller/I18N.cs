@@ -44,11 +44,12 @@ namespace Shadowsocks.Controller
             }
         }
 
-        public static string GetString(string key)
+        public static string GetString(string key, params object[] args)
         {
             return _strings.ContainsKey(key)
-                ? _strings[key]
-                : key;
+                ? string.Format(_strings[key], args)
+                : string.Format(key, args);
         }
+
     }
 }

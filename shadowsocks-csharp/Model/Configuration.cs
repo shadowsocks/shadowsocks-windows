@@ -164,8 +164,8 @@ namespace Shadowsocks.Model
         public static void CheckTimeout(int timeout, int maxTimeout)
         {
             if (timeout <= 0 || timeout > maxTimeout)
-                throw new ArgumentException(string.Format(
-                    I18N.GetString("Timeout is invalid, it should not exceed {0}"), maxTimeout));
+                throw new ArgumentException(
+                    I18N.GetString("Timeout is invalid, it should not exceed {0}", maxTimeout));
         }
     }
 }

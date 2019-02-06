@@ -185,7 +185,7 @@ namespace Shadowsocks.View
             switch (result)
             {
                 case RegResult.ParseError:
-                    MessageBox.Show(string.Format(I18N.GetString("Cannot parse hotkey: {0}"), hotkeyStr));
+                    MessageBox.Show(I18N.GetString("Cannot parse hotkey: {0}", hotkeyStr));
                     break;
                 case RegResult.UnregSuccess:
                     label.ResetBackColor();
