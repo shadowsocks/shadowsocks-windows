@@ -353,15 +353,15 @@ foreach (var item in filesToCleanup)
   <Target Name="CleanReferenceCopyLocalPaths" AfterTargets="AfterBuild;NonWinFodyTarget">
     <CosturaCleanup Config="FodyWeavers.xml" Files="@(ReferenceCopyLocalPaths->'$(OutDir)%(DestinationSubDirectory)%(Filename)%(Extension)')" />
   </Target>
-  <Import Project="3rd\Fody.3.3.5\build\Fody.targets" Condition="Exists('3rd\Fody.3.3.5\build\Fody.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
-    <Error Condition="!Exists('3rd\Fody.3.3.5\build\Fody.targets')" Text="$([System.String]::Format('$(ErrorText)', '3rd\Fody.3.3.5\build\Fody.targets'))" />
     <Error Condition="!Exists('3rd\Costura.Fody.3.3.2\build\Costura.Fody.props')" Text="$([System.String]::Format('$(ErrorText)', '3rd\Costura.Fody.3.3.2\build\Costura.Fody.props'))" />
     <Error Condition="!Exists('3rd\Caseless.Fody.1.8.3\build\Caseless.Fody.props')" Text="$([System.String]::Format('$(ErrorText)', '3rd\Caseless.Fody.1.8.3\build\Caseless.Fody.props'))" />
+    <Error Condition="!Exists('3rd\Fody.4.0.0\build\Fody.targets')" Text="$([System.String]::Format('$(ErrorText)', '3rd\Fody.4.0.0\build\Fody.targets'))" />
   </Target>
+  <Import Project="3rd\Fody.4.0.0\build\Fody.targets" Condition="Exists('3rd\Fody.4.0.0\build\Fody.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
