@@ -499,6 +499,7 @@ namespace Shadowsocks.Controller
             {
                 _pacServer = new PACServer();
                 _pacServer.PACFileChanged += pacServer_PACFileChanged;
+                _pacServer.PACSecretFileChanged += pacServer_PACSecretFileChanged;
                 _pacServer.UserRuleFileChanged += pacServer_UserRuleFileChanged;
             }
             _pacServer.UpdateConfiguration(_config);
@@ -587,6 +588,12 @@ namespace Shadowsocks.Controller
         }
 
         private void pacServer_PACFileChanged(object sender, EventArgs e)
+        {
+            UpdateSystemProxy();
+        }
+
+
+        private void pacServer_PACSecretFileChanged(object sender, EventArgs e)
         {
             UpdateSystemProxy();
         }

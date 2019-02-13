@@ -39,6 +39,7 @@ namespace Shadowsocks.Controller
                         }
                         else
                         {
+                            pacSrv.UpdateConfiguration(config);
                             pacUrl = pacSrv.PacUrl;
                         }
                         Sysproxy.SetIEProxy(true, false, null, pacUrl);

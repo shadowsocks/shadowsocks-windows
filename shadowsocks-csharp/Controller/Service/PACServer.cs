@@ -18,21 +18,25 @@ namespace Shadowsocks.Controller
         public const string PAC_FILE = "pac.txt";
         public const string USER_RULE_FILE = "user-rule.txt";
         public const string USER_ABP_FILE = "abp.txt";
+        private const string PAC_SECRET_FILE = "pac-secret.txt";
 
         private string PacSecret { get; set; } = "";
 
         public string PacUrl { get; private set; } = "";
 
         FileSystemWatcher PACFileWatcher;
+        FileSystemWatcher PACSecretFileWatcher;
         FileSystemWatcher UserRuleFileWatcher;
         private Configuration _config;
 
         public event EventHandler PACFileChanged;
+        public event EventHandler PACSecretFileChanged;
         public event EventHandler UserRuleFileChanged;
 
         public PACServer()
         {
             this.WatchPacFile();
+            this.WatchPacSecretFile();
             this.WatchUserRuleFile();
         }
 
@@ -42,22 +46,48 @@ namespace Shadowsocks.Controller
 
             if (config.secureLocalPac)
             {
-                var rd = new byte[32];
-                RNG.GetBytes(rd);
-                PacSecret = $"&secret={Convert.ToBase64String(rd)}";
+                if (!File.Exists(PAC_SECRET_FILE))
+                {
+                    var rd = new byte[32];
+                    RNG.GetBytes(rd);
+                    string secret = Convert.ToBase64String(rd);
+                    PacSecret = $"secret={secret}";
+                    File.WriteAllText(PAC_SECRET_FILE, secret);
+                }
+                else
+                {
+                    PacSecret = $"secret={File.ReadAllText(PAC_SECRET_FILE)}";
+                }
             }
             else
             {
+                if (File.Exists(PAC_SECRET_FILE))
+                {
+                    File.Delete(PAC_SECRET_FILE);
+                }
                 PacSecret = "";
             }
 
-            PacUrl = $"http://127.0.0.1:{config.localPort}/pac?t={GetTimestamp(DateTime.Now)}{PacSecret}";
+            PacUrl = $"http://127.0.0.1:{config.localPort}/pac?t={GetTimestamp()}{PacSecret}";
         }
 
 
-        private static string GetTimestamp(DateTime value)
+        private static string GetTimestamp()
         {
-            return value.ToString("yyyyMMddHHmmssfff");
+            string[] watchFileList = new string[] { PAC_FILE, PAC_SECRET_FILE, USER_ABP_FILE, USER_RULE_FILE };
+            DateTime lastModifiedTime = new DateTime(1970, 1, 1, 0, 0, 0);
+            foreach (string file in watchFileList)
+            {
+                if (File.Exists(file))
+                {
+                    DateTime fileTime = File.GetLastWriteTime(file);
+                    if (lastModifiedTime < fileTime)
+                    {
+                        lastModifiedTime = fileTime;
+                    }
+                }
+            }
+            return lastModifiedTime.ToString("yyyyMMddHHmmssfff");
         }
 
         public override bool Handle(byte[] firstPacket, int length, Socket socket, object state)
@@ -231,6 +261,19 @@ Connection: Close
             UserRuleFileWatcher.EnableRaisingEvents = true;
         }
 
+        private void WatchPacSecretFile()
+        {
+            PACSecretFileWatcher?.Dispose();
+            PACSecretFileWatcher = new FileSystemWatcher(Directory.GetCurrentDirectory());
+            PACSecretFileWatcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.DirectoryName;
+            PACSecretFileWatcher.Filter = PAC_SECRET_FILE;
+            PACSecretFileWatcher.Changed += PACSecretFileWatcher_Changed;
+            PACSecretFileWatcher.Created += PACSecretFileWatcher_Changed;
+            PACSecretFileWatcher.Deleted += PACSecretFileWatcher_Changed;
+            PACSecretFileWatcher.Renamed += PACSecretFileWatcher_Changed;
+            PACSecretFileWatcher.EnableRaisingEvents = true;
+        }
+
         #region FileSystemWatcher.OnChanged()
         // FileSystemWatcher Changed event is raised twice
         // http://stackoverflow.com/questions/1764809/filesystemwatcher-changed-event-is-raised-twice
@@ -245,6 +288,21 @@ Connection: Close
                     ((FileSystemWatcher)sender).EnableRaisingEvents = false;
                     System.Threading.Thread.Sleep(10);
                     PACFileChanged(this, new EventArgs());
+                    ((FileSystemWatcher)sender).EnableRaisingEvents = true;
+                });
+            }
+        }
+
+        private void PACSecretFileWatcher_Changed(object sender, FileSystemEventArgs e)
+        {
+            if (PACSecretFileChanged != null)
+            {
+                Logging.Info($"Detected: PAC Secret file '{e.Name}' was {e.ChangeType.ToString().ToLower()}.");
+                Task.Factory.StartNew(() =>
+                {
+                    ((FileSystemWatcher)sender).EnableRaisingEvents = false;
+                    System.Threading.Thread.Sleep(10);
+                    PACSecretFileChanged(this, new EventArgs());
                     ((FileSystemWatcher)sender).EnableRaisingEvents = true;
                 });
             }
