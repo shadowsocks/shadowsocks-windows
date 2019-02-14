@@ -144,9 +144,21 @@ namespace Shadowsocks.View
             PluginTextBox.Text = server.plugin;
             PluginOptionsTextBox.Text = server.plugin_opts;
             PluginArgumentsTextBox.Text = server.plugin_args;
+
+            bool showPluginArgInput = !string.IsNullOrEmpty(server.plugin_args);
+            UsePluginArgCheckBox.Checked = showPluginArgInput;
+            ShowHidePluginArgInput(showPluginArgInput);
+
             RemarksTextBox.Text = server.remarks;
             TimeoutTextBox.Text = server.timeout.ToString();
         }
+
+        private void ShowHidePluginArgInput(bool show)
+        {
+            PluginArgumentsTextBox.Visible = show;
+            PluginArgumentsLabel.Visible = show;
+        }
+
 
         private void LoadServerNameListToUI(Configuration configuration)
         {
@@ -361,6 +373,11 @@ namespace Shadowsocks.View
         private void ShowPasswdCheckBox_CheckedChanged(object sender, EventArgs e)
         {
             this.PasswordTextBox.UseSystemPasswordChar = !this.ShowPasswdCheckBox.Checked;
+        }
+
+        private void UsePluginArgCheckBox_CheckedChanged(object sender, EventArgs e)
+        {
+            ShowHidePluginArgInput(this.UsePluginArgCheckBox.Checked);
         }
     }
 }
