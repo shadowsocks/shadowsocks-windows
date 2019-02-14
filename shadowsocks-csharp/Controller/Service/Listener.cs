@@ -76,7 +76,10 @@ namespace Shadowsocks.Controller
 
                 // Start an asynchronous socket to listen for connections.
                 Logging.Info($"Shadowsocks started ({UpdateChecker.Version})");
-                Logging.Info(Encryption.EncryptorFactory.DumpRegisteredEncryptor());
+                if (_config.isVerboseLogging)
+                {
+                    Logging.Info(Encryption.EncryptorFactory.DumpRegisteredEncryptor());
+                }
                 _tcpSocket.BeginAccept(new AsyncCallback(AcceptCallback), _tcpSocket);
                 UDPState udpState = new UDPState();
                 udpState.socket = _udpSocket;
