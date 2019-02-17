@@ -72,7 +72,6 @@ namespace Shadowsocks.Encryption.Stream
             if (_method == "rc4-md5")
             {
                 byte[] temp = new byte[keyLen + ivLen];
-                realkey = new byte[keyLen];
                 Array.Copy(_key, 0, temp, 0, keyLen);
                 Array.Copy(iv, 0, temp, keyLen, ivLen);
                 realkey = MbedTLS.MD5(temp);
