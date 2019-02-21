@@ -118,6 +118,7 @@ namespace Shadowsocks.Controller
         [Flags]
         enum ApplicationRestartFlags
         {
+            RESTART_ALWAYS = 0,
             RESTART_NO_CRASH = 1,
             RESTART_NO_HANG = 2,
             RESTART_NO_PATCH = 4,
