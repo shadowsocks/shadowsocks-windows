@@ -115,8 +115,10 @@ namespace Shadowsocks.Controller
         [DllImport("kernel32.dll", SetLastError = true)]
         static extern int UnregisterApplicationRestart();
 
+        [Flags]
         enum ApplicationRestartFlags
         {
+            RESTART_ALWAYS = 0,
             RESTART_NO_CRASH = 1,
             RESTART_NO_HANG = 2,
             RESTART_NO_PATCH = 4,
@@ -137,7 +139,7 @@ namespace Shadowsocks.Controller
                 string cmdline = string.Join(" ", args);
                 // first parameter is process command line parameter
                 // needn't include the name of the executable in the command line
-                RegisterApplicationRestart(cmdline, (int)ApplicationRestartFlags.RESTART_NO_CRASH | (int)ApplicationRestartFlags.RESTART_NO_HANG);
+                RegisterApplicationRestart(cmdline, (int)(ApplicationRestartFlags.RESTART_NO_CRASH | ApplicationRestartFlags.RESTART_NO_HANG));
                 Logging.Debug("Register restart after system reboot, command line:" + cmdline);
             }
             // requested unregister, which has no side effect
