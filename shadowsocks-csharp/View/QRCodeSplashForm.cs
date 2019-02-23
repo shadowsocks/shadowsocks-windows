@@ -105,23 +105,23 @@ namespace Shadowsocks.View
                     g.DrawRectangle(pen, x, y, w, h);
                     SetBitmap(bitmap);
                 }
-                else if (flashStep == 1)
+                else if (flashStep == 2)
                 {
                     g.Clear(Color.Transparent);
                     SetBitmap(bitmap);
                 }
-                else if (flashStep == 2)
+                else if (flashStep == 3)
                 {
                     g.FillRectangle(brush, x, y, w, h);
                     g.DrawRectangle(pen, x, y, w, h);
                     SetBitmap(bitmap);
                 }
-                else if (flashStep == 3)
+                else if (flashStep == 4)
                 {
                     g.Clear(Color.Transparent);
                     SetBitmap(bitmap);
                 }
-                else if (flashStep == 4)
+                else if (flashStep == 5)
                 {
                     g.FillRectangle(brush, x, y, w, h);
                     g.DrawRectangle(pen, x, y, w, h);
