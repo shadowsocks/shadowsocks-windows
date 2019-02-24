@@ -59,8 +59,8 @@ namespace Shadowsocks.View
 
         private void OKButton_Click(object sender, EventArgs e)
         {
-
-            if (_modifiedProxyConfig.useProxy=UseProxyCheckBox.Checked)
+            _modifiedProxyConfig.useProxy = UseProxyCheckBox.Checked;
+            if (_modifiedProxyConfig.useProxy)
             {
                 if (!int.TryParse(ProxyPortTextBox.Text, out _modifiedProxyConfig.proxyPort))
                 {
