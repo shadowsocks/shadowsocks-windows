@@ -53,6 +53,7 @@ Show Password=显示密码
 Encryption=加密
 Plugin Program=插件程序
 Plugin Options=插件选项
+Use Plugin Arguement=需要命令行参数
 Plugin Arguments=插件参数
 Proxy Port=代理端口
 Portable Mode=便携模式
