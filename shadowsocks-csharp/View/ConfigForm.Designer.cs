@@ -49,6 +49,7 @@
             this.PluginArgumentsTextBox = new System.Windows.Forms.TextBox();
             this.PluginArgumentsLabel = new System.Windows.Forms.Label();
             this.RemarksLabel = new System.Windows.Forms.Label();
+            this.NeedPluginArgCheckBox = new System.Windows.Forms.CheckBox();
             this.panel2 = new System.Windows.Forms.Panel();
             this.OKButton = new System.Windows.Forms.Button();
             this.MyCancelButton = new System.Windows.Forms.Button();
@@ -68,7 +69,6 @@
             this.tableLayoutPanel4 = new System.Windows.Forms.TableLayoutPanel();
             this.DuplicateButton = new System.Windows.Forms.Button();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
-            this.UsePluginArgCheckBox = new System.Windows.Forms.CheckBox();
             this.tableLayoutPanel1.SuspendLayout();
             this.ServerGroupBox.SuspendLayout();
             this.tableLayoutPanel2.SuspendLayout();
@@ -104,7 +104,7 @@
             this.tableLayoutPanel1.Controls.Add(this.PluginArgumentsTextBox, 1, 8);
             this.tableLayoutPanel1.Controls.Add(this.PluginArgumentsLabel, 0, 8);
             this.tableLayoutPanel1.Controls.Add(this.RemarksLabel, 0, 10);
-            this.tableLayoutPanel1.Controls.Add(this.UsePluginArgCheckBox, 1, 7);
+            this.tableLayoutPanel1.Controls.Add(this.NeedPluginArgCheckBox, 1, 7);
             this.tableLayoutPanel1.Location = new System.Drawing.Point(8, 21);
             this.tableLayoutPanel1.Margin = new System.Windows.Forms.Padding(0);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
@@ -346,6 +346,17 @@
             this.RemarksLabel.Size = new System.Drawing.Size(47, 12);
             this.RemarksLabel.TabIndex = 8;
             this.RemarksLabel.Text = "Remarks";
+            // 
+            // NeedPluginArgCheckBox
+            // 
+            this.NeedPluginArgCheckBox.AutoSize = true;
+            this.NeedPluginArgCheckBox.Location = new System.Drawing.Point(113, 189);
+            this.NeedPluginArgCheckBox.Name = "NeedPluginArgCheckBox";
+            this.NeedPluginArgCheckBox.Size = new System.Drawing.Size(150, 16);
+            this.NeedPluginArgCheckBox.TabIndex = 10;
+            this.NeedPluginArgCheckBox.Text = "Need Plugin Arguement";
+            this.NeedPluginArgCheckBox.UseVisualStyleBackColor = true;
+            this.NeedPluginArgCheckBox.CheckedChanged += new System.EventHandler(this.UsePluginArgCheckBox_CheckedChanged);
             // 
             // panel2
             // 
@@ -603,17 +614,6 @@
             this.DuplicateButton.UseVisualStyleBackColor = true;
             this.DuplicateButton.Click += new System.EventHandler(this.DuplicateButton_Click);
             // 
-            // UsePluginArgCheckBox
-            // 
-            this.UsePluginArgCheckBox.AutoSize = true;
-            this.UsePluginArgCheckBox.Location = new System.Drawing.Point(113, 189);
-            this.UsePluginArgCheckBox.Name = "UsePluginArgCheckBox";
-            this.UsePluginArgCheckBox.Size = new System.Drawing.Size(96, 16);
-            this.UsePluginArgCheckBox.TabIndex = 10;
-            this.UsePluginArgCheckBox.Text = "UsePluginArg";
-            this.UsePluginArgCheckBox.UseVisualStyleBackColor = true;
-            this.UsePluginArgCheckBox.CheckedChanged += new System.EventHandler(this.UsePluginArgCheckBox_CheckedChanged);
-            // 
             // ConfigForm
             // 
             this.AcceptButton = this.OKButton;
@@ -692,7 +692,7 @@
         private System.Windows.Forms.Label PluginArgumentsLabel;
         private System.Windows.Forms.ToolTip toolTip1;
         private System.Windows.Forms.CheckBox PortableModeCheckBox;
-        private System.Windows.Forms.CheckBox UsePluginArgCheckBox;
+        private System.Windows.Forms.CheckBox NeedPluginArgCheckBox;
     }
 }
 

@@ -53,7 +53,7 @@ namespace Shadowsocks.View
             PluginLabel.Text = I18N.GetString("Plugin Program");
             PluginOptionsLabel.Text = I18N.GetString("Plugin Options");
             PluginArgumentsLabel.Text = I18N.GetString("Plugin Arguments");
-            UsePluginArgCheckBox.Text = I18N.GetString("Use Plugin Arguement");
+            NeedPluginArgCheckBox.Text = I18N.GetString("Need Plugin Arguement");
             ProxyPortLabel.Text = I18N.GetString("Proxy Port");
             PortableModeCheckBox.Text = I18N.GetString("Portable Mode");
             toolTip1.SetToolTip(this.PortableModeCheckBox, I18N.GetString("Restart required"));
@@ -147,7 +147,7 @@ namespace Shadowsocks.View
             PluginArgumentsTextBox.Text = server.plugin_args;
 
             bool showPluginArgInput = !string.IsNullOrEmpty(server.plugin_args);
-            UsePluginArgCheckBox.Checked = showPluginArgInput;
+            NeedPluginArgCheckBox.Checked = showPluginArgInput;
             ShowHidePluginArgInput(showPluginArgInput);
 
             RemarksTextBox.Text = server.remarks;
@@ -378,7 +378,7 @@ namespace Shadowsocks.View
 
         private void UsePluginArgCheckBox_CheckedChanged(object sender, EventArgs e)
         {
-            ShowHidePluginArgInput(this.UsePluginArgCheckBox.Checked);
+            ShowHidePluginArgInput(this.NeedPluginArgCheckBox.Checked);
         }
     }
 }
