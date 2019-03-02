@@ -354,7 +354,7 @@
             this.NeedPluginArgCheckBox.Name = "NeedPluginArgCheckBox";
             this.NeedPluginArgCheckBox.Size = new System.Drawing.Size(150, 16);
             this.NeedPluginArgCheckBox.TabIndex = 10;
-            this.NeedPluginArgCheckBox.Text = "Need Plugin Arguement";
+            this.NeedPluginArgCheckBox.Text = "Need Plugin Argument";
             this.NeedPluginArgCheckBox.UseVisualStyleBackColor = true;
             this.NeedPluginArgCheckBox.CheckedChanged += new System.EventHandler(this.UsePluginArgCheckBox_CheckedChanged);
             // 

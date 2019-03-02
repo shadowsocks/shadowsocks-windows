@@ -53,7 +53,7 @@ namespace Shadowsocks.View
             PluginLabel.Text = I18N.GetString("Plugin Program");
             PluginOptionsLabel.Text = I18N.GetString("Plugin Options");
             PluginArgumentsLabel.Text = I18N.GetString("Plugin Arguments");
-            NeedPluginArgCheckBox.Text = I18N.GetString("Need Plugin Arguement");
+            NeedPluginArgCheckBox.Text = I18N.GetString("Need Plugin Argument");
             ProxyPortLabel.Text = I18N.GetString("Proxy Port");
             PortableModeCheckBox.Text = I18N.GetString("Portable Mode");
             toolTip1.SetToolTip(this.PortableModeCheckBox, I18N.GetString("Restart required"));

@@ -195,7 +195,7 @@ namespace Shadowsocks.Util.SystemProxy
                     }
                     catch (System.ComponentModel.Win32Exception e)
                     {
-                        // log the arguements
+                        // log the arguments
                         throw new ProxyException(ProxyExceptionType.FailToRun, process.StartInfo.Arguments, e);
                     }
                     var stderr = error.ToString();
