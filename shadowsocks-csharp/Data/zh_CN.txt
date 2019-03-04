@@ -74,6 +74,9 @@ Proxy Type=代理类型
 Proxy Addr=代理地址
 Proxy Port=代理端口
 If server has a plugin, proxy will not be used=若服务器含有插件，代理将不被使用
+Use Auth=使用认证
+Auth User=认证用户
+Auth Pwd=认证密码
 
 # Log Form
 
@@ -152,3 +155,5 @@ Timeout is invalid, it should not exceed {0}=超时无效，不应超过 {0}
 
 Error occured when process proxy setting, do you want reset current setting and retry?=处理代理设置时发生错误，是否重置当前代理设置并重试？
 Unrecoverable proxy setting error occured, see log for detail=发生不可恢复的代理设置错误，查看日志以取得详情
+Auth user can not be blank=认证用户不能为空
+Auth pwd can not be blank=认证密码不能为空

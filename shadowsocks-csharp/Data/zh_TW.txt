@@ -73,6 +73,9 @@ Proxy Type=Proxy 類型
 Proxy Addr=Proxy 位址
 Proxy Port=Proxy 連接埠
 If server has a plugin, proxy will not be used=若伺服器含有外掛程式，Proxy 將不被使用
+Use Auth=使用認證
+Auth User=認證用戶
+Auth Pwd=認證口令
 
 # Log Form
 
@@ -148,3 +151,5 @@ Proxy handshake failed=Proxy 交握失敗
 Register hotkey failed=註冊快速鍵失敗
 Cannot parse hotkey: {0}=剖析快速鍵失敗: {0}
 Timeout is invalid, it should not exceed {0}=逾時無效，不應超過 {0}
+Auth user can not be blank=認證用戶不能為空
+Auth pwd can not be blank=認證口令不能為空

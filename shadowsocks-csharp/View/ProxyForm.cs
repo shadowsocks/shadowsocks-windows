@@ -37,6 +37,9 @@ namespace Shadowsocks.View
             ProxyPortLabel.Text = I18N.GetString("Proxy Port");
             ProxyTimeoutLabel.Text = I18N.GetString("Timeout(Sec)");
             ProxyNotificationLabel.Text = I18N.GetString("If server has a plugin, proxy will not be used");
+            UseAuthCheckBox.Text = I18N.GetString("Use Auth");
+            AuthUserLabel.Text = I18N.GetString("Auth User");
+            AuthPwdLabel.Text = I18N.GetString("Auth Pwd");
             OKButton.Text = I18N.GetString("OK");
             MyCancelButton.Text = I18N.GetString("Cancel");
             this.Text = I18N.GetString("Edit Proxy");
@@ -55,6 +58,9 @@ namespace Shadowsocks.View
             ProxyPortTextBox.Text = _modifiedProxyConfig.proxyPort.ToString();
             ProxyTimeoutTextBox.Text = _modifiedProxyConfig.proxyTimeout.ToString();
             ProxyTypeComboBox.SelectedIndex = _modifiedProxyConfig.proxyType;
+            UseAuthCheckBox.Checked = _modifiedProxyConfig.useAuth;
+            AuthUserTextBox.Text = _modifiedProxyConfig.authUser;
+            AuthPwdTextBox.Text = _modifiedProxyConfig.authPwd;
         }
 
         private void OKButton_Click(object sender, EventArgs e)
@@ -81,6 +87,13 @@ namespace Shadowsocks.View
                     Configuration.CheckServer(_modifiedProxyConfig.proxyServer = ProxyServerTextBox.Text);
                     Configuration.CheckPort(_modifiedProxyConfig.proxyPort);
                     Configuration.CheckTimeout(_modifiedProxyConfig.proxyTimeout, ProxyConfig.MaxProxyTimeoutSec);
+
+                    _modifiedProxyConfig.useAuth = UseAuthCheckBox.Checked;
+                    if (_modifiedProxyConfig.useAuth)
+                    {
+                        Configuration.CheckProxyAuthUser(_modifiedProxyConfig.authUser = AuthUserTextBox.Text);
+                        Configuration.CheckProxyAuthPwd(_modifiedProxyConfig.authPwd = AuthPwdTextBox.Text);
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -113,18 +126,62 @@ namespace Shadowsocks.View
         {
             if (UseProxyCheckBox.Checked)
             {
-                ProxyServerTextBox.Enabled = 
-                ProxyPortTextBox.Enabled = 
-                ProxyTimeoutTextBox.Enabled = 
+                ProxyServerTextBox.Enabled =
+                ProxyPortTextBox.Enabled =
+                ProxyTimeoutTextBox.Enabled =
                 ProxyTypeComboBox.Enabled = true;
+
+                if (ProxyTypeComboBox.SelectedIndex == ProxyConfig.PROXY_HTTP)
+                {
+                    UseAuthCheckBox.Enabled = true;
+
+                    if (UseAuthCheckBox.Checked)
+                    {
+                        AuthUserTextBox.Enabled =
+                        AuthPwdTextBox.Enabled = true;
+                    }
+                    else
+                    {
+                        AuthUserTextBox.Enabled =
+                        AuthPwdTextBox.Enabled = false;
+                    }
+                }
+                else
+                {
+                    // TODO support for SOCK5 auth
+                    UseAuthCheckBox.Enabled =
+                    AuthUserTextBox.Enabled =
+                    AuthPwdTextBox.Enabled = false;
+                }
             }
             else
             {
                 ProxyServerTextBox.Enabled =
                 ProxyPortTextBox.Enabled =
                 ProxyTimeoutTextBox.Enabled =
-                ProxyTypeComboBox.Enabled = false; 
+                ProxyTypeComboBox.Enabled =
+                UseAuthCheckBox.Enabled =
+                AuthUserTextBox.Enabled =
+                AuthPwdTextBox.Enabled = false;
             }
+        }
+
+        private void ProxyTypeComboBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            // TODO support for SOCK5 auth
+            if (ProxyTypeComboBox.SelectedIndex != ProxyConfig.PROXY_HTTP)
+            {
+                UseAuthCheckBox.Checked = false;
+                AuthUserTextBox.Clear();
+                AuthPwdTextBox.Clear();
+            }
+
+            UpdateEnabled();
+        }
+
+        private void UseAuthCheckBox_CheckedChanged(object sender, EventArgs e)
+        {
+            UpdateEnabled();
         }
     }
 }

@@ -68,12 +68,20 @@ namespace Shadowsocks.Proxy
             "Host: {0}" + HTTP_CRLF +
             "Proxy-Connection: keep-alive" + HTTP_CRLF +
             "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.121 Safari/537.36" + HTTP_CRLF +
+            "{1}" +         // Proxy-Authorization if any
             "" + HTTP_CRLF; // End with an empty line
+        private const string PROXY_AUTH_TEMPLATE = "Proxy-Authorization: Basic {0}" + HTTP_CRLF;
 
-        public void BeginConnectDest(EndPoint destEndPoint, AsyncCallback callback, object state)
+        public void BeginConnectDest(EndPoint destEndPoint, AsyncCallback callback, object state, NetworkCredential auth = null)
         {
             DestEndPoint = destEndPoint;
-            string request = string.Format(HTTP_CONNECT_TEMPLATE, destEndPoint);
+            String authInfo = "";
+            if (auth != null)
+            {
+                string authKey = Convert.ToBase64String(Encoding.UTF8.GetBytes(auth.UserName + ":" + auth.Password));
+                authInfo = string.Format(PROXY_AUTH_TEMPLATE, authKey);
+            }
+            string request = string.Format(HTTP_CONNECT_TEMPLATE, destEndPoint, authInfo);
 
             var b = Encoding.UTF8.GetBytes(request);
 

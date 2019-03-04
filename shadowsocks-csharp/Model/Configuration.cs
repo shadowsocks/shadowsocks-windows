@@ -167,5 +167,17 @@ namespace Shadowsocks.Model
                 throw new ArgumentException(
                     I18N.GetString("Timeout is invalid, it should not exceed {0}", maxTimeout));
         }
+
+        public static void CheckProxyAuthUser(string user)
+        {
+            if (user.IsNullOrEmpty())
+                throw new ArgumentException(I18N.GetString("Auth user can not be blank"));
+        }
+
+        public static void CheckProxyAuthPwd(string pwd)
+        {
+            if (pwd.IsNullOrEmpty())
+                throw new ArgumentException(I18N.GetString("Auth pwd can not be blank"));
+        }
     }
 }
