@@ -67,7 +67,7 @@ namespace Shadowsocks.Proxy
             "CONNECT {0} HTTP/1.1" + HTTP_CRLF + 
             "Host: {0}" + HTTP_CRLF +
             "Proxy-Connection: keep-alive" + HTTP_CRLF +
-            "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36" + HTTP_CRLF +
+            "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.121 Safari/537.36" + HTTP_CRLF +
             "" + HTTP_CRLF; // End with an empty line
 
         public void BeginConnectDest(EndPoint destEndPoint, AsyncCallback callback, object state)
