@@ -46,7 +46,9 @@ namespace Shadowsocks.Controller
 
         public static string GetString(string key, params object[] args)
         {
-            return string.Format(_strings.TryGetValue(key, out var value) ? value : key, args);
+            string value;
+            return string.Format(_strings.TryGetValue(key, out value) ? value : key, args);
         }
+
     }
 }
