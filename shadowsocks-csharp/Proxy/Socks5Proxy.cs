@@ -69,8 +69,9 @@ namespace Shadowsocks.Proxy
             }
         }
 
-        public void BeginConnectDest(EndPoint destEndPoint, AsyncCallback callback, object state)
+        public void BeginConnectDest(EndPoint destEndPoint, AsyncCallback callback, object state, NetworkCredential auth = null)
         {
+            // TODO: support SOCKS5 auth
             DestEndPoint = destEndPoint;
 
             byte[] request = null;

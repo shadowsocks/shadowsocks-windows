@@ -689,9 +689,16 @@ namespace Shadowsocks.Controller
                 connectTimer.Server = server;
 
                 _destConnected = false;
+
+                NetworkCredential auth = null;
+                if (_config.proxy.useAuth)
+                {
+                    auth = new NetworkCredential(_config.proxy.authUser, _config.proxy.authPwd);
+                }
+
                 // Connect to the remote endpoint.
                 remote.BeginConnectDest(destEndPoint, ConnectCallback,
-                    new AsyncSession<ServerTimer>(session, connectTimer));
+                    new AsyncSession<ServerTimer>(session, connectTimer), auth);
             }
             catch (ArgumentException)
             {

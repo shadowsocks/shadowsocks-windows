@@ -16,6 +16,9 @@ namespace Shadowsocks.Model
         public string proxyServer;
         public int proxyPort;
         public int proxyTimeout;
+        public bool useAuth;
+        public string authUser;
+        public string authPwd;
 
         public ProxyConfig()
         {
@@ -24,6 +27,9 @@ namespace Shadowsocks.Model
             proxyServer = "";
             proxyPort = 0;
             proxyTimeout = DefaultProxyTimeoutSec;
+            useAuth = false;
+            authUser = "";
+            authPwd = "";
         }
 
         public void CheckConfig()
