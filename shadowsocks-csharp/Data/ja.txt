@@ -6,7 +6,6 @@ Shadowsocks=Shadowsocks
 
 System Proxy=システムプロキシ
 Disable=無効
-Mode=モード
 PAC=PAC
 Global=全般
 Servers=サーバー

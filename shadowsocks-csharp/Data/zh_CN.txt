@@ -6,7 +6,6 @@ Shadowsocks=Shadowsocks
 
 System Proxy=系统代理
 Disable=禁用
-Mode=系统代理模式
 PAC=PAC 模式
 Global=全局模式
 Servers=服务器
