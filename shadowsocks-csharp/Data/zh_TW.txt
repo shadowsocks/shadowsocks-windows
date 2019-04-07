@@ -4,8 +4,8 @@ Shadowsocks=Shadowsocks
 
 # Menu items
 
-Enable System Proxy=啟用系統代理
-Mode=系統代理模式
+System Proxy=系統代理
+Disable=禁用
 PAC=PAC 模式
 Global=全局模式
 Servers=伺服器

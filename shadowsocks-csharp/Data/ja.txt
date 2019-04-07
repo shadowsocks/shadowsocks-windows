@@ -4,8 +4,8 @@ Shadowsocks=Shadowsocks
 
 # Menu items
 
-Enable System Proxy=システム プロキシを有効にする
-Mode=モード
+System Proxy=システムプロキシ
+Disable=無効
 PAC=PAC
 Global=全般
 Servers=サーバー
