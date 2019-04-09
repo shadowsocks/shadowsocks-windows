@@ -61,6 +61,7 @@ Remarks=付記
 Timeout(Sec)=タイムアウト (秒)
 OK=OK
 Cancel=キャンセル
+Apply=適用
 New server=新規サーバー
 Move &Up=上に移動 (&U)
 Move D&own=下に移動 (&O)

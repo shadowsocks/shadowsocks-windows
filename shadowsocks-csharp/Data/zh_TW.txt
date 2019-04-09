@@ -61,6 +61,7 @@ Remarks=註解
 Timeout(Sec)=逾時 (秒)
 OK=確定
 Cancel=取消
+Apply=應用
 New server=新伺服器
 Move &Up=上移 (&U)
 Move D&own=下移 (&O)
