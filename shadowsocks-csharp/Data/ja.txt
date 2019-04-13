@@ -118,6 +118,7 @@ Reg Hotkeys At Startup=起動時にホットキーを登録する
 
 Shadowsocks Error: {0}=Shadowsocks エラー: {0}
 Port {0} already in use=ポート番号 {0} は既に使用されています。
+Port {0} is reserved by system= ポート番号 {0} はシステムによって予約されています
 Invalid server address=サーバーアドレスが無効です。
 Illegal port number format=ポート番号のフォーマットが無効です。
 Illegal timeout format=タイムアウト値のフォーマットが無効です。

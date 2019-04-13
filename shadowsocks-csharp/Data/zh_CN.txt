@@ -119,6 +119,7 @@ Reg Hotkeys At Startup=启动时注册快捷键
 
 Shadowsocks Error: {0}=Shadowsocks 错误: {0}
 Port {0} already in use=端口 {0} 已被占用
+Port {0} is reserved by system=端口 {0} 是系统保留端口
 Invalid server address=非法服务器地址
 Illegal port number format=非法端口格式
 Illegal timeout format=非法超时格式
