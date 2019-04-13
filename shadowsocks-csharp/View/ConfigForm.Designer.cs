@@ -53,6 +53,7 @@
             this.panel2 = new System.Windows.Forms.Panel();
             this.OKButton = new System.Windows.Forms.Button();
             this.MyCancelButton = new System.Windows.Forms.Button();
+            this.ApplyButton = new System.Windows.Forms.Button();
             this.DeleteButton = new System.Windows.Forms.Button();
             this.AddButton = new System.Windows.Forms.Button();
             this.ServerGroupBox = new System.Windows.Forms.GroupBox();
@@ -230,7 +231,7 @@
             // 
             // EncryptionSelect
             // 
-            this.EncryptionSelect.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.EncryptionSelect.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.EncryptionSelect.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.EncryptionSelect.FormattingEnabled = true;
@@ -303,7 +304,7 @@
             // 
             // ShowPasswdCheckBox
             // 
-            this.ShowPasswdCheckBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            this.ShowPasswdCheckBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
             | System.Windows.Forms.AnchorStyles.Left)));
             this.ShowPasswdCheckBox.AutoSize = true;
             this.ShowPasswdCheckBox.Location = new System.Drawing.Point(113, 87);
@@ -386,13 +387,26 @@
             this.MyCancelButton.DialogResult = System.Windows.Forms.DialogResult.Cancel;
             this.MyCancelButton.Dock = System.Windows.Forms.DockStyle.Right;
             this.MyCancelButton.Location = new System.Drawing.Point(84, 3);
-            this.MyCancelButton.Margin = new System.Windows.Forms.Padding(3, 3, 0, 0);
+            this.MyCancelButton.Margin = new System.Windows.Forms.Padding(3, 3, 3, 0);
             this.MyCancelButton.Name = "MyCancelButton";
             this.MyCancelButton.Size = new System.Drawing.Size(75, 23);
             this.MyCancelButton.TabIndex = 18;
             this.MyCancelButton.Text = "Cancel";
             this.MyCancelButton.UseVisualStyleBackColor = true;
             this.MyCancelButton.Click += new System.EventHandler(this.CancelButton_Click);
+            // 
+            // ApplyButton
+            // 
+            this.ApplyButton.Enabled = false;
+            this.ApplyButton.Dock = System.Windows.Forms.DockStyle.Right;
+            this.ApplyButton.Location = new System.Drawing.Point(165, 3);
+            this.ApplyButton.Margin = new System.Windows.Forms.Padding(3, 3, 0, 0);
+            this.ApplyButton.Name = "ApplyButton";
+            this.ApplyButton.Size = new System.Drawing.Size(75, 23);
+            this.ApplyButton.TabIndex = 19;
+            this.ApplyButton.Text = "Apply";
+            this.ApplyButton.UseVisualStyleBackColor = true;
+            this.ApplyButton.Click += new System.EventHandler(this.ApplyButton_Click);
             // 
             // DeleteButton
             // 
@@ -510,7 +524,7 @@
             // 
             // tableLayoutPanel5
             // 
-            this.tableLayoutPanel5.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            this.tableLayoutPanel5.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
             | System.Windows.Forms.AnchorStyles.Left)));
             this.tableLayoutPanel5.AutoSize = true;
             this.tableLayoutPanel5.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
@@ -567,19 +581,21 @@
             // 
             this.tableLayoutPanel3.AutoSize = true;
             this.tableLayoutPanel3.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.tableLayoutPanel3.ColumnCount = 2;
+            this.tableLayoutPanel3.ColumnCount = 3;
+            this.tableLayoutPanel3.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tableLayoutPanel3.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tableLayoutPanel3.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tableLayoutPanel3.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 20F));
             this.tableLayoutPanel3.Controls.Add(this.MyCancelButton, 1, 0);
             this.tableLayoutPanel3.Controls.Add(this.OKButton, 0, 0);
+            this.tableLayoutPanel3.Controls.Add(this.ApplyButton, 2, 0);
             this.tableLayoutPanel3.Dock = System.Windows.Forms.DockStyle.Right;
-            this.tableLayoutPanel3.Location = new System.Drawing.Point(309, 397);
+            this.tableLayoutPanel3.Location = new System.Drawing.Point(309, 316);
             this.tableLayoutPanel3.Margin = new System.Windows.Forms.Padding(3, 3, 0, 3);
             this.tableLayoutPanel3.Name = "tableLayoutPanel3";
             this.tableLayoutPanel3.RowCount = 1;
             this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel3.Size = new System.Drawing.Size(159, 26);
+            this.tableLayoutPanel3.Size = new System.Drawing.Size(240, 26);
             this.tableLayoutPanel3.TabIndex = 8;
             // 
             // tableLayoutPanel4
@@ -664,6 +680,7 @@
         private System.Windows.Forms.Panel panel2;
         private System.Windows.Forms.Button OKButton;
         private System.Windows.Forms.Button MyCancelButton;
+        private System.Windows.Forms.Button ApplyButton;
         private System.Windows.Forms.Button DeleteButton;
         private System.Windows.Forms.Button AddButton;
         private System.Windows.Forms.GroupBox ServerGroupBox;
