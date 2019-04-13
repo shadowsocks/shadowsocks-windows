@@ -135,7 +135,7 @@
             this.PluginOptionsLabel.Size = new System.Drawing.Size(89, 12);
             this.PluginOptionsLabel.TabIndex = 6;
             this.PluginOptionsLabel.Text = "Plugin Options";
-            this.toolTip1.SetToolTip(this.PluginOptionsLabel, "Environment variables");
+            this.toolTip1.SetToolTip(this.PluginOptionsLabel, "Environment variables for plugin program");
             // 
             // PluginTextBox
             // 
@@ -231,7 +231,7 @@
             // 
             // EncryptionSelect
             // 
-            this.EncryptionSelect.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+            this.EncryptionSelect.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.EncryptionSelect.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.EncryptionSelect.FormattingEnabled = true;
@@ -304,7 +304,7 @@
             // 
             // ShowPasswdCheckBox
             // 
-            this.ShowPasswdCheckBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+            this.ShowPasswdCheckBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left)));
             this.ShowPasswdCheckBox.AutoSize = true;
             this.ShowPasswdCheckBox.Location = new System.Drawing.Point(113, 87);
@@ -335,8 +335,8 @@
             this.PluginArgumentsLabel.Size = new System.Drawing.Size(101, 12);
             this.PluginArgumentsLabel.TabIndex = 7;
             this.PluginArgumentsLabel.Text = "Plugin Arguments";
-            this.toolTip1.SetToolTip(this.PluginArgumentsLabel, "Not SIP003 standard. Used as CLI arguments.\r\nMandatory:\r\n%SS_LOCAL_HOST%, %SS_LOC" +
-        "SL_PORT%, %SS_REMOTE_HOST%, %SS_REMOTE_PORT%\r\nOptional:\r\n%SS_PLUGIN_OPTIONS%");
+            this.toolTip1.SetToolTip(this.PluginArgumentsLabel, "Not a SIP003 standard. Used as CLI arguments.\r\nMandatory:\r\n%SS_LOCAL_HOST%, %SS_L" +
+        "OCAL_PORT%, %SS_REMOTE_HOST%, %SS_REMOTE_PORT%\r\nOptional:\r\n%SS_PLUGIN_OPTIONS%");
             // 
             // RemarksLabel
             // 
@@ -353,7 +353,7 @@
             this.NeedPluginArgCheckBox.AutoSize = true;
             this.NeedPluginArgCheckBox.Location = new System.Drawing.Point(113, 189);
             this.NeedPluginArgCheckBox.Name = "NeedPluginArgCheckBox";
-            this.NeedPluginArgCheckBox.Size = new System.Drawing.Size(150, 16);
+            this.NeedPluginArgCheckBox.Size = new System.Drawing.Size(144, 16);
             this.NeedPluginArgCheckBox.TabIndex = 10;
             this.NeedPluginArgCheckBox.Text = "Need Plugin Argument";
             this.NeedPluginArgCheckBox.UseVisualStyleBackColor = true;
@@ -397,8 +397,8 @@
             // 
             // ApplyButton
             // 
-            this.ApplyButton.Enabled = false;
             this.ApplyButton.Dock = System.Windows.Forms.DockStyle.Right;
+            this.ApplyButton.Enabled = false;
             this.ApplyButton.Location = new System.Drawing.Point(165, 3);
             this.ApplyButton.Margin = new System.Windows.Forms.Padding(3, 3, 0, 0);
             this.ApplyButton.Name = "ApplyButton";
@@ -524,7 +524,7 @@
             // 
             // tableLayoutPanel5
             // 
-            this.tableLayoutPanel5.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+            this.tableLayoutPanel5.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left)));
             this.tableLayoutPanel5.AutoSize = true;
             this.tableLayoutPanel5.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
@@ -590,7 +590,7 @@
             this.tableLayoutPanel3.Controls.Add(this.OKButton, 0, 0);
             this.tableLayoutPanel3.Controls.Add(this.ApplyButton, 2, 0);
             this.tableLayoutPanel3.Dock = System.Windows.Forms.DockStyle.Right;
-            this.tableLayoutPanel3.Location = new System.Drawing.Point(309, 316);
+            this.tableLayoutPanel3.Location = new System.Drawing.Point(228, 397);
             this.tableLayoutPanel3.Margin = new System.Windows.Forms.Padding(3, 3, 0, 3);
             this.tableLayoutPanel3.Name = "tableLayoutPanel3";
             this.tableLayoutPanel3.RowCount = 1;
