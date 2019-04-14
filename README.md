@@ -65,6 +65,9 @@ If you would like to connect to server via a plugin, please set the plugin's
 path (relative or absolute) on Edit Servers form.
 _Note_: Forward Proxy will not be used while a plugin is enabled.
 
+Details:
+[Working with non SIP003 standard Plugin].
+
 #### Global hotkeys
 
 Hotkeys could be registered automatically on startup.
@@ -139,3 +142,4 @@ Sysproxy ()            https://github.com/Noisyfox/sysproxy
 [.NET Framework 4.6.2 Developer Pack]: https://www.microsoft.com/download/details.aspx?id=53321
 [Visual C++ 2015 Redistributable]:     https://www.microsoft.com/en-us/download/details.aspx?id=53840
 [GPLv3]:        https://github.com/shadowsocks/shadowsocks-windows/blob/master/LICENSE.txt
+[Working with non SIP003 standard Plugin]: https://github.com/shadowsocks/shadowsocks-windows/wiki/Working-with-non-SIP003-standard-Plugin
