@@ -1,3 +1,10 @@
+4.1.6 2019-04-17
+- Add http proxy "basic access authentication"
+- Add check box to toggle plugin argument input
+- Add apply button for server configuration form
+- Update UI of switching proxy mode
+- Update exception handler for port assignment
+
 4.1.5 2019-03-08
 - Update nuget packages
 - Update the PAC javascript to support user rules in a better way
