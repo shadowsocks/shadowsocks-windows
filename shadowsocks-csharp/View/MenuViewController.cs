@@ -13,6 +13,8 @@ using Shadowsocks.Model;
 using Shadowsocks.Properties;
 using Shadowsocks.Util;
 using System.Linq;
+using Microsoft.Win32;
+using System.Windows.Interop;
 
 namespace Shadowsocks.View
 {
@@ -57,6 +59,7 @@ namespace Shadowsocks.View
         private LogForm logForm;
         private HotkeySettingsForm hotkeySettingsForm;
         private string _urlToOpen;
+        private int windowsThemeMode;
 
         public MenuViewController(ShadowsocksController controller)
         {
@@ -83,6 +86,7 @@ namespace Shadowsocks.View
             _notifyIcon.MouseClick += notifyIcon1_Click;
             _notifyIcon.MouseDoubleClick += notifyIcon1_DoubleClick;
             _notifyIcon.BalloonTipClosed += _notifyIcon_BalloonTipClosed;
+            _notifyIcon.MouseMove += _notifyIcon_MouseMove;
             controller.TrafficChanged += controller_TrafficChanged;
 
             this.updateChecker = new UpdateChecker();
@@ -102,6 +106,11 @@ namespace Shadowsocks.View
                 _isStartupChecking = true;
                 updateChecker.CheckUpdate(config, 3000);
             }
+        }
+
+        private void _notifyIcon_MouseMove(object sender, MouseEventArgs e)
+        {
+            UpdateTrayIcon();
         }
 
         private void controller_TrafficChanged(object sender, EventArgs e)
@@ -161,6 +170,20 @@ namespace Shadowsocks.View
             Configuration config = controller.GetConfigurationCopy();
             bool enabled = config.enabled;
             bool global = config.global;
+
+            // set Windows 10 Theme color (1903+)
+            windowsThemeMode = getWindows10SystemThemeSetting();
+
+            switch (windowsThemeMode)
+            {
+                case 1:
+                    if (!global || !enabled)
+                        icon_baseBitmap = getDarkTrayIcon(icon_baseBitmap);
+                    break;
+                default:
+                    break;
+            }
+
             icon_baseBitmap = getTrayIconByState(icon_baseBitmap, enabled, global);
 
             icon_base = Icon.FromHandle(icon_baseBitmap.GetHicon());
@@ -192,6 +215,37 @@ namespace Shadowsocks.View
             ViewUtils.SetNotifyIconText(_notifyIcon, text);
         }
 
+        private Bitmap getDarkTrayIcon(Bitmap originIcon)
+        {
+            Bitmap iconCopy = new Bitmap(originIcon);
+            for (int x = 0; x < iconCopy.Width; x++)
+            {
+                for (int y = 0; y < iconCopy.Height; y++)
+                {
+                    Color color = originIcon.GetPixel(x, y);
+                    if (color.A != 0)
+                    {
+                        Color flyBlue = Color.FromArgb(192, 0, 0, 0);
+                        // Multiply with flyBlue
+                        //int red = (255 - color.R) * flyBlue.R / 255;
+                        //int green = (255 - color.G) * flyBlue.G / 255;
+                        //int blue = (255 - color.B) * flyBlue.B / 255;
+                        //int alpha = color.A * flyBlue.A / 255;
+                        int red = color.R * flyBlue.R / 255;
+                        int green = color.G * flyBlue.G / 255;
+                        int blue = color.B * flyBlue.B / 255;
+                        int alpha = color.A * flyBlue.A / 255;
+                        iconCopy.SetPixel(x, y, Color.FromArgb(alpha, red, green, blue));
+                    }
+                    else
+                    {
+                        iconCopy.SetPixel(x, y, Color.FromArgb(color.A, color.R, color.G, color.B));
+                    }
+                }
+            }
+            return iconCopy;
+        }
+
         private Bitmap getTrayIconByState(Bitmap originIcon, bool enabled, bool global)
         {
             Bitmap iconCopy = new Bitmap(originIcon);
@@ -204,12 +258,13 @@ namespace Shadowsocks.View
                     {
                         if (!enabled)
                         {
-                            Color flyBlue = Color.FromArgb(192, 192, 192);
+                            Color flyBlue = Color.FromArgb(192, 192, 192, 192);
                             // Multiply with flyBlue
                             int red = color.R * flyBlue.R / 255;
                             int green = color.G * flyBlue.G / 255;
                             int blue = color.B * flyBlue.B / 255;
-                            iconCopy.SetPixel(x, y, Color.FromArgb(color.A, red, green, blue));
+                            int alpha = color.A * flyBlue.A / 255;
+                            iconCopy.SetPixel(x, y, Color.FromArgb(alpha, red, green, blue));
                         }
                         else if (global)
                         {
@@ -228,6 +283,32 @@ namespace Shadowsocks.View
                 }
             }
             return iconCopy;
+        }
+
+        public int getWindows10SystemThemeSetting()
+        {
+            // Support on Windows 10 1903+
+            int registData = 0; // 0:dark mode, 1:light mode
+            try
+            {
+                RegistryKey reg_HKCU = Registry.CurrentUser;
+                RegistryKey reg_ThemesPersonalize = reg_HKCU.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize", false);
+                if (reg_ThemesPersonalize.GetValue("SystemUsesLightTheme") != null)
+                {
+                    registData = Convert.ToInt32(reg_ThemesPersonalize.GetValue("SystemUsesLightTheme").ToString());
+                    //Console.WriteLine(registData);
+                }
+                else
+                {
+                    throw new Exception("Reg-Value SystemUsesLightTheme not found.");
+                }
+            }
+            catch
+            {
+                Logging.Info(
+                        $"Cannot get Windows 10 system theme mode, return default value 0 (dark mode).");
+            }
+            return registData;
         }
 
         private Bitmap AddBitmapOverlay(Bitmap original, params Bitmap[] overlays)
