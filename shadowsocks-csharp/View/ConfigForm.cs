@@ -273,8 +273,7 @@ namespace Shadowsocks.View
             {
                 return;
             }
-            Server server = Configuration.GetDefaultServer();
-            _modifiedConfiguration.configs.Add(server);
+            Configuration.AddDefaultServerOrServer(_modifiedConfiguration);
             LoadServerNameListToUI(_modifiedConfiguration);
             ServersListBox.SelectedIndex = _modifiedConfiguration.configs.Count - 1;
             _lastSelectedIndex = ServersListBox.SelectedIndex;
@@ -282,7 +281,8 @@ namespace Shadowsocks.View
 
         private void DuplicateButton_Click(object sender, EventArgs e)
         {
-            if (!ValidateAndSaveSelectedServerDetails())
+            if (_lastSelectedIndex == -1 || _lastSelectedIndex > _modifiedConfiguration.configs.Count
+                || !ValidateAndSaveSelectedServerDetails())
             {
                 return;
             }
@@ -301,6 +301,10 @@ namespace Shadowsocks.View
             {
                 _modifiedConfiguration.configs.RemoveAt(_lastSelectedIndex);
             }
+            if (_modifiedConfiguration.configs.Count == 0)
+            {
+                Configuration.AddDefaultServerOrServer(_modifiedConfiguration);
+            }
             if (_lastSelectedIndex >= _modifiedConfiguration.configs.Count)
             {
                 // can be -1
@@ -310,6 +314,8 @@ namespace Shadowsocks.View
             LoadServerNameListToUI(_modifiedConfiguration);
             ServersListBox.SelectedIndex = _lastSelectedIndex;
             LoadSelectedServerDetails();
+
+            UpdateButtons();
         }
 
         private void OKButton_Click(object sender, EventArgs e)
