@@ -40,10 +40,10 @@ namespace Shadowsocks.Controller
             if (handler == null)
             {
                 handler = new UDPHandler(socket, _controller.GetAServer(IStrategyCallerType.UDP, remoteEndPoint, null/*TODO: fix this*/), remoteEndPoint);
+                handler.Receive();
                 _cache.add(remoteEndPoint, handler);
             }
             handler.Send(firstPacket, length);
-            handler.Receive();
             return true;
         }
 
@@ -74,6 +74,7 @@ namespace Shadowsocks.Controller
                 }
                 _remoteEndPoint = new IPEndPoint(ipAddress, server.server_port);
                 _remote = new Socket(_remoteEndPoint.AddressFamily, SocketType.Dgram, ProtocolType.Udp);
+                _remote.Bind(new IPEndPoint(IPAddress.Any, 0));
             }
 
             public void Send(byte[] data, int length)
