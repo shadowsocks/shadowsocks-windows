@@ -1,11 +1,128 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Net;
+using System.Net.NetworkInformation;
 using System.Net.Sockets;
+using System.Timers;
 
 namespace Shadowsocks.Util.Sockets
 {
+    public class HostInfo
+    {
+        private int ipIndex = 0;
+        public string HostName { get { return hostname; } }
+        private string hostname;
+        private List<IPAddress> ips;
+        private Timer timer;
+
+        public IPAddress IP
+        {
+            get
+            {
+                return GetNextIP();
+            }
+        }
+        public IPAddress LastIP { get { return lastIP; } }
+        private IPAddress lastIP;
+        public bool IPAvailable
+        {
+            get
+            {
+                if(ips.Count>0)
+                {
+                    return true;
+                }
+                return false;
+            }
+        }
+        public bool Refresh
+        {
+            set
+            {
+                if(value==true)
+                {
+                    DomainResolve();
+                }
+            }
+        }
+
+
+        private IPAddress GetNextIP()
+        {
+            if (ips.Count == 1)
+            {
+                lastIP = ips[0];
+                return ips[0];
+            }
+            if (ips.Count > 1)
+            {
+                lastIP = ips[ipIndex];
+                ipIndex++;
+                if (ipIndex >= ips.Count)
+                {
+                    ipIndex = 0;
+                }
+                return ips[ipIndex];
+            }
+            return null;
+        }
+
+        public HostInfo(string host)
+        {          
+            timer = new Timer();
+            ips = new List<IPAddress>();
+            hostname = host;
+            timer.AutoReset = true;
+            timer.Interval = 900000; //refresh ips,every 15 minutes
+            timer.Elapsed += Timer_Elapsed;
+            DomainResolve();
+            timer.Start();
+        }
+
+        private void Timer_Elapsed(object sender, ElapsedEventArgs e)
+        {
+            timer.Stop();
+            DomainResolve();
+            timer.Start();
+        }
+
+        private void DomainResolve()
+        {
+            try
+            {             
+                ips = new List<IPAddress>();
+                Shadowsocks.Controller.Logging.Info($"Resolve domain name: {hostname}");
+                IPHostEntry ip = Dns.GetHostEntry(hostname);
+                Ping ping = new Ping();
+                if (ip != null)
+                {
+                    foreach (IPAddress iPAddress in ip.AddressList)
+                    {
+                        PingReply reply = ping.Send(iPAddress, 6000);
+                        if (reply.Status != IPStatus.TimedOut)
+                        {
+                            Shadowsocks.Controller.Logging.Info($"Find {iPAddress} for {hostname}");
+                            ips.Add(iPAddress); 
+                        }
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Shadowsocks.Controller.Logging.Error($"Resolve domain {hostname} failed");
+            }          
+        }
+    }
     public static class SocketUtil
     {
+        private static Dictionary<string, HostInfo> dpPairs=new Dictionary<string, HostInfo>();
+        public static void RefreshHostDNS(string host)
+        {
+            if (dpPairs.ContainsKey(host))
+            {
+                dpPairs[host].Refresh = true;
+            }
+        }
         private class DnsEndPoint2 : DnsEndPoint
         {
             public DnsEndPoint2(string host, int port) : base(host, port)
@@ -22,7 +139,33 @@ namespace Shadowsocks.Util.Sockets
             }
         }
 
-        public static EndPoint GetEndPoint(string host, int port)
+       public static IPAddress GetIPAddress(string host)
+        {
+            try
+            {
+                IPAddress ipAddr;
+                bool parsed = IPAddress.TryParse(host, out ipAddr);
+                if(parsed)
+                {
+                    return ipAddr;
+                }
+                if(dpPairs.ContainsKey(host))
+                {
+                    if(dpPairs[host].IPAvailable)
+                    {
+                        return dpPairs[host].LastIP;
+                    }
+                }
+                return null;
+            }
+            catch(Exception e)
+            {
+                Shadowsocks.Controller.Logging.Error($"Get last ip address from {host} failed");
+                return null;
+            }       
+        }
+
+        public static EndPoint GetServerEndPoint(string host, int port)
         {
             IPAddress ipAddress;
             bool parsed = IPAddress.TryParse(host, out ipAddress);
@@ -30,7 +173,34 @@ namespace Shadowsocks.Util.Sockets
             {
                 return new IPEndPoint(ipAddress, port);
             }
+            // maybe is a domain name
+            lock (dpPairs)
+            {
+                if (dpPairs.ContainsKey(host))
+                {
+                    if (dpPairs[host].IPAvailable)
+                        return new IPEndPoint(dpPairs[host].IP, port);
+                }
+                else
+                {
+                    HostInfo hostInfo = new HostInfo(host);
+                    dpPairs.Add(host, hostInfo);
+                    if (dpPairs[host].IPAvailable)
+                        return new IPEndPoint(dpPairs[host].IP, port);
+                }
+            }
+            // maybe is a domain name
+            return new DnsEndPoint2(host, port);
+        }
 
+        public static EndPoint GetEndPoint(string host, int port)
+        {
+            IPAddress ipAddress;
+            bool parsed = IPAddress.TryParse(host, out ipAddress);
+            if (parsed)
+            {
+                return new IPEndPoint(ipAddress, port);
+            }     
             // maybe is a domain name
             return new DnsEndPoint2(host, port);
         }

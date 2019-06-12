@@ -79,6 +79,19 @@ namespace Shadowsocks.Model
             timeout = DefaultServerTimeoutSec;
         }
 
+        public Server(Server server)
+        {
+            this.server = server.server;
+            this.server_port = server.server_port;
+            this.method = server.method;
+            this.plugin = server.plugin;
+            this.plugin_opts = server.plugin_opts;
+            this.plugin_args = server.plugin_args;
+            this.password = server.password;
+            this.remarks = server.remarks;
+            this.timeout = server.timeout;
+        }
+
         private static Server ParseLegacyURL(string ssURL)
         {
             var match = UrlFinder.Match(ssURL);

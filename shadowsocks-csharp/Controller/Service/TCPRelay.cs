@@ -566,12 +566,23 @@ namespace Shadowsocks.Controller
             try
             {
                 CreateRemote();
-
+                Server server=new Server(_server);
                 // Setting up proxy
                 IProxy remote;
                 EndPoint proxyEP = null;
-                EndPoint serverEP = SocketUtil.GetEndPoint(_server.server, _server.server_port);
-                EndPoint pluginEP = _controller.GetPluginLocalEndPointIfConfigured(_server);
+                EndPoint serverEP = SocketUtil.GetServerEndPoint(_server.server, _server.server_port);              
+                IPAddress ip= SocketUtil.GetIPAddress(_server.server);
+                if ( ip== null)
+                {
+                    Logging.Error($"Connect to ss server {_server.server}:{_server.server_port} time out");
+                    SocketUtil.RefreshHostDNS(_server.server);
+                    return;
+                }
+                else
+                {
+                    server.server = ip.ToString();
+                }
+                EndPoint pluginEP = _controller.GetPluginLocalEndPointIfConfigured(server);
 
                 if (pluginEP != null)
                 {
@@ -727,6 +738,7 @@ namespace Shadowsocks.Controller
             IStrategy strategy = _controller.GetCurrentStrategy();
             strategy?.SetFailure(server);
             Logging.Info($"{server.FriendlyName()} timed out");
+            SocketUtil.RefreshHostDNS(server.server);
             session.Remote.Close();
             Close();
         }
