@@ -147,7 +147,14 @@ namespace Shadowsocks.Properties {
                 return ((byte[])(obj));
             }
         }
-        
+        internal static byte[] proxy_pac_ip_whitelist_txt {
+            get
+            {
+                object obj = ResourceManager.GetObject("proxy_pac_ip_whitelist_txt", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>

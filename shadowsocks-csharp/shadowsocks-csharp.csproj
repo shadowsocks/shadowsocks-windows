@@ -258,6 +258,7 @@
     <None Include="Data\libsscrypto.dll.gz" />
     <None Include="Data\privoxy.exe.gz" />
     <None Include="Data\proxy.pac.txt.gz" />
+    <None Include="Data\proxy.pac.ip.whitelist.txt.gz" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Data\sysproxy.exe.gz" />

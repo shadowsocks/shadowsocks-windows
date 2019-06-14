@@ -19,6 +19,7 @@ namespace Shadowsocks.Model
         public int index;
         public bool global;
         public bool enabled;
+        public bool skipZhIP;
         public bool shareOverLan;
         public bool isDefault;
         public int localPort;
@@ -87,6 +88,7 @@ namespace Shadowsocks.Model
                 {
                     index = 0,
                     isDefault = true,
+                    skipZhIP = false,
                     localPort = 1080,
                     autoCheckUpdate = true,
                     configs = new List<Server>()
@@ -95,7 +97,8 @@ namespace Shadowsocks.Model
                     },
                     logViewer = new LogViewerConfig(),
                     proxy = new ProxyConfig(),
-                    hotkey = new HotkeyConfig()
+                    hotkey = new HotkeyConfig(),
+                    isVerboseLogging = true
                 };
             }
         }

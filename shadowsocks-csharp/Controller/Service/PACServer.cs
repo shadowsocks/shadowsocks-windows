@@ -16,6 +16,7 @@ namespace Shadowsocks.Controller
     public class PACServer : Listener.Service
     {
         public const string PAC_FILE = "pac.txt";
+        public const string PAC_IP_WHITELIST_FILE = "pac-ip-whitelist.txt";
         public const string USER_RULE_FILE = "user-rule.txt";
         public const string USER_ABP_FILE = "abp.txt";
 
@@ -140,6 +141,18 @@ namespace Shadowsocks.Controller
                 return PAC_FILE;
             }
         }
+        public string TouchPACIpWhitelistFile()
+        {
+            if (File.Exists(PAC_IP_WHITELIST_FILE))
+            {
+                return PAC_IP_WHITELIST_FILE;
+            }
+            else
+            {
+                FileManager.UncompressFile(PAC_IP_WHITELIST_FILE, Resources.proxy_pac_ip_whitelist_txt);
+                return PAC_IP_WHITELIST_FILE;
+            }
+        }
 
         internal string TouchUserRuleFile()
         {
@@ -156,13 +169,27 @@ namespace Shadowsocks.Controller
 
         private string GetPACContent()
         {
-            if (File.Exists(PAC_FILE))
+            if (_config.skipZhIP)
             {
-                return File.ReadAllText(PAC_FILE, Encoding.UTF8);
+                if (File.Exists(PAC_IP_WHITELIST_FILE))
+                {
+                    return File.ReadAllText(PAC_IP_WHITELIST_FILE, Encoding.UTF8);
+                }
+                else
+                {
+                    return Utils.UnGzip(Resources.proxy_pac_ip_whitelist_txt);
+                }
             }
             else
             {
-                return Utils.UnGzip(Resources.proxy_pac_txt);
+                if (File.Exists(PAC_FILE))
+                {
+                    return File.ReadAllText(PAC_FILE, Encoding.UTF8);
+                }
+                else
+                {
+                    return Utils.UnGzip(Resources.proxy_pac_txt);
+                }
             }
         }
 

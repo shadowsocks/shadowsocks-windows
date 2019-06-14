@@ -8,6 +8,7 @@ System Proxy=系统代理
 Disable=禁用
 PAC=PAC 模式
 Global=全局模式
+Skip China IP=跳过大陆ip
 Servers=服务器
 Edit Servers...=编辑服务器...
 Statistics Config...=统计配置...

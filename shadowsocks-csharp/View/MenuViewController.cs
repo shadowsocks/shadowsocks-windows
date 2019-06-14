@@ -40,6 +40,7 @@ namespace Shadowsocks.View
         private MenuItem ServersItem;
         private MenuItem globalModeItem;
         private MenuItem PACModeItem;
+        private MenuItem SkipZhIPModeItem;
         private MenuItem localPACItem;
         private MenuItem onlinePACItem;
         private MenuItem editLocalPACItem;
@@ -71,7 +72,8 @@ namespace Shadowsocks.View
             controller.ShareOverLANStatusChanged += controller_ShareOverLANStatusChanged;
             controller.VerboseLoggingStatusChanged += controller_VerboseLoggingStatusChanged;
             controller.EnableGlobalChanged += controller_EnableGlobalChanged;
-            controller.Errored += controller_Errored;
+            controller.EnableSkipZhIPChanged += controller_EnableSkipZhIPChanged;
+            controller.Errored += controller_Errored; 
             controller.UpdatePACFromGFWListCompleted += controller_UpdatePACFromGFWListCompleted;
             controller.UpdatePACFromGFWListError += controller_UpdatePACFromGFWListError;
 
@@ -263,6 +265,7 @@ namespace Shadowsocks.View
                 CreateMenuGroup("System Proxy", new MenuItem[] {
                     this.disableItem = CreateMenuItem("Disable", new EventHandler(this.EnableItem_Click)),
                     this.PACModeItem = CreateMenuItem("PAC", new EventHandler(this.PACModeItem_Click)),
+                    this.SkipZhIPModeItem = CreateMenuItem("Skip Zh IP", new EventHandler(this.SkipZhIPModeItem_Click)),
                     this.globalModeItem = CreateMenuItem("Global", new EventHandler(this.GlobalModeItem_Click))
                 }),
                 this.ServersItem = CreateMenuGroup("Servers", new MenuItem[] {
@@ -336,6 +339,12 @@ namespace Shadowsocks.View
             PACModeItem.Checked = !globalModeItem.Checked;
         }
 
+        void controller_EnableSkipZhIPChanged(object sender, EventArgs e)
+        {
+            SkipZhIPModeItem.Checked = controller.GetConfigurationCopy().skipZhIP;
+            globalModeItem.Checked = !SkipZhIPModeItem.Checked;
+        }
+        
         void controller_FileReadyToOpen(object sender, ShadowsocksController.PathEventArgs e)
         {
             string argument = @"/select, " + e.Path;
@@ -607,22 +616,38 @@ namespace Shadowsocks.View
         private void UpdateSystemProxyItemsEnabledStatus(Configuration config)
         {
             disableItem.Checked = !config.enabled;
+            uncheckedAllProxyModeItem();
             if (!config.enabled)
             {
-                globalModeItem.Checked = false;
-                PACModeItem.Checked = false;
+                return;
+            }
+            
+            if (config.global)
+            {
+                globalModeItem.Checked = true;
+            }
+            else if (config.skipZhIP)
+            {
+                SkipZhIPModeItem.Checked = true;
             }
             else
             {
-                globalModeItem.Checked = config.global;
-                PACModeItem.Checked = !config.global;
+                PACModeItem.Checked = true;
             }
+        }
+
+        private void uncheckedAllProxyModeItem()
+        {
+            globalModeItem.Checked = false;
+            PACModeItem.Checked = false;
+            SkipZhIPModeItem.Checked = false;
         }
 
         private void GlobalModeItem_Click(object sender, EventArgs e)
         {
             controller.ToggleEnable(true);
             controller.ToggleGlobal(true);
+            controller.ToggleSkipZhIP(false);
             Configuration config = controller.GetConfigurationCopy();
             UpdateSystemProxyItemsEnabledStatus(config);
         }
@@ -631,6 +656,16 @@ namespace Shadowsocks.View
         {
             controller.ToggleEnable(true);
             controller.ToggleGlobal(false);
+            controller.ToggleSkipZhIP(false);
+            Configuration config = controller.GetConfigurationCopy();
+            UpdateSystemProxyItemsEnabledStatus(config);
+        }
+
+        private void SkipZhIPModeItem_Click(object sender, EventArgs e)
+        {
+            controller.ToggleEnable(true);
+            controller.ToggleGlobal(false);
+            controller.ToggleSkipZhIP(true);
             Configuration config = controller.GetConfigurationCopy();
             UpdateSystemProxyItemsEnabledStatus(config);
         }

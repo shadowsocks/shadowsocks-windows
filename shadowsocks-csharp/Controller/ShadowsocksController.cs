@@ -65,6 +65,7 @@ namespace Shadowsocks.Controller
         public event EventHandler ConfigChanged;
         public event EventHandler EnableStatusChanged;
         public event EventHandler EnableGlobalChanged;
+        public event EventHandler EnableSkipZhIPChanged;
         public event EventHandler ShareOverLANStatusChanged;
         public event EventHandler VerboseLoggingStatusChanged;
         public event EventHandler TrafficChanged;
@@ -235,6 +236,16 @@ namespace Shadowsocks.Controller
             }
         }
 
+        public void ToggleSkipZhIP(bool skipZhIP)
+        {
+            _config.skipZhIP = skipZhIP;
+            SaveConfig(_config);
+            if (EnableSkipZhIPChanged != null)
+            {
+                EnableSkipZhIPChanged(this, new EventArgs());
+            }
+        }
+
         public void ToggleShareOverLAN(bool enabled)
         {
             _config.shareOverLan = enabled;
@@ -309,6 +320,7 @@ namespace Shadowsocks.Controller
 
         public void TouchPACFile()
         {
+            _pacServer.TouchPACIpWhitelistFile();
             string pacFilename = _pacServer.TouchPACFile();
             if (PACFileReadyToOpen != null)
             {
