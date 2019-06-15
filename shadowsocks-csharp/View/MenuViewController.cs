@@ -59,7 +59,7 @@ namespace Shadowsocks.View
         private LogForm logForm;
         private HotkeySettingsForm hotkeySettingsForm;
         private string _urlToOpen;
-        private int windowsThemeMode;
+        private Utils.WindowsThemeMode currentWindowsThemeMode;
 
         public MenuViewController(ShadowsocksController controller)
         {
@@ -172,17 +172,11 @@ namespace Shadowsocks.View
             bool global = config.global;
 
             // set Windows 10 Theme color (1903+)
-            windowsThemeMode = getWindows10SystemThemeSetting();
+            currentWindowsThemeMode = Utils.GetWindows10SystemThemeSetting();
 
-            switch (windowsThemeMode)
-            {
-                case 1:
-                    if (!global || !enabled)
-                        icon_baseBitmap = getDarkTrayIcon(icon_baseBitmap);
-                    break;
-                default:
-                    break;
-            }
+            if (currentWindowsThemeMode == Utils.WindowsThemeMode.Light)
+                if (!global || !enabled)
+                    icon_baseBitmap = getDarkTrayIcon(icon_baseBitmap);
 
             icon_baseBitmap = getTrayIconByState(icon_baseBitmap, enabled, global);
 
@@ -227,14 +221,10 @@ namespace Shadowsocks.View
                     {
                         Color flyBlue = Color.FromArgb(192, 0, 0, 0);
                         // Multiply with flyBlue
-                        //int red = (255 - color.R) * flyBlue.R / 255;
-                        //int green = (255 - color.G) * flyBlue.G / 255;
-                        //int blue = (255 - color.B) * flyBlue.B / 255;
-                        //int alpha = color.A * flyBlue.A / 255;
                         int red = color.R * flyBlue.R / 255;
                         int green = color.G * flyBlue.G / 255;
                         int blue = color.B * flyBlue.B / 255;
-                        int alpha = color.A * flyBlue.A / 255;
+                        int alpha = color.A;
                         iconCopy.SetPixel(x, y, Color.FromArgb(alpha, red, green, blue));
                     }
                     else
@@ -258,8 +248,12 @@ namespace Shadowsocks.View
                     {
                         if (!enabled)
                         {
-                            Color flyBlue = Color.FromArgb(192, 192, 192, 192);
                             // Multiply with flyBlue
+                            Color flyBlue;
+                            if (currentWindowsThemeMode == Utils.WindowsThemeMode.Light)
+                                flyBlue = Color.FromArgb(128, 192, 192, 192); // Dark icon more transparent
+                            else
+                                flyBlue = Color.FromArgb(192, 192, 192, 192); // Light icon less transparent
                             int red = color.R * flyBlue.R / 255;
                             int green = color.G * flyBlue.G / 255;
                             int blue = color.B * flyBlue.B / 255;
@@ -283,32 +277,6 @@ namespace Shadowsocks.View
                 }
             }
             return iconCopy;
-        }
-
-        public int getWindows10SystemThemeSetting()
-        {
-            // Support on Windows 10 1903+
-            int registData = 0; // 0:dark mode, 1:light mode
-            try
-            {
-                RegistryKey reg_HKCU = Registry.CurrentUser;
-                RegistryKey reg_ThemesPersonalize = reg_HKCU.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize", false);
-                if (reg_ThemesPersonalize.GetValue("SystemUsesLightTheme") != null)
-                {
-                    registData = Convert.ToInt32(reg_ThemesPersonalize.GetValue("SystemUsesLightTheme").ToString());
-                    //Console.WriteLine(registData);
-                }
-                else
-                {
-                    throw new Exception("Reg-Value SystemUsesLightTheme not found.");
-                }
-            }
-            catch
-            {
-                Logging.Info(
-                        $"Cannot get Windows 10 system theme mode, return default value 0 (dark mode).");
-            }
-            return registData;
         }
 
         private Bitmap AddBitmapOverlay(Bitmap original, params Bitmap[] overlays)

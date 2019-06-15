@@ -55,6 +55,37 @@ namespace Shadowsocks.Util
             return _tempPath;
         }
 
+        public enum WindowsThemeMode { Dark, Light }
+
+        // Support on Windows 10 1903+
+        public static WindowsThemeMode GetWindows10SystemThemeSetting()
+        {
+            WindowsThemeMode registData = WindowsThemeMode.Dark;
+            try
+            {
+                RegistryKey reg_HKCU = Registry.CurrentUser;
+                RegistryKey reg_ThemesPersonalize = reg_HKCU.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize", false);
+                if (reg_ThemesPersonalize.GetValue("SystemUsesLightTheme") != null)
+                {
+                    if (Convert.ToInt32(reg_ThemesPersonalize.GetValue("SystemUsesLightTheme").ToString()) == 0) // 0:dark mode, 1:light mode
+                        registData = WindowsThemeMode.Dark;
+                    else
+                        registData = WindowsThemeMode.Light;
+                    //Console.WriteLine(registData);
+                }
+                else
+                {
+                    throw new Exception("Reg-Value SystemUsesLightTheme not found.");
+                }
+            }
+            catch
+            {
+                Logging.Info(
+                        $"Cannot get Windows 10 system theme mode, return default value 0 (dark mode).");
+            }
+            return registData;
+        }
+
         // return a full path with filename combined which pointed to the temporary directory
         public static string GetTempPath(string filename)
         {
