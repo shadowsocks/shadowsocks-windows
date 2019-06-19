@@ -49,10 +49,14 @@ namespace Shadowsocks.Controller
                     KillProcess(p);
                 }
                 string privoxyConfig = Resources.privoxy_conf;
-                _runningPort = GetFreePort();
+                _runningPort = GetFreePort(configuration.isIPv6Enabled);
                 privoxyConfig = privoxyConfig.Replace("__SOCKS_PORT__", configuration.localPort.ToString());
                 privoxyConfig = privoxyConfig.Replace("__PRIVOXY_BIND_PORT__", _runningPort.ToString());
-                privoxyConfig = privoxyConfig.Replace("__PRIVOXY_BIND_IP__", configuration.shareOverLan ? "0.0.0.0" : "127.0.0.1");
+                privoxyConfig = configuration.isIPv6Enabled
+                    ? privoxyConfig.Replace("__PRIVOXY_BIND_IP__", configuration.shareOverLan ? "[::]" : "[::1]")
+                    .Replace("__SOCKS_HOST__", "[::1]")
+                    : privoxyConfig.Replace("__PRIVOXY_BIND_IP__", configuration.shareOverLan ? "0.0.0.0" : "127.0.0.1")
+                    .Replace("__SOCKS_HOST__", "127.0.0.1");
                 FileManager.ByteArrayToFile(Utils.GetTempPath(_uniqueConfigFile), Encoding.UTF8.GetBytes(privoxyConfig));
 
                 _process = new Process
@@ -140,13 +144,13 @@ namespace Shadowsocks.Controller
             }
         }
 
-        private int GetFreePort()
+        private int GetFreePort(bool isIPv6 = false)
         {
             int defaultPort = 8123;
             try
             {
                 // TCP stack please do me a favor
-                TcpListener l = new TcpListener(IPAddress.Loopback, 0);
+                TcpListener l = new TcpListener(isIPv6 ? IPAddress.IPv6Loopback : IPAddress.Loopback, 0);
                 l.Start();
                 var port = ((IPEndPoint)l.LocalEndpoint).Port;
                 l.Stop();
