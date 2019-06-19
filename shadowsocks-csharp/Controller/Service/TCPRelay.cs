@@ -580,8 +580,13 @@ namespace Shadowsocks.Controller
                 }
                 else
                 {
+                    if (_config.isVerboseLogging)
+                    {
+                        Logging.Info($"Prepare to connect to ss server {ip}:{_server.server_port}");
+                    }
                     server.server = ip.ToString();
                 }
+                               
                 EndPoint pluginEP = _controller.GetPluginLocalEndPointIfConfigured(server);
 
                 if (pluginEP != null)

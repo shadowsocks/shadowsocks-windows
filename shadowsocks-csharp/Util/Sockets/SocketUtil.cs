@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
@@ -14,6 +15,7 @@ namespace Shadowsocks.Util.Sockets
         private string hostname;
         private List<IPAddress> ips;
         private Timer timer;
+        private DateTime dateTime;
 
         public IPAddress IP
         {
@@ -57,11 +59,15 @@ namespace Shadowsocks.Util.Sockets
             if (ips.Count > 1)
             {
                 lastIP = ips[ipIndex];
-                ipIndex++;
-                if (ipIndex >= ips.Count)
+                if (System.Math.Abs( DateTime.Now.Second - dateTime.Second) > 6)
                 {
-                    ipIndex = 0;
+                    ipIndex++;
+                    if (ipIndex >= ips.Count)
+                    {
+                        ipIndex = 0;
+                    }
                 }
+                dateTime = DateTime.Now;
                 return ips[ipIndex];
             }
             return null;
@@ -75,6 +81,7 @@ namespace Shadowsocks.Util.Sockets
             timer.AutoReset = true;
             timer.Interval = 900000; //refresh ips,every 15 minutes
             timer.Elapsed += Timer_Elapsed;
+            dateTime = new DateTime();
             DomainResolve();
             timer.Start();
         }
