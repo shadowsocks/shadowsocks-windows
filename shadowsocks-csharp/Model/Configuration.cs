@@ -36,8 +36,8 @@ namespace Shadowsocks.Model
         public HotkeyConfig hotkey;
 
         private static string CONFIG_FILE = "gui-config.json";
-
-        public string LocalHost => GetLocalHost();
+        [JsonIgnore]
+        public string localHost => GetLocalHost();
         private string GetLocalHost() {
             return isIPv6Enabled ? "[::1]" : "127.0.0.1";
         }

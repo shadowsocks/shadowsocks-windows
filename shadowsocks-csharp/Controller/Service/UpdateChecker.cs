@@ -170,7 +170,7 @@ namespace Shadowsocks.Controller
         {
             WebClient http = new WebClient();
             http.Headers.Add("User-Agent", UserAgent);
-            http.Proxy = new WebProxy(config.LocalHost, config.localPort);
+            http.Proxy = new WebProxy(config.localHost, config.localPort);
             return http;
         }
 

@@ -51,7 +51,7 @@ namespace Shadowsocks.Controller
                 PacSecret = "";
             }
 
-            PacUrl = $"http://{config.LocalHost}:{config.localPort}/pac?t={GetTimestamp(DateTime.Now)}{PacSecret}";
+            PacUrl = $"http://{config.localHost}:{config.localPort}/pac?t={GetTimestamp(DateTime.Now)}{PacSecret}";
         }
 
 
