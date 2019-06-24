@@ -12,7 +12,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Shadowsocks</RootNamespace>
     <AssemblyName>Shadowsocks</AssemblyName>
-    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <StartupObject>
     </StartupObject>
@@ -94,10 +94,10 @@
     <Reference Include="System.XML" />
     <Reference Include="WindowsBase" />
     <Reference Include="zxing, Version=0.16.4.0, Culture=neutral, PublicKeyToken=4e88037ac681fe60, processorArchitecture=MSIL">
-      <HintPath>3rd\ZXing.Net.0.16.4\lib\net461\zxing.dll</HintPath>
+      <HintPath>3rd\ZXing.Net.0.16.4\lib\net47\zxing.dll</HintPath>
     </Reference>
     <Reference Include="zxing.presentation, Version=0.16.4.0, Culture=neutral, PublicKeyToken=4e88037ac681fe60, processorArchitecture=MSIL">
-      <HintPath>3rd\ZXing.Net.0.16.4\lib\net461\zxing.presentation.dll</HintPath>
+      <HintPath>3rd\ZXing.Net.0.16.4\lib\net47\zxing.presentation.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>

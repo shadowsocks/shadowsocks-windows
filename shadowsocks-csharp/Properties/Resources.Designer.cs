@@ -19,7 +19,7 @@ namespace Shadowsocks.Properties {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "15.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "16.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     internal class Resources {
@@ -79,7 +79,6 @@ namespace Shadowsocks.Properties {
         ///
         ///System Proxy=システムプロキシ
         ///Disable=無効
-        ///Mode=モード
         ///PAC=PAC
         ///Global=全般
         ///Servers=サーバー
@@ -93,7 +92,7 @@ namespace Shadowsocks.Properties {
         ///Edit Local PAC File...=ローカル PAC ファイルの編集...
         ///Update Local PAC from GFWList=GFWList からローカル PAC を更新
         ///Edit User Rule for GFWList...=ユーザールールの編集...
-        ///Secur [rest of string was truncated]&quot;;.
+        ///Secure Local PA [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string ja {
             get {
@@ -248,7 +247,6 @@ namespace Shadowsocks.Properties {
         ///
         ///System Proxy=系统代理
         ///Disable=禁用
-        ///Mode=系统代理模式
         ///PAC=PAC 模式
         ///Global=全局模式
         ///Servers=服务器
@@ -262,7 +260,8 @@ namespace Shadowsocks.Properties {
         ///Edit Local PAC File...=编辑本地 PAC 文件...
         ///Update Local PAC from GFWList=从 GFWList 更新本地 PAC
         ///Edit User Rule for GFWList...=编辑 GFWList 的用户规则...
-        ///Secure Local PAC=保护本地 [rest of string was truncated]&quot;;.
+        ///Secure Local PAC=保护本地 PAC
+        ///Copy Lo [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string zh_CN {
             get {
@@ -279,7 +278,6 @@ namespace Shadowsocks.Properties {
         ///
         ///System Proxy=系統代理
         ///Disable=禁用
-        ///Mode=系統代理模式
         ///PAC=PAC 模式
         ///Global=全局模式
         ///Servers=伺服器
@@ -293,7 +291,7 @@ namespace Shadowsocks.Properties {
         ///Edit Local PAC File...=編輯本機 PAC 檔案...
         ///Update Local PAC from GFWList=從 GFWList 更新本機 PAC
         ///Edit User Rule for GFWList...=編輯 GFWList 的使用者規則...
-        ///Secure Local  [rest of string was truncated]&quot;;.
+        ///Secure Local PAC=安全本機 PAC        /// [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string zh_TW {
             get {
