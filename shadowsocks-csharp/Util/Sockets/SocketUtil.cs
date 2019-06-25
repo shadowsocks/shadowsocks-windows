@@ -4,8 +4,7 @@ using System.Diagnostics;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
-using System.Timers;
-
+using System.Threading;
 namespace Shadowsocks.Util.Sockets
 {
     public class HostInfo
@@ -14,14 +13,13 @@ namespace Shadowsocks.Util.Sockets
         public string HostName { get { return hostname; } }
         private string hostname;
         private List<IPAddress> ips;
-        private Timer timer;
+        private System.Timers.Timer timer;
         private DateTime dateTime;
-
         public IPAddress IP
         {
             get
             {
-                return GetNextIP();
+                return GetNextIP();          
             }
         }
         public IPAddress LastIP { get { return lastIP; } }
@@ -59,7 +57,7 @@ namespace Shadowsocks.Util.Sockets
             if (ips.Count > 1)
             {
                 lastIP = ips[ipIndex];
-                if (System.Math.Abs( DateTime.Now.Second - dateTime.Second) > 6)
+                if (System.Math.Abs( DateTime.Now.Second - dateTime.Second) > 20)
                 {
                     ipIndex++;
                     if (ipIndex >= ips.Count)
@@ -75,7 +73,7 @@ namespace Shadowsocks.Util.Sockets
 
         public HostInfo(string host)
         {          
-            timer = new Timer();
+            timer = new System.Timers.Timer();
             ips = new List<IPAddress>();
             hostname = host;
             timer.AutoReset = true;
@@ -86,7 +84,7 @@ namespace Shadowsocks.Util.Sockets
             timer.Start();
         }
 
-        private void Timer_Elapsed(object sender, ElapsedEventArgs e)
+        private void Timer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
             timer.Stop();
             DomainResolve();
@@ -114,7 +112,7 @@ namespace Shadowsocks.Util.Sockets
                     }
                 }
             }
-            catch (Exception e)
+            catch
             {
                 Shadowsocks.Controller.Logging.Error($"Resolve domain {hostname} failed");
             }          
@@ -165,7 +163,7 @@ namespace Shadowsocks.Util.Sockets
                 }
                 return null;
             }
-            catch(Exception e)
+            catch
             {
                 Shadowsocks.Controller.Logging.Error($"Get last ip address from {host} failed");
                 return null;
