@@ -122,7 +122,6 @@ Port {0} is reserved by system= ポート番号 {0} はシステムによって�
 Invalid server address=サーバーアドレスが無効です。
 Illegal port number format=ポート番号のフォーマットが無効です。
 Illegal timeout format=タイムアウト値のフォーマットが無効です。
-Please add at least one server=少なくとも一つのサーバーを指定して下さい。
 Server IP can not be blank=サーバー IP が指定されていません。
 Password can not be blank=パスワードが指定されていません。
 Port out of range=ポート番号は範囲外です。

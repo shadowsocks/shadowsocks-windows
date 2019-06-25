@@ -438,11 +438,14 @@ namespace Shadowsocks.View
             Configuration configuration = controller.GetConfigurationCopy();
             foreach (var server in configuration.configs)
             {
-                MenuItem item = new MenuItem(server.FriendlyName());
-                item.Tag = i - strategyCount;
-                item.Click += AServerItem_Click;
-                items.Add(i, item);
-                i++;
+                if (Configuration.ChecksServer(server))
+                {
+                    MenuItem item = new MenuItem(server.FriendlyName());
+                    item.Tag = i - strategyCount;
+                    item.Click += AServerItem_Click;
+                    items.Add(i, item);
+                    i++;
+                }
             }
 
             foreach (MenuItem item in items)

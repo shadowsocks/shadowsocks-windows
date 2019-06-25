@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-
-using Shadowsocks.Controller;
 using Newtonsoft.Json;
+using Shadowsocks.Controller;
 
 namespace Shadowsocks.Model
 {
@@ -34,7 +33,7 @@ namespace Shadowsocks.Model
         public ProxyConfig proxy;
         public HotkeyConfig hotkey;
 
-        private static string CONFIG_FILE = "gui-config.json";
+        private static readonly string CONFIG_FILE = "gui-config.json";
 
         public Server GetCurrentServer()
         {
@@ -46,10 +45,23 @@ namespace Shadowsocks.Model
 
         public static void CheckServer(Server server)
         {
+            CheckServer(server.server);
             CheckPort(server.server_port);
             CheckPassword(server.password);
-            CheckServer(server.server);
             CheckTimeout(server.timeout, Server.MaxServerTimeoutSec);
+        }
+
+        public static bool ChecksServer(Server server)
+        {
+            try
+            {
+                CheckServer(server);
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
         }
 
         public static Configuration Load()
@@ -125,12 +137,18 @@ namespace Shadowsocks.Model
             }
         }
 
-        public static Server AddDefaultServerOrServer(Configuration config, Server server = null)
+        public static Server AddDefaultServerOrServer(Configuration config, Server server = null, int? index = null)
         {
             if (config != null && config.configs != null)
             {
                 server = (server ?? GetDefaultServer());
-                config.configs.Add(server);
+
+                config.configs.Insert(index.GetValueOrDefault(config.configs.Count), server);
+
+                //if (index.HasValue)
+                //    config.configs.Insert(index.Value, server);
+                //else
+                //    config.configs.Add(server);
             }
             return server;
         }
@@ -174,8 +192,7 @@ namespace Shadowsocks.Model
         public static void CheckTimeout(int timeout, int maxTimeout)
         {
             if (timeout <= 0 || timeout > maxTimeout)
-                throw new ArgumentException(
-                    I18N.GetString("Timeout is invalid, it should not exceed {0}", maxTimeout));
+                throw new ArgumentException(I18N.GetString("Timeout is invalid, it should not exceed {0}", maxTimeout));
         }
 
         public static void CheckProxyAuthUser(string user)
