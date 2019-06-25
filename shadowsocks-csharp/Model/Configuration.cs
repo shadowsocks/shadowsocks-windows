@@ -125,6 +125,16 @@ namespace Shadowsocks.Model
             }
         }
 
+        public static Server AddDefaultServerOrServer(Configuration config, Server server = null)
+        {
+            if (config != null && config.configs != null)
+            {
+                server = (server ?? GetDefaultServer());
+                config.configs.Add(server);
+            }
+            return server;
+        }
+
         public static Server GetDefaultServer()
         {
             return new Server();
