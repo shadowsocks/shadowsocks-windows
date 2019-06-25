@@ -123,7 +123,6 @@ Port {0} is reserved by system=端口 {0} 是系统保留端口
 Invalid server address=非法服务器地址
 Illegal port number format=非法端口格式
 Illegal timeout format=非法超时格式
-Please add at least one server=请添加至少一个服务器
 Server IP can not be blank=服务器 IP 不能为空
 Password can not be blank=密码不能为空
 Port out of range=端口超出范围
@@ -154,6 +153,14 @@ Proxy handshake failed=代理握手失败
 Register hotkey failed=注册快捷键失败
 Cannot parse hotkey: {0}=解析快捷键失败: {0}
 Timeout is invalid, it should not exceed {0}=超时无效，不应超过 {0}
+
+Operation failure=操作失败
+Auto save failed=自动保存失败
+Whether to discard unconfigured servers=是否丢弃未配置的服务器
+Invalid server address, Cannot automatically save or discard changes=非法服务器地址，无法自动保存是否丢弃修改
+Illegal port number format, Cannot automatically save or discard changes=非法端口格式，无法自动保存是否丢弃修改
+Password can not be blank, Cannot automatically save or discard changes=密码不能为空，无法自动保存是否丢弃修改
+Illegal timeout format, Cannot automatically save or discard changes=非法超时格式，无法自动保存是否丢弃修改
 
 Error occured when process proxy setting, do you want reset current setting and retry?=处理代理设置时发生错误，是否重置当前代理设置并重试？
 Unrecoverable proxy setting error occured, see log for detail=发生不可恢复的代理设置错误，查看日志以取得详情
