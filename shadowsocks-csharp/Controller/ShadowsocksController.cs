@@ -531,7 +531,7 @@ namespace Shadowsocks.Controller
                     strategy.ReloadServers();
                 }
 
-                StartPlugin();
+                //StartPlugin();
                 privoxyRunner.Start(_config);
 
                 TCPRelay tcpRelay = new TCPRelay(this, _config);

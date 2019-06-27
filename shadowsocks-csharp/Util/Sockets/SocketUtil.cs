@@ -19,11 +19,9 @@ namespace Shadowsocks.Util.Sockets
         {
             get
             {
-                return GetNextIP();          
+                return GetIP(20);          
             }
         }
-        public IPAddress LastIP { get { return lastIP; } }
-        private IPAddress lastIP;
         public bool IPAvailable
         {
             get
@@ -47,25 +45,23 @@ namespace Shadowsocks.Util.Sockets
         }
 
 
-        private IPAddress GetNextIP()
+        private IPAddress GetIP(int sec)
         {
             if (ips.Count == 1)
             {
-                lastIP = ips[0];
                 return ips[0];
             }
             if (ips.Count > 1)
             {
-                lastIP = ips[ipIndex];
-                if (System.Math.Abs( DateTime.Now.Second - dateTime.Second) > 20)
+                if (ipIndex >= ips.Count)
                 {
-                    ipIndex++;
-                    if (ipIndex >= ips.Count)
-                    {
-                        ipIndex = 0;
-                    }
+                    ipIndex = 0;
                 }
-                dateTime = DateTime.Now;
+                if (System.Math.Abs( DateTime.Now.Second - dateTime.Second) > sec)
+                {      
+                    dateTime = DateTime.Now;
+                    return ips[ipIndex++];
+                }         
                 return ips[ipIndex];
             }
             return null;
@@ -79,7 +75,7 @@ namespace Shadowsocks.Util.Sockets
             timer.AutoReset = true;
             timer.Interval = 900000; //refresh ips,every 15 minutes
             timer.Elapsed += Timer_Elapsed;
-            dateTime = new DateTime();
+            dateTime = DateTime.Now;
             DomainResolve();
             timer.Start();
         }
@@ -90,7 +86,19 @@ namespace Shadowsocks.Util.Sockets
             DomainResolve();
             timer.Start();
         }
-
+        public void DeleteLastIP()
+        {
+            if (ips.Count > 1)
+            {
+                ips.RemoveAt(ipIndex);
+                ipIndex++;
+                if (ipIndex >= ips.Count)
+                {
+                    ipIndex = 0;
+                }
+                dateTime = DateTime.Now;
+            }
+        }
         private void DomainResolve()
         {
             try
@@ -103,7 +111,7 @@ namespace Shadowsocks.Util.Sockets
                 {
                     foreach (IPAddress iPAddress in ip.AddressList)
                     {
-                        PingReply reply = ping.Send(iPAddress, 6000);
+                        PingReply reply = ping.Send(iPAddress, 2000);
                         if (reply.Status != IPStatus.TimedOut)
                         {
                             Shadowsocks.Controller.Logging.Info($"Find {iPAddress} for {hostname}");
@@ -128,6 +136,15 @@ namespace Shadowsocks.Util.Sockets
                 dpPairs[host].Refresh = true;
             }
         }
+
+        public static void DeleteLastIP(string host)
+        {
+            if (dpPairs.ContainsKey(host))
+            {
+                dpPairs[host].DeleteLastIP();
+            }
+        }
+
         private class DnsEndPoint2 : DnsEndPoint
         {
             public DnsEndPoint2(string host, int port) : base(host, port)
@@ -142,32 +159,6 @@ namespace Shadowsocks.Util.Sockets
             {
                 return this.Host + ":" + this.Port;
             }
-        }
-
-       public static IPAddress GetIPAddress(string host)
-        {
-            try
-            {
-                IPAddress ipAddr;
-                bool parsed = IPAddress.TryParse(host, out ipAddr);
-                if(parsed)
-                {
-                    return ipAddr;
-                }
-                if(dpPairs.ContainsKey(host))
-                {
-                    if(dpPairs[host].IPAvailable)
-                    {
-                        return dpPairs[host].LastIP;
-                    }
-                }
-                return null;
-            }
-            catch
-            {
-                Shadowsocks.Controller.Logging.Error($"Get last ip address from {host} failed");
-                return null;
-            }       
         }
 
         public static EndPoint GetServerEndPoint(string host, int port)
