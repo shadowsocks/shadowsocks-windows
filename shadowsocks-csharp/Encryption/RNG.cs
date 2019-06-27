@@ -3,6 +3,7 @@ using System.Security.Cryptography;
 
 namespace Shadowsocks.Encryption
 {
+    //TODO: This class needs to be modified for multithreading.
     public static class RNG
     {
         private static RNGCryptoServiceProvider _rng = null;
@@ -16,7 +17,7 @@ namespace Shadowsocks.Encryption
         public static void Close()
         {
             if (_rng == null) return;
-            _rng.Dispose();
+            _rng?.Dispose();
             _rng = null;
         }
 
