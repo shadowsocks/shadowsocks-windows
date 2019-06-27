@@ -19,14 +19,14 @@ namespace Shadowsocks.Util.Sockets
         {
             get
             {
-                return GetIP(20);          
+                return GetIP(20);
             }
         }
         public bool IPAvailable
         {
             get
             {
-                if(ips.Count>0)
+                if (ips.Count > 0)
                 {
                     return true;
                 }
@@ -37,7 +37,7 @@ namespace Shadowsocks.Util.Sockets
         {
             set
             {
-                if(value==true)
+                if (value == true)
                 {
                     DomainResolve();
                 }
@@ -57,18 +57,18 @@ namespace Shadowsocks.Util.Sockets
                 {
                     ipIndex = 0;
                 }
-                if (System.Math.Abs( DateTime.Now.Second - dateTime.Second) > sec)
-                {      
+                if (System.Math.Abs(DateTime.Now.Second - dateTime.Second) > sec)
+                {
                     dateTime = DateTime.Now;
                     return ips[ipIndex++];
-                }         
+                }
                 return ips[ipIndex];
             }
             return null;
         }
 
         public HostInfo(string host)
-        {          
+        {
             timer = new System.Timers.Timer();
             ips = new List<IPAddress>();
             hostname = host;
@@ -102,7 +102,7 @@ namespace Shadowsocks.Util.Sockets
         private void DomainResolve()
         {
             try
-            {             
+            {
                 ips = new List<IPAddress>();
                 Shadowsocks.Controller.Logging.Info($"Resolve domain name: {hostname}");
                 IPHostEntry ip = Dns.GetHostEntry(hostname);
@@ -115,7 +115,7 @@ namespace Shadowsocks.Util.Sockets
                         if (reply.Status != IPStatus.TimedOut)
                         {
                             Shadowsocks.Controller.Logging.Info($"Find {iPAddress} for {hostname}");
-                            ips.Add(iPAddress); 
+                            ips.Add(iPAddress);
                         }
                     }
                 }
@@ -123,12 +123,12 @@ namespace Shadowsocks.Util.Sockets
             catch
             {
                 Shadowsocks.Controller.Logging.Error($"Resolve domain {hostname} failed");
-            }          
+            }
         }
     }
     public static class SocketUtil
     {
-        private static Dictionary<string, HostInfo> dpPairs=new Dictionary<string, HostInfo>();
+        private static Dictionary<string, HostInfo> dpPairs = new Dictionary<string, HostInfo>();
         public static void RefreshHostDNS(string host)
         {
             if (dpPairs.ContainsKey(host))
@@ -196,7 +196,7 @@ namespace Shadowsocks.Util.Sockets
             if (parsed)
             {
                 return new IPEndPoint(ipAddress, port);
-            }     
+            }
             // maybe is a domain name
             return new DnsEndPoint2(host, port);
         }
@@ -226,6 +226,6 @@ namespace Shadowsocks.Util.Sockets
             {
             }
         }
-        
+
     }
 }
