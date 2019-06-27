@@ -86,7 +86,6 @@ namespace Shadowsocks.View
             _notifyIcon.MouseClick += notifyIcon1_Click;
             _notifyIcon.MouseDoubleClick += notifyIcon1_DoubleClick;
             _notifyIcon.BalloonTipClosed += _notifyIcon_BalloonTipClosed;
-            _notifyIcon.MouseMove += _notifyIcon_MouseMove;
             controller.TrafficChanged += controller_TrafficChanged;
 
             this.updateChecker = new UpdateChecker();
@@ -106,11 +105,6 @@ namespace Shadowsocks.View
                 _isStartupChecking = true;
                 updateChecker.CheckUpdate(config, 3000);
             }
-        }
-
-        private void _notifyIcon_MouseMove(object sender, MouseEventArgs e)
-        {
-            UpdateTrayIcon();
         }
 
         private void controller_TrafficChanged(object sender, EventArgs e)
@@ -632,6 +626,7 @@ namespace Shadowsocks.View
 
         private void notifyIcon1_Click(object sender, MouseEventArgs e)
         {
+            UpdateTrayIcon();
             if (e.Button == MouseButtons.Middle)
             {
                 ShowLogForm();
