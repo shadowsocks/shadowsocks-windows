@@ -20,6 +20,7 @@ namespace Shadowsocks.Model
         public bool enabled;
         public bool shareOverLan;
         public bool isDefault;
+        public bool isIPv6Enabled = false;
         public int localPort;
         public bool portableMode = true;
         public string pacUrl;
@@ -34,7 +35,11 @@ namespace Shadowsocks.Model
         public HotkeyConfig hotkey;
 
         private static readonly string CONFIG_FILE = "gui-config.json";
-
+        [JsonIgnore]
+        public string localHost => GetLocalHost();
+        private string GetLocalHost() {
+            return isIPv6Enabled ? "[::1]" : "127.0.0.1";
+        }
         public Server GetCurrentServer()
         {
             if (index >= 0 && index < configs.Count)
@@ -86,6 +91,10 @@ namespace Shadowsocks.Model
                     config.proxy = new ProxyConfig();
                 if (config.hotkey == null)
                     config.hotkey = new HotkeyConfig();
+                if (!System.Net.Sockets.Socket.OSSupportsIPv6) {
+                    config.isIPv6Enabled = false; // disable IPv6 if os not support
+                }
+                //TODO if remote host(server) do not support IPv6 (or DNS resolve AAAA TYPE record) disable IPv6?
 
                 config.proxy.CheckConfig();
 
@@ -192,7 +201,8 @@ namespace Shadowsocks.Model
         public static void CheckTimeout(int timeout, int maxTimeout)
         {
             if (timeout <= 0 || timeout > maxTimeout)
-                throw new ArgumentException(I18N.GetString("Timeout is invalid, it should not exceed {0}", maxTimeout));
+                throw new ArgumentException(
+                    I18N.GetString("Timeout is invalid, it should not exceed {0}", maxTimeout));
         }
 
         public static void CheckProxyAuthUser(string user)
