@@ -570,21 +570,21 @@ namespace Shadowsocks.Controller
                 // Setting up proxy
                 IProxy remote;
                 EndPoint proxyEP = null;
-                EndPoint serverEP = SocketUtil.GetServerEndPoint(_server.server, _server.server_port);              
-                IPAddress ip = ((IPEndPoint)serverEP).Address;
-                if ( ip == null)
+                EndPoint serverEP = SocketUtil.GetServerEndPoint(_server.server, _server.server_port);
+                try
                 {
-                    Logging.Error($"Connect to ss server {_server.server}:{_server.server_port} time out");
-                    SocketUtil.RefreshHostDNS(_server.server);
-                    return;
-                }
-                else
-                {
+                    IPAddress ip = ((IPEndPoint)serverEP).Address;
                     if (_config.isVerboseLogging)
                     {
                         Logging.Info($"Prepare to connect to ss server {ip}:{_server.server_port}");
                     }
                     server.server = ip.ToString();
+                }
+                catch
+                {
+                    Logging.Error($"Connect to ss server {_server.server}:{_server.server_port} time out");
+                    SocketUtil.RefreshHostDNS(_server.server);
+                    return;
                 }
                                
                 EndPoint pluginEP = _controller.GetPluginLocalEndPointIfConfigured(server);

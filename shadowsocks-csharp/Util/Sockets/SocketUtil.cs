@@ -19,7 +19,7 @@ namespace Shadowsocks.Util.Sockets
         {
             get
             {
-                return GetIP(20);
+                return GetIP(10);
             }
         }
         public bool IPAvailable
@@ -109,14 +109,22 @@ namespace Shadowsocks.Util.Sockets
                 Ping ping = new Ping();
                 if (ip != null)
                 {
-                    foreach (IPAddress iPAddress in ip.AddressList)
+                    //if the domain name contain only one ip, just add it.
+                    if (ip.AddressList.Length > 1)
                     {
-                        PingReply reply = ping.Send(iPAddress, 2000);
-                        if (reply.Status != IPStatus.TimedOut)
+                        foreach (IPAddress iPAddress in ip.AddressList)
                         {
-                            Shadowsocks.Controller.Logging.Info($"Find {iPAddress} for {hostname}");
-                            ips.Add(iPAddress);
+                            PingReply reply = ping.Send(iPAddress, 2000);
+                            if (reply.Status != IPStatus.TimedOut)
+                            {
+                                Shadowsocks.Controller.Logging.Info($"Find {iPAddress} for {hostname}");
+                                ips.Add(iPAddress);
+                            }
                         }
+                    }
+                    else
+                    {
+                        ips.Add(ip.AddressList[0]);
                     }
                 }
             }
