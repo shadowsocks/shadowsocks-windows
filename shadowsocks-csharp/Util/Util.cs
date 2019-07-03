@@ -38,7 +38,7 @@ namespace Shadowsocks.Util
                 {
                     if (isPortableMode)
                     {
-                        _tempPath = Directory.CreateDirectory(Path.Combine(Application.StartupPath, "ss_win_temp")).FullName;
+                        _tempPath = Directory.CreateDirectory("ss_win_temp").FullName;
                         // don't use "/", it will fail when we call explorer /select xxx/ss_win_temp\xxx.log
                     }
                     else
