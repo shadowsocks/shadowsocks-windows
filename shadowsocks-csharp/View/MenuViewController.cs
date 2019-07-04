@@ -13,6 +13,8 @@ using Shadowsocks.Model;
 using Shadowsocks.Properties;
 using Shadowsocks.Util;
 using System.Linq;
+using Microsoft.Win32;
+using System.Windows.Interop;
 
 namespace Shadowsocks.View
 {
@@ -57,6 +59,7 @@ namespace Shadowsocks.View
         private LogForm logForm;
         private HotkeySettingsForm hotkeySettingsForm;
         private string _urlToOpen;
+        private Utils.WindowsThemeMode currentWindowsThemeMode;
 
         public MenuViewController(ShadowsocksController controller)
         {
@@ -161,6 +164,14 @@ namespace Shadowsocks.View
             Configuration config = controller.GetConfigurationCopy();
             bool enabled = config.enabled;
             bool global = config.global;
+
+            // set Windows 10 Theme color (1903+)
+            currentWindowsThemeMode = Utils.GetWindows10SystemThemeSetting();
+
+            if (currentWindowsThemeMode == Utils.WindowsThemeMode.Light)
+                if (!global || !enabled)
+                    icon_baseBitmap = getDarkTrayIcon(icon_baseBitmap);
+
             icon_baseBitmap = getTrayIconByState(icon_baseBitmap, enabled, global);
 
             icon_base = Icon.FromHandle(icon_baseBitmap.GetHicon());
@@ -192,6 +203,33 @@ namespace Shadowsocks.View
             ViewUtils.SetNotifyIconText(_notifyIcon, text);
         }
 
+        private Bitmap getDarkTrayIcon(Bitmap originIcon)
+        {
+            Bitmap iconCopy = new Bitmap(originIcon);
+            for (int x = 0; x < iconCopy.Width; x++)
+            {
+                for (int y = 0; y < iconCopy.Height; y++)
+                {
+                    Color color = originIcon.GetPixel(x, y);
+                    if (color.A != 0)
+                    {
+                        Color flyBlue = Color.FromArgb(192, 0, 0, 0);
+                        // Multiply with flyBlue
+                        int red = color.R * flyBlue.R / 255;
+                        int green = color.G * flyBlue.G / 255;
+                        int blue = color.B * flyBlue.B / 255;
+                        int alpha = color.A;
+                        iconCopy.SetPixel(x, y, Color.FromArgb(alpha, red, green, blue));
+                    }
+                    else
+                    {
+                        iconCopy.SetPixel(x, y, Color.FromArgb(color.A, color.R, color.G, color.B));
+                    }
+                }
+            }
+            return iconCopy;
+        }
+
         private Bitmap getTrayIconByState(Bitmap originIcon, bool enabled, bool global)
         {
             Bitmap iconCopy = new Bitmap(originIcon);
@@ -204,12 +242,17 @@ namespace Shadowsocks.View
                     {
                         if (!enabled)
                         {
-                            Color flyBlue = Color.FromArgb(192, 192, 192);
                             // Multiply with flyBlue
+                            Color flyBlue;
+                            if (currentWindowsThemeMode == Utils.WindowsThemeMode.Light)
+                                flyBlue = Color.FromArgb(128, 192, 192, 192); // Dark icon more transparent
+                            else
+                                flyBlue = Color.FromArgb(192, 192, 192, 192); // Light icon less transparent
                             int red = color.R * flyBlue.R / 255;
                             int green = color.G * flyBlue.G / 255;
                             int blue = color.B * flyBlue.B / 255;
-                            iconCopy.SetPixel(x, y, Color.FromArgb(color.A, red, green, blue));
+                            int alpha = color.A * flyBlue.A / 255;
+                            iconCopy.SetPixel(x, y, Color.FromArgb(alpha, red, green, blue));
                         }
                         else if (global)
                         {
@@ -586,6 +629,7 @@ namespace Shadowsocks.View
 
         private void notifyIcon1_Click(object sender, MouseEventArgs e)
         {
+            UpdateTrayIcon();
             if (e.Button == MouseButtons.Middle)
             {
                 ShowLogForm();
