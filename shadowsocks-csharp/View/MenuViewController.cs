@@ -28,12 +28,13 @@ namespace Shadowsocks.View
         private UpdateChecker updateChecker;
 
         private NotifyIcon _notifyIcon;
-        private Bitmap icon_baseBitmap;
-        private Icon icon_base, icon_in, icon_out, icon_both, targetIcon;
-        private ContextMenu contextMenu1;
+        private Icon icon, icon_in, icon_out, icon_both, previousIcon;
 
         private bool _isFirstRun;
         private bool _isStartupChecking;
+        private string _urlToOpen;
+
+        private ContextMenu contextMenu1;
         private MenuItem disableItem;
         private MenuItem AutoStartupItem;
         private MenuItem ShareOverLANItem;
@@ -54,12 +55,19 @@ namespace Shadowsocks.View
         private MenuItem proxyItem;
         private MenuItem hotKeyItem;
         private MenuItem VerboseLoggingToggleItem;
+
         private ConfigForm configForm;
         private ProxyForm proxyForm;
         private LogForm logForm;
         private HotkeySettingsForm hotkeySettingsForm;
-        private string _urlToOpen;
-        private Utils.WindowsThemeMode currentWindowsThemeMode;
+
+
+
+        // color definition for icon color transformation
+        private readonly Color colorMaskBlue = Color.FromArgb(255, 25, 125, 191);
+        private readonly Color colorMaskDarkSilver = Color.FromArgb(128, 192, 192, 192);
+        private readonly Color colorMaskLightSilver = Color.FromArgb(192, 192, 192, 192);
+        private readonly Color colorMaskEclipse = Color.FromArgb(192, 64, 64, 64);
 
         public MenuViewController(ShadowsocksController controller)
         {
@@ -79,7 +87,7 @@ namespace Shadowsocks.View
             controller.UpdatePACFromGFWListError += controller_UpdatePACFromGFWListError;
 
             _notifyIcon = new NotifyIcon();
-            UpdateTrayIcon();
+            UpdateTrayIconAndNotifyText();
             _notifyIcon.Visible = true;
             _notifyIcon.ContextMenu = contextMenu1;
             _notifyIcon.BalloonTipClicked += notifyIcon1_BalloonTipClicked;
@@ -109,7 +117,7 @@ namespace Shadowsocks.View
 
         private void controller_TrafficChanged(object sender, EventArgs e)
         {
-            if (icon_baseBitmap == null)
+            if (icon == null)
                 return;
 
             Icon newIcon;
@@ -124,11 +132,11 @@ namespace Shadowsocks.View
             else if (hasOutbound)
                 newIcon = icon_out;
             else
-                newIcon = icon_base;
+                newIcon = icon;
 
-            if (newIcon != this.targetIcon)
+            if (newIcon != this.previousIcon)
             {
-                this.targetIcon = newIcon;
+                this.previousIcon = newIcon;
                 _notifyIcon.Icon = newIcon;
             }
         }
@@ -140,46 +148,19 @@ namespace Shadowsocks.View
 
         #region Tray Icon
 
-        private void UpdateTrayIcon()
+        private void UpdateTrayIconAndNotifyText()
         {
-            int dpi;
-            Graphics graphics = Graphics.FromHwnd(IntPtr.Zero);
-            dpi = (int)graphics.DpiX;
-            graphics.Dispose();
-            icon_baseBitmap = null;
-            if (dpi < 97)
-            {
-                // dpi = 96;
-                icon_baseBitmap = Resources.ss16;
-            }
-            else if (dpi < 121)
-            {
-                // dpi = 120;
-                icon_baseBitmap = Resources.ss20;
-            }
-            else
-            {
-                icon_baseBitmap = Resources.ss24;
-            }
             Configuration config = controller.GetConfigurationCopy();
             bool enabled = config.enabled;
             bool global = config.global;
 
-            // set Windows 10 Theme color (1903+)
-            currentWindowsThemeMode = Utils.GetWindows10SystemThemeSetting();
+            Color colorMask = SelectColorMask(enabled, global);
+            Size iconSize = SelectIconSize();
 
-            if (currentWindowsThemeMode == Utils.WindowsThemeMode.Light)
-                if (!global || !enabled)
-                    icon_baseBitmap = getDarkTrayIcon(icon_baseBitmap);
+            UpdateIconSet(colorMask, iconSize, out icon, out icon_in, out icon_out, out icon_both);
 
-            icon_baseBitmap = getTrayIconByState(icon_baseBitmap, enabled, global);
-
-            icon_base = Icon.FromHandle(icon_baseBitmap.GetHicon());
-            targetIcon = icon_base;
-            icon_in = Icon.FromHandle(AddBitmapOverlay(icon_baseBitmap, Resources.ssIn24).GetHicon());
-            icon_out = Icon.FromHandle(AddBitmapOverlay(icon_baseBitmap, Resources.ssOut24).GetHicon());
-            icon_both = Icon.FromHandle(AddBitmapOverlay(icon_baseBitmap, Resources.ssIn24, Resources.ssOut24).GetHicon());
-            _notifyIcon.Icon = targetIcon;
+            previousIcon = icon;
+            _notifyIcon.Icon = previousIcon;
 
             string serverInfo = null;
             if (controller.GetCurrentStrategy() != null)
@@ -203,88 +184,89 @@ namespace Shadowsocks.View
             ViewUtils.SetNotifyIconText(_notifyIcon, text);
         }
 
-        private Bitmap getDarkTrayIcon(Bitmap originIcon)
+        /// <summary>
+        /// Determine the icon size based on the screen DPI.
+        /// </summary>
+        /// <returns></returns>
+        /// https://stackoverflow.com/a/40851713/2075611
+        private Size SelectIconSize()
         {
-            Bitmap iconCopy = new Bitmap(originIcon);
-            for (int x = 0; x < iconCopy.Width; x++)
+            Size size = new Size(32, 32);
+            int dpi = ViewUtils.GetScreenDpi();
+            if (dpi < 97)
             {
-                for (int y = 0; y < iconCopy.Height; y++)
+                // dpi = 96;
+                size = new Size(16, 16);
+            }
+            else if (dpi < 121)
+            {
+                // dpi = 120;
+                size = new Size(20, 20);
+            }
+            else if (dpi < 145)
+            {
+                // dpi = 144;
+                size = new Size(24, 24);
+            }
+            else
+            {
+                // dpi = 168;
+                size = new Size(28, 28);
+            }
+            return size;
+        }
+
+        private Color SelectColorMask(bool isProxyEnabled, bool isGlobalProxy)
+        {
+            Color colorMask = Color.White;
+
+            Utils.WindowsThemeMode currentWindowsThemeMode = Utils.GetWindows10SystemThemeSetting();
+
+            if (isProxyEnabled)
+            {
+                if (isGlobalProxy)  // global
                 {
-                    Color color = originIcon.GetPixel(x, y);
-                    if (color.A != 0)
+                    colorMask = colorMaskBlue;
+                }
+                else  // PAC
+                {
+                    if (currentWindowsThemeMode == Utils.WindowsThemeMode.Light)
                     {
-                        Color flyBlue = Color.FromArgb(192, 0, 0, 0);
-                        // Multiply with flyBlue
-                        int red = color.R * flyBlue.R / 255;
-                        int green = color.G * flyBlue.G / 255;
-                        int blue = color.B * flyBlue.B / 255;
-                        int alpha = color.A;
-                        iconCopy.SetPixel(x, y, Color.FromArgb(alpha, red, green, blue));
-                    }
-                    else
-                    {
-                        iconCopy.SetPixel(x, y, Color.FromArgb(color.A, color.R, color.G, color.B));
+                        colorMask = colorMaskEclipse;
                     }
                 }
             }
-            return iconCopy;
-        }
-
-        private Bitmap getTrayIconByState(Bitmap originIcon, bool enabled, bool global)
-        {
-            Bitmap iconCopy = new Bitmap(originIcon);
-            for (int x = 0; x < iconCopy.Width; x++)
+            else  // disabled
             {
-                for (int y = 0; y < iconCopy.Height; y++)
+                if (currentWindowsThemeMode == Utils.WindowsThemeMode.Light)
                 {
-                    Color color = originIcon.GetPixel(x, y);
-                    if (color.A != 0)
-                    {
-                        if (!enabled)
-                        {
-                            // Multiply with flyBlue
-                            Color flyBlue;
-                            if (currentWindowsThemeMode == Utils.WindowsThemeMode.Light)
-                                flyBlue = Color.FromArgb(128, 192, 192, 192); // Dark icon more transparent
-                            else
-                                flyBlue = Color.FromArgb(192, 192, 192, 192); // Light icon less transparent
-                            int red = color.R * flyBlue.R / 255;
-                            int green = color.G * flyBlue.G / 255;
-                            int blue = color.B * flyBlue.B / 255;
-                            int alpha = color.A * flyBlue.A / 255;
-                            iconCopy.SetPixel(x, y, Color.FromArgb(alpha, red, green, blue));
-                        }
-                        else if (global)
-                        {
-                            Color flyBlue = Color.FromArgb(25, 125, 191);
-                            // Multiply with flyBlue
-                            int red = color.R * flyBlue.R / 255;
-                            int green = color.G * flyBlue.G / 255;
-                            int blue = color.B * flyBlue.B / 255;
-                            iconCopy.SetPixel(x, y, Color.FromArgb(color.A, red, green, blue));
-                        }
-                    }
-                    else
-                    {
-                        iconCopy.SetPixel(x, y, Color.FromArgb(color.A, color.R, color.G, color.B));
-                    }
+                    colorMask = colorMaskDarkSilver;
+                }
+                else
+                {
+                    colorMask = colorMaskLightSilver;
                 }
             }
-            return iconCopy;
+
+            return colorMask;
         }
 
-        private Bitmap AddBitmapOverlay(Bitmap original, params Bitmap[] overlays)
+        private void UpdateIconSet(Color colorMask, Size size,
+            out Icon icon, out Icon icon_in, out Icon icon_out, out Icon icon_both)
         {
-            Bitmap bitmap = new Bitmap(original.Width, original.Height, PixelFormat.Format64bppArgb);
-            Graphics canvas = Graphics.FromImage(bitmap);
-            canvas.DrawImage(original, new Point(0, 0));
-            foreach (Bitmap overlay in overlays)
-            {
-                canvas.DrawImage(new Bitmap(overlay, original.Size), new Point(0, 0));
-            }
-            canvas.Save();
-            return bitmap;
+            Bitmap iconBitmap;
+
+            // generate the base icon
+            iconBitmap = ViewUtils.ChangeBitmapColor(Resources.ss32Fill, colorMask);
+            iconBitmap = ViewUtils.AddBitmapOverlay(iconBitmap, Resources.ss32Outline);
+
+            icon = Icon.FromHandle(ViewUtils.ResizeBitmap(iconBitmap, size.Width, size.Height).GetHicon());
+            icon_in = Icon.FromHandle(ViewUtils.ResizeBitmap(ViewUtils.AddBitmapOverlay(iconBitmap, Resources.ss32In), size.Width, size.Height).GetHicon());
+            icon_out = Icon.FromHandle(ViewUtils.ResizeBitmap(ViewUtils.AddBitmapOverlay(iconBitmap, Resources.ss32In), size.Width, size.Height).GetHicon());
+            icon_both = Icon.FromHandle(ViewUtils.ResizeBitmap(ViewUtils.AddBitmapOverlay(iconBitmap, Resources.ss32In, Resources.ss32Out), size.Width, size.Height).GetHicon());
         }
+
+
 
         #endregion
 
@@ -355,7 +337,7 @@ namespace Shadowsocks.View
         private void controller_ConfigChanged(object sender, EventArgs e)
         {
             LoadCurrentConfiguration();
-            UpdateTrayIcon();
+            UpdateTrayIconAndNotifyText();
         }
 
         private void controller_EnableStatusChanged(object sender, EventArgs e)
@@ -629,7 +611,7 @@ namespace Shadowsocks.View
 
         private void notifyIcon1_Click(object sender, MouseEventArgs e)
         {
-            UpdateTrayIcon();
+            UpdateTrayIconAndNotifyText();
             if (e.Button == MouseButtons.Middle)
             {
                 ShowLogForm();

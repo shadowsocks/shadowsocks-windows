@@ -60,18 +60,16 @@ namespace Shadowsocks.Util
         // Support on Windows 10 1903+
         public static WindowsThemeMode GetWindows10SystemThemeSetting()
         {
-            WindowsThemeMode registData = WindowsThemeMode.Dark;
+            WindowsThemeMode themeMode = WindowsThemeMode.Dark;
             try
             {
-                RegistryKey reg_HKCU = Registry.CurrentUser;
-                RegistryKey reg_ThemesPersonalize = reg_HKCU.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize", false);
+                RegistryKey reg_ThemesPersonalize = Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize", false);
                 if (reg_ThemesPersonalize.GetValue("SystemUsesLightTheme") != null)
                 {
-                    if (Convert.ToInt32(reg_ThemesPersonalize.GetValue("SystemUsesLightTheme").ToString()) == 0) // 0:dark mode, 1:light mode
-                        registData = WindowsThemeMode.Dark;
+                    if ((int)(reg_ThemesPersonalize.GetValue("SystemUsesLightTheme")) == 0) // 0:dark mode, 1:light mode
+                        themeMode = WindowsThemeMode.Dark;
                     else
-                        registData = WindowsThemeMode.Light;
-                    //Console.WriteLine(registData);
+                        themeMode = WindowsThemeMode.Light;
                 }
                 else
                 {
@@ -83,7 +81,7 @@ namespace Shadowsocks.Util
                 Logging.Info(
                         $"Cannot get Windows 10 system theme mode, return default value 0 (dark mode).");
             }
-            return registData;
+            return themeMode;
         }
 
         // return a full path with filename combined which pointed to the temporary directory

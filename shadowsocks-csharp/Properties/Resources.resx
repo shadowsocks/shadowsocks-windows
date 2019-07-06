@@ -136,20 +136,17 @@
   <data name="proxy_pac_txt" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Data\proxy.pac.txt.gz;System.Byte[], mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="ss16" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\ss16.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="ss32Fill" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\ss32Fill.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="ss20" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\ss20.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="ss32In" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\ss32In.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="ss24" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\ss24.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="ss32Out" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\ss32Out.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="ssIn24" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\ssIn24.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ssOut24" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\ssOut24.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="ss32Outline" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\ss32Outline.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="ssw128" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\ssw128.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>

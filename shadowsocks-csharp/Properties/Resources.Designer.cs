@@ -116,7 +116,7 @@ namespace Shadowsocks.Properties {
         ///logfile ss_privoxy.log
         ///show-on-task-bar 0
         ///activity-animation 0
-        ///forward-socks5 / 127.0.0.1:__SOCKS_PORT__ .
+        ///forward-socks5 / __SOCKS_HOST__:__SOCKS_PORT__ .
         ///max-client-connections 2048
         ///hide-console
         ///.
@@ -150,9 +150,9 @@ namespace Shadowsocks.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap ss16 {
+        internal static System.Drawing.Bitmap ss32Fill {
             get {
-                object obj = ResourceManager.GetObject("ss16", resourceCulture);
+                object obj = ResourceManager.GetObject("ss32Fill", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -160,9 +160,9 @@ namespace Shadowsocks.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap ss20 {
+        internal static System.Drawing.Bitmap ss32In {
             get {
-                object obj = ResourceManager.GetObject("ss20", resourceCulture);
+                object obj = ResourceManager.GetObject("ss32In", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -170,9 +170,9 @@ namespace Shadowsocks.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap ss24 {
+        internal static System.Drawing.Bitmap ss32Out {
             get {
-                object obj = ResourceManager.GetObject("ss24", resourceCulture);
+                object obj = ResourceManager.GetObject("ss32Out", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -180,19 +180,9 @@ namespace Shadowsocks.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap ssIn24 {
+        internal static System.Drawing.Bitmap ss32Outline {
             get {
-                object obj = ResourceManager.GetObject("ssIn24", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap ssOut24 {
-            get {
-                object obj = ResourceManager.GetObject("ssOut24", resourceCulture);
+                object obj = ResourceManager.GetObject("ss32Outline", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
