@@ -103,10 +103,14 @@ if you want to deactivate all, please clear all textboxes.
 
 Please visit [Servers] for more information.
 
+#### Experimental
+
+[Experimental Features]
+
 #### Development
 
 1. [Visual Studio 2017] & [.NET Framework 4.7.2 Developer Pack] are required.
-3. It is recommended to share your idea on the Issue Board before you start to work,
+2. It is recommended to share your idea on the Issue Board before you start to work,
 especially for feature development.
 
 #### License
@@ -143,3 +147,4 @@ Sysproxy ()            https://github.com/Noisyfox/sysproxy
 [Visual C++ 2015 Redistributable]:     https://www.microsoft.com/en-us/download/details.aspx?id=53840
 [GPLv3]:        https://github.com/shadowsocks/shadowsocks-windows/blob/master/LICENSE.txt
 [Working with non SIP003 standard Plugin]: https://github.com/shadowsocks/shadowsocks-windows/wiki/Working-with-non-SIP003-standard-Plugin
+[Experimental Features]: https://github.com/shadowsocks/shadowsocks-windows/blob/master/Experimental.md
