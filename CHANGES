@@ -1,3 +1,7 @@
+4.1.7.1 2019-07-14
+- Fix unexpected server delete behavior (#2459)
+- Reduce info log when checking Windows 10 Light Theme
+
 4.1.7 2019-07-10
 - Fix UDP relay (#2387)
 - Support Windows 10 1903 Light Theme (#2379)
