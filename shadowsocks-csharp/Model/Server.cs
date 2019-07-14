@@ -29,6 +29,7 @@ namespace Shadowsocks.Model
         public string plugin_args;
         public string remarks;
         public int timeout;
+        public string nick_name;
 
         public override int GetHashCode()
         {
@@ -48,7 +49,7 @@ namespace Shadowsocks.Model
                 return I18N.GetString("New server");
             }
 
-            string serverStr = $"{FormatHostName(server)}:{server_port}";
+            string serverStr = this.nick_name.IsNullOrEmpty() ? $"{FormatHostName(server)}:{server_port}" : this.nick_name;
             return remarks.IsNullOrEmpty()
                 ? serverStr
                 : $"{remarks} ({serverStr})";

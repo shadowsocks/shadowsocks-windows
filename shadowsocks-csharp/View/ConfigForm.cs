@@ -63,6 +63,7 @@ namespace Shadowsocks.View
             MoveUpButton.Text = I18N.GetString("Move &Up");
             MoveDownButton.Text = I18N.GetString("Move D&own");
             Text = I18N.GetString("Edit Servers");
+            NickNameLabel.Text = I18N.GetString("Nickname");
         }
 
         private void SetupValueChangedListeners()
@@ -78,6 +79,7 @@ namespace Shadowsocks.View
             TimeoutTextBox.TextChanged += ConfigValueChanged;
             PortableModeCheckBox.CheckedChanged += ConfigValueChanged;
             ServerPortTextBox.TextChanged += ConfigValueChanged;
+            NickNameTextBox.TextChanged += ConfigValueChanged;
         }
 
         private void Controller_ConfigChanged(object sender, EventArgs e)
@@ -126,11 +128,13 @@ namespace Shadowsocks.View
             bool? checkPort = false;
             bool? checkPassword = false;
             bool? checkTimeout = false;
+            bool? checkNickname = false;
 
             if ((checkIP = CheckIPTextBox(out string address, isSave, isCopy)).GetValueOrDefault(false) && address != null
                     && (checkPort = CheckServerPortTextBox(out int? addressPort, isSave, isCopy)).GetValueOrDefault(false) && addressPort.HasValue
                         && (checkPassword = CheckPasswordTextBox(out string serverPassword, isSave, isCopy)).GetValueOrDefault(false) && serverPassword != null
-                            && (checkTimeout = CheckTimeoutTextBox(out int? timeout, isSave, isCopy)).GetValueOrDefault(false) && timeout.HasValue)
+                            && (checkTimeout = CheckTimeoutTextBox(out int? timeout, isSave, isCopy)).GetValueOrDefault(false) && timeout.HasValue
+                                && (checkNickname = CheckNickNameTextBox(out string nickname, isSave, isCopy)).GetValueOrDefault(false) && nickname != null)
             {
                 server = new Server()
                 {
@@ -143,12 +147,13 @@ namespace Shadowsocks.View
                     plugin_args = PluginArgumentsTextBox.Text,
                     remarks = RemarksTextBox.Text,
                     timeout = timeout.Value,
+                    nick_name = nickname
                 };
 
                 return true;
             }
 
-            if (checkIP == null || checkPort == null || checkTimeout == null)
+            if (checkIP == null || checkPort == null || checkTimeout == null || checkNickname == null)
             {
                 _modifiedConfiguration.configs.RemoveAt(_lastSelectedIndex);
                 ServersListBox.SelectedIndexChanged -= ServersListBox_SelectedIndexChanged;
@@ -322,6 +327,45 @@ namespace Shadowsocks.View
             return true;
         }
 
+        private bool? CheckNickNameTextBox(out string nickName, bool isSave, bool isCopy)
+        {
+            nickName = null;
+            string outNickName;
+            if ((outNickName = NickNameTextBox.Text).Length > 32)
+            {
+                if (!isSave && !isCopy && ServersListBox.Items.Count > 1 && I18N.GetString("New server").Equals(ServersListBox.Items[_lastSelectedIndex].ToString()))
+                {
+                    DialogResult result = MessageBox.Show(I18N.GetString("Whether to discard unconfigured servers"), I18N.GetString("Operation failure"), MessageBoxButtons.OKCancel);
+
+                    if (result == DialogResult.OK)
+                        return null;
+                }
+                else if (ApplyButton.Enabled && !isSave && !isCopy)
+                {
+                    var result = MessageBox.Show(I18N.GetString("Nickname cannot be longer than 32 characters, Cannot automatically save or discard changes"), I18N.GetString("Auto save failed"), MessageBoxButtons.OKCancel);
+
+                    if (result == DialogResult.Cancel)
+                        return false;
+                    else
+                    {
+                        nickName = _modifiedConfiguration.configs[_lastSelectedIndex].nick_name;
+                        return true;
+                    }
+                }
+                else
+                {
+                    MessageBox.Show(I18N.GetString("Nickname cannot be longer than 32 characters"), I18N.GetString("Operation failure"));
+                    PasswordTextBox.Focus();
+                }
+                return false;
+            }
+            else
+            {
+                nickName = outNickName;
+            }
+            return true;
+        }
+
         #endregion
 
         private void LoadSelectedServerDetails()
@@ -349,6 +393,9 @@ namespace Shadowsocks.View
 
             RemarksTextBox.Text = server.remarks;
             TimeoutTextBox.Text = server.timeout.ToString();
+
+            NickNameTextBox.Text = server.nick_name;
+            ApplyButton.Enabled = false;
 
             isChange = false;
         }

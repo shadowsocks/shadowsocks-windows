@@ -50,6 +50,8 @@
             this.PluginArgumentsLabel = new System.Windows.Forms.Label();
             this.RemarksLabel = new System.Windows.Forms.Label();
             this.NeedPluginArgCheckBox = new System.Windows.Forms.CheckBox();
+            this.NickNameLabel = new System.Windows.Forms.Label();
+            this.NickNameTextBox = new System.Windows.Forms.TextBox();
             this.panel2 = new System.Windows.Forms.Panel();
             this.OKButton = new System.Windows.Forms.Button();
             this.MyCancelButton = new System.Windows.Forms.Button();
@@ -106,11 +108,14 @@
             this.tableLayoutPanel1.Controls.Add(this.PluginArgumentsLabel, 0, 8);
             this.tableLayoutPanel1.Controls.Add(this.RemarksLabel, 0, 10);
             this.tableLayoutPanel1.Controls.Add(this.NeedPluginArgCheckBox, 1, 7);
+            this.tableLayoutPanel1.Controls.Add(this.NickNameLabel, 0, 12);
+            this.tableLayoutPanel1.Controls.Add(this.NickNameTextBox, 1, 12);
             this.tableLayoutPanel1.Location = new System.Drawing.Point(8, 21);
             this.tableLayoutPanel1.Margin = new System.Windows.Forms.Padding(0);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
             this.tableLayoutPanel1.Padding = new System.Windows.Forms.Padding(3);
-            this.tableLayoutPanel1.RowCount = 12;
+            this.tableLayoutPanel1.RowCount = 13;
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
@@ -630,6 +635,26 @@
             this.DuplicateButton.UseVisualStyleBackColor = true;
             this.DuplicateButton.Click += new System.EventHandler(this.DuplicateButton_Click);
             // 
+            // NickNameLabel
+            // 
+            this.NickNameLabel.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.NickNameLabel.AutoSize = true;
+            this.NickNameLabel.Location = new System.Drawing.Point(30, 296);
+            this.NickNameLabel.Name = "NickNameLabel";
+            this.NickNameLabel.Size = new System.Drawing.Size(77, 12);
+            this.NickNameLabel.TabIndex = 0;
+            this.NickNameLabel.Text = "Nickname";
+            // 
+            // NickNameTextBox
+            // 
+            this.NickNameTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.NickNameTextBox.Location = new System.Drawing.Point(113, 292);
+            this.NickNameTextBox.MaxLength = 512;
+            this.NickNameTextBox.Name = "NickNameTextBox";
+            this.NickNameTextBox.Size = new System.Drawing.Size(160, 21);
+            this.NickNameTextBox.TabIndex = 0;
+            this.NickNameTextBox.WordWrap = false;
+            // 
             // ConfigForm
             // 
             this.AcceptButton = this.OKButton;
@@ -710,6 +735,8 @@
         private System.Windows.Forms.ToolTip toolTip1;
         private System.Windows.Forms.CheckBox PortableModeCheckBox;
         private System.Windows.Forms.CheckBox NeedPluginArgCheckBox;
+        private System.Windows.Forms.Label NickNameLabel;
+        private System.Windows.Forms.TextBox NickNameTextBox;
     }
 }
 
