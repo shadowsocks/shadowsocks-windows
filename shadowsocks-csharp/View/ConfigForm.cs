@@ -15,6 +15,8 @@ namespace Shadowsocks.View
         private Configuration _modifiedConfiguration;
         private int _lastSelectedIndex = -1;
 
+        private bool isChange = false;
+
         public ConfigForm(ShadowsocksController controller)
         {
             Font = SystemFonts.MessageBoxFont;
@@ -85,6 +87,7 @@ namespace Shadowsocks.View
 
         private void ConfigValueChanged(object sender, EventArgs e)
         {
+            isChange = true;
             ApplyButton.Enabled = true;
         }
 
@@ -178,7 +181,7 @@ namespace Shadowsocks.View
                     if (result == DialogResult.OK)
                         return null;
                 }
-                else if (ApplyButton.Enabled && !isSave && !isCopy)
+                else if (isChange && !isSave && !isCopy)
                 {
                     var result = MessageBox.Show(I18N.GetString("Invalid server address, Cannot automatically save or discard changes"), I18N.GetString("Auto save failed"), MessageBoxButtons.OKCancel);
 
@@ -216,7 +219,7 @@ namespace Shadowsocks.View
                     if (result == DialogResult.OK)
                         return null;
                 }
-                else if (!isSave && !isCopy)
+                else if (isChange && !isSave && !isCopy)
                 {
                     var result = MessageBox.Show(I18N.GetString("Illegal port number format, Cannot automatically save or discard changes"), I18N.GetString("Auto save failed"), MessageBoxButtons.OKCancel);
 
@@ -255,7 +258,7 @@ namespace Shadowsocks.View
                     if (result == DialogResult.OK)
                         return null;
                 }
-                else if (ApplyButton.Enabled && !isSave && !isCopy)
+                else if (isChange && !isSave && !isCopy)
                 {
                     var result = MessageBox.Show(I18N.GetString("Password can not be blank, Cannot automatically save or discard changes"), I18N.GetString("Auto save failed"), MessageBoxButtons.OKCancel);
 
@@ -293,7 +296,7 @@ namespace Shadowsocks.View
                     if (result == DialogResult.OK)
                         return null;
                 }
-                else if (ApplyButton.Enabled && !isSave && !isCopy)
+                else if (isChange && !isSave && !isCopy)
                 {
                     var result = MessageBox.Show(I18N.GetString("Illegal timeout format, Cannot automatically save or discard changes"), I18N.GetString("Auto save failed"), MessageBoxButtons.OKCancel);
 
@@ -347,7 +350,7 @@ namespace Shadowsocks.View
             RemarksTextBox.Text = server.remarks;
             TimeoutTextBox.Text = server.timeout.ToString();
 
-            ApplyButton.Enabled = false;
+            isChange = false;
         }
 
         private void ShowHidePluginArgInput(bool show)
