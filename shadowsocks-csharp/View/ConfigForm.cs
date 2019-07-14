@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Drawing;
-using System.Runtime.CompilerServices;
 using System.Windows.Forms;
 using Shadowsocks.Controller;
 using Shadowsocks.Model;
@@ -89,12 +88,6 @@ namespace Shadowsocks.View
             ApplyButton.Enabled = true;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void UpdateIndexToEnd()
-        {
-            _lastSelectedIndex = (ServersListBox.SelectedIndex = (_modifiedConfiguration.configs.Count - 1));
-        }
-
         private bool ValidateAndSaveSelectedServerDetails(bool isSave = false, bool isCopy = false)
         {
             try
@@ -157,8 +150,11 @@ namespace Shadowsocks.View
                 _modifiedConfiguration.configs.RemoveAt(_lastSelectedIndex);
                 ServersListBox.SelectedIndexChanged -= ServersListBox_SelectedIndexChanged;
 
+                int lastIndex = ServersListBox.SelectedIndex;
+
                 LoadServerNameListToUI(_modifiedConfiguration);
-                UpdateIndexToEnd();
+
+                _lastSelectedIndex = (ServersListBox.SelectedIndex = lastIndex);
 
                 ServersListBox.SelectedIndexChanged += ServersListBox_SelectedIndexChanged;
                 return true;
@@ -453,7 +449,7 @@ namespace Shadowsocks.View
             {
                 Configuration.AddDefaultServerOrServer(_modifiedConfiguration);
                 LoadServerNameListToUI(_modifiedConfiguration);
-                UpdateIndexToEnd();
+                _lastSelectedIndex = (ServersListBox.SelectedIndex = _modifiedConfiguration.configs.Count - 1);
             }
         }
 
@@ -462,9 +458,9 @@ namespace Shadowsocks.View
             if (ValidateAndSaveSelectedServerDetails(isCopy: true))
             {
                 Server currServer = _modifiedConfiguration.configs[_lastSelectedIndex];
-                Configuration.AddDefaultServerOrServer(_modifiedConfiguration, currServer);
+                Configuration.AddDefaultServerOrServer(_modifiedConfiguration, currServer, _lastSelectedIndex + 1);
                 LoadServerNameListToUI(_modifiedConfiguration);
-                UpdateIndexToEnd();
+                _lastSelectedIndex = (ServersListBox.SelectedIndex = (_lastSelectedIndex + 1));
             }
         }
 
@@ -478,7 +474,11 @@ namespace Shadowsocks.View
             }
 
             LoadServerNameListToUI(_modifiedConfiguration);
-            UpdateIndexToEnd();
+            ServersListBox.SelectedIndexChanged -= ServersListBox_SelectedIndexChanged;
+
+            _lastSelectedIndex = (ServersListBox.SelectedIndex = (_lastSelectedIndex >= _modifiedConfiguration.configs.Count ? (_modifiedConfiguration.configs.Count - 1) : _lastSelectedIndex));
+
+            ServersListBox.SelectedIndexChanged += ServersListBox_SelectedIndexChanged;
             LoadSelectedServerDetails();
 
             UpdateButtons();
