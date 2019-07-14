@@ -147,4 +147,4 @@ Sysproxy ()            https://github.com/Noisyfox/sysproxy
 [Visual C++ 2015 Redistributable]:     https://www.microsoft.com/en-us/download/details.aspx?id=53840
 [GPLv3]:        https://github.com/shadowsocks/shadowsocks-windows/blob/master/LICENSE.txt
 [Working with non SIP003 standard Plugin]: https://github.com/shadowsocks/shadowsocks-windows/wiki/Working-with-non-SIP003-standard-Plugin
-[Experimental Features]: https://github.com/shadowsocks/shadowsocks-windows/blob/master/Experimental.md
+[Experimental Features]: https://github.com/shadowsocks/shadowsocks-windows/wiki/Experimental
