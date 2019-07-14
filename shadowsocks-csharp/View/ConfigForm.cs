@@ -478,7 +478,11 @@ namespace Shadowsocks.View
             }
 
             LoadServerNameListToUI(_modifiedConfiguration);
+            ServersListBox.SelectedIndexChanged -= ServersListBox_SelectedIndexChanged;
+
             UpdateIndexToEnd();
+
+            ServersListBox.SelectedIndexChanged += ServersListBox_SelectedIndexChanged;
             LoadSelectedServerDetails();
 
             UpdateButtons();
