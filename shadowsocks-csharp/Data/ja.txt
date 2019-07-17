@@ -33,6 +33,7 @@ Check for Updates at Startup=起動時に更新プログラムを確認
 Check Pre-release Version=先行開発版も確認
 Edit Hotkeys...=ホットキーの編集...
 About...=Shadowsocks について...
+OpenFolder=打开程序文件夹
 Help=ヘルプ
 Quit=終了
 Edit Servers=サーバーの編集

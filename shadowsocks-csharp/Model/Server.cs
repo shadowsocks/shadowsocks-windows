@@ -5,6 +5,7 @@ using System.Text;
 using System.Web;
 using Shadowsocks.Controller;
 using System.Text.RegularExpressions;
+using System.Linq;
 
 namespace Shadowsocks.Model
 {
@@ -28,6 +29,23 @@ namespace Shadowsocks.Model
         public string plugin_opts;
         public string plugin_args;
         public string remarks;
+        public int tag;
+        public string group;
+        public string serverGroup
+        {
+            get
+            {
+                if (!group.IsNullOrEmpty()) { return group; }
+                var t = new Regex("[1-9a-zA-Z(]", RegexOptions.Compiled);
+                var gn = t.Replace(remarks, "|");
+                var grp = gn.Split(new char[] { '|' }, StringSplitOptions.RemoveEmptyEntries).FirstOrDefault();
+                if (grp == null || grp.IsNullOrEmpty())
+                {
+                    grp = "Î´·Ö×é";
+                }
+                return grp;
+            }
+        }
         public int timeout;
 
         public override int GetHashCode()

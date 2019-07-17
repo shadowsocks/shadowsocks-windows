@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
@@ -327,6 +328,10 @@ namespace Shadowsocks.View
                     }),
                     CreateMenuItem("About...", new EventHandler(this.AboutItem_Click)),
                 }),
+                CreateMenuItem("OpenFolder", new EventHandler((x,y) =>
+                {
+                    Process.Start("explorer", "/open," + Environment.CurrentDirectory);
+                })),
                 new MenuItem("-"),
                 CreateMenuItem("Quit", new EventHandler(this.Quit_Click))
             });
@@ -461,17 +466,76 @@ namespace Shadowsocks.View
 
             int strategyCount = i;
             Configuration configuration = controller.GetConfigurationCopy();
-            foreach (var server in configuration.configs)
+
+
+
+
+            //foreach (var server in configuration.configs)
+            //{
+            //    if (Configuration.ChecksServer(server))
+            //    {
+            //        MenuItem item = new MenuItem(server.FriendlyName());
+            //        item.Tag = i - strategyCount;
+            //        item.Click += AServerItem_Click;
+            //        items.Add(i, item);
+            //        i++;
+            //    }
+            //}
+            var allServers = configuration.configs.Where(Configuration.ChecksServer).ToList();
+            for (var ii = 0; ii < allServers.Count; ii++)
             {
-                if (Configuration.ChecksServer(server))
-                {
-                    MenuItem item = new MenuItem(server.FriendlyName());
-                    item.Tag = i - strategyCount;
-                    item.Click += AServerItem_Click;
-                    items.Add(i, item);
-                    i++;
-                }
+                allServers[ii].tag = ii;
             }
+
+            var serverGroups = allServers.GroupBy(x => x.serverGroup).ToList();
+            var m = serverGroups.Where(x => x.Count() > 1);
+            var s = serverGroups.Where(x => x.Count() == 1);
+            serverGroups = m.Concat(s).ToList();
+            foreach (var grp in serverGroups)
+            {
+                //分组只有一个服务器
+                if (grp.Count() == 1)
+                {
+                    var singleGrpMenu = new MenuItem(grp.First().FriendlyName())
+                    {
+                        Tag = grp.First().tag
+                    };
+                    singleGrpMenu.Click += AServerItem_Click;
+                    if (singleGrpMenu.Tag.ToString() == configuration.index.ToString())
+                    {
+                        singleGrpMenu.Checked = true;
+                    }
+                    items.Add(i, singleGrpMenu);
+                    i++;
+                    continue;
+                }
+                //分组多个服务器  合并为一组
+                var t = new List<MenuItem>();
+                foreach (var server in grp)
+                {
+                    var item = new MenuItem(server.FriendlyName())
+                    {
+                        Tag = server.tag
+                    };
+                    item.Click += AServerItem_Click;
+                    if (item.Tag.ToString() == configuration.index.ToString())
+                    {
+                        item.Checked = true;
+                    }
+                    t.Add(item);
+                }
+                var grpMenu = new MenuItem(grp.Key + " (" + grp.Count() + ")", t.ToArray())
+                {
+                    Tag = grp.Key
+                };
+                if (t.Any(x => x.Checked))
+                {
+                    grpMenu.Text = "√ " + grpMenu.Text;
+                }
+                items.Add(i, grpMenu);
+                i++;
+            }
+
 
             foreach (MenuItem item in items)
             {

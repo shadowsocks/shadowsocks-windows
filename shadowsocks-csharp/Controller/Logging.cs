@@ -21,7 +21,7 @@ namespace Shadowsocks.Controller
         {
             try
             {
-                LogFilePath = Utils.GetTempPath("shadowsocks.log");
+                LogFilePath = Path.Combine(Path.GetTempPath(),"shadowsocks.log");
 
                 _fs = new FileStream(LogFilePath, FileMode.Append);
                 _sw = new StreamWriterWithTimestamp(_fs);
