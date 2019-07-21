@@ -25,7 +25,8 @@ namespace Shadowsocks
         static void Main(string[] args)
         {
             // .NET Framework 4.7.2 on Win7 compatibility
-            System.Net.ServicePointManager.SecurityProtocol = System.Net.SecurityProtocolType.Tls12 | System.Net.SecurityProtocolType.SystemDefault;
+            System.Net.ServicePointManager.SecurityProtocol |= 
+                SecurityProtocolType.Tls | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12
 
             // store args for further use
             Args = args;
