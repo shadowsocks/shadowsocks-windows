@@ -24,6 +24,10 @@ namespace Shadowsocks
         [STAThread]
         static void Main(string[] args)
         {
+            // .NET Framework 4.7.2 on Win7 compatibility
+            System.Net.ServicePointManager.SecurityProtocol |= 
+                System.Net.SecurityProtocolType.Tls | System.Net.SecurityProtocolType.Tls11 | System.Net.SecurityProtocolType.Tls12;
+
             // store args for further use
             Args = args;
             // Check OS since we are using dual-mode socket
