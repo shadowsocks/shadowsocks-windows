@@ -28,7 +28,7 @@ namespace Shadowsocks.Controller
                 {
                     if (global)
                     {
-                        Sysproxy.SetIEProxy(true, true, "127.0.0.1:" + config.localPort.ToString(), null);
+                        Sysproxy.SetIEProxy(true, true, "localhost:" + config.localPort.ToString(), null);
                     }
                     else
                     {

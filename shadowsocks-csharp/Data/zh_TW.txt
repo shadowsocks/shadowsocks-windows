@@ -122,7 +122,6 @@ Port {0} is reserved by system=連接埠號碼 {0} 由系統保留
 Invalid server address=無效伺服器位址
 Illegal port number format=無效連接埠號碼格式
 Illegal timeout format=無效逾時格式
-Please add at least one server=請新增至少一個伺服器
 Server IP can not be blank=伺服器 IP 不能為空
 Password can not be blank=密碼不能為空
 Port out of range=連接埠號碼超出範圍

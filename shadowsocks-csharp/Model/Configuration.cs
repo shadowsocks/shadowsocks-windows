@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-
-using Shadowsocks.Controller;
 using Newtonsoft.Json;
+using Shadowsocks.Controller;
 
 namespace Shadowsocks.Model
 {
@@ -22,6 +21,7 @@ namespace Shadowsocks.Model
         public bool skipZhIP;
         public bool shareOverLan;
         public bool isDefault;
+        public bool isIPv6Enabled = false;
         public int localPort;
         public bool portableMode = true;
         public string pacUrl;
@@ -35,8 +35,12 @@ namespace Shadowsocks.Model
         public ProxyConfig proxy;
         public HotkeyConfig hotkey;
 
-        private static string CONFIG_FILE = "gui-config.json";
-
+        private static readonly string CONFIG_FILE = "gui-config.json";
+        [JsonIgnore]
+        public string localHost => GetLocalHost();
+        private string GetLocalHost() {
+            return isIPv6Enabled ? "[::1]" : "127.0.0.1";
+        }
         public Server GetCurrentServer()
         {
             if (index >= 0 && index < configs.Count)
@@ -47,10 +51,23 @@ namespace Shadowsocks.Model
 
         public static void CheckServer(Server server)
         {
+            CheckServer(server.server);
             CheckPort(server.server_port);
             CheckPassword(server.password);
-            CheckServer(server.server);
             CheckTimeout(server.timeout, Server.MaxServerTimeoutSec);
+        }
+
+        public static bool ChecksServer(Server server)
+        {
+            try
+            {
+                CheckServer(server);
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
         }
 
         public static Configuration Load()
@@ -75,6 +92,10 @@ namespace Shadowsocks.Model
                     config.proxy = new ProxyConfig();
                 if (config.hotkey == null)
                     config.hotkey = new HotkeyConfig();
+                if (!System.Net.Sockets.Socket.OSSupportsIPv6) {
+                    config.isIPv6Enabled = false; // disable IPv6 if os not support
+                }
+                //TODO if remote host(server) do not support IPv6 (or DNS resolve AAAA TYPE record) disable IPv6?
 
                 config.proxy.CheckConfig();
 
@@ -128,12 +149,18 @@ namespace Shadowsocks.Model
             }
         }
 
-        public static Server AddDefaultServerOrServer(Configuration config, Server server = null)
+        public static Server AddDefaultServerOrServer(Configuration config, Server server = null, int? index = null)
         {
             if (config != null && config.configs != null)
             {
                 server = (server ?? GetDefaultServer());
-                config.configs.Add(server);
+
+                config.configs.Insert(index.GetValueOrDefault(config.configs.Count), server);
+
+                //if (index.HasValue)
+                //    config.configs.Insert(index.Value, server);
+                //else
+                //    config.configs.Add(server);
             }
             return server;
         }

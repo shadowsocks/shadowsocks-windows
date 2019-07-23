@@ -1,3 +1,18 @@
+4.1.7.1 2019-07-14
+- Fix unexpected server delete behavior (#2459)
+- Reduce info log when checking Windows 10 Light Theme
+
+4.1.7 2019-07-10
+- Fix UDP relay (#2387)
+- Support Windows 10 1903 Light Theme (#2379)
+- Listening on local IPv6 interface (#2419) (Experimental)
+- Turn off per-monitor DPI awareness as it is not supported (#2427)
+- Fix a defect when parsing ss:// URL (#2364)
+- Upgrade the development environment to VS2017 with .NET Framework 4.7.2
+- Refactoring config form (#2410)
+- Refactoring tray icon
+- Other minor bug fixes and improvements
+
 4.1.6 2019-04-17
 - Add http proxy "basic access authentication"
 - Add check box to toggle plugin argument input

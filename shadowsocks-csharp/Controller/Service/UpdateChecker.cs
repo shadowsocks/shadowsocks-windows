@@ -24,7 +24,7 @@ namespace Shadowsocks.Controller
         public string LatestVersionLocalName;
         public event EventHandler CheckUpdateCompleted;
 
-        public const string Version = "4.1.6";
+        public const string Version = "4.1.7.1";
 
         private class CheckUpdateTimer : System.Timers.Timer
         {
@@ -84,7 +84,7 @@ namespace Shadowsocks.Controller
                 {
                     foreach (JObject release in result)
                     {
-                        var isPreRelease = (bool) release["prerelease"];
+                        var isPreRelease = (bool)release["prerelease"];
                         if (isPreRelease && !config.checkPreRelease)
                         {
                             continue;
@@ -170,7 +170,7 @@ namespace Shadowsocks.Controller
         {
             WebClient http = new WebClient();
             http.Headers.Add("User-Agent", UserAgent);
-            http.Proxy = new WebProxy(IPAddress.Loopback.ToString(), config.localPort);
+            http.Proxy = new WebProxy(config.localHost, config.localPort);
             return http;
         }
 
@@ -189,7 +189,7 @@ namespace Shadowsocks.Controller
 
             public static Asset ParseAsset(JObject assertJObject)
             {
-                var name = (string) assertJObject["name"];
+                var name = (string)assertJObject["name"];
                 Match match = Regex.Match(name, @"^Shadowsocks-(?<version>\d+(?:\.\d+)*)(?:|-(?<suffix>.+))\.\w+$",
                     RegexOptions.IgnoreCase);
                 if (match.Success)
@@ -198,7 +198,7 @@ namespace Shadowsocks.Controller
 
                     var asset = new Asset
                     {
-                        browser_download_url = (string) assertJObject["browser_download_url"],
+                        browser_download_url = (string)assertJObject["browser_download_url"],
                         name = name,
                         version = version
                     };
