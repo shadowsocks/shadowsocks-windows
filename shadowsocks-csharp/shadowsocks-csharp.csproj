@@ -12,7 +12,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Shadowsocks</RootNamespace>
     <AssemblyName>Shadowsocks</AssemblyName>
-    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <StartupObject>
     </StartupObject>
@@ -83,6 +83,7 @@
     <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>3rd\Newtonsoft.Json.12.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
+    <Reference Include="PresentationCore" />
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
@@ -123,6 +124,11 @@
     <Compile Include="Model\HotKeyConfig.cs" />
     <Compile Include="Model\ProxyConfig.cs" />
     <Compile Include="Model\SysproxyConfig.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
     <Compile Include="Properties\Settings.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
@@ -149,11 +155,6 @@
     <Compile Include="Model\Configuration.cs" />
     <Compile Include="Model\StatisticsRecord.cs" />
     <Compile Include="Model\StatisticsStrategyConfiguration.cs" />
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
     <Compile Include="Controller\Strategy\BalancingStrategy.cs" />
     <Compile Include="Controller\Strategy\StrategyManager.cs" />
     <Compile Include="Controller\Strategy\IStrategy.cs" />
@@ -269,9 +270,6 @@
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
-    <None Include="Resources\ss20.png" />
-    <None Include="Resources\ss16.png" />
-    <None Include="Resources\ss24.png" />
     <None Include="Resources\ssw128.png" />
     <Content Include="Data\zh_CN.txt" />
     <Content Include="Data\zh_TW.txt" />
@@ -281,8 +279,10 @@
     <None Include="FodyWeavers.xml">
       <SubType>Designer</SubType>
     </None>
-    <Content Include="Resources\ssIn24.png" />
-    <Content Include="Resources\ssOut24.png" />
+    <Content Include="Resources\ss32Fill.png" />
+    <Content Include="Resources\ss32In.png" />
+    <Content Include="Resources\ss32Out.png" />
+    <Content Include="Resources\ss32Outline.png" />
     <Content Include="shadowsocks.ico" />
   </ItemGroup>
   <ItemGroup>

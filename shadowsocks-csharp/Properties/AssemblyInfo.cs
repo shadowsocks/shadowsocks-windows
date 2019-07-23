@@ -11,7 +11,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("Shadowsocks")]
-[assembly: AssemblyCopyright("clowwindy & community 2018")]
+[assembly: AssemblyCopyright("clowwindy & community 2019")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

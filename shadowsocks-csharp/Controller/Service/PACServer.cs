@@ -52,7 +52,7 @@ namespace Shadowsocks.Controller
                 PacSecret = "";
             }
 
-            PacUrl = $"http://127.0.0.1:{config.localPort}/pac?t={GetTimestamp(DateTime.Now)}{PacSecret}";
+            PacUrl = $"http://{config.localHost}:{config.localPort}/pac?t={GetTimestamp(DateTime.Now)}{PacSecret}";
         }
 
 
@@ -102,7 +102,7 @@ namespace Shadowsocks.Controller
                         }
                         if (!secretMatch)
                         {
-                            if(line.IndexOf(PacSecret, StringComparison.Ordinal) >= 0)
+                            if (line.IndexOf(PacSecret, StringComparison.Ordinal) >= 0)
                             {
                                 secretMatch = true;
                             }
@@ -282,7 +282,7 @@ Connection: Close
             if (UserRuleFileChanged != null)
             {
                 Logging.Info($"Detected: User Rule file '{e.Name}' was {e.ChangeType.ToString().ToLower()}.");
-                Task.Factory.StartNew(()=>
+                Task.Factory.StartNew(() =>
                 {
                     ((FileSystemWatcher)sender).EnableRaisingEvents = false;
                     System.Threading.Thread.Sleep(10);
@@ -295,7 +295,9 @@ Connection: Close
 
         private string GetPACAddress(IPEndPoint localEndPoint, bool useSocks)
         {
-            return $"{(useSocks ? "SOCKS5" : "PROXY")} {localEndPoint.Address}:{_config.localPort};";
+            return localEndPoint.AddressFamily == AddressFamily.InterNetworkV6
+                ? $"{(useSocks ? "SOCKS5" : "PROXY")} [{localEndPoint.Address}]:{_config.localPort};"
+                : $"{(useSocks ? "SOCKS5" : "PROXY")} {localEndPoint.Address}:{_config.localPort};";
         }
     }
 }
