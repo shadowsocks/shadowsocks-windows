@@ -9,17 +9,17 @@ namespace Shadowsocks.Util.Sockets
 {
     public class HostInfo
     {
-        private int ipIndex = 0;
+        private static int ipIndex = 0;
         public string HostName { get { return hostname; } }
-        private string hostname;
-        private List<IPAddress> ips;
-        private System.Timers.Timer timer;
-        private DateTime dateTime;
+        private static string hostname;
+        private static List<IPAddress> ips;
+        private static System.Timers.Timer timer;
+        private static DateTime dateTime;
         public IPAddress IP
         {
             get
             {
-                return GetIP(10);
+                return GetIP(3);
             }
         }
         public bool IPAvailable
@@ -79,13 +79,23 @@ namespace Shadowsocks.Util.Sockets
             DomainResolve();
             timer.Start();
         }
-
+        public static bool StopTimer
+        {
+            set
+            {
+                if(value==true)
+                {
+                    timer?.Stop();
+                }
+            }  
+        }
         private void Timer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
             timer.Stop();
             DomainResolve();
             timer.Start();
         }
+
         public void DeleteLastIP()
         {
             if (ips.Count > 1)
@@ -124,6 +134,7 @@ namespace Shadowsocks.Util.Sockets
                     }
                     else
                     {
+                        Shadowsocks.Controller.Logging.Info($"Find {ip.AddressList[0]} for {hostname}");
                         ips.Add(ip.AddressList[0]);
                     }
                 }
@@ -136,20 +147,20 @@ namespace Shadowsocks.Util.Sockets
     }
     public static class SocketUtil
     {
-        private static Dictionary<string, HostInfo> dpPairs = new Dictionary<string, HostInfo>();
+        private static KeyValuePair<string, HostInfo> dpPairs = new KeyValuePair<string, HostInfo>();
         public static void RefreshHostDNS(string host)
         {
-            if (dpPairs.ContainsKey(host))
+            if (dpPairs.Key==host)
             {
-                dpPairs[host].Refresh = true;
+                dpPairs.Value.Refresh = true;
             }
         }
 
         public static void DeleteLastIP(string host)
         {
-            if (dpPairs.ContainsKey(host))
+            if (dpPairs.Key == host)
             {
-                dpPairs[host].DeleteLastIP();
+                dpPairs.Value.DeleteLastIP();
             }
         }
 
@@ -172,26 +183,26 @@ namespace Shadowsocks.Util.Sockets
         public static EndPoint GetServerEndPoint(string host, int port)
         {
             IPAddress ipAddress;
+            HostInfo hostInfo;
             bool parsed = IPAddress.TryParse(host, out ipAddress);
             if (parsed)
             {
+                hostInfo = null;
+                dpPairs = new KeyValuePair<string, HostInfo>();
                 return new IPEndPoint(ipAddress, port);
             }
             // maybe is a domain name
-            lock (dpPairs)
+            if (dpPairs.Key == host)
             {
-                if (dpPairs.ContainsKey(host))
-                {
-                    if (dpPairs[host].IPAvailable)
-                        return new IPEndPoint(dpPairs[host].IP, port);
-                }
-                else
-                {
-                    HostInfo hostInfo = new HostInfo(host);
-                    dpPairs.Add(host, hostInfo);
-                    if (dpPairs[host].IPAvailable)
-                        return new IPEndPoint(dpPairs[host].IP, port);
-                }
+                if (dpPairs.Value.IPAvailable)
+                    return new IPEndPoint(dpPairs.Value.IP, port);
+            }
+            else
+            {
+                hostInfo= new HostInfo(host);
+                dpPairs=new KeyValuePair<string, HostInfo>(host, hostInfo);
+                if (dpPairs.Value.IPAvailable)
+                    return new IPEndPoint(dpPairs.Value.IP, port);
             }
             // maybe is a domain name
             return new DnsEndPoint2(host, port);

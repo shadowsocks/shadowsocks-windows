@@ -517,7 +517,7 @@ namespace Shadowsocks.Controller
             }
 
             StopPlugins();
-
+            Shadowsocks.Util.Sockets.HostInfo.StopTimer = true;
             // don't put PrivoxyRunner.Start() before pacServer.Stop()
             // or bind will fail when switching bind address from 0.0.0.0 to 127.0.0.1
             // though UseShellExecute is set to true now
