@@ -40,6 +40,11 @@ with any editor, Shadowsocks will notify browsers about the change automatically
 2. You can also update PAC file from [GFWList] \(maintained by 3rd party)
 3. You can also use online PAC URL
 
+For Windows10 Store and related applications, please execute the following command under Admin privilege:
+```
+netsh winhttp import proxy source=ie
+```
+
 #### Server Auto Switching
 
 1. Load balance: choosing server randomly
