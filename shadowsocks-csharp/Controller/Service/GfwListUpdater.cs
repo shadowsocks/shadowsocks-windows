@@ -93,7 +93,9 @@ namespace Shadowsocks.Controller
             WebClient http = new WebClient();
             if (config.enabled)
             {
-                http.Proxy = new WebProxy(IPAddress.Loopback.ToString(), config.localPort);
+                http.Proxy = new WebProxy(
+                    config.isIPv6Enabled ? IPAddress.IPv6Loopback.ToString() : IPAddress.Loopback.ToString(), 
+                    config.localPort);
             }
             http.DownloadStringCompleted += http_DownloadStringCompleted;
             http.DownloadStringAsync(new Uri(GFWLIST_URL));
