@@ -28,6 +28,7 @@ namespace Shadowsocks.Controller
         private Thread _trafficThread;
 
         private Listener _listener;
+        private PACDaemon _pacDaemon;
         private PACServer _pacServer;
         private Configuration _config;
         private StrategyManager _strategyManager;
@@ -299,14 +300,14 @@ namespace Shadowsocks.Controller
 
         public void TouchPACFile()
         {
-            string pacFilename = _pacServer.TouchPACFile();
+            string pacFilename = _pacDaemon.TouchPACFile();
 
             PACFileReadyToOpen?.Invoke(this, new PathEventArgs() { Path = pacFilename });
         }
 
         public void TouchUserRuleFile()
         {
-            string userRuleFilename = _pacServer.TouchUserRuleFile();
+            string userRuleFilename = _pacDaemon.TouchUserRuleFile();
 
             UserRuleFileReadyToOpen?.Invoke(this, new PathEventArgs() { Path = userRuleFilename });
         }
@@ -468,13 +469,20 @@ namespace Shadowsocks.Controller
             {
                 privoxyRunner = new PrivoxyRunner();
             }
+
+            if (_pacDaemon == null)
+            {
+                _pacDaemon = new PACDaemon();
+                _pacDaemon.PACFileChanged += PacDaemon_PACFileChanged;
+                _pacDaemon.UserRuleFileChanged += PacDaemon_UserRuleFileChanged;
+            }
+
             if (_pacServer == null)
             {
-                _pacServer = new PACServer();
-                _pacServer.PACFileChanged += PacServer_PACFileChanged;
-                _pacServer.UserRuleFileChanged += PacServer_UserRuleFileChanged;
+                _pacServer = new PACServer(_pacDaemon);
             }
-            _pacServer.UpdateConfiguration(_config);
+
+            _pacServer.UpdatePACURL(_config);
             if (gfwListUpdater == null)
             {
                 gfwListUpdater = new GFWListUpdater();
@@ -561,7 +569,7 @@ namespace Shadowsocks.Controller
             SystemProxy.Update(_config, false, _pacServer);
         }
 
-        private void PacServer_PACFileChanged(object sender, EventArgs e)
+        private void PacDaemon_PACFileChanged(object sender, EventArgs e)
         {
             UpdateSystemProxy();
         }
@@ -577,7 +585,7 @@ namespace Shadowsocks.Controller
         }
 
         private static readonly IEnumerable<char> IgnoredLineBegins = new[] { '!', '[' };
-        private void PacServer_UserRuleFileChanged(object sender, EventArgs e)
+        private void PacDaemon_UserRuleFileChanged(object sender, EventArgs e)
         {
             if (!File.Exists(Utils.GetTempPath("gfwlist.txt")))
             {

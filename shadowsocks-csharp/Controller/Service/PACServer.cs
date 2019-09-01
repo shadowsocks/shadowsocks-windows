@@ -15,28 +15,21 @@ namespace Shadowsocks.Controller
 {
     public class PACServer : Listener.Service
     {
-        public const string PAC_FILE = "pac.txt";
-        public const string USER_RULE_FILE = "user-rule.txt";
-        public const string USER_ABP_FILE = "abp.txt";
+        public const string RESOURCE_NAME = "pac";
 
         private string PacSecret { get; set; } = "";
 
         public string PacUrl { get; private set; } = "";
 
-        FileSystemWatcher PACFileWatcher;
-        FileSystemWatcher UserRuleFileWatcher;
         private Configuration _config;
+        private PACDaemon _pacDaemon;
 
-        public event EventHandler PACFileChanged;
-        public event EventHandler UserRuleFileChanged;
-
-        public PACServer()
+        public PACServer(PACDaemon pacDaemon)
         {
-            this.WatchPacFile();
-            this.WatchUserRuleFile();
+            _pacDaemon = pacDaemon;
         }
 
-        public void UpdateConfiguration(Configuration config)
+        public void UpdatePACURL(Configuration config)
         {
             this._config = config;
 
@@ -51,7 +44,7 @@ namespace Shadowsocks.Controller
                 PacSecret = "";
             }
 
-            PacUrl = $"http://{config.localHost}:{config.localPort}/pac?t={GetTimestamp(DateTime.Now)}{PacSecret}";
+            PacUrl = $"http://{config.localHost}:{config.localPort}/{RESOURCE_NAME}?t={GetTimestamp(DateTime.Now)}{PacSecret}";
         }
 
 
@@ -66,15 +59,61 @@ namespace Shadowsocks.Controller
             {
                 return false;
             }
+
             try
             {
+                /*
+                 *  RFC 7230
+                 *  
+                    GET /hello.txt HTTP/1.1
+                    User-Agent: curl/7.16.3 libcurl/7.16.3 OpenSSL/0.9.7l zlib/1.2.3
+                    Host: www.example.com
+                    Accept-Language: en, mi 
+                 */
+        
                 string request = Encoding.UTF8.GetString(firstPacket, 0, length);
                 string[] lines = request.Split('\r', '\n');
                 bool hostMatch = false, pathMatch = false, useSocks = false;
                 bool secretMatch = PacSecret.IsNullOrEmpty();
-                foreach (string line in lines)
+
+                if (lines.Length < 2)   // need at lease RequestLine + Host
                 {
-                    string[] kv = line.Split(new char[] { ':' }, 2);
+                    return false;
+                }
+
+                // parse request line
+                string requestLine = lines[0];
+                // GET /pac?t=yyyyMMddHHmmssfff&secret=foobar HTTP/1.1
+                string[] requestItems = requestLine.Split(' ');
+                if (requestItems.Length == 3 && requestItems[0] == "GET")
+                {
+                    int index = requestItems[1].IndexOf('?');
+                    if (index < 0)
+                    {
+                        index = requestItems[1].Length;
+                    }
+                    string resourceString = requestItems[1].Substring(0, index).Remove(0, 1);
+                    if (string.Equals(resourceString, RESOURCE_NAME, StringComparison.OrdinalIgnoreCase))
+                    {
+                        pathMatch = true;
+                        if (!secretMatch)
+                        {
+                            string queryString = requestItems[1].Substring(index);
+                            if (queryString.Contains(PacSecret))
+                            {
+                                secretMatch = true;
+                            }
+                        }
+                    }
+                }
+
+                // parse request header
+                for (int i = 1; i < lines.Length; i++)
+                {
+                    if (string.IsNullOrEmpty(lines[i]))
+                        continue;
+
+                    string[] kv = lines[i].Split(new char[] { ':' }, 2);
                     if (kv.Length == 2)
                     {
                         if (kv[0] == "Host")
@@ -93,21 +132,8 @@ namespace Shadowsocks.Controller
                         //    }
                         //}
                     }
-                    else if (kv.Length == 1)
-                    {
-                        if (line.IndexOf("pac", StringComparison.Ordinal) >= 0)
-                        {
-                            pathMatch = true;
-                        }
-                        if (!secretMatch)
-                        {
-                            if (line.IndexOf(PacSecret, StringComparison.Ordinal) >= 0)
-                            {
-                                secretMatch = true;
-                            }
-                        }
-                    }
                 }
+
                 if (hostMatch && pathMatch)
                 {
                     if (!secretMatch)
@@ -128,43 +154,7 @@ namespace Shadowsocks.Controller
             }
         }
 
-        public string TouchPACFile()
-        {
-            if (File.Exists(PAC_FILE))
-            {
-                return PAC_FILE;
-            }
-            else
-            {
-                FileManager.UncompressFile(PAC_FILE, Resources.proxy_pac_txt);
-                return PAC_FILE;
-            }
-        }
 
-        internal string TouchUserRuleFile()
-        {
-            if (File.Exists(USER_RULE_FILE))
-            {
-                return USER_RULE_FILE;
-            }
-            else
-            {
-                File.WriteAllText(USER_RULE_FILE, Resources.user_rule);
-                return USER_RULE_FILE;
-            }
-        }
-
-        private string GetPACContent()
-        {
-            if (File.Exists(PAC_FILE))
-            {
-                return File.ReadAllText(PAC_FILE, Encoding.UTF8);
-            }
-            else
-            {
-                return Utils.UnGzip(Resources.proxy_pac_txt);
-            }
-        }
 
         public void SendResponse(Socket socket, bool useSocks)
         {
@@ -174,7 +164,7 @@ namespace Shadowsocks.Controller
 
                 string proxy = GetPACAddress(localEndPoint, useSocks);
 
-                string pacContent = GetPACContent().Replace("__PROXY__", proxy);
+                string pacContent = _pacDaemon.GetPACContent().Replace("__PROXY__", proxy);
 
                 string responseHead = String.Format(@"HTTP/1.1 200 OK
 Server: Shadowsocks
@@ -205,66 +195,6 @@ Connection: Close
             { }
         }
 
-        private void WatchPacFile()
-        {
-            PACFileWatcher?.Dispose();
-            PACFileWatcher = new FileSystemWatcher(Directory.GetCurrentDirectory());
-            PACFileWatcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.DirectoryName;
-            PACFileWatcher.Filter = PAC_FILE;
-            PACFileWatcher.Changed += PACFileWatcher_Changed;
-            PACFileWatcher.Created += PACFileWatcher_Changed;
-            PACFileWatcher.Deleted += PACFileWatcher_Changed;
-            PACFileWatcher.Renamed += PACFileWatcher_Changed;
-            PACFileWatcher.EnableRaisingEvents = true;
-        }
-
-        private void WatchUserRuleFile()
-        {
-            UserRuleFileWatcher?.Dispose();
-            UserRuleFileWatcher = new FileSystemWatcher(Directory.GetCurrentDirectory());
-            UserRuleFileWatcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.DirectoryName;
-            UserRuleFileWatcher.Filter = USER_RULE_FILE;
-            UserRuleFileWatcher.Changed += UserRuleFileWatcher_Changed;
-            UserRuleFileWatcher.Created += UserRuleFileWatcher_Changed;
-            UserRuleFileWatcher.Deleted += UserRuleFileWatcher_Changed;
-            UserRuleFileWatcher.Renamed += UserRuleFileWatcher_Changed;
-            UserRuleFileWatcher.EnableRaisingEvents = true;
-        }
-
-        #region FileSystemWatcher.OnChanged()
-        // FileSystemWatcher Changed event is raised twice
-        // http://stackoverflow.com/questions/1764809/filesystemwatcher-changed-event-is-raised-twice
-        // Add a short delay to avoid raise event twice in a short period
-        private void PACFileWatcher_Changed(object sender, FileSystemEventArgs e)
-        {
-            if (PACFileChanged != null)
-            {
-                Logging.Info($"Detected: PAC file '{e.Name}' was {e.ChangeType.ToString().ToLower()}.");
-                Task.Factory.StartNew(() =>
-                {
-                    ((FileSystemWatcher)sender).EnableRaisingEvents = false;
-                    System.Threading.Thread.Sleep(10);
-                    PACFileChanged(this, new EventArgs());
-                    ((FileSystemWatcher)sender).EnableRaisingEvents = true;
-                });
-            }
-        }
-
-        private void UserRuleFileWatcher_Changed(object sender, FileSystemEventArgs e)
-        {
-            if (UserRuleFileChanged != null)
-            {
-                Logging.Info($"Detected: User Rule file '{e.Name}' was {e.ChangeType.ToString().ToLower()}.");
-                Task.Factory.StartNew(() =>
-                {
-                    ((FileSystemWatcher)sender).EnableRaisingEvents = false;
-                    System.Threading.Thread.Sleep(10);
-                    UserRuleFileChanged(this, new EventArgs());
-                    ((FileSystemWatcher)sender).EnableRaisingEvents = true;
-                });
-            }
-        }
-        #endregion
 
         private string GetPACAddress(IPEndPoint localEndPoint, bool useSocks)
         {
