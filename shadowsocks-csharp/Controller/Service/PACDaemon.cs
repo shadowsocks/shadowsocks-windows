@@ -27,6 +27,9 @@ namespace Shadowsocks.Controller
 
         public PACDaemon()
         {
+            TouchPACFile();
+            TouchUserRuleFile();
+
             this.WatchPacFile();
             this.WatchUserRuleFile();
         }
@@ -34,28 +37,20 @@ namespace Shadowsocks.Controller
 
         public string TouchPACFile()
         {
-            if (File.Exists(PAC_FILE))
+            if (!File.Exists(PAC_FILE))
             {
-                return PAC_FILE;
+                File.WriteAllText(PAC_FILE, Resources.proxy_pac_txt);
             }
-            else
-            {
-                FileManager.UncompressFile(PAC_FILE, Resources.proxy_pac_txt);
-                return PAC_FILE;
-            }
+            return PAC_FILE;
         }
 
         internal string TouchUserRuleFile()
         {
-            if (File.Exists(USER_RULE_FILE))
-            {
-                return USER_RULE_FILE;
-            }
-            else
+            if (!File.Exists(USER_RULE_FILE))
             {
                 File.WriteAllText(USER_RULE_FILE, Resources.user_rule);
-                return USER_RULE_FILE;
             }
+            return USER_RULE_FILE;
         }
 
         internal string GetPACContent()
@@ -66,7 +61,7 @@ namespace Shadowsocks.Controller
             }
             else
             {
-                return Utils.UnGzip(Resources.proxy_pac_txt);
+                return Resources.proxy_pac_txt;
             }
         }
 

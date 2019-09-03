@@ -256,10 +256,8 @@
     <None Include="app.manifest">
       <SubType>Designer</SubType>
     </None>
-    <None Include="Data\abp.js.gz" />
     <None Include="Data\libsscrypto.dll.gz" />
     <None Include="Data\privoxy.exe.gz" />
-    <None Include="Data\proxy.pac.txt.gz" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Data\sysproxy.exe.gz" />
@@ -271,6 +269,8 @@
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
     <None Include="Resources\ssw128.png" />
+    <Content Include="Data\abp.js" />
+    <Content Include="Data\proxy.pac.txt" />
     <Content Include="Data\zh_CN.txt" />
     <Content Include="Data\zh_TW.txt" />
     <Content Include="Data\ja.txt" />
