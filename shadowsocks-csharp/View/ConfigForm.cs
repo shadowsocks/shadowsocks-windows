@@ -1,6 +1,7 @@
-﻿using System;
+using System;
 using System.Drawing;
 using System.Windows.Forms;
+
 using Shadowsocks.Controller;
 using Shadowsocks.Model;
 using Shadowsocks.Properties;
@@ -157,7 +158,7 @@ namespace Shadowsocks.View
 
                 LoadServerNameListToUI(_modifiedConfiguration);
 
-                _lastSelectedIndex = (ServersListBox.SelectedIndex = lastIndex);
+                _lastSelectedIndex = (ServersListBox.SelectedIndex = ( _lastSelectedIndex == ServersListBox.Items.Count ? lastIndex : lastIndex - 1));
 
                 ServersListBox.SelectedIndexChanged += ServersListBox_SelectedIndexChanged;
                 return true;
