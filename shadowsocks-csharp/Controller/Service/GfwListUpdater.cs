@@ -94,7 +94,7 @@ namespace Shadowsocks.Controller
             if (config.enabled)
             {
                 http.Proxy = new WebProxy(
-                    config.isIPv6Enabled ? IPAddress.IPv6Loopback.ToString() : IPAddress.Loopback.ToString(), 
+                    config.isIPv6Enabled ? IPAddress.IPv6Loopback.ToString() : IPAddress.Loopback.ToString(),
                     config.localPort);
             }
             http.DownloadStringCompleted += http_DownloadStringCompleted;
@@ -117,7 +117,12 @@ namespace Shadowsocks.Controller
                 {
                     if (line.BeginWithAny(IgnoredLineBegins))
                         continue;
-                    valid_lines.Add(line);
+
+                    // Fix https://github.com/shadowsocks/shadowsocks-windows/issues/2329
+                    if ((line.StartsWith("@@||") || line.StartsWith("||")) && !line.Contains("/") && !line.BeginWith('*'))
+                        valid_lines.Add(line + '^');
+                    else
+                        valid_lines.Add(line);
                 }
             }
             return valid_lines;
