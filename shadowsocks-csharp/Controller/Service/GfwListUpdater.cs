@@ -119,7 +119,7 @@ namespace Shadowsocks.Controller
                         continue;
 
                     // Fix https://github.com/shadowsocks/shadowsocks-windows/issues/2329
-                    if ((line.StartsWith("@@||") || line.StartsWith("||")) && !line.Contains("/") && !line.BeginWith('*'))
+                    if ((line.StartsWith("@@||") || line.StartsWith("||")) && !line.Contains("/") && !line.FinishWith('*'))
                         valid_lines.Add(line + '^');
                     else
                         valid_lines.Add(line);
