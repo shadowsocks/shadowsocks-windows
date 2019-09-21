@@ -31,6 +31,7 @@ namespace Shadowsocks.Controller
         }
 
         private static readonly IEnumerable<char> IgnoredLineBegins = new[] { '!', '[' };
+        private static readonly char[] IgnoredABPItems = new[] { '/', '$', '^' };
         private void http_DownloadStringCompleted(object sender, DownloadStringCompletedEventArgs e)
         {
             try
@@ -119,7 +120,7 @@ namespace Shadowsocks.Controller
                         continue;
 
                     // Fix https://github.com/shadowsocks/shadowsocks-windows/issues/2329
-                    if ((line.StartsWith("@@||") || line.StartsWith("||")) && -1 == line.IndexOfAny(new[] { '/', '$', '^' }) && !line.FinishWith('*'))
+                    if ((line.StartsWith("@@||") || line.StartsWith("||")) && -1 == line.IndexOfAny(IgnoredABPItems) && !line.FinishWith('*'))
                         valid_lines.Add(line + '^');
                     else
                         valid_lines.Add(line);
