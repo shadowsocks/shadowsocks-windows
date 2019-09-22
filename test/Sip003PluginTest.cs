@@ -12,10 +12,12 @@ namespace Shadowsocks.Test
     [TestClass]
     public class Sip003PluginTest
     {
+        string fake_plugin = "ftp";
+
         [TestMethod]
-        public void Sip003PluginSupport()
+        public void TestSip003Plugin_NoPlugin()
         {
-            string fake_plugin = "ftp";
+
 
             var NoPlugin = Sip003Plugin.CreateIfConfigured(new Server
             {
@@ -32,7 +34,11 @@ namespace Shadowsocks.Test
                 "",
                 "192.168.100.1",
                 8888);
+        }
 
+        [TestMethod]
+        public void TestSip003Plugin_Plugin()
+        {
             var Plugin = Sip003Plugin.CreateIfConfigured(new Server
             {
                 server = "192.168.100.1",
@@ -48,7 +54,11 @@ namespace Shadowsocks.Test
                 "",
                 "192.168.100.1",
                 8888);
+        }
 
+        [TestMethod]
+        public void TestSip003Plugin_PluginWithOpts()
+        { 
             var PluginWithOpts = Sip003Plugin.CreateIfConfigured(new Server
             {
                 server = "192.168.100.1",
@@ -65,7 +75,11 @@ namespace Shadowsocks.Test
                 "",
                 "192.168.100.1",
                 8888);
+        }
 
+        [TestMethod]
+        public void TestSip003Plugin_PluginWithArgs()
+        {
             var PluginWithArgs = Sip003Plugin.CreateIfConfigured(new Server
             {
                 server = "192.168.100.1",
@@ -82,7 +96,11 @@ namespace Shadowsocks.Test
                 "_test",
                 "192.168.100.1",
                 8888);
+        }
 
+        [TestMethod]
+        public void TestSip003Plugin_PluginWithOptsAndArgs()
+        {
             var PluginWithOptsAndArgs = Sip003Plugin.CreateIfConfigured(new Server
             {
                 server = "192.168.100.1",
@@ -100,7 +118,11 @@ namespace Shadowsocks.Test
                 "_test",
                 "192.168.100.1",
                 8888);
+        }
 
+        [TestMethod]
+        public void TestSip003Plugin_PluginWithArgsReplaced()
+        {
             var PluginWithArgsReplaced = Sip003Plugin.CreateIfConfigured(new Server
             {
                 server = "192.168.100.1",
@@ -117,7 +139,11 @@ namespace Shadowsocks.Test
                 "_test,192.168.100.1",
                 "192.168.100.1",
                 8888);
+        }
 
+        [TestMethod]
+        public void TestSip003Plugin_PluginWithOptsAndArgsReplaced()
+        { 
             var PluginWithOptsAndArgsReplaced = Sip003Plugin.CreateIfConfigured(new Server
             {
                 server = "192.168.100.1",

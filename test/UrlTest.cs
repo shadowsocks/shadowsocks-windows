@@ -11,38 +11,46 @@ namespace Shadowsocks.Test
     [TestClass]
     public class UrlTest
     {
-        [TestMethod]
-        public void ParseAndGenerateShadowsocksUrl()
+        Server server1, server1WithRemark, server1WithPlugin, server1WithPluginAndRemark;
+        string server1CanonUrl, server1WithRemarkCanonUrl, server1WithPluginCanonUrl, server1WithPluginAndRemarkCanonUrl;
+
+        Server server2, server2WithRemark, server2WithPlugin, server2WithPluginAndRemark;
+        string server2CanonUrl, server2WithRemarkCanonUrl, server2WithPluginCanonUrl, server2WithPluginAndRemarkCanonUrl;
+
+
+        [TestInitialize]
+        public void PrepareTestData()
         {
-            var server = new Server
+            server1 = new Server
             {
                 server = "192.168.100.1",
                 server_port = 8888,
                 password = "test",
                 method = "bf-cfb"
             };
-            var serverCanonUrl = "ss://YmYtY2ZiOnRlc3RAMTkyLjE2OC4xMDAuMTo4ODg4";
+            server1CanonUrl = "ss://YmYtY2ZiOnRlc3RAMTkyLjE2OC4xMDAuMTo4ODg4";
 
-            var server2 = new Server
+            // server2 has base64 padding
+            server2 = new Server
             {
                 server = "192.168.1.1",
                 server_port = 8388,
                 password = "test",
                 method = "bf-cfb"
             };
-            var server2CanonUrl = "ss://YmYtY2ZiOnRlc3RAMTkyLjE2OC4xLjE6ODM4OA==";
+            server2CanonUrl = "ss://YmYtY2ZiOnRlc3RAMTkyLjE2OC4xLjE6ODM4OA==";
 
-            var serverWithRemark = new Server
+            server1WithRemark = new Server
             {
-                server = server.server,
-                server_port = server.server_port,
-                password = server.password,
-                method = server.method,
+                server = server1.server,
+                server_port = server1.server_port,
+                password = server1.password,
+                method = server1.method,
                 remarks = "example-server"
             };
-            var serverWithRemarkCanonUrl = "ss://YmYtY2ZiOnRlc3RAMTkyLjE2OC4xMDAuMTo4ODg4#example-server";
+            server1WithRemarkCanonUrl = "ss://YmYtY2ZiOnRlc3RAMTkyLjE2OC4xMDAuMTo4ODg4#example-server";
 
-            var server2WithRemark = new Server
+            server2WithRemark = new Server
             {
                 server = server2.server,
                 server_port = server2.server_port,
@@ -50,21 +58,22 @@ namespace Shadowsocks.Test
                 method = server2.method,
                 remarks = "example-server"
             };
-            var server2WithRemarkCanonUrl = "ss://YmYtY2ZiOnRlc3RAMTkyLjE2OC4xLjE6ODM4OA==#example-server";
 
-            var serverWithPlugin = new Server
+            server2WithRemarkCanonUrl = "ss://YmYtY2ZiOnRlc3RAMTkyLjE2OC4xLjE6ODM4OA==#example-server";
+
+            server1WithPlugin = new Server
             {
-                server = server.server,
-                server_port = server.server_port,
-                password = server.password,
-                method = server.method,
+                server = server1.server,
+                server_port = server1.server_port,
+                password = server1.password,
+                method = server1.method,
                 plugin = "obfs-local",
                 plugin_opts = "obfs=http;obfs-host=google.com"
             };
-            var serverWithPluginCanonUrl =
+            server1WithPluginCanonUrl =
                 "ss://YmYtY2ZiOnRlc3Q@192.168.100.1:8888/?plugin=obfs-local%3bobfs%3dhttp%3bobfs-host%3dgoogle.com";
 
-            var server2WithPlugin = new Server
+            server2WithPlugin = new Server
             {
                 server = server2.server,
                 server_port = server2.server_port,
@@ -73,23 +82,23 @@ namespace Shadowsocks.Test
                 plugin = "obfs-local",
                 plugin_opts = "obfs=http;obfs-host=google.com"
             };
-            var server2WithPluginCanonUrl =
+            server2WithPluginCanonUrl =
                 "ss://YmYtY2ZiOnRlc3Q@192.168.1.1:8388/?plugin=obfs-local%3bobfs%3dhttp%3bobfs-host%3dgoogle.com";
 
-            var serverWithPluginAndRemark = new Server
+            server1WithPluginAndRemark = new Server
             {
-                server = server.server,
-                server_port = server.server_port,
-                password = server.password,
-                method = server.method,
-                plugin = serverWithPlugin.plugin,
-                plugin_opts = serverWithPlugin.plugin_opts,
-                remarks = serverWithRemark.remarks
+                server = server1.server,
+                server_port = server1.server_port,
+                password = server1.password,
+                method = server1.method,
+                plugin = server1WithPlugin.plugin,
+                plugin_opts = server1WithPlugin.plugin_opts,
+                remarks = server1WithRemark.remarks
             };
-            var serverWithPluginAndRemarkCanonUrl =
+            server1WithPluginAndRemarkCanonUrl =
                 "ss://YmYtY2ZiOnRlc3Q@192.168.100.1:8888/?plugin=obfs-local%3bobfs%3dhttp%3bobfs-host%3dgoogle.com#example-server";
 
-            var server2WithPluginAndRemark = new Server
+            server2WithPluginAndRemark = new Server
             {
                 server = server2.server,
                 server_port = server2.server_port,
@@ -99,26 +108,57 @@ namespace Shadowsocks.Test
                 plugin_opts = server2WithPlugin.plugin_opts,
                 remarks = server2WithRemark.remarks
             };
-            var server2WithPluginAndRemarkCanonUrl =
+            server2WithPluginAndRemarkCanonUrl =
                 "ss://YmYtY2ZiOnRlc3Q@192.168.1.1:8388/?plugin=obfs-local%3bobfs%3dhttp%3bobfs-host%3dgoogle.com#example-server";
+        }
 
+        [TestMethod]
+        public void TestParseUrl_Server1()
+        {
+            RunParseShadowsocksUrlTest(
+                string.Join(
+                    "\r\n",
+                    server1CanonUrl,
+                    "\r\n",
+                    "ss://YmYtY2ZiOnRlc3RAMTkyLjE2OC4xMDAuMTo4ODg4/",
+                    server1WithRemarkCanonUrl,
+                    "ss://YmYtY2ZiOnRlc3RAMTkyLjE2OC4xMDAuMTo4ODg4/#example-server"),
+                new[]
+                {
+                    server1,
+                    server1,
+                    server1WithRemark,
+                    server1WithRemark
+                });
 
             RunParseShadowsocksUrlTest(
                 string.Join(
                     "\r\n",
-                    serverCanonUrl,
+                    "ss://YmYtY2ZiOnRlc3Q@192.168.100.1:8888",
                     "\r\n",
-                    "ss://YmYtY2ZiOnRlc3RAMTkyLjE2OC4xMDAuMTo4ODg4/",
-                    serverWithRemarkCanonUrl,
-                    "ss://YmYtY2ZiOnRlc3RAMTkyLjE2OC4xMDAuMTo4ODg4/#example-server"),
+                    "ss://YmYtY2ZiOnRlc3Q@192.168.100.1:8888/",
+                    "ss://YmYtY2ZiOnRlc3Q@192.168.100.1:8888#example-server",
+                    "ss://YmYtY2ZiOnRlc3Q@192.168.100.1:8888/#example-server",
+                    server1WithPluginCanonUrl,
+                    server1WithPluginAndRemarkCanonUrl,
+                    "ss://YmYtY2ZiOnRlc3Q@192.168.100.1:8888/?plugin=obfs-local%3bobfs%3dhttp%3bobfs-host%3dgoogle.com&unsupported=1#example-server"),
                 new[]
                 {
-                    server,
-                    server,
-                    serverWithRemark,
-                    serverWithRemark
+                    server1,
+                    server1,
+                    server1WithRemark,
+                    server1WithRemark,
+                    server1WithPlugin,
+                    server1WithPluginAndRemark,
+                    server1WithPluginAndRemark
                 });
+        }
 
+
+
+        [TestMethod]
+        public void TestParseUrl_Server2()
+        {
             RunParseShadowsocksUrlTest(
                 string.Join(
                     "\r\n",
@@ -133,28 +173,6 @@ namespace Shadowsocks.Test
                     server2,
                     server2WithRemark,
                     server2WithRemark
-                });
-
-            RunParseShadowsocksUrlTest(
-                string.Join(
-                    "\r\n",
-                    "ss://YmYtY2ZiOnRlc3Q@192.168.100.1:8888",
-                    "\r\n",
-                    "ss://YmYtY2ZiOnRlc3Q@192.168.100.1:8888/",
-                    "ss://YmYtY2ZiOnRlc3Q@192.168.100.1:8888#example-server",
-                    "ss://YmYtY2ZiOnRlc3Q@192.168.100.1:8888/#example-server",
-                    serverWithPluginCanonUrl,
-                    serverWithPluginAndRemarkCanonUrl,
-                    "ss://YmYtY2ZiOnRlc3Q@192.168.100.1:8888/?plugin=obfs-local%3bobfs%3dhttp%3bobfs-host%3dgoogle.com&unsupported=1#example-server"),
-                new[]
-                {
-                    server,
-                    server,
-                    serverWithRemark,
-                    serverWithRemark,
-                    serverWithPlugin,
-                    serverWithPluginAndRemark,
-                    serverWithPluginAndRemark
                 });
 
             RunParseShadowsocksUrlTest(
@@ -178,13 +196,18 @@ namespace Shadowsocks.Test
                     server2WithPluginAndRemark,
                     server2WithPluginAndRemark
                 });
+        }
 
+
+        [TestMethod]
+        public void TestUrlGenerate()
+        { 
             var generateUrlCases = new Dictionary<string, Server>
             {
-                [serverCanonUrl] = server,
-                [serverWithRemarkCanonUrl] = serverWithRemark,
-                [serverWithPluginCanonUrl] = serverWithPlugin,
-                [serverWithPluginAndRemarkCanonUrl] = serverWithPluginAndRemark
+                [server1CanonUrl] = server1,
+                [server1WithRemarkCanonUrl] = server1WithRemark,
+                [server1WithPluginCanonUrl] = server1WithPlugin,
+                [server1WithPluginAndRemarkCanonUrl] = server1WithPluginAndRemark
             };
             RunGenerateShadowsocksUrlTest(generateUrlCases);
         }
