@@ -479,10 +479,10 @@ namespace Shadowsocks.Controller
 
             if (_pacServer == null)
             {
-                _pacServer = new PACServer(_pacDaemon);
+                _pacServer = new PACServer(_pacDaemon, _config);
             }
 
-            _pacServer.UpdatePACURL(_config);
+            _pacServer.UpdatePACURL();
             if (gfwListUpdater == null)
             {
                 gfwListUpdater = new GFWListUpdater();

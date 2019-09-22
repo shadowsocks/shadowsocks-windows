@@ -24,16 +24,15 @@ namespace Shadowsocks.Controller
         private Configuration _config;
         private PACDaemon _pacDaemon;
 
-        public PACServer(PACDaemon pacDaemon)
+        public PACServer(PACDaemon pacDaemon, Configuration config)
         {
             _pacDaemon = pacDaemon;
+            _config = config;
         }
 
-        public void UpdatePACURL(Configuration config)
+        public void UpdatePACURL()
         {
-            this._config = config;
-
-            if (config.secureLocalPac)
+             if (_config.secureLocalPac)
             {
                 var rd = new byte[32];
                 RNG.GetBytes(rd);
@@ -44,7 +43,7 @@ namespace Shadowsocks.Controller
                 PacSecret = "";
             }
 
-            PacUrl = $"http://{config.localHost}:{config.localPort}/{RESOURCE_NAME}?t={GetTimestamp(DateTime.Now)}{PacSecret}";
+            PacUrl = $"http://{_config.localHost}:{_config.localPort}/{RESOURCE_NAME}?t={GetTimestamp(DateTime.Now)}{PacSecret}";
         }
 
 
@@ -118,10 +117,7 @@ namespace Shadowsocks.Controller
                     {
                         if (kv[0] == "Host")
                         {
-                            if (kv[1].Trim() == ((IPEndPoint)socket.LocalEndPoint).ToString())
-                            {
-                                hostMatch = true;
-                            }
+                            hostMatch = IsRequestedHostMatch(kv[1].Trim(), (IPEndPoint)socket.LocalEndPoint);
                         }
                         //else if (kv[0] == "User-Agent")
                         //{
@@ -155,6 +151,25 @@ namespace Shadowsocks.Controller
         }
 
 
+        private bool IsRequestedHostMatch(string requestStr, IPEndPoint endpoint)
+        {
+            if (requestStr == endpoint.ToString())
+            {
+                return true;
+            }
+            else
+            {
+                if (endpoint.Address.IsIPv4MappedToIPv6)
+                {
+                    IPEndPoint v4Endpoint = new IPEndPoint(endpoint.Address.MapToIPv4(), endpoint.Port);
+                    return (requestStr == v4Endpoint.ToString());
+                }
+                else
+                {
+                    return false;
+                }
+            }
+        }
 
         public void SendResponse(Socket socket, bool useSocks)
         {
@@ -198,9 +213,9 @@ Connection: Close
 
         private string GetPACAddress(IPEndPoint localEndPoint, bool useSocks)
         {
-            return localEndPoint.AddressFamily == AddressFamily.InterNetworkV6
+            return _config.isIPv6Enabled
                 ? $"{(useSocks ? "SOCKS5" : "PROXY")} [{localEndPoint.Address}]:{_config.localPort};"
-                : $"{(useSocks ? "SOCKS5" : "PROXY")} {localEndPoint.Address}:{_config.localPort};";
+                : $"{(useSocks ? "SOCKS5" : "PROXY")} {localEndPoint.Address.MapToIPv4()}:{_config.localPort};";
         }
     }
 }

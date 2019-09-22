@@ -38,7 +38,6 @@ namespace Shadowsocks.Controller
         }
 
         Configuration _config;
-        bool _shareOverLAN;
         Socket _tcpSocket;
         Socket _udpSocket;
         List<IService> _services;
@@ -57,27 +56,26 @@ namespace Shadowsocks.Controller
         public void Start(Configuration config)
         {
             this._config = config;
-            this._shareOverLAN = config.shareOverLan;
 
             if (CheckIfPortInUse(_config.localPort))
                 throw new Exception(I18N.GetString("Port {0} already in use", _config.localPort));
 
             try
             {
-                // Create a TCP/IP socket.
-                _tcpSocket = new Socket(config.isIPv6Enabled ? AddressFamily.InterNetworkV6 : AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-                _udpSocket = new Socket(config.isIPv6Enabled ? AddressFamily.InterNetworkV6 : AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-                _tcpSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
-                _udpSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
-                IPEndPoint localEndPoint = null;
-                localEndPoint = _shareOverLAN
-                    ? new IPEndPoint(config.isIPv6Enabled ? IPAddress.IPv6Any : IPAddress.Any, _config.localPort)
-                    : new IPEndPoint(config.isIPv6Enabled ? IPAddress.IPv6Loopback : IPAddress.Loopback, _config.localPort);
+                // Prepare listening port
+                IPEndPoint localEndPoint = new IPEndPoint(IPAddress.IPv6Any, _config.localPort);
 
-                // Bind the socket to the local endpoint and listen for incoming connections.
+                // Create a dual-stack TCP/IP socket. Supported from Windows Vista and above.
+                _tcpSocket = new Socket(SocketType.Stream, ProtocolType.Tcp);
+                _tcpSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
+                _tcpSocket.SetSocketOption(SocketOptionLevel.IPv6, SocketOptionName.IPv6Only, false);
                 _tcpSocket.Bind(localEndPoint);
-                _udpSocket.Bind(localEndPoint);
                 _tcpSocket.Listen(1024);
+
+                _udpSocket = new Socket(SocketType.Dgram, ProtocolType.Udp);
+                _udpSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
+                _udpSocket.SetSocketOption(SocketOptionLevel.IPv6, SocketOptionName.IPv6Only, false);
+                _udpSocket.Bind(localEndPoint);
 
                 // Start an asynchronous socket to listen for connections.
                 Logging.Info($"Shadowsocks started ({UpdateChecker.Version})");
@@ -116,6 +114,13 @@ namespace Shadowsocks.Controller
         {
             UDPState state = (UDPState)ar.AsyncState;
             var socket = state.socket;
+
+            IPAddress remoteIpAddress = ((IPEndPoint)socket.RemoteEndPoint).Address;
+            if (!_config.shareOverLan && !remoteIpAddress.Equals(IPAddress.IPv6Loopback) && !remoteIpAddress.Equals(IPAddress.Loopback.MapToIPv6()))
+            {
+                return;
+            }
+
             try
             {
                 int bytesRead = socket.EndReceiveFrom(ar, ref state.remoteEndPoint);
@@ -156,6 +161,12 @@ namespace Shadowsocks.Controller
             try
             {
                 Socket conn = listener.EndAccept(ar);
+                IPAddress remoteIpAddress = ((IPEndPoint)conn.RemoteEndPoint).Address;
+                if (!_config.shareOverLan && !remoteIpAddress.Equals(IPAddress.IPv6Loopback) && !remoteIpAddress.Equals(IPAddress.Loopback.MapToIPv6()))
+                {
+                    conn.Close();
+                    return;
+                }
 
                 byte[] buf = new byte[4096];
                 object[] state = new object[] {
