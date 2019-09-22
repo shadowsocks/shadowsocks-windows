@@ -56,6 +56,9 @@
   </Choose>
   <ItemGroup>
     <Compile Include="ProcessEnvironment.cs" />
+    <Compile Include="CryptographyTest.cs" />
+    <Compile Include="Sip003PluginTest.cs" />
+    <Compile Include="UrlTest.cs" />
     <Compile Include="UnitTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
