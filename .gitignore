@@ -10,3 +10,6 @@ shadowsocks-csharp/3rd/*
 packages/*
 
 shadowsocks-csharp.sln.DotSettings.user
+
+node_modules
+package-lock.json

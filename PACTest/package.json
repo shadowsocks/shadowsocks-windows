@@ -1,0 +1,16 @@
+{
+  "name": "pactest",
+  "version": "0.1-4.1.7.1",
+  "description": "test ss-windows pac file",
+  "main": "wip.js",
+  "private": true,
+  "scripts": {
+    "test": "npx jest"
+  },
+  "author": {
+    "name": ""
+  },
+  "devDependencies": {
+    "jest": "^24.9.0"
+  }
+}
