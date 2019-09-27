@@ -67,6 +67,33 @@ New server=未配置的服务器
 Move &Up=上移(&U)
 Move D&own=下移(&O)
 
+#Statistics Config
+
+Enable Statistics=启用统计
+Ping Test=Ping测试
+package everytime=个包/次
+By hour of day=按照每天的小时数统计
+Collect data per=收集数据每
+Keep choice for=保持选择每
+minutes=分钟
+Final Score=总分
+AverageLatency=平均延迟
+MinLatency=最小延迟
+MaxLatency=最大延迟
+AverageInboundSpeed=平均入站速度
+MinInboundSpeed=最小入站速度
+MaxInboundSpeed=最大入站速度
+AverageOutboundSpeed=平均出站速度
+MinOutboundSpeed=最小出站速度
+MaxOutboundSpeed=最大出站速度
+AverageResponse=平均响应速度
+MinResponse=最小响应速度
+MaxResponse=最大响应速度
+PackageLoss=丢包率
+Speed=速度
+Package Loss=丢包率
+Ping=网络延迟
+
 # Proxy Form
 
 Edit Proxy=代理设置
