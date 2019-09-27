@@ -6,6 +6,7 @@
     <RootNamespace>PACTest</RootNamespace>
     <SaveNodeJsSettingsInProjectFile>True</SaveNodeJsSettingsInProjectFile>
     <JavaScriptTestFramework>Jest</JavaScriptTestFramework>
+    <JavaScriptTestRoot>test\</JavaScriptTestRoot>
   </PropertyGroup>
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -31,14 +32,22 @@
   </PropertyGroup>
   <ItemGroup>
     <Content Include="abpwrapper.js" />
-    <Content Include="DemoTest.js">
+    <Content Include="app.js" />
+    <Content Include="jest.config.js">
       <SubType>Code</SubType>
-      <TestFramework>ExportRunner</TestFramework>
     </Content>
+    <Compile Include="test\DemoTest.js">
+      <SubType>Code</SubType>
+      <TestFramework>Jest</TestFramework>
+      <Publish>True</Publish>
+    </Compile>
     <Content Include="nsProxyAutoConfig.js">
       <SubType>Code</SubType>
     </Content>
     <Content Include="package.json" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="test\" />
   </ItemGroup>
   <Import Project="$(VSToolsPath)\Node.js Tools\Microsoft.NodejsToolsV2.targets" />
 </Project>

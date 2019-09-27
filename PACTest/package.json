@@ -1,16 +1,17 @@
 {
   "name": "pactest",
-  "version": "0.1-4.1.7.1",
+  "version": "0.0.2-4.1.7.1",
   "description": "test ss-windows pac file",
-  "main": "wip.js",
   "private": true,
+  "main": "app.js",
   "scripts": {
     "test": "npx jest"
   },
   "author": {
-    "name": ""
+    "name": "community"
   },
   "devDependencies": {
-    "jest": "^24.9.0"
+    "jest": "^24.9.0",
+    "jest-editor-support": "^25.0.1"
   }
 }
