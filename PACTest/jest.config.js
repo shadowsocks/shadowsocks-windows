@@ -1,4 +1,4 @@
 ﻿module.exports = {
-    roots: ['<rootDir>'],
+    roots: ["<rootDir>"],
     testMatch: ["**/test/**"]
 };

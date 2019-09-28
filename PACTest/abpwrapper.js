@@ -36,5 +36,7 @@ module.exports = {
     },
     set rules(r) {
         abpcontext.__RULES__ = r;
-    }
+    },
+    direct: "DIRECT;",
+    proxy: "__PROXY__"
 };

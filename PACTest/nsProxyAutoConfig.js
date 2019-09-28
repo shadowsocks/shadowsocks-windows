@@ -1,6 +1,6 @@
-﻿// PAC runtime in Mozilla Firefox
+﻿/* eslint-disable */
+// PAC runtime in Mozilla Firefox
 // See: https://dxr.mozilla.org/mozilla-central/source/netwerk/base/ProxyAutoConfig.cpp#45
-
 function dnsDomainIs(host, domain) {
     return (host.length >= domain.length &&
         host.substring(host.length - domain.length) == domain);

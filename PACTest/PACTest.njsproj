@@ -31,6 +31,9 @@
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
+    <Content Include=".eslintrc.json">
+      <SubType>Code</SubType>
+    </Content>
     <Content Include="abpwrapper.js" />
     <Content Include="app.js" />
     <Content Include="jest.config.js">
@@ -45,6 +48,10 @@
       <SubType>Code</SubType>
     </Content>
     <Content Include="package.json" />
+    <Content Include="test\Issue2329.js">
+      <SubType>Code</SubType>
+      <TestFramework>Jest</TestFramework>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="test\" />
