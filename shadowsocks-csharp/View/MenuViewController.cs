@@ -15,6 +15,7 @@ using Shadowsocks.Util;
 using System.Linq;
 using Microsoft.Win32;
 using System.Windows.Interop;
+using System.Collections.Generic;
 
 namespace Shadowsocks.View
 {
@@ -455,21 +456,41 @@ namespace Shadowsocks.View
                 items.Add(i, item);
                 i++;
             }
-
+            
             // user wants a seperator item between strategy and servers menugroup
             items.Add(i++, new MenuItem("-"));
 
             int strategyCount = i;
             Configuration configuration = controller.GetConfigurationCopy();
-            foreach (var server in configuration.configs)
+            List<MenuItem> moreServersPages = new List<MenuItem>();
+            const int MAX_DISPLAY_SERVER_PER_PAGE = 20;
+
+            for (int serverIndex = 0; serverIndex < configuration.configs.Count; serverIndex++)
             {
+                var server = configuration.configs[serverIndex];
                 if (Configuration.ChecksServer(server))
                 {
                     MenuItem item = new MenuItem(server.FriendlyName());
-                    item.Tag = i - strategyCount;
+                    item.Tag = serverIndex;
                     item.Click += AServerItem_Click;
-                    items.Add(i, item);
-                    i++;
+                    if (serverIndex > MAX_DISPLAY_SERVER_PER_PAGE)
+                    {
+                        if (moreServersPages.Count != 0 && moreServersPages.Last().MenuItems.Count < MAX_DISPLAY_SERVER_PER_PAGE)
+                        {
+                            moreServersPages.Last().MenuItems.Add(item);
+                        }
+                        else
+                        {
+                            var newPage = new MenuItem(I18N.GetString("Next Page"), new MenuItem[]{ item });
+                            moreServersPages.LastOrDefault()?.MenuItems?.Add(newPage);
+                            moreServersPages.Add(newPage);
+                        }
+                    }
+                    else
+                    {
+                        items.Add(i, item);
+                        i++;
+                    }
                 }
             }
 
@@ -478,6 +499,20 @@ namespace Shadowsocks.View
                 if (item.Tag != null && (item.Tag.ToString() == configuration.index.ToString() || item.Tag.ToString() == configuration.strategy))
                 {
                     item.Checked = true;
+                }
+            }
+
+            if (moreServersPages.Count != 0)
+            {
+                items.Add(i++, moreServersPages[0]);
+                if (configuration.index >= MAX_DISPLAY_SERVER_PER_PAGE)
+                {
+                    int selectedPage = configuration.index / MAX_DISPLAY_SERVER_PER_PAGE - 1;
+                    moreServersPages[selectedPage].MenuItems[configuration.index % MAX_DISPLAY_SERVER_PER_PAGE].Checked = true;
+                    for (int pageIndex = 0; pageIndex <= selectedPage; pageIndex++)
+                    {
+                        moreServersPages[pageIndex].Text = I18N.GetString("✔Next Page");
+                    }
                 }
             }
         }

@@ -39,6 +39,8 @@ Edit Servers=编辑服务器
 Load Balance=负载均衡
 High Availability=高可用
 Choose by statistics=根据统计
+Next Page=下一页
+✔Next Page=✔下一页
 
 # Config Form
 
