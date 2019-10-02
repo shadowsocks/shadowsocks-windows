@@ -28,6 +28,7 @@ namespace Shadowsocks.Controller.Strategy
             var servers = controller.GetCurrentConfiguration().configs;
             var randomIndex = new Random().Next() % servers.Count;
             _currentServer = servers[randomIndex];  //choose a server randomly at first
+            // FIXME: consider Statistics and Config changing asynchrously.
             _timer = new Timer(ReloadStatisticsAndChooseAServer);
         }
 
