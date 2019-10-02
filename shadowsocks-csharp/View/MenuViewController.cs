@@ -473,7 +473,7 @@ namespace Shadowsocks.View
                     MenuItem item = new MenuItem(server.FriendlyName());
                     item.Tag = serverIndex;
                     item.Click += AServerItem_Click;
-                    if (serverIndex > MAX_DISPLAY_SERVER_PER_PAGE)
+                    if (serverIndex >= MAX_DISPLAY_SERVER_PER_PAGE)
                     {
                         if (moreServersPages.Count != 0 && moreServersPages.Last().MenuItems.Count < MAX_DISPLAY_SERVER_PER_PAGE)
                         {
