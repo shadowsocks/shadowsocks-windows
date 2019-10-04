@@ -50,7 +50,7 @@ namespace Shadowsocks.Controller
                 try
                 {
                     // Local Port Forward use IP as is
-                    EndPoint remoteEP = SocketUtil.GetEndPoint(_local.AddressFamily == AddressFamily.InterNetworkV6 ? "[::1]" : "127.0.0.1", targetPort);
+                    EndPoint remoteEP = SocketUtil.GetEndPoint(((IPEndPoint)_local.LocalEndPoint).Address.IsIPv4MappedToIPv6 ? "127.0.0.1" : "[::1]", targetPort);
 
                     // Connect to the remote endpoint.
                     _remote = new WrappedSocket();

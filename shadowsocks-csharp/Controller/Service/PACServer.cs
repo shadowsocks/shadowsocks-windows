@@ -7,7 +7,6 @@ using System.Net.Sockets;
 using System.Text;
 using Shadowsocks.Encryption;
 using Shadowsocks.Model;
-using Shadowsocks.Properties;
 using Shadowsocks.Util;
 using System.Threading.Tasks;
 
@@ -213,9 +212,9 @@ Connection: Close
 
         private string GetPACAddress(IPEndPoint localEndPoint, bool useSocks)
         {
-            return _config.isIPv6Enabled
-                ? $"{(useSocks ? "SOCKS5" : "PROXY")} [{localEndPoint.Address}]:{_config.localPort};"
-                : $"{(useSocks ? "SOCKS5" : "PROXY")} {localEndPoint.Address.MapToIPv4()}:{_config.localPort};";
+            return localEndPoint.Address.IsIPv4MappedToIPv6
+                ? $"{(useSocks ? "SOCKS5" : "PROXY")} {localEndPoint.Address.MapToIPv4()}:{_config.localPort};"
+                : $"{(useSocks ? "SOCKS5" : "PROXY")} [{localEndPoint.Address}]:{_config.localPort};";
         }
     }
 }
