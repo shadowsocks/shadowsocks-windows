@@ -115,14 +115,13 @@ namespace Shadowsocks.Controller
             UDPState state = (UDPState)ar.AsyncState;
             var socket = state.socket;
 
-            IPAddress remoteIpAddress = ((IPEndPoint)socket.RemoteEndPoint).Address;
-            if (!_config.shareOverLan && !remoteIpAddress.Equals(IPAddress.IPv6Loopback) && !remoteIpAddress.Equals(IPAddress.Loopback.MapToIPv6()))
-            {
-                return;
-            }
-
             try
             {
+                IPAddress remoteIpAddress = ((IPEndPoint)socket.RemoteEndPoint).Address;
+                if (!_config.shareOverLan && !remoteIpAddress.Equals(IPAddress.IPv6Loopback) && !remoteIpAddress.Equals(IPAddress.Loopback.MapToIPv6()))
+                {
+                    return;
+                }
                 int bytesRead = socket.EndReceiveFrom(ar, ref state.remoteEndPoint);
                 foreach (IService service in _services)
                 {
