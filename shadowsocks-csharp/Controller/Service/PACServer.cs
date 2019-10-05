@@ -164,17 +164,15 @@ namespace Shadowsocks.Controller
 
                 string proxy = GetPACAddress(localEndPoint, useSocks);
 
-                string pacContent = $"var __PROXY__ = \"{proxy}\";\n" + _pacDaemon.GetPACContent();
-
-                //string pacContent = _pacDaemon.GetPACContent().Replace("__PROXY__", proxy);
-
-                string responseHead = String.Format(@"HTTP/1.1 200 OK
-Server: Shadowsocks
+                string pacContent = $"var __PROXY__ = '{proxy}';\n" + _pacDaemon.GetPACContent();
+                string responseHead = 
+$@"HTTP/1.1 200 OK
+Server: ShadowsocksWindows/{UpdateChecker.Version}
 Content-Type: application/x-ns-proxy-autoconfig
-Content-Length: {0}
+Content-Length: { Encoding.UTF8.GetBytes(pacContent).Length}
 Connection: Close
 
-", Encoding.UTF8.GetBytes(pacContent).Length);
+";
                 byte[] response = Encoding.UTF8.GetBytes(responseHead + pacContent);
                 socket.BeginSend(response, 0, response.Length, 0, new AsyncCallback(SendCallback), socket);
                 Utils.ReleaseMemory(true);

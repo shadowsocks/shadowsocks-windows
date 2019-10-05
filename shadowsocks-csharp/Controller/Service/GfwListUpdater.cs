@@ -81,10 +81,10 @@ namespace Shadowsocks.Controller
 
             List<string> gfwLines = new List<string>();
             gfwLines = ParseBase64ToValidList(gfwListResult);
-            abpContent = $"var __USERRULES__ = {JsonConvert.SerializeObject(userruleLines, Formatting.Indented)};\n" +
-                $"var __RULES__ = {JsonConvert.SerializeObject(gfwLines, Formatting.Indented)};\n";
-            //abpContent = abpContent.Replace("__USERRULES__", JsonConvert.SerializeObject(userruleLines, Formatting.Indented))
-            //                       .Replace("__RULES__", JsonConvert.SerializeObject(gfwLines, Formatting.Indented));
+            abpContent =
+$@"var __USERRULES__ = {JsonConvert.SerializeObject(userruleLines, Formatting.Indented)};
+var __RULES__ = {JsonConvert.SerializeObject(gfwLines, Formatting.Indented)};
+";
             return abpContent;
         }
 
