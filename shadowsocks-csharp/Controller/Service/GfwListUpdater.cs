@@ -84,7 +84,7 @@ namespace Shadowsocks.Controller
             abpContent =
 $@"var __USERRULES__ = {JsonConvert.SerializeObject(userruleLines, Formatting.Indented)};
 var __RULES__ = {JsonConvert.SerializeObject(gfwLines, Formatting.Indented)};
-";
+{abpContent}";
             return abpContent;
         }
 
