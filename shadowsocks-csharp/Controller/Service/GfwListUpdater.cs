@@ -94,7 +94,9 @@ namespace Shadowsocks.Controller
             if (config.enabled)
             {
                 http.Proxy = new WebProxy(
-                    config.isIPv6Enabled ? IPAddress.IPv6Loopback.ToString() : IPAddress.Loopback.ToString(), 
+                    config.isIPv6Enabled
+                    ? $"http://[{IPAddress.IPv6Loopback.ToString()}]"
+                    : $"http://{IPAddress.Loopback.ToString()}",
                     config.localPort);
             }
             http.DownloadStringCompleted += http_DownloadStringCompleted;
