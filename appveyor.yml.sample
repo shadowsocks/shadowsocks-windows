@@ -1,0 +1,483 @@
+
+# Notes:
+#   - Minimal appveyor.yml file is an empty file. All sections are optional.
+#   - Indent each level of configuration with 2 spaces. Do not use tabs!
+#   - All section names are case-sensitive.
+#   - Section names should be unique on each level.
+
+#---------------------------------#
+#      general configuration      #
+#---------------------------------#
+
+# version format
+version: 1.0.{build}
+
+# you can use {branch} name in version format too
+# version: 1.0.{build}-{branch}
+
+# branches to build
+branches:
+  # whitelist
+  only:
+    - master
+    - production
+
+  # blacklist
+  except:
+    - gh-pages
+
+# Do not build on tags (GitHub and BitBucket)
+skip_tags: true
+
+# Start builds on tags only (GitHub and BitBucket)
+skip_non_tags: true
+
+# Skipping commits with particular message or from specific user
+skip_commits:
+  message: /Created.*\.(png|jpg|jpeg|bmp|gif)/      # Regex for matching commit message
+  author: John                                      # Commit author's username, name, email or regexp maching one of these.
+
+# Including commits with particular message or from specific user
+only_commits:
+  message: /build/                # Start a new build if message contains 'build'
+  author: jack@company.com        # Start a new build for commit of user with email jack@company.com
+
+# Skipping commits affecting specific files (GitHub only). More details here: /docs/appveyor-yml
+#skip_commits:
+#  files:
+#    - docs/*
+#    - '**/*.html'
+
+# Including commits affecting specific files (GitHub only). More details here: /docs/appveyor-yml
+#only_commits:
+#  files:
+#    - Project-A/
+#    - Project-B/
+
+# Do not build feature branch with open Pull Requests
+skip_branch_with_pr: true
+
+# Maximum number of concurrent jobs for the project
+max_jobs: 1
+
+#---------------------------------#
+#    environment configuration    #
+#---------------------------------#
+
+# Build worker image (VM template)
+image: Visual Studio 2015
+
+# scripts that are called at very beginning, before repo cloning
+init:
+  - git config --global core.autocrlf input
+
+# clone directory
+clone_folder: c:\projects\myproject
+
+# fetch repository as zip archive
+shallow_clone: true                 # default is "false"
+
+# set clone depth
+clone_depth: 5                      # clone entire repository history if not defined
+
+# setting up etc\hosts file
+hosts:
+  queue-server: 127.0.0.1
+  db.server.com: 127.0.0.2
+
+# environment variables
+environment:
+  my_var1: value1
+  my_var2: value2
+  # this is how to set encrypted variable. Go to "Settings" -> "Encrypt YAML" page in account menu to encrypt data.
+  my_secure_var1:
+    secure: FW3tJ3fMncxvs58/ifSP7w==
+
+# environment:
+#  global:
+#    connection_string: server=12;password=13;
+#    service_url: https://127.0.0.1:8090
+#
+#  matrix:
+#  - db: mysql
+#    provider: mysql
+#
+#  - db: mssql
+#    provider: mssql
+#    password:
+#      secure: $#(JFDA)jQ@#$
+
+# this is how to allow failing jobs in the matrix
+matrix:
+  fast_finish: true     # set this flag to immediately finish build once one of the jobs fails.
+  allow_failures:
+    - platform: x86
+      configuration: Debug
+    - platform: x64
+      configuration: Release
+
+# exclude configuration from the matrix. Works similarly to 'allow_failures' but build not even being started for excluded combination.
+  exclude:
+    - platform: x86
+      configuration: Debug
+
+# build cache to preserve files/folders between builds
+cache:
+  - packages -> **\packages.config  # preserve "packages" directory in the root of build folder but will reset it if packages.config is modified
+  - projectA\libs
+  - node_modules                    # local npm modules
+  - '%LocalAppData%\NuGet\Cache'    # NuGet < v3
+  - '%LocalAppData%\NuGet\v3-cache' # NuGet v3
+
+# enable service required for build/tests
+services:
+  - mssql2014           # start SQL Server 2014 Express
+  - mssql2014rs         # start SQL Server 2014 Express and Reporting Services
+  - mssql2012sp1        # start SQL Server 2012 SP1 Express
+  - mssql2012sp1rs      # start SQL Server 2012 SP1 Express and Reporting Services
+  - mssql2008r2sp2      # start SQL Server 2008 R2 SP2 Express
+  - mssql2008r2sp2rs    # start SQL Server 2008 R2 SP2 Express and Reporting Services
+  - mysql               # start MySQL 5.6 service
+  - postgresql          # start PostgreSQL 9.5 service
+  - iis                 # start IIS
+  - msmq                # start Queuing services
+  - mongodb             # start MongoDB
+
+# scripts that run after cloning repository
+install:
+  # by default, all script lines are interpreted as batch
+  - echo This is batch
+  # to run script as a PowerShell command prepend it with ps:
+  - ps: Write-Host 'This is PowerShell'
+  # batch commands start from cmd:
+  - cmd: echo This is batch again
+  - cmd: set MY_VAR=12345
+
+# enable patching of AssemblyInfo.* files
+assembly_info:
+  patch: true
+  file: AssemblyInfo.*
+  assembly_version: "2.2.{build}"
+  assembly_file_version: "{version}"
+  assembly_informational_version: "{version}"
+
+
+# Automatically register private account and/or project AppVeyor NuGet feeds.
+nuget:
+  account_feed: true
+  project_feed: true
+  disable_publish_on_pr: true     # disable publishing of .nupkg artifacts to account/project feeds for pull request builds
+  publish_wap_octopus: true       # disable publishing of Octopus Deploy .nupkg artifacts to account/project feeds
+
+#---------------------------------#
+#       build configuration       #
+#---------------------------------#
+
+# build platform, i.e. x86, x64, Any CPU. This setting is optional.
+platform: Any CPU
+
+# to add several platforms to build matrix:
+#platform:
+#  - x86
+#  - Any CPU
+
+# build Configuration, i.e. Debug, Release, etc.
+configuration: Release
+
+# to add several configurations to build matrix:
+#configuration:
+#  - Debug
+#  - Release
+
+# Build settings, not to be confused with "before_build" and "after_build".
+# "project" is relative to the original build directory and not influenced by directory changes in "before_build".
+build:
+  parallel: true                  # enable MSBuild parallel builds
+  project: MyTestAzureCS.sln      # path to Visual Studio solution or project
+  publish_wap: true               # package Web Application Projects (WAP) for Web Deploy
+  publish_wap_xcopy: true         # package Web Application Projects (WAP) for XCopy deployment
+  publish_wap_beanstalk: true     # Package Web Applications for AWS Elastic Beanstalk deployment
+  publish_wap_octopus: true       # Package Web Applications for Octopus deployment
+  publish_azure_webjob: true      # Package Azure WebJobs for Zip Push deployment
+  publish_azure: true             # package Azure Cloud Service projects and push to artifacts
+  publish_aspnet_core: true       # Package ASP.NET Core projects
+  publish_core_console: true      # Package .NET Core console projects
+  publish_nuget: true             # package projects with .nuspec files and push to artifacts
+  publish_nuget_symbols: true     # generate and publish NuGet symbol packages
+  include_nuget_references: true  # add -IncludeReferencedProjects option while packaging NuGet artifacts
+
+  # MSBuild verbosity level
+  verbosity: quiet|minimal|normal|detailed
+
+
+# scripts to run before build
+before_build:
+
+# to run your custom scripts instead of automatic MSBuild
+build_script:
+
+# scripts to run after build (working directory and environment changes are persisted from the previous steps)
+after_build:
+
+# scripts to run *after* solution is built and *before* automatic packaging occurs (web apps, NuGet packages, Azure Cloud Services)
+before_package:
+
+# to disable automatic builds
+#build: off
+
+#---------------------------------#
+#       tests configuration       #
+#---------------------------------#
+
+# to run tests against only selected assemblies and/or categories
+test:
+  assemblies:
+    only:
+      - asm1.dll
+      - asm2.dll
+
+  categories:
+    only:
+      - UI
+      - E2E
+
+# to run tests against all except selected assemblies and/or categories
+#test:
+#  assemblies:
+#    except:
+#      - asm1.dll
+#      - asm2.dll
+#
+#  categories:
+#    except:
+#      - UI
+#      - E2E
+
+# to run tests from different categories as separate jobs in parallel
+#test:
+#  categories:
+#    - A            # A category common for all jobs
+#    - [UI]         # 1st job
+#    - [DAL, BL]    # 2nd job
+
+# scripts to run before tests (working directory and environment changes are persisted from the previous steps such as "before_build")
+before_test:
+  - echo script1
+  - ps: Write-Host "script1"
+
+# to run your custom scripts instead of automatic tests
+test_script:
+  - echo This is my custom test script
+
+# scripts to run after tests
+after_test:
+
+# to disable automatic tests
+#test: off
+
+
+#---------------------------------#
+#      artifacts configuration    #
+#---------------------------------#
+
+artifacts:
+
+  # pushing a single file
+  - path: test.zip
+
+  # pushing a single file with environment variable in path and "Deployment name" specified
+  - path: MyProject\bin\$(configuration)
+    name: myapp
+
+  # pushing entire folder as a zip archive
+  - path: logs
+
+  # pushing all *.nupkg files in build directory recursively
+  - path: '**\*.nupkg'
+
+
+#---------------------------------#
+#     deployment configuration    #
+#---------------------------------#
+
+# providers: Local, FTP, WebDeploy, AzureCS, AzureBlob, S3, NuGet, Environment
+# provider names are case-sensitive!
+deploy:
+
+    # FTP deployment provider settings
+  - provider: FTP
+    protocol: ftp|ftps|sftp
+    host: ftp.myserver.com
+    username: admin
+    password:
+      secure: eYKZKFkkEvFYWX6NfjZIVw==
+    folder:
+    application:
+    active_mode: false
+    beta: true      # enable alternative FTP library for 'ftp' and 'ftps' modes
+    debug: true     # show complete FTP log
+
+    # Amazon S3 deployment provider settings
+  - provider: S3
+    access_key_id:
+      secure: ABcd==
+    secret_access_key:
+      secure: ABcd==
+    bucket: my_bucket
+    folder:
+    artifact:
+    set_public: false
+
+    # Azure Blob storage deployment provider settings
+  - provider: AzureBlob
+    storage_account_name:
+      secure: ABcd==
+    storage_access_key:
+      secure: ABcd==
+    container: my_container
+    folder:
+    artifact:
+
+    # Web Deploy deployment provider settings
+  - provider: WebDeploy
+    server: http://www.deploy.com/myendpoint
+    website: mywebsite
+    username: user
+    password:
+      secure: eYKZKFkkEvFYWX6NfjZIVw==
+    ntlm: false
+    remove_files: false
+    app_offline: false
+    do_not_use_checksum: true           # do not use check sum for comparing source and destination files. By default checksums are used.
+    sync_retry_attempts: 2              # sync attempts, max
+    sync_retry_interval: 2000           # timeout between sync attempts, milliseconds
+    aspnet_core: true                   # artifact zip contains ASP.NET Core application
+    aspnet_core_force_restart: true     # poke app's web.config before deploy to force application restart
+    skip_dirs: \\App_Data
+    skip_files: web.config
+    on:
+      branch: release
+      platform: x86
+      configuration: debug
+
+    # Deploying to Azure Cloud Service
+  - provider: AzureCS
+    subscription_id:
+      secure: fjZIVw==
+    subscription_certificate:
+      secure: eYKZKFkkEv...FYWX6NfjZIVw==
+    storage_account_name: my_storage
+    storage_access_key:
+      secure: ABcd==
+    service: my_service
+    slot: Production
+    target_profile: Cloud
+    artifact: MyPackage.cspkg
+
+    # Deploying to NuGet feed
+  - provider: NuGet
+    server: https://my.nuget.server/feed
+    api_key:
+      secure: FYWX6NfjZIVw==
+    skip_symbols: false
+    symbol_server: https://your.symbol.server/feed
+    artifact: MyPackage.nupkg
+
+    # Deploy to GitHub Releases
+  - provider: GitHub
+    artifact: /.*\.nupkg/           # upload all NuGet packages to release assets
+    draft: false
+    prerelease: false
+    on:
+      branch: master                # release from master branch only
+      APPVEYOR_REPO_TAG: true       # deploy on tag push only
+
+    # Deploying to a named environment
+  - provider: Environment
+    name: staging
+    on:
+      branch: staging
+      env_var1: value1
+      env_var2: value2
+
+# scripts to run before deployment
+before_deploy:
+
+# scripts to run after deployment
+after_deploy:
+
+# to run your custom scripts instead of provider deployments
+deploy_script:
+
+# to disable deployment
+#deploy: off
+
+#---------------------------------#
+#        global handlers          #
+#---------------------------------#
+
+# on successful build
+on_success:
+  - do something
+
+# on build failure
+on_failure:
+  - do something
+
+# after build failure or success
+on_finish:
+  - do something
+
+
+#---------------------------------#
+#         notifications           #
+#---------------------------------#
+
+notifications:
+
+  # Email
+  - provider: Email
+    to:
+      - user1@email.com
+      - user2@email.com
+    subject: 'Build {{status}}'                  # optional
+    message: "{{message}}, {{commitId}}, ..."    # optional
+    on_build_status_changed: true
+
+  # HipChat
+  - provider: HipChat
+    auth_token:
+      secure: RbOnSMSFKYzxzFRrxM1+XA==
+    room: ProjectA
+    template: "{message}, {commitId}, ..."
+
+  # Slack
+  - provider: Slack
+    incoming_webhook: http://incoming-webhook-url
+
+  # ...or using auth token
+
+  - provider: Slack
+    auth_token:
+      secure: kBl9BlxvRMr9liHmnBs14A==
+    channel: development
+    template: "{message}, {commitId}, ..."
+
+  # Campfire
+  - provider: Campfire
+    account: appveyor
+    auth_token:
+      secure: RifLRG8Vfyol+sNhj9u2JA==
+    room: ProjectA
+    template: "{message}, {commitId}, ..."
+
+  # Webhook
+  - provider: Webhook
+    url: http://www.myhook2.com
+    headers:
+      User-Agent: myapp 1.0
+      Authorization:
+        secure: GhD+5xhLz/tkYY6AO3fcfQ==
+    on_build_success: false
+    on_build_failure: true
+    on_build_status_changed: true
