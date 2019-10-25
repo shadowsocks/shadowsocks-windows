@@ -4,7 +4,6 @@
   <xs:element name="Weavers">
     <xs:complexType>
       <xs:all>
-        <xs:element name="Caseless" minOccurs="0" maxOccurs="1" type="xs:anyType" />
         <xs:element name="Costura" minOccurs="0" maxOccurs="1">
           <xs:complexType>
             <xs:all>
@@ -91,6 +90,7 @@
             </xs:attribute>
           </xs:complexType>
         </xs:element>
+        <xs:element name="Caseless" minOccurs="0" maxOccurs="1" type="xs:anyType" />
       </xs:all>
       <xs:attribute name="VerifyAssembly" type="xs:boolean">
         <xs:annotation>
