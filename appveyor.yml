@@ -1,22 +1,186 @@
-version: 1.0.{build}
+
+# Notes:
+#   - Minimal appveyor.yml file is an empty file. All sections are optional.
+#   - Indent each level of configuration with 2 spaces. Do not use tabs!
+#   - All section names are case-sensitive.
+#   - Section names should be unique on each level.
+
+#---------------------------------#
+#      general configuration      #
+#---------------------------------#
+
+# version format
+# Build version format is taken from UI if it is not set
+# version: 1.0.{build}
+
+# # branches to build
+# branches:
+#   # whitelist
+#   only:
+#     - master
+#     - production
+
+#   # blacklist
+#   except:
+#     - gh-pages
+
+
+#---------------------------------#
+#    environment configuration    #
+#---------------------------------#
+
+# Build worker image (VM template)
 image: Visual Studio 2017
+
+# scripts that are called at very beginning, before repo cloning
+# init:
+#   - git config --global core.autocrlf false
+
+
+# set clone depth
+clone_depth: 5                      # clone entire repository history if not defined
+
+
+# environment variables
 environment:
+  # my_var1: value1
+  # # this is how to set encrypted variable. Go to "Settings" -> "Encrypt YAML" page in account menu to encrypt data.
+  # my_secure_var1:
+  #   secure: FW3tJ3fMncxvs58/ifSP7w==
   matrix:
     - platform: x86
       configuration: Debug
     - platform: x86
       configuration: Release
+
+# this is how to allow failing jobs in the matrix
 matrix:
-  fast_finish: false
-nuget:
-  project_feed: true
-before_build:
-- cmd: nuget restore
+  fast_finish: false     # set this flag to immediately finish build once one of the jobs fails.
+
+# build cache to preserve files/folders between builds
+cache:
+  - packages -> **\packages.config  # preserve "packages" directory in the root of build folder but will reset it if packages.config is modified
+  # - '%LocalAppData%\NuGet\Cache'    # NuGet < v3
+  - '%LocalAppData%\NuGet\v3-cache' # NuGet v3
+
+
+# Automatically register private account and/or project AppVeyor NuGet feeds.
+# nuget:
+  # account_feed: true
+  # project_feed: true
+  # disable_publish_on_pr: true     # disable publishing of .nupkg artifacts to account/project feeds for pull request builds
+  # publish_wap_octopus: true       # disable publishing of Octopus Deploy .nupkg artifacts to account/project feeds
+
+#---------------------------------#
+#       build configuration       #
+#---------------------------------#
+
+# Build settings, not to be confused with "before_build" and "after_build".
+# "project" is relative to the original build directory and not influenced by directory changes in "before_build".
 build:
-  parallel: true
-  verbosity: normal
-artifacts:
-- path: shadowsocks-csharp\bin\x86\Release\Shadowsocks.exe
-  name: Shadowsocks-release.exe
-- path: shadowsocks-csharp\bin\x86\Debug\Shadowsocks.exe
-  name: Shadowsocks-debug.exe
+  # parallel: true                  # enable MSBuild parallel builds
+  # publish_nuget: true             # package projects with .nuspec files and push to artifacts
+  # publish_nuget_symbols: true     # generate and publish NuGet symbol packages
+  # include_nuget_references: true  # add -IncludeReferencedProjects option while packaging NuGet artifacts
+
+  # MSBuild verbosity level
+  verbosity: normal  # quiet|minimal|normal|detailed
+
+
+# scripts to run before build
+before_build:
+  - cmd: nuget restore
+
+# to run your custom scripts instead of automatic MSBuild
+# build_script:
+
+# scripts to run after build (working directory and environment changes are persisted from the previous steps)
+after_build:
+  ps: |
+    function CalculateHash($file)
+    {
+        $newLine = "`r`n"
+        $text = (Split-Path $file -Leaf) + $newLine
+        $text += 'MD5' + $newLine
+        $text += (Get-FileHash $file -Algorithm MD5).Hash + $newLine
+        $text += 'SHA-1' + $newLine
+        $text += (Get-FileHash $file -Algorithm SHA1).Hash + $newLine
+        $text += 'SHA-256' + $newLine
+        $text += (Get-FileHash $file -Algorithm SHA256).Hash + $newLine
+        $text += 'SHA-512' + $newLine
+        $text += (Get-FileHash $file -Algorithm SHA512).Hash
+        return $text
+    }
+
+
+    $WorkingFolder = "$env:APPVEYOR_BUILD_FOLDER\working"
+    $ExeFileName = "Shadowsocks-$env:APPVEYOR_BUILD_VERSION-$env:CONFIGURATION.exe"
+    $ExeFile = "$WorkingFolder\$ExeFileName"
+    $ExeHashFile = "$Exefile.hash"
+
+    New-Item $WorkingFolder -ItemType Directory -Force
+    Copy-Item $env:APPVEYOR_BUILD_FOLDER\shadowsocks-csharp\bin\$env:PLATFORM\$env:CONFIGURATION\Shadowsocks.exe $WorkingFolder\Shadowsocks.exe
+    Copy-Item $WorkingFolder\Shadowsocks.exe $ExeFile
+
+    CalculateHash -file $Exefile | Out-File -FilePath $ExeHashFile
+
+    Push-AppveyorArtifact $ExeFile
+    Push-AppveyorArtifact $ExeHashFile
+
+    # Create and deploy the release zip
+    if ($env:configuration -eq 'Release')
+    {
+        $ReleaseFile = "$WorkingFolder\Shadowsocks.exe"
+        $HashFile = "$ReleaseFile.hash"
+        $ZipFile = "$WorkingFolder\Shadowsocks-$env:APPVEYOR_BUILD_VERSION.zip"
+        $ZipHashFile = "$ZipFile.hash"
+        # Calculate exe Hash and archieve both exe and hash to zip
+        CalculateHash -file $ReleaseFile | Out-File -FilePath $hashFile
+        7z a $ZipFile $ReleaseFile
+        7z a $ZipFile $HashFile
+        Push-AppveyorArtifact $ZipFile
+        # Calculate zip Hash
+        CalculateHash -file $ZipFile | Out-File -FilePath $ZipHashFile
+        Push-AppveyorArtifact $ZipHashFile
+    }
+
+# scripts to run *after* solution is built and *before* automatic packaging occurs (web apps, NuGet packages, Azure Cloud Services)
+# before_package:
+
+# to disable automatic builds
+#build: off
+
+
+#---------------------------------#
+#     deployment configuration    #
+#---------------------------------#
+
+# providers: Local, FTP, WebDeploy, AzureCS, AzureBlob, S3, NuGet, Environment
+# provider names are case-sensitive!
+deploy:
+
+    # Deploy to GitHub Releases
+  - provider: GitHub
+    auth_token:
+      secure: ZrRlVe3eWp1ccIVZcmFrI7vaCxwz5ewIMSmaPUTjMGyC1rVRlYm7nWWi6Pzkpe0A
+    description: '%APPVEYOR_BUILD_VERSION%'
+    artifact: Shadowsocks-%APPVEYOR_BUILD_VERSION%.zip, Shadowsocks-%APPVEYOR_BUILD_VERSION%.zip.hash
+    draft: true
+    prerelease: true
+    on:
+      branch: master                # release from master branch only
+      configuration: Release
+      APPVEYOR_REPO_TAG: true       # deploy on tag push only
+
+
+# # scripts to run before deployment
+# before_deploy:
+
+# # scripts to run after deployment
+# after_deploy:
+
+# # to run your custom scripts instead of provider deployments
+# deploy_script:
+
+# # to disable deployment
+#deploy: off
