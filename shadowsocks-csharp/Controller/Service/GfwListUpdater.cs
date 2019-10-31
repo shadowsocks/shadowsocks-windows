@@ -95,7 +95,9 @@ var __RULES__ = {JsonConvert.SerializeObject(gfwLines, Formatting.Indented)};
             if (config.enabled)
             {
                 http.Proxy = new WebProxy(
-                    config.isIPv6Enabled ? IPAddress.IPv6Loopback.ToString() : IPAddress.Loopback.ToString(),
+                    config.isIPv6Enabled
+                    ? $"[{IPAddress.IPv6Loopback.ToString()}]"
+                    : IPAddress.Loopback.ToString(),
                     config.localPort);
             }
             http.DownloadStringCompleted += http_DownloadStringCompleted;
