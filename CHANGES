@@ -1,3 +1,13 @@
+4.1.8 2019-10-31
+- Update the nuget configurations and packages
+- Fix some crash about thread-safe in statistics (#2591)
+- Fix server list index invalidation (#2543, #2542)
+- Refine PAC server (#2539)
+- Update the GFWList via IPv6Loopback when available
+- Modify PAC request behavior (#2526)
+- Fix .NET 4.7.2 on Win7 TLS compatibility (#2473)
+- Other minor bug fixes and improvements
+
 4.1.7.1 2019-07-14
 - Fix unexpected server delete behavior (#2459)
 - Reduce info log when checking Windows 10 Light Theme
