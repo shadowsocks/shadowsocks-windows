@@ -81,9 +81,10 @@ namespace Shadowsocks.Controller
 
             List<string> gfwLines = new List<string>();
             gfwLines = ParseBase64ToValidList(gfwListResult);
-
-            abpContent = abpContent.Replace("__USERRULES__", JsonConvert.SerializeObject(userruleLines, Formatting.Indented))
-                                   .Replace("__RULES__", JsonConvert.SerializeObject(gfwLines, Formatting.Indented));
+            abpContent =
+$@"var __USERRULES__ = {JsonConvert.SerializeObject(userruleLines, Formatting.Indented)};
+var __RULES__ = {JsonConvert.SerializeObject(gfwLines, Formatting.Indented)};
+{abpContent}";
             return abpContent;
         }
 
@@ -94,7 +95,7 @@ namespace Shadowsocks.Controller
             if (config.enabled)
             {
                 http.Proxy = new WebProxy(
-                    config.isIPv6Enabled ? IPAddress.IPv6Loopback.ToString() : IPAddress.Loopback.ToString(), 
+                    config.isIPv6Enabled ? IPAddress.IPv6Loopback.ToString() : IPAddress.Loopback.ToString(),
                     config.localPort);
             }
             http.DownloadStringCompleted += http_DownloadStringCompleted;

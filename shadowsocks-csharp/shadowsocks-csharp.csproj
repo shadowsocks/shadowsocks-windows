@@ -269,7 +269,7 @@
     </None>
     <None Include="Resources\ssw128.png" />
     <Content Include="Data\abp.js" />
-    <Content Include="Data\proxy.pac.txt" />
+    <Content Include="Data\default-abp-rule.js" />
     <Content Include="Data\zh_CN.txt" />
     <Content Include="Data\zh_TW.txt" />
     <Content Include="Data\ja.txt" />

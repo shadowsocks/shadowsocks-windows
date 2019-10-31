@@ -39,7 +39,7 @@ namespace Shadowsocks.Controller
         {
             if (!File.Exists(PAC_FILE))
             {
-                File.WriteAllText(PAC_FILE, Resources.proxy_pac_txt);
+                File.WriteAllText(PAC_FILE, Resources.default_abp_rule + Resources.abp_js);
             }
             return PAC_FILE;
         }
@@ -61,7 +61,7 @@ namespace Shadowsocks.Controller
             }
             else
             {
-                return Resources.proxy_pac_txt;
+                return Resources.default_abp_rule + Resources.abp_js;
             }
         }
 
