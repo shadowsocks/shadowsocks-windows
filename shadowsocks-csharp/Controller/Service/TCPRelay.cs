@@ -157,6 +157,7 @@ namespace Shadowsocks.Controller
         private int _firstPacketLength;
 
         private const int CMD_CONNECT = 0x01;
+        private const int CMD_BIND = 0x02;
         private const int CMD_UDP_ASSOC = 0x03;
 
         private int _addrBufLength = -1;
@@ -339,23 +340,27 @@ namespace Shadowsocks.Controller
                 if (bytesRead >= 5)
                 {
                     _command = _connetionRecvBuffer[1];
-                    if (_command != CMD_CONNECT && _command != CMD_UDP_ASSOC)
+                    switch(_command)
                     {
-                        Logging.Debug("Unsupported CMD=" + _command);
-                        Close();
-                    }
-                    else
-                    {
-                        if (_command == CMD_CONNECT)
-                        {
+                        case CMD_CONNECT:
+
+                            // +----+-----+-------+------+----------+----------+
+                            // |VER | REP |  RSV  | ATYP | BND.ADDR | BND.PORT |
+                            // +----+-----+-------+------+----------+----------+
+                            // | 1  |  1  | X'00' |  1   | Variable |    2     |
+                            // +----+-----+-------+------+----------+----------+
                             byte[] response = { 5, 0, 0, 1, 0, 0, 0, 0, 0, 0 };
                             _connection.BeginSend(response, 0, response.Length, SocketFlags.None,
                                 ResponseCallback, null);
-                        }
-                        else if (_command == CMD_UDP_ASSOC)
-                        {
+                            break;
+                        case CMD_UDP_ASSOC:
                             ReadAddress(HandleUDPAssociate);
-                        }
+                            break;
+                        case CMD_BIND:  // not implemented
+                        default:
+                            Logging.Debug("Unsupported CMD=" + _command);
+                            Close();
+                            break;
                     }
                 }
                 else

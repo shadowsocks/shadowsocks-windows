@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
@@ -48,42 +48,43 @@ namespace Shadowsocks.Controller
         public static bool MergeAndWritePACFile(string gfwListResult)
         {
             string abpContent = MergePACFile(gfwListResult);
-            if (File.Exists(PACServer.PAC_FILE))
+            if (File.Exists(PACDaemon.PAC_FILE))
             {
-                string original = FileManager.NonExclusiveReadAllText(PACServer.PAC_FILE, Encoding.UTF8);
+                string original = FileManager.NonExclusiveReadAllText(PACDaemon.PAC_FILE, Encoding.UTF8);
                 if (original == abpContent)
                 {
                     return false;
                 }
             }
-            File.WriteAllText(PACServer.PAC_FILE, abpContent, Encoding.UTF8);
+            File.WriteAllText(PACDaemon.PAC_FILE, abpContent, Encoding.UTF8);
             return true;
         }
 
         private static string MergePACFile(string gfwListResult)
         {
             string abpContent;
-            if (File.Exists(PACServer.USER_ABP_FILE))
+            if (File.Exists(PACDaemon.USER_ABP_FILE))
             {
-                abpContent = FileManager.NonExclusiveReadAllText(PACServer.USER_ABP_FILE, Encoding.UTF8);
+                abpContent = FileManager.NonExclusiveReadAllText(PACDaemon.USER_ABP_FILE, Encoding.UTF8);
             }
             else
             {
-                abpContent = Utils.UnGzip(Resources.abp_js);
+                abpContent = Resources.abp_js;
             }
 
             List<string> userruleLines = new List<string>();
-            if (File.Exists(PACServer.USER_RULE_FILE))
+            if (File.Exists(PACDaemon.USER_RULE_FILE))
             {
-                string userrulesString = FileManager.NonExclusiveReadAllText(PACServer.USER_RULE_FILE, Encoding.UTF8);
+                string userrulesString = FileManager.NonExclusiveReadAllText(PACDaemon.USER_RULE_FILE, Encoding.UTF8);
                 userruleLines = ParseToValidList(userrulesString);
             }
 
             List<string> gfwLines = new List<string>();
             gfwLines = ParseBase64ToValidList(gfwListResult);
-
-            abpContent = abpContent.Replace("__USERRULES__", JsonConvert.SerializeObject(userruleLines, Formatting.Indented))
-                                   .Replace("__RULES__", JsonConvert.SerializeObject(gfwLines, Formatting.Indented));
+            abpContent =
+$@"var __USERRULES__ = {JsonConvert.SerializeObject(userruleLines, Formatting.Indented)};
+var __RULES__ = {JsonConvert.SerializeObject(gfwLines, Formatting.Indented)};
+{abpContent}";
             return abpContent;
         }
 
@@ -91,7 +92,14 @@ namespace Shadowsocks.Controller
         {
             Logging.Info($"Checking GFWList from {GFWLIST_URL}");
             WebClient http = new WebClient();
-            http.Proxy = new WebProxy(IPAddress.Loopback.ToString(), config.localPort);
+            if (config.enabled)
+            {
+                http.Proxy = new WebProxy(
+                    config.isIPv6Enabled
+                    ? $"[{IPAddress.IPv6Loopback.ToString()}]"
+                    : IPAddress.Loopback.ToString(),
+                    config.localPort);
+            }
             http.DownloadStringCompleted += http_DownloadStringCompleted;
             http.DownloadStringAsync(new Uri(GFWLIST_URL));
         }

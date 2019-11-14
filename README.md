@@ -21,7 +21,7 @@ Download the latest release from [release page].
 
 #### Requirements
 
-Microsoft [.NET Framework 4.6.2] or higher, Microsoft [Visual C++ 2015 Redistributable] (x86) .
+Microsoft [.NET Framework 4.7.2] or higher, Microsoft [Visual C++ 2015 Redistributable] (x86) .
 
 #### Basic
 
@@ -39,6 +39,11 @@ port in `Servers -> Edit Servers`
 with any editor, Shadowsocks will notify browsers about the change automatically
 2. You can also update PAC file from [GFWList] \(maintained by 3rd party)
 3. You can also use online PAC URL
+
+For Windows10 Store and related applications, please execute the following command under Admin privilege:
+```
+netsh winhttp import proxy source=ie
+```
 
 #### Server Auto Switching
 
@@ -103,9 +108,13 @@ if you want to deactivate all, please clear all textboxes.
 
 Please visit [Servers] for more information.
 
+#### Experimental
+
+[Experimental Features]
+
 #### Development
 
-1. [Visual Studio 2015] & [.NET Framework 4.6.2 Developer Pack] are required.
+1. [Visual Studio 2017] & [.NET Framework 4.7.2 Developer Pack] are required.
 2. It is recommended to share your idea on the Issue Board before you start to work,
 especially for feature development.
 
@@ -137,9 +146,10 @@ Sysproxy ()            https://github.com/Noisyfox/sysproxy
 [GFWList]:      https://github.com/gfwlist/gfwlist
 [Servers]:      https://github.com/shadowsocks/shadowsocks/wiki/Ports-and-Clients#linux--server-side
 [中文说明]:     https://github.com/shadowsocks/shadowsocks-windows/wiki/Shadowsocks-Windows-%E4%BD%BF%E7%94%A8%E8%AF%B4%E6%98%8E
-[Visual Studio 2015]:   https://www.visualstudio.com/downloads/
-[.NET Framework 4.6.2]: https://www.microsoft.com/en-US/download/details.aspx?id=53344
-[.NET Framework 4.6.2 Developer Pack]: https://www.microsoft.com/download/details.aspx?id=53321
+[Visual Studio 2017]:   https://www.visualstudio.com/downloads/
+[.NET Framework 4.7.2]: https://dotnet.microsoft.com/download/dotnet-framework/net472
+[.NET Framework 4.7.2 Developer Pack]: https://dotnet.microsoft.com/download/dotnet-framework/net472
 [Visual C++ 2015 Redistributable]:     https://www.microsoft.com/en-us/download/details.aspx?id=53840
 [GPLv3]:        https://github.com/shadowsocks/shadowsocks-windows/blob/master/LICENSE.txt
 [Working with non SIP003 standard Plugin]: https://github.com/shadowsocks/shadowsocks-windows/wiki/Working-with-non-SIP003-standard-Plugin
+[Experimental Features]: https://github.com/shadowsocks/shadowsocks-windows/wiki/Experimental

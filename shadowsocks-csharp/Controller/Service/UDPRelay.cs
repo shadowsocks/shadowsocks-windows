@@ -40,10 +40,10 @@ namespace Shadowsocks.Controller
             if (handler == null)
             {
                 handler = new UDPHandler(socket, _controller.GetAServer(IStrategyCallerType.UDP, remoteEndPoint, null/*TODO: fix this*/), remoteEndPoint);
+                handler.Receive();
                 _cache.add(remoteEndPoint, handler);
             }
             handler.Send(firstPacket, length);
-            handler.Receive();
             return true;
         }
 
@@ -57,6 +57,19 @@ namespace Shadowsocks.Controller
 
             private IPEndPoint _localEndPoint;
             private IPEndPoint _remoteEndPoint;
+
+            private IPAddress GetIPAddress()
+            {
+                switch (_remote.AddressFamily)
+                {
+                    case AddressFamily.InterNetwork:
+                        return IPAddress.Any;
+                    case AddressFamily.InterNetworkV6:
+                        return IPAddress.IPv6Any;
+                    default:
+                        return IPAddress.Any;
+                }
+            }
 
             public UDPHandler(Socket local, Server server, IPEndPoint localEndPoint)
             {
@@ -74,6 +87,7 @@ namespace Shadowsocks.Controller
                 }
                 _remoteEndPoint = new IPEndPoint(ipAddress, server.server_port);
                 _remote = new Socket(_remoteEndPoint.AddressFamily, SocketType.Dgram, ProtocolType.Udp);
+                _remote.Bind(new IPEndPoint(GetIPAddress(), 0));
             }
 
             public void Send(byte[] data, int length)
@@ -90,7 +104,7 @@ namespace Shadowsocks.Controller
 
             public void Receive()
             {
-                EndPoint remoteEndPoint = new IPEndPoint(IPAddress.Any, 0);
+                EndPoint remoteEndPoint = new IPEndPoint(GetIPAddress(), 0);
                 Logging.Debug($"++++++Receive Server Port, size:" + _buffer.Length);
                 _remote?.BeginReceiveFrom(_buffer, 0, _buffer.Length, 0, ref remoteEndPoint, new AsyncCallback(RecvFromCallback), null);
             }
@@ -100,7 +114,7 @@ namespace Shadowsocks.Controller
                 try
                 {
                     if (_remote == null) return;
-                    EndPoint remoteEndPoint = new IPEndPoint(IPAddress.Any, 0);
+                    EndPoint remoteEndPoint = new IPEndPoint(GetIPAddress(), 0);
                     int bytesRead = _remote.EndReceiveFrom(ar, ref remoteEndPoint);
 
                     byte[] dataOut = new byte[bytesRead];
