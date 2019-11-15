@@ -154,6 +154,8 @@ namespace Shadowsocks.View
             Configuration config = controller.GetConfigurationCopy();
             bool enabled = config.enabled;
             bool global = config.global;
+            bool pac = config.pacEnabled;
+            bool pacIpWhiteList = config.pacIpWhiteListEnabled;
 
             Color colorMask = SelectColorMask(enabled, global);
             Size iconSize = SelectIconSize();
@@ -175,7 +177,7 @@ namespace Shadowsocks.View
             // show more info by hacking the P/Invoke declaration for NOTIFYICONDATA inside Windows Forms
             string text = I18N.GetString("Shadowsocks") + " " + UpdateChecker.Version + "\n" +
                           (enabled ?
-                              I18N.GetString("System Proxy On: ") + (global ? I18N.GetString("Global") : I18N.GetString("PAC")) :
+                              I18N.GetString("System Proxy On: ") + (pac ? I18N.GetString("PAC") : pacIpWhiteList ? I18N.GetString("PAC IP WHITELIST") : I18N.GetString("Global") ) : 
                               I18N.GetString("Running: Port {0}", config.localPort))  // this feedback is very important because they need to know Shadowsocks is running
                           + "\n" + serverInfo;
             if (text.Length > 127)
