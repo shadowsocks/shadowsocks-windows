@@ -18,6 +18,8 @@ namespace Shadowsocks.Model
         public int index;
         public bool global;
         public bool enabled;
+        public bool pacEnabled;
+        public bool pacIpWhiteListEnabled;
         public bool shareOverLan;
         public bool isDefault;
         public bool isIPv6Enabled = false;

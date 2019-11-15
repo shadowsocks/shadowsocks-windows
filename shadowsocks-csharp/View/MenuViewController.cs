@@ -41,8 +41,9 @@ namespace Shadowsocks.View
         private MenuItem SeperatorItem;
         private MenuItem ConfigItem;
         private MenuItem ServersItem;
-        private MenuItem globalModeItem;
+        private MenuItem globalModeItem; 
         private MenuItem PACModeItem;
+        private MenuItem PACIpWhiteListModeItem;
         private MenuItem localPACItem;
         private MenuItem onlinePACItem;
         private MenuItem editLocalPACItem;
@@ -288,6 +289,7 @@ namespace Shadowsocks.View
                 CreateMenuGroup("System Proxy", new MenuItem[] {
                     this.disableItem = CreateMenuItem("Disable", new EventHandler(this.EnableItem_Click)),
                     this.PACModeItem = CreateMenuItem("PAC", new EventHandler(this.PACModeItem_Click)),
+                    this.PACIpWhiteListModeItem = CreateMenuItem("PAC Ip White List", new EventHandler(this.PACIpWhiteListModeItem_Click)),
                     this.globalModeItem = CreateMenuItem("Global", new EventHandler(this.GlobalModeItem_Click))
                 }),
                 this.ServersItem = CreateMenuGroup("Servers", new MenuItem[] {
@@ -629,6 +631,9 @@ namespace Shadowsocks.View
         private void EnableItem_Click(object sender, EventArgs e)
         {
             controller.ToggleEnable(false);
+            controller.ToggleGlobal(false);
+            controller.TogglePacEnable(false);
+            controller.TogglePacIpWhiteListEnable(false);
             Configuration config = controller.GetConfigurationCopy();
             UpdateSystemProxyItemsEnabledStatus(config);
         }
@@ -638,13 +643,25 @@ namespace Shadowsocks.View
             disableItem.Checked = !config.enabled;
             if (!config.enabled)
             {
-                globalModeItem.Checked = false;
                 PACModeItem.Checked = false;
-            }
-            else
+                PACIpWhiteListModeItem.Checked = false;
+                globalModeItem.Checked = false;
+            }else if (config.pacEnabled)
             {
+                PACModeItem.Checked = true;
+                PACIpWhiteListModeItem.Checked = false;
+                globalModeItem.Checked = false;
+            }
+            else if (config.pacIpWhiteListEnabled)
+            {
+                PACModeItem.Checked = false;
+                PACIpWhiteListModeItem.Checked = true;
+                globalModeItem.Checked = false;
+            }
+            else {
+                PACModeItem.Checked = false;
+                PACIpWhiteListModeItem.Checked = false;
                 globalModeItem.Checked = config.global;
-                PACModeItem.Checked = !config.global;
             }
         }
 
@@ -652,6 +669,8 @@ namespace Shadowsocks.View
         {
             controller.ToggleEnable(true);
             controller.ToggleGlobal(true);
+            controller.TogglePacEnable(false);
+            controller.TogglePacIpWhiteListEnable(false);
             Configuration config = controller.GetConfigurationCopy();
             UpdateSystemProxyItemsEnabledStatus(config);
         }
@@ -660,10 +679,22 @@ namespace Shadowsocks.View
         {
             controller.ToggleEnable(true);
             controller.ToggleGlobal(false);
+            controller.TogglePacEnable(true);
+            controller.TogglePacIpWhiteListEnable(false);
             Configuration config = controller.GetConfigurationCopy();
             UpdateSystemProxyItemsEnabledStatus(config);
         }
 
+        private void PACIpWhiteListModeItem_Click(object sender, EventArgs e)
+        {
+            controller.ToggleEnable(true);
+            controller.ToggleGlobal(false);
+            controller.TogglePacEnable(false);
+            controller.TogglePacIpWhiteListEnable(true);
+            Configuration config = controller.GetConfigurationCopy();
+            UpdateSystemProxyItemsEnabledStatus(config);
+        }
+        
         private void ShareOverLANItem_Click(object sender, EventArgs e)
         {
             ShareOverLANItem.Checked = !ShareOverLANItem.Checked;

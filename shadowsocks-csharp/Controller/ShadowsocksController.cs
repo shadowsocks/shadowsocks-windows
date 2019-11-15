@@ -62,6 +62,8 @@ namespace Shadowsocks.Controller
 
         public event EventHandler ConfigChanged;
         public event EventHandler EnableStatusChanged;
+        public event EventHandler PacEnabledStatusChanged;
+        public event EventHandler PacIpWhiteListEnabledStatusChanged;
         public event EventHandler EnableGlobalChanged;
         public event EventHandler ShareOverLANStatusChanged;
         public event EventHandler VerboseLoggingStatusChanged;
@@ -220,6 +222,22 @@ namespace Shadowsocks.Controller
             SaveConfig(_config);
 
             EnableStatusChanged?.Invoke(this, new EventArgs());
+        }
+
+        public void TogglePacEnable(bool enabled)
+        {
+            _config.pacEnabled = enabled;
+            SaveConfig(_config);
+
+            PacEnabledStatusChanged?.Invoke(this, new EventArgs());
+        }
+
+        public void TogglePacIpWhiteListEnable(bool enabled)
+        {
+            _config.pacIpWhiteListEnabled = enabled;
+            SaveConfig(_config);
+
+            PacIpWhiteListEnabledStatusChanged?.Invoke(this, new EventArgs());
         }
 
         public void ToggleGlobal(bool global)

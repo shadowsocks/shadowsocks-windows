@@ -16,22 +16,27 @@ namespace Shadowsocks.Controller
     public class PACDaemon
     {
         public const string PAC_FILE = "pac.txt";
+        public const string PAC_IP_WHITELIST_FILE = "pac-ip-whitelist.txt";
         public const string USER_RULE_FILE = "user-rule.txt";
         public const string USER_ABP_FILE = "abp.txt";
 
         FileSystemWatcher PACFileWatcher;
+        FileSystemWatcher PACIpWhitelistFileWatcher;
         FileSystemWatcher UserRuleFileWatcher;
 
         public event EventHandler PACFileChanged;
+        public event EventHandler PACIpWhitelistFileChanged;
         public event EventHandler UserRuleFileChanged;
 
         public PACDaemon()
         {
             TouchPACFile();
             TouchUserRuleFile();
+            TouchPACIpWhitelistFile();
 
             this.WatchPacFile();
             this.WatchUserRuleFile();
+            this.WatchPACIpWhitelistFile();
         }
 
 
@@ -40,6 +45,15 @@ namespace Shadowsocks.Controller
             if (!File.Exists(PAC_FILE))
             {
                 File.WriteAllText(PAC_FILE, Resources.default_abp_rule + Resources.abp_js);
+            }
+            return PAC_FILE;
+        }
+
+        public string TouchPACIpWhitelistFile()
+        {
+            if (!File.Exists(PAC_IP_WHITELIST_FILE))
+            {
+                File.WriteAllText(PAC_IP_WHITELIST_FILE, Resources.pac_ip_whitelist);
             }
             return PAC_FILE;
         }
@@ -79,6 +93,19 @@ namespace Shadowsocks.Controller
             PACFileWatcher.EnableRaisingEvents = true;
         }
 
+        private void WatchPACIpWhitelistFile()
+        {
+            PACIpWhitelistFileWatcher?.Dispose();
+            PACIpWhitelistFileWatcher = new FileSystemWatcher(Directory.GetCurrentDirectory());
+            PACIpWhitelistFileWatcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.DirectoryName;
+            PACIpWhitelistFileWatcher.Filter = PAC_IP_WHITELIST_FILE;
+            PACIpWhitelistFileWatcher.Changed += PACIpWhitelistFileWatcher_Changed;
+            PACIpWhitelistFileWatcher.Created += PACIpWhitelistFileWatcher_Changed;
+            PACIpWhitelistFileWatcher.Deleted += PACIpWhitelistFileWatcher_Changed;
+            PACIpWhitelistFileWatcher.Renamed += PACIpWhitelistFileWatcher_Changed;
+            PACIpWhitelistFileWatcher.EnableRaisingEvents = true;
+        }
+
         private void WatchUserRuleFile()
         {
             UserRuleFileWatcher?.Dispose();
@@ -111,6 +138,21 @@ namespace Shadowsocks.Controller
             }
         }
 
+        private void PACIpWhitelistFileWatcher_Changed(object sender, FileSystemEventArgs e)
+        {
+            if (PACIpWhitelistFileChanged != null)
+            {
+                Logging.Info($"Detected: PACIpWhitelist file '{e.Name}' was {e.ChangeType.ToString().ToLower()}.");
+                Task.Factory.StartNew(() =>
+                {
+                    ((FileSystemWatcher)sender).EnableRaisingEvents = false;
+                    System.Threading.Thread.Sleep(10);
+                    PACIpWhitelistFileChanged(this, new EventArgs());
+                    ((FileSystemWatcher)sender).EnableRaisingEvents = true;
+                });
+            }
+        }
+        
         private void UserRuleFileWatcher_Changed(object sender, FileSystemEventArgs e)
         {
             if (UserRuleFileChanged != null)

@@ -155,6 +155,33 @@ namespace Shadowsocks.Properties {
         }
         
         /// <summary>
+        ///   查找类似 //var proxy = &quot;__PROXY__&quot;;
+        /////var wall_proxy = &quot;SOCKS5 127.0.0.1:8888;PROXY 127.0.0.1:8888&quot;;
+        ///
+        ///var wall_proxy = &quot;__PROXY__&quot;;
+        ///var nowall_proxy = &quot;DIRECT;&quot;;
+        ///var direct = &quot;DIRECT;&quot;;
+        ///var ip_proxy = &quot;DIRECT;&quot;;
+        ///
+        ///var excludeRule = [
+        ///	&quot;wunderlist.com&quot;
+        ///]
+        ///
+        ////*
+        /// * Copyright (C) 2014 breakwa11
+        /// * https://github.com/breakwa11/gfw_whitelist
+        /// */
+        ///
+        ///var cnIpRange = [
+        ///{},{0x10001:1,0x10002:1,0x10003:1,0x10008:4,0x1000c:4,0x10020:16,0x10030:16,0x10100:1,0x10102:1,0x10103:1,0x10104:4,0x10108:4,0x1010c:4,0x10110:1 [字符串的其余部分被截断]&quot;; 的本地化字符串。
+        /// </summary>
+        internal static string pac_ip_whitelist {
+            get {
+                return ResourceManager.GetString("pac_ip_whitelist", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 listen-address __PRIVOXY_BIND_IP__:__PRIVOXY_BIND_PORT__
         ///toggle 0
         ///logfile ss_privoxy.log
