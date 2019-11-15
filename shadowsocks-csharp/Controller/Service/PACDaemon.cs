@@ -55,7 +55,7 @@ namespace Shadowsocks.Controller
             {
                 File.WriteAllText(PAC_IP_WHITELIST_FILE, Resources.pac_ip_whitelist);
             }
-            return PAC_FILE;
+            return PAC_IP_WHITELIST_FILE;
         }
 
         internal string TouchUserRuleFile()
@@ -76,6 +76,18 @@ namespace Shadowsocks.Controller
             else
             {
                 return Resources.default_abp_rule + Resources.abp_js;
+            }
+        }
+
+        internal string GetPACIpWhiteListContent()
+        {
+            if (File.Exists(PAC_IP_WHITELIST_FILE))
+            {
+                return File.ReadAllText(PAC_IP_WHITELIST_FILE, Encoding.UTF8);
+            }
+            else
+            {
+                return Resources.pac_ip_whitelist;
             }
         }
 
