@@ -1,10 +1,10 @@
 ﻿//var proxy = "__PROXY__";
 //var wall_proxy = "SOCKS5 127.0.0.1:8888;PROXY 127.0.0.1:8888";
 
-var wall_proxy = "__PROXY__";
-var nowall_proxy = "DIRECT;";
-var direct = "DIRECT;";
-var ip_proxy = "DIRECT;";
+var wall_proxy = __PROXY__;
+var direct = 'DIRECT;';
+var nowall_proxy = direct;
+var ip_proxy = direct;
 
 var excludeRule = [
 	"wunderlist.com"

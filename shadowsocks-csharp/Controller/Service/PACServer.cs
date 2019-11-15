@@ -164,15 +164,8 @@ namespace Shadowsocks.Controller
 
                 string proxy = GetPACAddress(localEndPoint, useSocks);
 
-                string pacContent;
-                if (_config.pacIpWhiteListEnabled)
-                {
-                    pacContent = _pacDaemon.GetPACIpWhiteListContent();
-                }
-                else
-                {
-                    pacContent = $"var __PROXY__ = '{proxy}';\n" + _pacDaemon.GetPACContent();
-                }
+                string pacContent = $"var __PROXY__ = '{proxy}';\n" + (_config.pacIpWhiteListEnabled ? _pacDaemon.GetPACIpWhiteListContent() : _pacDaemon.GetPACContent());
+                
                 string responseHead = 
 $@"HTTP/1.1 200 OK
 Server: ShadowsocksWindows/{UpdateChecker.Version}
