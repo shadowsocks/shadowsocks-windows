@@ -188,7 +188,7 @@ namespace Shadowsocks.Controller
             StatisticsStrategyConfiguration.Save(configuration);
         }
 
-        public bool AddServerBySSURL(string ssURL)
+        public bool AddServerByURL(string ssURL)
         {
             try
             {

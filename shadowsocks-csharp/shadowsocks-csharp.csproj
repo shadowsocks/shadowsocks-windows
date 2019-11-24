@@ -163,6 +163,7 @@
     <Compile Include="Settings.cs" />
     <Compile Include="Controller\System\Hotkeys\Hotkeys.cs" />
     <Compile Include="StringEx.cs" />
+    <Compile Include="Util\Base64.cs" />
     <Compile Include="Util\ProcessManagement\Job.cs" />
     <Compile Include="Util\ProcessManagement\ThreadUtil.cs" />
     <Compile Include="Util\Sockets\LineReader.cs" />

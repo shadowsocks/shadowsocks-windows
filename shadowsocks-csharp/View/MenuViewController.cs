@@ -285,6 +285,7 @@ namespace Shadowsocks.View
         private void LoadMenu()
         {
             this.contextMenu1 = new ContextMenu(new MenuItem[] {
+                CreateMenuItem("Scan QRCode from Screen...", new EventHandler(this.ScanQRCodeItem_Click)),
                 CreateMenuGroup("System Proxy", new MenuItem[] {
                     this.disableItem = CreateMenuItem("Disable", new EventHandler(this.EnableItem_Click)),
                     this.PACModeItem = CreateMenuItem("PAC", new EventHandler(this.PACModeItem_Click)),
@@ -753,7 +754,7 @@ namespace Shadowsocks.View
                         var result = reader.decode(bitmap);
                         if (result != null)
                         {
-                            var success = controller.AddServerBySSURL(result.Text);
+                            var success = controller.AddServerByURL(result.Text);
                             QRCodeSplashForm splash = new QRCodeSplashForm();
                             if (success)
                             {
@@ -803,7 +804,7 @@ namespace Shadowsocks.View
 
         private void ImportURLItem_Click(object sender, EventArgs e)
         {
-            var success = controller.AddServerBySSURL(Clipboard.GetText(TextDataFormat.Text));
+            var success = controller.AddServerByURL(Clipboard.GetText(TextDataFormat.Text));
             if (success)
             {
                 ShowConfigForm();
