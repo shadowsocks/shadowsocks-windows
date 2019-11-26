@@ -90,7 +90,7 @@ namespace Shadowsocks.Controller.Strategy
                 var serversWithStatistics = (from server in servers
                     let id = server.Identifier()
                     where _filteredStatistics.ContainsKey(id)
-                    let score = GetScore(server.Identifier(), _filteredStatistics[server.Identifier()])
+                    let score = GetScore(id, _filteredStatistics[id])
                     where score != null
                     select new
                     {
