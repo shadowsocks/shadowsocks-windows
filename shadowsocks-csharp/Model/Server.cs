@@ -70,7 +70,7 @@ namespace Shadowsocks.Model
         {
             server = "";
             server_port = 8388;
-            method = "aes-256-cfb";
+            method = "chacha20-ietf-poly1305";
             plugin = "";
             plugin_opts = "";
             plugin_args = "";
