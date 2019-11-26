@@ -71,12 +71,12 @@ Move D&own=下移(&O)
 
 Enable Statistics=启用统计
 Ping Test=Ping测试
-package everytime=个包/次
+packages everytime=个包/次
 By hour of day=按照每天的小时数统计
 Collect data per=收集数据每
 Keep choice for=保持选择每
 minutes=分钟
-Final Score=总分
+Final Score:=总分：
 AverageLatency=平均延迟
 MinLatency=最小延迟
 MaxLatency=最大延迟
@@ -93,6 +93,9 @@ PackageLoss=丢包率
 Speed=速度
 Package Loss=丢包率
 Ping=网络延迟
+Chart Mode=图表模式
+24h=24小时
+all=全部
 
 # Proxy Form
 

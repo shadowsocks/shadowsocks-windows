@@ -40,9 +40,9 @@ namespace Shadowsocks.View
         {
             Control[] controls = new Control[]
             {
-                StatisticsEnabledCheckBox,PingCheckBox,label6,
-                byHourOfDayCheckBox,label9,label8,label2,label3,
-                label1,chartModeSelector,dayMode,allMode,
+                StatisticsEnabledCheckBox,PingCheckBox,PackagePerPingLabel,
+                byHourOfDayCheckBox,CollectDataPerLabel,MinutesLabel1,KeepChoiceForLabel,MinutesLabel2,
+                FinalScoreLabel,chartModeSelector,dayMode,allMode,
                 OKButton,CancelButton
             };
             foreach (var item in controls)
