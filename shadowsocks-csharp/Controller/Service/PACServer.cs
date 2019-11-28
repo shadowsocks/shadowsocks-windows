@@ -44,13 +44,18 @@ namespace Shadowsocks.Controller
                 PacSecret = "";
             }
 
-            PacUrl = $"http://{config.localHost}:{config.localPort}/{RESOURCE_NAME}?t={GetTimestamp(DateTime.Now)}{PacSecret}";
+            PacUrl = $"http://{config.localHost}:{config.localPort}/{RESOURCE_NAME}?hash={GetHash(_pacDaemon.GetPACContent())}{PacSecret}";
         }
 
 
-        private static string GetTimestamp(DateTime value)
+        private static string GetHash(string content)
         {
-            return value.ToString("yyyyMMddHHmmssfff");
+            var contentBytes = Encoding.ASCII.GetBytes(content);
+            using (var md5 = System.Security.Cryptography.MD5.Create())
+            {
+                var md5Bytes = md5.ComputeHash(contentBytes);
+                return BitConverter.ToString(md5Bytes).Replace("-", "");
+            };
         }
 
         public override bool Handle(byte[] firstPacket, int length, Socket socket, object state)
@@ -165,7 +170,7 @@ namespace Shadowsocks.Controller
                 string proxy = GetPACAddress(localEndPoint, useSocks);
 
                 string pacContent = $"var __PROXY__ = '{proxy}';\n" + _pacDaemon.GetPACContent();
-                string responseHead = 
+                string responseHead =
 $@"HTTP/1.1 200 OK
 Server: ShadowsocksWindows/{UpdateChecker.Version}
 Content-Type: application/x-ns-proxy-autoconfig
