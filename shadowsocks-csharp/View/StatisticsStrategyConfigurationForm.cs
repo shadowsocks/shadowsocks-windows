@@ -73,7 +73,7 @@ namespace Shadowsocks.View
             bindingConfiguration.Add(_configuration);
             foreach (var kv in _configuration.Calculations)
             {
-                var calculation = new CalculationControl(kv.Key, kv.Value);
+                var calculation = new CalculationControl(I18N.GetString(kv.Key), kv.Value);
                 calculationContainer.Controls.Add(calculation);
             }
 
