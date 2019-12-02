@@ -10,6 +10,7 @@ using Shadowsocks.Model;
 using Shadowsocks.Properties;
 using Shadowsocks.Util;
 using System.Threading.Tasks;
+using System.Web;
 
 namespace Shadowsocks.Controller
 {
@@ -17,8 +18,20 @@ namespace Shadowsocks.Controller
     {
         public const string RESOURCE_NAME = "pac";
 
-        private string PacSecret { get; set; } = "";
-
+        private string PacSecret
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_cachedPacSecret))
+                {
+                    var rd = new byte[32];
+                    RNG.GetBytes(rd);
+                    _cachedPacSecret = HttpServerUtility.UrlTokenEncode(rd);
+                }
+                return _cachedPacSecret;
+            }
+        }
+        private string _cachedPacSecret = "";
         public string PacUrl { get; private set; } = "";
 
         private Configuration _config;
@@ -31,22 +44,12 @@ namespace Shadowsocks.Controller
 
         public void UpdatePACURL(Configuration config)
         {
-            this._config = config;
-
-            if (config.secureLocalPac)
-            {
-                var rd = new byte[32];
-                RNG.GetBytes(rd);
-                PacSecret = $"&secret={Convert.ToBase64String(rd)}";
-            }
-            else
-            {
-                PacSecret = "";
-            }
-
-            PacUrl = $"http://{config.localHost}:{config.localPort}/{RESOURCE_NAME}?hash={GetHash(_pacDaemon.GetPACContent())}{PacSecret}";
+            _config = config;
+            string usedSecret = _config.secureLocalPac ? $"&secret={PacSecret}" : "";
+            string contentHash = GetHash(_pacDaemon.GetPACContent());
+            PacUrl = $"http://{config.localHost}:{config.localPort}/{RESOURCE_NAME}?hash={contentHash}{usedSecret}";
+            Logging.Debug("Set PAC URL:" + PacUrl);
         }
-
 
         private static string GetHash(string content)
         {
@@ -54,7 +57,7 @@ namespace Shadowsocks.Controller
             using (var md5 = System.Security.Cryptography.MD5.Create())
             {
                 var md5Bytes = md5.ComputeHash(contentBytes);
-                return BitConverter.ToString(md5Bytes).Replace("-", "");
+                return HttpServerUtility.UrlTokenEncode(md5Bytes);
             };
         }
 
@@ -79,7 +82,7 @@ namespace Shadowsocks.Controller
                 string request = Encoding.UTF8.GetString(firstPacket, 0, length);
                 string[] lines = request.Split('\r', '\n');
                 bool hostMatch = false, pathMatch = false, useSocks = false;
-                bool secretMatch = PacSecret.IsNullOrEmpty();
+                bool secretMatch = _config.secureLocalPac;
 
                 if (lines.Length < 2)   // need at lease RequestLine + Host
                 {
