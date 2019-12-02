@@ -1,10 +1,9 @@
-using System;
-using System.Drawing;
-using System.Windows.Forms;
-
 using Shadowsocks.Controller;
 using Shadowsocks.Model;
 using Shadowsocks.Properties;
+using System;
+using System.Drawing;
+using System.Windows.Forms;
 
 namespace Shadowsocks.View
 {
@@ -40,30 +39,8 @@ namespace Shadowsocks.View
 
         private void UpdateTexts()
         {
-            AddButton.Text = I18N.GetString("&Add");
-            DeleteButton.Text = I18N.GetString("&Delete");
-            DuplicateButton.Text = I18N.GetString("Dupli&cate");
-            IPLabel.Text = I18N.GetString("Server Addr");
-            ServerPortLabel.Text = I18N.GetString("Server Port");
-            PasswordLabel.Text = I18N.GetString("Password");
-            ShowPasswdCheckBox.Text = I18N.GetString("Show Password");
-            EncryptionLabel.Text = I18N.GetString("Encryption");
-            PluginLabel.Text = I18N.GetString("Plugin Program");
-            PluginOptionsLabel.Text = I18N.GetString("Plugin Options");
-            PluginArgumentsLabel.Text = I18N.GetString("Plugin Arguments");
-            NeedPluginArgCheckBox.Text = I18N.GetString("Need Plugin Argument");
-            ProxyPortLabel.Text = I18N.GetString("Proxy Port");
-            PortableModeCheckBox.Text = I18N.GetString("Portable Mode");
+            I18N.TranslateForm(this);
             toolTip1.SetToolTip(PortableModeCheckBox, I18N.GetString("Restart required"));
-            RemarksLabel.Text = I18N.GetString("Remarks");
-            TimeoutLabel.Text = I18N.GetString("Timeout(Sec)");
-            ServerGroupBox.Text = I18N.GetString("Server");
-            OKButton.Text = I18N.GetString("OK");
-            MyCancelButton.Text = I18N.GetString("Cancel");
-            ApplyButton.Text = I18N.GetString("Apply");
-            MoveUpButton.Text = I18N.GetString("Move &Up");
-            MoveDownButton.Text = I18N.GetString("Move D&own");
-            Text = I18N.GetString("Edit Servers");
         }
 
         private void SetupValueChangedListeners()
@@ -158,7 +135,7 @@ namespace Shadowsocks.View
 
                 LoadServerNameListToUI(_modifiedConfiguration);
 
-                _lastSelectedIndex = (ServersListBox.SelectedIndex = ( _lastSelectedIndex == ServersListBox.Items.Count ? lastIndex : lastIndex - 1));
+                _lastSelectedIndex = (ServersListBox.SelectedIndex = (_lastSelectedIndex == ServersListBox.Items.Count ? lastIndex : lastIndex - 1));
 
                 ServersListBox.SelectedIndexChanged += ServersListBox_SelectedIndexChanged;
                 return true;

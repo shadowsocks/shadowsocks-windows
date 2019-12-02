@@ -38,17 +38,7 @@ namespace Shadowsocks.View
 
         private void UpdateTexts()
         {
-            Control[] controls = new Control[]
-            {
-                StatisticsEnabledCheckBox,PingCheckBox,PackagePerPingLabel,
-                byHourOfDayCheckBox,CollectDataPerLabel,MinutesLabel1,KeepChoiceForLabel,MinutesLabel2,
-                FinalScoreLabel,chartModeSelector,dayMode,allMode,
-                OKButton,CancelButton
-            };
-            foreach (var item in controls)
-            {
-                item.Text = I18N.GetString(item.Text);
-            }
+            I18N.TranslateForm(this);
 
             foreach (var item in StatisticsChart.Series)
             {
