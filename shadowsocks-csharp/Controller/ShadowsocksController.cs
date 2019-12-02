@@ -482,7 +482,6 @@ namespace Shadowsocks.Controller
                 _pacServer = new PACServer(_pacDaemon);
             }
 
-            _pacServer.UpdatePACURL(_config);
             if (gfwListUpdater == null)
             {
                 gfwListUpdater = new GFWListUpdater();
