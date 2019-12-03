@@ -43,19 +43,18 @@ namespace Shadowsocks.Controller
                     for (int i = 0; i < localeNames.Length; i++)
                     {
                         if (localeNames[i].Split('-')[0] == localeNoRegion)
-                        {
                             targetIndex = i;
-                        }
                     }
+                    Logging.Info($"Using {localeNames[targetIndex]} translation for {locale}");
                 }
 
                 // Still not found, exit
-                if (targetIndex == -1)
+                if (targetIndex == -1 || enIndex == targetIndex)
                 {
                     Logging.Info($"Translation for {locale} not found");
                     return;
                 }
-                
+
                 // read translation lines
                 while (!csvParser.EndOfData)
                 {
