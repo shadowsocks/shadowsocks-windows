@@ -5,11 +5,15 @@ using Shadowsocks.Properties;
 using Shadowsocks.Util;
 using System.Windows.Forms;
 using Microsoft.VisualBasic.FileIO;
+using System.Text;
+
 namespace Shadowsocks.Controller
 {
 
     public static class I18N
     {
+        private static readonly string I18N_FILE = "i18n.csv";
+
         private static Dictionary<string, string> _strings = new Dictionary<string, string>();
 
         private static void Init(string res, string locale)
@@ -18,38 +22,71 @@ namespace Shadowsocks.Controller
             {
                 csvParser.SetDelimiters(",");
 
+                // search language index
                 string[] localeNames = csvParser.ReadFields();
 
                 int enIndex = 0;
-                int targetIndex = 0;
+                int targetIndex = -1;
 
-                for (int i = 1; i < localeNames.Length; i++)
+                for (int i = 0; i < localeNames.Length; i++)
                 {
                     if (localeNames[i] == "en")
-                    {
-
-                    }
-
+                        enIndex = i;
                     if (localeNames[i] == locale)
-                    {
                         targetIndex = i;
+                }
+
+                // Fallback to same language with different region
+                if (targetIndex == -1)
+                {
+                    string localeNoRegion = locale.Split('-')[0];
+                    for (int i = 0; i < localeNames.Length; i++)
+                    {
+                        if (localeNames[i].Split('-')[0] == localeNoRegion)
+                        {
+                            targetIndex = i;
+                        }
                     }
                 }
 
-
+                // Still not found, exit
+                if (targetIndex == -1)
+                {
+                    Logging.Info($"Translation for {locale} not found");
+                    return;
+                }
+                
+                // read translation lines
                 while (!csvParser.EndOfData)
                 {
                     string[] translations = csvParser.ReadFields();
-                    if (string.IsNullOrWhiteSpace(translations[0])) continue;
+                    string source = translations[enIndex];
+                    string translation = translations[targetIndex];
+
+                    // source string or translation empty
+                    if (string.IsNullOrWhiteSpace(source) || string.IsNullOrWhiteSpace(translation)) continue;
+                    // line start with comment
                     if (translations[0].TrimStart(' ')[0] == '#') continue;
-                    _strings[translations[enIndex]] = translations[targetIndex];
+
+                    _strings[source] = translation;
                 }
             }
         }
 
         static I18N()
         {
-            Init(Resources.i18n_csv, CultureInfo.CurrentCulture.IetfLanguageTag);
+            string i18n;
+            if (!File.Exists(I18N_FILE))
+            {
+                i18n = Resources.i18n_csv;
+                File.WriteAllText(I18N_FILE, i18n, Encoding.UTF8);
+            }
+            else
+            {
+                i18n = File.ReadAllText(I18N_FILE, Encoding.UTF8);
+            }
+            Logging.Info("Current language is: " + CultureInfo.CurrentCulture.Name);
+            Init(i18n, CultureInfo.CurrentCulture.Name);
         }
 
         public static string GetString(string key, params object[] args)

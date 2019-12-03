@@ -1,5 +1,11 @@
-﻿en,zh-CN,zh-TW,ja
-,,,
+en,zh-CN,zh-TW,ja
+#Restart program to apply translation,,,
+#This is comment line,,,
+#Always keep language name at head of file,,,
+#Language name is output in log,,,
+#You can find it by search Current language is:,,,
+#Please use UTF-8 encoding,,,
+
 Shadowsocks,Shadowsocks,Shadowsocks,Shadowsocks
 ,,,
 System Proxy,系统代理,系統代理,システムプロキシ
