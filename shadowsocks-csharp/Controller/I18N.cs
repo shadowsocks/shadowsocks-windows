@@ -95,17 +95,21 @@ namespace Shadowsocks.Controller
 
         public static void TranslateForm(Form c)
         {
+            if (c == null) return;
             c.Text = GetString(c.Text);
             foreach (var item in ViewUtils.GetChildControls<Control>(c))
             {
+                if (item == null) continue;
                 item.Text = GetString(item.Text);
             }
             TranslateMenu(c.Menu);
         }
         public static void TranslateMenu(Menu m)
         {
+            if (m == null) return;
             foreach (var item in ViewUtils.GetMenuItems(m))
             {
+                if (item == null) continue;
                 item.Text = GetString(item.Text);
             }
         }
