@@ -22,7 +22,7 @@ namespace Shadowsocks.Controller.Service
         private bool _started;
         private bool _disposed;
 
-        public static Sip003Plugin CreateIfConfigured(Server server)
+        public static Sip003Plugin CreateIfConfigured(Server server, bool showPluginOutput)
         {
             if (server == null)
             {
@@ -34,10 +34,16 @@ namespace Shadowsocks.Controller.Service
                 return null;
             }
 
-            return new Sip003Plugin(server.plugin, server.plugin_opts, server.plugin_args, server.server, server.server_port);
+            return new Sip003Plugin(
+                server.plugin,
+                server.plugin_opts,
+                server.plugin_args,
+                server.server,
+                server.server_port,
+                showPluginOutput);
         }
 
-        private Sip003Plugin(string plugin, string pluginOpts, string pluginArgs, string serverAddress, int serverPort)
+        private Sip003Plugin(string plugin, string pluginOpts, string pluginArgs, string serverAddress, int serverPort, bool showPluginOutput)
         {
             if (plugin == null) throw new ArgumentNullException(nameof(plugin));
             if (string.IsNullOrWhiteSpace(serverAddress))
@@ -58,7 +64,7 @@ namespace Shadowsocks.Controller.Service
                     FileName = plugin,
                     Arguments = pluginArgs,
                     UseShellExecute = false,
-                    CreateNoWindow = true,
+                    CreateNoWindow = !showPluginOutput,
                     ErrorDialog = false,
                     WindowStyle = ProcessWindowStyle.Hidden,
                     WorkingDirectory = appPath ?? Environment.CurrentDirectory,
