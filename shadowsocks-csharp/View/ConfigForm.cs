@@ -78,6 +78,7 @@ namespace Shadowsocks.View
             RemarksTextBox.TextChanged += ConfigValueChanged;
             TimeoutTextBox.TextChanged += ConfigValueChanged;
             PortableModeCheckBox.CheckedChanged += ConfigValueChanged;
+            ShowPluginOutputCheckbox.CheckedChanged += ConfigValueChanged;
             ServerPortTextBox.TextChanged += ConfigValueChanged;
         }
 
@@ -386,6 +387,7 @@ namespace Shadowsocks.View
 
             ProxyPortTextBox.Text = _modifiedConfiguration.localPort.ToString();
             PortableModeCheckBox.Checked = _modifiedConfiguration.portableMode;
+            ShowPluginOutputCheckbox.Checked = _modifiedConfiguration.showPluginOutput;
 
             ApplyButton.Enabled = false;
         }
@@ -402,8 +404,14 @@ namespace Shadowsocks.View
             _modifiedConfiguration.localPort = localPort;
 
             _modifiedConfiguration.portableMode = PortableModeCheckBox.Checked;
+            _modifiedConfiguration.showPluginOutput = ShowPluginOutputCheckbox.Checked;
 
-            controller.SaveServers(_modifiedConfiguration.configs, _modifiedConfiguration.localPort, _modifiedConfiguration.portableMode);
+            controller.SaveServers(
+                _modifiedConfiguration.configs,
+                _modifiedConfiguration.localPort,
+                _modifiedConfiguration.portableMode,
+                _modifiedConfiguration.showPluginOutput);
+
             // SelectedIndex remains valid
             // We handled this in event handlers, e.g. Add/DeleteButton, SelectedIndexChanged
             // and move operations

@@ -174,11 +174,12 @@ namespace Shadowsocks.Controller
             return plugin.LocalEndPoint;
         }
 
-        public void SaveServers(List<Server> servers, int localPort, bool portableMode)
+        public void SaveServers(List<Server> servers, int localPort, bool portableMode, bool showPluginOutput)
         {
             _config.configs = servers;
             _config.localPort = localPort;
             _config.portableMode = portableMode;
+            _config.showPluginOutput = showPluginOutput;
             Configuration.Save(_config);
         }
 

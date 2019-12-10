@@ -58,7 +58,7 @@ namespace Shadowsocks.Controller.Service
                     FileName = plugin,
                     Arguments = pluginArgs,
                     UseShellExecute = false,
-                    CreateNoWindow = true,
+                    CreateNoWindow = !Program.MainController.GetCurrentConfiguration().showPluginOutput,
                     ErrorDialog = false,
                     WindowStyle = ProcessWindowStyle.Hidden,
                     WorkingDirectory = appPath ?? Environment.CurrentDirectory,
