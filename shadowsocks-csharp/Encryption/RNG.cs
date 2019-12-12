@@ -9,14 +9,12 @@ namespace Shadowsocks.Encryption
 
         public static void Init()
         {
-            if (_rng == null)
-                _rng = new RNGCryptoServiceProvider();
+            _rng = _rng ?? new RNGCryptoServiceProvider();
         }
 
         public static void Close()
         {
-            if (_rng == null) return;
-            _rng.Dispose();
+            _rng?.Dispose();
             _rng = null;
         }
 
@@ -33,12 +31,12 @@ namespace Shadowsocks.Encryption
 
         public static void GetBytes(byte[] buf, int len)
         {
-            if (_rng == null) Reload();
+            if (_rng == null) Init();
             try
             {
                 _rng.GetBytes(buf, 0, len);
             }
-            catch (System.Exception)
+            catch
             {
                 // the backup way
                 byte[] tmp = new byte[len];
