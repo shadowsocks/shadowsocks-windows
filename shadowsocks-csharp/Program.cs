@@ -41,11 +41,12 @@ namespace Shadowsocks
             // Check .NET Framework version
             if (!Utils.IsSupportedRuntimeVersion())
             {
-                MessageBox.Show(I18N.GetString("Unsupported .NET Framework, please update to 4.6.2 or later."),
-                "Shadowsocks Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-
-                Process.Start(
-                    "https://www.microsoft.com/download/details.aspx?id=53344");
+                if (DialogResult.OK == MessageBox.Show(I18N.GetString("Unsupported .NET Framework, please update to {0} or later.", "4.7.2"),
+                "Shadowsocks Error", MessageBoxButtons.OKCancel, MessageBoxIcon.Error))
+                {
+                    //Process.Start("https://www.microsoft.com/download/details.aspx?id=53344");    // 4.6.2
+                    Process.Start("https://dotnet.microsoft.com/download/dotnet-framework/net472");
+                }
                 return;
             }
 
