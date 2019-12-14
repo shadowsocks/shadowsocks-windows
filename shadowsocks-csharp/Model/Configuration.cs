@@ -24,6 +24,7 @@ namespace Shadowsocks.Model
         public int localPort;
         public bool portableMode = true;
         public string pacUrl;
+        public string gfwListUrl;
         public bool useOnlinePac;
         public bool secureLocalPac = true;
         public bool availabilityStatistics;
