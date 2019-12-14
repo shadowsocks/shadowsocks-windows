@@ -94,18 +94,24 @@ namespace Shadowsocks.Controller.Service
                     return false;
                 }
 
-                if (!File.Exists(_pluginProcess.StartInfo.FileName))
-                {
-                    throw new FileNotFoundException(I18N.GetString("Cannot find the plugin program file"), _pluginProcess.StartInfo.FileName);
-                }
-
                 var localPort = GetNextFreeTcpPort();
                 LocalEndPoint = new IPEndPoint(IPAddress.Loopback, localPort);
 
                 _pluginProcess.StartInfo.Environment["SS_LOCAL_HOST"] = LocalEndPoint.Address.ToString();
                 _pluginProcess.StartInfo.Environment["SS_LOCAL_PORT"] = LocalEndPoint.Port.ToString();
                 _pluginProcess.StartInfo.Arguments = ExpandEnvironmentVariables(_pluginProcess.StartInfo.Arguments, _pluginProcess.StartInfo.EnvironmentVariables);
-                _pluginProcess.Start();
+                try
+                {
+                    _pluginProcess.Start();
+                }
+                catch (System.ComponentModel.Win32Exception ex)
+                {
+                    // do not use File.Exists(...), it can not handle the scenarios when the plugin file is in system environment path.
+                    if ((uint)ex.ErrorCode == 0x80004005)   // file not found
+                    {
+                        throw new FileNotFoundException(I18N.GetString("Cannot find the plugin program file"), _pluginProcess.StartInfo.FileName, ex);
+                    }
+                }
                 _pluginJob.AddProcess(_pluginProcess.Handle);
                 _started = true;
             }
