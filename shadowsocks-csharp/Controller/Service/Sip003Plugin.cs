@@ -94,6 +94,11 @@ namespace Shadowsocks.Controller.Service
                     return false;
                 }
 
+                if (!File.Exists(_pluginProcess.StartInfo.FileName))
+                {
+                    throw new FileNotFoundException(I18N.GetString("Cannot find the plugin program file"), _pluginProcess.StartInfo.FileName);
+                }
+
                 var localPort = GetNextFreeTcpPort();
                 LocalEndPoint = new IPEndPoint(IPAddress.Loopback, localPort);
 
