@@ -6,6 +6,8 @@
 
 - [ ] [Searched](https://github.com/shadowsocks/shadowsocks-windows/search?q=is%3Apr&type=Issues) for similar pull requests
 - [ ] Compiled the code with Visual Studio
+- [ ] Require translation update
+- [ ] Require document update (readme.md, wikipage, etc)
 
 ### What is the purpose of your *pull request*?
 - [ ] Bug fix
