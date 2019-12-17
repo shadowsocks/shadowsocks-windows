@@ -55,6 +55,7 @@ namespace Shadowsocks.View
         private MenuItem proxyItem;
         private MenuItem hotKeyItem;
         private MenuItem VerboseLoggingToggleItem;
+        private MenuItem ShowPluginOutputToggleItem;
 
         private ConfigForm configForm;
         private ProxyForm proxyForm;
@@ -81,6 +82,7 @@ namespace Shadowsocks.View
             controller.UserRuleFileReadyToOpen += controller_FileReadyToOpen;
             controller.ShareOverLANStatusChanged += controller_ShareOverLANStatusChanged;
             controller.VerboseLoggingStatusChanged += controller_VerboseLoggingStatusChanged;
+            controller.ShowPluginOutputChanged += controller_ShowPluginOutputChanged;
             controller.EnableGlobalChanged += controller_EnableGlobalChanged;
             controller.Errored += controller_Errored;
             controller.UpdatePACFromGFWListCompleted += controller_UpdatePACFromGFWListCompleted;
@@ -319,6 +321,7 @@ namespace Shadowsocks.View
                 CreateMenuGroup("Help", new MenuItem[] {
                     CreateMenuItem("Show Logs...", new EventHandler(this.ShowLogItem_Click)),
                     this.VerboseLoggingToggleItem = CreateMenuItem( "Verbose Logging", new EventHandler(this.VerboseLoggingToggleItem_Click) ),
+                    this.ShowPluginOutputToggleItem = CreateMenuItem("Show Plugin Output", new EventHandler(this.ShowPluginOutputToggleItem_Click)),
                     CreateMenuGroup("Updates...", new MenuItem[] {
                         CreateMenuItem("Check for Updates...", new EventHandler(this.checkUpdatesItem_Click)),
                         new MenuItem("-"),
@@ -353,6 +356,11 @@ namespace Shadowsocks.View
         void controller_VerboseLoggingStatusChanged(object sender, EventArgs e)
         {
             VerboseLoggingToggleItem.Checked = controller.GetConfigurationCopy().isVerboseLogging;
+        }
+
+        void controller_ShowPluginOutputChanged(object sender, EventArgs e)
+        {
+            ShowPluginOutputToggleItem.Checked = controller.GetConfigurationCopy().showPluginOutput;
         }
 
         void controller_EnableGlobalChanged(object sender, EventArgs e)
@@ -431,6 +439,7 @@ namespace Shadowsocks.View
             UpdateSystemProxyItemsEnabledStatus(config);
             ShareOverLANItem.Checked = config.shareOverLan;
             VerboseLoggingToggleItem.Checked = config.isVerboseLogging;
+            ShowPluginOutputToggleItem.Checked = config.showPluginOutput;
             AutoStartupItem.Checked = AutoStartup.Check();
             onlinePACItem.Checked = onlinePACItem.Enabled && config.useOnlinePac;
             localPACItem.Checked = !onlinePACItem.Checked;
@@ -701,6 +710,12 @@ namespace Shadowsocks.View
         {
             VerboseLoggingToggleItem.Checked = !VerboseLoggingToggleItem.Checked;
             controller.ToggleVerboseLogging(VerboseLoggingToggleItem.Checked);
+        }
+
+        private void ShowPluginOutputToggleItem_Click(object sender, EventArgs e)
+        {
+            ShowPluginOutputToggleItem.Checked = !ShowPluginOutputToggleItem.Checked;
+            controller.ToggleShowPluginOutput(ShowPluginOutputToggleItem.Checked);
         }
 
         private void StatisticsConfigItem_Click(object sender, EventArgs e)

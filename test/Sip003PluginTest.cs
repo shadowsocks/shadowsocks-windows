@@ -19,13 +19,15 @@ namespace Shadowsocks.Test
         {
 
 
-            var NoPlugin = Sip003Plugin.CreateIfConfigured(new Server
-            {
-                server = "192.168.100.1",
-                server_port = 8888,
-                password = "test",
-                method = "bf-cfb"
-            });
+            var NoPlugin = Sip003Plugin.CreateIfConfigured(
+                new Server
+                {
+                    server = "192.168.100.1",
+                    server_port = 8888,
+                    password = "test",
+                    method = "bf-cfb"
+                },
+                false);
 
             RunPluginSupportTest(
                 NoPlugin,
@@ -39,14 +41,17 @@ namespace Shadowsocks.Test
         [TestMethod]
         public void TestSip003Plugin_Plugin()
         {
-            var Plugin = Sip003Plugin.CreateIfConfigured(new Server
-            {
-                server = "192.168.100.1",
-                server_port = 8888,
-                password = "test",
-                method = "bf-cfb",
-                plugin = fake_plugin
-            });
+            var Plugin = Sip003Plugin.CreateIfConfigured(
+                new Server
+                {
+                    server = "192.168.100.1",
+                    server_port = 8888,
+                    password = "test",
+                    method = "bf-cfb",
+                    plugin = fake_plugin
+                },
+                false);
+
             RunPluginSupportTest(
                 Plugin,
                 fake_plugin,
@@ -58,16 +63,19 @@ namespace Shadowsocks.Test
 
         [TestMethod]
         public void TestSip003Plugin_PluginWithOpts()
-        { 
-            var PluginWithOpts = Sip003Plugin.CreateIfConfigured(new Server
-            {
-                server = "192.168.100.1",
-                server_port = 8888,
-                password = "test",
-                method = "bf-cfb",
-                plugin = fake_plugin,
-                plugin_opts = "_option"
-            });
+        {
+            var PluginWithOpts = Sip003Plugin.CreateIfConfigured(
+                new Server
+                {
+                    server = "192.168.100.1",
+                    server_port = 8888,
+                    password = "test",
+                    method = "bf-cfb",
+                    plugin = fake_plugin,
+                    plugin_opts = "_option"
+                },
+                false);
+
             RunPluginSupportTest(
                 PluginWithOpts,
                 fake_plugin,
@@ -80,15 +88,18 @@ namespace Shadowsocks.Test
         [TestMethod]
         public void TestSip003Plugin_PluginWithArgs()
         {
-            var PluginWithArgs = Sip003Plugin.CreateIfConfigured(new Server
-            {
-                server = "192.168.100.1",
-                server_port = 8888,
-                password = "test",
-                method = "bf-cfb",
-                plugin = fake_plugin,
-                plugin_args = "_test"
-            });
+            var PluginWithArgs = Sip003Plugin.CreateIfConfigured(
+                new Server
+                {
+                    server = "192.168.100.1",
+                    server_port = 8888,
+                    password = "test",
+                    method = "bf-cfb",
+                    plugin = fake_plugin,
+                    plugin_args = "_test"
+                },
+                false);
+
             RunPluginSupportTest(
                 PluginWithArgs,
                 fake_plugin,
@@ -101,16 +112,19 @@ namespace Shadowsocks.Test
         [TestMethod]
         public void TestSip003Plugin_PluginWithOptsAndArgs()
         {
-            var PluginWithOptsAndArgs = Sip003Plugin.CreateIfConfigured(new Server
-            {
-                server = "192.168.100.1",
-                server_port = 8888,
-                password = "test",
-                method = "bf-cfb",
-                plugin = fake_plugin,
-                plugin_opts = "_option",
-                plugin_args = "_test"
-            });
+            var PluginWithOptsAndArgs = Sip003Plugin.CreateIfConfigured(
+                new Server
+                {
+                    server = "192.168.100.1",
+                    server_port = 8888,
+                    password = "test",
+                    method = "bf-cfb",
+                    plugin = fake_plugin,
+                    plugin_opts = "_option",
+                    plugin_args = "_test"
+                },
+                false);
+
             RunPluginSupportTest(
                 PluginWithOptsAndArgs,
                 fake_plugin,
@@ -123,15 +137,18 @@ namespace Shadowsocks.Test
         [TestMethod]
         public void TestSip003Plugin_PluginWithArgsReplaced()
         {
-            var PluginWithArgsReplaced = Sip003Plugin.CreateIfConfigured(new Server
-            {
-                server = "192.168.100.1",
-                server_port = 8888,
-                password = "test",
-                method = "bf-cfb",
-                plugin = fake_plugin,
-                plugin_args = "_test,%SS_REMOTE_HOST%"
-            });
+            var PluginWithArgsReplaced = Sip003Plugin.CreateIfConfigured(
+                new Server
+                {
+                    server = "192.168.100.1",
+                    server_port = 8888,
+                    password = "test",
+                    method = "bf-cfb",
+                    plugin = fake_plugin,
+                    plugin_args = "_test,%SS_REMOTE_HOST%"
+                },
+                false);
+
             RunPluginSupportTest(
                 PluginWithArgsReplaced,
                 fake_plugin,
@@ -143,17 +160,20 @@ namespace Shadowsocks.Test
 
         [TestMethod]
         public void TestSip003Plugin_PluginWithOptsAndArgsReplaced()
-        { 
-            var PluginWithOptsAndArgsReplaced = Sip003Plugin.CreateIfConfigured(new Server
-            {
-                server = "192.168.100.1",
-                server_port = 8888,
-                password = "test",
-                method = "bf-cfb",
-                plugin = fake_plugin,
-                plugin_opts = "_option",
-                plugin_args = "_test,%SS_REMOTE_HOST%,%SS_PLUGIN_OPTIONS%"
-            });
+        {
+            var PluginWithOptsAndArgsReplaced = Sip003Plugin.CreateIfConfigured(
+                new Server
+                {
+                    server = "192.168.100.1",
+                    server_port = 8888,
+                    password = "test",
+                    method = "bf-cfb",
+                    plugin = fake_plugin,
+                    plugin_opts = "_option",
+                    plugin_args = "_test,%SS_REMOTE_HOST%,%SS_PLUGIN_OPTIONS%"
+                },
+                false);
+
             RunPluginSupportTest(
                 PluginWithOptsAndArgsReplaced,
                 fake_plugin,
