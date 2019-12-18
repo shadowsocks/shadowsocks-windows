@@ -25,6 +25,7 @@ namespace Shadowsocks.Model
         public bool portableMode = true;
         public bool showPluginOutput;
         public string pacUrl;
+        public string gfwListUrl;
         public bool useOnlinePac;
         public bool secureLocalPac = true;
         public bool availabilityStatistics;

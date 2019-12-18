@@ -90,7 +90,13 @@ var __RULES__ = {JsonConvert.SerializeObject(gfwLines, Formatting.Indented)};
 
         public void UpdatePACFromGFWList(Configuration config)
         {
-            Logging.Info($"Checking GFWList from {GFWLIST_URL}");
+            string gfwListUrl = GFWLIST_URL;
+            if (!string.IsNullOrWhiteSpace(config.gfwListUrl))
+            {
+                Logging.Info("Found custom GFWListURL in config file");
+                gfwListUrl = config.gfwListUrl;
+            }
+            Logging.Info($"Checking GFWList from {gfwListUrl}");
             WebClient http = new WebClient();
             if (config.enabled)
             {
@@ -101,7 +107,7 @@ var __RULES__ = {JsonConvert.SerializeObject(gfwLines, Formatting.Indented)};
                     config.localPort);
             }
             http.DownloadStringCompleted += http_DownloadStringCompleted;
-            http.DownloadStringAsync(new Uri(GFWLIST_URL));
+            http.DownloadStringAsync(new Uri(gfwListUrl));
         }
 
         public static List<string> ParseBase64ToValidList(string response)
