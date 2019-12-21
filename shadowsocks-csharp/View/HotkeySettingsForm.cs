@@ -1,13 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Windows.Forms;
-
-using Shadowsocks.Controller;
+﻿using Shadowsocks.Controller;
 using Shadowsocks.Model;
 using Shadowsocks.Properties;
+using System;
+using System.Drawing;
+using System.Text;
+using System.Windows.Forms;
 using static Shadowsocks.Controller.HotkeyReg;
 
 namespace Shadowsocks.View
@@ -33,18 +30,7 @@ namespace Shadowsocks.View
 
         private void UpdateTexts()
         {
-            // I18N stuff
-            SwitchSystemProxyLabel.Text = I18N.GetString("Switch system proxy");
-            SwitchProxyModeLabel.Text = I18N.GetString("Switch system proxy mode");
-            SwitchAllowLanLabel.Text = I18N.GetString("Switch share over LAN");
-            ShowLogsLabel.Text = I18N.GetString("Show Logs");
-            ServerMoveUpLabel.Text = I18N.GetString("Switch to prev server");
-            ServerMoveDownLabel.Text = I18N.GetString("Switch to next server");
-            RegHotkeysAtStartupLabel.Text = I18N.GetString("Reg Hotkeys At Startup");
-            btnOK.Text = I18N.GetString("OK");
-            btnCancel.Text = I18N.GetString("Cancel");
-            btnRegisterAll.Text = I18N.GetString("Reg All");
-            this.Text = I18N.GetString("Edit Hotkeys...");
+            I18N.TranslateForm(this);
         }
 
         private void controller_ConfigChanged(object sender, EventArgs e)

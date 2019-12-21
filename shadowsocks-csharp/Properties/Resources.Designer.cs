@@ -115,32 +115,26 @@ namespace Shadowsocks.Properties {
         }
         
         /// <summary>
-        ///   查找类似 # translation for Japanese
-        ///
-        ///Shadowsocks=Shadowsocks
-        ///
-        ///# Menu items
-        ///
-        ///System Proxy=システムプロキシ
-        ///Disable=無効
-        ///PAC=PAC
-        ///Global=全般
-        ///Servers=サーバー
-        ///Edit Servers...=サーバーの編集...
-        ///Statistics Config...=統計情報の設定...
-        ///Start on Boot=システムと同時に起動
-        ///Forward Proxy...=フォワードプロキシの設定...
-        ///Allow other Devices to connect=他のデバイスからの接続を許可する
-        ///Local PAC=ローカル PAC
-        ///Online PAC=オンライン PAC
-        ///Edit Local PAC File...=ローカル PAC ファイルの編集...
-        ///Update Local PAC from GFWList=GFWList からローカル PAC を更新
-        ///Edit User Rule for GFWList...=ユーザールールの編集...
-        ///Secure Local PA [字符串的其余部分被截断]&quot;; 的本地化字符串。
+        ///   查找类似 en,zh-CN,zh-TW,ja
+        ///,,,
+        ///Shadowsocks,Shadowsocks,Shadowsocks,Shadowsocks
+        ///,,,
+        ///System Proxy,系统代理,系統代理,システムプロキシ
+        ///Disable,禁用,禁用,無効
+        ///PAC,PAC 模式,PAC 模式,PAC
+        ///Global,全局模式,全局模式,全般
+        ///Servers,服务器,伺服器,サーバー
+        ///Edit Servers...,编辑服务器...,編輯伺服器...,サーバーの編集...
+        ///Statistics Config...,统计配置...,統計設定檔...,統計情報の設定...
+        ///Start on Boot,开机启动,開機啟動,システムと同時に起動
+        ///Forward Proxy...,正向代理设置...,正向 Proxy 設定...,フォワードプロキシの設定...
+        ///Allow other Devices to connect,允许其他设备连入,允許其他裝置連入,他のデバイスからの接続を許可する
+        ///Local PAC,使用本地 PAC,使用本機 PAC,ローカル PAC
+        ///Online PAC,使用在线 PAC,使 [字符串的其余部分被截断]&quot;; 的本地化字符串。
         /// </summary>
-        internal static string ja {
+        internal static string i18n_csv {
             get {
-                return ResourceManager.GetString("ja", resourceCulture);
+                return ResourceManager.GetString("i18n_csv", resourceCulture);
             }
         }
         
@@ -259,67 +253,6 @@ namespace Shadowsocks.Properties {
         internal static string user_rule {
             get {
                 return ResourceManager.GetString("user_rule", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   查找类似 # translation for Simplified Chinese
-        ///
-        ///Shadowsocks=Shadowsocks
-        ///
-        ///# Menu items
-        ///
-        ///System Proxy=系统代理
-        ///Disable=禁用
-        ///PAC=PAC 模式
-        ///Global=全局模式
-        ///Servers=服务器
-        ///Edit Servers...=编辑服务器...
-        ///Statistics Config...=统计配置...
-        ///Start on Boot=开机启动
-        ///Forward Proxy...=正向代理设置...
-        ///Allow other Devices to connect=允许其他设备连入
-        ///Local PAC=使用本地 PAC
-        ///Online PAC=使用在线 PAC
-        ///Edit Local PAC File...=编辑本地 PAC 文件...
-        ///Update Local PAC from GFWList=从 GFWList 更新本地 PAC
-        ///Edit User Rule for GFWList...=编辑 GFWList 的用户规则...
-        ///Secure Local PAC=保护本地 PAC
-        ///Copy Lo [字符串的其余部分被截断]&quot;; 的本地化字符串。
-        /// </summary>
-        internal static string zh_CN {
-            get {
-                return ResourceManager.GetString("zh_CN", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   查找类似 # translation for Traditional Chinese
-        ///
-        ///Shadowsocks=Shadowsocks
-        ///
-        ///# Menu items
-        ///
-        ///System Proxy=系統代理
-        ///Disable=禁用
-        ///PAC=PAC 模式
-        ///Global=全局模式
-        ///Servers=伺服器
-        ///Edit Servers...=編輯伺服器...
-        ///Statistics Config...=統計設定檔...
-        ///Start on Boot=開機啟動
-        ///Forward Proxy...=正向 Proxy 設定...
-        ///Allow other Devices to connect=允許其他裝置連入
-        ///Local PAC=使用本機 PAC
-        ///Online PAC=使用線上 PAC
-        ///Edit Local PAC File...=編輯本機 PAC 檔案...
-        ///Update Local PAC from GFWList=從 GFWList 更新本機 PAC
-        ///Edit User Rule for GFWList...=編輯 GFWList 的使用者規則...
-        ///Secure Local PAC=安全本機 PAC        /// [字符串的其余部分被截断]&quot;; 的本地化字符串。
-        /// </summary>
-        internal static string zh_TW {
-            get {
-                return ResourceManager.GetString("zh_TW", resourceCulture);
             }
         }
     }
