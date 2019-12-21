@@ -187,6 +187,7 @@ Proxy handshake failed,代理握手失败,Proxy 交握失敗,プロキシ ハン
 Register hotkey failed,注册快捷键失败,註冊快速鍵失敗,ホットキーの登錄に失敗しました。
 Cannot parse hotkey: {0},解析快捷键失败: {0},剖析快速鍵失敗: {0},ホットキーを解析できません: {0}
 "Timeout is invalid, it should not exceed {0}",超时无效，不应超过 {0},逾時無效，不應超過 {0},タイムアウト値が無効です。{0} 以下の値を指定して下さい。
+Cannot find the plugin program file,找不到插件程序文件,找不到外掛程式文件,,
 ,,,
 Operation failure,操作失败,,
 Auto save failed,自动保存失败,,
