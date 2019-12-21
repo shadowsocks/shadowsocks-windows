@@ -145,21 +145,7 @@ namespace Shadowsocks.View
 
         private void UpdateTexts()
         {
-            FileMenuItem.Text = I18N.GetString("&File");
-            OpenLocationMenuItem.Text = I18N.GetString("&Open Location");
-            ExitMenuItem.Text = I18N.GetString("E&xit");
-            ClearLogsButton.Text = I18N.GetString("&Clear Logs");
-            ChangeFontButton.Text = I18N.GetString("Change &Font");
-            WrapTextCheckBox.Text = I18N.GetString("&Wrap Text");
-            TopMostCheckBox.Text = I18N.GetString("&Top Most");
-            ViewMenuItem.Text = I18N.GetString("&View");
-            ClearLogsMenuItem.Text = I18N.GetString("&Clear Logs");
-            ChangeFontMenuItem.Text = I18N.GetString("Change &Font");
-            WrapTextMenuItem.Text = I18N.GetString("&Wrap Text");
-            TopMostMenuItem.Text = I18N.GetString("&Top Most");
-            ShowToolbarMenuItem.Text = I18N.GetString("&Show Toolbar");
-            Text = I18N.GetString("Log Viewer");
-            // traffic chart
+            I18N.TranslateForm(this);
             trafficChart.Series["Inbound"].LegendText = I18N.GetString("Inbound");
             trafficChart.Series["Outbound"].LegendText = I18N.GetString("Outbound");
         }

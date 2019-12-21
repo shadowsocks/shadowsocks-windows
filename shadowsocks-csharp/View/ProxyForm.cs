@@ -31,18 +31,7 @@ namespace Shadowsocks.View
 
         private void UpdateTexts()
         {
-            UseProxyCheckBox.Text = I18N.GetString("Use Proxy");
-            ProxyTypeLabel.Text = I18N.GetString("Proxy Type");
-            ProxyAddrLabel.Text = I18N.GetString("Proxy Addr");
-            ProxyPortLabel.Text = I18N.GetString("Proxy Port");
-            ProxyTimeoutLabel.Text = I18N.GetString("Timeout(Sec)");
-            ProxyNotificationLabel.Text = I18N.GetString("If server has a plugin, proxy will not be used");
-            UseAuthCheckBox.Text = I18N.GetString("Use Auth");
-            AuthUserLabel.Text = I18N.GetString("Auth User");
-            AuthPwdLabel.Text = I18N.GetString("Auth Pwd");
-            OKButton.Text = I18N.GetString("OK");
-            MyCancelButton.Text = I18N.GetString("Cancel");
-            this.Text = I18N.GetString("Edit Proxy");
+            I18N.TranslateForm(this);
         }
 
         private void controller_ConfigChanged(object sender, EventArgs e)

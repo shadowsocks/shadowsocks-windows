@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Shadowsocks.Controller;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
@@ -17,9 +18,19 @@ namespace Shadowsocks.Util
             {
                 return Enumerable.Empty<TControl>();
             }
-
             var children = control.Controls.OfType<TControl>().ToList();
             return children.SelectMany(GetChildControls<TControl>).Concat(children);
+        }
+
+        public static IEnumerable<MenuItem> GetMenuItems(Menu m)
+        {
+            if (m?.MenuItems == null || m.MenuItems.Count == 0) return Enumerable.Empty<MenuItem>();
+            var children = new List<MenuItem>();
+            foreach (var item in m.MenuItems)
+            {
+                children.Add((MenuItem)item);
+            }
+            return children.SelectMany(GetMenuItems).Concat(children);
         }
 
         // Workaround NotifyIcon's 63 chars limit
@@ -74,7 +85,7 @@ namespace Shadowsocks.Util
             return newBitmap;
         }
 
-        public static Bitmap ResizeBitmap (Bitmap original, int width, int height)
+        public static Bitmap ResizeBitmap(Bitmap original, int width, int height)
         {
             Bitmap newBitmap = new Bitmap(width, height);
             using (Graphics g = Graphics.FromImage(newBitmap))
