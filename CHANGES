@@ -1,3 +1,17 @@
+4.1.9.0 2019-12-21
+- Refine merge PAC+abp script logic (#2598)
+- Format the proxy hostname in GfwListUpdater (#2616)
+- Fix the trayIcon display issue under Win10 dark theme (#2658)
+- Set default encryption method as chacha20-ietf-poly1305 (#2699)
+- Translate statistics config form (#2698)
+- Update .Net Framework download link (#2731)
+- Use MD5 hash instead of timestamp for PAC URL parameter (#2705)
+- Add option "Show Plugin Output" (#2722)
+- Support custom GFWListUrl defined in config file (#2728)
+- Implement new I18N csv structure (#2712)
+- Refine message when plugin program file does not exist (#2730)
+- Other minor bug fixes and improvements
+
 4.1.8 2019-10-31
 - Update the nuget configurations and packages
 - Fix some crash about thread-safe in statistics (#2591)
