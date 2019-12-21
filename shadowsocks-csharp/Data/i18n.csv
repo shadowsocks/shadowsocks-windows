@@ -181,7 +181,7 @@ System Proxy On: ,系统代理已启用：,系統 Proxy 已啟用：,システ�
 Running: Port {0},正在运行：端口 {0},正在執行：連接埠號碼 {0},実行中：ポート {0}
 "Unexpected error, shadowsocks will exit. Please report to",非预期错误，Shadowsocks将退出。请提交此错误到,非預期錯誤，Shadowsocks 將結束。請報告此錯誤至,予想外のエラーが発生したため、Shadowsocks を終了します。詳しくは下記までお問い合わせ下さい：
 "Unsupported operating system, use Windows Vista at least.",不支持的操作系统版本，最低需求为Windows Vista。,不支援的作業系統版本，最低需求為 Windows Vista。,お使いの OS はサポートされていません。Windows Vista 以降の OS で実行して下さい。
-"Unsupported .NET Framework, please update to 4.6.2 or later.",当前 .NET Framework 版本过低，请升级至4.6.2或更新版本。,目前 .NET Framework 版本過低，最低需求為4.6.2。,お使いの .NET Framework はサポートされていません。4.6.2 以降のバンジョーをインストールして下さい。
+"Unsupported .NET Framework, please update to {0} or later.",当前 .NET Framework 版本过低，请升级至{0}或更新版本。,目前 .NET Framework 版本過低，最低需求為{0}。,お使いの .NET Framework はサポートされていません。{0} 以降のバンジョーをインストールして下さい。
 Proxy request failed,代理请求失败,Proxy 要求失敗,プロキシ要求が失敗しました。
 Proxy handshake failed,代理握手失败,Proxy 交握失敗,プロキシ ハンドシェイクに失敗しました。
 Register hotkey failed,注册快捷键失败,註冊快速鍵失敗,ホットキーの登錄に失敗しました。
