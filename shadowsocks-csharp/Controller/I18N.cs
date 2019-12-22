@@ -1,11 +1,11 @@
-﻿using System.Collections.Generic;
-using System.Globalization;
-using System.IO;
+﻿using Microsoft.VisualBasic.FileIO;
 using Shadowsocks.Properties;
 using Shadowsocks.Util;
-using System.Windows.Forms;
-using Microsoft.VisualBasic.FileIO;
+using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
 using System.Text;
+using System.Windows.Forms;
 
 namespace Shadowsocks.Controller
 {
@@ -90,7 +90,7 @@ namespace Shadowsocks.Controller
 
         public static string GetString(string key, params object[] args)
         {
-            return string.Format(_strings.TryGetValue(key, out var value) ? value : key, args);
+            return string.Format(_strings.TryGetValue(key.Trim(), out var value) ? value : key, args);
         }
 
         public static void TranslateForm(Form c)

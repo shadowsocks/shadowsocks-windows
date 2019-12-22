@@ -1,12 +1,14 @@
-en,zh-CN,zh-TW,ja
+﻿en,zh-CN,zh-TW,ja
 #Restart program to apply translation,,,
 #This is comment line,,,
 #Always keep language name at head of file,,,
 #Language name is output in log,,,
-#You can find it by search Current language is:,,,
-#Please use UTF-8 encoding,,,
-
+"#You can find it by search ""Current language is:""",,,
+#Please use UTF-8 with BOM encoding so we can edit it in Excel,,,
+,,,
 Shadowsocks,Shadowsocks,Shadowsocks,Shadowsocks
+,,,
+#Menu,,,
 ,,,
 System Proxy,系统代理,系統代理,システムプロキシ
 Disable,禁用,禁用,無効
@@ -43,6 +45,7 @@ Edit Servers,编辑服务器,編輯伺服器,サーバーの編集
 Load Balance,负载均衡,負載平衡,負荷分散
 High Availability,高可用,高可用性,高可用性
 Choose by statistics,根据统计,根據統計,統計で選ぶ
+Show Plugin Output,显示插件输出,,
 ,,,
 # Config Form,,,
 ,,,
@@ -187,7 +190,7 @@ Proxy handshake failed,代理握手失败,Proxy 交握失敗,プロキシ ハン
 Register hotkey failed,注册快捷键失败,註冊快速鍵失敗,ホットキーの登錄に失敗しました。
 Cannot parse hotkey: {0},解析快捷键失败: {0},剖析快速鍵失敗: {0},ホットキーを解析できません: {0}
 "Timeout is invalid, it should not exceed {0}",超时无效，不应超过 {0},逾時無效，不應超過 {0},タイムアウト値が無効です。{0} 以下の値を指定して下さい。
-Cannot find the plugin program file,找不到插件程序文件,找不到外掛程式文件,,
+Cannot find the plugin program file,找不到插件程序文件,找不到外掛程式文件,
 ,,,
 Operation failure,操作失败,,
 Auto save failed,自动保存失败,,
