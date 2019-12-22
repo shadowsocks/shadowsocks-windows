@@ -483,6 +483,7 @@ namespace Shadowsocks.Controller
             _pacDaemon.PACFileChanged += PacDaemon_PACFileChanged;
             _pacDaemon.UserRuleFileChanged += PacDaemon_UserRuleFileChanged;
             _pacServer = _pacServer ?? new PACServer(_pacDaemon);
+            _pacServer.UpdatePACURL(_config); // So PACServer works when system proxy disabled.
 
             gfwListUpdater = gfwListUpdater ?? new GFWListUpdater();
             gfwListUpdater.UpdateCompleted += PacServer_PACUpdateCompleted;
