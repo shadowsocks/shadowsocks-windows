@@ -12,7 +12,7 @@ namespace Shadowsocks.Controller
 
     public static class I18N
     {
-        private const string I18N_FILE = "i18n.csv";
+        public const string I18N_FILE = "i18n.csv";
 
         private static Dictionary<string, string> _strings = new Dictionary<string, string>();
 
@@ -81,10 +81,11 @@ namespace Shadowsocks.Controller
             if (!File.Exists(I18N_FILE))
             {
                 i18n = Resources.i18n_csv;
-                File.WriteAllText(I18N_FILE, i18n, Encoding.UTF8);
+                //File.WriteAllText(I18N_FILE, i18n, Encoding.UTF8);
             }
             else
             {
+                Logging.Info("Using external translation");
                 i18n = File.ReadAllText(I18N_FILE, Encoding.UTF8);
             }
             Logging.Info("Current language is: " + locale);

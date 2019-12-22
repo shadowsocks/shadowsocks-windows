@@ -1,20 +1,17 @@
-﻿using System;
-using System.Diagnostics;
-using System.Drawing;
-using System.Drawing.Imaging;
-using System.Windows.Forms;
-
-using ZXing;
-using ZXing.Common;
-using ZXing.QrCode;
-
-using Shadowsocks.Controller;
+﻿using Shadowsocks.Controller;
 using Shadowsocks.Model;
 using Shadowsocks.Properties;
 using Shadowsocks.Util;
+using System;
+using System.Diagnostics;
+using System.Drawing;
+using System.IO;
 using System.Linq;
-using Microsoft.Win32;
-using System.Windows.Interop;
+using System.Text;
+using System.Windows.Forms;
+using ZXing;
+using ZXing.Common;
+using ZXing.QrCode;
 
 namespace Shadowsocks.View
 {
@@ -56,6 +53,7 @@ namespace Shadowsocks.View
         private MenuItem hotKeyItem;
         private MenuItem VerboseLoggingToggleItem;
         private MenuItem ShowPluginOutputToggleItem;
+        private MenuItem WriteI18NFileItem;
 
         private ConfigForm configForm;
         private ProxyForm proxyForm;
@@ -322,6 +320,7 @@ namespace Shadowsocks.View
                     CreateMenuItem("Show Logs...", new EventHandler(this.ShowLogItem_Click)),
                     this.VerboseLoggingToggleItem = CreateMenuItem( "Verbose Logging", new EventHandler(this.VerboseLoggingToggleItem_Click) ),
                     this.ShowPluginOutputToggleItem = CreateMenuItem("Show Plugin Output", new EventHandler(this.ShowPluginOutputToggleItem_Click)),
+                    this.WriteI18NFileItem = CreateMenuItem("Write translation template",new EventHandler(WriteI18NFileItem_Click)),
                     CreateMenuGroup("Updates...", new MenuItem[] {
                         CreateMenuItem("Check for Updates...", new EventHandler(this.checkUpdatesItem_Click)),
                         new MenuItem("-"),
@@ -716,6 +715,11 @@ namespace Shadowsocks.View
         {
             ShowPluginOutputToggleItem.Checked = !ShowPluginOutputToggleItem.Checked;
             controller.ToggleShowPluginOutput(ShowPluginOutputToggleItem.Checked);
+        }
+
+        private void WriteI18NFileItem_Click(object sender, EventArgs e)
+        {
+            File.WriteAllText(I18N.I18N_FILE, Resources.i18n_csv, Encoding.UTF8);
         }
 
         private void StatisticsConfigItem_Click(object sender, EventArgs e)
