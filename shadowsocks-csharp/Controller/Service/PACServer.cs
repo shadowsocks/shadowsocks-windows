@@ -82,7 +82,7 @@ namespace Shadowsocks.Controller
                 string request = Encoding.UTF8.GetString(firstPacket, 0, length);
                 string[] lines = request.Split('\r', '\n');
                 bool hostMatch = false, pathMatch = false, useSocks = false;
-                bool secretMatch = _config.secureLocalPac;
+                bool secretMatch = !_config.secureLocalPac;
 
                 if (lines.Length < 2)   // need at lease RequestLine + Host
                 {
