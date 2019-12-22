@@ -1,3 +1,7 @@
+4.1.9.1 2019-12-22
+- Fix #2739: PAC does not work
+- Translate Show Plugin Option
+
 4.1.9.0 2019-12-21
 - Refine merge PAC+abp script logic (#2598)
 - Format the proxy hostname in GfwListUpdater (#2616)
