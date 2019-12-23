@@ -12,7 +12,7 @@ namespace Shadowsocks.Controller
 
     public static class I18N
     {
-        private static readonly string I18N_FILE = "i18n.csv";
+        public const string I18N_FILE = "i18n.csv";
 
         private static Dictionary<string, string> _strings = new Dictionary<string, string>();
 
@@ -45,14 +45,16 @@ namespace Shadowsocks.Controller
                         if (localeNames[i].Split('-')[0] == localeNoRegion)
                             targetIndex = i;
                     }
-                    Logging.Info($"Using {localeNames[targetIndex]} translation for {locale}");
-                }
-
-                // Still not found, exit
-                if (targetIndex == -1 || enIndex == targetIndex)
-                {
-                    Logging.Info($"Translation for {locale} not found");
-                    return;
+                    if (targetIndex != -1 && enIndex != targetIndex)
+                    {
+                        Logging.Info($"Using {localeNames[targetIndex]} translation for {locale}");
+                    }
+                    else
+                    {
+                        // Still not found, exit
+                        Logging.Info($"Translation for {locale} not found");
+                        return;
+                    }
                 }
 
                 // read translation lines
@@ -75,17 +77,19 @@ namespace Shadowsocks.Controller
         static I18N()
         {
             string i18n;
+            string locale = CultureInfo.CurrentCulture.Name;
             if (!File.Exists(I18N_FILE))
             {
                 i18n = Resources.i18n_csv;
-                File.WriteAllText(I18N_FILE, i18n, Encoding.UTF8);
+                //File.WriteAllText(I18N_FILE, i18n, Encoding.UTF8);
             }
             else
             {
+                Logging.Info("Using external translation");
                 i18n = File.ReadAllText(I18N_FILE, Encoding.UTF8);
             }
-            Logging.Info("Current language is: " + CultureInfo.CurrentCulture.Name);
-            Init(i18n, CultureInfo.CurrentCulture.Name);
+            Logging.Info("Current language is: " + locale);
+            Init(i18n, locale);
         }
 
         public static string GetString(string key, params object[] args)
