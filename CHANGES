@@ -1,3 +1,6 @@
+4.1.9.2 2019-12-25
+- Fix i18n issues (#2740, #2741)
+
 4.1.9.1 2019-12-22
 - Fix #2739: PAC does not work
 - Translate Show Plugin Option
