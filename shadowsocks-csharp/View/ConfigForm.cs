@@ -17,6 +17,9 @@ namespace Shadowsocks.View
 
         private bool isChange = false;
 
+        private readonly Font ConsolasWithUnderline = new Font("Consolas", 9F, FontStyle.Underline, GraphicsUnit.Point);
+        private readonly Font Consolas = new Font("Consolas", 9F, FontStyle.Regular, GraphicsUnit.Point);
+
         public ConfigForm(ShadowsocksController controller)
         {
             Font = SystemFonts.MessageBoxFont;
@@ -27,6 +30,7 @@ namespace Shadowsocks.View
             tableLayoutPanel5.Dock = DockStyle.Fill;
             PerformLayout();
 
+            PasswordTextBox.Font = Consolas;
             UpdateTexts();
             SetupValueChangedListeners();
             Icon = Icon.FromHandle(Resources.ssw128.GetHicon());
@@ -537,10 +541,11 @@ namespace Shadowsocks.View
         {
             controller.ConfigChanged -= Controller_ConfigChanged;
         }
-
         private void ShowPasswdCheckBox_CheckedChanged(object sender, EventArgs e)
         {
-            PasswordTextBox.UseSystemPasswordChar = !ShowPasswdCheckBox.Checked;
+            bool showPassword = ShowPasswdCheckBox.Checked;
+            PasswordTextBox.UseSystemPasswordChar = !showPassword;
+            PasswordTextBox.Font = showPassword ? ConsolasWithUnderline : Consolas;
         }
 
         private void UsePluginArgCheckBox_CheckedChanged(object sender, EventArgs e)
