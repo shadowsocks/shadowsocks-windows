@@ -320,7 +320,7 @@ namespace Shadowsocks.View
                     CreateMenuItem("Show Logs...", new EventHandler(this.ShowLogItem_Click)),
                     this.VerboseLoggingToggleItem = CreateMenuItem( "Verbose Logging", new EventHandler(this.VerboseLoggingToggleItem_Click) ),
                     this.ShowPluginOutputToggleItem = CreateMenuItem("Show Plugin Output", new EventHandler(this.ShowPluginOutputToggleItem_Click)),
-                    this.WriteI18NFileItem = CreateMenuItem("Write translation template",new EventHandler(WriteI18NFileItem_Click)),
+                    //this.WriteI18NFileItem = CreateMenuItem("Write translation template",new EventHandler(WriteI18NFileItem_Click)),
                     CreateMenuGroup("Updates...", new MenuItem[] {
                         CreateMenuItem("Check for Updates...", new EventHandler(this.checkUpdatesItem_Click)),
                         new MenuItem("-"),
@@ -715,11 +715,6 @@ namespace Shadowsocks.View
         {
             ShowPluginOutputToggleItem.Checked = !ShowPluginOutputToggleItem.Checked;
             controller.ToggleShowPluginOutput(ShowPluginOutputToggleItem.Checked);
-        }
-
-        private void WriteI18NFileItem_Click(object sender, EventArgs e)
-        {
-            File.WriteAllText(I18N.I18N_FILE, Resources.i18n_csv, Encoding.UTF8);
         }
 
         private void StatisticsConfigItem_Click(object sender, EventArgs e)

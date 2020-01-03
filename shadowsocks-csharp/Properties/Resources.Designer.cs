@@ -115,32 +115,6 @@ namespace Shadowsocks.Properties {
         }
         
         /// <summary>
-        ///   查找类似 en,zh-CN,zh-TW,ja
-        ///#Restart program to apply translation,,,
-        ///#This is comment line,,,
-        ///#Always keep language name at head of file,,,
-        ///#Language name is output in log,,,
-        ///&quot;#You can find it by search &quot;&quot;Current language is:&quot;&quot;&quot;,,,
-        ///#Please use UTF-8 with BOM encoding so we can edit it in Excel,,,
-        ///,,,
-        ///Shadowsocks,Shadowsocks,Shadowsocks,Shadowsocks
-        ///,,,
-        ///#Menu,,,
-        ///,,,
-        ///System Proxy,系统代理,系統代理,システムプロキシ
-        ///Disable,禁用,禁用,無効
-        ///PAC,PAC 模式,PAC 模式,PAC
-        ///Global,全局模式,全局模式,全般
-        ///Servers,服务器,伺服器,サーバー
-        ///Edit Servers...,编辑服务器...,編 [字符串的其余部分被截断]&quot;; 的本地化字符串。
-        /// </summary>
-        internal static string i18n_csv {
-            get {
-                return ResourceManager.GetString("i18n_csv", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   查找 System.Byte[] 类型的本地化资源。
         /// </summary>
         internal static byte[] libsscrypto {
