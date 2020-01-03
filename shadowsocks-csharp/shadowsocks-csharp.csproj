@@ -255,13 +255,11 @@
     <None Include="app.manifest">
       <SubType>Designer</SubType>
     </None>
-    <None Include="Data\i18n.csv" />
-    <None Include="Data\libsscrypto.dll.gz" />
-    <None Include="Data\privoxy.exe.gz" />
+    <None Include="Data\i18n.csv">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Data\sysproxy.exe.gz" />
-    <None Include="Data\sysproxy64.exe.gz" />
     <None Include="packages.config" />
     <None Include="Properties\DataSources\Shadowsocks.Model.StatisticsStrategyConfiguration.datasource" />
     <None Include="Properties\Settings.settings">
@@ -269,10 +267,22 @@
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
     <None Include="Resources\ssw128.png" />
-    <Content Include="Data\abp.js" />
-    <Content Include="Data\default-abp-rule.js" />
-    <Content Include="Data\privoxy_conf.txt" />
-    <Content Include="Data\user-rule.txt" />
+    <Content Include="Data\abp.js">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Data\default-abp-rule.js">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Data\libsscrypto.dll" />
+    <Content Include="Data\privoxy.exe" />
+    <Content Include="Data\privoxy_conf.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Data\sysproxy.exe" />
+    <Content Include="Data\sysproxy64.exe" />
+    <Content Include="Data\user-rule.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <None Include="FodyWeavers.xml">
       <SubType>Designer</SubType>
     </None>

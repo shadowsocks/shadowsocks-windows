@@ -29,7 +29,7 @@ namespace Shadowsocks.Controller
                 _uniqueConfigFile = $"privoxy_{_uid}.conf";
                 _privoxyJob = new Job();
 
-                FileManager.UncompressFile(Utils.GetTempPath("ss_privoxy.exe"), Resources.privoxy_exe);
+                FileManager.ByteArrayToFile(Utils.GetTempPath("ss_privoxy.exe"), Resources.privoxy);
             }
             catch (IOException e)
             {

@@ -65,8 +65,8 @@ namespace Shadowsocks.Util.SystemProxy
         {
             try
             {
-                FileManager.UncompressFile(Utils.GetTempPath("sysproxy.exe"),
-                    Environment.Is64BitOperatingSystem ? Resources.sysproxy64_exe : Resources.sysproxy_exe);
+                FileManager.ByteArrayToFile(Utils.GetTempPath("sysproxy.exe"),
+                    Environment.Is64BitOperatingSystem ? Resources.sysproxy64 : Resources.sysproxy);
             }
             catch (IOException e)
             {

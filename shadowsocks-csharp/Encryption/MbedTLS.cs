@@ -19,7 +19,7 @@ namespace Shadowsocks.Encryption
             string dllPath = Utils.GetTempPath(DLLNAME);
             try
             {
-                FileManager.UncompressFile(dllPath, Resources.libsscrypto_dll);
+                FileManager.ByteArrayToFile(dllPath, Resources.libsscrypto);
             }
             catch (IOException)
             {
