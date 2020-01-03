@@ -65,8 +65,8 @@ namespace Shadowsocks.Util.SystemProxy
         {
             try
             {
-                FileManager.ByteArrayToFile(Utils.GetTempPath("sysproxy.exe"),
-                    Environment.Is64BitOperatingSystem ? Resources.sysproxy64 : Resources.sysproxy);
+                //FileManager.ByteArrayToFile(Utils.GetTempPath("sysproxy.exe"),
+                //    Environment.Is64BitOperatingSystem ? Resources.sysproxy64 : Resources.sysproxy);
             }
             catch (IOException e)
             {
@@ -134,6 +134,11 @@ namespace Shadowsocks.Util.SystemProxy
             return true;
         }
 
+        private static string SysproxyName
+        {
+            get { return Environment.Is64BitOperatingSystem ? "sysproxy64.exe" : "sysproxy.exe"; }
+        }
+
         private static void ExecSysproxy(string arguments)
         {
             // using event to avoid hanging when redirect standard output/error
@@ -145,9 +150,9 @@ namespace Shadowsocks.Util.SystemProxy
                 using (var process = new Process())
                 {
                     // Configure the process using the StartInfo properties.
-                    process.StartInfo.FileName = Utils.GetTempPath("sysproxy.exe");
+                    process.StartInfo.FileName = Utils.GetDataPath(SysproxyName);
                     process.StartInfo.Arguments = arguments;
-                    process.StartInfo.WorkingDirectory = Utils.GetTempPath();
+                    process.StartInfo.WorkingDirectory = Utils.GetDataPath();
                     process.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
                     process.StartInfo.UseShellExecute = false;
                     process.StartInfo.RedirectStandardError = true;

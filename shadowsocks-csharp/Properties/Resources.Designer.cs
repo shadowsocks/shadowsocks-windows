@@ -228,26 +228,6 @@ namespace Shadowsocks.Properties {
         }
         
         /// <summary>
-        ///   查找 System.Byte[] 类型的本地化资源。
-        /// </summary>
-        internal static byte[] sysproxy {
-            get {
-                object obj = ResourceManager.GetObject("sysproxy", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   查找 System.Byte[] 类型的本地化资源。
-        /// </summary>
-        internal static byte[] sysproxy64 {
-            get {
-                object obj = ResourceManager.GetObject("sysproxy64", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
         ///   查找类似 ! Put user rules line by line in this file.
         ///! See https://adblockplus.org/en/filter-cheatsheet
         /// 的本地化字符串。
