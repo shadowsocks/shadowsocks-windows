@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using NLog;
 using Shadowsocks.Controller;
 using Shadowsocks.Model;
 using Shadowsocks.Properties;
@@ -14,6 +15,8 @@ namespace Shadowsocks.Util.SystemProxy
 {
     public static class Sysproxy
     {
+        private static Logger logger = LogManager.GetCurrentClassLogger();
+
         private const string _userWininetConfigFile = "user-wininet.json";
 
         private readonly static string[] _lanIP = {
@@ -70,7 +73,7 @@ namespace Shadowsocks.Util.SystemProxy
             }
             catch (IOException e)
             {
-                Logging.LogUsefulException(e);
+                logger.LogUsefulException(e);
             }
         }
 
@@ -233,7 +236,7 @@ namespace Shadowsocks.Util.SystemProxy
             }
             catch (IOException e)
             {
-                Logging.LogUsefulException(e);
+                logger.LogUsefulException(e);
             }
         }
 

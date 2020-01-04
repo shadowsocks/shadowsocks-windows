@@ -11,11 +11,14 @@ using Shadowsocks.Properties;
 using Shadowsocks.Model;
 using Shadowsocks.Util;
 using System.Text;
+using NLog;
 
 namespace Shadowsocks.View
 {
     public partial class LogForm : Form
     {
+        private static Logger logger = LogManager.GetCurrentClassLogger();
+
         long lastOffset;
         string filename;
         Timer timer;
@@ -38,7 +41,7 @@ namespace Shadowsocks.View
         TextAnnotation outboundAnnotation = new TextAnnotation();
         #endregion
 
-        public LogForm(ShadowsocksController controller, string filename)
+        public LogForm(ShadowsocksController controller, string filename=null)
         {
             this.controller = controller;
             this.filename = filename;
@@ -270,7 +273,7 @@ namespace Shadowsocks.View
         private void OpenLocationMenuItem_Click(object sender, EventArgs e)
         {
             string argument = "/select, \"" + filename + "\"";
-            Logging.Debug(argument);
+            logger.Debug(argument);
             System.Diagnostics.Process.Start("explorer.exe", argument);
         }
 
@@ -287,7 +290,7 @@ namespace Shadowsocks.View
         #region Clean up the content in LogMessageTextBox.
         private void DoClearLogs()
         {
-            Logging.Clear();
+            //logger.Clear();
             lastOffset = 0;
             LogMessageTextBox.Clear();
         }
@@ -317,7 +320,7 @@ namespace Shadowsocks.View
             }
             catch (Exception ex)
             {
-                Logging.LogUsefulException(ex);
+                logger.LogUsefulException(ex);
                 MessageBox.Show(ex.Message);
             }
         }

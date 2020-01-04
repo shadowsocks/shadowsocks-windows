@@ -3,6 +3,7 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Security;
 using System.Text;
+using NLog;
 using Shadowsocks.Controller;
 using Shadowsocks.Encryption.Exception;
 using Shadowsocks.Properties;
@@ -13,6 +14,8 @@ namespace Shadowsocks.Encryption
     // XXX: only for OpenSSL 1.1.0 and higher
     public static class OpenSSL
     {
+        private static Logger logger = LogManager.GetCurrentClassLogger();
+
         private const string DLLNAME = "libsscrypto.dll";
 
         public const int OPENSSL_ENCRYPT = 1;
@@ -34,7 +37,7 @@ namespace Shadowsocks.Encryption
             }
             catch (System.Exception e)
             {
-                Logging.LogUsefulException(e);
+                logger.LogUsefulException(e);
             }
             LoadLibrary(dllPath);
         }

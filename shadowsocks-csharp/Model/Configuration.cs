@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using Newtonsoft.Json;
+using NLog;
 using Shadowsocks.Controller;
 
 namespace Shadowsocks.Model
@@ -9,6 +10,9 @@ namespace Shadowsocks.Model
     [Serializable]
     public class Configuration
     {
+        [JsonIgnore]
+        private static Logger logger = LogManager.GetCurrentClassLogger();
+
         public string version;
 
         public List<Server> configs;
@@ -105,7 +109,7 @@ namespace Shadowsocks.Model
             catch (Exception e)
             {
                 if (!(e is FileNotFoundException))
-                    Logging.LogUsefulException(e);
+                    logger.LogUsefulException(e);
                 return new Configuration
                 {
                     index = 0,
@@ -144,7 +148,7 @@ namespace Shadowsocks.Model
             }
             catch (IOException e)
             {
-                Logging.LogUsefulException(e);
+                logger.LogUsefulException(e);
             }
         }
 

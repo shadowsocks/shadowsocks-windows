@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NLog;
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
@@ -26,6 +27,8 @@ namespace Shadowsocks.Util
 
     public static class Utils
     {
+        private static Logger logger = LogManager.GetCurrentClassLogger();
+
         private static string _tempPath = null;
 
         // return path to store temporary files
@@ -48,7 +51,7 @@ namespace Shadowsocks.Util
                 }
                 catch (Exception e)
                 {
-                    Logging.Error(e);
+                    logger.Error(e);
                     throw;
                 }
             }
@@ -80,7 +83,7 @@ namespace Shadowsocks.Util
             {
                 if (isVerbose)
                 {
-                    Logging.Info(
+                    logger.Info(
                             $"Cannot get Windows 10 system theme mode, return default value 0 (dark mode).");
                 }
             }
@@ -251,7 +254,7 @@ namespace Shadowsocks.Util
             }
             catch (Exception e)
             {
-                Logging.LogUsefulException(e);
+                logger.LogUsefulException(e);
                 return null;
             }
         }

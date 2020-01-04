@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Net;
 using System.Net.Sockets;
+using NLog;
 using Shadowsocks.Util.Sockets;
 
 namespace Shadowsocks.Controller
@@ -26,6 +27,8 @@ namespace Shadowsocks.Controller
 
         private class Handler
         {
+            private static Logger logger = LogManager.GetCurrentClassLogger();
+
             private byte[] _firstPacket;
             private int _firstPacketLength;
             private Socket _local;
@@ -58,7 +61,7 @@ namespace Shadowsocks.Controller
                 }
                 catch (Exception e)
                 {
-                    Logging.LogUsefulException(e);
+                    logger.LogUsefulException(e);
                     Close();
                 }
             }
@@ -77,7 +80,7 @@ namespace Shadowsocks.Controller
                 }
                 catch (Exception e)
                 {
-                    Logging.LogUsefulException(e);
+                    logger.LogUsefulException(e);
                     Close();
                 }
             }
@@ -94,7 +97,7 @@ namespace Shadowsocks.Controller
                 }
                 catch (Exception e)
                 {
-                    Logging.LogUsefulException(e);
+                    logger.LogUsefulException(e);
                     Close();
                 }
             }
@@ -115,7 +118,7 @@ namespace Shadowsocks.Controller
                 }
                 catch (Exception e)
                 {
-                    Logging.LogUsefulException(e);
+                    logger.LogUsefulException(e);
                     Close();
                 }
             }
@@ -142,7 +145,7 @@ namespace Shadowsocks.Controller
                 }
                 catch (Exception e)
                 {
-                    Logging.LogUsefulException(e);
+                    logger.LogUsefulException(e);
                     Close();
                 }
             }
@@ -169,7 +172,7 @@ namespace Shadowsocks.Controller
                 }
                 catch (Exception e)
                 {
-                    Logging.LogUsefulException(e);
+                    logger.LogUsefulException(e);
                     Close();
                 }
             }
@@ -188,7 +191,7 @@ namespace Shadowsocks.Controller
                 }
                 catch (Exception e)
                 {
-                    Logging.LogUsefulException(e);
+                    logger.LogUsefulException(e);
                     Close();
                 }
             }
@@ -207,7 +210,7 @@ namespace Shadowsocks.Controller
                 }
                 catch (Exception e)
                 {
-                    Logging.LogUsefulException(e);
+                    logger.LogUsefulException(e);
                     Close();
                 }
             }
@@ -239,7 +242,7 @@ namespace Shadowsocks.Controller
                     }
                     catch (Exception e)
                     {
-                        Logging.LogUsefulException(e);
+                        logger.LogUsefulException(e);
                     }
                 }
                 if (_remote != null)
@@ -251,7 +254,7 @@ namespace Shadowsocks.Controller
                     }
                     catch (SocketException e)
                     {
-                        Logging.LogUsefulException(e);
+                        logger.LogUsefulException(e);
                     }
                 }
             }

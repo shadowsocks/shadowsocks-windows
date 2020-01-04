@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NLog;
+using System;
 using System.IO;
 using System.IO.Compression;
 using System.Text;
@@ -7,6 +8,8 @@ namespace Shadowsocks.Controller
 {
     public static class FileManager
     {
+        private static Logger logger = LogManager.GetCurrentClassLogger();
+
         public static bool ByteArrayToFile(string fileName, byte[] content)
         {
             try
@@ -17,7 +20,7 @@ namespace Shadowsocks.Controller
             }
             catch (Exception ex)
             {
-                Logging.Error(ex);
+                logger.Error(ex);
             }
             return false;
         }
@@ -57,7 +60,7 @@ namespace Shadowsocks.Controller
             }
             catch (Exception ex)
             {
-                Logging.Error(ex);
+                logger.Error(ex);
                 throw ex;
             }
         }

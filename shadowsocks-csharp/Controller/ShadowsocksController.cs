@@ -9,7 +9,7 @@ using System.Text;
 using System.Threading;
 using System.Web;
 using System.Windows.Forms;
-
+using NLog;
 using Shadowsocks.Controller.Service;
 using Shadowsocks.Controller.Strategy;
 using Shadowsocks.Model;
@@ -19,6 +19,8 @@ namespace Shadowsocks.Controller
 {
     public class ShadowsocksController
     {
+        private static Logger logger = LogManager.GetCurrentClassLogger();
+
         // controller:
         // handle user actions
         // manipulates UI
@@ -165,13 +167,13 @@ namespace Shadowsocks.Controller
             {
                 if (plugin.StartIfNeeded())
                 {
-                    Logging.Info(
+                    logger.Info(
                         $"Started SIP003 plugin for {server.Identifier()} on {plugin.LocalEndPoint} - PID: {plugin.ProcessId}");
                 }
             }
             catch (Exception ex)
             {
-                Logging.Error("Failed to start SIP003 plugin: " + ex.Message);
+                logger.Error("Failed to start SIP003 plugin: " + ex.Message);
                 throw;
             }
 
@@ -213,7 +215,7 @@ namespace Shadowsocks.Controller
             }
             catch (Exception e)
             {
-                Logging.LogUsefulException(e);
+                logger.LogUsefulException(e);
                 return false;
             }
         }
@@ -533,7 +535,7 @@ namespace Shadowsocks.Controller
                         e = new Exception(I18N.GetString("Port {0} is reserved by system", _config.localPort), e);
                     }
                 }
-                Logging.LogUsefulException(e);
+                logger.LogUsefulException(e);
                 ReportError(e);
             }
 

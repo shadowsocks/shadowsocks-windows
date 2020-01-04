@@ -1,4 +1,5 @@
-﻿using Shadowsocks.Properties;
+﻿using NLog;
+using Shadowsocks.Properties;
 using Shadowsocks.Util;
 using System;
 using System.Collections.Generic;
@@ -15,6 +16,8 @@ namespace Shadowsocks.Controller
     /// </summary>
     public class PACDaemon
     {
+        private static Logger logger = LogManager.GetCurrentClassLogger();
+
         public const string PAC_FILE = "pac.txt";
         public const string USER_RULE_FILE = "user-rule.txt";
         public const string USER_ABP_FILE = "abp.txt";
@@ -100,7 +103,7 @@ namespace Shadowsocks.Controller
         {
             if (PACFileChanged != null)
             {
-                Logging.Info($"Detected: PAC file '{e.Name}' was {e.ChangeType.ToString().ToLower()}.");
+                logger.Info($"Detected: PAC file '{e.Name}' was {e.ChangeType.ToString().ToLower()}.");
                 Task.Factory.StartNew(() =>
                 {
                     ((FileSystemWatcher)sender).EnableRaisingEvents = false;
@@ -115,7 +118,7 @@ namespace Shadowsocks.Controller
         {
             if (UserRuleFileChanged != null)
             {
-                Logging.Info($"Detected: User Rule file '{e.Name}' was {e.ChangeType.ToString().ToLower()}.");
+                logger.Info($"Detected: User Rule file '{e.Name}' was {e.ChangeType.ToString().ToLower()}.");
                 Task.Factory.StartNew(() =>
                 {
                     ((FileSystemWatcher)sender).EnableRaisingEvents = false;
