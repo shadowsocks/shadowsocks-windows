@@ -18,7 +18,7 @@ namespace Shadowsocks.Encryption
 
         static Sodium()
         {
-            LoadLibrary(Utils.GetDataPath(DLLNAME));
+            LoadLibrary(DLLNAME);
 
             lock (_initLock)
             {

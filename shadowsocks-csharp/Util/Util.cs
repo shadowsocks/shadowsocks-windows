@@ -139,25 +139,6 @@ namespace Shadowsocks.Util
             }
         }
 
-        public static string UnGzip(byte[] buf)
-        {
-            byte[] buffer = new byte[1024];
-            int n;
-            using (MemoryStream sb = new MemoryStream())
-            {
-                using (GZipStream input = new GZipStream(new MemoryStream(buf),
-                                                         CompressionMode.Decompress,
-                                                         false))
-                {
-                    while ((n = input.Read(buffer, 0, buffer.Length)) > 0)
-                    {
-                        sb.Write(buffer, 0, n);
-                    }
-                }
-                return System.Text.Encoding.UTF8.GetString(sb.ToArray());
-            }
-        }
-
         public static string FormatBandwidth(long n)
         {
             var result = GetBandwidthScale(n);

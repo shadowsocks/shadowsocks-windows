@@ -7,7 +7,6 @@ using System.Net.Sockets;
 using System.Text;
 using System.Windows.Forms;
 using Shadowsocks.Model;
-using Shadowsocks.Properties;
 using Shadowsocks.Util;
 using Shadowsocks.Util.ProcessManagement;
 

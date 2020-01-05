@@ -150,9 +150,9 @@ namespace Shadowsocks.Util.SystemProxy
                 using (var process = new Process())
                 {
                     // Configure the process using the StartInfo properties.
-                    process.StartInfo.FileName = Utils.GetDataPath(SysproxyName);
+                    process.StartInfo.FileName = SysproxyName;
                     process.StartInfo.Arguments = arguments;
-                    process.StartInfo.WorkingDirectory = Utils.GetDataPath();
+                    process.StartInfo.WorkingDirectory = Directory.GetCurrentDirectory();
                     process.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
                     process.StartInfo.UseShellExecute = false;
                     process.StartInfo.RedirectStandardError = true;

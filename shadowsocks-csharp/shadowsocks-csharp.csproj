@@ -255,9 +255,6 @@
     <None Include="app.manifest">
       <SubType>Designer</SubType>
     </None>
-    <None Include="Data\i18n.csv">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -273,24 +270,32 @@
     <Content Include="Data\default-abp-rule.js">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Data\libsscrypto.dll">
+    <ContentWithTargetPath Include="Data\libsscrypto.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
+      <TargetPath>libsscrypto.dll</TargetPath>
+    </ContentWithTargetPath >
     <Content Include="Data\privoxy.exe">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Data\privoxy_conf.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Data\sysproxy.exe">
+    <ContentWithTargetPath Include="Data\sysproxy.exe">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Data\sysproxy64.exe">
+      <TargetPath>sysproxy.exe</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath Include="Data\sysproxy64.exe">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Data\user-rule.txt">
+      <TargetPath>sysproxy64.exe</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath Include="Data\user-rule.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
+      <TargetPath>user-rule.txt</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath  Include="Data\i18n.csv">
+      <TargetPath>i18n.csv</TargetPath>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </ContentWithTargetPath >
     <None Include="FodyWeavers.xml">
       <SubType>Designer</SubType>
     </None>

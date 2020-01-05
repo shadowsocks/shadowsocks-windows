@@ -76,7 +76,7 @@ namespace Shadowsocks.Controller
         static I18N()
         {
             string locale = CultureInfo.CurrentCulture.Name;
-            string i18n = File.ReadAllText(Utils.GetDataPath(I18N_FILE), Encoding.UTF8);
+            string i18n = File.ReadAllText(I18N_FILE, Encoding.UTF8);
             Logging.Info("Current language is: " + locale);
             Init(i18n, locale);
         }
