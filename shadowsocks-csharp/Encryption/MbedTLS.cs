@@ -16,19 +16,7 @@ namespace Shadowsocks.Encryption
 
         static MbedTLS()
         {
-            string dllPath = Utils.GetTempPath(DLLNAME);
-            try
-            {
-                FileManager.ByteArrayToFile(dllPath, Resources.libsscrypto);
-            }
-            catch (IOException)
-            {
-            }
-            catch (System.Exception e)
-            {
-                Logging.LogUsefulException(e);
-            }
-            LoadLibrary(dllPath);
+            LoadLibrary(Utils.GetDataPath(DLLNAME));
         }
 
         public static byte[] MD5(byte[] input)

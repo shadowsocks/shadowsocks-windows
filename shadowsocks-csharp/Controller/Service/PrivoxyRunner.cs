@@ -28,8 +28,7 @@ namespace Shadowsocks.Controller
                 _uid = Application.StartupPath.GetHashCode(); // Currently we use ss's StartupPath to identify different Privoxy instance.
                 _uniqueConfigFile = $"privoxy_{_uid}.conf";
                 _privoxyJob = new Job();
-
-                FileManager.ByteArrayToFile(Utils.GetTempPath("ss_privoxy.exe"), Resources.privoxy);
+                File.Copy(Utils.GetDataPath("privoxy.exe"), Utils.GetTempPath("ss_privoxy.exe"));
             }
             catch (IOException e)
             {
@@ -48,7 +47,7 @@ namespace Shadowsocks.Controller
                 {
                     KillProcess(p);
                 }
-                string privoxyConfig = Resources.privoxy_conf;
+                string privoxyConfig = File.ReadAllText(Utils.GetDataPath("privoxy_conf.txt"));
                 _runningPort = GetFreePort(configuration.isIPv6Enabled);
                 privoxyConfig = privoxyConfig.Replace("__SOCKS_PORT__", configuration.localPort.ToString());
                 privoxyConfig = privoxyConfig.Replace("__PRIVOXY_BIND_PORT__", _runningPort.ToString());

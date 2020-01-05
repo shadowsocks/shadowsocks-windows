@@ -24,19 +24,7 @@ namespace Shadowsocks.Encryption
 
         static OpenSSL()
         {
-            string dllPath = Utils.GetTempPath(DLLNAME);
-            try
-            {
-                FileManager.ByteArrayToFile(dllPath, Resources.libsscrypto);
-            }
-            catch (IOException)
-            {
-            }
-            catch (System.Exception e)
-            {
-                Logging.LogUsefulException(e);
-            }
-            LoadLibrary(dllPath);
+            LoadLibrary(Utils.GetDataPath(DLLNAME));
         }
 
         public static IntPtr GetCipherInfo(string cipherName)

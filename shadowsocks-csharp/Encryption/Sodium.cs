@@ -18,19 +18,7 @@ namespace Shadowsocks.Encryption
 
         static Sodium()
         {
-            string dllPath = Utils.GetTempPath(DLLNAME);
-            try
-            {
-                FileManager.ByteArrayToFile(dllPath, Resources.libsscrypto);
-            }
-            catch (IOException)
-            {
-            }
-            catch (System.Exception e)
-            {
-                Logging.LogUsefulException(e);
-            }
-            LoadLibrary(dllPath);
+            LoadLibrary(Utils.GetDataPath(DLLNAME));
 
             lock (_initLock)
             {
