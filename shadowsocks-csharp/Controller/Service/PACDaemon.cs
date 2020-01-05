@@ -39,7 +39,9 @@ namespace Shadowsocks.Controller
         {
             if (!File.Exists(PAC_FILE))
             {
-                File.WriteAllText(PAC_FILE, Resources.default_abp_rule + Resources.abp_js);
+                string defaultRule = File.ReadAllText(Utils.GetDataPath("default-abp-rule.js"));
+                string abpJs = File.ReadAllText(Utils.GetDataPath("abp.js"));
+                File.WriteAllText(PAC_FILE, defaultRule + abpJs);
             }
             return PAC_FILE;
         }
@@ -48,21 +50,20 @@ namespace Shadowsocks.Controller
         {
             if (!File.Exists(USER_RULE_FILE))
             {
-                File.WriteAllText(USER_RULE_FILE, Resources.user_rule);
+                File.WriteAllText(USER_RULE_FILE, Utils.GetDataPath("user-rule.txt"));
             }
             return USER_RULE_FILE;
         }
 
         internal string GetPACContent()
         {
-            if (File.Exists(PAC_FILE))
+            if (!File.Exists(PAC_FILE))
             {
-                return File.ReadAllText(PAC_FILE, Encoding.UTF8);
+                string defaultRule = File.ReadAllText(Utils.GetDataPath("default-abp-rule.js"));
+                string abpJs = File.ReadAllText(Utils.GetDataPath("abp.js"));
+                File.WriteAllText(PAC_FILE, defaultRule + abpJs);
             }
-            else
-            {
-                return Resources.default_abp_rule + Resources.abp_js;
-            }
+            return File.ReadAllText(PAC_FILE, Encoding.UTF8);
         }
 
 
