@@ -28,7 +28,6 @@ namespace Shadowsocks.View
         private Icon icon, icon_in, icon_out, icon_both, previousIcon;
 
         private bool _isFirstRun;
-        private bool _isStartupChecking;
         private string _urlToOpen;
 
         private ContextMenu contextMenu1;
@@ -96,9 +95,6 @@ namespace Shadowsocks.View
             _notifyIcon.BalloonTipClosed += _notifyIcon_BalloonTipClosed;
             controller.TrafficChanged += controller_TrafficChanged;
 
-            this.updateChecker = new UpdateChecker();
-            updateChecker.CheckUpdateCompleted += updateChecker_CheckUpdateCompleted;
-
             LoadCurrentConfiguration();
 
             Configuration config = controller.GetConfigurationCopy();
@@ -107,11 +103,6 @@ namespace Shadowsocks.View
             {
                 _isFirstRun = true;
                 ShowConfigForm();
-            }
-            else if (config.autoCheckUpdate)
-            {
-                _isStartupChecking = true;
-                updateChecker.CheckUpdate(config, 3000);
             }
         }
 
@@ -320,13 +311,6 @@ namespace Shadowsocks.View
                     CreateMenuItem("Show Logs...", new EventHandler(this.ShowLogItem_Click)),
                     this.VerboseLoggingToggleItem = CreateMenuItem( "Verbose Logging", new EventHandler(this.VerboseLoggingToggleItem_Click) ),
                     this.ShowPluginOutputToggleItem = CreateMenuItem("Show Plugin Output", new EventHandler(this.ShowPluginOutputToggleItem_Click)),
-                    //this.WriteI18NFileItem = CreateMenuItem("Write translation template",new EventHandler(WriteI18NFileItem_Click)),
-                    CreateMenuGroup("Updates...", new MenuItem[] {
-                        CreateMenuItem("Check for Updates...", new EventHandler(this.checkUpdatesItem_Click)),
-                        new MenuItem("-"),
-                        this.autoCheckUpdatesToggleItem = CreateMenuItem("Check for Updates at Startup", new EventHandler(this.autoCheckUpdatesToggleItem_Click)),
-                        this.checkPreReleaseToggleItem = CreateMenuItem("Check Pre-release Version", new EventHandler(this.checkPreReleaseToggleItem_Click)),
-                    }),
                     CreateMenuItem("About...", new EventHandler(this.AboutItem_Click)),
                 }),
                 new MenuItem("-"),
@@ -395,19 +379,6 @@ namespace Shadowsocks.View
                 ? I18N.GetString("PAC updated")
                 : I18N.GetString("No updates found. Please report to GFWList if you have problems with it.");
             ShowBalloonTip(I18N.GetString("Shadowsocks"), result, ToolTipIcon.Info, 1000);
-        }
-
-        void updateChecker_CheckUpdateCompleted(object sender, EventArgs e)
-        {
-            if (updateChecker.NewVersionFound)
-            {
-                ShowBalloonTip(I18N.GetString("Shadowsocks {0} Update Found", updateChecker.LatestVersionNumber + updateChecker.LatestVersionSuffix), I18N.GetString("Click here to update"), ToolTipIcon.Info, 5000);
-            }
-            else if (!_isStartupChecking)
-            {
-                ShowBalloonTip(I18N.GetString("Shadowsocks"), I18N.GetString("No update is available"), ToolTipIcon.Info, 5000);
-            }
-            _isStartupChecking = false;
         }
 
         void notifyIcon1_BalloonTipClicked(object sender, EventArgs e)
@@ -564,7 +535,6 @@ namespace Shadowsocks.View
             Utils.ReleaseMemory(true);
             if (_isFirstRun)
             {
-                CheckUpdateForFirstRun();
                 ShowFirstTimeBalloon();
                 _isFirstRun = false;
             }
@@ -594,14 +564,6 @@ namespace Shadowsocks.View
             controller.Stop();
             _notifyIcon.Visible = false;
             Application.Exit();
-        }
-
-        private void CheckUpdateForFirstRun()
-        {
-            Configuration config = controller.GetConfigurationCopy();
-            if (config.isDefault) return;
-            _isStartupChecking = true;
-            updateChecker.CheckUpdate(config, 3000);
         }
 
         private void ShowFirstTimeBalloon()
@@ -934,11 +896,6 @@ namespace Shadowsocks.View
             Configuration configuration = controller.GetConfigurationCopy();
             controller.ToggleCheckingPreRelease(!configuration.checkPreRelease);
             UpdateUpdateMenu();
-        }
-
-        private void checkUpdatesItem_Click(object sender, EventArgs e)
-        {
-            updateChecker.CheckUpdate(controller.GetConfigurationCopy());
         }
 
         private void proxyItem_Click(object sender, EventArgs e)
