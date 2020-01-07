@@ -119,8 +119,8 @@ after_build:
     $ExeHashFile = "$Exefile.hash"
 
     New-Item $WorkingFolder -ItemType Directory -Force
-    Copy-Item $env:APPVEYOR_BUILD_FOLDER\shadowsocks-csharp\bin\$env:PLATFORM\$env:CONFIGURATION\Shadowsocks.exe $WorkingFolder\Shadowsocks.exe
-    Copy-Item $WorkingFolder\Shadowsocks.exe $ExeFile
+    Copy-Item $env:APPVEYOR_BUILD_FOLDER\shadowsocks-csharp\bin\$env:PLATFORM\$env:CONFIGURATION\* $WorkingFolder\
+    # Copy-Item $WorkingFolder\Shadowsocks.exe $ExeFile
 
     CalculateHash -file $Exefile | Out-File -FilePath $ExeHashFile
 
@@ -130,7 +130,7 @@ after_build:
     # Create and deploy the release zip
     if ($env:configuration -eq 'Release')
     {
-        $ReleaseFile = "$WorkingFolder\Shadowsocks.exe"
+        $ReleaseFile = "$WorkingFolder\*"
         $HashFile = "$ReleaseFile.hash"
         $ZipFile = "$WorkingFolder\Shadowsocks-$env:APPVEYOR_BUILD_VERSION.zip"
         $ZipHashFile = "$ZipFile.hash"
