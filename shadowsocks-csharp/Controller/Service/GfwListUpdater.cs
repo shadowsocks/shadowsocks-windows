@@ -69,7 +69,7 @@ namespace Shadowsocks.Controller
             }
             else
             {
-                abpContent = File.ReadAllText(Utils.GetDataPath("abp.js"));
+                abpContent = File.ReadAllText("abp.js");
             }
 
             List<string> userruleLines = new List<string>();
