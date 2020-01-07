@@ -415,7 +415,6 @@ namespace Shadowsocks.View
             localPACItem.Checked = !onlinePACItem.Checked;
             secureLocalPacUrlToggleItem.Checked = config.secureLocalPac;
             UpdatePACItemsEnabledStatus();
-            UpdateUpdateMenu();
         }
 
         private void UpdateServersMenu()
@@ -874,28 +873,6 @@ namespace Shadowsocks.View
                 this.editGFWUserRuleItem.Enabled = false;
                 this.editOnlinePACItem.Enabled = true;
             }
-        }
-
-
-        private void UpdateUpdateMenu()
-        {
-            Configuration configuration = controller.GetConfigurationCopy();
-            autoCheckUpdatesToggleItem.Checked = configuration.autoCheckUpdate;
-            checkPreReleaseToggleItem.Checked = configuration.checkPreRelease;
-        }
-
-        private void autoCheckUpdatesToggleItem_Click(object sender, EventArgs e)
-        {
-            Configuration configuration = controller.GetConfigurationCopy();
-            controller.ToggleCheckingUpdate(!configuration.autoCheckUpdate);
-            UpdateUpdateMenu();
-        }
-
-        private void checkPreReleaseToggleItem_Click(object sender, EventArgs e)
-        {
-            Configuration configuration = controller.GetConfigurationCopy();
-            controller.ToggleCheckingPreRelease(!configuration.checkPreRelease);
-            UpdateUpdateMenu();
         }
 
         private void proxyItem_Click(object sender, EventArgs e)
