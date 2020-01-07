@@ -264,37 +264,41 @@
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
     <None Include="Resources\ssw128.png" />
-    <Content Include="Data\abp.js">
+    <ContentWithTargetPath Include="Data\abp.js">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Data\default-abp-rule.js">
+      <TargetPath>abp.js</TargetPath>
+    </ContentWithTargetPath >
+    <ContentWithTargetPath Include="Data\default-abp-rule.js">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
+      <TargetPath>default-abp-rule.js</TargetPath>
+    </ContentWithTargetPath >
+    <ContentWithTargetPath Include="Data\i18n.csv">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>i18n.csv</TargetPath>
+    </ContentWithTargetPath >
     <ContentWithTargetPath Include="Data\libsscrypto.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <TargetPath>libsscrypto.dll</TargetPath>
     </ContentWithTargetPath >
-    <Content Include="Data\privoxy.exe">
+    <ContentWithTargetPath Include="Data\privoxy.exe">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Data\privoxy_conf.txt">
+      <TargetPath>privoxy.exe</TargetPath>
+    </ContentWithTargetPath >
+    <ContentWithTargetPath Include="Data\privoxy_conf.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
+      <TargetPath>privoxy_conf.txt</TargetPath>
+    </ContentWithTargetPath >
     <ContentWithTargetPath Include="Data\sysproxy.exe">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <TargetPath>sysproxy.exe</TargetPath>
-    </ContentWithTargetPath>
+    </ContentWithTargetPath >
     <ContentWithTargetPath Include="Data\sysproxy64.exe">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <TargetPath>sysproxy64.exe</TargetPath>
-    </ContentWithTargetPath>
+    </ContentWithTargetPath >
     <ContentWithTargetPath Include="Data\user-rule.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <TargetPath>user-rule.txt</TargetPath>
-    </ContentWithTargetPath>
-    <ContentWithTargetPath  Include="Data\i18n.csv">
-      <TargetPath>i18n.csv</TargetPath>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </ContentWithTargetPath >
     <None Include="FodyWeavers.xml">
       <SubType>Designer</SubType>

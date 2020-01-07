@@ -55,16 +55,6 @@ namespace Shadowsocks.Util
             return _tempPath;
         }
 
-        public static string GetDataPath()
-        {
-            return Path.Combine(Directory.GetCurrentDirectory(), "Data");
-        }
-
-        public static string GetDataPath(string filename)
-        {
-            return Path.Combine(GetDataPath(), filename);
-        }
-
         public enum WindowsThemeMode { Dark, Light }
 
         // Support on Windows 10 1903+
