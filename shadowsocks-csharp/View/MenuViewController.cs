@@ -22,7 +22,7 @@ namespace Shadowsocks.View
         // and it should just do anything related to the config form
 
         private ShadowsocksController controller;
-        private UpdateChecker updateChecker;
+        //private UpdateChecker updateChecker;
 
         private NotifyIcon _notifyIcon;
         private Icon icon, icon_in, icon_out, icon_both, previousIcon;
@@ -89,10 +89,8 @@ namespace Shadowsocks.View
             UpdateTrayIconAndNotifyText();
             _notifyIcon.Visible = true;
             _notifyIcon.ContextMenu = contextMenu1;
-            _notifyIcon.BalloonTipClicked += notifyIcon1_BalloonTipClicked;
             _notifyIcon.MouseClick += notifyIcon1_Click;
             _notifyIcon.MouseDoubleClick += notifyIcon1_DoubleClick;
-            _notifyIcon.BalloonTipClosed += _notifyIcon_BalloonTipClosed;
             controller.TrafficChanged += controller_TrafficChanged;
 
             LoadCurrentConfiguration();
@@ -379,27 +377,6 @@ namespace Shadowsocks.View
                 ? I18N.GetString("PAC updated")
                 : I18N.GetString("No updates found. Please report to GFWList if you have problems with it.");
             ShowBalloonTip(I18N.GetString("Shadowsocks"), result, ToolTipIcon.Info, 1000);
-        }
-
-        void notifyIcon1_BalloonTipClicked(object sender, EventArgs e)
-        {
-            if (updateChecker.NewVersionFound)
-            {
-                updateChecker.NewVersionFound = false; /* Reset the flag */
-                if (System.IO.File.Exists(updateChecker.LatestVersionLocalName))
-                {
-                    string argument = "/select, \"" + updateChecker.LatestVersionLocalName + "\"";
-                    System.Diagnostics.Process.Start("explorer.exe", argument);
-                }
-            }
-        }
-
-        private void _notifyIcon_BalloonTipClosed(object sender, EventArgs e)
-        {
-            if (updateChecker.NewVersionFound)
-            {
-                updateChecker.NewVersionFound = false; /* Reset the flag */
-            }
         }
 
         private void LoadCurrentConfiguration()
