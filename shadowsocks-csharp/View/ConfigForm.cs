@@ -316,7 +316,7 @@ namespace Shadowsocks.View
             IPTextBox.Text = server.server;
             ServerPortTextBox.Text = server.server_port.ToString();
             PasswordTextBox.Text = server.password;
-            EncryptionSelect.Text = server.method ?? "aes-256-cfb";
+            EncryptionSelect.Text = server.method ?? Server.DefaultMethod;
             PluginTextBox.Text = server.plugin;
             PluginOptionsTextBox.Text = server.plugin_opts;
             PluginArgumentsTextBox.Text = server.plugin_args;

@@ -70,7 +70,7 @@ namespace Shadowsocks.Encryption
         {
             if (method.IsNullOrEmpty())
             {
-                method = "aes-256-cfb";
+                method = Model.Server.DefaultMethod;
             }
 
             method = method.ToLowerInvariant();
