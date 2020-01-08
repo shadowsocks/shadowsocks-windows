@@ -624,6 +624,7 @@ copy of the Program in return for a fee.
                      END OF TERMS AND CONDITIONS
 
 Copyright (C) 2015 clowwindy <clowwindy42@gmail.com>
+Copyright (C) 2020 Shadowsocks Project <https://shadowsocks.org>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

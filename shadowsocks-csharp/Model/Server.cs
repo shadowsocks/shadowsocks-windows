@@ -11,6 +11,9 @@ namespace Shadowsocks.Model
     [Serializable]
     public class Server
     {
+        public const string DefaultMethod = "chacha20-ietf-poly1305";
+        public const int DefaultPort = 8388;
+
         #region ParseLegacyURL
         public static readonly Regex
             UrlFinder = new Regex(@"ss://(?<base64>[A-Za-z0-9+-/=_]+)(?:#(?<tag>\S+))?", RegexOptions.IgnoreCase),
@@ -69,8 +72,8 @@ namespace Shadowsocks.Model
         public Server()
         {
             server = "";
-            server_port = 8388;
-            method = "chacha20-ietf-poly1305";
+            server_port = DefaultPort;
+            method = DefaultMethod;
             plugin = "";
             plugin_opts = "";
             plugin_args = "";
