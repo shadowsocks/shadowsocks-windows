@@ -1,15 +1,10 @@
-﻿using System;
-using System.Collections;
-using System.Globalization;
-using System.IO;
+﻿using Shadowsocks.Encryption;
+using Shadowsocks.Model;
+using Shadowsocks.Util;
+using System;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
-using Shadowsocks.Encryption;
-using Shadowsocks.Model;
-using Shadowsocks.Properties;
-using Shadowsocks.Util;
-using System.Threading.Tasks;
 using System.Web;
 
 namespace Shadowsocks.Controller
@@ -53,12 +48,7 @@ namespace Shadowsocks.Controller
 
         private static string GetHash(string content)
         {
-            var contentBytes = Encoding.ASCII.GetBytes(content);
-            using (var md5 = System.Security.Cryptography.MD5.Create())
-            {
-                var md5Bytes = md5.ComputeHash(contentBytes);
-                return HttpServerUtility.UrlTokenEncode(md5Bytes);
-            };
+            return HttpServerUtility.UrlTokenEncode(MbedTLS.MD5(Encoding.ASCII.GetBytes(content)));
         }
 
         public override bool Handle(byte[] firstPacket, int length, Socket socket, object state)
