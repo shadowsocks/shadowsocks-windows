@@ -481,6 +481,7 @@
             this.MinimumSize = new System.Drawing.Size(1000, 800);
             this.Name = "StatisticsStrategyConfigurationForm";
             this.Text = "StatisticsStrategyConfigurationForm";
+            this.Text = "Statistics configuration";
             ((System.ComponentModel.ISupportInitialize)(this.StatisticsChart)).EndInit();
             this.chartModeSelector.ResumeLayout(false);
             this.chartModeSelector.PerformLayout();

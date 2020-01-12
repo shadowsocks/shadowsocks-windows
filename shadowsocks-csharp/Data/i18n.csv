@@ -50,6 +50,7 @@ Write translation template,写入翻译模板,,
 ,,,
 # Config Form,,,
 ,,,
+Statistics configuration,统计配置,,,
 &Add,添加(&A),新增 (&A),新規 (&A)
 &Delete,删除(&D),移除 (&D),削除 (&D)
 Dupli&cate,复制(&C),複製 (&C),コピー (&C)
