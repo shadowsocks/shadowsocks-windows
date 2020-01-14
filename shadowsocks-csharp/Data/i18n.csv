@@ -50,6 +50,7 @@ Write translation template,Создать шаблон для перевода,�
 ,,,,
 # Config Form,,,,
 ,,,,
+Statistics configuration,Настройки статистики,统计配置,,
 &Add,Добавить,添加(&A),新增 (&A),新規 (&A)
 &Delete,Удалить,删除(&D),移除 (&D),削除 (&D)
 Dupli&cate,Дублир-ть,复制(&C),複製 (&C),コピー (&C)
@@ -104,7 +105,6 @@ Ping,Ping,网络延迟,,
 Chart Mode,График,图表模式,,
 24h,24ч,24小时,,
 all,За все время,全部,,
-StatisticsStrategyConfigurationForm,Настройки статистики,,,
 ,,,,
 # Proxy Form,,,,
 ,,,,
