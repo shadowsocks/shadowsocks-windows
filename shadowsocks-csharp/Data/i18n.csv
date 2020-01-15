@@ -1,208 +1,208 @@
-﻿en,zh-CN,zh-TW,ja
-#Restart program to apply translation,,,
-#This is comment line,,,
-#Always keep language name at head of file,,,
-#Language name is output in log,,,
-"#You can find it by search ""Current language is:""",,,
-#Please use UTF-8 with BOM encoding so we can edit it in Excel,,,
-,,,
-Shadowsocks,Shadowsocks,Shadowsocks,Shadowsocks
-,,,
-#Menu,,,
-,,,
-System Proxy,系统代理,系統代理,システムプロキシ
-Disable,禁用,禁用,無効
-PAC,PAC 模式,PAC 模式,PAC
-Global,全局模式,全局模式,全般
-Servers,服务器,伺服器,サーバー
-Edit Servers...,编辑服务器...,編輯伺服器...,サーバーの編集...
-Statistics Config...,统计配置...,統計設定檔...,統計情報の設定...
-Start on Boot,开机启动,開機啟動,システムと同時に起動
-Forward Proxy...,正向代理设置...,正向 Proxy 設定...,フォワードプロキシの設定...
-Allow other Devices to connect,允许其他设备连入,允許其他裝置連入,他のデバイスからの接続を許可する
-Local PAC,使用本地 PAC,使用本機 PAC,ローカル PAC
-Online PAC,使用在线 PAC,使用線上 PAC,オンライン PAC
-Edit Local PAC File...,编辑本地 PAC 文件...,編輯本機 PAC 檔案...,ローカル PAC ファイルの編集...
-Update Local PAC from GFWList,从 GFWList 更新本地 PAC,從 GFWList 更新本機 PAC,GFWList からローカル PAC を更新
-Edit User Rule for GFWList...,编辑 GFWList 的用户规则...,編輯 GFWList 的使用者規則...,ユーザールールの編集...
-Secure Local PAC,保护本地 PAC,安全本機 PAC,ローカル PAC を保護
-Copy Local PAC URL,复制本地 PAC 网址,複製本機 PAC 網址,ローカル PAC URL をコピー
-Share Server Config...,分享服务器配置...,分享伺服器設定檔...,サーバーの設定を共有...
-Scan QRCode from Screen...,扫描屏幕上的二维码...,掃描螢幕上的 QR 碼...,画面から QR コードをスキャン...
-Import URL from Clipboard...,从剪贴板导入URL...,從剪貼簿匯入 URL...,クリップボードから URL をインポート...
-Availability Statistics,统计可用性,統計可用性,可用性の統計
-Show Logs...,显示日志...,顯示記錄檔...,ログの表示...
-Verbose Logging,详细记录日志,詳細資訊記錄,詳細なログを記録
-Updates...,更新...,更新...,更新...
-Check for Updates...,检查更新,檢查更新,更新プログラムの確認...
-Check for Updates at Startup,启动时检查更新,啟動時檢查更新,起動時に更新プログラムを確認
-Check Pre-release Version,检查测试版更新,檢查發行前版本更新,先行開発版も確認
-Edit Hotkeys...,编辑快捷键...,編輯快速鍵...,ホットキーの編集...
-About...,关于...,關於...,Shadowsocks について...
-Help,帮助,說明,ヘルプ
-Quit,退出,結束,終了
-Edit Servers,编辑服务器,編輯伺服器,サーバーの編集
-Load Balance,负载均衡,負載平衡,負荷分散
-High Availability,高可用,高可用性,高可用性
-Choose by statistics,根据统计,根據統計,統計で選ぶ
-Show Plugin Output,显示插件输出,,
-Write translation template,写入翻译模板,,
-,,,
-# Config Form,,,
-,,,
-Statistics configuration,统计配置,,,
-&Add,添加(&A),新增 (&A),新規 (&A)
-&Delete,删除(&D),移除 (&D),削除 (&D)
-Dupli&cate,复制(&C),複製 (&C),コピー (&C)
-Server,服务器,伺服器,サーバー
-Server IP,服务器地址,伺服器位址,サーバーアドレス
-Server Port,服务器端口,伺服器連接埠,サーバーポート
-Password,密码,密碼,パスワード
-Show Password,显示密码,顯示密碼,パスワードを表示する
-Encryption,加密,加密,暗号化
-Plugin Program,插件程序,外掛程式,プラグインプログラム
-Plugin Options,插件选项,外掛程式選項,プラグインのオプション
-Need Plugin Argument,需要命令行参数,,
-Plugin Arguments,插件参数,外掛程式參數,プラグインの引数
-Proxy Port,代理端口,Proxy 連接埠,プロキシポート
-Portable Mode,便携模式,便攜模式,ポータブルモード
-Restart required,需要重新启动SS,需要重新啟動SS,再起動SSが必要
-Remarks,备注,註解,付記
-Timeout(Sec),超时(秒),逾時 (秒),タイムアウト (秒)
-OK,确定,確定,OK
-Cancel,取消,取消,キャンセル
-Apply,应用,應用,適用
-New server,未配置的服务器,新伺服器,新規サーバー
-Move &Up,上移(&U),上移 (&U),上に移動 (&U)
-Move D&own,下移(&O),下移 (&O),下に移動 (&O)
-,,,
-#Statistics Config,,,
-,,,
-Enable Statistics,启用统计,,
-Ping Test,Ping测试,,
-packages everytime,个包/次,,
-By hour of day,按照每天的小时数统计,,
-Collect data per,收集数据每,,
-Keep choice for,保持选择每,,
-minutes,分钟,,
-Final Score:,总分：,,
-AverageLatency,平均延迟,,
-MinLatency,最小延迟,,
-MaxLatency,最大延迟,,
-AverageInboundSpeed,平均入站速度,,
-MinInboundSpeed,最小入站速度,,
-MaxInboundSpeed,最大入站速度,,
-AverageOutboundSpeed,平均出站速度,,
-MinOutboundSpeed,最小出站速度,,
-MaxOutboundSpeed,最大出站速度,,
-AverageResponse,平均响应速度,,
-MinResponse,最小响应速度,,
-MaxResponse,最大响应速度,,
-PackageLoss,丢包率,,
-Speed,速度,,
-Package Loss,丢包率,,
-Ping,网络延迟,,
-Chart Mode,图表模式,,
-24h,24小时,,
-all,全部,,
-,,,
-# Proxy Form,,,
-,,,
-Edit Proxy,代理设置,編輯 Proxy,プロキシの編集
-Use Proxy,使用代理,使用 Proxy,プロキシを利用する
-Proxy Type,代理类型,Proxy 類型,プロキシの種類
-Proxy Addr,代理地址,Proxy 位址,プロキシアドレス
-Proxy Port,代理端口,Proxy 連接埠,プロキシポート
-"If server has a plugin, proxy will not be used",若服务器含有插件，代理将不被使用,若伺服器含有外掛程式，Proxy 將不被使用,サーバーにプラグインがある場合、プロキシは利用されません
-Use Auth,使用认证,使用認證,認証を利用する
-User Name,用户名,認證用戶,認証ユーザ
-Auth Pwd,认证密码,認證口令,認証パスワード
-,,,
-# Log Form,,,
-,,,
-&File,文件(&F),檔案 (&F),ファイル (&F)
-&Open Location,在资源管理器中打开(&O),在檔案總管中開啟 (&O),ファイルの場所を開く (&O)
-E&xit,退出(&X),結束 (&X),終了 (&X)
-&View,视图(&V),檢視 (&V),表示 (&V)
-&Clear Logs,清空日志(&C),清除記錄檔 (&C),ログの削除 (&C)
-Change &Font,设置字体(&F),變更字型 (&F),フォント (&F)
-&Wrap Text,自动换行(&W),自動換行 (&W),右端で折り返す (&W)
-&Top Most,置顶(&T),置頂 (&T),常に最前面に表示 (&T)
-&Show Toolbar,显示工具栏(&S),顯示工具列 (&S),ツールバーの表示 (&S)
-Log Viewer,日志查看器,記錄檔檢視器,ログビューア
-Inbound,入站,輸入,受信
-Outbound,出站,輸出,送信
-,,,
-# QRCode Form,,,
-,,,
-QRCode and URL,二维码与 URL,QR 碼與 URL,QR コードと URL
-,,,
-# PAC Url Form,,,
-,,,
-Edit Online PAC URL,编辑在线 PAC 网址,編輯線上 PAC 網址,オンライン PAC URL の編集
-Edit Online PAC URL...,编辑在线 PAC 网址...,編輯線上 PAC 網址...,オンライン PAC URL の編集...
-Please input PAC Url,请输入 PAC 网址,請輸入 PAC 網址,PAC URLを入力して下さい
-,,,
-# HotkeySettings Form,,,
-,,,
-Switch system proxy,切换系统代理状态,切換系統 Proxy 狀態,システム プロキシの状態を切り替える
-Switch system proxy mode,切换系统代理模式,切換系統 Proxy 模式,プロキシモードを切り替える
-Allow Clients from LAN,切换局域网共享,切換區域網路共用,LAN からのアクセスの許可を切り替える
-Show Logs...,显示日志,顯示記錄檔,ログの表示
-Switch to previous server,切换上个服务器,切換上一個伺服器,前のサーバーに切り替える
-Switch to next server,切换下个服务器,切換下一個伺服器,次のサーバーに切り替える
-Reg All,注册全部快捷键,註冊所有快速鍵,全部登録する
-Reg Hotkeys At Startup,启动时注册快捷键,啟動時註冊快速鍵,起動時にホットキーを登録する
-,,,
-# Messages,,,
-,,,
-Shadowsocks Error: {0},Shadowsocks 错误: {0},Shadowsocks 錯誤: {0},Shadowsocks エラー: {0}
-Port {0} already in use,端口 {0} 已被占用,連接埠號碼 {0} 已被使用,ポート番号 {0} は既に使用されています。
-Port {0} is reserved by system,端口 {0} 是系统保留端口,連接埠號碼 {0} 由系統保留, ポート番号 {0} はシステムによって予約されています
-Invalid server address,非法服务器地址,無效伺服器位址,サーバーアドレスが無効です。
-Illegal port number format,非法端口格式,無效連接埠號碼格式,ポート番号のフォーマットが無効です。
-Illegal timeout format,非法超时格式,無效逾時格式,タイムアウト値のフォーマットが無効です。
-Server IP can not be blank,服务器 IP 不能为空,伺服器 IP 不能為空,サーバー IP が指定されていません。
-Password can not be blank,密码不能为空,密碼不能為空,パスワードが指定されていません。
-Port out of range,端口超出范围,連接埠號碼超出範圍,ポート番号は範囲外です。
-Port can't be 8123,端口不能为 8123,連接埠號碼不能為 8123,8123 番以外のポート番号を指定して下さい。
-Shadowsocks {0} Update Found,Shadowsocks {0} 更新,Shadowsocks {0} 更新,Shadowsocks バージョン {0} は利用できます。
-No update is available,没有可用的更新,沒有可用的更新,お使いのバージョンは最新です。
-Click here to update,点击这里升级,點按此處升級,クリックしてアップデートします。
-Shadowsocks is here,Shadowsocks 在这里,Shadowsocks 在這裡,Shadowsocks はここです。
-You can turn on/off Shadowsocks in the context menu,可以在右键菜单中开关 Shadowsocks,可以在右鍵選項單中開關 Shadowsocks,コンテキストメニューを使って、Shadowsocks を有効または無効にすることができます。
-System Proxy Enabled,系统代理已启用,系統 Proxy 已啟用,システム プロキシが有効です。
-System Proxy Disabled,系统代理未启用,系統 Proxy 未啟用,システム プロキシが無効です。
-Failed to update PAC file ,更新 PAC 文件失败,更新 PAC 檔案失敗,PAC の更新に失敗しました。
-PAC updated,更新 PAC 成功,更新 PAC 成功,PAC を更新しました。
-No updates found. Please report to GFWList if you have problems with it.,未发现更新。如有问题请提交给 GFWList。,未發現更新。如有問題請報告至 GFWList。,お使いのバージョンは最新です。問題がある場合は、GFWList に報告して下さい。
-No QRCode found. Try to zoom in or move it to the center of the screen.,未发现二维码，尝试把它放大或移动到靠近屏幕中间的位置,未發現 QR 碼，嘗試把它放大或移動到靠近熒幕中間的位置,QR コードが見つかりませんでした。コードを大きくするか、画面の中央に移動して下さい。
-Shadowsocks is already running.,Shadowsocks 已经在运行。,Shadowsocks 已經在執行。,Shadowsocks 実行中
-Find Shadowsocks icon in your notify tray.,请在任务栏里寻找 Shadowsocks 图标。,請在工作列裡尋找 Shadowsocks 圖示。,通知領域には Shadowsocks のアイコンがあります。
-"If you want to start multiple Shadowsocks, make a copy in another directory.",如果想同时启动多个，可以另外复制一份到别的目录。,如果想同時啟動多個，可以另外複製一份至別的目錄。,複数起動したい場合は、プログラムファイルを別のフォルダーにコピーしてから、もう一度実行して下さい。
-Failed to decode QRCode,无法解析二维码,QR 碼解碼失敗,QR コードの読み取りに失敗しました。
-Failed to update registry,无法修改注册表,無法修改登錄檔,レジストリの更新に失敗しました。
-System Proxy On: ,系统代理已启用：,系統 Proxy 已啟用：,システム プロキシが有効：
-Running: Port {0},正在运行：端口 {0},正在執行：連接埠號碼 {0},実行中：ポート {0}
-"Unexpected error, shadowsocks will exit. Please report to",非预期错误，Shadowsocks将退出。请提交此错误到,非預期錯誤，Shadowsocks 將結束。請報告此錯誤至,予想外のエラーが発生したため、Shadowsocks を終了します。詳しくは下記までお問い合わせ下さい：
-"Unsupported operating system, use Windows Vista at least.",不支持的操作系统版本，最低需求为Windows Vista。,不支援的作業系統版本，最低需求為 Windows Vista。,お使いの OS はサポートされていません。Windows Vista 以降の OS で実行して下さい。
-"Unsupported .NET Framework, please update to {0} or later.",当前 .NET Framework 版本过低，请升级至{0}或更新版本。,目前 .NET Framework 版本過低，最低需求為{0}。,お使いの .NET Framework はサポートされていません。{0} 以降のバンジョーをインストールして下さい。
-Proxy request failed,代理请求失败,Proxy 要求失敗,プロキシ要求が失敗しました。
-Proxy handshake failed,代理握手失败,Proxy 交握失敗,プロキシ ハンドシェイクに失敗しました。
-Register hotkey failed,注册快捷键失败,註冊快速鍵失敗,ホットキーの登錄に失敗しました。
-Cannot parse hotkey: {0},解析快捷键失败: {0},剖析快速鍵失敗: {0},ホットキーを解析できません: {0}
-"Timeout is invalid, it should not exceed {0}",超时无效，不应超过 {0},逾時無效，不應超過 {0},タイムアウト値が無効です。{0} 以下の値を指定して下さい。
-Cannot find the plugin program file,找不到插件程序文件,找不到外掛程式文件,
-,,,
-Operation failure,操作失败,,
-Auto save failed,自动保存失败,,
-Whether to discard unconfigured servers,是否丢弃未配置的服务器,,
-"Invalid server address, Cannot automatically save or discard changes",非法服务器地址，无法自动保存，是否丢弃修改,,
-"Illegal port number format, Cannot automatically save or discard changes",非法端口格式，无法自动保存，是否丢弃修改,,
-"Password can not be blank, Cannot automatically save or discard changes",密码不能为空，无法自动保存，是否丢弃修改,,
-"Illegal timeout format, Cannot automatically save or discard changes",非法超时格式，无法自动保存，是否丢弃修改,,
-,,,
-"Error occured when process proxy setting, do you want reset current setting and retry?",处理代理设置时发生错误，是否重置当前代理设置并重试？,,
-"Unrecoverable proxy setting error occured, see log for detail",发生不可恢复的代理设置错误，查看日志以取得详情,,
-Auth user can not be blank,认证用户不能为空,認證用戶不能為空,認証ユーザが指定されていません。
-Auth pwd can not be blank,认证密码不能为空,認證口令不能為空,認証パスワードが指定されていません。
+en,ru-RU,zh-CN,zh-TW,ja
+#Restart program to apply translation,,,,
+#This is comment line,,,,
+#Always keep language name at head of file,,,,
+#Language name is output in log,,,,
+"#You can find it by search ""Current language is:""",,,,
+#Please use UTF-8 with BOM encoding so we can edit it in Excel,,,,
+,,,,
+Shadowsocks,Shadowsocks,Shadowsocks,Shadowsocks,Shadowsocks
+,,,,
+#Menu,,,,
+,,,,
+System Proxy,Системный прокси-сервер,系统代理,系統代理,システムプロキシ
+Disable,Отключен,禁用,禁用,無効
+PAC,Сценарий настройки (PAC),PAC 模式,PAC 模式,PAC
+Global,Для всей системы,全局模式,全局模式,全般
+Servers,Серверы,服务器,伺服器,サーバー
+Edit Servers...,Редактировать серверы…,编辑服务器...,編輯伺服器...,サーバーの編集...
+Statistics Config...,Настройки статистики…,统计配置...,統計設定檔...,統計情報の設定...
+Start on Boot,Автозагрузка,开机启动,開機啟動,システムと同時に起動
+Forward Proxy...,Прямой прокси…,正向代理设置...,正向 Proxy 設定...,フォワードプロキシの設定...
+Allow other Devices to connect,Общий доступ к подключению,允许其他设备连入,允許其他裝置連入,他のデバイスからの接続を許可する
+Local PAC,Локальный PAC,使用本地 PAC,使用本機 PAC,ローカル PAC
+Online PAC,Удаленный PAC,使用在线 PAC,使用線上 PAC,オンライン PAC
+Edit Local PAC File...,Редактировать локальный PAC…,编辑本地 PAC 文件...,編輯本機 PAC 檔案...,ローカル PAC ファイルの編集...
+Update Local PAC from GFWList,Обновить локальный PAC из GFWList,从 GFWList 更新本地 PAC,從 GFWList 更新本機 PAC,GFWList からローカル PAC を更新
+Edit User Rule for GFWList...,Редактировать свои правила для GFWList,编辑 GFWList 的用户规则...,編輯 GFWList 的使用者規則...,ユーザールールの編集...
+Secure Local PAC,Безопасный URL локального PAC,保护本地 PAC,安全本機 PAC,ローカル PAC を保護
+Copy Local PAC URL,Копировать URL локального PAC,复制本地 PAC 网址,複製本機 PAC 網址,ローカル PAC URL をコピー
+Share Server Config...,Поделиться конфигурацией сервера…,分享服务器配置...,分享伺服器設定檔...,サーバーの設定を共有...
+Scan QRCode from Screen...,Сканировать QRCode с экрана…,扫描屏幕上的二维码...,掃描螢幕上的 QR 碼...,画面から QR コードをスキャン...
+Import URL from Clipboard...,Импорт адреса из буфера обмена…,从剪贴板导入URL...,從剪貼簿匯入 URL...,クリップボードから URL をインポート...
+Availability Statistics,Статистика доступности,统计可用性,統計可用性,可用性の統計
+Show Logs...,Показать журнал…,显示日志...,顯示記錄檔...,ログの表示...
+Verbose Logging,Подробный журнал,详细记录日志,詳細資訊記錄,詳細なログを記録
+Updates...,Обновления…,更新...,更新...,更新...
+Check for Updates...,Проверить обновления…,检查更新,檢查更新,更新プログラムの確認...
+Check for Updates at Startup,Проверять при запуске,启动时检查更新,啟動時檢查更新,起動時に更新プログラムを確認
+Check Pre-release Version,Проверять предрелизные версии,检查测试版更新,檢查發行前版本更新,先行開発版も確認
+Edit Hotkeys...,Горячие клавиши…,编辑快捷键...,編輯快速鍵...,ホットキーの編集...
+About...,О программе…,关于...,關於...,Shadowsocks について...
+Help,Помощь,帮助,說明,ヘルプ
+Quit,Выход,退出,結束,終了
+Edit Servers,Редактирование серверов,编辑服务器,編輯伺服器,サーバーの編集
+Load Balance,Балансировка нагрузки,负载均衡,負載平衡,負荷分散
+High Availability,Высокая доступность,高可用,高可用性,高可用性
+Choose by statistics,На основе статистики,根据统计,根據統計,統計で選ぶ
+Show Plugin Output,События плагинов в журнале,显示插件输出,,
+Write translation template,Создать шаблон для перевода,写入翻译模板,,
+,,,,
+# Config Form,,,,
+,,,,
+Statistics configuration,Настройки статистики,统计配置,,
+&Add,Добавить,添加(&A),新增 (&A),新規 (&A)
+&Delete,Удалить,删除(&D),移除 (&D),削除 (&D)
+Dupli&cate,Дублир-ть,复制(&C),複製 (&C),コピー (&C)
+Server,Сервер,服务器,伺服器,サーバー
+Server IP,IP-адрес,服务器地址,伺服器位址,サーバーアドレス
+Server Port,Порт,服务器端口,伺服器連接埠,サーバーポート
+Password,Пароль,密码,密碼,パスワード
+Show Password,Показать пароль,显示密码,顯示密碼,パスワードを表示する
+Encryption,Шифрование,加密,加密,暗号化
+Plugin Program,Плагин,插件程序,外掛程式,プラグインプログラム
+Plugin Options,Опции плагина,插件选项,外掛程式選項,プラグインのオプション
+Need Plugin Argument,Требуются аргументы,需要命令行参数,,
+Plugin Arguments,Аргументы,插件参数,外掛程式參數,プラグインの引数
+Proxy Port,Порт прокси,代理端口,Proxy 連接埠,プロキシポート
+Portable Mode,Переносимый режим,便携模式,便攜模式,ポータブルモード
+Restart required,Требуется перезапуск программы,需要重新启动SS,需要重新啟動SS,再起動SSが必要
+Remarks,Примечания,备注,註解,付記
+Timeout(Sec),Таймаут(сек),超时(秒),逾時 (秒),タイムアウト (秒)
+OK,ОК,确定,確定,OK
+Cancel,Отмена,取消,取消,キャンセル
+Apply,Применить,应用,應用,適用
+New server,Новый сервер,未配置的服务器,新伺服器,新規サーバー
+Move &Up,Выше,上移(&U),上移 (&U),上に移動 (&U)
+Move D&own,Ниже,下移(&O),下移 (&O),下に移動 (&O)
+,,,,
+#Statistics Config,,,,
+,,,,
+Enable Statistics,Включить сбор статистики,启用统计,,
+Ping Test,Проверка связи (Ping),Ping测试,,
+packages everytime,пакета на проверку,个包/次,,
+By hour of day,Ежечасно,按照每天的小时数统计,,
+Collect data per,Собирать данные за,收集数据每,,
+Keep choice for,Хранить отбор данных за,保持选择每,,
+minutes,мин.,分钟,,
+Final Score:,Финальная оценка:,总分：,,
+AverageLatency,СредЗадержка,平均延迟,,
+MinLatency,МинЗадержка,最小延迟,,
+MaxLatency,МаксЗадержка,最大延迟,,
+AverageInboundSpeed,СредВходСкорость,平均入站速度,,
+MinInboundSpeed,МинВходСкорость,最小入站速度,,
+MaxInboundSpeed,СредВходСкорость,最大入站速度,,
+AverageOutboundSpeed,СредИсхСкорость,平均出站速度,,
+MinOutboundSpeed,МинИсхСкорость,最小出站速度,,
+MaxOutboundSpeed,МаксИсхСкорость,最大出站速度,,
+AverageResponse,СредВремяОтвета,平均响应速度,,
+MinResponse,МинВремяОтвета,最小响应速度,,
+MaxResponse,МаксВремяОтвета,最大响应速度,,
+PackageLoss,ПотериПакетов,丢包率,,
+Speed,Скорость,速度,,
+Package Loss,Потери пакетов,丢包率,,
+Ping,Ping,网络延迟,,
+Chart Mode,График,图表模式,,
+24h,24ч,24小时,,
+all,За все время,全部,,
+,,,,
+# Proxy Form,,,,
+,,,,
+Edit Proxy,Редактирование прокси,代理设置,編輯 Proxy,プロキシの編集
+Use Proxy,Использовать прокси,使用代理,使用 Proxy,プロキシを利用する
+Proxy Type,Тип прокси,代理类型,Proxy 類型,プロキシの種類
+Proxy Addr,Адрес прокси,代理地址,Proxy 位址,プロキシアドレス
+Proxy Port,Порт прокси,代理端口,Proxy 連接埠,プロキシポート
+"If server has a plugin, proxy will not be used","Если сервер использует плагины, прокси НЕ будет использоваться",若服务器含有插件，代理将不被使用,若伺服器含有外掛程式，Proxy 將不被使用,サーバーにプラグインがある場合、プロキシは利用されません
+Use Auth,Требуется авторизация,使用认证,使用認證,認証を利用する
+User Name,Пользователь,用户名,認證用戶,認証ユーザ
+Auth Pwd,Пароль,认证密码,認證口令,認証パスワード
+,,,,
+# Log Form,,,,
+,,,,
+&File,Файл,文件(&F),檔案 (&F),ファイル (&F)
+&Open Location,Расположение файла,在资源管理器中打开(&O),在檔案總管中開啟 (&O),ファイルの場所を開く (&O)
+E&xit,Выход,退出(&X),結束 (&X),終了 (&X)
+&View,Вид,视图(&V),檢視 (&V),表示 (&V)
+&Clear Logs,Очистить журнал,清空日志(&C),清除記錄檔 (&C),ログの削除 (&C)
+Change &Font,Шрифт…,设置字体(&F),變更字型 (&F),フォント (&F)
+&Wrap Text,Перенос строк,自动换行(&W),自動換行 (&W),右端で折り返す (&W)
+&Top Most,Поверх всех окон,置顶(&T),置頂 (&T),常に最前面に表示 (&T)
+&Show Toolbar,Панель инструментов,显示工具栏(&S),顯示工具列 (&S),ツールバーの表示 (&S)
+Log Viewer,Просмотр журнала,日志查看器,記錄檔檢視器,ログビューア
+Inbound,Входящая,入站,輸入,受信
+Outbound,Исходящая,出站,輸出,送信
+,,,,
+# QRCode Form,,,,
+,,,,
+QRCode and URL,QRCode и URL,二维码与 URL,QR 碼與 URL,QR コードと URL
+,,,,
+# PAC Url Form,,,,
+,,,,
+Edit Online PAC URL,Изменение URL удаленного PAC,编辑在线 PAC 网址,編輯線上 PAC 網址,オンライン PAC URL の編集
+Edit Online PAC URL...,Редактировать URL удаленного PAC…,编辑在线 PAC 网址...,編輯線上 PAC 網址...,オンライン PAC URL の編集...
+Please input PAC Url,Введите URL адрес для PAC-файла,请输入 PAC 网址,請輸入 PAC 網址,PAC URLを入力して下さい
+,,,,
+# HotkeySettings Form,,,,
+,,,,
+Switch system proxy,ВКЛ/ВЫКЛ системный прокси-сервер,切换系统代理状态,切換系統 Proxy 狀態,システム プロキシの状態を切り替える
+Switch system proxy mode,Переключение режима прокси-сервера,切换系统代理模式,切換系統 Proxy 模式,プロキシモードを切り替える
+Allow Clients from LAN,Общий доступ к подключению,切换局域网共享,切換區域網路共用,LAN からのアクセスの許可を切り替える
+Show Logs...,Просмотр журналов,显示日志,顯示記錄檔,ログの表示
+Switch to previous server,Переключить на пред. сервер,切换上个服务器,切換上一個伺服器,前のサーバーに切り替える
+Switch to next server,Переключить на след. сервер,切换下个服务器,切換下一個伺服器,次のサーバーに切り替える
+Reg All,Применить все,注册全部快捷键,註冊所有快速鍵,全部登録する
+Reg Hotkeys At Startup,Применять при запуске программы,启动时注册快捷键,啟動時註冊快速鍵,起動時にホットキーを登録する
+,,,,
+# Messages,,,,
+,,,,
+Shadowsocks Error: {0},Ошибка Shadowsocks: {0},Shadowsocks 错误: {0},Shadowsocks 錯誤: {0},Shadowsocks エラー: {0}
+Port {0} already in use,Порт {0} уже используется,端口 {0} 已被占用,連接埠號碼 {0} 已被使用,ポート番号 {0} は既に使用されています。
+Port {0} is reserved by system,Порт {0} зарезервирован системой,端口 {0} 是系统保留端口,連接埠號碼 {0} 由系統保留, ポート番号 {0} はシステムによって予約されています
+Invalid server address,Неверный адрес сервера,非法服务器地址,無效伺服器位址,サーバーアドレスが無効です。
+Illegal port number format,Неверный числовой формат порта,非法端口格式,無效連接埠號碼格式,ポート番号のフォーマットが無効です。
+Illegal timeout format,Неверный формат таймаута,非法超时格式,無效逾時格式,タイムアウト値のフォーマットが無効です。
+Server IP can not be blank,IP-адрес сервера не может быть пустым,服务器 IP 不能为空,伺服器 IP 不能為空,サーバー IP が指定されていません。
+Password can not be blank,Пароль не может быть пустым,密码不能为空,密碼不能為空,パスワードが指定されていません。
+Port out of range,Порт выходит за допустимый диапазон,端口超出范围,連接埠號碼超出範圍,ポート番号は範囲外です。
+Port can't be 8123,Адрес порта 8123 не может быть использован,端口不能为 8123,連接埠號碼不能為 8123,8123 番以外のポート番号を指定して下さい。
+Shadowsocks {0} Update Found,Обнаружена новая версия Shadowsocks: {0},Shadowsocks {0} 更新,Shadowsocks {0} 更新,Shadowsocks バージョン {0} は利用できます。
+No update is available,Обновлений не обнаружено,没有可用的更新,沒有可用的更新,お使いのバージョンは最新です。
+Click here to update,Нажмите сюда для обновления,点击这里升级,點按此處升級,クリックしてアップデートします。
+Shadowsocks is here,Shadowsocks находится здесь,Shadowsocks 在这里,Shadowsocks 在這裡,Shadowsocks はここです。
+You can turn on/off Shadowsocks in the context menu,Вы можете управлять Shadowsocks из контекстного меню,可以在右键菜单中开关 Shadowsocks,可以在右鍵選項單中開關 Shadowsocks,コンテキストメニューを使って、Shadowsocks を有効または無効にすることができます。
+System Proxy Enabled,Системный прокси включен,系统代理已启用,系統 Proxy 已啟用,システム プロキシが有効です。
+System Proxy Disabled,Системный прокси отключен,系统代理未启用,系統 Proxy 未啟用,システム プロキシが無効です。
+Failed to update PAC file ,Не удалось обновить PAC файл,更新 PAC 文件失败,更新 PAC 檔案失敗,PAC の更新に失敗しました。
+PAC updated,PAC файл обновлен,更新 PAC 成功,更新 PAC 成功,PAC を更新しました。
+No updates found. Please report to GFWList if you have problems with it.,Обновлений не найдено. Сообщите авторам GFWList если у вас возникли проблемы.,未发现更新。如有问题请提交给 GFWList。,未發現更新。如有問題請報告至 GFWList。,お使いのバージョンは最新です。問題がある場合は、GFWList に報告して下さい。
+No QRCode found. Try to zoom in or move it to the center of the screen.,QRCode не обнаружен. Попробуйте увеличить изображение или переместить его в центр экрана.,未发现二维码，尝试把它放大或移动到靠近屏幕中间的位置,未發現 QR 碼，嘗試把它放大或移動到靠近熒幕中間的位置,QR コードが見つかりませんでした。コードを大きくするか、画面の中央に移動して下さい。
+Shadowsocks is already running.,Shadowsocks уже запущен.,Shadowsocks 已经在运行。,Shadowsocks 已經在執行。,Shadowsocks 実行中
+Find Shadowsocks icon in your notify tray.,Значок Shadowsocks можно найти в области уведомлений.,请在任务栏里寻找 Shadowsocks 图标。,請在工作列裡尋找 Shadowsocks 圖示。,通知領域には Shadowsocks のアイコンがあります。
+"If you want to start multiple Shadowsocks, make a copy in another directory.","Если вы хотите запустить несколько копий Shadowsocks одновременно, создайте отдельную папку на каждую копию.",如果想同时启动多个，可以另外复制一份到别的目录。,如果想同時啟動多個，可以另外複製一份至別的目錄。,複数起動したい場合は、プログラムファイルを別のフォルダーにコピーしてから、もう一度実行して下さい。
+Failed to decode QRCode,Не удалось распознать QRCode,无法解析二维码,QR 碼解碼失敗,QR コードの読み取りに失敗しました。
+Failed to update registry,Не удалось обновить запись в реестре,无法修改注册表,無法修改登錄檔,レジストリの更新に失敗しました。
+System Proxy On: ,Системный прокси:,系统代理已启用：,系統 Proxy 已啟用：,システム プロキシが有効：
+Running: Port {0},Запущен на порту {0},正在运行：端口 {0},正在執行：連接埠號碼 {0},実行中：ポート {0}
+"Unexpected error, shadowsocks will exit. Please report to","Непредвиденная ошибка, пожалуйста сообщите на",非预期错误，Shadowsocks将退出。请提交此错误到,非預期錯誤，Shadowsocks 將結束。請報告此錯誤至,予想外のエラーが発生したため、Shadowsocks を終了します。詳しくは下記までお問い合わせ下さい：
+"Unsupported operating system, use Windows Vista at least.","Операционная система не поддерживается, минимальные системные требования: Windows Vista или выше.",不支持的操作系统版本，最低需求为Windows Vista。,不支援的作業系統版本，最低需求為 Windows Vista。,お使いの OS はサポートされていません。Windows Vista 以降の OS で実行して下さい。
+"Unsupported .NET Framework, please update to {0} or later.","Версия .NET Framework не поддерживается, минимальные системные требования: {0} или выше.",当前 .NET Framework 版本过低，请升级至{0}或更新版本。,目前 .NET Framework 版本過低，最低需求為{0}。,お使いの .NET Framework はサポートされていません。{0} 以降のバンジョーをインストールして下さい。
+Proxy request failed,Не удалось выполнить запрос,代理请求失败,Proxy 要求失敗,プロキシ要求が失敗しました。
+Proxy handshake failed,Не удалось выполнить хэндшейк,代理握手失败,Proxy 交握失敗,プロキシ ハンドシェイクに失敗しました。
+Register hotkey failed,Не удалось применить настройки горячих клавиш,注册快捷键失败,註冊快速鍵失敗,ホットキーの登錄に失敗しました。
+Cannot parse hotkey: {0},Не удалось распознать следующие горячие клавиши: {0},解析快捷键失败: {0},剖析快速鍵失敗: {0},ホットキーを解析できません: {0}
+"Timeout is invalid, it should not exceed {0}",Таймаут не может превышать значение {0},超时无效，不应超过 {0},逾時無效，不應超過 {0},タイムアウト値が無効です。{0} 以下の値を指定して下さい。
+Cannot find the plugin program file,Файл плагина не найден,找不到插件程序文件,找不到外掛程式文件,
+,,,,
+Operation failure,Операция завершилась неудачей,操作失败,,
+Auto save failed,Автоматическое сохранение не удалось,自动保存失败,,
+Whether to discard unconfigured servers,Внесенные изменения будут утеряны,是否丢弃未配置的服务器,,
+"Invalid server address, Cannot automatically save or discard changes",Неверный адрес сервера. Невозможно сохранить или отменить изменения,非法服务器地址，无法自动保存，是否丢弃修改,,
+"Illegal port number format, Cannot automatically save or discard changes",Неверный числовой адрес порта. Невозможно сохранить или отменить изменения,非法端口格式，无法自动保存，是否丢弃修改,,
+"Password can not be blank, Cannot automatically save or discard changes",Пароль не может быть пустым. Невозможно сохранить или отменить изменения,密码不能为空，无法自动保存，是否丢弃修改,,
+"Illegal timeout format, Cannot automatically save or discard changes",Неверный формат таймаута. Невозможно сохранить или отменить изменения,非法超时格式，无法自动保存，是否丢弃修改,,
+,,,,
+"Error occured when process proxy setting, do you want reset current setting and retry?",Произошла ошибка при обработке настроек. Хотите сбросить текущие настройки и попробовать снова?,处理代理设置时发生错误，是否重置当前代理设置并重试？,,
+"Unrecoverable proxy setting error occured, see log for detail","Произошла серьезная ошибка, подробности можно узнать в журналах",发生不可恢复的代理设置错误，查看日志以取得详情,,
+Auth user can not be blank,Пользователь не может быть пустым,认证用户不能为空,認證用戶不能為空,認証ユーザが指定されていません。
+Auth pwd can not be blank,Пароль не может быть пустым,认证密码不能为空,認證口令不能為空,認証パスワードが指定されていません。
