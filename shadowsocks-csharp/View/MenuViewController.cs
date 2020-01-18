@@ -30,6 +30,7 @@ namespace Shadowsocks.View
         private bool _isFirstRun;
         private bool _isStartupChecking;
         private string _urlToOpen;
+        private bool _updated;
 
         private ContextMenu contextMenu1;
         private MenuItem disableItem;
@@ -112,6 +113,18 @@ namespace Shadowsocks.View
             {
                 _isStartupChecking = true;
                 updateChecker.CheckUpdate(config, 3000);
+            }
+
+            if (config.updated)
+            {
+                ShowBalloonTip(
+                    I18N.GetString("Updated"),
+                    I18N.GetString("updated"),
+                    ToolTipIcon.Info,
+                    0
+                );
+                config.updated = false;
+                Configuration.Save(config);
             }
         }
 
@@ -565,8 +578,23 @@ namespace Shadowsocks.View
             if (_isFirstRun)
             {
                 CheckUpdateForFirstRun();
-                ShowFirstTimeBalloon();
+                ShowBalloonTip(
+                    I18N.GetString("Shadowsocks is here"),
+                    I18N.GetString("You can turn on/off Shadowsocks in the context menu"),
+                    ToolTipIcon.Info,
+                    0
+                );
                 _isFirstRun = false;
+            }
+            if (_updated)
+            {
+                ShowBalloonTip(
+                    I18N.GetString("Updated"),
+                    I18N.GetString("updated"),
+                    ToolTipIcon.Info,
+                    0
+                );
+                _updated = false;
             }
         }
 

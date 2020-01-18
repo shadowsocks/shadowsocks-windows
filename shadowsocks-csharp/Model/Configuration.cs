@@ -37,6 +37,10 @@ namespace Shadowsocks.Model
         public HotkeyConfig hotkey;
 
         private static readonly string CONFIG_FILE = "gui-config.json";
+
+        [JsonIgnore]
+        public bool updated = false;
+
         [JsonIgnore]
         public string localHost => GetLocalHost();
         private string GetLocalHost() {
@@ -78,6 +82,10 @@ namespace Shadowsocks.Model
                 string configContent = File.ReadAllText(CONFIG_FILE);
                 Configuration config = JsonConvert.DeserializeObject<Configuration>(configContent);
                 config.isDefault = false;
+                if (UpdateChecker.Asset.CompareVersion(UpdateChecker.Version, config.version) > 0)
+                {
+                    config.updated = true; 
+                }
 
                 if (config.configs == null)
                     config.configs = new List<Server>();
