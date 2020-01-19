@@ -385,7 +385,7 @@ namespace Shadowsocks.View
         {
             string argument = @"/select, " + e.Path;
 
-            System.Diagnostics.Process.Start("explorer.exe", argument);
+            Process.Start("explorer.exe", argument);
         }
 
         void ShowBalloonTip(string title, string content, ToolTipIcon icon, int timeout)
@@ -428,10 +428,10 @@ namespace Shadowsocks.View
             if (updateChecker.NewVersionFound)
             {
                 updateChecker.NewVersionFound = false; /* Reset the flag */
-                if (System.IO.File.Exists(updateChecker.LatestVersionLocalName))
+                if (File.Exists(updateChecker.LatestVersionLocalName))
                 {
                     string argument = "/select, \"" + updateChecker.LatestVersionLocalName + "\"";
-                    System.Diagnostics.Process.Start("explorer.exe", argument);
+                    Process.Start("explorer.exe", argument);
                 }
             }
         }
@@ -630,14 +630,6 @@ namespace Shadowsocks.View
             if (config.isDefault) return;
             _isStartupChecking = true;
             updateChecker.CheckUpdate(config, 3000);
-        }
-
-        private void ShowFirstTimeBalloon()
-        {
-            _notifyIcon.BalloonTipTitle = I18N.GetString("Shadowsocks is here");
-            _notifyIcon.BalloonTipText = I18N.GetString("You can turn on/off Shadowsocks in the context menu");
-            _notifyIcon.BalloonTipIcon = ToolTipIcon.Info;
-            _notifyIcon.ShowBalloonTip(0);
         }
 
         private void AboutItem_Click(object sender, EventArgs e)
