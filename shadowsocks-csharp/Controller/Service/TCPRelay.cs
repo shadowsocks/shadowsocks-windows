@@ -472,10 +472,7 @@ namespace Shadowsocks.Controller
                             break;
                     }
 
-                    if (_config.isVerboseLogging)
-                    {
-                        Logger.Info($"connect to {dstAddr}:{dstPort}");
-                    }
+                     Logger.Debug($"connect to {dstAddr}:{dstPort}");
 
                     _destEndPoint = SocketUtil.GetEndPoint(dstAddr, dstPort);
 
@@ -682,12 +679,9 @@ namespace Shadowsocks.Controller
 
                 _proxyConnected = true;
 
-                if (_config.isVerboseLogging)
+                if (!(remote is DirectConnect))
                 {
-                    if (!(remote is DirectConnect))
-                    {
-                        Logger.Info($"Socket connected to proxy {remote.ProxyEndPoint}");
-                    }
+                    Logger.Debug($"Socket connected to proxy {remote.ProxyEndPoint}");
                 }
 
                 _startConnectTime = DateTime.Now;
@@ -758,10 +752,7 @@ namespace Shadowsocks.Controller
 
                 _destConnected = true;
 
-                if (_config.isVerboseLogging)
-                {
-                    Logger.Info($"Socket connected to ss server: {_server.FriendlyName()}");
-                }
+                Logger.Debug($"Socket connected to ss server: {_server.FriendlyName()}");
 
                 var latency = DateTime.Now - _startConnectTime;
                 IStrategy strategy = _controller.GetCurrentStrategy();
