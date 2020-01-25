@@ -254,6 +254,7 @@ namespace Shadowsocks.Controller
         {
             _config.isVerboseLogging = enabled;
             SaveConfig(_config);
+            NLogConfig.LoadConfiguration(); // reload nlog
 
             VerboseLoggingStatusChanged?.Invoke(this, new EventArgs());
         }
@@ -477,6 +478,9 @@ namespace Shadowsocks.Controller
             Encryption.RNG.Reload();
             // some logic in configuration updated the config when saving, we need to read it again
             _config = Configuration.Load();
+
+            NLogConfig.LoadConfiguration();
+
             StatisticsConfiguration = StatisticsStrategyConfiguration.Load();
 
             privoxyRunner = privoxyRunner ?? new PrivoxyRunner();

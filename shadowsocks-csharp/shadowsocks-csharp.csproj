@@ -132,6 +132,7 @@
     <Compile Include="Encryption\Stream\StreamOpenSSLEncryptor.cs" />
     <Compile Include="Encryption\Stream\StreamSodiumEncryptor.cs" />
     <Compile Include="Model\HotKeyConfig.cs" />
+    <Compile Include="Model\NLogConfig.cs" />
     <Compile Include="Model\ProxyConfig.cs" />
     <Compile Include="Model\SysproxyConfig.cs" />
     <Compile Include="Properties\Resources.Designer.cs">

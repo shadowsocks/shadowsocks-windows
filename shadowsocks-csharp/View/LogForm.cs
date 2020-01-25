@@ -41,12 +41,15 @@ namespace Shadowsocks.View
         TextAnnotation outboundAnnotation = new TextAnnotation();
         #endregion
 
-        public LogForm(ShadowsocksController controller, string filename=null)
+        public LogForm(ShadowsocksController controller)
         {
             this.controller = controller;
-            this.filename = filename;
+
             InitializeComponent();
             Icon = Icon.FromHandle(Resources.ssw128.GetHicon());
+
+            var nLogConfig = NLogConfig.LoadXML();
+            this.filename = nLogConfig.GetLogFileName();
 
             LogViewerConfig config = controller.GetConfigurationCopy().logViewer;
 
@@ -173,7 +176,7 @@ namespace Shadowsocks.View
                 string line = "";
                 StringBuilder appendText = new StringBuilder(1024);
                 while ((line = reader.ReadLine()) != null)
-                    appendText.Append(line + Environment.NewLine);
+                    appendText.AppendLine(line);
 
                 LogMessageTextBox.AppendText(appendText.ToString());
                 LogMessageTextBox.ScrollToCaret();
@@ -197,7 +200,7 @@ namespace Shadowsocks.View
                     while ((line = reader.ReadLine()) != null)
                     {
                         changed = true;
-                        appendText.Append(line + Environment.NewLine);
+                        appendText.AppendLine(line);
                     }
 
                     if (changed)

@@ -222,7 +222,7 @@ namespace Shadowsocks.View
         {
             Color colorMask = Color.White;
 
-            Utils.WindowsThemeMode currentWindowsThemeMode = Utils.GetWindows10SystemThemeSetting(controller.GetCurrentConfiguration().isVerboseLogging);
+            Utils.WindowsThemeMode currentWindowsThemeMode = Utils.GetWindows10SystemThemeSetting();
 
             if (isProxyEnabled)
             {

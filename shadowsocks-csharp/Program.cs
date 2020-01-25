@@ -27,7 +27,7 @@ namespace Shadowsocks
         static void Main(string[] args)
         {
             // todo: initialize the NLog configuartion
-            TouchAndApplyNLogConfig();
+            Model.NLogConfig.TouchAndApplyNLogConfig();
 
             // .NET Framework 4.7.2 on Win7 compatibility
             System.Net.ServicePointManager.SecurityProtocol |= 
@@ -94,16 +94,6 @@ namespace Shadowsocks
                 HotKeys.Init(MainController);
                 MainController.Start();
                 Application.Run();
-            }
-        }
-
-        private static void TouchAndApplyNLogConfig()
-        {
-            string NLogConfigFileName = "NLog.config";
-            if (!File.Exists(NLogConfigFileName))
-            {
-                File.WriteAllText(NLogConfigFileName, Properties.Resources.NLog_config);
-                LogManager.LoadConfiguration(NLogConfigFileName);
             }
         }
 

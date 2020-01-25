@@ -61,7 +61,7 @@ namespace Shadowsocks.Util
         public enum WindowsThemeMode { Dark, Light }
 
         // Support on Windows 10 1903+
-        public static WindowsThemeMode GetWindows10SystemThemeSetting(bool isVerbose)
+        public static WindowsThemeMode GetWindows10SystemThemeSetting()
         {
             WindowsThemeMode themeMode = WindowsThemeMode.Dark;
             try
@@ -81,11 +81,10 @@ namespace Shadowsocks.Util
             }
             catch
             {
-                if (isVerbose)
-                {
-                    logger.Info(
-                            $"Cannot get Windows 10 system theme mode, return default value 0 (dark mode).");
-                }
+
+                logger.Info(
+                        $"Cannot get Windows 10 system theme mode, return default value 0 (dark mode).");
+
             }
             return themeMode;
         }

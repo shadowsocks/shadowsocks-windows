@@ -36,9 +36,13 @@ namespace Shadowsocks.Model
         public bool autoCheckUpdate;
         public bool checkPreRelease;
         public bool isVerboseLogging;
+        //public NLogConfig.LogLevel logLevel;
         public LogViewerConfig logViewer;
         public ProxyConfig proxy;
         public HotkeyConfig hotkey;
+
+        [JsonIgnore]
+        NLogConfig nLogConfig;
 
         private static readonly string CONFIG_FILE = "gui-config.json";
         [JsonIgnore]
@@ -104,6 +108,28 @@ namespace Shadowsocks.Model
 
                 config.proxy.CheckConfig();
 
+                try
+                {
+                    config.nLogConfig = NLogConfig.LoadXML();
+                    switch (config.nLogConfig.GetLogLevel())
+                    {
+                        case NLogConfig.LogLevel.Fatal:
+                        case NLogConfig.LogLevel.Error:
+                        case NLogConfig.LogLevel.Warn:
+                        case NLogConfig.LogLevel.Info:
+                            config.isVerboseLogging = false;
+                            break;
+                        case NLogConfig.LogLevel.Debug:
+                        case NLogConfig.LogLevel.Trace:
+                            config.isVerboseLogging = true;
+                            break;
+                    }
+                }
+                catch (Exception e)
+                {
+                    logger.Error(e, "Cannot get the log level from NLog config file.");
+                }
+
                 return config;
             }
             catch (Exception e)
@@ -122,7 +148,7 @@ namespace Shadowsocks.Model
                     },
                     logViewer = new LogViewerConfig(),
                     proxy = new ProxyConfig(),
-                    hotkey = new HotkeyConfig()
+                    hotkey = new HotkeyConfig(),
                 };
             }
         }
@@ -144,6 +170,16 @@ namespace Shadowsocks.Model
                     string jsonString = JsonConvert.SerializeObject(config, Formatting.Indented);
                     sw.Write(jsonString);
                     sw.Flush();
+                }
+                try
+                {             
+                    // apply changs to NLog.config
+                    config.nLogConfig.SetLogLevel(config.isVerboseLogging? NLogConfig.LogLevel.Trace: NLogConfig.LogLevel.Info);
+                    NLogConfig.SaveXML(config.nLogConfig);
+                }
+                catch(Exception e)
+                {
+                    logger.Error(e, "Cannot set the log level");
                 }
             }
             catch (IOException e)
