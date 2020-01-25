@@ -13,31 +13,40 @@ namespace NLog
     {
         public static void Dump(this Logger logger, string tag, byte[] arr, int length)
         {
-            var sb = new StringBuilder($"{Environment.NewLine}{tag}: ");
-            for (int i = 0; i < length - 1; i++)
+            if (logger.IsTraceEnabled)
             {
-                sb.Append($"0x{arr[i]:X2}, ");
+                var sb = new StringBuilder($"{Environment.NewLine}{tag}: ");
+                for (int i = 0; i < length - 1; i++)
+                {
+                    sb.Append($"0x{arr[i]:X2}, ");
+                }
+                sb.Append($"0x{arr[length - 1]:X2}");
+                sb.Append(Environment.NewLine);
+                logger.Trace(sb.ToString());
             }
-            sb.Append($"0x{arr[length - 1]:X2}");
-            sb.Append(Environment.NewLine);
-            logger.Debug(sb.ToString());
         }
 
         public static void Debug(this Logger logger, EndPoint local, EndPoint remote, int len, string header = null, string tailer = null)
         {
-            if (header == null && tailer == null)
-                logger.Debug($"{local} => {remote} (size={len})");
-            else if (header == null && tailer != null)
-                logger.Debug($"{local} => {remote} (size={len}), {tailer}");
-            else if (header != null && tailer == null)
-                logger.Debug($"{header}: {local} => {remote} (size={len})");
-            else
-                logger.Debug($"{header}: {local} => {remote} (size={len}), {tailer}");
+            if (logger.IsDebugEnabled)
+            {
+                if (header == null && tailer == null)
+                    logger.Debug($"{local} => {remote} (size={len})");
+                else if (header == null && tailer != null)
+                    logger.Debug($"{local} => {remote} (size={len}), {tailer}");
+                else if (header != null && tailer == null)
+                    logger.Debug($"{header}: {local} => {remote} (size={len})");
+                else
+                    logger.Debug($"{header}: {local} => {remote} (size={len}), {tailer}");
+            }
         }
 
         public static void Debug(this Logger logger, Socket sock, int len, string header = null, string tailer = null)
         {
-            logger.Debug(sock.LocalEndPoint, sock.RemoteEndPoint, len, header, tailer);
+            if (logger.IsDebugEnabled)
+            {
+                logger.Debug(sock.LocalEndPoint, sock.RemoteEndPoint, len, header, tailer);
+            }
         }
 
         public static void LogUsefulException(this Logger logger, Exception e)
@@ -69,7 +78,7 @@ namespace NLog
                 }
                 else
                 {
-                    logger.Info(e);
+                    logger.Warn(e);
                 }
             }
             else if (e is ObjectDisposedException)
@@ -82,7 +91,7 @@ namespace NLog
                 // Win32Exception (0x80004005): A 32 bit processes cannot access modules of a 64 bit process.
                 if ((uint)ex.ErrorCode != 0x80004005)
                 {
-                    logger.Info(e);
+                    logger.Warn(e);
                 }
             }
             else if (e is ProxyException)
@@ -103,7 +112,7 @@ namespace NLog
             }
             else
             {
-                logger.Info(e);
+                logger.Warn(e);
             }
         }
     }
