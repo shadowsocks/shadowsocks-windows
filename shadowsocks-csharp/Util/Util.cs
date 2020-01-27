@@ -82,7 +82,7 @@ namespace Shadowsocks.Util
             catch
             {
 
-                logger.Info(
+                logger.Debug(
                         $"Cannot get Windows 10 system theme mode, return default value 0 (dark mode).");
 
             }

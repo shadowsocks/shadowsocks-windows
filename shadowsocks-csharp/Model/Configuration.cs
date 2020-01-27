@@ -127,7 +127,8 @@ namespace Shadowsocks.Model
                 }
                 catch (Exception e)
                 {
-                    logger.Error(e, "Cannot get the log level from NLog config file.");
+                    // todo: route the error to UI since there is no log file in this scenario
+                    logger.Error(e, "Cannot get the log level from NLog config file. Please check if the nlog config file exists with corresponding XML nodes.");
                 }
 
                 return config;
@@ -179,7 +180,7 @@ namespace Shadowsocks.Model
                 }
                 catch(Exception e)
                 {
-                    logger.Error(e, "Cannot set the log level");
+                    logger.Error(e, "Cannot set the log level to NLog config file. Please check if the nlog config file exists with corresponding XML nodes.");
                 }
             }
             catch (IOException e)

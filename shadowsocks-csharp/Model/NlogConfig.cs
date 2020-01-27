@@ -22,12 +22,12 @@ namespace Shadowsocks.Model
         }
 
         const string NLOG_CONFIG_FILE_NAME = "NLog.config";
-        const string MIN_LEVEL_ATTRIBUTE = "minlevel";
-        const string FILE_NAME_ATTRIBUTE = "fileName";
+        const string TARGET_MIN_LEVEL_ATTRIBUTE = "minlevel";
+        const string LOGGER_FILE_NAME_ATTRIBUTE = "fileName";
 
         XmlDocument doc = new XmlDocument();
-        XmlElement logLevelElement;
         XmlElement logFileNameElement;
+        XmlElement logLevelElement;
 
         /// <summary>
         /// Load the NLog config xml file content
@@ -57,7 +57,7 @@ namespace Shadowsocks.Model
         public LogLevel GetLogLevel()
         {
             LogLevel level = LogLevel.Warn;
-            string levelStr = logLevelElement.GetAttribute(MIN_LEVEL_ATTRIBUTE);
+            string levelStr = logLevelElement.GetAttribute(TARGET_MIN_LEVEL_ATTRIBUTE);
             Enum.TryParse(levelStr, out level);
             return level;
         }
@@ -68,7 +68,7 @@ namespace Shadowsocks.Model
         /// <returns></returns>
         public string GetLogFileName()
         {
-            return logFileNameElement.GetAttribute(FILE_NAME_ATTRIBUTE);
+            return logFileNameElement.GetAttribute(LOGGER_FILE_NAME_ATTRIBUTE);
         }
 
         /// <summary>
@@ -77,7 +77,7 @@ namespace Shadowsocks.Model
         /// <param name="logLevel"></param>
         public void SetLogLevel(LogLevel logLevel)
         {
-            logLevelElement.SetAttribute(MIN_LEVEL_ATTRIBUTE, logLevel.ToString("G"));
+            logLevelElement.SetAttribute(TARGET_MIN_LEVEL_ATTRIBUTE, logLevel.ToString("G"));
         }
 
         /// <summary>
@@ -86,9 +86,15 @@ namespace Shadowsocks.Model
         /// <param name="fileName"></param>
         public void SetLogFileName(string fileName)
         {
-            logFileNameElement.SetAttribute(FILE_NAME_ATTRIBUTE, fileName);
+            logFileNameElement.SetAttribute(LOGGER_FILE_NAME_ATTRIBUTE, fileName);
         }
 
+        /// <summary>
+        /// Select a single XML node/elemant
+        /// </summary>
+        /// <param name="doc"></param>
+        /// <param name="xpath"></param>
+        /// <returns></returns>
         private static XmlNode SelectSingleNode(XmlDocument doc, string xpath)
         {
             XmlNamespaceManager manager = new XmlNamespaceManager(doc.NameTable);
@@ -109,6 +115,9 @@ namespace Shadowsocks.Model
             }
         }
 
+        /// <summary>
+        /// NLog reload the config file and apply to current LogManager
+        /// </summary>
         public static void LoadConfiguration()
         {
             LogManager.LoadConfiguration(NLOG_CONFIG_FILE_NAME);

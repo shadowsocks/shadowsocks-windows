@@ -49,7 +49,18 @@ namespace Shadowsocks.View
             Icon = Icon.FromHandle(Resources.ssw128.GetHicon());
 
             var nLogConfig = NLogConfig.LoadXML();
-            this.filename = nLogConfig.GetLogFileName();
+            try
+            {
+                this.filename = nLogConfig.GetLogFileName();
+            }
+            catch(Exception)
+            {
+                // failed to get the file name
+            }
+            if (string.IsNullOrEmpty(this.filename))
+            {
+                LogMessageTextBox.AppendText("Cannot get the log file name from NLog config file. Please check if the nlog config file exists with corresponding XML nodes.");
+            }
 
             LogViewerConfig config = controller.GetConfigurationCopy().logViewer;
 
@@ -164,6 +175,8 @@ namespace Shadowsocks.View
 
         private void InitContent()
         {
+            if (string.IsNullOrEmpty(filename))
+                return;
             using (StreamReader reader = new StreamReader(new FileStream(filename,
                      FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
             {
@@ -187,6 +200,11 @@ namespace Shadowsocks.View
 
         private void UpdateContent()
         {
+            this.Text = I18N.GetString("Log Viewer") +
+                        $" [in: {Utils.FormatBytes(controller.InboundCounter)}, out: {Utils.FormatBytes(controller.OutboundCounter)}]";
+
+            if (string.IsNullOrEmpty(filename))
+                return;
             try
             {
                 using (StreamReader reader = new StreamReader(new FileStream(filename,
@@ -215,9 +233,6 @@ namespace Shadowsocks.View
             catch (FileNotFoundException)
             {
             }
-
-            this.Text = I18N.GetString("Log Viewer") +
-                $" [in: {Utils.FormatBytes(controller.InboundCounter)}, out: {Utils.FormatBytes(controller.OutboundCounter)}]";
         }
 
         private void LogForm_Load(object sender, EventArgs e)
