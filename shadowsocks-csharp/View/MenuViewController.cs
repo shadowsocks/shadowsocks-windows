@@ -454,30 +454,30 @@ namespace Shadowsocks.View
             {
                 items.RemoveAt(0);
             }
-            int i = 0;
+            int strategyCount = 0;
             foreach (var strategy in controller.GetStrategies())
             {
                 MenuItem item = new MenuItem(strategy.Name);
                 item.Tag = strategy.ID;
                 item.Click += AStrategyItem_Click;
-                items.Add(i, item);
-                i++;
+                items.Add(strategyCount, item);
+                strategyCount++;
             }
 
             // user wants a seperator item between strategy and servers menugroup
-            items.Add(i++, new MenuItem("-"));
+            items.Add(strategyCount++, new MenuItem("-"));
 
-            int strategyCount = i;
+            int serverCount = 0;
             Configuration configuration = controller.GetConfigurationCopy();
             foreach (var server in configuration.configs)
             {
                 if (Configuration.ChecksServer(server))
                 {
                     MenuItem item = new MenuItem(server.FriendlyName());
-                    item.Tag = i - strategyCount;
+                    item.Tag = configuration.configs.FindIndex(s => s == server);
                     item.Click += AServerItem_Click;
-                    items.Add(i, item);
-                    i++;
+                    items.Add(strategyCount + serverCount, item);
+                    serverCount++;
                 }
             }
 
