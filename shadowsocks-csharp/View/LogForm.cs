@@ -308,7 +308,11 @@ namespace Shadowsocks.View
         #region Clean up the content in LogMessageTextBox.
         private void DoClearLogs()
         {
-            //logger.Clear();
+            try
+            {
+                File.Delete(filename);
+            }
+            catch { }
             lastOffset = 0;
             LogMessageTextBox.Clear();
         }
