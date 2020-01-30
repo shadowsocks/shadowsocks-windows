@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System.Runtime.CompilerServices;
+using NLog;
 using Shadowsocks.Controller.Strategy;
 using Shadowsocks.Encryption;
 using Shadowsocks.Model;
@@ -49,6 +50,8 @@ namespace Shadowsocks.Controller
 
         public class UDPHandler
         {
+            private static Logger logger = LogManager.GetCurrentClassLogger();
+
             private Socket _local;
             private Socket _remote;
 
@@ -98,14 +101,14 @@ namespace Shadowsocks.Controller
                 byte[] dataOut = new byte[65536];  // enough space for AEAD ciphers
                 int outlen;
                 encryptor.EncryptUDP(dataIn, length - 3, dataOut, out outlen);
-                Logging.Debug(_localEndPoint, _remoteEndPoint, outlen, "UDP Relay");
+                logger.Debug(_localEndPoint, _remoteEndPoint, outlen, "UDP Relay");
                 _remote?.SendTo(dataOut, outlen, SocketFlags.None, _remoteEndPoint);
             }
 
             public void Receive()
             {
                 EndPoint remoteEndPoint = new IPEndPoint(GetIPAddress(), 0);
-                Logging.Debug($"++++++Receive Server Port, size:" + _buffer.Length);
+                logger.Debug($"++++++Receive Server Port, size:" + _buffer.Length);
                 _remote?.BeginReceiveFrom(_buffer, 0, _buffer.Length, 0, ref remoteEndPoint, new AsyncCallback(RecvFromCallback), null);
             }
 
@@ -126,7 +129,7 @@ namespace Shadowsocks.Controller
                     byte[] sendBuf = new byte[outlen + 3];
                     Array.Copy(dataOut, 0, sendBuf, 3, outlen);
 
-                    Logging.Debug(_localEndPoint, _remoteEndPoint, outlen, "UDP Relay");
+                    logger.Debug(_localEndPoint, _remoteEndPoint, outlen, "UDP Relay");
                     _local?.SendTo(sendBuf, outlen + 3, 0, _localEndPoint);
 
                     Receive();

@@ -4,7 +4,7 @@ using System.Net;
 using System.Text.RegularExpressions;
 
 using Newtonsoft.Json.Linq;
-
+using NLog;
 using Shadowsocks.Model;
 using Shadowsocks.Util;
 
@@ -12,6 +12,8 @@ namespace Shadowsocks.Controller
 {
     public class UpdateChecker
     {
+        private static Logger logger = LogManager.GetCurrentClassLogger();
+
         private const string UpdateURL = "https://api.github.com/repos/shadowsocks/shadowsocks-windows/releases";
         private const string UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.121 Safari/537.36";
 
@@ -60,14 +62,14 @@ namespace Shadowsocks.Controller
 
             try
             {
-                Logging.Debug("Checking updates...");
+                logger.Debug("Checking updates...");
                 WebClient http = CreateWebClient();
                 http.DownloadStringCompleted += http_DownloadStringCompleted;
                 http.DownloadStringAsync(new Uri(UpdateURL));
             }
             catch (Exception ex)
             {
-                Logging.LogUsefulException(ex);
+                logger.LogUsefulException(ex);
             }
         }
 
@@ -117,7 +119,7 @@ namespace Shadowsocks.Controller
                 }
                 else
                 {
-                    Logging.Debug("No update is available");
+                    logger.Debug("No update is available");
                     if (CheckUpdateCompleted != null)
                     {
                         CheckUpdateCompleted(this, new EventArgs());
@@ -126,7 +128,7 @@ namespace Shadowsocks.Controller
             }
             catch (Exception ex)
             {
-                Logging.LogUsefulException(ex);
+                logger.LogUsefulException(ex);
             }
         }
 
@@ -141,7 +143,7 @@ namespace Shadowsocks.Controller
             }
             catch (Exception ex)
             {
-                Logging.LogUsefulException(ex);
+                logger.LogUsefulException(ex);
             }
         }
 
@@ -151,10 +153,10 @@ namespace Shadowsocks.Controller
             {
                 if (e.Error != null)
                 {
-                    Logging.LogUsefulException(e.Error);
+                    logger.LogUsefulException(e.Error);
                     return;
                 }
-                Logging.Debug($"New version {LatestVersionNumber}{LatestVersionSuffix} found: {LatestVersionLocalName}");
+                logger.Debug($"New version {LatestVersionNumber}{LatestVersionSuffix} found: {LatestVersionLocalName}");
                 if (CheckUpdateCompleted != null)
                 {
                     CheckUpdateCompleted(this, new EventArgs());
@@ -162,7 +164,7 @@ namespace Shadowsocks.Controller
             }
             catch (Exception ex)
             {
-                Logging.LogUsefulException(ex);
+                logger.LogUsefulException(ex);
             }
         }
 

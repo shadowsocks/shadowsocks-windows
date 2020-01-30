@@ -1,4 +1,5 @@
-﻿using Shadowsocks.Controller;
+﻿using NLog;
+using Shadowsocks.Controller;
 using Shadowsocks.Model;
 using Shadowsocks.Properties;
 using Shadowsocks.Util;
@@ -17,6 +18,7 @@ namespace Shadowsocks.View
 {
     public class MenuViewController
     {
+        private static Logger logger = LogManager.GetCurrentClassLogger();
         // yes this is just a menu view controller
         // when config form is closed, it moves away from RAM
         // and it should just do anything related to the config form
@@ -220,7 +222,7 @@ namespace Shadowsocks.View
         {
             Color colorMask = Color.White;
 
-            Utils.WindowsThemeMode currentWindowsThemeMode = Utils.GetWindows10SystemThemeSetting(controller.GetCurrentConfiguration().isVerboseLogging);
+            Utils.WindowsThemeMode currentWindowsThemeMode = Utils.GetWindows10SystemThemeSetting();
 
             if (isProxyEnabled)
             {
@@ -386,7 +388,7 @@ namespace Shadowsocks.View
         void controller_UpdatePACFromGFWListError(object sender, System.IO.ErrorEventArgs e)
         {
             ShowBalloonTip(I18N.GetString("Failed to update PAC file"), e.GetException().Message, ToolTipIcon.Error, 5000);
-            Logging.LogUsefulException(e.GetException());
+            logger.LogUsefulException(e.GetException());
         }
 
         void controller_UpdatePACFromGFWListCompleted(object sender, GFWListUpdater.ResultEventArgs e)
@@ -543,7 +545,7 @@ namespace Shadowsocks.View
             }
             else
             {
-                logForm = new LogForm(controller, Logging.LogFilePath);
+                logForm = new LogForm(controller);
                 logForm.Show();
                 logForm.Activate();
                 logForm.FormClosed += logForm_FormClosed;

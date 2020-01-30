@@ -6,11 +6,14 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Web;
+using NLog;
 
 namespace Shadowsocks.Controller
 {
     public class PACServer : Listener.Service
     {
+        private static Logger logger = LogManager.GetCurrentClassLogger();
+
         public const string RESOURCE_NAME = "pac";
 
         private string PacSecret
@@ -43,7 +46,7 @@ namespace Shadowsocks.Controller
             string usedSecret = _config.secureLocalPac ? $"&secret={PacSecret}" : "";
             string contentHash = GetHash(_pacDaemon.GetPACContent());
             PacUrl = $"http://{config.localHost}:{config.localPort}/{RESOURCE_NAME}?hash={contentHash}{usedSecret}";
-            Logging.Debug("Set PAC URL:" + PacUrl);
+            logger.Debug("Set PAC URL:" + PacUrl);
         }
 
         private static string GetHash(string content)
@@ -177,7 +180,7 @@ Connection: Close
             }
             catch (Exception e)
             {
-                Logging.LogUsefulException(e);
+                logger.LogUsefulException(e);
                 socket.Close();
             }
         }

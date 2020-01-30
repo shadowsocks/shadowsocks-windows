@@ -130,6 +130,9 @@
   <data name="libsscrypto_dll" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Data\libsscrypto.dll.gz;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
+  <data name="NLog_config" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\data\nlog.config;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+  </data>
   <data name="privoxy_conf" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\data\privoxy_conf.txt;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
   </data>

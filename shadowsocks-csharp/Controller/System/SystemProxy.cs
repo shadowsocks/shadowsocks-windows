@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Windows.Forms;
+using NLog;
 using Shadowsocks.Model;
 using Shadowsocks.Util.SystemProxy;
 
@@ -7,6 +8,8 @@ namespace Shadowsocks.Controller
 {
     public static class SystemProxy
     {
+        private static Logger logger = LogManager.GetCurrentClassLogger();
+
         private static string GetTimestamp(DateTime value)
         {
             return value.ToString("yyyyMMddHHmmssfff");
@@ -52,7 +55,7 @@ namespace Shadowsocks.Controller
             }
             catch (ProxyException ex)
             {
-                Logging.LogUsefulException(ex);
+                logger.LogUsefulException(ex);
                 if (ex.Type != ProxyExceptionType.Unspecific && !noRetry)
                 {
                     var ret = MessageBox.Show(I18N.GetString("Error occured when process proxy setting, do you want reset current setting and retry?"), I18N.GetString("Shadowsocks"), MessageBoxButtons.YesNo, MessageBoxIcon.Warning);

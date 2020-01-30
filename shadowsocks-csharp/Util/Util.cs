@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NLog;
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
@@ -26,6 +27,8 @@ namespace Shadowsocks.Util
 
     public static class Utils
     {
+        private static Logger logger = LogManager.GetCurrentClassLogger();
+
         private static string _tempPath = null;
 
         // return path to store temporary files
@@ -48,7 +51,7 @@ namespace Shadowsocks.Util
                 }
                 catch (Exception e)
                 {
-                    Logging.Error(e);
+                    logger.Error(e);
                     throw;
                 }
             }
@@ -58,7 +61,7 @@ namespace Shadowsocks.Util
         public enum WindowsThemeMode { Dark, Light }
 
         // Support on Windows 10 1903+
-        public static WindowsThemeMode GetWindows10SystemThemeSetting(bool isVerbose)
+        public static WindowsThemeMode GetWindows10SystemThemeSetting()
         {
             WindowsThemeMode themeMode = WindowsThemeMode.Dark;
             try
@@ -78,11 +81,10 @@ namespace Shadowsocks.Util
             }
             catch
             {
-                if (isVerbose)
-                {
-                    Logging.Info(
-                            $"Cannot get Windows 10 system theme mode, return default value 0 (dark mode).");
-                }
+
+                logger.Debug(
+                        $"Cannot get Windows 10 system theme mode, return default value 0 (dark mode).");
+
             }
             return themeMode;
         }
@@ -251,7 +253,7 @@ namespace Shadowsocks.Util
             }
             catch (Exception e)
             {
-                Logging.LogUsefulException(e);
+                logger.LogUsefulException(e);
                 return null;
             }
         }
