@@ -1,12 +1,8 @@
-﻿using System;
+﻿using GlobalHotKey;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Shadowsocks.Controller;
-using GlobalHotKey;
-using System.Windows.Input;
-using System.Threading;
-using System.Collections.Generic;
 using Shadowsocks.Controller.Hotkeys;
-using System.Diagnostics;
+using System.Windows.Input;
 
 
 namespace Shadowsocks.Test
@@ -53,5 +49,49 @@ namespace Shadowsocks.Test
             Assert.IsTrue(testKey3 != null && testKey3.Equals(new HotKey(Key.NumPad7, (ModifierKeys.Control | ModifierKeys.Alt | ModifierKeys.Shift))));
         }
 
+        [TestMethod]
+        public void TestGetBandwidthScale()
+        {
+            Assert.AreEqual(new Util.BandwidthScaleInfo()
+            {
+                value = 1,
+                unitName = "B",
+                unit = 1
+            }, Util.Utils.GetBandwidthScale(1));
+
+            Assert.AreEqual(new Util.BandwidthScaleInfo()
+            {
+                value = 1024,
+                unitName = "B",
+                unit = 1
+            }, Util.Utils.GetBandwidthScale(1024));
+
+            Assert.AreEqual(new Util.BandwidthScaleInfo()
+            {
+                value = 1.125f,
+                unitName = "KiB",
+                unit = 1024
+            }, Util.Utils.GetBandwidthScale(1152));
+
+            Assert.AreEqual(new Util.BandwidthScaleInfo()
+            {
+                value = 1024,
+                unitName = "KiB",
+                unit = 1024
+            }, Util.Utils.GetBandwidthScale(1048576));
+
+            Assert.AreEqual(new Util.BandwidthScaleInfo()
+            {
+                value = 2,
+                unitName = "GiB",
+                unit = 1073741824
+            }, Util.Utils.GetBandwidthScale(2147483648));
+            Assert.AreEqual(new Util.BandwidthScaleInfo()
+            {
+                value = 2,
+                unitName = "TiB",
+                unit = 1099511627776
+            }, Util.Utils.GetBandwidthScale(2199023255552));
+        }
     }
 }

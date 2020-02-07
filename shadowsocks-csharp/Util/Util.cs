@@ -23,6 +23,10 @@ namespace Shadowsocks.Util
             this.unitName = unitName;
             this.unit = unit;
         }
+        public override string ToString()
+        {
+            return $"{value.ToString()} {unitName}({unit})";
+        }
     }
 
     public static class Utils
@@ -131,25 +135,6 @@ namespace Shadowsocks.Util
             }
         }
 
-        public static string UnGzip(byte[] buf)
-        {
-            byte[] buffer = new byte[1024];
-            int n;
-            using (MemoryStream sb = new MemoryStream())
-            {
-                using (GZipStream input = new GZipStream(new MemoryStream(buf),
-                                                         CompressionMode.Decompress,
-                                                         false))
-                {
-                    while ((n = input.Read(buffer, 0, buffer.Length)) > 0)
-                    {
-                        sb.Write(buffer, 0, n);
-                    }
-                }
-                return System.Text.Encoding.UTF8.GetString(sb.ToArray());
-            }
-        }
-
         public static string FormatBandwidth(long n)
         {
             var result = GetBandwidthScale(n);
@@ -205,32 +190,15 @@ namespace Shadowsocks.Util
         {
             long scale = 1;
             float f = n;
-            string unit = "B";
-            if (f > 1024)
+            string[] units = { "B", "KiB", "MiB", "GiB", "TiB" };
+            int unitptr = 0;
+            while (f > 1024 && unitptr < units.Length - 1)
             {
-                f = f / 1024;
+                f /= 1024;
                 scale <<= 10;
-                unit = "KiB";
+                unitptr++;
             }
-            if (f > 1024)
-            {
-                f = f / 1024;
-                scale <<= 10;
-                unit = "MiB";
-            }
-            if (f > 1024)
-            {
-                f = f / 1024;
-                scale <<= 10;
-                unit = "GiB";
-            }
-            if (f > 1024)
-            {
-                f = f / 1024;
-                scale <<= 10;
-                unit = "TiB";
-            }
-            return new BandwidthScaleInfo(f, unit, scale);
+            return new BandwidthScaleInfo(f, units[unitptr], scale);
         }
 
         public static RegistryKey OpenRegKey(string name, bool writable, RegistryHive hive = RegistryHive.CurrentUser)
