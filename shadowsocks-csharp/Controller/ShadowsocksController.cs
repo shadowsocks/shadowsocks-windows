@@ -486,14 +486,25 @@ namespace Shadowsocks.Controller
             privoxyRunner = privoxyRunner ?? new PrivoxyRunner();
 
             _pacDaemon = _pacDaemon ?? new PACDaemon();
-            _pacDaemon.PACFileChanged += PacDaemon_PACFileChanged;
-            _pacDaemon.UserRuleFileChanged += PacDaemon_UserRuleFileChanged;
+            _pacDaemon.PACFileChanged += (o, e) => UpdateSystemProxy();
+            _pacDaemon.UserRuleFileChanged += (o, e) =>
+            {
+                if (!File.Exists(Utils.GetTempPath("gfwlist.txt")))
+                {
+                    UpdatePACFromGFWList();
+                }
+                else
+                {
+                    GFWListUpdater.MergeAndWritePACFile(FileManager.NonExclusiveReadAllText(Utils.GetTempPath("gfwlist.txt")));
+                }
+                UpdateSystemProxy();
+            };
             _pacServer = _pacServer ?? new PACServer(_pacDaemon);
             _pacServer.UpdatePACURL(_config); // So PACServer works when system proxy disabled.
 
             gfwListUpdater = gfwListUpdater ?? new GFWListUpdater();
-            gfwListUpdater.UpdateCompleted += PacServer_PACUpdateCompleted;
-            gfwListUpdater.Error += PacServer_PACUpdateError;
+            gfwListUpdater.UpdateCompleted += (o, e) => UpdatePACFromGFWListCompleted?.Invoke(this, e);
+            gfwListUpdater.Error += (o, e) => UpdatePACFromGFWListError?.Invoke(this, e);
 
             availabilityStatistics.UpdateConfiguration(this);
             _listener?.Stop();
@@ -565,34 +576,7 @@ namespace Shadowsocks.Controller
             SystemProxy.Update(_config, false, _pacServer);
         }
 
-        private void PacDaemon_PACFileChanged(object sender, EventArgs e)
-        {
-            UpdateSystemProxy();
-        }
-
-        private void PacServer_PACUpdateCompleted(object sender, GFWListUpdater.ResultEventArgs e)
-        {
-            UpdatePACFromGFWListCompleted?.Invoke(this, e);
-        }
-
-        private void PacServer_PACUpdateError(object sender, ErrorEventArgs e)
-        {
-            UpdatePACFromGFWListError?.Invoke(this, e);
-        }
-
         private static readonly IEnumerable<char> IgnoredLineBegins = new[] { '!', '[' };
-        private void PacDaemon_UserRuleFileChanged(object sender, EventArgs e)
-        {
-            if (!File.Exists(Utils.GetTempPath("gfwlist.txt")))
-            {
-                UpdatePACFromGFWList();
-            }
-            else
-            {
-                GFWListUpdater.MergeAndWritePACFile(FileManager.NonExclusiveReadAllText(Utils.GetTempPath("gfwlist.txt")));
-            }
-            UpdateSystemProxy();
-        }
 
         public void CopyPacUrl()
         {

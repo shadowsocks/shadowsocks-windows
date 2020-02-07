@@ -729,7 +729,7 @@ namespace Shadowsocks.Controller
             Server server = timer.Server;
             IStrategy strategy = _controller.GetCurrentStrategy();
             strategy?.SetFailure(server);
-            Logger.Info($"{server.FriendlyName()} timed out");
+            Logger.Info($"{server.ToString()} timed out");
             session.Remote.Close();
             Close();
         }
@@ -752,7 +752,7 @@ namespace Shadowsocks.Controller
 
                 _destConnected = true;
 
-                Logger.Debug($"Socket connected to ss server: {_server.FriendlyName()}");
+                Logger.Debug($"Socket connected to ss server: {_server.ToString()}");
 
                 var latency = DateTime.Now - _startConnectTime;
                 IStrategy strategy = _controller.GetCurrentStrategy();

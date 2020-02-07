@@ -44,7 +44,7 @@ namespace Shadowsocks.Model
             return server == o2.server && server_port == o2.server_port;
         }
 
-        public string FriendlyName()
+        public override string ToString()
         {
             if (server.IsNullOrEmpty())
             {

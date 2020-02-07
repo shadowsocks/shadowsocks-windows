@@ -64,7 +64,7 @@ namespace Shadowsocks.Controller
             {
                 logger.Debug("Checking updates...");
                 WebClient http = CreateWebClient();
-                http.DownloadStringCompleted += http_DownloadStringCompleted;
+                http.DownloadStringCompleted += ParseUpdateAndDownload;
                 http.DownloadStringAsync(new Uri(UpdateURL));
             }
             catch (Exception ex)
@@ -73,7 +73,7 @@ namespace Shadowsocks.Controller
             }
         }
 
-        private void http_DownloadStringCompleted(object sender, DownloadStringCompletedEventArgs e)
+        private void ParseUpdateAndDownload(object sender, DownloadStringCompletedEventArgs e)
         {
             try
             {
@@ -120,10 +120,7 @@ namespace Shadowsocks.Controller
                 else
                 {
                     logger.Debug("No update is available");
-                    if (CheckUpdateCompleted != null)
-                    {
-                        CheckUpdateCompleted(this, new EventArgs());
-                    }
+                    CheckUpdateCompleted?.Invoke(this, new EventArgs());
                 }
             }
             catch (Exception ex)
@@ -138,29 +135,24 @@ namespace Shadowsocks.Controller
             {
                 LatestVersionLocalName = Utils.GetTempPath(LatestVersionName);
                 WebClient http = CreateWebClient();
-                http.DownloadFileCompleted += Http_DownloadFileCompleted;
+                http.DownloadFileCompleted += (o, e) =>
+                {
+                    try
+                    {
+                        if (e.Error != null)
+                        {
+                            logger.LogUsefulException(e.Error);
+                            return;
+                        }
+                        logger.Debug($"New version {LatestVersionNumber}{LatestVersionSuffix} found: {LatestVersionLocalName}");
+                        CheckUpdateCompleted?.Invoke(this, new EventArgs());
+                    }
+                    catch (Exception ex)
+                    {
+                        logger.LogUsefulException(ex);
+                    }
+                };
                 http.DownloadFileAsync(new Uri(LatestVersionURL), LatestVersionLocalName);
-            }
-            catch (Exception ex)
-            {
-                logger.LogUsefulException(ex);
-            }
-        }
-
-        private void Http_DownloadFileCompleted(object sender, System.ComponentModel.AsyncCompletedEventArgs e)
-        {
-            try
-            {
-                if (e.Error != null)
-                {
-                    logger.LogUsefulException(e.Error);
-                    return;
-                }
-                logger.Debug($"New version {LatestVersionNumber}{LatestVersionSuffix} found: {LatestVersionLocalName}");
-                if (CheckUpdateCompleted != null)
-                {
-                    CheckUpdateCompleted(this, new EventArgs());
-                }
             }
             catch (Exception ex)
             {
