@@ -6,6 +6,8 @@ using System.Net;
 using System.Diagnostics;
 using System.Text;
 using Shadowsocks.Util.SystemProxy;
+using System.Linq;
+using System.Reflection;
 
 namespace NLog
 {
@@ -13,40 +15,28 @@ namespace NLog
     {
         public static void Dump(this Logger logger, string tag, byte[] arr, int length)
         {
-            if (logger.IsTraceEnabled)
-            {
-                var sb = new StringBuilder($"{Environment.NewLine}{tag}: ");
-                for (int i = 0; i < length - 1; i++)
-                {
-                    sb.Append($"0x{arr[i]:X2}, ");
-                }
-                sb.Append($"0x{arr[length - 1]:X2}");
-                sb.Append(Environment.NewLine);
-                logger.Trace(sb.ToString());
-            }
+            if (!logger.IsTraceEnabled) return;
+            logger.Trace(Environment.NewLine
+                + $"{tag}: {BitConverter.ToString(arr.Take(length).ToArray())}"
+                + Environment.NewLine);
         }
 
         public static void Debug(this Logger logger, EndPoint local, EndPoint remote, int len, string header = null, string tailer = null)
         {
-            if (logger.IsDebugEnabled)
-            {
-                if (header == null && tailer == null)
-                    logger.Debug($"{local} => {remote} (size={len})");
-                else if (header == null && tailer != null)
-                    logger.Debug($"{local} => {remote} (size={len}), {tailer}");
-                else if (header != null && tailer == null)
-                    logger.Debug($"{header}: {local} => {remote} (size={len})");
-                else
-                    logger.Debug($"{header}: {local} => {remote} (size={len}), {tailer}");
-            }
+            if (!logger.IsDebugEnabled) return;
+
+            string fullheader = header == null ? "" : header + ": ";
+            string fulltailer = tailer == null ? "" : ", " + tailer;
+            logger.Debug(fullheader + $"{local} => {remote} (size={len})" + fulltailer);
+
         }
 
         public static void Debug(this Logger logger, Socket sock, int len, string header = null, string tailer = null)
         {
-            if (logger.IsDebugEnabled)
-            {
-                logger.Debug(sock.LocalEndPoint, sock.RemoteEndPoint, len, header, tailer);
-            }
+            if (!logger.IsDebugEnabled) return;
+
+            logger.Debug(sock.LocalEndPoint, sock.RemoteEndPoint, len, header, tailer);
+
         }
 
         public static void LogUsefulException(this Logger logger, Exception e)
@@ -55,30 +45,24 @@ namespace NLog
             if (e is SocketException)
             {
                 SocketException se = (SocketException)e;
-                if (se.SocketErrorCode == SocketError.ConnectionAborted)
+
+                switch (se.SocketErrorCode)
                 {
                     // closed by browser when sending
                     // normally happens when download is canceled or a tab is closed before page is loaded
-                }
-                else if (se.SocketErrorCode == SocketError.ConnectionReset)
-                {
+                    case SocketError.ConnectionAborted:
                     // received rst
-                }
-                else if (se.SocketErrorCode == SocketError.NotConnected)
-                {
+                    case SocketError.ConnectionReset:
                     // The application tried to send or receive data, and the System.Net.Sockets.Socket is not connected.
-                }
-                else if (se.SocketErrorCode == SocketError.HostUnreachable)
-                {
+                    case SocketError.NotConnected:
                     // There is no network route to the specified host.
-                }
-                else if (se.SocketErrorCode == SocketError.TimedOut)
-                {
+                    case SocketError.HostUnreachable:
                     // The connection attempt timed out, or the connected host has failed to respond.
-                }
-                else
-                {
-                    logger.Warn(e);
+                    case SocketError.TimedOut:
+                        break;
+                    default:
+                        logger.Warn(e);
+                        break;
                 }
             }
             else if (e is ObjectDisposedException)
@@ -89,6 +73,7 @@ namespace NLog
                 var ex = (Win32Exception)e;
 
                 // Win32Exception (0x80004005): A 32 bit processes cannot access modules of a 64 bit process.
+                // Why?
                 if ((uint)ex.ErrorCode != 0x80004005)
                 {
                     logger.Warn(e);
@@ -109,6 +94,10 @@ namespace NLog
                         logger.Error($"sysproxy - {ex.Type.ToString()}");
                         break;
                 }
+            }
+            else if (e is TargetInvocationException)
+            {
+                logger.LogUsefulException(e.InnerException);
             }
             else
             {
