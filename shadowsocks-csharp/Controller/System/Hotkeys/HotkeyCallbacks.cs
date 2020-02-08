@@ -66,7 +66,7 @@ namespace Shadowsocks.Controller.Hotkeys
 
         private void ShowLogsCallback()
         {
-            Program.MenuController.ShowLogForm_HotKey();
+            Program.MenuController.ShowLogForm();
         }
 
         private void ServerMoveUpCallback()
