@@ -76,30 +76,90 @@ namespace Shadowsocks.View
 
             LoadMenu();
 
-            controller.EnableStatusChanged += controller_EnableStatusChanged;
-            controller.ConfigChanged += controller_ConfigChanged;
-            controller.PACFileReadyToOpen += controller_FileReadyToOpen;
-            controller.UserRuleFileReadyToOpen += controller_FileReadyToOpen;
-            controller.ShareOverLANStatusChanged += controller_ShareOverLANStatusChanged;
-            controller.VerboseLoggingStatusChanged += controller_VerboseLoggingStatusChanged;
-            controller.ShowPluginOutputChanged += controller_ShowPluginOutputChanged;
-            controller.EnableGlobalChanged += controller_EnableGlobalChanged;
-            controller.Errored += controller_Errored;
-            controller.UpdatePACFromGFWListCompleted += controller_UpdatePACFromGFWListCompleted;
-            controller.UpdatePACFromGFWListError += controller_UpdatePACFromGFWListError;
+            #region Controller events
 
+            controller.ConfigChanged += (o, e) =>
+            {
+                LoadCurrentConfiguration();
+                UpdateTrayIconAndNotifyText();
+            };
+            controller.TrafficChanged += ChooseIconByTraffic;
+
+            controller.PACFileReadyToOpen += ShowFileInExplorer;
+            controller.UserRuleFileReadyToOpen += ShowFileInExplorer;
+
+            // show message events
+            controller.Errored += (o, e) =>
+                MessageBox.Show(e.GetException().ToString(), I18N.GetString("Shadowsocks Error: {0}", e.GetException().Message));
+
+            controller.UpdatePACFromGFWListCompleted += (o, e) =>
+            {
+                string result = e.Success
+                    ? I18N.GetString("PAC updated")
+                    : I18N.GetString("No updates found. Please report to GFWList if you have problems with it.");
+                ShowBalloonTip(I18N.GetString("Shadowsocks"), result, ToolTipIcon.Info, 1000);
+            }
+;
+            controller.UpdatePACFromGFWListError += (o, e) =>
+            {
+                ShowBalloonTip(I18N.GetString("Failed to update PAC file"), e.GetException().Message, ToolTipIcon.Error, 5000);
+                logger.LogUsefulException(e.GetException());
+            };
+            // toggle item events
+            controller.EnableStatusChanged += (o, e) => disableItem.Checked = !controller.GetConfigurationCopy().enabled;
+            controller.ShareOverLANStatusChanged += (o, e) => ShareOverLANItem.Checked = controller.GetConfigurationCopy().shareOverLan;
+            controller.VerboseLoggingStatusChanged += (o, e) => VerboseLoggingToggleItem.Checked = controller.GetConfigurationCopy().isVerboseLogging; ;
+            controller.ShowPluginOutputChanged += (o, e) => ShowPluginOutputToggleItem.Checked = controller.GetConfigurationCopy().showPluginOutput; ;
+            controller.EnableGlobalChanged += (sender, e) =>
+            {
+                globalModeItem.Checked = controller.GetConfigurationCopy().global;
+                PACModeItem.Checked = !globalModeItem.Checked;
+            };
+            #endregion
+
+            #region Notify icon
+            
             _notifyIcon = new NotifyIcon();
             UpdateTrayIconAndNotifyText();
             _notifyIcon.Visible = true;
             _notifyIcon.ContextMenu = contextMenu1;
-            _notifyIcon.BalloonTipClicked += notifyIcon1_BalloonTipClicked;
+            _notifyIcon.BalloonTipClicked += (o, e) =>
+            {
+                if (updateChecker.NewVersionFound)
+                {
+                    updateChecker.NewVersionFound = false; /* Reset the flag */
+                    if (System.IO.File.Exists(updateChecker.LatestVersionLocalName))
+                    {
+                        string argument = "/select, \"" + updateChecker.LatestVersionLocalName + "\"";
+                        System.Diagnostics.Process.Start("explorer.exe", argument);
+                    }
+                }
+            };
             _notifyIcon.MouseClick += notifyIcon1_Click;
             _notifyIcon.MouseDoubleClick += notifyIcon1_DoubleClick;
-            _notifyIcon.BalloonTipClosed += _notifyIcon_BalloonTipClosed;
-            controller.TrafficChanged += controller_TrafficChanged;
+            _notifyIcon.BalloonTipClosed += (o, e) =>
+            {
+                if (updateChecker.NewVersionFound)
+                {
+                    updateChecker.NewVersionFound = false; /* Reset the flag */
+                }
+            };
+
+            #endregion
 
             this.updateChecker = new UpdateChecker();
-            updateChecker.CheckUpdateCompleted += updateChecker_CheckUpdateCompleted;
+            updateChecker.CheckUpdateCompleted += (o, e) =>
+            {
+                if (updateChecker.NewVersionFound)
+                {
+                    ShowBalloonTip(I18N.GetString("Shadowsocks {0} Update Found", updateChecker.LatestVersionNumber + updateChecker.LatestVersionSuffix), I18N.GetString("Click here to update"), ToolTipIcon.Info, 5000);
+                }
+                else if (!_isStartupChecking)
+                {
+                    ShowBalloonTip(I18N.GetString("Shadowsocks"), I18N.GetString("No update is available"), ToolTipIcon.Info, 5000);
+                }
+                _isStartupChecking = false;
+            };
 
             LoadCurrentConfiguration();
 
@@ -117,7 +177,7 @@ namespace Shadowsocks.View
             }
         }
 
-        private void controller_TrafficChanged(object sender, EventArgs e)
+        private void ChooseIconByTraffic(object sender, EventArgs e)
         {
             if (icon == null)
                 return;
@@ -141,11 +201,6 @@ namespace Shadowsocks.View
                 this.previousIcon = newIcon;
                 _notifyIcon.Icon = newIcon;
             }
-        }
-
-        void controller_Errored(object sender, System.IO.ErrorEventArgs e)
-        {
-            MessageBox.Show(e.GetException().ToString(), I18N.GetString("Shadowsocks Error: {0}", e.GetException().Message));
         }
 
         #region Tray Icon
@@ -338,43 +393,10 @@ namespace Shadowsocks.View
 
         #endregion
 
-        private void controller_ConfigChanged(object sender, EventArgs e)
-        {
-            LoadCurrentConfiguration();
-            UpdateTrayIconAndNotifyText();
-        }
 
-        private void controller_EnableStatusChanged(object sender, EventArgs e)
+        void ShowFileInExplorer(object sender, ShadowsocksController.PathEventArgs e)
         {
-            disableItem.Checked = !controller.GetConfigurationCopy().enabled;
-        }
-
-        void controller_ShareOverLANStatusChanged(object sender, EventArgs e)
-        {
-            ShareOverLANItem.Checked = controller.GetConfigurationCopy().shareOverLan;
-        }
-
-        void controller_VerboseLoggingStatusChanged(object sender, EventArgs e)
-        {
-            VerboseLoggingToggleItem.Checked = controller.GetConfigurationCopy().isVerboseLogging;
-        }
-
-        void controller_ShowPluginOutputChanged(object sender, EventArgs e)
-        {
-            ShowPluginOutputToggleItem.Checked = controller.GetConfigurationCopy().showPluginOutput;
-        }
-
-        void controller_EnableGlobalChanged(object sender, EventArgs e)
-        {
-            globalModeItem.Checked = controller.GetConfigurationCopy().global;
-            PACModeItem.Checked = !globalModeItem.Checked;
-        }
-
-        void controller_FileReadyToOpen(object sender, ShadowsocksController.PathEventArgs e)
-        {
-            string argument = @"/select, " + e.Path;
-
-            System.Diagnostics.Process.Start("explorer.exe", argument);
+            Process.Start("explorer.exe", @"/select, " + e.Path);
         }
 
         void ShowBalloonTip(string title, string content, ToolTipIcon icon, int timeout)
@@ -383,54 +405,6 @@ namespace Shadowsocks.View
             _notifyIcon.BalloonTipText = content;
             _notifyIcon.BalloonTipIcon = icon;
             _notifyIcon.ShowBalloonTip(timeout);
-        }
-
-        void controller_UpdatePACFromGFWListError(object sender, System.IO.ErrorEventArgs e)
-        {
-            ShowBalloonTip(I18N.GetString("Failed to update PAC file"), e.GetException().Message, ToolTipIcon.Error, 5000);
-            logger.LogUsefulException(e.GetException());
-        }
-
-        void controller_UpdatePACFromGFWListCompleted(object sender, GFWListUpdater.ResultEventArgs e)
-        {
-            string result = e.Success
-                ? I18N.GetString("PAC updated")
-                : I18N.GetString("No updates found. Please report to GFWList if you have problems with it.");
-            ShowBalloonTip(I18N.GetString("Shadowsocks"), result, ToolTipIcon.Info, 1000);
-        }
-
-        void updateChecker_CheckUpdateCompleted(object sender, EventArgs e)
-        {
-            if (updateChecker.NewVersionFound)
-            {
-                ShowBalloonTip(I18N.GetString("Shadowsocks {0} Update Found", updateChecker.LatestVersionNumber + updateChecker.LatestVersionSuffix), I18N.GetString("Click here to update"), ToolTipIcon.Info, 5000);
-            }
-            else if (!_isStartupChecking)
-            {
-                ShowBalloonTip(I18N.GetString("Shadowsocks"), I18N.GetString("No update is available"), ToolTipIcon.Info, 5000);
-            }
-            _isStartupChecking = false;
-        }
-
-        void notifyIcon1_BalloonTipClicked(object sender, EventArgs e)
-        {
-            if (updateChecker.NewVersionFound)
-            {
-                updateChecker.NewVersionFound = false; /* Reset the flag */
-                if (System.IO.File.Exists(updateChecker.LatestVersionLocalName))
-                {
-                    string argument = "/select, \"" + updateChecker.LatestVersionLocalName + "\"";
-                    System.Diagnostics.Process.Start("explorer.exe", argument);
-                }
-            }
-        }
-
-        private void _notifyIcon_BalloonTipClosed(object sender, EventArgs e)
-        {
-            if (updateChecker.NewVersionFound)
-            {
-                updateChecker.NewVersionFound = false; /* Reset the flag */
-            }
         }
 
         private void LoadCurrentConfiguration()
@@ -503,7 +477,16 @@ namespace Shadowsocks.View
                 configForm = new ConfigForm(controller);
                 configForm.Show();
                 configForm.Activate();
-                configForm.FormClosed += configForm_FormClosed;
+                configForm.FormClosed += (object sender, FormClosedEventArgs e) =>
+                {
+                    disposeForm(configForm)(sender, e);
+                    if (_isFirstRun)
+                    {
+                        CheckUpdateForFirstRun();
+                        ShowFirstTimeBalloon();
+                        _isFirstRun = false;
+                    }
+                };
             }
         }
 
@@ -518,7 +501,7 @@ namespace Shadowsocks.View
                 proxyForm = new ProxyForm(controller);
                 proxyForm.Show();
                 proxyForm.Activate();
-                proxyForm.FormClosed += proxyForm_FormClosed;
+                proxyForm.FormClosed += disposeForm(proxyForm);
             }
         }
 
@@ -533,7 +516,7 @@ namespace Shadowsocks.View
                 hotkeySettingsForm = new HotkeySettingsForm(controller);
                 hotkeySettingsForm.Show();
                 hotkeySettingsForm.Activate();
-                hotkeySettingsForm.FormClosed += hotkeySettingsForm_FormClosed;
+                hotkeySettingsForm.FormClosed += disposeForm(hotkeySettingsForm);
             }
         }
 
@@ -548,42 +531,18 @@ namespace Shadowsocks.View
                 logForm = new LogForm(controller);
                 logForm.Show();
                 logForm.Activate();
-                logForm.FormClosed += logForm_FormClosed;
+                logForm.FormClosed += disposeForm(logForm);
             }
         }
 
-        void logForm_FormClosed(object sender, FormClosedEventArgs e)
+        FormClosedEventHandler disposeForm(Form f)
         {
-            logForm.Dispose();
-            logForm = null;
-            Utils.ReleaseMemory(true);
-        }
-
-        void configForm_FormClosed(object sender, FormClosedEventArgs e)
-        {
-            configForm.Dispose();
-            configForm = null;
-            Utils.ReleaseMemory(true);
-            if (_isFirstRun)
+            return (object o, FormClosedEventArgs e) =>
             {
-                CheckUpdateForFirstRun();
-                ShowFirstTimeBalloon();
-                _isFirstRun = false;
-            }
-        }
-
-        void proxyForm_FormClosed(object sender, FormClosedEventArgs e)
-        {
-            proxyForm.Dispose();
-            proxyForm = null;
-            Utils.ReleaseMemory(true);
-        }
-
-        void hotkeySettingsForm_FormClosed(object sender, FormClosedEventArgs e)
-        {
-            hotkeySettingsForm.Dispose();
-            hotkeySettingsForm = null;
-            Utils.ReleaseMemory(true);
+                f?.Dispose();
+                f = null;
+                Utils.ReleaseMemory(true);
+            };
         }
 
         private void Config_Click(object sender, EventArgs e)
