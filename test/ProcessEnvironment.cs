@@ -114,13 +114,7 @@ namespace Shadowsocks.Test
                 return Value.ToString();
             }
 
-            public bool FitsInNativePointer
-            {
-                get
-                {
-                    return Size <= IntPtr.Size;
-                }
-            }
+            public bool FitsInNativePointer => Size <= IntPtr.Size;
 
             public bool CanBeRepresentedByNativePointer
             {
@@ -131,7 +125,9 @@ namespace Shadowsocks.Test
                     if (actualSize == 8)
                     {
                         if (Value >> 32 == 0)
+                        {
                             actualSize = 4;
+                        }
                     }
 
                     return actualSize <= IntPtr.Size;
@@ -146,22 +142,25 @@ namespace Shadowsocks.Test
 
         static StringDictionary _GetEnvironmentVariablesCore(IntPtr hProcess)
         {
-            var penv = _GetPenv(hProcess);
+            UniPtr penv = _GetPenv(hProcess);
 
             const int maxEnvSize = 32767;
             byte[] envData;
 
             if (penv.CanBeRepresentedByNativePointer)
             {
-                int dataSize;
-                if (!_HasReadAccess(hProcess, penv, out dataSize))
+                if (!_HasReadAccess(hProcess, penv, out int dataSize))
+                {
                     throw new Exception("Unable to read environment block.");
+                }
 
                 if (dataSize > maxEnvSize)
+                {
                     dataSize = maxEnvSize;
+                }
 
                 envData = new byte[dataSize];
-                var res_len = IntPtr.Zero;
+                IntPtr res_len = IntPtr.Zero;
                 bool b = WindowsApi.ReadProcessMemory(
                     hProcess,
                     penv,
@@ -170,18 +169,23 @@ namespace Shadowsocks.Test
                     ref res_len);
 
                 if (!b || (int)res_len != dataSize)
+                {
                     throw new Exception("Unable to read environment block data.");
+                }
             }
             else if (penv.Size == 8 && IntPtr.Size == 4)
             {
                 // Accessing 64 bit process under 32 bit host.
 
-                int dataSize;
-                if (!_HasReadAccessWow64(hProcess, penv.ToInt64(), out dataSize))
+                if (!_HasReadAccessWow64(hProcess, penv.ToInt64(), out int dataSize))
+                {
                     throw new Exception("Unable to read environment block with WOW64 API.");
+                }
 
                 if (dataSize > maxEnvSize)
+                {
                     dataSize = maxEnvSize;
+                }
 
                 envData = new byte[dataSize];
                 long res_len = 0;
@@ -193,7 +197,9 @@ namespace Shadowsocks.Test
                     ref res_len);
 
                 if (result != WindowsApi.STATUS_SUCCESS || res_len != dataSize)
+                {
                     throw new Exception("Unable to read environment block data with WOW64 API.");
+                }
             }
             else
             {
@@ -205,11 +211,13 @@ namespace Shadowsocks.Test
 
         static StringDictionary _EnvToDictionary(byte[] env)
         {
-            var result = new StringDictionary();
+            StringDictionary result = new StringDictionary();
 
             int len = env.Length;
             if (len < 4)
+            {
                 return result;
+            }
 
             int n = len - 3;
             for (int i = 0; i < n; ++i)
@@ -271,8 +279,8 @@ namespace Shadowsocks.Test
             }
             finally
             {
-                int dataSize = sizeof(Int32);
-                var data = Marshal.AllocHGlobal(dataSize);
+                int dataSize = sizeof(int);
+                IntPtr data = Marshal.AllocHGlobal(dataSize);
                 IntPtr res_len = IntPtr.Zero;
                 bool b = WindowsApi.ReadProcessMemory(
                     hProcess,
@@ -283,9 +291,13 @@ namespace Shadowsocks.Test
                 readPtr = new IntPtr(Marshal.ReadInt32(data));
                 Marshal.FreeHGlobal(data);
                 if (!b || (int)res_len != dataSize)
+                {
                     result = false;
+                }
                 else
+                {
                     result = true;
+                }
             }
             return result;
         }
@@ -300,7 +312,7 @@ namespace Shadowsocks.Test
             finally
             {
                 int dataSize = IntPtr.Size;
-                var data = Marshal.AllocHGlobal(dataSize);
+                IntPtr data = Marshal.AllocHGlobal(dataSize);
                 IntPtr res_len = IntPtr.Zero;
                 bool b = WindowsApi.ReadProcessMemory(
                     hProcess,
@@ -311,9 +323,13 @@ namespace Shadowsocks.Test
                 readPtr = Marshal.ReadIntPtr(data);
                 Marshal.FreeHGlobal(data);
                 if (!b || (int)res_len != dataSize)
+                {
                     result = false;
+                }
                 else
+                {
                     result = true;
+                }
             }
             return result;
         }
@@ -328,7 +344,7 @@ namespace Shadowsocks.Test
             finally
             {
                 int dataSize = sizeof(long);
-                var data = Marshal.AllocHGlobal(dataSize);
+                IntPtr data = Marshal.AllocHGlobal(dataSize);
                 long res_len = 0;
                 int status = WindowsApi.NtWow64ReadVirtualMemory64(
                     hProcess,
@@ -339,9 +355,13 @@ namespace Shadowsocks.Test
                 readPtr = Marshal.ReadInt64(data);
                 Marshal.FreeHGlobal(data);
                 if (status != WindowsApi.STATUS_SUCCESS || res_len != dataSize)
+                {
                     result = false;
+                }
                 else
+                {
                     result = true;
+                }
             }
             return result;
         }
@@ -358,13 +378,15 @@ namespace Shadowsocks.Test
 
                     IntPtr pPeb = _GetPeb64(hProcess);
 
-                    IntPtr ptr;
-                    if (!_TryReadIntPtr(hProcess, pPeb + 0x20, out ptr))
+                    if (!_TryReadIntPtr(hProcess, pPeb + 0x20, out IntPtr ptr))
+                    {
                         throw new Exception("Unable to read PEB.");
+                    }
 
-                    IntPtr penv;
-                    if (!_TryReadIntPtr(hProcess, ptr + 0x80, out penv))
+                    if (!_TryReadIntPtr(hProcess, ptr + 0x80, out IntPtr penv))
+                    {
                         throw new Exception("Unable to read RTL_USER_PROCESS_PARAMETERS.");
+                    }
 
                     return penv;
                 }
@@ -372,15 +394,17 @@ namespace Shadowsocks.Test
                 {
                     // Accessing 64 bit process under 32 bit host.
 
-                    var pPeb = _GetPeb64(hProcess);
+                    UniPtr pPeb = _GetPeb64(hProcess);
 
-                    long ptr;
-                    if (!_TryReadIntPtrWow64(hProcess, pPeb.ToInt64() + 0x20, out ptr))
+                    if (!_TryReadIntPtrWow64(hProcess, pPeb.ToInt64() + 0x20, out long ptr))
+                    {
                         throw new Exception("Unable to read PEB.");
+                    }
 
-                    long penv;
-                    if (!_TryReadIntPtrWow64(hProcess, ptr + 0x80, out penv))
+                    if (!_TryReadIntPtrWow64(hProcess, ptr + 0x80, out long penv))
+                    {
                         throw new Exception("Unable to read RTL_USER_PROCESS_PARAMETERS.");
+                    }
 
                     return new UniPtr(penv);
                 }
@@ -391,13 +415,15 @@ namespace Shadowsocks.Test
 
                 IntPtr pPeb = _GetPeb32(hProcess);
 
-                IntPtr ptr;
-                if (!_TryReadIntPtr32(hProcess, pPeb + 0x10, out ptr))
+                if (!_TryReadIntPtr32(hProcess, pPeb + 0x10, out IntPtr ptr))
+                {
                     throw new Exception("Unable to read PEB.");
+                }
 
-                IntPtr penv;
-                if (!_TryReadIntPtr32(hProcess, ptr + 0x48, out penv))
+                if (!_TryReadIntPtr32(hProcess, ptr + 0x48, out IntPtr penv))
+                {
                     throw new Exception("Unable to read RTL_USER_PROCESS_PARAMETERS.");
+                }
 
                 return penv;
             }
@@ -407,11 +433,16 @@ namespace Shadowsocks.Test
         {
             if (Environment.Is64BitOperatingSystem)
             {
-                bool wow64;
-                if (!WindowsApi.IsWow64Process(hProcess, out wow64))
+                if (!WindowsApi.IsWow64Process(hProcess, out bool wow64))
+                {
                     return 32;
+                }
+
                 if (wow64)
+                {
                     return 32;
+                }
+
                 return 64;
             }
             else
@@ -424,7 +455,7 @@ namespace Shadowsocks.Test
         {
             if (Environment.Is64BitProcess)
             {
-                var ptr = IntPtr.Zero;
+                IntPtr ptr = IntPtr.Zero;
                 int res_len = 0;
                 int pbiSize = IntPtr.Size;
                 int status = WindowsApi.NtQueryInformationProcess(
@@ -434,7 +465,10 @@ namespace Shadowsocks.Test
                     pbiSize,
                     ref res_len);
                 if (res_len != pbiSize)
+                {
                     throw new Exception("Unable to query process information.");
+                }
+
                 return ptr;
             }
             else
@@ -445,7 +479,7 @@ namespace Shadowsocks.Test
 
         static IntPtr _GetPebNative(IntPtr hProcess)
         {
-            var pbi = new WindowsApi.PROCESS_BASIC_INFORMATION();
+            WindowsApi.PROCESS_BASIC_INFORMATION pbi = new WindowsApi.PROCESS_BASIC_INFORMATION();
             int res_len = 0;
             int pbiSize = Marshal.SizeOf(pbi);
             int status = WindowsApi.NtQueryInformationProcess(
@@ -455,7 +489,10 @@ namespace Shadowsocks.Test
                 pbiSize,
                 ref res_len);
             if (res_len != pbiSize)
+            {
                 throw new Exception("Unable to query process information.");
+            }
+
             return pbi.PebBaseAddress;
         }
 
@@ -468,7 +505,7 @@ namespace Shadowsocks.Test
             else
             {
                 // Get PEB via WOW64 API.
-                var pbi = new WindowsApi.PROCESS_BASIC_INFORMATION_WOW64();
+                WindowsApi.PROCESS_BASIC_INFORMATION_WOW64 pbi = new WindowsApi.PROCESS_BASIC_INFORMATION_WOW64();
                 int res_len = 0;
                 int pbiSize = Marshal.SizeOf(pbi);
                 int status = WindowsApi.NtWow64QueryInformationProcess64(
@@ -478,7 +515,10 @@ namespace Shadowsocks.Test
                     pbiSize,
                     ref res_len);
                 if (res_len != pbiSize)
+                {
                     throw new Exception("Unable to query process information.");
+                }
+
                 return new UniPtr(pbi.PebBaseAddress);
             }
         }
@@ -487,7 +527,7 @@ namespace Shadowsocks.Test
         {
             size = 0;
 
-            var memInfo = new WindowsApi.MEMORY_BASIC_INFORMATION();
+            WindowsApi.MEMORY_BASIC_INFORMATION memInfo = new WindowsApi.MEMORY_BASIC_INFORMATION();
             int result = WindowsApi.VirtualQueryEx(
                 hProcess,
                 address,
@@ -495,10 +535,14 @@ namespace Shadowsocks.Test
                 Marshal.SizeOf(memInfo));
 
             if (result == 0)
+            {
                 return false;
+            }
 
             if (memInfo.Protect == WindowsApi.PAGE_NOACCESS || memInfo.Protect == WindowsApi.PAGE_EXECUTE)
+            {
                 return false;
+            }
 
             try
             {
@@ -510,7 +554,9 @@ namespace Shadowsocks.Test
             }
 
             if (size <= 0)
+            {
                 return false;
+            }
 
             return true;
         }
@@ -520,7 +566,7 @@ namespace Shadowsocks.Test
             size = 0;
 
             WindowsApi.MEMORY_BASIC_INFORMATION_WOW64 memInfo;
-            var memInfoType = typeof(WindowsApi.MEMORY_BASIC_INFORMATION_WOW64);
+            Type memInfoType = typeof(WindowsApi.MEMORY_BASIC_INFORMATION_WOW64);
             int memInfoLength = Marshal.SizeOf(memInfoType);
             const int memInfoAlign = 8;
 
@@ -549,10 +595,14 @@ namespace Shadowsocks.Test
             }
 
             if (result != WindowsApi.STATUS_SUCCESS)
+            {
                 return false;
+            }
 
             if (memInfo.Protect == WindowsApi.PAGE_NOACCESS || memInfo.Protect == WindowsApi.PAGE_EXECUTE)
+            {
                 return false;
+            }
 
             try
             {
@@ -564,7 +614,9 @@ namespace Shadowsocks.Test
             }
 
             if (size <= 0)
+            {
                 return false;
+            }
 
             return true;
         }

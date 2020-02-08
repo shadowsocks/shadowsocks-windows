@@ -1,7 +1,7 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Drawing;
 using System.Windows.Forms;
-using Newtonsoft.Json;
 
 namespace Shadowsocks.Model
 {
@@ -36,33 +36,33 @@ namespace Shadowsocks.Model
         [JsonIgnore]
         public int Width
         {
-            get { return Properties.Settings.Default.LogViewerWidth; }
-            set { Properties.Settings.Default.LogViewerWidth = value; }
+            get => Properties.Settings.Default.LogViewerWidth;
+            set => Properties.Settings.Default.LogViewerWidth = value;
         }
 
         [JsonIgnore]
         public int Height
         {
-            get { return Properties.Settings.Default.LogViewerHeight; }
-            set { Properties.Settings.Default.LogViewerHeight = value; }
+            get => Properties.Settings.Default.LogViewerHeight;
+            set => Properties.Settings.Default.LogViewerHeight = value;
         }
         [JsonIgnore]
         public int Top
         {
-            get { return Properties.Settings.Default.LogViewerTop; }
-            set { Properties.Settings.Default.LogViewerTop = value; }
+            get => Properties.Settings.Default.LogViewerTop;
+            set => Properties.Settings.Default.LogViewerTop = value;
         }
         [JsonIgnore]
         public int Left
         {
-            get { return Properties.Settings.Default.LogViewerLeft; }
-            set { Properties.Settings.Default.LogViewerLeft = value; }
+            get => Properties.Settings.Default.LogViewerLeft;
+            set => Properties.Settings.Default.LogViewerLeft = value;
         }
         [JsonIgnore]
         public bool Maximized
         {
-            get { return Properties.Settings.Default.LogViewerMaximized; }
-            set { Properties.Settings.Default.LogViewerMaximized = value; }
+            get => Properties.Settings.Default.LogViewerMaximized;
+            set => Properties.Settings.Default.LogViewerMaximized = value;
         }
 
         [JsonIgnore]

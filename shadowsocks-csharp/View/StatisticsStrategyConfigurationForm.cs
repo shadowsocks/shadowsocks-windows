@@ -1,13 +1,13 @@
-﻿using System;
-using System.Drawing;
+﻿using Shadowsocks.Controller;
+using Shadowsocks.Model;
+using Shadowsocks.Properties;
+using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 using System.Windows.Forms.DataVisualization.Charting;
-using Shadowsocks.Controller;
-using Shadowsocks.Model;
-using Shadowsocks.Properties;
 
 namespace Shadowsocks.View
 {
@@ -23,7 +23,11 @@ namespace Shadowsocks.View
 
         public StatisticsStrategyConfigurationForm(ShadowsocksController controller)
         {
-            if (controller == null) return;
+            if (controller == null)
+            {
+                return;
+            }
+
             InitializeComponent();
             Icon = Icon.FromHandle(Resources.ssw128.GetHicon());
             _speedSeries = StatisticsChart.Series["Speed"];
@@ -40,7 +44,7 @@ namespace Shadowsocks.View
         {
             I18N.TranslateForm(this);
 
-            foreach (var item in StatisticsChart.Series)
+            foreach (Series item in StatisticsChart.Series)
             {
                 item.Name = I18N.GetString(item.Name);
             }
@@ -48,7 +52,7 @@ namespace Shadowsocks.View
         }
         private void LoadConfiguration()
         {
-            var configs = _controller.GetCurrentConfiguration().configs;
+            List<Server> configs = _controller.GetCurrentConfiguration().configs;
             _servers = configs.Select(server => server.Identifier()).ToList();
             _configuration = _controller.StatisticsConfiguration
                              ?? new StatisticsStrategyConfiguration();
@@ -61,9 +65,9 @@ namespace Shadowsocks.View
         private void InitData()
         {
             bindingConfiguration.Add(_configuration);
-            foreach (var kv in _configuration.Calculations)
+            foreach (KeyValuePair<string, float> kv in _configuration.Calculations)
             {
-                var calculation = new CalculationControl(I18N.GetString(kv.Key), kv.Value);
+                CalculationControl calculation = new CalculationControl(I18N.GetString(kv.Key), kv.Value);
                 calculationContainer.Controls.Add(calculation);
             }
 
@@ -105,13 +109,20 @@ namespace Shadowsocks.View
 
         private void LoadChartData()
         {
-            var serverName = _servers[serverSelector.SelectedIndex];
+            string serverName = _servers[serverSelector.SelectedIndex];
             _dataTable.Rows.Clear();
 
             //return directly when no data is usable
-            if (_controller.availabilityStatistics?.FilteredStatistics == null) return;
-            List<StatisticsRecord> statistics;
-            if (!_controller.availabilityStatistics.FilteredStatistics.TryGetValue(serverName, out statistics)) return;
+            if (_controller.availabilityStatistics?.FilteredStatistics == null)
+            {
+                return;
+            }
+
+            if (!_controller.availabilityStatistics.FilteredStatistics.TryGetValue(serverName, out List<StatisticsRecord> statistics))
+            {
+                return;
+            }
+
             IEnumerable<IGrouping<int, StatisticsRecord>> dataGroups;
             if (allMode.Checked)
             {

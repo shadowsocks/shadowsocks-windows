@@ -1,12 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Net;
-using System.Text.RegularExpressions;
-
-using Newtonsoft.Json.Linq;
+﻿using Newtonsoft.Json.Linq;
 using NLog;
 using Shadowsocks.Model;
 using Shadowsocks.Util;
+using System;
+using System.Collections.Generic;
+using System.Net;
+using System.Text.RegularExpressions;
 
 namespace Shadowsocks.Controller
 {
@@ -39,8 +38,10 @@ namespace Shadowsocks.Controller
 
         public void CheckUpdate(Configuration config, int delay)
         {
-            CheckUpdateTimer timer = new CheckUpdateTimer(delay);
-            timer.AutoReset = false;
+            CheckUpdateTimer timer = new CheckUpdateTimer(delay)
+            {
+                AutoReset = false
+            };
             timer.Elapsed += Timer_Elapsed;
             timer.config = config;
             timer.Enabled = true;
@@ -86,7 +87,7 @@ namespace Shadowsocks.Controller
                 {
                     foreach (JObject release in result)
                     {
-                        var isPreRelease = (bool)release["prerelease"];
+                        bool isPreRelease = (bool)release["prerelease"];
                         if (isPreRelease && !config.checkPreRelease)
                         {
                             continue;
@@ -183,14 +184,14 @@ namespace Shadowsocks.Controller
 
             public static Asset ParseAsset(JObject assertJObject)
             {
-                var name = (string)assertJObject["name"];
+                string name = (string)assertJObject["name"];
                 Match match = Regex.Match(name, @"^Shadowsocks-(?<version>\d+(?:\.\d+)*)(?:|-(?<suffix>.+))\.\w+$",
                     RegexOptions.IgnoreCase);
                 if (match.Success)
                 {
                     string version = match.Groups["version"].Value;
 
-                    var asset = new Asset
+                    Asset asset = new Asset
                     {
                         browser_download_url = (string)assertJObject["browser_download_url"],
                         name = name,
@@ -218,14 +219,14 @@ namespace Shadowsocks.Controller
                 {
                     return false;
                 }
-                var cmp = CompareVersion(version, currentVersion);
+                int cmp = CompareVersion(version, currentVersion);
                 return cmp > 0;
             }
 
             public static int CompareVersion(string l, string r)
             {
-                var ls = l.Split('.');
-                var rs = r.Split('.');
+                string[] ls = l.Split('.');
+                string[] rs = r.Split('.');
                 for (int i = 0; i < Math.Max(ls.Length, rs.Length); i++)
                 {
                     int lp = (i < ls.Length) ? int.Parse(ls[i]) : 0;

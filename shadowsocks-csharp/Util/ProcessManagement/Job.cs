@@ -1,8 +1,7 @@
-﻿using System;
+﻿using NLog;
+using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
-using NLog;
-using Shadowsocks.Controller;
 
 namespace Shadowsocks.Util.ProcessManagement
 {
@@ -19,13 +18,13 @@ namespace Shadowsocks.Util.ProcessManagement
         public Job()
         {
             handle = CreateJobObject(IntPtr.Zero, null);
-            var extendedInfoPtr = IntPtr.Zero;
-            var info = new JOBOBJECT_BASIC_LIMIT_INFORMATION
+            IntPtr extendedInfoPtr = IntPtr.Zero;
+            JOBOBJECT_BASIC_LIMIT_INFORMATION info = new JOBOBJECT_BASIC_LIMIT_INFORMATION
             {
                 LimitFlags = 0x2000
             };
 
-            var extendedInfo = new JOBOBJECT_EXTENDED_LIMIT_INFORMATION
+            JOBOBJECT_EXTENDED_LIMIT_INFORMATION extendedInfo = new JOBOBJECT_EXTENDED_LIMIT_INFORMATION
             {
                 BasicLimitInformation = info
             };
@@ -37,9 +36,11 @@ namespace Shadowsocks.Util.ProcessManagement
                 Marshal.StructureToPtr(extendedInfo, extendedInfoPtr, false);
 
                 if (!SetInformationJobObject(handle, JobObjectInfoType.ExtendedLimitInformation, extendedInfoPtr,
-                        (uint) length))
+                        (uint)length))
+                {
                     throw new Exception(string.Format("Unable to set information.  Error: {0}",
                         Marshal.GetLastWin32Error()));
+                }
             }
             finally
             {
@@ -53,7 +54,7 @@ namespace Shadowsocks.Util.ProcessManagement
 
         public bool AddProcess(IntPtr processHandle)
         {
-            var succ = AssignProcessToJobObject(handle, processHandle);
+            bool succ = AssignProcessToJobObject(handle, processHandle);
 
             if (!succ)
             {
@@ -80,7 +81,11 @@ namespace Shadowsocks.Util.ProcessManagement
 
         protected virtual void Dispose(bool disposing)
         {
-            if (disposed) return;
+            if (disposed)
+            {
+                return;
+            }
+
             disposed = true;
 
             if (disposing)
@@ -108,7 +113,7 @@ namespace Shadowsocks.Util.ProcessManagement
         private static extern IntPtr CreateJobObject(IntPtr a, string lpName);
 
         [DllImport("kernel32.dll", SetLastError = true)]
-        private static extern bool SetInformationJobObject(IntPtr hJob, JobObjectInfoType infoType, IntPtr lpJobObjectInfo, UInt32 cbJobObjectInfoLength);
+        private static extern bool SetInformationJobObject(IntPtr hJob, JobObjectInfoType infoType, IntPtr lpJobObjectInfo, uint cbJobObjectInfoLength);
 
         [DllImport("kernel32.dll", SetLastError = true)]
         private static extern bool AssignProcessToJobObject(IntPtr job, IntPtr process);
@@ -125,35 +130,35 @@ namespace Shadowsocks.Util.ProcessManagement
     [StructLayout(LayoutKind.Sequential)]
     struct IO_COUNTERS
     {
-        public UInt64 ReadOperationCount;
-        public UInt64 WriteOperationCount;
-        public UInt64 OtherOperationCount;
-        public UInt64 ReadTransferCount;
-        public UInt64 WriteTransferCount;
-        public UInt64 OtherTransferCount;
+        public ulong ReadOperationCount;
+        public ulong WriteOperationCount;
+        public ulong OtherOperationCount;
+        public ulong ReadTransferCount;
+        public ulong WriteTransferCount;
+        public ulong OtherTransferCount;
     }
 
 
     [StructLayout(LayoutKind.Sequential)]
     struct JOBOBJECT_BASIC_LIMIT_INFORMATION
     {
-        public Int64 PerProcessUserTimeLimit;
-        public Int64 PerJobUserTimeLimit;
-        public UInt32 LimitFlags;
+        public long PerProcessUserTimeLimit;
+        public long PerJobUserTimeLimit;
+        public uint LimitFlags;
         public UIntPtr MinimumWorkingSetSize;
         public UIntPtr MaximumWorkingSetSize;
-        public UInt32 ActiveProcessLimit;
+        public uint ActiveProcessLimit;
         public UIntPtr Affinity;
-        public UInt32 PriorityClass;
-        public UInt32 SchedulingClass;
+        public uint PriorityClass;
+        public uint SchedulingClass;
     }
 
     [StructLayout(LayoutKind.Sequential)]
     public struct SECURITY_ATTRIBUTES
     {
-        public UInt32 nLength;
+        public uint nLength;
         public IntPtr lpSecurityDescriptor;
-        public Int32 bInheritHandle;
+        public int bInheritHandle;
     }
 
     [StructLayout(LayoutKind.Sequential)]

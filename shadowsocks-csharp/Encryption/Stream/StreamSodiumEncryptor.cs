@@ -1,6 +1,6 @@
-﻿using System;
+﻿using Shadowsocks.Encryption.Exception;
+using System;
 using System.Collections.Generic;
-using Shadowsocks.Encryption.Exception;
 
 namespace Shadowsocks.Encryption.Stream
 {
@@ -81,7 +81,10 @@ namespace Shadowsocks.Encryption.Stream
                     ret = Sodium.crypto_stream_chacha20_ietf_xor_ic(sodiumBuf, sodiumBuf, (ulong)(padding + length), iv, (uint)ic, _key);
                     break;
             }
-            if (ret != 0) throw new CryptoErrorException();
+            if (ret != 0)
+            {
+                throw new CryptoErrorException();
+            }
 
             Buffer.BlockCopy(sodiumBuf, padding, outbuf, 0, length);
             padding += length;

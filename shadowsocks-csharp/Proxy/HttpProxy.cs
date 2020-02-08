@@ -1,12 +1,12 @@
-﻿using System;
+﻿using NLog;
+using Shadowsocks.Controller;
+using Shadowsocks.Util.Sockets;
+using System;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
-using NLog;
-using Shadowsocks.Controller;
-using Shadowsocks.Util.Sockets;
 
 namespace Shadowsocks.Proxy
 {
@@ -66,8 +66,8 @@ namespace Shadowsocks.Proxy
         }
 
         private const string HTTP_CRLF = "\r\n";
-        private const string HTTP_CONNECT_TEMPLATE = 
-            "CONNECT {0} HTTP/1.1" + HTTP_CRLF + 
+        private const string HTTP_CONNECT_TEMPLATE =
+            "CONNECT {0} HTTP/1.1" + HTTP_CRLF +
             "Host: {0}" + HTTP_CRLF +
             "Proxy-Connection: keep-alive" + HTTP_CRLF +
             "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.121 Safari/537.36" + HTTP_CRLF +
@@ -78,7 +78,7 @@ namespace Shadowsocks.Proxy
         public void BeginConnectDest(EndPoint destEndPoint, AsyncCallback callback, object state, NetworkCredential auth = null)
         {
             DestEndPoint = destEndPoint;
-            String authInfo = "";
+            string authInfo = "";
             if (auth != null)
             {
                 string authKey = Convert.ToBase64String(Encoding.UTF8.GetBytes(auth.UserName + ":" + auth.Password));
@@ -86,18 +86,20 @@ namespace Shadowsocks.Proxy
             }
             string request = string.Format(HTTP_CONNECT_TEMPLATE, destEndPoint, authInfo);
 
-            var b = Encoding.UTF8.GetBytes(request);
+            byte[] b = Encoding.UTF8.GetBytes(request);
 
-            var st = new HttpState();
-            st.Callback = callback;
-            st.AsyncState = state;
+            HttpState st = new HttpState
+            {
+                Callback = callback,
+                AsyncState = state
+            };
 
             _remote.BeginSend(b, 0, b.Length, 0, HttpRequestSendCallback, st);
         }
 
         public void EndConnectDest(IAsyncResult asyncResult)
         {
-            var state = ((FakeAsyncResult)asyncResult).innerState;
+            HttpState state = ((FakeAsyncResult)asyncResult).innerState;
 
             if (state.ex != null)
             {
@@ -139,7 +141,7 @@ namespace Shadowsocks.Proxy
 
         private void HttpRequestSendCallback(IAsyncResult ar)
         {
-            var state = (HttpState) ar.AsyncState;
+            HttpState state = (HttpState)ar.AsyncState;
             try
             {
                 _remote.EndSend(ar);
@@ -156,7 +158,7 @@ namespace Shadowsocks.Proxy
 
         private void OnFinish(byte[] lastBytes, int index, int length, object state)
         {
-            var st = (FakeAsyncResult)state;
+            FakeAsyncResult st = (FakeAsyncResult)state;
 
             if (st.innerState.ex == null)
             {
@@ -171,7 +173,7 @@ namespace Shadowsocks.Proxy
 
         private void OnException(Exception ex, object state)
         {
-            var st = (FakeAsyncResult) state;
+            FakeAsyncResult st = (FakeAsyncResult)state;
 
             st.innerState.ex = ex;
         }
@@ -186,10 +188,10 @@ namespace Shadowsocks.Proxy
 
             if (_respondLineCount == 0)
             {
-                var m = HttpRespondHeaderRegex.Match(line);
+                Match m = HttpRespondHeaderRegex.Match(line);
                 if (m.Success)
                 {
-                    var resultCode = m.Groups[2].Value;
+                    string resultCode = m.Groups[2].Value;
                     if ("200" != resultCode)
                     {
                         return true;

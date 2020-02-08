@@ -1,11 +1,9 @@
-﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Threading;
-using System.Collections.Generic;
-using Shadowsocks.Model;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Shadowsocks.Controller.Service;
+using Shadowsocks.Model;
 using System.Diagnostics;
 using System.Net;
+using System.Threading;
 
 namespace Shadowsocks.Test
 {
@@ -19,7 +17,7 @@ namespace Shadowsocks.Test
         {
 
 
-            var NoPlugin = Sip003Plugin.CreateIfConfigured(
+            Sip003Plugin NoPlugin = Sip003Plugin.CreateIfConfigured(
                 new Server
                 {
                     server = "192.168.100.1",
@@ -41,7 +39,7 @@ namespace Shadowsocks.Test
         [TestMethod]
         public void TestSip003Plugin_Plugin()
         {
-            var Plugin = Sip003Plugin.CreateIfConfigured(
+            Sip003Plugin Plugin = Sip003Plugin.CreateIfConfigured(
                 new Server
                 {
                     server = "192.168.100.1",
@@ -64,7 +62,7 @@ namespace Shadowsocks.Test
         [TestMethod]
         public void TestSip003Plugin_PluginWithOpts()
         {
-            var PluginWithOpts = Sip003Plugin.CreateIfConfigured(
+            Sip003Plugin PluginWithOpts = Sip003Plugin.CreateIfConfigured(
                 new Server
                 {
                     server = "192.168.100.1",
@@ -88,7 +86,7 @@ namespace Shadowsocks.Test
         [TestMethod]
         public void TestSip003Plugin_PluginWithArgs()
         {
-            var PluginWithArgs = Sip003Plugin.CreateIfConfigured(
+            Sip003Plugin PluginWithArgs = Sip003Plugin.CreateIfConfigured(
                 new Server
                 {
                     server = "192.168.100.1",
@@ -112,7 +110,7 @@ namespace Shadowsocks.Test
         [TestMethod]
         public void TestSip003Plugin_PluginWithOptsAndArgs()
         {
-            var PluginWithOptsAndArgs = Sip003Plugin.CreateIfConfigured(
+            Sip003Plugin PluginWithOptsAndArgs = Sip003Plugin.CreateIfConfigured(
                 new Server
                 {
                     server = "192.168.100.1",
@@ -137,7 +135,7 @@ namespace Shadowsocks.Test
         [TestMethod]
         public void TestSip003Plugin_PluginWithArgsReplaced()
         {
-            var PluginWithArgsReplaced = Sip003Plugin.CreateIfConfigured(
+            Sip003Plugin PluginWithArgsReplaced = Sip003Plugin.CreateIfConfigured(
                 new Server
                 {
                     server = "192.168.100.1",
@@ -161,7 +159,7 @@ namespace Shadowsocks.Test
         [TestMethod]
         public void TestSip003Plugin_PluginWithOptsAndArgsReplaced()
         {
-            var PluginWithOptsAndArgsReplaced = Sip003Plugin.CreateIfConfigured(
+            Sip003Plugin PluginWithOptsAndArgsReplaced = Sip003Plugin.CreateIfConfigured(
                 new Server
                 {
                     server = "192.168.100.1",
@@ -186,7 +184,10 @@ namespace Shadowsocks.Test
         private static void RunPluginSupportTest(Sip003Plugin plugin, string pluginName, string pluginOpts, string pluginArgs, string serverAddress, int serverPort)
         {
 
-            if (string.IsNullOrWhiteSpace(pluginName)) return;
+            if (string.IsNullOrWhiteSpace(pluginName))
+            {
+                return;
+            }
 
             plugin.StartIfNeeded();
 
@@ -195,17 +196,16 @@ namespace Shadowsocks.Test
             Process p = processes[0];
 
 
-            var penv = ProcessEnvironment.ReadEnvironmentVariables(p);
-            var pcmd = ProcessEnvironment.GetCommandLine(p).Trim();
+            System.Collections.Specialized.StringDictionary penv = ProcessEnvironment.ReadEnvironmentVariables(p);
+            string pcmd = ProcessEnvironment.GetCommandLine(p).Trim();
             pcmd = pcmd.IndexOf(' ') >= 0 ? pcmd.Substring(pcmd.IndexOf(' ') + 1) : "";
-            
+
             Assert.AreEqual(penv["SS_REMOTE_HOST"], serverAddress);
             Assert.AreEqual(penv["SS_REMOTE_PORT"], serverPort.ToString());
             Assert.AreEqual(penv["SS_LOCAL_HOST"], IPAddress.Loopback.ToString());
-            
-            int _ignored;
-            Assert.IsTrue(int.TryParse(penv["SS_LOCAL_PORT"], out _ignored));
-            
+
+            Assert.IsTrue(int.TryParse(penv["SS_LOCAL_PORT"], out int _ignored));
+
             Assert.AreEqual(penv["SS_PLUGIN_OPTIONS"], pluginOpts);
             Assert.AreEqual(pcmd, pluginArgs);
 
@@ -213,7 +213,11 @@ namespace Shadowsocks.Test
             plugin.Dispose();
             for (int i = 0; i < 50; i++)
             {
-                if (Process.GetProcessesByName(pluginName).Length == 0) return;
+                if (Process.GetProcessesByName(pluginName).Length == 0)
+                {
+                    return;
+                }
+
                 Thread.Sleep(50);
             }
         }

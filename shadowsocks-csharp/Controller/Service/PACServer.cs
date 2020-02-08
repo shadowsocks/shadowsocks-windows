@@ -1,4 +1,5 @@
-﻿using Shadowsocks.Encryption;
+﻿using NLog;
+using Shadowsocks.Encryption;
 using Shadowsocks.Model;
 using Shadowsocks.Util;
 using System;
@@ -6,7 +7,6 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Web;
-using NLog;
 
 namespace Shadowsocks.Controller
 {
@@ -22,7 +22,7 @@ namespace Shadowsocks.Controller
             {
                 if (string.IsNullOrEmpty(_cachedPacSecret))
                 {
-                    var rd = new byte[32];
+                    byte[] rd = new byte[32];
                     RNG.GetBytes(rd);
                     _cachedPacSecret = HttpServerUtility.UrlTokenEncode(rd);
                 }
@@ -112,7 +112,9 @@ namespace Shadowsocks.Controller
                 for (int i = 1; i < lines.Length; i++)
                 {
                     if (string.IsNullOrEmpty(lines[i]))
+                    {
                         continue;
+                    }
 
                     string[] kv = lines[i].Split(new char[] { ':' }, 2);
                     if (kv.Length == 2)

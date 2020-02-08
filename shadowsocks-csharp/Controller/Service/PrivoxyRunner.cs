@@ -1,4 +1,9 @@
-﻿using System;
+﻿using NLog;
+using Shadowsocks.Model;
+using Shadowsocks.Properties;
+using Shadowsocks.Util;
+using Shadowsocks.Util.ProcessManagement;
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -6,11 +11,6 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Windows.Forms;
-using NLog;
-using Shadowsocks.Model;
-using Shadowsocks.Properties;
-using Shadowsocks.Util;
-using Shadowsocks.Util.ProcessManagement;
 
 namespace Shadowsocks.Controller
 {
@@ -130,7 +130,7 @@ namespace Shadowsocks.Controller
                 /*
                  * Under PortableMode, we could identify it by the path of ss_privoxy.exe.
                  */
-                var path = process.MainModule.FileName;
+                string path = process.MainModule.FileName;
 
                 return Utils.GetTempPath("ss_privoxy.exe").Equals(path);
 
@@ -155,7 +155,7 @@ namespace Shadowsocks.Controller
                 // TCP stack please do me a favor
                 TcpListener l = new TcpListener(isIPv6 ? IPAddress.IPv6Loopback : IPAddress.Loopback, 0);
                 l.Start();
-                var port = ((IPEndPoint)l.LocalEndpoint).Port;
+                int port = ((IPEndPoint)l.LocalEndpoint).Port;
                 l.Stop();
                 return port;
             }

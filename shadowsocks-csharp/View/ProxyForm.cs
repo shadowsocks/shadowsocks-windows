@@ -1,9 +1,9 @@
-﻿using System;
-using System.Drawing;
-using System.Windows.Forms;
-using Shadowsocks.Controller;
+﻿using Shadowsocks.Controller;
 using Shadowsocks.Model;
 using Shadowsocks.Properties;
+using System;
+using System.Drawing;
+using System.Windows.Forms;
 
 namespace Shadowsocks.View
 {
@@ -16,11 +16,11 @@ namespace Shadowsocks.View
 
         public ProxyForm(ShadowsocksController controller)
         {
-            this.Font = System.Drawing.SystemFonts.MessageBoxFont;
+            Font = System.Drawing.SystemFonts.MessageBoxFont;
             InitializeComponent();
 
             UpdateTexts();
-            this.Icon = Icon.FromHandle(Resources.ssw128.GetHicon());
+            Icon = Icon.FromHandle(Resources.ssw128.GetHicon());
 
             this.controller = controller;
             controller.ConfigChanged += controller_ConfigChanged;
@@ -93,12 +93,12 @@ namespace Shadowsocks.View
 
             controller.SaveProxy(_modifiedProxyConfig);
 
-            this.Close();
+            Close();
         }
 
         private void CancelButton_Click(object sender, EventArgs e)
         {
-            this.Close();
+            Close();
         }
 
         private void ProxyForm_FormClosed(object sender, FormClosedEventArgs e)

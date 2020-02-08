@@ -1,9 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Windows.Forms;
-using NLog;
+﻿using NLog;
 using Shadowsocks.Controller.Hotkeys;
 using Shadowsocks.Model;
+using System;
+using System.Windows.Forms;
 
 namespace Shadowsocks.Controller
 {
@@ -12,10 +11,12 @@ namespace Shadowsocks.Controller
         private static Logger logger = LogManager.GetCurrentClassLogger();
         public static void RegAllHotkeys()
         {
-            var hotkeyConfig = Configuration.Load().hotkey;
+            HotkeyConfig hotkeyConfig = Configuration.Load().hotkey;
 
             if (hotkeyConfig == null || !hotkeyConfig.RegHotkeysAtStartup)
+            {
                 return;
+            }
 
             // if any of the hotkey reg fail, undo everything
             if (RegHotkeyFromString(hotkeyConfig.SwitchSystemProxy, "SwitchSystemProxyCallback")
@@ -42,13 +43,13 @@ namespace Shadowsocks.Controller
 
         public static bool RegHotkeyFromString(string hotkeyStr, string callbackName, Action<RegResult> onComplete = null)
         {
-            var _callback = HotkeyCallbacks.GetCallback(callbackName);
+            Delegate _callback = HotkeyCallbacks.GetCallback(callbackName);
             if (_callback == null)
             {
                 throw new Exception($"{callbackName} not found");
             }
 
-            var callback = _callback as HotKeys.HotKeyCallBackHandler;
+            HotKeys.HotKeyCallBackHandler callback = _callback as HotKeys.HotKeyCallBackHandler;
 
             if (hotkeyStr.IsNullOrEmpty())
             {
@@ -58,7 +59,7 @@ namespace Shadowsocks.Controller
             }
             else
             {
-                var hotkey = HotKeys.Str2HotKey(hotkeyStr);
+                GlobalHotKey.HotKey hotkey = HotKeys.Str2HotKey(hotkeyStr);
                 if (hotkey == null)
                 {
                     logger.Error($"Cannot parse hotkey: {hotkeyStr}");

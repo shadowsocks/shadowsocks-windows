@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace Shadowsocks.Model
 {
@@ -41,7 +40,8 @@ namespace Shadowsocks.Model
         private bool EmptyResponseData
             => (AverageResponse == null) && (MinResponse == null) && (MaxResponse == null) && (PackageLoss == null);
 
-        public bool IsEmptyData() {
+        public bool IsEmptyData()
+        {
             return EmptyInboundSpeedData && EmptyOutboundSpeedData && EmptyResponseData && EmptyLatencyData;
         }
 
@@ -52,24 +52,24 @@ namespace Shadowsocks.Model
         public StatisticsRecord(string identifier, ICollection<int> inboundSpeedRecords, ICollection<int> outboundSpeedRecords, ICollection<int> latencyRecords)
         {
             ServerIdentifier = identifier;
-            var inbound = inboundSpeedRecords?.Where(s => s > 0).ToList();
+            List<int> inbound = inboundSpeedRecords?.Where(s => s > 0).ToList();
             if (inbound != null && inbound.Any())
             {
-                AverageInboundSpeed = (int) inbound.Average();
+                AverageInboundSpeed = (int)inbound.Average();
                 MinInboundSpeed = inbound.Min();
                 MaxInboundSpeed = inbound.Max();
             }
-            var outbound = outboundSpeedRecords?.Where(s => s > 0).ToList();
-            if (outbound!= null && outbound.Any())
+            List<int> outbound = outboundSpeedRecords?.Where(s => s > 0).ToList();
+            if (outbound != null && outbound.Any())
             {
-                AverageOutboundSpeed = (int) outbound.Average();
+                AverageOutboundSpeed = (int)outbound.Average();
                 MinOutboundSpeed = outbound.Min();
                 MaxOutboundSpeed = outbound.Max();
             }
-            var latency = latencyRecords?.Where(s => s > 0).ToList();
-            if (latency!= null && latency.Any())
+            List<int> latency = latencyRecords?.Where(s => s > 0).ToList();
+            if (latency != null && latency.Any())
             {
-                AverageLatency = (int) latency.Average();
+                AverageLatency = (int)latency.Average();
                 MinLatency = latency.Min();
                 MaxLatency = latency.Max();
             }
@@ -83,13 +83,21 @@ namespace Shadowsocks.Model
 
         public void SetResponse(ICollection<int?> responseRecords)
         {
-            if (responseRecords == null) return;
-            var records = responseRecords.Where(response => response != null).Select(response => response.Value).ToList();
-            if (!records.Any()) return;
-            AverageResponse = (int?) records.Average();
+            if (responseRecords == null)
+            {
+                return;
+            }
+
+            List<int> records = responseRecords.Where(response => response != null).Select(response => response.Value).ToList();
+            if (!records.Any())
+            {
+                return;
+            }
+
+            AverageResponse = (int?)records.Average();
             MinResponse = records.Min();
             MaxResponse = records.Max();
-            PackageLoss = responseRecords.Count(response => response != null)/(float) responseRecords.Count;
+            PackageLoss = responseRecords.Count(response => response != null) / (float)responseRecords.Count;
         }
     }
 }

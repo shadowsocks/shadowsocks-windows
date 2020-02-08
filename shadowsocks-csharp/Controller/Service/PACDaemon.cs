@@ -1,10 +1,7 @@
 ﻿using NLog;
 using Shadowsocks.Properties;
-using Shadowsocks.Util;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -33,8 +30,8 @@ namespace Shadowsocks.Controller
             TouchPACFile();
             TouchUserRuleFile();
 
-            this.WatchPacFile();
-            this.WatchUserRuleFile();
+            WatchPacFile();
+            WatchUserRuleFile();
         }
 
 
@@ -72,9 +69,11 @@ namespace Shadowsocks.Controller
         private void WatchPacFile()
         {
             PACFileWatcher?.Dispose();
-            PACFileWatcher = new FileSystemWatcher(Directory.GetCurrentDirectory());
-            PACFileWatcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.DirectoryName;
-            PACFileWatcher.Filter = PAC_FILE;
+            PACFileWatcher = new FileSystemWatcher(Directory.GetCurrentDirectory())
+            {
+                NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.DirectoryName,
+                Filter = PAC_FILE
+            };
             PACFileWatcher.Changed += PACFileWatcher_Changed;
             PACFileWatcher.Created += PACFileWatcher_Changed;
             PACFileWatcher.Deleted += PACFileWatcher_Changed;
@@ -85,9 +84,11 @@ namespace Shadowsocks.Controller
         private void WatchUserRuleFile()
         {
             UserRuleFileWatcher?.Dispose();
-            UserRuleFileWatcher = new FileSystemWatcher(Directory.GetCurrentDirectory());
-            UserRuleFileWatcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.DirectoryName;
-            UserRuleFileWatcher.Filter = USER_RULE_FILE;
+            UserRuleFileWatcher = new FileSystemWatcher(Directory.GetCurrentDirectory())
+            {
+                NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.DirectoryName,
+                Filter = USER_RULE_FILE
+            };
             UserRuleFileWatcher.Changed += UserRuleFileWatcher_Changed;
             UserRuleFileWatcher.Created += UserRuleFileWatcher_Changed;
             UserRuleFileWatcher.Deleted += UserRuleFileWatcher_Changed;

@@ -137,12 +137,16 @@ namespace Shadowsocks.View
             {
                 UpdateTrayIconAndNotifyText();
                 if (e.Button == MouseButtons.Middle)
+                {
                     ShowLogForm();
+                }
             };
             _notifyIcon.MouseDoubleClick += (o, e) =>
             {
                 if (e.Button == MouseButtons.Left)
+                {
                     ShowConfigForm();
+                }
             };
             _notifyIcon.BalloonTipClosed += (o, e) =>
             {
@@ -154,7 +158,7 @@ namespace Shadowsocks.View
 
             #endregion
 
-            this.updateChecker = new UpdateChecker();
+            updateChecker = new UpdateChecker();
             updateChecker.CheckUpdateCompleted += (o, e) =>
             {
                 if (updateChecker.NewVersionFound)
@@ -187,7 +191,9 @@ namespace Shadowsocks.View
         private void ChooseIconByTraffic(object sender, EventArgs e)
         {
             if (icon == null)
+            {
                 return;
+            }
 
             Icon newIcon;
 
@@ -195,17 +201,25 @@ namespace Shadowsocks.View
             bool hasOutbound = controller.trafficPerSecondQueue.Last().outboundIncreasement > 0;
 
             if (hasInbound && hasOutbound)
-                newIcon = icon_both;
-            else if (hasInbound)
-                newIcon = icon_in;
-            else if (hasOutbound)
-                newIcon = icon_out;
-            else
-                newIcon = icon;
-
-            if (newIcon != this.previousIcon)
             {
-                this.previousIcon = newIcon;
+                newIcon = icon_both;
+            }
+            else if (hasInbound)
+            {
+                newIcon = icon_in;
+            }
+            else if (hasOutbound)
+            {
+                newIcon = icon_out;
+            }
+            else
+            {
+                newIcon = icon;
+            }
+
+            if (newIcon != previousIcon)
+            {
+                previousIcon = newIcon;
                 _notifyIcon.Icon = newIcon;
             }
         }
@@ -346,22 +360,22 @@ namespace Shadowsocks.View
 
         private void LoadMenu()
         {
-            this.contextMenu = new ContextMenu(new MenuItem[] {
+            contextMenu = new ContextMenu(new MenuItem[] {
                 CreateMenuGroup("System Proxy", new MenuItem[] {
-                    this.disableItem = CreateMenuItem("Disable", (o,e)=>
+                    disableItem = CreateMenuItem("Disable", (o,e)=>
                     {
                         controller.ToggleEnable(false);
                         Configuration config = controller.GetConfigurationCopy();
                         UpdateSystemProxyItemsEnabledStatus(config);
                     }),
-                    this.PACModeItem = CreateMenuItem("PAC", (o,e)=>
+                    PACModeItem = CreateMenuItem("PAC", (o,e)=>
                     {
                         controller.ToggleEnable(true);
                         controller.ToggleGlobal(false);
                         Configuration config = controller.GetConfigurationCopy();
                         UpdateSystemProxyItemsEnabledStatus(config);
                     }),
-                    this.globalModeItem = CreateMenuItem("Global", (o,e)=>
+                    globalModeItem = CreateMenuItem("Global", (o,e)=>
                     {
                         controller.ToggleEnable(true);
                         controller.ToggleGlobal(true);
@@ -369,32 +383,27 @@ namespace Shadowsocks.View
                         UpdateSystemProxyItemsEnabledStatus(config);
                     })
                 }),
-                this.ServersItem = CreateMenuGroup("Servers", new MenuItem[] {
-                    this.SeperatorItem = new MenuItem("-"),
-                    this.ConfigItem = CreateMenuItem("Edit Servers...", (o,e)=>ShowConfigForm()),
+                ServersItem = CreateMenuGroup("Servers", new MenuItem[] {
+                    SeperatorItem = new MenuItem("-"),
+                    ConfigItem = CreateMenuItem("Edit Servers...", (o,e)=>ShowConfigForm()),
                     CreateMenuItem("Statistics Config...", (o,e)=>new StatisticsStrategyConfigurationForm(controller).Show()),
                     new MenuItem("-"),
                     CreateMenuItem("Share Server Config...", (o,e)=> new QRCodeForm(controller.GetServerURLForCurrentServer()).Show()),
-                    CreateMenuItem("Scan QRCode from Screen...", this.ScanQRCode),
+                    CreateMenuItem("Scan QRCode from Screen...", ScanQRCode),
                     CreateMenuItem("Import URL from Clipboard...",(o,e)=>
                     {
-                        if (controller.AddServerBySSURL(Clipboard.GetText(TextDataFormat.Text)))
-                            ShowConfigForm();
-                    })
+                        if (controller.AddServerBySSURL(Clipboard.GetText(TextDataFormat.Text))) { ShowConfigForm(); } })
                 }),
                 CreateMenuGroup("PAC ", new MenuItem[] {
-                    this.localPACItem = CreateMenuItem("Local PAC", (o,e)=>
+                    localPACItem = CreateMenuItem("Local PAC", (o,e)=>
                     {
-                        if (localPACItem.Checked) return;
-                        localPACItem.Checked = true;
+                        if (localPACItem.Checked) { return; } localPACItem.Checked = true;
                         onlinePACItem.Checked = false;
                         controller.UseOnlinePAC(false);
                         UpdatePACItemsEnabledStatus();
                     }),
-                    this.onlinePACItem = CreateMenuItem("Online PAC", (o,e)=>{
-                        if (onlinePACItem.Checked) return;
-
-                        if (controller.GetConfigurationCopy().pacUrl.IsNullOrEmpty())
+                    onlinePACItem = CreateMenuItem("Online PAC", (o,e)=>{
+                        if (onlinePACItem.Checked) { return; } if (controller.GetConfigurationCopy().pacUrl.IsNullOrEmpty())
                         {
                             AskForOnlinePACURL(o, e);
                         }
@@ -408,20 +417,20 @@ namespace Shadowsocks.View
                         UpdatePACItemsEnabledStatus();
                     }),
                     new MenuItem("-"),
-                    this.editLocalPACItem = CreateMenuItem("Edit Local PAC File...",(o,e)=> controller.TouchPACFile()),
-                    this.updateFromGFWListItem = CreateMenuItem("Update Local PAC from GFWList", (o,e)=> controller.UpdatePACFromGFWList()),
-                    this.editGFWUserRuleItem = CreateMenuItem("Edit User Rule for GFWList...", (o,e)=>controller.TouchUserRuleFile()),
-                    this.secureLocalPacUrlToggleItem = CreateMenuItem("Secure Local PAC", (o,e)=>
+                    editLocalPACItem = CreateMenuItem("Edit Local PAC File...",(o,e)=> controller.TouchPACFile()),
+                    updateFromGFWListItem = CreateMenuItem("Update Local PAC from GFWList", (o,e)=> controller.UpdatePACFromGFWList()),
+                    editGFWUserRuleItem = CreateMenuItem("Edit User Rule for GFWList...", (o,e)=>controller.TouchUserRuleFile()),
+                    secureLocalPacUrlToggleItem = CreateMenuItem("Secure Local PAC", (o,e)=>
                     {
                         Configuration configuration = controller.GetConfigurationCopy();
                         controller.ToggleSecureLocalPac(!configuration.secureLocalPac);
                     }),
                     CreateMenuItem("Copy Local PAC URL", (o, e)=>controller.CopyPacUrl()),
-                    this.editOnlinePACItem = CreateMenuItem("Edit Online PAC URL...", this.AskForOnlinePACURL),
+                    editOnlinePACItem = CreateMenuItem("Edit Online PAC URL...", AskForOnlinePACURL),
                 }),
-                this.proxyItem = CreateMenuItem("Forward Proxy...", (o, e) => ShowProxyForm()),
+                proxyItem = CreateMenuItem("Forward Proxy...", (o, e) => ShowProxyForm()),
                 new MenuItem("-"),
-                this.AutoStartupItem = CreateMenuItem("Start on Boot",(o,e)=>
+                AutoStartupItem = CreateMenuItem("Start on Boot",(o,e)=>
                 {
                     if (!AutoStartup.Set(AutoStartupItem.Checked))
                     {
@@ -430,36 +439,36 @@ namespace Shadowsocks.View
                     }
                     AutoStartupItem.Checked = !AutoStartupItem.Checked;
                 }),
-                this.ShareOverLANItem = CreateMenuItem("Allow other Devices to connect", (o,e)=>
+                ShareOverLANItem = CreateMenuItem("Allow other Devices to connect", (o,e)=>
                 {
                     ShareOverLANItem.Checked = !ShareOverLANItem.Checked;
                     controller.ToggleShareOverLAN(ShareOverLANItem.Checked);
                 }),
                 new MenuItem("-"),
-                this.hotKeyItem = CreateMenuItem("Edit Hotkeys...", (o, e) => ShowHotKeySettingsForm()),
+                hotKeyItem = CreateMenuItem("Edit Hotkeys...", (o, e) => ShowHotKeySettingsForm()),
                 CreateMenuGroup("Help", new MenuItem[] {
                     CreateMenuItem("Show Logs...", (o, e) => ShowLogForm()),
-                    this.VerboseLoggingToggleItem = CreateMenuItem("Verbose Logging",(o,e)=>
+                    VerboseLoggingToggleItem = CreateMenuItem("Verbose Logging",(o,e)=>
                     {
                         VerboseLoggingToggleItem.Checked = !VerboseLoggingToggleItem.Checked;
                         controller.ToggleVerboseLogging(VerboseLoggingToggleItem.Checked);
                     }),
-                    this.ShowPluginOutputToggleItem = CreateMenuItem("Show Plugin Output",(o,e)=>
+                    ShowPluginOutputToggleItem = CreateMenuItem("Show Plugin Output",(o,e)=>
                     {
                         ShowPluginOutputToggleItem.Checked = !ShowPluginOutputToggleItem.Checked;
                         controller.ToggleShowPluginOutput(ShowPluginOutputToggleItem.Checked);
                     }),
-                    this.WriteI18NFileItem = CreateMenuItem("Write translation template", (o,e)=> File.WriteAllText(I18N.I18N_FILE, Resources.i18n_csv, Encoding.UTF8)),
+                    WriteI18NFileItem = CreateMenuItem("Write translation template", (o,e)=> File.WriteAllText(I18N.I18N_FILE, Resources.i18n_csv, Encoding.UTF8)),
                     CreateMenuGroup("Updates...", new MenuItem[] {
                         CreateMenuItem("Check for Updates...", (o, e)=>updateChecker.CheckUpdate(controller.GetConfigurationCopy())),
                         new MenuItem("-"),
-                        this.autoCheckUpdatesToggleItem = CreateMenuItem("Check for Updates at Startup", (o,e)=>
+                        autoCheckUpdatesToggleItem = CreateMenuItem("Check for Updates at Startup", (o,e)=>
                         {
                             Configuration configuration = controller.GetConfigurationCopy();
                             controller.ToggleCheckingUpdate(!configuration.autoCheckUpdate);
                             UpdateUpdateMenu();
                         }),
-                        this.checkPreReleaseToggleItem = CreateMenuItem("Check Pre-release Version", (o,e)=>
+                        checkPreReleaseToggleItem = CreateMenuItem("Check Pre-release Version", (o,e)=>
                         {
                             Configuration configuration = controller.GetConfigurationCopy();
                             controller.ToggleCheckingPreRelease(!configuration.checkPreRelease);
@@ -511,16 +520,18 @@ namespace Shadowsocks.View
 
         private void UpdateServersMenu()
         {
-            var items = ServersItem.MenuItems;
+            Menu.MenuItemCollection items = ServersItem.MenuItems;
             while (items[0] != SeperatorItem)
             {
                 items.RemoveAt(0);
             }
             int strategyCount = 0;
-            foreach (var strategy in controller.GetStrategies())
+            foreach (Controller.Strategy.IStrategy strategy in controller.GetStrategies())
             {
-                MenuItem item = new MenuItem(strategy.Name);
-                item.Tag = strategy.ID;
+                MenuItem item = new MenuItem(strategy.Name)
+                {
+                    Tag = strategy.ID
+                };
                 item.Click += (o, e) => controller.SelectStrategy((string)((MenuItem)o).Tag);
                 items.Add(strategyCount, item);
                 strategyCount++;
@@ -531,12 +542,14 @@ namespace Shadowsocks.View
 
             int serverCount = 0;
             Configuration configuration = controller.GetConfigurationCopy();
-            foreach (var server in configuration.configs)
+            foreach (Server server in configuration.configs)
             {
                 if (Configuration.ChecksServer(server))
                 {
-                    MenuItem item = new MenuItem(server.ToString());
-                    item.Tag = configuration.configs.FindIndex(s => s == server);
+                    MenuItem item = new MenuItem(server.ToString())
+                    {
+                        Tag = configuration.configs.FindIndex(s => s == server)
+                    };
                     item.Click += (o, e) => controller.SelectServerIndex((int)((MenuItem)o).Tag);
                     items.Add(strategyCount + serverCount, item);
                     serverCount++;
@@ -634,7 +647,11 @@ namespace Shadowsocks.View
         private void CheckUpdateForFirstRun()
         {
             Configuration config = controller.GetConfigurationCopy();
-            if (config.isDefault) return;
+            if (config.isDefault)
+            {
+                return;
+            }
+
             _isStartupChecking = true;
             updateChecker.CheckUpdate(config, 3000);
         }
@@ -686,20 +703,23 @@ namespace Shadowsocks.View
                         Rectangle cropRect = new Rectangle(marginLeft, marginTop, fullImage.Width - marginLeft * 2, fullImage.Height - marginTop * 2);
                         Bitmap target = new Bitmap(screen.Bounds.Width, screen.Bounds.Height);
 
-                        double imageScale = (double)screen.Bounds.Width / (double)cropRect.Width;
+                        double imageScale = screen.Bounds.Width / (double)cropRect.Width;
                         using (Graphics g = Graphics.FromImage(target))
                         {
                             g.DrawImage(fullImage, new Rectangle(0, 0, target.Width, target.Height),
                                             cropRect,
                                             GraphicsUnit.Pixel);
                         }
-                        var source = new BitmapLuminanceSource(target);
-                        var bitmap = new BinaryBitmap(new HybridBinarizer(source));
+                        BitmapLuminanceSource source = new BitmapLuminanceSource(target);
+                        BinaryBitmap bitmap = new BinaryBitmap(new HybridBinarizer(source));
                         QRCodeReader reader = new QRCodeReader();
-                        var result = reader.decode(bitmap);
-                        if (result == null) continue;
+                        Result result = reader.decode(bitmap);
+                        if (result == null)
+                        {
+                            continue;
+                        }
 
-                        var success = controller.AddServerBySSURL(result.Text);
+                        bool success = controller.AddServerBySSURL(result.Text);
                         QRCodeSplashForm splash = new QRCodeSplashForm();
                         if (success)
                         {
@@ -715,7 +735,7 @@ namespace Shadowsocks.View
                             MessageBox.Show(I18N.GetString("Failed to decode QRCode"));
                             return;
                         }
-                        double minX = Int32.MaxValue, minY = Int32.MaxValue, maxX = 0, maxY = 0;
+                        double minX = int.MaxValue, minY = int.MaxValue, maxX = 0, maxY = 0;
                         // calculate splash position
                         foreach (ResultPoint point in result.ResultPoints)
                         {
@@ -762,19 +782,19 @@ namespace Shadowsocks.View
 
         private void UpdatePACItemsEnabledStatus()
         {
-            if (this.localPACItem.Checked)
+            if (localPACItem.Checked)
             {
-                this.editLocalPACItem.Enabled = true;
-                this.updateFromGFWListItem.Enabled = true;
-                this.editGFWUserRuleItem.Enabled = true;
-                this.editOnlinePACItem.Enabled = false;
+                editLocalPACItem.Enabled = true;
+                updateFromGFWListItem.Enabled = true;
+                editGFWUserRuleItem.Enabled = true;
+                editOnlinePACItem.Enabled = false;
             }
             else
             {
-                this.editLocalPACItem.Enabled = false;
-                this.updateFromGFWListItem.Enabled = false;
-                this.editGFWUserRuleItem.Enabled = false;
-                this.editOnlinePACItem.Enabled = true;
+                editLocalPACItem.Enabled = false;
+                updateFromGFWListItem.Enabled = false;
+                editGFWUserRuleItem.Enabled = false;
+                editOnlinePACItem.Enabled = true;
             }
         }
 

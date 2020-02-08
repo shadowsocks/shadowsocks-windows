@@ -23,14 +23,18 @@ namespace Shadowsocks.Controller.Hotkeys
         /// <returns></returns>
         public static Delegate GetCallback(string methodname)
         {
-            if (methodname.IsNullOrEmpty()) throw new ArgumentException(nameof(methodname));
+            if (methodname.IsNullOrEmpty())
+            {
+                throw new ArgumentException(nameof(methodname));
+            }
+
             MethodInfo dynMethod = typeof(HotkeyCallbacks).GetMethod(methodname,
                 BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.IgnoreCase);
             return dynMethod == null ? null : Delegate.CreateDelegate(typeof(HotKeys.HotKeyCallBackHandler), Instance, dynMethod);
         }
 
         #region Singleton 
-        
+
         private static HotkeyCallbacks Instance { get; set; }
 
         private readonly ShadowsocksController _controller;
@@ -52,15 +56,19 @@ namespace Shadowsocks.Controller.Hotkeys
 
         private void SwitchSystemProxyModeCallback()
         {
-            var config = _controller.GetConfigurationCopy();
-            if (config.enabled == false) return;
-            var currStatus = config.global;
+            Model.Configuration config = _controller.GetConfigurationCopy();
+            if (config.enabled == false)
+            {
+                return;
+            }
+
+            bool currStatus = config.global;
             _controller.ToggleGlobal(!currStatus);
         }
 
         private void SwitchAllowLanCallback()
         {
-            var status = _controller.GetConfigurationCopy().shareOverLan;
+            bool status = _controller.GetConfigurationCopy().shareOverLan;
             _controller.ToggleShareOverLAN(!status);
         }
 
@@ -71,9 +79,7 @@ namespace Shadowsocks.Controller.Hotkeys
 
         private void ServerMoveUpCallback()
         {
-            int currIndex;
-            int serverCount;
-            GetCurrServerInfo(out currIndex, out serverCount);
+            GetCurrServerInfo(out int currIndex, out int serverCount);
             if (currIndex - 1 < 0)
             {
                 // revert to last server
@@ -88,9 +94,7 @@ namespace Shadowsocks.Controller.Hotkeys
 
         private void ServerMoveDownCallback()
         {
-            int currIndex;
-            int serverCount;
-            GetCurrServerInfo(out currIndex, out serverCount);
+            GetCurrServerInfo(out int currIndex, out int serverCount);
             if (currIndex + 1 == serverCount)
             {
                 // revert to first server
@@ -105,7 +109,7 @@ namespace Shadowsocks.Controller.Hotkeys
 
         private void GetCurrServerInfo(out int currIndex, out int serverCount)
         {
-            var currConfig = _controller.GetCurrentConfiguration();
+            Model.Configuration currConfig = _controller.GetCurrentConfiguration();
             currIndex = currConfig.index;
             serverCount = currConfig.configs.Count;
         }

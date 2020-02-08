@@ -1,12 +1,12 @@
-﻿using System;
+﻿using Shadowsocks.Model;
+using Shadowsocks.Util.ProcessManagement;
+using System;
 using System.Collections.Specialized;
 using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Reflection;
-using Shadowsocks.Model;
-using Shadowsocks.Util.ProcessManagement;
 
 namespace Shadowsocks.Controller.Service
 {
@@ -45,7 +45,11 @@ namespace Shadowsocks.Controller.Service
 
         private Sip003Plugin(string plugin, string pluginOpts, string pluginArgs, string serverAddress, int serverPort, bool showPluginOutput)
         {
-            if (plugin == null) throw new ArgumentNullException(nameof(plugin));
+            if (plugin == null)
+            {
+                throw new ArgumentNullException(nameof(plugin));
+            }
+
             if (string.IsNullOrWhiteSpace(serverAddress))
             {
                 throw new ArgumentException("Value cannot be null or whitespace.", nameof(serverAddress));
@@ -55,7 +59,7 @@ namespace Shadowsocks.Controller.Service
                 throw new ArgumentOutOfRangeException("serverPort");
             }
 
-            var appPath = Path.GetDirectoryName(new Uri(Assembly.GetExecutingAssembly().GetName().CodeBase).LocalPath);
+            string appPath = Path.GetDirectoryName(new Uri(Assembly.GetExecutingAssembly().GetName().CodeBase).LocalPath);
 
             _pluginProcess = new Process
             {
@@ -94,7 +98,7 @@ namespace Shadowsocks.Controller.Service
                     return false;
                 }
 
-                var localPort = GetNextFreeTcpPort();
+                int localPort = GetNextFreeTcpPort();
                 LocalEndPoint = new IPEndPoint(IPAddress.Loopback, localPort);
 
                 _pluginProcess.StartInfo.Environment["SS_LOCAL_HOST"] = LocalEndPoint.Address.ToString();
@@ -128,7 +132,7 @@ namespace Shadowsocks.Controller.Service
             // Expand the environment variables from the new process itself
             if (environmentVariables != null)
             {
-                foreach(string key in environmentVariables.Keys)
+                foreach (string key in environmentVariables.Keys)
                 {
                     name = name.Replace($"%{key}%", environmentVariables[key], StringComparison.OrdinalIgnoreCase);
                 }
@@ -140,7 +144,7 @@ namespace Shadowsocks.Controller.Service
 
         static int GetNextFreeTcpPort()
         {
-            var l = new TcpListener(IPAddress.Loopback, 0);
+            TcpListener l = new TcpListener(IPAddress.Loopback, 0);
             l.Start();
             int port = ((IPEndPoint)l.LocalEndpoint).Port;
             l.Stop();

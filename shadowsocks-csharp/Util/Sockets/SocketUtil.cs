@@ -18,14 +18,13 @@ namespace Shadowsocks.Util.Sockets
 
             public override string ToString()
             {
-                return this.Host + ":" + this.Port;
+                return Host + ":" + Port;
             }
         }
 
         public static EndPoint GetEndPoint(string host, int port)
         {
-            IPAddress ipAddress;
-            bool parsed = IPAddress.TryParse(host, out ipAddress);
+            bool parsed = IPAddress.TryParse(host, out IPAddress ipAddress);
             if (parsed)
             {
                 return new IPEndPoint(ipAddress, port);
@@ -60,6 +59,6 @@ namespace Shadowsocks.Util.Sockets
             {
             }
         }
-        
+
     }
 }

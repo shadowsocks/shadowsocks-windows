@@ -1,9 +1,9 @@
-﻿using System;
+﻿using GlobalHotKey;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Windows.Input;
-using GlobalHotKey;
 
 namespace Shadowsocks.Controller.Hotkeys
 {
@@ -31,10 +31,11 @@ namespace Shadowsocks.Controller.Hotkeys
 
         private static void HotKeyManagerPressed(object sender, KeyPressedEventArgs e)
         {
-            var hotkey = e.HotKey;
-            HotKeyCallBackHandler callback;
-            if (_keymap.TryGetValue(hotkey, out callback))
+            HotKey hotkey = e.HotKey;
+            if (_keymap.TryGetValue(hotkey, out HotKeyCallBackHandler callback))
+            {
                 callback();
+            }
         }
 
         public static bool RegHotkey(HotKey hotkey, HotKeyCallBackHandler callback)
@@ -45,8 +46,7 @@ namespace Shadowsocks.Controller.Hotkeys
 
         public static bool UnregExistingHotkey(HotKeys.HotKeyCallBackHandler cb)
         {
-            HotKey existingHotKey;
-            if (IsCallbackExists(cb, out existingHotKey))
+            if (IsCallbackExists(cb, out HotKey existingHotKey))
             {
                 // unregister existing one
                 Unregister(existingHotKey);
@@ -58,15 +58,23 @@ namespace Shadowsocks.Controller.Hotkeys
             }
         }
 
-        public static bool IsHotkeyExists( HotKey hotKey )
+        public static bool IsHotkeyExists(HotKey hotKey)
         {
-            if (hotKey == null) throw new ArgumentNullException(nameof(hotKey));
-            return _keymap.Any( v => v.Key.Equals( hotKey ) );
+            if (hotKey == null)
+            {
+                throw new ArgumentNullException(nameof(hotKey));
+            }
+
+            return _keymap.Any(v => v.Key.Equals(hotKey));
         }
 
-        public static bool IsCallbackExists( HotKeyCallBackHandler cb, out HotKey hotkey)
+        public static bool IsCallbackExists(HotKeyCallBackHandler cb, out HotKey hotkey)
         {
-            if (cb == null) throw new ArgumentNullException(nameof(cb));
+            if (cb == null)
+            {
+                throw new ArgumentNullException(nameof(cb));
+            }
+
             if (_keymap.Any(v => v.Value == cb))
             {
                 hotkey = _keymap.First(v => v.Value == cb).Key;
@@ -81,21 +89,28 @@ namespace Shadowsocks.Controller.Hotkeys
 
         #region Converters
 
-        public static string HotKey2Str( HotKey key )
+        public static string HotKey2Str(HotKey key)
         {
-            if (key == null) throw new ArgumentNullException(nameof(key));
-            return HotKey2Str( key.Key, key.Modifiers );
+            if (key == null)
+            {
+                throw new ArgumentNullException(nameof(key));
+            }
+
+            return HotKey2Str(key.Key, key.Modifiers);
         }
 
-        public static string HotKey2Str( Key key, ModifierKeys modifier )
+        public static string HotKey2Str(Key key, ModifierKeys modifier)
         {
             if (!Enum.IsDefined(typeof(Key), key))
-                throw new InvalidEnumArgumentException(nameof(key), (int) key, typeof(Key));
+            {
+                throw new InvalidEnumArgumentException(nameof(key), (int)key, typeof(Key));
+            }
+
             try
             {
                 ModifierKeysConverter mkc = new ModifierKeysConverter();
-                var keyStr = Enum.GetName(typeof(Key), key);
-                var modifierStr = mkc.ConvertToInvariantString(modifier);
+                string keyStr = Enum.GetName(typeof(Key), key);
+                string modifierStr = mkc.ConvertToInvariantString(modifier);
 
                 return $"{modifierStr}+{keyStr}";
             }
@@ -110,16 +125,24 @@ namespace Shadowsocks.Controller.Hotkeys
         {
             try
             {
-                if (s.IsNullOrEmpty()) return null;
+                if (s.IsNullOrEmpty())
+                {
+                    return null;
+                }
+
                 int offset = s.LastIndexOf("+", StringComparison.OrdinalIgnoreCase);
-                if (offset <= 0) return null;
+                if (offset <= 0)
+                {
+                    return null;
+                }
+
                 string modifierStr = s.Substring(0, offset).Trim();
                 string keyStr = s.Substring(offset + 1).Trim();
 
                 KeyConverter kc = new KeyConverter();
                 ModifierKeysConverter mkc = new ModifierKeysConverter();
-                Key key = (Key) kc.ConvertFrom(keyStr.ToUpper());
-                ModifierKeys modifier = (ModifierKeys) mkc.ConvertFrom(modifierStr.ToUpper());
+                Key key = (Key)kc.ConvertFrom(keyStr.ToUpper());
+                ModifierKeys modifier = (ModifierKeys)mkc.ConvertFrom(modifierStr.ToUpper());
 
                 return new HotKey(key, modifier);
             }
@@ -139,9 +162,15 @@ namespace Shadowsocks.Controller.Hotkeys
         private static bool Register(HotKey key, HotKeyCallBackHandler callBack)
         {
             if (key == null)
+            {
                 throw new ArgumentNullException(nameof(key));
+            }
+
             if (callBack == null)
+            {
                 throw new ArgumentNullException(nameof(callBack));
+            }
+
             try
             {
                 _hotKeyManager.Register(key);
@@ -165,10 +194,15 @@ namespace Shadowsocks.Controller.Hotkeys
         private static void Unregister(HotKey key)
         {
             if (key == null)
+            {
                 throw new ArgumentNullException(nameof(key));
+            }
+
             _hotKeyManager.Unregister(key);
-            if(_keymap.ContainsKey(key))
+            if (_keymap.ContainsKey(key))
+            {
                 _keymap.Remove(key);
+            }
         }
     }
 }

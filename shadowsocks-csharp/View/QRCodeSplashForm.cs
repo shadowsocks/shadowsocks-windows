@@ -1,13 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
+using System.Diagnostics;
 using System.Drawing;
-using System.Text;
-using System.Windows.Forms;
 using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
-using System.Diagnostics;
+using System.Windows.Forms;
 
 
 namespace Shadowsocks.View
@@ -19,20 +15,20 @@ namespace Shadowsocks.View
         public QRCodeSplashForm()
         {
             FormBorderStyle = FormBorderStyle.None;
-            this.Load += QRCodeSplashForm_Load;
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
-            this.BackColor = System.Drawing.Color.White;
-            this.ClientSize = new System.Drawing.Size(1, 1);
-            this.ControlBox = false;
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
-            this.MaximizeBox = false;
-            this.MinimizeBox = false;
-            this.Name = "QRCodeSplashForm";
-            this.ShowIcon = false;
-            this.ShowInTaskbar = false;
-            this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
-            this.StartPosition = System.Windows.Forms.FormStartPosition.Manual;
-            this.TopMost = true;
+            Load += QRCodeSplashForm_Load;
+            AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
+            BackColor = System.Drawing.Color.White;
+            ClientSize = new System.Drawing.Size(1, 1);
+            ControlBox = false;
+            FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
+            MaximizeBox = false;
+            MinimizeBox = false;
+            Name = "QRCodeSplashForm";
+            ShowIcon = false;
+            ShowInTaskbar = false;
+            SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
+            StartPosition = System.Windows.Forms.FormStartPosition.Manual;
+            TopMost = true;
         }
 
         private Timer timer;
@@ -53,15 +49,17 @@ namespace Shadowsocks.View
         private void QRCodeSplashForm_Load(object sender, EventArgs e)
         {
             SetStyle(ControlStyles.SupportsTransparentBackColor, true);
-            this.BackColor = Color.Transparent;
+            BackColor = Color.Transparent;
             flashStep = 0;
             x = 0;
             y = 0;
             w = Width;
             h = Height;
             sw = Stopwatch.StartNew();
-            timer = new Timer();
-            timer.Interval = (int)(ANIMATION_TIME * 1000 / ANIMATION_STEPS);
+            timer = new Timer
+            {
+                Interval = (int)(ANIMATION_TIME * 1000 / ANIMATION_STEPS)
+            };
             timer.Tick += timer_Tick;
             timer.Start();
             bitmap = new Bitmap(Width, Height, PixelFormat.Format32bppArgb);
@@ -72,15 +70,15 @@ namespace Shadowsocks.View
 
         void timer_Tick(object sender, EventArgs e)
         {
-            double percent = (double)sw.ElapsedMilliseconds / 1000.0 / (double)ANIMATION_TIME;
+            double percent = sw.ElapsedMilliseconds / 1000.0 / ANIMATION_TIME;
             if (percent < 1)
             {
                 // ease out
                 percent = 1 - Math.Pow((1 - percent), 4);
                 x = (int)(TargetRect.X * percent);
                 y = (int)(TargetRect.Y * percent);
-                w = (int)(TargetRect.Width * percent + this.Size.Width * (1 - percent));
-                h = (int)(TargetRect.Height * percent + this.Size.Height * (1 - percent));
+                w = (int)(TargetRect.Width * percent + Size.Width * (1 - percent));
+                h = (int)(TargetRect.Height * percent + Size.Height * (1 - percent));
                 //codeRectView.Location = new Point(x, y);
                 //codeRectView.Size = new Size(w, h);
                 pen.Color = Color.FromArgb((int)(255 * percent), Color.Red);
@@ -134,7 +132,7 @@ namespace Shadowsocks.View
                     pen.Dispose();
                     brush.Dispose();
                     bitmap.Dispose();
-                    this.Close();
+                    Close();
                 }
                 flashStep++;
             }
@@ -162,7 +160,9 @@ namespace Shadowsocks.View
         public void SetBitmap(Bitmap bitmap, byte opacity)
         {
             if (bitmap.PixelFormat != PixelFormat.Format32bppArgb)
+            {
                 throw new ApplicationException("The bitmap must be 32ppp with alpha-channel.");
+            }
 
             // The idea of this is very simple,
             // 1. Create a compatible DC with screen;
@@ -182,11 +182,13 @@ namespace Shadowsocks.View
                 Win32.Size size = new Win32.Size(bitmap.Width, bitmap.Height);
                 Win32.Point pointSource = new Win32.Point(0, 0);
                 Win32.Point topPos = new Win32.Point(Left, Top);
-                Win32.BLENDFUNCTION blend = new Win32.BLENDFUNCTION();
-                blend.BlendOp = Win32.AC_SRC_OVER;
-                blend.BlendFlags = 0;
-                blend.SourceConstantAlpha = opacity;
-                blend.AlphaFormat = Win32.AC_SRC_ALPHA;
+                Win32.BLENDFUNCTION blend = new Win32.BLENDFUNCTION
+                {
+                    BlendOp = Win32.AC_SRC_OVER,
+                    BlendFlags = 0,
+                    SourceConstantAlpha = opacity,
+                    AlphaFormat = Win32.AC_SRC_ALPHA
+                };
 
                 Win32.UpdateLayeredWindow(Handle, screenDc, ref topPos, ref size, memDc, ref pointSource, 0, ref blend, Win32.ULW_ALPHA);
             }
@@ -212,20 +214,20 @@ namespace Shadowsocks.View
         [StructLayout(LayoutKind.Sequential)]
         public struct Point
         {
-            public Int32 x;
-            public Int32 y;
+            public int x;
+            public int y;
 
-            public Point(Int32 x, Int32 y) { this.x = x; this.y = y; }
+            public Point(int x, int y) { this.x = x; this.y = y; }
         }
 
 
         [StructLayout(LayoutKind.Sequential)]
         public struct Size
         {
-            public Int32 cx;
-            public Int32 cy;
+            public int cx;
+            public int cy;
 
-            public Size(Int32 cx, Int32 cy) { this.cx = cx; this.cy = cy; }
+            public Size(int cx, int cy) { this.cx = cx; this.cy = cy; }
         }
 
 
@@ -249,16 +251,16 @@ namespace Shadowsocks.View
         }
 
 
-        public const Int32 ULW_COLORKEY = 0x00000001;
-        public const Int32 ULW_ALPHA = 0x00000002;
-        public const Int32 ULW_OPAQUE = 0x00000004;
+        public const int ULW_COLORKEY = 0x00000001;
+        public const int ULW_ALPHA = 0x00000002;
+        public const int ULW_OPAQUE = 0x00000004;
 
         public const byte AC_SRC_OVER = 0x00;
         public const byte AC_SRC_ALPHA = 0x01;
 
 
         [DllImport("user32.dll", ExactSpelling = true, SetLastError = true)]
-        public static extern int UpdateLayeredWindow(IntPtr hwnd, IntPtr hdcDst, ref Point pptDst, ref Size psize, IntPtr hdcSrc, ref Point pprSrc, Int32 crKey, ref BLENDFUNCTION pblend, Int32 dwFlags);
+        public static extern int UpdateLayeredWindow(IntPtr hwnd, IntPtr hdcDst, ref Point pptDst, ref Size psize, IntPtr hdcSrc, ref Point pprSrc, int crKey, ref BLENDFUNCTION pblend, int dwFlags);
 
         [DllImport("user32.dll", ExactSpelling = true, SetLastError = true)]
         public static extern IntPtr GetDC(IntPtr hWnd);

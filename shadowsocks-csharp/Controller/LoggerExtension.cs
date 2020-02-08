@@ -1,12 +1,9 @@
-﻿using System;
+﻿using Shadowsocks.Util.SystemProxy;
+using System;
 using System.ComponentModel;
-using System.IO;
-using System.Net.Sockets;
-using System.Net;
-using System.Diagnostics;
-using System.Text;
-using Shadowsocks.Util.SystemProxy;
 using System.Linq;
+using System.Net;
+using System.Net.Sockets;
 using System.Reflection;
 
 namespace NLog
@@ -15,7 +12,11 @@ namespace NLog
     {
         public static void Dump(this Logger logger, string tag, byte[] arr, int length)
         {
-            if (!logger.IsTraceEnabled) return;
+            if (!logger.IsTraceEnabled)
+            {
+                return;
+            }
+
             logger.Trace(Environment.NewLine
                 + $"{tag}: {BitConverter.ToString(arr.Take(length).ToArray())}"
                 + Environment.NewLine);
@@ -23,7 +24,10 @@ namespace NLog
 
         public static void Debug(this Logger logger, EndPoint local, EndPoint remote, int len, string header = null, string tailer = null)
         {
-            if (!logger.IsDebugEnabled) return;
+            if (!logger.IsDebugEnabled)
+            {
+                return;
+            }
 
             string fullheader = header == null ? "" : header + ": ";
             string fulltailer = tailer == null ? "" : ", " + tailer;
@@ -33,7 +37,10 @@ namespace NLog
 
         public static void Debug(this Logger logger, Socket sock, int len, string header = null, string tailer = null)
         {
-            if (!logger.IsDebugEnabled) return;
+            if (!logger.IsDebugEnabled)
+            {
+                return;
+            }
 
             logger.Debug(sock.LocalEndPoint, sock.RemoteEndPoint, len, header, tailer);
 
@@ -70,7 +77,7 @@ namespace NLog
             }
             else if (e is Win32Exception)
             {
-                var ex = (Win32Exception)e;
+                Win32Exception ex = (Win32Exception)e;
 
                 // Win32Exception (0x80004005): A 32 bit processes cannot access modules of a 64 bit process.
                 // Why?
@@ -81,7 +88,7 @@ namespace NLog
             }
             else if (e is ProxyException)
             {
-                var ex = (ProxyException)e;
+                ProxyException ex = (ProxyException)e;
                 switch (ex.Type)
                 {
                     case ProxyExceptionType.FailToRun:

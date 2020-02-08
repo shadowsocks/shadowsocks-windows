@@ -17,18 +17,18 @@
 
         public EncryptorInfo(string innerLibName, int keySize, int ivSize, int type)
         {
-            this.KeySize = keySize;
-            this.IvSize = ivSize;
-            this.Type = type;
-            this.InnerLibName = innerLibName;
+            KeySize = keySize;
+            IvSize = ivSize;
+            Type = type;
+            InnerLibName = innerLibName;
         }
 
         public EncryptorInfo(int keySize, int ivSize, int type)
         {
-            this.KeySize = keySize;
-            this.IvSize = ivSize;
-            this.Type = type;
-            this.InnerLibName = string.Empty;
+            KeySize = keySize;
+            IvSize = ivSize;
+            Type = type;
+            InnerLibName = string.Empty;
         }
 
         #endregion
@@ -37,22 +37,22 @@
 
         public EncryptorInfo(string innerLibName, int keySize, int saltSize, int nonceSize, int tagSize, int type)
         {
-            this.KeySize = keySize;
-            this.SaltSize = saltSize;
-            this.NonceSize = nonceSize;
-            this.TagSize = tagSize;
-            this.Type = type;
-            this.InnerLibName = innerLibName;
+            KeySize = keySize;
+            SaltSize = saltSize;
+            NonceSize = nonceSize;
+            TagSize = tagSize;
+            Type = type;
+            InnerLibName = innerLibName;
         }
 
         public EncryptorInfo(int keySize, int saltSize, int nonceSize, int tagSize, int type)
         {
-            this.KeySize = keySize;
-            this.SaltSize = saltSize;
-            this.NonceSize = nonceSize;
-            this.TagSize = tagSize;
-            this.Type = type;
-            this.InnerLibName = string.Empty;
+            KeySize = keySize;
+            SaltSize = saltSize;
+            NonceSize = nonceSize;
+            TagSize = tagSize;
+            Type = type;
+            InnerLibName = string.Empty;
         }
 
         #endregion
@@ -92,6 +92,6 @@
 
         public abstract void Dispose();
 
-        public int AddrBufLength { get; set; } = - 1;
+        public int AddrBufLength { get; set; } = -1;
     }
 }

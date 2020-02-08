@@ -1,8 +1,8 @@
-﻿using System;
+﻿using NLog;
+using Shadowsocks.Util.Sockets;
+using System;
 using System.Net;
 using System.Net.Sockets;
-using NLog;
-using Shadowsocks.Util.Sockets;
 
 namespace Shadowsocks.Controller
 {

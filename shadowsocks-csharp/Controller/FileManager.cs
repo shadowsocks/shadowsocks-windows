@@ -14,8 +14,11 @@ namespace Shadowsocks.Controller
         {
             try
             {
-                using (var fs = new FileStream(fileName, FileMode.Create, FileAccess.Write))
+                using (FileStream fs = new FileStream(fileName, FileMode.Create, FileAccess.Write))
+                {
                     fs.Write(content, 0, content.Length);
+                }
+
                 return true;
             }
             catch (Exception ex)
@@ -32,8 +35,8 @@ namespace Shadowsocks.Controller
             byte[] buffer = new byte[4096];
             int n;
 
-            using(var fs = File.Create(fileName))
-            using (var input = new GZipStream(new MemoryStream(content),
+            using (FileStream fs = File.Create(fileName))
+            using (GZipStream input = new GZipStream(new MemoryStream(content),
                     CompressionMode.Decompress, false))
             {
                 while ((n = input.Read(buffer, 0, buffer.Length)) > 0)
@@ -52,8 +55,8 @@ namespace Shadowsocks.Controller
         {
             try
             {
-                using (var fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
-                using (var sr = new StreamReader(fs, encoding))
+                using (FileStream fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                using (StreamReader sr = new StreamReader(fs, encoding))
                 {
                     return sr.ReadToEnd();
                 }

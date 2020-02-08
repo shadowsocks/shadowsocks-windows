@@ -122,8 +122,8 @@ namespace Shadowsocks.View
         /// </summary>
         private void HotkeyUp(object sender, KeyEventArgs e)
         {
-            var tb = (TextBox)sender;
-            var content = tb.Text.TrimEnd();
+            TextBox tb = (TextBox)sender;
+            string content = tb.Text.TrimEnd();
             if (content.Length >= 1 && content[content.Length - 1] == '+')
             {
                 tb.Text = "";
@@ -132,7 +132,7 @@ namespace Shadowsocks.View
 
         private void CancelButton_Click(object sender, EventArgs e)
         {
-            this.Close();
+            Close();
         }
 
         private void OKButton_Click(object sender, EventArgs e)
@@ -146,7 +146,7 @@ namespace Shadowsocks.View
 
             // All check passed, saving
             SaveConfig();
-            this.Close();
+            Close();
         }
 
         private void RegisterAllButton_Click(object sender, EventArgs e)

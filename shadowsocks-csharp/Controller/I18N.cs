@@ -33,9 +33,14 @@ namespace Shadowsocks.Controller
                 for (int i = 0; i < localeNames.Length; i++)
                 {
                     if (localeNames[i] == "en")
+                    {
                         enIndex = i;
+                    }
+
                     if (localeNames[i] == locale)
+                    {
                         targetIndex = i;
+                    }
                 }
 
                 // Fallback to same language with different region
@@ -45,7 +50,9 @@ namespace Shadowsocks.Controller
                     for (int i = 0; i < localeNames.Length; i++)
                     {
                         if (localeNames[i].Split('-')[0] == localeNoRegion)
+                        {
                             targetIndex = i;
+                        }
                     }
                     if (targetIndex != -1 && enIndex != targetIndex)
                     {
@@ -67,9 +74,15 @@ namespace Shadowsocks.Controller
                     string translation = translations[targetIndex];
 
                     // source string or translation empty
-                    if (string.IsNullOrWhiteSpace(source) || string.IsNullOrWhiteSpace(translation)) continue;
+                    if (string.IsNullOrWhiteSpace(source) || string.IsNullOrWhiteSpace(translation))
+                    {
+                        continue;
+                    }
                     // line start with comment
-                    if (translations[0].TrimStart(' ')[0] == '#') continue;
+                    if (translations[0].TrimStart(' ')[0] == '#')
+                    {
+                        continue;
+                    }
 
                     _strings[source] = translation;
                 }
@@ -96,26 +109,42 @@ namespace Shadowsocks.Controller
 
         public static string GetString(string key, params object[] args)
         {
-            return string.Format(_strings.TryGetValue(key.Trim(), out var value) ? value : key, args);
+            return string.Format(_strings.TryGetValue(key.Trim(), out string value) ? value : key, args);
         }
 
         public static void TranslateForm(Form c)
         {
-            if (c == null) return;
-            c.Text = GetString(c.Text);
-            foreach (var item in ViewUtils.GetChildControls<Control>(c))
+            if (c == null)
             {
-                if (item == null) continue;
+                return;
+            }
+
+            c.Text = GetString(c.Text);
+            foreach (Control item in ViewUtils.GetChildControls<Control>(c))
+            {
+                if (item == null)
+                {
+                    continue;
+                }
+
                 item.Text = GetString(item.Text);
             }
             TranslateMenu(c.Menu);
         }
         public static void TranslateMenu(Menu m)
         {
-            if (m == null) return;
-            foreach (var item in ViewUtils.GetMenuItems(m))
+            if (m == null)
             {
-                if (item == null) continue;
+                return;
+            }
+
+            foreach (MenuItem item in ViewUtils.GetMenuItems(m))
+            {
+                if (item == null)
+                {
+                    continue;
+                }
+
                 item.Text = GetString(item.Text);
             }
         }

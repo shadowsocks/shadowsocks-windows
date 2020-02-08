@@ -75,7 +75,7 @@ namespace Shadowsocks.Util.Sockets
             int length = (int)ar.AsyncState;
             try
             {
-                var bytesRead = _socket.EndReceive(ar);
+                int bytesRead = _socket.EndReceive(ar);
 
                 if (bytesRead == 0)
                 {
@@ -89,14 +89,14 @@ namespace Shadowsocks.Util.Sockets
                 while ((i = IndexOf(_lineBuffer, _bufferIndex, length, _delimiterBytes, _delimiterSearchOffsetTable,
                            _delimiterSearchCharTable)) != -1)
                 {
-                    var decodeLen = i - _bufferIndex;
+                    int decodeLen = i - _bufferIndex;
                     string line = _encoding.GetString(_lineBuffer, _bufferIndex, decodeLen);
 
                     _bufferIndex = i + _delimiterBytes.Length;
                     length -= decodeLen;
                     length -= _delimiterBytes.Length;
 
-                    var stop = _onLineRead(line, _state);
+                    bool stop = _onLineRead(line, _state);
                     if (stop)
                     {
                         OnFinish(length);
@@ -140,7 +140,7 @@ namespace Shadowsocks.Util.Sockets
 
         public static int IndexOf(byte[] haystack, int index, int length, byte[] needle, int[] offsetTable, int[] charTable)
         {
-            var end = index + length;
+            int end = index + length;
             for (int i = needle.Length - 1 + index, j; i < end;)
             {
                 for (j = needle.Length - 1; needle[j] == haystack[i]; --i, --j)

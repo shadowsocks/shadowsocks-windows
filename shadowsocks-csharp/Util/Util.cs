@@ -1,13 +1,11 @@
-﻿using NLog;
+﻿using Microsoft.Win32;
+using NLog;
+using Shadowsocks.Model;
 using System;
 using System.Diagnostics;
 using System.IO;
-using System.IO.Compression;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
-using Microsoft.Win32;
-using Shadowsocks.Controller;
-using Shadowsocks.Model;
 
 namespace Shadowsocks.Util
 {
@@ -74,9 +72,13 @@ namespace Shadowsocks.Util
                 if (reg_ThemesPersonalize.GetValue("SystemUsesLightTheme") != null)
                 {
                     if ((int)(reg_ThemesPersonalize.GetValue("SystemUsesLightTheme")) == 0) // 0:dark mode, 1:light mode
+                    {
                         themeMode = WindowsThemeMode.Dark;
+                    }
                     else
+                    {
                         themeMode = WindowsThemeMode.Light;
+                    }
                 }
                 else
                 {
@@ -137,7 +139,7 @@ namespace Shadowsocks.Util
 
         public static string FormatBandwidth(long n)
         {
-            var result = GetBandwidthScale(n);
+            BandwidthScaleInfo result = GetBandwidthScale(n);
             return $"{result.value:0.##}{result.unitName}";
         }
 
@@ -151,11 +153,20 @@ namespace Shadowsocks.Util
             const long E = P * 1024L;
 
             if (bytes >= P * 990)
+            {
                 return (bytes / (double)E).ToString("F5") + "EiB";
+            }
+
             if (bytes >= T * 990)
+            {
                 return (bytes / (double)P).ToString("F5") + "PiB";
+            }
+
             if (bytes >= G * 990)
+            {
                 return (bytes / (double)T).ToString("F5") + "TiB";
+            }
+
             if (bytes >= M * 990)
             {
                 return (bytes / (double)G).ToString("F4") + "GiB";
@@ -206,7 +217,11 @@ namespace Shadowsocks.Util
             // we are building x86 binary for both x86 and x64, which will
             // cause problem when opening registry key
             // detect operating system instead of CPU
-            if (name.IsNullOrEmpty()) throw new ArgumentException(nameof(name));
+            if (name.IsNullOrEmpty())
+            {
+                throw new ArgumentException(nameof(name));
+            }
+
             try
             {
                 RegistryKey userKey = RegistryKey.OpenBaseKey(hive,
@@ -251,11 +266,11 @@ namespace Shadowsocks.Util
             const int minSupportedRelease = 394802;
 
             const string subkey = @"SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\Full\";
-            using (var ndpKey = OpenRegKey(subkey, false, RegistryHive.LocalMachine))
+            using (RegistryKey ndpKey = OpenRegKey(subkey, false, RegistryHive.LocalMachine))
             {
                 if (ndpKey?.GetValue("Release") != null)
                 {
-                    var releaseKey = (int)ndpKey.GetValue("Release");
+                    int releaseKey = (int)ndpKey.GetValue("Release");
 
                     if (releaseKey >= minSupportedRelease)
                     {

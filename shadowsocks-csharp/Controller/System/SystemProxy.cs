@@ -1,8 +1,8 @@
-﻿using System;
-using System.Windows.Forms;
-using NLog;
+﻿using NLog;
 using Shadowsocks.Model;
 using Shadowsocks.Util.SystemProxy;
+using System;
+using System.Windows.Forms;
 
 namespace Shadowsocks.Controller
 {
@@ -58,7 +58,7 @@ namespace Shadowsocks.Controller
                 logger.LogUsefulException(ex);
                 if (ex.Type != ProxyExceptionType.Unspecific && !noRetry)
                 {
-                    var ret = MessageBox.Show(I18N.GetString("Error occured when process proxy setting, do you want reset current setting and retry?"), I18N.GetString("Shadowsocks"), MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+                    DialogResult ret = MessageBox.Show(I18N.GetString("Error occured when process proxy setting, do you want reset current setting and retry?"), I18N.GetString("Shadowsocks"), MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
                     if (ret == DialogResult.Yes)
                     {
                         Sysproxy.ResetIEProxy();

@@ -1,12 +1,12 @@
-﻿using System;
+﻿using NLog;
+using Shadowsocks.Controller.Strategy;
+using Shadowsocks.Encryption;
+using Shadowsocks.Model;
+using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System.Runtime.CompilerServices;
-using NLog;
-using Shadowsocks.Controller.Strategy;
-using Shadowsocks.Encryption;
-using Shadowsocks.Model;
 
 namespace Shadowsocks.Controller
 {
@@ -22,7 +22,7 @@ namespace Shadowsocks.Controller
 
         public UDPRelay(ShadowsocksController controller)
         {
-            this._controller = controller;
+            _controller = controller;
         }
 
         public override bool Handle(byte[] firstPacket, int length, Socket socket, object state)
@@ -81,8 +81,7 @@ namespace Shadowsocks.Controller
                 _localEndPoint = localEndPoint;
 
                 // TODO async resolving
-                IPAddress ipAddress;
-                bool parsed = IPAddress.TryParse(server.server, out ipAddress);
+                bool parsed = IPAddress.TryParse(server.server, out IPAddress ipAddress);
                 if (!parsed)
                 {
                     IPHostEntry ipHostInfo = Dns.GetHostEntry(server.server);
@@ -99,8 +98,7 @@ namespace Shadowsocks.Controller
                 byte[] dataIn = new byte[length - 3];
                 Array.Copy(data, 3, dataIn, 0, length - 3);
                 byte[] dataOut = new byte[65536];  // enough space for AEAD ciphers
-                int outlen;
-                encryptor.EncryptUDP(dataIn, length - 3, dataOut, out outlen);
+                encryptor.EncryptUDP(dataIn, length - 3, dataOut, out int outlen);
                 logger.Debug(_localEndPoint, _remoteEndPoint, outlen, "UDP Relay");
                 _remote?.SendTo(dataOut, outlen, SocketFlags.None, _remoteEndPoint);
             }
@@ -116,15 +114,18 @@ namespace Shadowsocks.Controller
             {
                 try
                 {
-                    if (_remote == null) return;
+                    if (_remote == null)
+                    {
+                        return;
+                    }
+
                     EndPoint remoteEndPoint = new IPEndPoint(GetIPAddress(), 0);
                     int bytesRead = _remote.EndReceiveFrom(ar, ref remoteEndPoint);
 
                     byte[] dataOut = new byte[bytesRead];
-                    int outlen;
 
                     IEncryptor encryptor = EncryptorFactory.GetEncryptor(_server.method, _server.password);
-                    encryptor.DecryptUDP(_buffer, bytesRead, dataOut, out outlen);
+                    encryptor.DecryptUDP(_buffer, bytesRead, dataOut, out int outlen);
 
                     byte[] sendBuf = new byte[outlen + 3];
                     Array.Copy(dataOut, 0, sendBuf, 3, outlen);
@@ -184,8 +185,7 @@ namespace Shadowsocks.Controller
         [MethodImpl(MethodImplOptions.Synchronized)]
         public V get(K key)
         {
-            LinkedListNode<LRUCacheItem<K, V>> node;
-            if (cacheMap.TryGetValue(key, out node))
+            if (cacheMap.TryGetValue(key, out LinkedListNode<LRUCacheItem<K, V>> node))
             {
                 V value = node.Value.value;
                 lruList.Remove(node);

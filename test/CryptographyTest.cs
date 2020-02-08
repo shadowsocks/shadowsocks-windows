@@ -1,10 +1,9 @@
-﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Shadowsocks.Encryption;
-using System.Threading;
-using System.Collections.Generic;
 using Shadowsocks.Encryption.Stream;
-using System.Diagnostics;
+using System;
+using System.Collections.Generic;
+using System.Threading;
 
 namespace Shadowsocks.Test
 {
@@ -19,7 +18,7 @@ namespace Shadowsocks.Test
             {
                 System.Security.Cryptography.MD5 md5 = System.Security.Cryptography.MD5.Create();
                 byte[] bytes = new byte[len];
-                var random = new Random();
+                Random random = new Random();
                 random.NextBytes(bytes);
                 string md5str = Convert.ToBase64String(md5.ComputeHash(bytes));
                 string md5str2 = Convert.ToBase64String(MbedTLS.MD5(bytes));
@@ -33,12 +32,10 @@ namespace Shadowsocks.Test
             byte[] plain = new byte[16384];
             byte[] cipher = new byte[plain.Length + 16];
             byte[] plain2 = new byte[plain.Length + 16];
-            int outLen = 0;
-            int outLen2 = 0;
-            var random = new Random();
+            Random random = new Random();
             random.NextBytes(plain);
-            encryptor.Encrypt(plain, plain.Length, cipher, out outLen);
-            decryptor.Decrypt(cipher, outLen, plain2, out outLen2);
+            encryptor.Encrypt(plain, plain.Length, cipher, out int outLen);
+            decryptor.Decrypt(cipher, outLen, plain2, out int outLen2);
             Assert.AreEqual(plain.Length, outLen2);
             for (int j = 0; j < plain.Length; j++)
             {
@@ -131,7 +128,7 @@ namespace Shadowsocks.Test
             {
                 for (int i = 0; i < 100; i++)
                 {
-                    var random = new Random();
+                    Random random = new Random();
                     IEncryptor encryptor;
                     IEncryptor decryptor;
                     encryptor = new StreamMbedTLSEncryptor("rc4-md5", "barfoo!");
@@ -173,7 +170,7 @@ namespace Shadowsocks.Test
             {
                 for (int i = 0; i < 100; i++)
                 {
-                    var random = new Random();
+                    Random random = new Random();
                     IEncryptor encryptor;
                     IEncryptor decryptor;
                     encryptor = new StreamSodiumEncryptor("salsa20", "barfoo!");
@@ -215,7 +212,7 @@ namespace Shadowsocks.Test
             {
                 for (int i = 0; i < 100; i++)
                 {
-                    var random = new Random();
+                    Random random = new Random();
                     IEncryptor encryptor;
                     IEncryptor decryptor;
                     encryptor = new StreamOpenSSLEncryptor("aes-256-cfb", "barfoo!");

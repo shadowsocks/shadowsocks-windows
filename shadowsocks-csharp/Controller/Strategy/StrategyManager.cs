@@ -1,7 +1,4 @@
-﻿using Shadowsocks.Controller;
-using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 
 namespace Shadowsocks.Controller.Strategy
 {
@@ -10,10 +7,12 @@ namespace Shadowsocks.Controller.Strategy
         List<IStrategy> _strategies;
         public StrategyManager(ShadowsocksController controller)
         {
-            _strategies = new List<IStrategy>();
-            _strategies.Add(new BalancingStrategy(controller));
-            _strategies.Add(new HighAvailabilityStrategy(controller));
-            _strategies.Add(new StatisticsStrategy(controller));
+            _strategies = new List<IStrategy>
+            {
+                new BalancingStrategy(controller),
+                new HighAvailabilityStrategy(controller),
+                new StatisticsStrategy(controller)
+            };
             // TODO: load DLL plugins
         }
         public IList<IStrategy> GetStrategies()

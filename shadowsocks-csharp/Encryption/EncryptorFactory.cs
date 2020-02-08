@@ -1,9 +1,9 @@
-﻿using System;
+﻿using Shadowsocks.Encryption.AEAD;
+using Shadowsocks.Encryption.Stream;
+using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Text;
-using Shadowsocks.Encryption.AEAD;
-using Shadowsocks.Encryption.Stream;
 
 namespace Shadowsocks.Encryption
 {
@@ -11,12 +11,12 @@ namespace Shadowsocks.Encryption
     {
         private static Dictionary<string, Type> _registeredEncryptors = new Dictionary<string, Type>();
 
-        private static readonly Type[] ConstructorTypes = {typeof(string), typeof(string)};
+        private static readonly Type[] ConstructorTypes = { typeof(string), typeof(string) };
 
         static EncryptorFactory()
         {
-            var AEADMbedTLSEncryptorSupportedCiphers = AEADMbedTLSEncryptor.SupportedCiphers();
-            var AEADSodiumEncryptorSupportedCiphers = AEADSodiumEncryptor.SupportedCiphers();
+            List<string> AEADMbedTLSEncryptorSupportedCiphers = AEADMbedTLSEncryptor.SupportedCiphers();
+            List<string> AEADSodiumEncryptorSupportedCiphers = AEADSodiumEncryptor.SupportedCiphers();
             if (Sodium.AES256GCMAvailable)
             {
                 // prefer to aes-256-gcm in libsodium
@@ -31,38 +31,50 @@ namespace Shadowsocks.Encryption
             foreach (string method in StreamOpenSSLEncryptor.SupportedCiphers())
             {
                 if (!_registeredEncryptors.ContainsKey(method))
+                {
                     _registeredEncryptors.Add(method, typeof(StreamOpenSSLEncryptor));
+                }
             }
 
             foreach (string method in StreamSodiumEncryptor.SupportedCiphers())
             {
                 if (!_registeredEncryptors.ContainsKey(method))
+                {
                     _registeredEncryptors.Add(method, typeof(StreamSodiumEncryptor));
+                }
             }
 
             foreach (string method in StreamMbedTLSEncryptor.SupportedCiphers())
             {
                 if (!_registeredEncryptors.ContainsKey(method))
+                {
                     _registeredEncryptors.Add(method, typeof(StreamMbedTLSEncryptor));
+                }
             }
 
 
             foreach (string method in AEADOpenSSLEncryptor.SupportedCiphers())
             {
                 if (!_registeredEncryptors.ContainsKey(method))
+                {
                     _registeredEncryptors.Add(method, typeof(AEADOpenSSLEncryptor));
+                }
             }
 
             foreach (string method in AEADSodiumEncryptorSupportedCiphers)
             {
                 if (!_registeredEncryptors.ContainsKey(method))
+                {
                     _registeredEncryptors.Add(method, typeof(AEADSodiumEncryptor));
+                }
             }
 
             foreach (string method in AEADMbedTLSEncryptorSupportedCiphers)
             {
                 if (!_registeredEncryptors.ContainsKey(method))
+                {
                     _registeredEncryptors.Add(method, typeof(AEADMbedTLSEncryptor));
+                }
             }
         }
 
@@ -77,20 +89,24 @@ namespace Shadowsocks.Encryption
             Type t = _registeredEncryptors[method];
 
             ConstructorInfo c = t.GetConstructor(ConstructorTypes);
-            if (c == null) throw new System.Exception("Invalid ctor");
-            IEncryptor result = (IEncryptor) c.Invoke(new object[] {method, password});
+            if (c == null)
+            {
+                throw new System.Exception("Invalid ctor");
+            }
+
+            IEncryptor result = (IEncryptor)c.Invoke(new object[] { method, password });
             return result;
         }
 
         public static string DumpRegisteredEncryptor()
         {
-            var sb = new StringBuilder();
+            StringBuilder sb = new StringBuilder();
             sb.Append(Environment.NewLine);
             sb.AppendLine("=========================");
             sb.AppendLine("Registered Encryptor Info");
-            foreach (var encryptor in _registeredEncryptors)
+            foreach (KeyValuePair<string, Type> encryptor in _registeredEncryptors)
             {
-                sb.AppendLine(String.Format("{0}=>{1}", encryptor.Key, encryptor.Value.Name));
+                sb.AppendLine(string.Format("{0}=>{1}", encryptor.Key, encryptor.Value.Name));
             }
 
             sb.AppendLine("=========================");

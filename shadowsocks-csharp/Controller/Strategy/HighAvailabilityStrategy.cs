@@ -3,7 +3,6 @@ using Shadowsocks.Model;
 using System;
 using System.Collections.Generic;
 using System.Net;
-using System.Text;
 
 namespace Shadowsocks.Controller.Strategy
 {
@@ -43,32 +42,28 @@ namespace Shadowsocks.Controller.Strategy
             _serverStatus = new Dictionary<Server, ServerStatus>();
         }
 
-        public string Name
-        {
-            get { return I18N.GetString("High Availability"); }
-        }
+        public string Name => I18N.GetString("High Availability");
 
-        public string ID
-        {
-            get { return "com.shadowsocks.strategy.ha"; }
-        }
+        public string ID => "com.shadowsocks.strategy.ha";
 
         public void ReloadServers()
         {
             // make a copy to avoid locking
-            var newServerStatus = new Dictionary<Server, ServerStatus>(_serverStatus);
+            Dictionary<Server, ServerStatus> newServerStatus = new Dictionary<Server, ServerStatus>(_serverStatus);
 
-            foreach (var server in _controller.GetCurrentConfiguration().configs)
+            foreach (Server server in _controller.GetCurrentConfiguration().configs)
             {
                 if (!newServerStatus.ContainsKey(server))
                 {
-                    var status = new ServerStatus();
-                    status.server = server;
-                    status.lastFailure = DateTime.MinValue;
-                    status.lastRead = DateTime.Now;
-                    status.lastWrite = DateTime.Now;
-                    status.latency = new TimeSpan(0, 0, 0, 0, 10);
-                    status.lastTimeDetectLatency = DateTime.Now;
+                    ServerStatus status = new ServerStatus
+                    {
+                        server = server,
+                        lastFailure = DateTime.MinValue,
+                        lastRead = DateTime.Now,
+                        lastWrite = DateTime.Now,
+                        latency = new TimeSpan(0, 0, 0, 0, 10),
+                        lastTimeDetectLatency = DateTime.Now
+                    };
                     newServerStatus[server] = status;
                 }
                 else
@@ -106,18 +101,18 @@ namespace Shadowsocks.Controller.Strategy
             ServerStatus oldServer = _currentServer;
             List<ServerStatus> servers = new List<ServerStatus>(_serverStatus.Values);
             DateTime now = DateTime.Now;
-            foreach (var status in servers)
+            foreach (ServerStatus status in servers)
             {
                 // all of failure, latency, (lastread - lastwrite) normalized to 1000, then
                 // 100 * failure - 2 * latency - 0.5 * (lastread - lastwrite)
                 status.score =
                     100 * 1000 * Math.Min(5 * 60, (now - status.lastFailure).TotalSeconds)
-                    -2 * 5 * (Math.Min(2000, status.latency.TotalMilliseconds) / (1 + (now - status.lastTimeDetectLatency).TotalSeconds / 30 / 10) +
+                    - 2 * 5 * (Math.Min(2000, status.latency.TotalMilliseconds) / (1 + (now - status.lastTimeDetectLatency).TotalSeconds / 30 / 10) +
                     -0.5 * 200 * Math.Min(5, (status.lastRead - status.lastWrite).TotalSeconds));
-                logger.Debug(String.Format("server: {0} latency:{1} score: {2}", status.server.ToString(), status.latency, status.score));
+                logger.Debug(string.Format("server: {0} latency:{1} score: {2}", status.server.ToString(), status.latency, status.score));
             }
             ServerStatus max = null;
-            foreach (var status in servers)
+            foreach (ServerStatus status in servers)
             {
                 if (max == null)
                 {
@@ -145,8 +140,7 @@ namespace Shadowsocks.Controller.Strategy
         {
             logger.Debug($"latency: {server.ToString()} {latency}");
 
-            ServerStatus status;
-            if (_serverStatus.TryGetValue(server, out status))
+            if (_serverStatus.TryGetValue(server, out ServerStatus status))
             {
                 status.latency = latency;
                 status.lastTimeDetectLatency = DateTime.Now;
@@ -157,8 +151,7 @@ namespace Shadowsocks.Controller.Strategy
         {
             logger.Debug($"last read: {server.ToString()}");
 
-            ServerStatus status;
-            if (_serverStatus.TryGetValue(server, out status))
+            if (_serverStatus.TryGetValue(server, out ServerStatus status))
             {
                 status.lastRead = DateTime.Now;
             }
@@ -168,8 +161,7 @@ namespace Shadowsocks.Controller.Strategy
         {
             logger.Debug($"last write: {server.ToString()}");
 
-            ServerStatus status;
-            if (_serverStatus.TryGetValue(server, out status))
+            if (_serverStatus.TryGetValue(server, out ServerStatus status))
             {
                 status.lastWrite = DateTime.Now;
             }
@@ -179,8 +171,7 @@ namespace Shadowsocks.Controller.Strategy
         {
             logger.Debug($"failure: {server.ToString()}");
 
-            ServerStatus status;
-            if (_serverStatus.TryGetValue(server, out status))
+            if (_serverStatus.TryGetValue(server, out ServerStatus status))
             {
                 status.lastFailure = DateTime.Now;
             }

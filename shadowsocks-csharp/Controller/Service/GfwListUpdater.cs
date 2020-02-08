@@ -1,14 +1,13 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Net;
-using System.Text;
-
 using Newtonsoft.Json;
 using NLog;
 using Shadowsocks.Model;
 using Shadowsocks.Properties;
 using Shadowsocks.Util;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Net;
+using System.Text;
 
 namespace Shadowsocks.Controller
 {
@@ -28,7 +27,7 @@ namespace Shadowsocks.Controller
 
             public ResultEventArgs(bool success)
             {
-                this.Success = success;
+                Success = success;
             }
         }
 
@@ -122,12 +121,15 @@ var __RULES__ = {JsonConvert.SerializeObject(gfwLines, Formatting.Indented)};
         private static List<string> ParseToValidList(string content)
         {
             List<string> valid_lines = new List<string>();
-            using (var sr = new StringReader(content))
+            using (StringReader sr = new StringReader(content))
             {
-                foreach (var line in sr.NonWhiteSpaceLines())
+                foreach (string line in sr.NonWhiteSpaceLines())
                 {
                     if (line.BeginWithAny(IgnoredLineBegins))
+                    {
                         continue;
+                    }
+
                     valid_lines.Add(line);
                 }
             }

@@ -1,13 +1,13 @@
-﻿using System;
-using System.IO;
-using System.Runtime.InteropServices;
-using System.Security;
-using System.Text;
-using NLog;
+﻿using NLog;
 using Shadowsocks.Controller;
 using Shadowsocks.Encryption.Exception;
 using Shadowsocks.Properties;
 using Shadowsocks.Util;
+using System;
+using System.IO;
+using System.Runtime.InteropServices;
+using System.Security;
+using System.Text;
 
 namespace Shadowsocks.Encryption
 {
@@ -44,7 +44,7 @@ namespace Shadowsocks.Encryption
 
         public static IntPtr GetCipherInfo(string cipherName)
         {
-            var name = Encoding.ASCII.GetBytes(cipherName);
+            byte[] name = Encoding.ASCII.GetBytes(cipherName);
             Array.Resize(ref name, name.Length + 1);
             return EVP_get_cipherbyname(name);
         }
@@ -57,11 +57,14 @@ namespace Shadowsocks.Encryption
         /// <param name="nonce"></param>
         public static void SetCtxNonce(IntPtr ctx, byte[] nonce, bool isEncrypt)
         {
-            var ret = EVP_CipherInit_ex(ctx, IntPtr.Zero,
+            int ret = EVP_CipherInit_ex(ctx, IntPtr.Zero,
                 IntPtr.Zero, null,
                 nonce,
                 isEncrypt ? OPENSSL_ENCRYPT : OPENSSL_DECRYPT);
-            if (ret != 1) throw new System.Exception("openssl: fail to set AEAD nonce");
+            if (ret != 1)
+            {
+                throw new System.Exception("openssl: fail to set AEAD nonce");
+            }
         }
 
         public static void AEADGetTag(IntPtr ctx, byte[] tagbuf, int taglen)
@@ -70,9 +73,12 @@ namespace Shadowsocks.Encryption
             try
             {
                 tagBufIntPtr = Marshal.AllocHGlobal(taglen);
-                var ret = EVP_CIPHER_CTX_ctrl(ctx,
+                int ret = EVP_CIPHER_CTX_ctrl(ctx,
                     EVP_CTRL_AEAD_GET_TAG, taglen, tagBufIntPtr);
-                if (ret != 1) throw new CryptoErrorException("openssl: fail to get AEAD tag");
+                if (ret != 1)
+                {
+                    throw new CryptoErrorException("openssl: fail to get AEAD tag");
+                }
                 // take tag from unmanaged memory
                 Marshal.Copy(tagBufIntPtr, tagbuf, 0, taglen);
             }
@@ -96,11 +102,13 @@ namespace Shadowsocks.Encryption
                 // copy tag to unmanaged memory
                 Marshal.Copy(tagbuf, 0, tagBufIntPtr, taglen);
 
-                var ret = EVP_CIPHER_CTX_ctrl(ctx,
+                int ret = EVP_CIPHER_CTX_ctrl(ctx,
                     EVP_CTRL_AEAD_SET_TAG, taglen, tagBufIntPtr);
 
-                if (ret != 1) throw new CryptoErrorException("openssl: fail to set AEAD tag");
-
+                if (ret != 1)
+                {
+                    throw new CryptoErrorException("openssl: fail to set AEAD tag");
+                }
             }
             finally
             {

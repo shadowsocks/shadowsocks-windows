@@ -1,5 +1,4 @@
-﻿using Shadowsocks.Controller;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
@@ -18,15 +17,19 @@ namespace Shadowsocks.Util
             {
                 return Enumerable.Empty<TControl>();
             }
-            var children = control.Controls.OfType<TControl>().ToList();
+            List<TControl> children = control.Controls.OfType<TControl>().ToList();
             return children.SelectMany(GetChildControls<TControl>).Concat(children);
         }
 
         public static IEnumerable<MenuItem> GetMenuItems(Menu m)
         {
-            if (m?.MenuItems == null || m.MenuItems.Count == 0) return Enumerable.Empty<MenuItem>();
-            var children = new List<MenuItem>();
-            foreach (var item in m.MenuItems)
+            if (m?.MenuItems == null || m.MenuItems.Count == 0)
+            {
+                return Enumerable.Empty<MenuItem>();
+            }
+
+            List<MenuItem> children = new List<MenuItem>();
+            foreach (object item in m.MenuItems)
             {
                 children.Add((MenuItem)item);
             }
@@ -38,12 +41,17 @@ namespace Shadowsocks.Util
         public static void SetNotifyIconText(NotifyIcon ni, string text)
         {
             if (text.Length >= 128)
+            {
                 throw new ArgumentOutOfRangeException("Text limited to 127 characters");
+            }
+
             Type t = typeof(NotifyIcon);
             BindingFlags hidden = BindingFlags.NonPublic | BindingFlags.Instance;
             t.GetField("text", hidden).SetValue(ni, text);
             if ((bool)t.GetField("added", hidden).GetValue(ni))
+            {
                 t.GetMethod("UpdateIcon", hidden).Invoke(ni, new object[] { true });
+            }
         }
 
         public static Bitmap AddBitmapOverlay(Bitmap original, params Bitmap[] overlays)

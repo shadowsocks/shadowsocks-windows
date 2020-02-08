@@ -1,8 +1,8 @@
-﻿using System;
+﻿using Shadowsocks.Util.Sockets;
+using System;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
-using Shadowsocks.Util.Sockets;
 
 namespace Shadowsocks.Proxy
 {
@@ -42,7 +42,7 @@ namespace Shadowsocks.Proxy
         {
             // do nothing
 
-            var r = new FakeAsyncResult(state);
+            FakeAsyncResult r = new FakeAsyncResult(state);
             callback?.Invoke(r);
         }
 

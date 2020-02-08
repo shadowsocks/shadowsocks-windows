@@ -54,7 +54,11 @@ namespace Shadowsocks.View
             {
                 get
                 {
-                    if (!init) Init();
+                    if (!init)
+                    {
+                        Init();
+                    }
+
                     return allMethods;
                 }
             }
@@ -63,13 +67,13 @@ namespace Shadowsocks.View
             private static Dictionary<string, EncryptionMethod> methodByName = new Dictionary<string, EncryptionMethod>();
             private static void Init()
             {
-                var all = new List<EncryptionMethod>();
+                List<EncryptionMethod> all = new List<EncryptionMethod>();
 
                 all.AddRange(inuseMethod.Select(i => new EncryptionMethod(i, false)));
                 all.AddRange(deprecatedMethod.Select(d => new EncryptionMethod(d, true)));
 
                 allMethods = all.ToArray();
-                foreach (var item in all)
+                foreach (EncryptionMethod item in all)
                 {
                     methodByName[item.name] = item;
                 }
@@ -78,7 +82,11 @@ namespace Shadowsocks.View
 
             public static EncryptionMethod GetMethod(string name)
             {
-                if (!init) Init();
+                if (!init)
+                {
+                    Init();
+                }
+
                 return methodByName[name];
             }
 
@@ -161,7 +169,9 @@ namespace Shadowsocks.View
                 if (server != null)
                 {
                     if (isSave || isCopy)
+                    {
                         Configuration.CheckServer(server);
+                    }
 
                     _modifiedConfiguration.configs[_lastSelectedIndex] = server;
                 }
@@ -219,7 +229,9 @@ namespace Shadowsocks.View
                 return true;
             }
             else
+            {
                 return false;
+            }
         }
 
         #region GetServerDetailsFromUI Check
@@ -235,14 +247,18 @@ namespace Shadowsocks.View
                     DialogResult result = MessageBox.Show(I18N.GetString("Whether to discard unconfigured servers"), I18N.GetString("Operation failure"), MessageBoxButtons.OKCancel);
 
                     if (result == DialogResult.OK)
+                    {
                         return null;
+                    }
                 }
                 else if (isChange && !isSave && !isCopy)
                 {
-                    var result = MessageBox.Show(I18N.GetString("Invalid server address, Cannot automatically save or discard changes"), I18N.GetString("Auto save failed"), MessageBoxButtons.OKCancel);
+                    DialogResult result = MessageBox.Show(I18N.GetString("Invalid server address, Cannot automatically save or discard changes"), I18N.GetString("Auto save failed"), MessageBoxButtons.OKCancel);
 
                     if (result == DialogResult.Cancel)
+                    {
                         return false;
+                    }
                     else
                     {
                         address = _modifiedConfiguration.configs[_lastSelectedIndex].server;
@@ -273,14 +289,18 @@ namespace Shadowsocks.View
                     DialogResult result = MessageBox.Show(I18N.GetString("Whether to discard unconfigured servers"), I18N.GetString("Operation failure"), MessageBoxButtons.OKCancel);
 
                     if (result == DialogResult.OK)
+                    {
                         return null;
+                    }
                 }
                 else if (isChange && !isSave && !isCopy)
                 {
-                    var result = MessageBox.Show(I18N.GetString("Illegal port number format, Cannot automatically save or discard changes"), I18N.GetString("Auto save failed"), MessageBoxButtons.OKCancel);
+                    DialogResult result = MessageBox.Show(I18N.GetString("Illegal port number format, Cannot automatically save or discard changes"), I18N.GetString("Auto save failed"), MessageBoxButtons.OKCancel);
 
                     if (result == DialogResult.Cancel)
+                    {
                         return false;
+                    }
                     else
                     {
                         addressPort = _modifiedConfiguration.configs[_lastSelectedIndex].server_port;
@@ -312,14 +332,18 @@ namespace Shadowsocks.View
                     DialogResult result = MessageBox.Show(I18N.GetString("Whether to discard unconfigured servers"), I18N.GetString("Operation failure"), MessageBoxButtons.OKCancel);
 
                     if (result == DialogResult.OK)
+                    {
                         return null;
+                    }
                 }
                 else if (isChange && !isSave && !isCopy)
                 {
-                    var result = MessageBox.Show(I18N.GetString("Password can not be blank, Cannot automatically save or discard changes"), I18N.GetString("Auto save failed"), MessageBoxButtons.OKCancel);
+                    DialogResult result = MessageBox.Show(I18N.GetString("Password can not be blank, Cannot automatically save or discard changes"), I18N.GetString("Auto save failed"), MessageBoxButtons.OKCancel);
 
                     if (result == DialogResult.Cancel)
+                    {
                         return false;
+                    }
                     else
                     {
                         password = _modifiedConfiguration.configs[_lastSelectedIndex].password;
@@ -350,14 +374,18 @@ namespace Shadowsocks.View
                     DialogResult result = MessageBox.Show(I18N.GetString("Whether to discard unconfigured servers"), I18N.GetString("Operation failure"), MessageBoxButtons.OKCancel);
 
                     if (result == DialogResult.OK)
+                    {
                         return null;
+                    }
                 }
                 else if (isChange && !isSave && !isCopy)
                 {
-                    var result = MessageBox.Show(I18N.GetString("Illegal timeout format, Cannot automatically save or discard changes"), I18N.GetString("Auto save failed"), MessageBoxButtons.OKCancel);
+                    DialogResult result = MessageBox.Show(I18N.GetString("Illegal timeout format, Cannot automatically save or discard changes"), I18N.GetString("Auto save failed"), MessageBoxButtons.OKCancel);
 
                     if (result == DialogResult.Cancel)
+                    {
                         return false;
+                    }
                     else
                     {
                         timeout = _modifiedConfiguration.configs[_lastSelectedIndex].timeout;

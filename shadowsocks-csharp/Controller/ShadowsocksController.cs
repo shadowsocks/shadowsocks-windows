@@ -1,4 +1,9 @@
-﻿using System;
+﻿using NLog;
+using Shadowsocks.Controller.Service;
+using Shadowsocks.Controller.Strategy;
+using Shadowsocks.Model;
+using Shadowsocks.Util;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
@@ -9,11 +14,6 @@ using System.Text;
 using System.Threading;
 using System.Web;
 using System.Windows.Forms;
-using NLog;
-using Shadowsocks.Controller.Service;
-using Shadowsocks.Controller.Strategy;
-using Shadowsocks.Model;
-using Shadowsocks.Util;
 
 namespace Shadowsocks.Controller
 {
@@ -128,7 +128,7 @@ namespace Shadowsocks.Controller
 
         public IStrategy GetCurrentStrategy()
         {
-            foreach (var strategy in _strategyManager.GetStrategies())
+            foreach (IStrategy strategy in _strategyManager.GetStrategies())
             {
                 if (strategy.ID == _config.strategy)
                 {
@@ -154,7 +154,7 @@ namespace Shadowsocks.Controller
 
         public EndPoint GetPluginLocalEndPointIfConfigured(Server server)
         {
-            var plugin = _pluginsByServer.GetOrAdd(
+            Sip003Plugin plugin = _pluginsByServer.GetOrAdd(
                 server,
                 x => Sip003Plugin.CreateIfConfigured(x, _config.showPluginOutput));
 
@@ -199,13 +199,17 @@ namespace Shadowsocks.Controller
             try
             {
                 if (ssURL.IsNullOrEmpty() || ssURL.IsWhiteSpace())
+                {
                     return false;
+                }
 
-                var servers = Server.GetServers(ssURL);
+                List<Server> servers = Server.GetServers(ssURL);
                 if (servers == null || servers.Count == 0)
+                {
                     return false;
+                }
 
-                foreach (var server in servers)
+                foreach (Server server in servers)
                 {
                     _config.configs.Add(server);
                 }
@@ -306,7 +310,7 @@ namespace Shadowsocks.Controller
 
         private void StopPlugins()
         {
-            foreach (var serverAndPlugin in _pluginsByServer)
+            foreach (KeyValuePair<Server, Sip003Plugin> serverAndPlugin in _pluginsByServer)
             {
                 serverAndPlugin.Value?.Dispose();
             }
@@ -517,7 +521,7 @@ namespace Shadowsocks.Controller
             privoxyRunner.Stop();
             try
             {
-                var strategy = GetCurrentStrategy();
+                IStrategy strategy = GetCurrentStrategy();
                 strategy?.ReloadServers();
 
                 StartPlugin();
@@ -561,7 +565,7 @@ namespace Shadowsocks.Controller
 
         private void StartPlugin()
         {
-            var server = _config.GetCurrentServer();
+            Server server = _config.GetCurrentServer();
             GetPluginLocalEndPointIfConfigured(server);
         }
 
@@ -637,7 +641,9 @@ namespace Shadowsocks.Controller
 
                 trafficPerSecondQueue.Enqueue(current);
                 if (trafficPerSecondQueue.Count > queueMaxSize)
+                {
                     trafficPerSecondQueue.Dequeue();
+                }
 
                 TrafficChanged?.Invoke(this, new EventArgs());
 

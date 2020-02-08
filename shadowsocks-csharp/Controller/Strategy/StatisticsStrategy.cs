@@ -1,12 +1,11 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using NLog;
+using Shadowsocks.Model;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading;
-
-using Newtonsoft.Json;
-using NLog;
-using Shadowsocks.Model;
 
 namespace Shadowsocks.Controller.Strategy
 {
@@ -27,8 +26,8 @@ namespace Shadowsocks.Controller.Strategy
         public StatisticsStrategy(ShadowsocksController controller)
         {
             _controller = controller;
-            var servers = controller.GetCurrentConfiguration().configs;
-            var randomIndex = new Random().Next() % servers.Count;
+            List<Server> servers = controller.GetCurrentConfiguration().configs;
+            int randomIndex = new Random().Next() % servers.Count;
             _currentServer = servers[randomIndex];  //choose a server randomly at first
             // FIXME: consider Statistics and Config changing asynchrously.
             _timer = new Timer(ReloadStatisticsAndChooseAServer);
@@ -37,7 +36,7 @@ namespace Shadowsocks.Controller.Strategy
         private void ReloadStatisticsAndChooseAServer(object obj)
         {
             logger.Debug("Reloading statistics and choose a new server....");
-            var servers = _controller.GetCurrentConfiguration().configs;
+            List<Server> servers = _controller.GetCurrentConfiguration().configs;
             LoadStatistics();
             ChooseNewServer(servers);
         }
@@ -54,22 +53,26 @@ namespace Shadowsocks.Controller.Strategy
         //server with highest score will be choosen
         private float? GetScore(string identifier, List<StatisticsRecord> records)
         {
-            var config = _controller.StatisticsConfiguration;
+            StatisticsStrategyConfiguration config = _controller.StatisticsConfiguration;
             float? score = null;
 
-            var averageRecord = new StatisticsRecord(identifier,
+            StatisticsRecord averageRecord = new StatisticsRecord(identifier,
                 records.Where(record => record.MaxInboundSpeed != null).Select(record => record.MaxInboundSpeed.Value).ToList(),
                 records.Where(record => record.MaxOutboundSpeed != null).Select(record => record.MaxOutboundSpeed.Value).ToList(),
                 records.Where(record => record.AverageLatency != null).Select(record => record.AverageLatency.Value).ToList());
             averageRecord.SetResponse(records.Select(record => record.AverageResponse).ToList());
 
-            foreach (var calculation in config.Calculations)
+            foreach (KeyValuePair<string, float> calculation in config.Calculations)
             {
-                var name = calculation.Key;
-                var field = typeof (StatisticsRecord).GetField(name);
+                string name = calculation.Key;
+                System.Reflection.FieldInfo field = typeof(StatisticsRecord).GetField(name);
                 dynamic value = field?.GetValue(averageRecord);
-                var factor = calculation.Value;
-                if (value == null || factor.Equals(0)) continue;
+                float factor = calculation.Value;
+                if (value == null || factor.Equals(0))
+                {
+                    continue;
+                }
+
                 score = score ?? 0;
                 score += value * factor;
             }
@@ -90,15 +93,15 @@ namespace Shadowsocks.Controller.Strategy
             try
             {
                 var serversWithStatistics = (from server in servers
-                    let id = server.Identifier()
-                    where _filteredStatistics.ContainsKey(id)
-                    let score = GetScore(id, _filteredStatistics[id])
-                    where score != null
-                    select new
-                    {
-                        server,
-                        score
-                    }).ToArray();
+                                             let id = server.Identifier()
+                                             where _filteredStatistics.ContainsKey(id)
+                                             let score = GetScore(id, _filteredStatistics[id])
+                                             where score != null
+                                             select new
+                                             {
+                                                 server,
+                                                 score
+                                             }).ToArray();
 
                 if (serversWithStatistics.Length < 2)
                 {

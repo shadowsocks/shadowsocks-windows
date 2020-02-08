@@ -19,7 +19,7 @@ namespace Shadowsocks.Util.SystemProxy
 
         private const string _userWininetConfigFile = "user-wininet.json";
 
-        private readonly static string[] _lanIP = {
+        private static readonly string[] _lanIP = {
             "<local>",
             "localhost",
             "127.*",
@@ -104,10 +104,10 @@ namespace Shadowsocks.Util.SystemProxy
             else
             {
                 // restore user settings
-                var flags = _userSettings.Flags;
-                var proxy_server = _userSettings.ProxyServer ?? "-";
-                var bypass_list = _userSettings.BypassList ?? "-";
-                var pac_url = _userSettings.PacUrl ?? "-";
+                string flags = _userSettings.Flags;
+                string proxy_server = _userSettings.ProxyServer ?? "-";
+                string bypass_list = _userSettings.BypassList ?? "-";
+                string pac_url = _userSettings.PacUrl ?? "-";
                 arguments = $"set {flags} {proxy_server} {bypass_list} {pac_url}";
 
                 // have to get new settings
@@ -145,7 +145,7 @@ namespace Shadowsocks.Util.SystemProxy
             using (AutoResetEvent outputWaitHandle = new AutoResetEvent(false))
             using (AutoResetEvent errorWaitHandle = new AutoResetEvent(false))
             {
-                using (var process = new Process())
+                using (Process process = new Process())
                 {
                     // Configure the process using the StartInfo properties.
                     process.StartInfo.FileName = Utils.GetTempPath("sysproxy.exe");
@@ -201,10 +201,10 @@ namespace Shadowsocks.Util.SystemProxy
                         // log the arguments
                         throw new ProxyException(ProxyExceptionType.FailToRun, process.StartInfo.Arguments, e);
                     }
-                    var stderr = error.ToString();
-                    var stdout = output.ToString();
+                    string stderr = error.ToString();
+                    string stdout = output.ToString();
 
-                    var exitCode = process.ExitCode;
+                    int exitCode = process.ExitCode;
                     if (exitCode != (int)RET_ERRORS.RET_NO_ERROR)
                     {
                         throw new ProxyException(ProxyExceptionType.SysproxyExitError, stderr);
@@ -253,7 +253,10 @@ namespace Shadowsocks.Util.SystemProxy
             }
             finally
             {
-                if (_userSettings == null) _userSettings = new SysproxyConfig();
+                if (_userSettings == null)
+                {
+                    _userSettings = new SysproxyConfig();
+                }
             }
         }
 
@@ -278,12 +281,32 @@ namespace Shadowsocks.Util.SystemProxy
             _userSettings.Flags = userSettingsArr[0];
 
             // handle output from WinINET
-            if (userSettingsArr[1] == "(null)") _userSettings.ProxyServer = null;
-            else _userSettings.ProxyServer = userSettingsArr[1];
-            if (userSettingsArr[2] == "(null)") _userSettings.BypassList = null;
-            else _userSettings.BypassList = userSettingsArr[2];
-            if (userSettingsArr[3] == "(null)") _userSettings.PacUrl = null;
-            else _userSettings.PacUrl = userSettingsArr[3];
+            if (userSettingsArr[1] == "(null)")
+            {
+                _userSettings.ProxyServer = null;
+            }
+            else
+            {
+                _userSettings.ProxyServer = userSettingsArr[1];
+            }
+
+            if (userSettingsArr[2] == "(null)")
+            {
+                _userSettings.BypassList = null;
+            }
+            else
+            {
+                _userSettings.BypassList = userSettingsArr[2];
+            }
+
+            if (userSettingsArr[3] == "(null)")
+            {
+                _userSettings.PacUrl = null;
+            }
+            else
+            {
+                _userSettings.PacUrl = userSettingsArr[3];
+            }
 
             _userSettings.UserSettingsRecorded = true;
         }

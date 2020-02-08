@@ -1,10 +1,10 @@
+using Shadowsocks.Controller;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Text;
-using System.Web;
-using Shadowsocks.Controller;
 using System.Text.RegularExpressions;
+using System.Web;
 
 namespace Shadowsocks.Model
 {
@@ -84,13 +84,15 @@ namespace Shadowsocks.Model
 
         private static Server ParseLegacyURL(string ssURL)
         {
-            var match = UrlFinder.Match(ssURL);
+            Match match = UrlFinder.Match(ssURL);
             if (!match.Success)
+            {
                 return null;
+            }
 
             Server server = new Server();
-            var base64 = match.Groups["base64"].Value.TrimEnd('/');
-            var tag = match.Groups["tag"].Value;
+            string base64 = match.Groups["base64"].Value.TrimEnd('/');
+            string tag = match.Groups["tag"].Value;
             if (!tag.IsNullOrEmpty())
             {
                 server.remarks = HttpUtility.UrlDecode(tag, Encoding.UTF8);
@@ -106,7 +108,10 @@ namespace Shadowsocks.Model
                 return null;
             }
             if (!details.Success)
+            {
                 return null;
+            }
+
             server.method = details.Groups["method"].Value;
             server.password = details.Groups["password"].Value;
             server.server = details.Groups["hostname"].Value;
@@ -116,7 +121,7 @@ namespace Shadowsocks.Model
 
         public static List<Server> GetServers(string ssURL)
         {
-            var serverUrls = ssURL.Split('\r', '\n', ' ');
+            string[] serverUrls = ssURL.Split('\r', '\n', ' ');
 
             List<Server> servers = new List<Server>();
             foreach (string serverUrl in serverUrls)

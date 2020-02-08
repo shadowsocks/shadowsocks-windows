@@ -1,10 +1,10 @@
-﻿using System;
+﻿using Shadowsocks.Controller;
+using Shadowsocks.Util.Sockets;
+using System;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
-using Shadowsocks.Controller;
-using Shadowsocks.Util.Sockets;
 
 namespace Shadowsocks.Proxy
 {
@@ -50,9 +50,11 @@ namespace Shadowsocks.Proxy
 
         public void BeginConnectProxy(EndPoint remoteEP, AsyncCallback callback, object state)
         {
-            var st = new Socks5State();
-            st.Callback = callback;
-            st.AsyncState = state;
+            Socks5State st = new Socks5State
+            {
+                Callback = callback,
+                AsyncState = state
+            };
 
             ProxyEndPoint = remoteEP;
 
@@ -61,7 +63,7 @@ namespace Shadowsocks.Proxy
 
         public void EndConnectProxy(IAsyncResult asyncResult)
         {
-            var state = ((FakeAsyncResult)asyncResult).innerState;
+            Socks5State state = ((FakeAsyncResult)asyncResult).innerState;
 
             if (state.ex != null)
             {
@@ -78,14 +80,14 @@ namespace Shadowsocks.Proxy
             byte atyp = 0;
             int port;
 
-            var dep = destEndPoint as DnsEndPoint;
+            DnsEndPoint dep = destEndPoint as DnsEndPoint;
             if (dep != null)
             {
                 // is a domain name, we will leave it to server
 
                 atyp = 3; // DOMAINNAME
-                var enc = Encoding.UTF8;
-                var hostByteCount = enc.GetByteCount(dep.Host);
+                Encoding enc = Encoding.UTF8;
+                int hostByteCount = enc.GetByteCount(dep.Host);
 
                 request = new byte[4 + 1/*length byte*/ + hostByteCount + 2];
                 request[4] = (byte)hostByteCount;
@@ -108,8 +110,8 @@ namespace Shadowsocks.Proxy
                     default:
                         throw new Exception(I18N.GetString("Proxy request failed"));
                 }
-                port = ((IPEndPoint) DestEndPoint).Port;
-                var addr = ((IPEndPoint)DestEndPoint).Address.GetAddressBytes();
+                port = ((IPEndPoint)DestEndPoint).Port;
+                byte[] addr = ((IPEndPoint)DestEndPoint).Address.GetAddressBytes();
                 Array.Copy(addr, 0, request, 4, request.Length - 4 - 2);
             }
 
@@ -118,19 +120,21 @@ namespace Shadowsocks.Proxy
             request[1] = 1;
             request[2] = 0;
             request[3] = atyp;
-            request[request.Length - 2] = (byte) ((port >> 8) & 0xff);
-            request[request.Length - 1] = (byte) (port & 0xff);
+            request[request.Length - 2] = (byte)((port >> 8) & 0xff);
+            request[request.Length - 1] = (byte)(port & 0xff);
 
-            var st = new Socks5State();
-            st.Callback = callback;
-            st.AsyncState = state;
+            Socks5State st = new Socks5State
+            {
+                Callback = callback,
+                AsyncState = state
+            };
 
             _remote.BeginSend(request, 0, request.Length, 0, Socks5RequestSendCallback, st);
         }
 
         public void EndConnectDest(IAsyncResult asyncResult)
         {
-            var state = ((FakeAsyncResult)asyncResult).innerState;
+            Socks5State state = ((FakeAsyncResult)asyncResult).innerState;
 
             if (state.ex != null)
             {
@@ -169,18 +173,18 @@ namespace Shadowsocks.Proxy
         {
             _remote.Dispose();
         }
-        
+
 
         private void ConnectCallback(IAsyncResult ar)
         {
-            var state = (Socks5State) ar.AsyncState;
+            Socks5State state = (Socks5State)ar.AsyncState;
             try
             {
                 _remote.EndConnect(ar);
 
                 _remote.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, true);
 
-                byte[] handshake = {5, 1, 0};
+                byte[] handshake = { 5, 1, 0 };
                 _remote.BeginSend(handshake, 0, handshake.Length, 0, Socks5HandshakeSendCallback, state);
             }
             catch (Exception ex)
@@ -192,7 +196,7 @@ namespace Shadowsocks.Proxy
 
         private void Socks5HandshakeSendCallback(IAsyncResult ar)
         {
-            var state = (Socks5State)ar.AsyncState;
+            Socks5State state = (Socks5State)ar.AsyncState;
             try
             {
                 _remote.EndSend(ar);
@@ -209,10 +213,10 @@ namespace Shadowsocks.Proxy
         private void Socks5HandshakeReceiveCallback(IAsyncResult ar)
         {
             Exception ex = null;
-            var state = (Socks5State)ar.AsyncState;
+            Socks5State state = (Socks5State)ar.AsyncState;
             try
             {
-                var bytesRead = _remote.EndReceive(ar);
+                int bytesRead = _remote.EndReceive(ar);
                 if (bytesRead >= 2)
                 {
                     if (_receiveBuffer[0] != 5 || _receiveBuffer[1] != 0)
@@ -236,7 +240,7 @@ namespace Shadowsocks.Proxy
 
         private void Socks5RequestSendCallback(IAsyncResult ar)
         {
-            var state = (Socks5State)ar.AsyncState;
+            Socks5State state = (Socks5State)ar.AsyncState;
             try
             {
                 _remote.EndSend(ar);
@@ -252,10 +256,10 @@ namespace Shadowsocks.Proxy
 
         private void Socks5ReplyReceiveCallback(IAsyncResult ar)
         {
-            var state = (Socks5State)ar.AsyncState;
+            Socks5State state = (Socks5State)ar.AsyncState;
             try
             {
-                var bytesRead = _remote.EndReceive(ar);
+                int bytesRead = _remote.EndReceive(ar);
                 if (bytesRead >= 4)
                 {
                     if (_receiveBuffer[0] == 5 && _receiveBuffer[1] == 0)
@@ -300,11 +304,11 @@ namespace Shadowsocks.Proxy
         private void Socks5ReplyReceiveCallback2(IAsyncResult ar)
         {
             Exception ex = null;
-            var state = (Socks5State)ar.AsyncState;
+            Socks5State state = (Socks5State)ar.AsyncState;
             try
             {
-                var bytesRead = _remote.EndReceive(ar);
-                var bytesNeedSkip = state.BytesToRead;
+                int bytesRead = _remote.EndReceive(ar);
+                int bytesNeedSkip = state.BytesToRead;
 
                 if (bytesRead < bytesNeedSkip)
                 {

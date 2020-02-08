@@ -31,7 +31,11 @@ namespace Shadowsocks.Encryption
 
         public static void GetBytes(byte[] buf, int len)
         {
-            if (_rng == null) Init();
+            if (_rng == null)
+            {
+                Init();
+            }
+
             try
             {
                 _rng.GetBytes(buf, 0, len);

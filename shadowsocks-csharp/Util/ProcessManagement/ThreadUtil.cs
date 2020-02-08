@@ -13,12 +13,12 @@ namespace Shadowsocks.Util.ProcessManagement
          */
         public static string GetCommandLine(this Process process)
         {
-            var commandLine = new StringBuilder(process.MainModule.FileName);
+            StringBuilder commandLine = new StringBuilder(process.MainModule.FileName);
 
             commandLine.Append(" ");
-            using (var searcher = new ManagementObjectSearcher("SELECT CommandLine FROM Win32_Process WHERE ProcessId = " + process.Id))
+            using (ManagementObjectSearcher searcher = new ManagementObjectSearcher("SELECT CommandLine FROM Win32_Process WHERE ProcessId = " + process.Id))
             {
-                foreach (var @object in searcher.Get())
+                foreach (ManagementBaseObject @object in searcher.Get())
                 {
                     commandLine.Append(@object["CommandLine"]);
                     commandLine.Append(" ");

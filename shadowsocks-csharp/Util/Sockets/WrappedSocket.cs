@@ -34,15 +34,17 @@ namespace Shadowsocks.Util.Sockets
             }
             if (Connected)
             {
-                throw new SocketException((int) SocketError.IsConnected);
+                throw new SocketException((int)SocketError.IsConnected);
             }
 
-            var arg = new SocketAsyncEventArgs();
-            arg.RemoteEndPoint = remoteEP;
+            SocketAsyncEventArgs arg = new SocketAsyncEventArgs
+            {
+                RemoteEndPoint = remoteEP
+            };
             arg.Completed += OnTcpConnectCompleted;
             arg.UserToken = new TcpUserToken(callback, state);
 
-            if(!Socket.ConnectAsync(SocketType.Stream, ProtocolType.Tcp, arg))
+            if (!Socket.ConnectAsync(SocketType.Stream, ProtocolType.Tcp, arg))
             {
                 OnTcpConnectCompleted(this, arg);
             }
@@ -74,13 +76,13 @@ namespace Shadowsocks.Util.Sockets
             using (args)
             {
                 args.Completed -= OnTcpConnectCompleted;
-                var token = (TcpUserToken) args.UserToken;
+                TcpUserToken token = (TcpUserToken)args.UserToken;
 
                 if (args.SocketError != SocketError.Success)
                 {
-                    var ex = args.ConnectByNameError ?? new SocketException((int) args.SocketError);
+                    Exception ex = args.ConnectByNameError ?? new SocketException((int)args.SocketError);
 
-                    var r = new FakeAsyncResult()
+                    FakeAsyncResult r = new FakeAsyncResult()
                     {
                         AsyncState = token.AsyncState,
                         InternalException = ex
@@ -90,7 +92,7 @@ namespace Shadowsocks.Util.Sockets
                 }
                 else
                 {
-                    var lockTaken = false;
+                    bool lockTaken = false;
                     if (!_socketSyncLock.IsHeldByCurrentThread)
                     {
                         _socketSyncLock.TryEnter(ref lockTaken);
@@ -109,7 +111,7 @@ namespace Shadowsocks.Util.Sockets
                                 _activeSocket.FullClose();
                             }
 
-                            var r = new FakeAsyncResult()
+                            FakeAsyncResult r = new FakeAsyncResult()
                             {
                                 AsyncState = token.AsyncState
                             };
@@ -134,7 +136,7 @@ namespace Shadowsocks.Util.Sockets
                 throw new ObjectDisposedException(GetType().FullName);
             }
 
-            var r = asyncResult as FakeAsyncResult;
+            FakeAsyncResult r = asyncResult as FakeAsyncResult;
             if (r == null)
             {
                 throw new ArgumentException("Invalid asyncResult.", nameof(asyncResult));
@@ -152,7 +154,7 @@ namespace Shadowsocks.Util.Sockets
             {
                 return;
             }
-            var lockTaken = false;
+            bool lockTaken = false;
             if (!_socketSyncLock.IsHeldByCurrentThread)
             {
                 _socketSyncLock.TryEnter(ref lockTaken);
@@ -182,7 +184,7 @@ namespace Shadowsocks.Util.Sockets
             }
             if (!Connected)
             {
-                throw new SocketException((int) SocketError.NotConnected);
+                throw new SocketException((int)SocketError.NotConnected);
             }
 
             return _activeSocket.BeginSend(buffer, offset, size, socketFlags, callback, state);
@@ -196,7 +198,7 @@ namespace Shadowsocks.Util.Sockets
             }
             if (!Connected)
             {
-                throw new SocketException((int) SocketError.NotConnected);
+                throw new SocketException((int)SocketError.NotConnected);
             }
 
             return _activeSocket.EndSend(asyncResult);
@@ -212,7 +214,7 @@ namespace Shadowsocks.Util.Sockets
             }
             if (!Connected)
             {
-                throw new SocketException((int) SocketError.NotConnected);
+                throw new SocketException((int)SocketError.NotConnected);
             }
 
             return _activeSocket.BeginReceive(buffer, offset, size, socketFlags, callback, state);
@@ -226,7 +228,7 @@ namespace Shadowsocks.Util.Sockets
             }
             if (!Connected)
             {
-                throw new SocketException((int) SocketError.NotConnected);
+                throw new SocketException((int)SocketError.NotConnected);
             }
 
             return _activeSocket.EndReceive(asyncResult);

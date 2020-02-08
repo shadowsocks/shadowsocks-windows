@@ -1,15 +1,14 @@
-﻿using System;
-using System.Diagnostics;
-using System.IO;
-using System.Threading;
-using System.Windows.Forms;
+﻿using Microsoft.Win32;
 using NLog;
-using Microsoft.Win32;
-
 using Shadowsocks.Controller;
 using Shadowsocks.Controller.Hotkeys;
 using Shadowsocks.Util;
 using Shadowsocks.View;
+using System;
+using System.Diagnostics;
+using System.IO;
+using System.Threading;
+using System.Windows.Forms;
 
 namespace Shadowsocks
 {
@@ -30,7 +29,7 @@ namespace Shadowsocks
             Model.NLogConfig.TouchAndApplyNLogConfig();
 
             // .NET Framework 4.7.2 on Win7 compatibility
-            System.Net.ServicePointManager.SecurityProtocol |= 
+            System.Net.ServicePointManager.SecurityProtocol |=
                 System.Net.SecurityProtocolType.Tls | System.Net.SecurityProtocolType.Tls11 | System.Net.SecurityProtocolType.Tls12;
 
             // store args for further use
@@ -87,7 +86,9 @@ namespace Shadowsocks
                 // truncate privoxy log file while debugging
                 string privoxyLogFilename = Utils.GetTempPath("privoxy.log");
                 if (File.Exists(privoxyLogFilename))
+                {
                     using (new FileStream(privoxyLogFilename, FileMode.Truncate)) { }
+                }
 #endif
                 MainController = new ShadowsocksController();
                 MenuController = new MenuViewController(MainController);

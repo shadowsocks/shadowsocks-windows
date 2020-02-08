@@ -1,12 +1,10 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using NLog;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-
-using Newtonsoft.Json;
-using NLog;
-using Shadowsocks.Controller;
 
 namespace Shadowsocks.Model
 {
@@ -29,13 +27,13 @@ namespace Shadowsocks.Model
         {
             try
             {
-                var content = File.ReadAllText(ConfigFile);
-                var configuration = JsonConvert.DeserializeObject<StatisticsStrategyConfiguration>(content);
+                string content = File.ReadAllText(ConfigFile);
+                StatisticsStrategyConfiguration configuration = JsonConvert.DeserializeObject<StatisticsStrategyConfiguration>(content);
                 return configuration;
             }
             catch (FileNotFoundException)
             {
-                var configuration = new StatisticsStrategyConfiguration();
+                StatisticsStrategyConfiguration configuration = new StatisticsStrategyConfiguration();
                 Save(configuration);
                 return configuration;
             }
@@ -50,7 +48,7 @@ namespace Shadowsocks.Model
         {
             try
             {
-                var content = JsonConvert.SerializeObject(configuration, Formatting.Indented);
+                string content = JsonConvert.SerializeObject(configuration, Formatting.Indented);
                 File.WriteAllText(ConfigFile, content);
             }
             catch (Exception e)
@@ -63,7 +61,7 @@ namespace Shadowsocks.Model
 
         public StatisticsStrategyConfiguration()
         {
-            var properties = typeof(StatisticsRecord).GetFields(BindingFlags.Instance | BindingFlags.Public);
+            FieldInfo[] properties = typeof(StatisticsRecord).GetFields(BindingFlags.Instance | BindingFlags.Public);
             Calculations = properties.ToDictionary(p => p.Name, _ => (float)0);
         }
     }

@@ -1,8 +1,8 @@
-﻿using System;
+﻿using Shadowsocks.Encryption.Exception;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
-using Shadowsocks.Encryption.Exception;
 
 namespace Shadowsocks.Encryption.AEAD
 {
@@ -51,7 +51,9 @@ namespace Shadowsocks.Encryption.AEAD
 
             MbedTLS.cipher_init(ctx);
             if (MbedTLS.cipher_setup(ctx, MbedTLS.cipher_info_from_string(_innerLibName)) != 0)
+            {
                 throw new System.Exception("Cannot initialize mbed TLS cipher context");
+            }
 
             DeriveSessionKey(isEncrypt ? _encryptSalt : _decryptSalt,
                 _Masterkey, _sessionKey);
@@ -63,9 +65,16 @@ namespace Shadowsocks.Encryption.AEAD
             IntPtr ctx = isEncrypt ? _encryptCtx : _decryptCtx;
             int ret = MbedTLS.cipher_setkey(ctx, key, keyLen * 8,
                 isEncrypt ? MbedTLS.MBEDTLS_ENCRYPT : MbedTLS.MBEDTLS_DECRYPT);
-            if (ret != 0) throw new System.Exception("failed to set key");
+            if (ret != 0)
+            {
+                throw new System.Exception("failed to set key");
+            }
+
             ret = MbedTLS.cipher_reset(ctx);
-            if (ret != 0) throw new System.Exception("failed to finish preparation");
+            if (ret != 0)
+            {
+                throw new System.Exception("failed to finish preparation");
+            }
         }
 
         public override void cipherEncrypt(byte[] plaintext, uint plen, byte[] ciphertext, ref uint clen)
@@ -80,19 +89,23 @@ namespace Shadowsocks.Encryption.AEAD
                 case CIPHER_AES:
                     ret = MbedTLS.cipher_auth_encrypt(_encryptCtx,
                         /* nonce */
-                        _encNonce, (uint) nonceLen,
+                        _encNonce, (uint)nonceLen,
                         /* AD */
                         IntPtr.Zero, 0,
                         /* plain */
                         plaintext, plen,
                         /* cipher */
                         ciphertext, ref olen,
-                        tagbuf, (uint) tagLen);
-                    if (ret != 0) throw new CryptoErrorException(String.Format("ret is {0}", ret));
+                        tagbuf, (uint)tagLen);
+                    if (ret != 0)
+                    {
+                        throw new CryptoErrorException(string.Format("ret is {0}", ret));
+                    }
+
                     Debug.Assert(olen == plen);
                     // attach tag to ciphertext
-                    Array.Copy(tagbuf, 0, ciphertext, (int) plen, tagLen);
-                    clen = olen + (uint) tagLen;
+                    Array.Copy(tagbuf, 0, ciphertext, (int)plen, tagLen);
+                    clen = olen + (uint)tagLen;
                     break;
                 default:
                     throw new System.Exception("not implemented");
@@ -107,17 +120,21 @@ namespace Shadowsocks.Encryption.AEAD
             uint olen = 0;
             // split tag
             byte[] tagbuf = new byte[tagLen];
-            Array.Copy(ciphertext, (int) (clen - tagLen), tagbuf, 0, tagLen);
+            Array.Copy(ciphertext, (int)(clen - tagLen), tagbuf, 0, tagLen);
             switch (_cipher)
             {
                 case CIPHER_AES:
                     ret = MbedTLS.cipher_auth_decrypt(_decryptCtx,
-                        _decNonce, (uint) nonceLen,
+                        _decNonce, (uint)nonceLen,
                         IntPtr.Zero, 0,
-                        ciphertext, (uint) (clen - tagLen),
+                        ciphertext, (uint)(clen - tagLen),
                         plaintext, ref olen,
-                        tagbuf, (uint) tagLen);
-                    if (ret != 0) throw new CryptoErrorException(String.Format("ret is {0}", ret));
+                        tagbuf, (uint)tagLen);
+                    if (ret != 0)
+                    {
+                        throw new CryptoErrorException(string.Format("ret is {0}", ret));
+                    }
+
                     Debug.Assert(olen == clen - tagLen);
                     plen = olen;
                     break;
@@ -148,7 +165,11 @@ namespace Shadowsocks.Encryption.AEAD
         {
             lock (_lock)
             {
-                if (_disposed) return;
+                if (_disposed)
+                {
+                    return;
+                }
+
                 _disposed = true;
             }
 

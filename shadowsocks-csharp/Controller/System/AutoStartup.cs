@@ -1,12 +1,12 @@
-﻿using System;
+﻿using Microsoft.Win32;
+using NLog;
+using Shadowsocks.Util;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
-using Microsoft.Win32;
-using NLog;
-using Shadowsocks.Util;
 
 namespace Shadowsocks.Controller
 {
@@ -78,7 +78,9 @@ namespace Shadowsocks.Controller
                 foreach (string item in runList)
                 {
                     if (item.Equals(Key, StringComparison.OrdinalIgnoreCase))
+                    {
                         return true;
+                    }
                     else if (item.Equals("Shadowsocks", StringComparison.OrdinalIgnoreCase)) // Compatibility with older versions
                     {
                         string value = Convert.ToString(runKey.GetValue(item));

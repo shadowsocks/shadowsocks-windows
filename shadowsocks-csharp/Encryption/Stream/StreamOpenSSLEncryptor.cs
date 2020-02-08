@@ -1,7 +1,7 @@
-﻿using System;
+﻿using Shadowsocks.Encryption.Exception;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using Shadowsocks.Encryption.Exception;
 
 
 namespace Shadowsocks.Encryption.Stream
@@ -55,10 +55,17 @@ namespace Shadowsocks.Encryption.Stream
         {
             base.initCipher(iv, isEncrypt);
             IntPtr cipherInfo = OpenSSL.GetCipherInfo(_innerLibName);
-            if (cipherInfo == IntPtr.Zero) throw new System.Exception("openssl: cipher not found");
+            if (cipherInfo == IntPtr.Zero)
+            {
+                throw new System.Exception("openssl: cipher not found");
+            }
+
             IntPtr ctx = OpenSSL.EVP_CIPHER_CTX_new();
-            if (ctx == IntPtr.Zero) throw new System.Exception("fail to create ctx");
-            
+            if (ctx == IntPtr.Zero)
+            {
+                throw new System.Exception("fail to create ctx");
+            }
+
             if (isEncrypt)
             {
                 _encryptCtx = ctx;
@@ -80,16 +87,28 @@ namespace Shadowsocks.Encryption.Stream
             {
                 realkey = _key;
             }
-            
-            var ret = OpenSSL.EVP_CipherInit_ex(ctx, cipherInfo, IntPtr.Zero, null,null,
+
+            int ret = OpenSSL.EVP_CipherInit_ex(ctx, cipherInfo, IntPtr.Zero, null, null,
                 isEncrypt ? OpenSSL.OPENSSL_ENCRYPT : OpenSSL.OPENSSL_DECRYPT);
-            if (ret != 1) throw new System.Exception("openssl: fail to set key length");
+            if (ret != 1)
+            {
+                throw new System.Exception("openssl: fail to set key length");
+            }
+
             ret = OpenSSL.EVP_CIPHER_CTX_set_key_length(ctx, keyLen);
-            if (ret != 1) throw new System.Exception("openssl: fail to set key length");
+            if (ret != 1)
+            {
+                throw new System.Exception("openssl: fail to set key length");
+            }
+
             ret = OpenSSL.EVP_CipherInit_ex(ctx, IntPtr.Zero, IntPtr.Zero, realkey,
                 _method == "rc4-md5" ? null : iv,
                 isEncrypt ? OpenSSL.OPENSSL_ENCRYPT : OpenSSL.OPENSSL_DECRYPT);
-            if (ret != 1) throw new System.Exception("openssl: cannot set key and iv");
+            if (ret != 1)
+            {
+                throw new System.Exception("openssl: cannot set key and iv");
+            }
+
             OpenSSL.EVP_CIPHER_CTX_set_padding(ctx, 0);
         }
 
@@ -98,14 +117,16 @@ namespace Shadowsocks.Encryption.Stream
             // C# could be multi-threaded
             if (_disposed)
             {
-                throw new ObjectDisposedException(this.ToString());
+                throw new ObjectDisposedException(ToString());
             }
 
-            int outlen = 0;
-            var ret = OpenSSL.EVP_CipherUpdate(isEncrypt ? _encryptCtx : _decryptCtx,
-                outbuf, out outlen, buf, length);
+            int ret = OpenSSL.EVP_CipherUpdate(isEncrypt ? _encryptCtx : _decryptCtx,
+                outbuf, out int outlen, buf, length);
             if (ret != 1)
-                throw new CryptoErrorException(String.Format("ret is {0}", ret));
+            {
+                throw new CryptoErrorException(string.Format("ret is {0}", ret));
+            }
+
             Debug.Assert(outlen == length);
         }
 
@@ -131,7 +152,11 @@ namespace Shadowsocks.Encryption.Stream
         {
             lock (_lock)
             {
-                if (_disposed) return;
+                if (_disposed)
+                {
+                    return;
+                }
+
                 _disposed = true;
             }
 

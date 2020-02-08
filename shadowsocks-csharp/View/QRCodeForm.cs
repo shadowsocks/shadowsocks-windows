@@ -1,17 +1,13 @@
-﻿using ZXing.QrCode.Internal;
-using Shadowsocks.Controller;
+﻿using Shadowsocks.Controller;
+using Shadowsocks.Model;
 using Shadowsocks.Properties;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
 using System.Drawing;
-using System.IO;
-using System.IO.Compression;
 using System.Linq;
-using System.Text;
 using System.Windows.Forms;
-using Shadowsocks.Model;
+using ZXing.QrCode.Internal;
 
 namespace Shadowsocks.View
 {
@@ -23,8 +19,8 @@ namespace Shadowsocks.View
         {
             this.code = code;
             InitializeComponent();
-            this.Icon = Icon.FromHandle(Resources.ssw128.GetHicon());
-            this.Text = I18N.GetString("QRCode and URL");
+            Icon = Icon.FromHandle(Resources.ssw128.GetHicon());
+            Text = I18N.GetString("QRCode and URL");
         }
 
         private void GenQR(string ssconfig)
@@ -32,16 +28,16 @@ namespace Shadowsocks.View
             string qrText = ssconfig;
             QRCode code = ZXing.QrCode.Internal.Encoder.encode(qrText, ErrorCorrectionLevel.M);
             ByteMatrix m = code.Matrix;
-            int blockSize = Math.Max(pictureBox1.Height/m.Height, 1);
+            int blockSize = Math.Max(pictureBox1.Height / m.Height, 1);
 
-            var qrWidth = m.Width*blockSize;
-            var qrHeight = m.Height*blockSize;
-            var dWidth = pictureBox1.Width - qrWidth;
-            var dHeight = pictureBox1.Height - qrHeight;
-            var maxD = Math.Max(dWidth, dHeight);
-            pictureBox1.SizeMode = maxD >= 7*blockSize ? PictureBoxSizeMode.Zoom : PictureBoxSizeMode.CenterImage;
+            int qrWidth = m.Width * blockSize;
+            int qrHeight = m.Height * blockSize;
+            int dWidth = pictureBox1.Width - qrWidth;
+            int dHeight = pictureBox1.Height - qrHeight;
+            int maxD = Math.Max(dWidth, dHeight);
+            pictureBox1.SizeMode = maxD >= 7 * blockSize ? PictureBoxSizeMode.Zoom : PictureBoxSizeMode.CenterImage;
 
-            Bitmap drawArea = new Bitmap((m.Width*blockSize), (m.Height*blockSize));
+            Bitmap drawArea = new Bitmap((m.Width * blockSize), (m.Height * blockSize));
             using (Graphics g = Graphics.FromImage(drawArea))
             {
                 g.Clear(Color.White);
@@ -53,7 +49,7 @@ namespace Shadowsocks.View
                         {
                             if (m[row, col] != 0)
                             {
-                                g.FillRectangle(b, blockSize*row, blockSize*col, blockSize, blockSize);
+                                g.FillRectangle(b, blockSize * row, blockSize * col, blockSize, blockSize);
                             }
                         }
                     }
@@ -64,20 +60,23 @@ namespace Shadowsocks.View
 
         private void QRCodeForm_Load(object sender, EventArgs e)
         {
-            var servers = Configuration.Load();
-            var serverDatas = servers.configs.Select(
+            Configuration servers = Configuration.Load();
+            List<KeyValuePair<string, string>> serverDatas = servers.configs.Select(
                 server =>
                     new KeyValuePair<string, string>(ShadowsocksController.GetServerURL(server), server.ToString())
                 ).ToList();
             listBox1.DataSource = serverDatas;
 
-            var selectIndex = serverDatas.FindIndex(serverData => serverData.Key.StartsWith(code));
-            if (selectIndex >= 0) listBox1.SetSelected(selectIndex, true);
+            int selectIndex = serverDatas.FindIndex(serverData => serverData.Key.StartsWith(code));
+            if (selectIndex >= 0)
+            {
+                listBox1.SetSelected(selectIndex, true);
+            }
         }
 
         private void listBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
-            var url = (sender as ListBox)?.SelectedValue.ToString();
+            string url = (sender as ListBox)?.SelectedValue.ToString();
             GenQR(url);
             textBoxURL.Text = url;
         }

@@ -1,11 +1,11 @@
-﻿using System;
+﻿using NLog;
+using Shadowsocks.Model;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
-using NLog;
-using Shadowsocks.Model;
 
 namespace Shadowsocks.Controller
 {
@@ -47,7 +47,7 @@ namespace Shadowsocks.Controller
 
         public Listener(List<IService> services)
         {
-            this._services = services;
+            _services = services;
         }
 
         private bool CheckIfPortInUse(int port)
@@ -58,11 +58,13 @@ namespace Shadowsocks.Controller
 
         public void Start(Configuration config)
         {
-            this._config = config;
-            this._shareOverLAN = config.shareOverLan;
+            _config = config;
+            _shareOverLAN = config.shareOverLan;
 
             if (CheckIfPortInUse(_config.localPort))
+            {
                 throw new Exception(I18N.GetString("Port {0} already in use", _config.localPort));
+            }
 
             try
             {
@@ -114,7 +116,7 @@ namespace Shadowsocks.Controller
         public void RecvFromCallback(IAsyncResult ar)
         {
             UDPState state = (UDPState)ar.AsyncState;
-            var socket = state.socket;
+            Socket socket = state.socket;
             try
             {
                 int bytesRead = socket.EndReceiveFrom(ar, ref state.remoteEndPoint);
@@ -200,7 +202,11 @@ namespace Shadowsocks.Controller
             try
             {
                 int bytesRead = conn.EndReceive(ar);
-                if (bytesRead <= 0) goto Shutdown;
+                if (bytesRead <= 0)
+                {
+                    goto Shutdown;
+                }
+
                 foreach (IService service in _services)
                 {
                     if (service.Handle(buf, bytesRead, conn, null))
@@ -208,7 +214,7 @@ namespace Shadowsocks.Controller
                         return;
                     }
                 }
-                Shutdown:
+            Shutdown:
                 // no service found for this
                 if (conn.ProtocolType == ProtocolType.Tcp)
                 {

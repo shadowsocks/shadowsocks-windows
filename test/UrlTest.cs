@@ -1,10 +1,7 @@
-﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Shadowsocks.Controller;
-using System.Threading;
-using System.Collections.Generic;
 using Shadowsocks.Model;
-using System.Diagnostics;
+using System.Collections.Generic;
 
 namespace Shadowsocks.Test
 {
@@ -201,8 +198,8 @@ namespace Shadowsocks.Test
 
         [TestMethod]
         public void TestUrlGenerate()
-        { 
-            var generateUrlCases = new Dictionary<string, Server>
+        {
+            Dictionary<string, Server> generateUrlCases = new Dictionary<string, Server>
             {
                 [server1CanonUrl] = server1,
                 [server1WithRemarkCanonUrl] = server1WithRemark,
@@ -214,7 +211,7 @@ namespace Shadowsocks.Test
 
         private static void RunParseShadowsocksUrlTest(string testCase, IReadOnlyList<Server> expected)
         {
-            var actual = Server.GetServers(testCase);
+            List<Server> actual = Server.GetServers(testCase);
             if (actual.Count != expected.Count)
             {
                 Assert.Fail("Wrong number of configs. Expected: {0}. Actual: {1}", expected.Count, actual.Count);
@@ -222,8 +219,8 @@ namespace Shadowsocks.Test
 
             for (int i = 0; i < expected.Count; i++)
             {
-                var expectedServer = expected[i];
-                var actualServer = actual[i];
+                Server expectedServer = expected[i];
+                Server actualServer = actual[i];
 
                 Assert.AreEqual(expectedServer.server, actualServer.server);
                 Assert.AreEqual(expectedServer.server_port, actualServer.server_port);
@@ -238,12 +235,12 @@ namespace Shadowsocks.Test
 
         private static void RunGenerateShadowsocksUrlTest(IReadOnlyDictionary<string, Server> testCases)
         {
-            foreach (var testCase in testCases)
+            foreach (KeyValuePair<string, Server> testCase in testCases)
             {
                 string expected = testCase.Key;
                 Server config = testCase.Value;
 
-                var actual = ShadowsocksController.GetServerURL(config);
+                string actual = ShadowsocksController.GetServerURL(config);
                 Assert.AreEqual(expected, actual);
             }
         }

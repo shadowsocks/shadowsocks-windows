@@ -1,9 +1,7 @@
-﻿using Shadowsocks.Controller;
-using Shadowsocks.Model;
+﻿using Shadowsocks.Model;
 using System;
 using System.Collections.Generic;
 using System.Net;
-using System.Text;
 
 namespace Shadowsocks.Controller.Strategy
 {
@@ -18,15 +16,9 @@ namespace Shadowsocks.Controller.Strategy
             _random = new Random();
         }
 
-        public string Name
-        {
-            get { return I18N.GetString("Load Balance"); }
-        }
+        public string Name => I18N.GetString("Load Balance");
 
-        public string ID
-        {
-            get { return "com.shadowsocks.strategy.balancing"; }
-        }
+        public string ID => "com.shadowsocks.strategy.balancing";
 
         public void ReloadServers()
         {
@@ -35,7 +27,7 @@ namespace Shadowsocks.Controller.Strategy
 
         public Server GetAServer(IStrategyCallerType type, IPEndPoint localIPEndPoint, EndPoint destEndPoint)
         {
-            var configs = _controller.GetCurrentConfiguration().configs;
+            List<Server> configs = _controller.GetCurrentConfiguration().configs;
             int index;
             if (type == IStrategyCallerType.TCP)
             {

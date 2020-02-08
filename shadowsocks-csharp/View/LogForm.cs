@@ -1,17 +1,16 @@
-﻿using System;
+﻿using NLog;
+using Shadowsocks.Controller;
+using Shadowsocks.Model;
+using Shadowsocks.Properties;
+using Shadowsocks.Util;
+using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
+using System.Linq;
+using System.Text;
 using System.Windows.Forms;
 using System.Windows.Forms.DataVisualization.Charting;
-using System.Collections.Generic;
-using System.Linq;
-
-using Shadowsocks.Controller;
-using Shadowsocks.Properties;
-using Shadowsocks.Model;
-using Shadowsocks.Util;
-using System.Text;
-using NLog;
 
 namespace Shadowsocks.View
 {
@@ -48,16 +47,16 @@ namespace Shadowsocks.View
             InitializeComponent();
             Icon = Icon.FromHandle(Resources.ssw128.GetHicon());
 
-            var nLogConfig = NLogConfig.LoadXML();
+            NLogConfig nLogConfig = NLogConfig.LoadXML();
             try
             {
-                this.filename = nLogConfig.GetLogFileName();
+                filename = nLogConfig.GetLogFileName();
             }
-            catch(Exception)
+            catch (Exception)
             {
                 // failed to get the file name
             }
-            if (string.IsNullOrEmpty(this.filename))
+            if (string.IsNullOrEmpty(filename))
             {
                 LogMessageTextBox.AppendText("Cannot get the log file name from NLog config file. Please check if the nlog config file exists with corresponding XML nodes.");
             }
@@ -81,12 +80,14 @@ namespace Shadowsocks.View
             lock (_lock)
             {
                 if (trafficInfoQueue.Count == 0)
+                {
                     return;
+                }
 
                 inboundPoints.Clear();
                 outboundPoints.Clear();
                 maxSpeed = 0;
-                foreach (var trafficInfo in trafficInfoQueue)
+                foreach (TrafficInfo trafficInfo in trafficInfoQueue)
                 {
                     inboundPoints.Add(trafficInfo.inbound);
                     outboundPoints.Add(trafficInfo.outbound);
@@ -141,21 +142,25 @@ namespace Shadowsocks.View
                         trafficInfoQueue.Enqueue(new TrafficInfo(0, 0));
                     }
 
-                    foreach (var trafficPerSecond in controller.trafficPerSecondQueue)
+                    foreach (ShadowsocksController.TrafficPerSecond trafficPerSecond in controller.trafficPerSecondQueue)
                     {
                         trafficInfoQueue.Enqueue(new TrafficInfo(trafficPerSecond.inboundIncreasement,
                                                                  trafficPerSecond.outboundIncreasement));
                         if (trafficInfoQueue.Count > queueMaxLength)
+                        {
                             trafficInfoQueue.Dequeue();
+                        }
                     }
                 }
                 else
                 {
-                    var lastTraffic = controller.trafficPerSecondQueue.Last();
+                    ShadowsocksController.TrafficPerSecond lastTraffic = controller.trafficPerSecondQueue.Last();
                     trafficInfoQueue.Enqueue(new TrafficInfo(lastTraffic.inboundIncreasement,
                                                              lastTraffic.outboundIncreasement));
                     if (trafficInfoQueue.Count > queueMaxLength)
+                    {
                         trafficInfoQueue.Dequeue();
+                    }
                 }
             }
         }
@@ -176,7 +181,10 @@ namespace Shadowsocks.View
         private void InitContent()
         {
             if (string.IsNullOrEmpty(filename))
+            {
                 return;
+            }
+
             using (StreamReader reader = new StreamReader(new FileStream(filename,
                      FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
             {
@@ -189,7 +197,9 @@ namespace Shadowsocks.View
                 string line = "";
                 StringBuilder appendText = new StringBuilder(1024);
                 while ((line = reader.ReadLine()) != null)
+                {
                     appendText.AppendLine(line);
+                }
 
                 LogMessageTextBox.AppendText(appendText.ToString());
                 LogMessageTextBox.ScrollToCaret();
@@ -200,11 +210,14 @@ namespace Shadowsocks.View
 
         private void UpdateContent()
         {
-            this.Text = I18N.GetString("Log Viewer") +
+            Text = I18N.GetString("Log Viewer") +
                         $" [in: {Utils.FormatBytes(controller.InboundCounter)}, out: {Utils.FormatBytes(controller.OutboundCounter)}]";
 
             if (string.IsNullOrEmpty(filename))
+            {
                 return;
+            }
+
             try
             {
                 using (StreamReader reader = new StreamReader(new FileStream(filename,
@@ -239,8 +252,10 @@ namespace Shadowsocks.View
         {
             InitContent();
 
-            timer = new Timer();
-            timer.Interval = 100;
+            timer = new Timer
+            {
+                Interval = 100
+            };
             timer.Tick += Timer_Tick;
             timer.Start();
 
@@ -333,8 +348,10 @@ namespace Shadowsocks.View
         {
             try
             {
-                FontDialog fd = new FontDialog();
-                fd.Font = LogMessageTextBox.Font;
+                FontDialog fd = new FontDialog
+                {
+                    Font = LogMessageTextBox.Font
+                };
                 if (fd.ShowDialog() == DialogResult.OK)
                 {
                     LogMessageTextBox.Font = new Font(fd.Font.FontFamily, fd.Font.Size, fd.Font.Style);
