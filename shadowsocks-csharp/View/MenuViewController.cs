@@ -118,7 +118,7 @@ namespace Shadowsocks.View
             #endregion
 
             #region Notify icon
-            
+
             _notifyIcon = new NotifyIcon();
             UpdateTrayIconAndNotifyText();
             _notifyIcon.Visible = true;
@@ -343,56 +343,55 @@ namespace Shadowsocks.View
         {
             this.contextMenu1 = new ContextMenu(new MenuItem[] {
                 CreateMenuGroup("System Proxy", new MenuItem[] {
-                    this.disableItem = CreateMenuItem("Disable", new EventHandler(this.EnableItem_Click)),
-                    this.PACModeItem = CreateMenuItem("PAC", new EventHandler(this.PACModeItem_Click)),
-                    this.globalModeItem = CreateMenuItem("Global", new EventHandler(this.GlobalModeItem_Click))
+                    this.disableItem = CreateMenuItem("Disable", this.EnableItem_Click),
+                    this.PACModeItem = CreateMenuItem("PAC", this.PACModeItem_Click),
+                    this.globalModeItem = CreateMenuItem("Global", this.GlobalModeItem_Click)
                 }),
                 this.ServersItem = CreateMenuGroup("Servers", new MenuItem[] {
                     this.SeperatorItem = new MenuItem("-"),
-                    this.ConfigItem = CreateMenuItem("Edit Servers...", new EventHandler(this.Config_Click)),
+                    this.ConfigItem = CreateMenuItem("Edit Servers...", this.Config_Click),
                     CreateMenuItem("Statistics Config...", StatisticsConfigItem_Click),
                     new MenuItem("-"),
-                    CreateMenuItem("Share Server Config...", new EventHandler(this.QRCodeItem_Click)),
-                    CreateMenuItem("Scan QRCode from Screen...", new EventHandler(this.ScanQRCodeItem_Click)),
-                    CreateMenuItem("Import URL from Clipboard...", new EventHandler(this.ImportURLItem_Click))
+                    CreateMenuItem("Share Server Config...", this.QRCodeItem_Click),
+                    CreateMenuItem("Scan QRCode from Screen...", this.ScanQRCodeItem_Click),
+                    CreateMenuItem("Import URL from Clipboard...",this.ImportURLItem_Click)
                 }),
                 CreateMenuGroup("PAC ", new MenuItem[] {
-                    this.localPACItem = CreateMenuItem("Local PAC", new EventHandler(this.LocalPACItem_Click)),
-                    this.onlinePACItem = CreateMenuItem("Online PAC", new EventHandler(this.OnlinePACItem_Click)),
+                    this.localPACItem = CreateMenuItem("Local PAC", this.LocalPACItem_Click),
+                    this.onlinePACItem = CreateMenuItem("Online PAC", this.OnlinePACItem_Click),
                     new MenuItem("-"),
-                    this.editLocalPACItem = CreateMenuItem("Edit Local PAC File...", new EventHandler(this.EditPACFileItem_Click)),
-                    this.updateFromGFWListItem = CreateMenuItem("Update Local PAC from GFWList", new EventHandler(this.UpdatePACFromGFWListItem_Click)),
-                    this.editGFWUserRuleItem = CreateMenuItem("Edit User Rule for GFWList...", new EventHandler(this.EditUserRuleFileForGFWListItem_Click)),
-                    this.secureLocalPacUrlToggleItem = CreateMenuItem("Secure Local PAC", new EventHandler(this.SecureLocalPacUrlToggleItem_Click)),
-                    CreateMenuItem("Copy Local PAC URL", new EventHandler(this.CopyLocalPacUrlItem_Click)),
-                    this.editOnlinePACItem = CreateMenuItem("Edit Online PAC URL...", new EventHandler(this.UpdateOnlinePACURLItem_Click)),
+                    this.editLocalPACItem = CreateMenuItem("Edit Local PAC File...", this.EditPACFileItem_Click),
+                    this.updateFromGFWListItem = CreateMenuItem("Update Local PAC from GFWList", this.UpdatePACFromGFWListItem_Click),
+                    this.editGFWUserRuleItem = CreateMenuItem("Edit User Rule for GFWList...", this.EditUserRuleFileForGFWListItem_Click),
+                    this.secureLocalPacUrlToggleItem = CreateMenuItem("Secure Local PAC", this.SecureLocalPacUrlToggleItem_Click),
+                    CreateMenuItem("Copy Local PAC URL", this.CopyLocalPacUrlItem_Click),
+                    this.editOnlinePACItem = CreateMenuItem("Edit Online PAC URL...",this.UpdateOnlinePACURLItem_Click),
                 }),
-                this.proxyItem = CreateMenuItem("Forward Proxy...", new EventHandler(this.proxyItem_Click)),
+                this.proxyItem = CreateMenuItem("Forward Proxy...", this.proxyItem_Click),
                 new MenuItem("-"),
-                this.AutoStartupItem = CreateMenuItem("Start on Boot", new EventHandler(this.AutoStartupItem_Click)),
-                this.ShareOverLANItem = CreateMenuItem("Allow other Devices to connect", new EventHandler(this.ShareOverLANItem_Click)),
+                this.AutoStartupItem = CreateMenuItem("Start on Boot", this.AutoStartupItem_Click),
+                this.ShareOverLANItem = CreateMenuItem("Allow other Devices to connect", this.ShareOverLANItem_Click),
                 new MenuItem("-"),
-                this.hotKeyItem = CreateMenuItem("Edit Hotkeys...", new EventHandler(this.hotKeyItem_Click)),
+                this.hotKeyItem = CreateMenuItem("Edit Hotkeys...",this.hotKeyItem_Click),
                 CreateMenuGroup("Help", new MenuItem[] {
-                    CreateMenuItem("Show Logs...", new EventHandler(this.ShowLogItem_Click)),
-                    this.VerboseLoggingToggleItem = CreateMenuItem( "Verbose Logging", new EventHandler(this.VerboseLoggingToggleItem_Click) ),
-                    this.ShowPluginOutputToggleItem = CreateMenuItem("Show Plugin Output", new EventHandler(this.ShowPluginOutputToggleItem_Click)),
-                    this.WriteI18NFileItem = CreateMenuItem("Write translation template",new EventHandler(WriteI18NFileItem_Click)),
+                    CreateMenuItem("Show Logs...", this.ShowLogItem_Click),
+                    this.VerboseLoggingToggleItem = CreateMenuItem( "Verbose Logging", this.VerboseLoggingToggleItem_Click),
+                    this.ShowPluginOutputToggleItem = CreateMenuItem("Show Plugin Output", this.ShowPluginOutputToggleItem_Click),
+                    this.WriteI18NFileItem = CreateMenuItem("Write translation template",WriteI18NFileItem_Click),
                     CreateMenuGroup("Updates...", new MenuItem[] {
-                        CreateMenuItem("Check for Updates...", new EventHandler(this.checkUpdatesItem_Click)),
+                        CreateMenuItem("Check for Updates...", this.checkUpdatesItem_Click),
                         new MenuItem("-"),
-                        this.autoCheckUpdatesToggleItem = CreateMenuItem("Check for Updates at Startup", new EventHandler(this.autoCheckUpdatesToggleItem_Click)),
-                        this.checkPreReleaseToggleItem = CreateMenuItem("Check Pre-release Version", new EventHandler(this.checkPreReleaseToggleItem_Click)),
+                        this.autoCheckUpdatesToggleItem = CreateMenuItem("Check for Updates at Startup", this.autoCheckUpdatesToggleItem_Click),
+                        this.checkPreReleaseToggleItem = CreateMenuItem("Check Pre-release Version", this.checkPreReleaseToggleItem_Click),
                     }),
-                    CreateMenuItem("About...", new EventHandler(this.AboutItem_Click)),
+                    CreateMenuItem("About...", this.AboutItem_Click),
                 }),
                 new MenuItem("-"),
-                CreateMenuItem("Quit", new EventHandler(this.Quit_Click))
+                CreateMenuItem("Quit", this.Quit_Click)
             });
         }
 
         #endregion
-
 
         void ShowFileInExplorer(object sender, ShadowsocksController.PathEventArgs e)
         {
