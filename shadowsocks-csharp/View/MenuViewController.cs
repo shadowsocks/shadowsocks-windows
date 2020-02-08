@@ -10,9 +10,6 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
-using ZXing;
-using ZXing.Common;
-using ZXing.QrCode;
 
 namespace Shadowsocks.View
 {
@@ -240,15 +237,7 @@ namespace Shadowsocks.View
             previousIcon = icon;
             _notifyIcon.Icon = previousIcon;
 
-            string serverInfo = null;
-            if (controller.GetCurrentStrategy() != null)
-            {
-                serverInfo = controller.GetCurrentStrategy().Name;
-            }
-            else
-            {
-                serverInfo = config.GetCurrentServer().ToString();
-            }
+            string serverInfo = controller.GetCurrentStrategy()?.Name ?? config.GetCurrentServer().ToString();
             // show more info by hacking the P/Invoke declaration for NOTIFYICONDATA inside Windows Forms
             string text = I18N.GetString("Shadowsocks") + " " + UpdateChecker.Version + "\n" +
                           (enabled ?
@@ -681,90 +670,27 @@ namespace Shadowsocks.View
 
         private void ScanQRCode(object sender, EventArgs e)
         {
-            foreach (Screen screen in Screen.AllScreens)
+            string qrcode = QRCodeUtil.ScanScreenQRCode();
+            if (qrcode.IsNullOrWhiteSpace())
             {
-                using (Bitmap fullImage = new Bitmap(screen.Bounds.Width, screen.Bounds.Height))
-                {
-                    // make screen shot
-                    using (Graphics g = Graphics.FromImage(fullImage))
-                    {
-                        g.CopyFromScreen(screen.Bounds.X,
-                                         screen.Bounds.Y,
-                                         0, 0,
-                                         fullImage.Size,
-                                         CopyPixelOperation.SourceCopy);
-                    }
-                    // search qrcode
-                    int maxTry = 10;
-                    for (int i = 0; i < maxTry; i++)
-                    {
-                        int marginLeft = (int)((double)fullImage.Width * i / 2.5 / maxTry);
-                        int marginTop = (int)((double)fullImage.Height * i / 2.5 / maxTry);
-                        Rectangle cropRect = new Rectangle(marginLeft, marginTop, fullImage.Width - marginLeft * 2, fullImage.Height - marginTop * 2);
-                        Bitmap target = new Bitmap(screen.Bounds.Width, screen.Bounds.Height);
-
-                        double imageScale = screen.Bounds.Width / (double)cropRect.Width;
-                        using (Graphics g = Graphics.FromImage(target))
-                        {
-                            g.DrawImage(fullImage, new Rectangle(0, 0, target.Width, target.Height),
-                                            cropRect,
-                                            GraphicsUnit.Pixel);
-                        }
-                        BitmapLuminanceSource source = new BitmapLuminanceSource(target);
-                        BinaryBitmap bitmap = new BinaryBitmap(new HybridBinarizer(source));
-                        QRCodeReader reader = new QRCodeReader();
-                        Result result = reader.decode(bitmap);
-                        if (result == null)
-                        {
-                            continue;
-                        }
-
-                        bool success = controller.AddServerBySSURL(result.Text);
-                        QRCodeSplashForm splash = new QRCodeSplashForm();
-                        if (success)
-                        {
-                            splash.FormClosed += (o, ev) => ShowConfigForm();
-                        }
-                        else if (result.Text.ToLower().StartsWith("http://") || result.Text.ToLower().StartsWith("https://"))
-                        {
-                            _urlToOpen = result.Text;
-                            splash.FormClosed += (o, ev) => Process.Start(_urlToOpen);
-                        }
-                        else
-                        {
-                            MessageBox.Show(I18N.GetString("Failed to decode QRCode"));
-                            return;
-                        }
-                        double minX = int.MaxValue, minY = int.MaxValue, maxX = 0, maxY = 0;
-                        // calculate splash position
-                        foreach (ResultPoint point in result.ResultPoints)
-                        {
-                            minX = Math.Min(minX, point.X);
-                            minY = Math.Min(minY, point.Y);
-                            maxX = Math.Max(maxX, point.X);
-                            maxY = Math.Max(maxY, point.Y);
-                        }
-                        minX /= imageScale;
-                        minY /= imageScale;
-                        maxX /= imageScale;
-                        maxY /= imageScale;
-                        // make it 20% larger
-                        double margin = (maxX - minX) * 0.20f;
-                        minX += -margin + marginLeft;
-                        maxX += margin + marginLeft;
-                        minY += -margin + marginTop;
-                        maxY += margin + marginTop;
-                        splash.Location = new Point(screen.Bounds.X, screen.Bounds.Y);
-                        // we need a panel because a window has a minimal size
-                        // TODO: test on high DPI
-                        splash.TargetRect = new Rectangle((int)minX, (int)minY, (int)maxX - (int)minX, (int)maxY - (int)minY);
-                        splash.Size = new Size(fullImage.Width, fullImage.Height);
-                        splash.Show();
-                        return;
-                    }
-                }
+                MessageBox.Show(I18N.GetString("No QRCode found. Try to zoom in or move it to the center of the screen."));
+                return;
             }
-            MessageBox.Show(I18N.GetString("No QRCode found. Try to zoom in or move it to the center of the screen."));
+            bool success = controller.AddServerBySSURL(qrcode);
+            if (success)
+            {
+                ShowConfigForm();
+            }
+            else if (qrcode.ToLower().StartsWith("http://") || qrcode.ToLower().StartsWith("https://"))
+            {
+                _urlToOpen = qrcode;
+                Process.Start(_urlToOpen);
+            }
+            else
+            {
+                MessageBox.Show(I18N.GetString("Failed to decode QRCode"));
+                return;
+            }
         }
 
         private void AskForOnlinePACURL(object o, EventArgs e)
