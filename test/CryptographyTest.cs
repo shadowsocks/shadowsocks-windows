@@ -229,5 +229,53 @@ namespace Shadowsocks.Test
                 throw;
             }
         }
+
+        [TestMethod]
+        public void TestNativeEncryption()
+        {
+            encryptionFailed = false;
+            // run it once before the multi-threading test to initialize global tables
+            RunSingleNativeEncryptionThread();
+            List<Thread> threads = new List<Thread>();
+            for (int i = 0; i < 10; i++)
+            {
+                Thread t = new Thread(new ThreadStart(RunSingleNativeEncryptionThread));
+                threads.Add(t);
+                t.Start();
+            }
+            foreach (Thread t in threads)
+            {
+                t.Join();
+            }
+            RNG.Close();
+            Assert.IsFalse(encryptionFailed);
+        }
+
+        private void RunSingleNativeEncryptionThread()
+        {
+            try
+            {
+                for (int i = 0; i < 100; i++)
+                {
+                    var random = new Random();
+                    IEncryptor encryptorO, encryptorN, encryptorN2;
+                    IEncryptor decryptorO, decryptorN, decryptorN2;
+                    encryptorO = new StreamOpenSSLEncryptor("rc4-md5", "barfoo!");
+                    decryptorO = new StreamOpenSSLEncryptor("rc4-md5", "barfoo!");
+                    encryptorN = new StreamNativeEncryptor("rc4-md5", "barfoo!");
+                    encryptorN2 = new StreamNativeEncryptor("rc4-md5", "barfoo!");
+                    decryptorN = new StreamNativeEncryptor("rc4-md5", "barfoo!");
+                    decryptorN2 = new StreamNativeEncryptor("rc4-md5", "barfoo!");
+                    RunEncryptionRound(encryptorN, decryptorN);
+                    RunEncryptionRound(encryptorO, decryptorN2);
+                    RunEncryptionRound(encryptorN2, decryptorO);
+                }
+            }
+            catch
+            {
+                encryptionFailed = true;
+                throw;
+            }
+        }
     }
 }
