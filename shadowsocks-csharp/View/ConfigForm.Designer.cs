@@ -109,7 +109,7 @@
             this.tableLayoutPanel1.Location = new System.Drawing.Point(10, 26);
             this.tableLayoutPanel1.Margin = new System.Windows.Forms.Padding(0);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
-            this.tableLayoutPanel1.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tableLayoutPanel1.Padding = new System.Windows.Forms.Padding(4);
             this.tableLayoutPanel1.RowCount = 12;
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
@@ -142,7 +142,7 @@
             // 
             this.PluginTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             this.PluginTextBox.Location = new System.Drawing.Point(151, 165);
-            this.PluginTextBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.PluginTextBox.Margin = new System.Windows.Forms.Padding(4);
             this.PluginTextBox.MaxLength = 256;
             this.PluginTextBox.Name = "PluginTextBox";
             this.PluginTextBox.Size = new System.Drawing.Size(235, 25);
@@ -153,7 +153,7 @@
             // 
             this.RemarksTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             this.RemarksTextBox.Location = new System.Drawing.Point(151, 291);
-            this.RemarksTextBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.RemarksTextBox.Margin = new System.Windows.Forms.Padding(4);
             this.RemarksTextBox.MaxLength = 32;
             this.RemarksTextBox.Name = "RemarksTextBox";
             this.RemarksTextBox.Size = new System.Drawing.Size(235, 25);
@@ -198,7 +198,7 @@
             // 
             this.IPTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             this.IPTextBox.Location = new System.Drawing.Point(151, 8);
-            this.IPTextBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.IPTextBox.Margin = new System.Windows.Forms.Padding(4);
             this.IPTextBox.MaxLength = 512;
             this.IPTextBox.Name = "IPTextBox";
             this.IPTextBox.Size = new System.Drawing.Size(235, 25);
@@ -209,7 +209,7 @@
             // 
             this.ServerPortTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             this.ServerPortTextBox.Location = new System.Drawing.Point(151, 41);
-            this.ServerPortTextBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.ServerPortTextBox.Margin = new System.Windows.Forms.Padding(4);
             this.ServerPortTextBox.MaxLength = 10;
             this.ServerPortTextBox.Name = "ServerPortTextBox";
             this.ServerPortTextBox.Size = new System.Drawing.Size(235, 25);
@@ -219,8 +219,9 @@
             // PasswordTextBox
             // 
             this.PasswordTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.PasswordTextBox.Font = new System.Drawing.Font("Consolas", 9F);
             this.PasswordTextBox.Location = new System.Drawing.Point(151, 74);
-            this.PasswordTextBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.PasswordTextBox.Margin = new System.Windows.Forms.Padding(4);
             this.PasswordTextBox.MaxLength = 256;
             this.PasswordTextBox.Name = "PasswordTextBox";
             this.PasswordTextBox.Size = new System.Drawing.Size(235, 25);
@@ -248,7 +249,7 @@
             this.EncryptionSelect.ImeMode = System.Windows.Forms.ImeMode.NoControl;
             this.EncryptionSelect.ItemHeight = 15;
             this.EncryptionSelect.Location = new System.Drawing.Point(151, 134);
-            this.EncryptionSelect.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.EncryptionSelect.Margin = new System.Windows.Forms.Padding(4);
             this.EncryptionSelect.Name = "EncryptionSelect";
             this.EncryptionSelect.Size = new System.Drawing.Size(235, 23);
             this.EncryptionSelect.TabIndex = 4;
@@ -269,7 +270,7 @@
             // 
             this.TimeoutTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             this.TimeoutTextBox.Location = new System.Drawing.Point(151, 324);
-            this.TimeoutTextBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.TimeoutTextBox.Margin = new System.Windows.Forms.Padding(4);
             this.TimeoutTextBox.MaxLength = 5;
             this.TimeoutTextBox.Name = "TimeoutTextBox";
             this.TimeoutTextBox.Size = new System.Drawing.Size(235, 25);
@@ -290,7 +291,7 @@
             // 
             this.PluginOptionsTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             this.PluginOptionsTextBox.Location = new System.Drawing.Point(151, 198);
-            this.PluginOptionsTextBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.PluginOptionsTextBox.Margin = new System.Windows.Forms.Padding(4);
             this.PluginOptionsTextBox.MaxLength = 256;
             this.PluginOptionsTextBox.Name = "PluginOptionsTextBox";
             this.PluginOptionsTextBox.Size = new System.Drawing.Size(235, 25);
@@ -303,7 +304,7 @@
             | System.Windows.Forms.AnchorStyles.Left)));
             this.ShowPasswdCheckBox.AutoSize = true;
             this.ShowPasswdCheckBox.Location = new System.Drawing.Point(151, 107);
-            this.ShowPasswdCheckBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.ShowPasswdCheckBox.Margin = new System.Windows.Forms.Padding(4);
             this.ShowPasswdCheckBox.Name = "ShowPasswdCheckBox";
             this.ShowPasswdCheckBox.Size = new System.Drawing.Size(133, 19);
             this.ShowPasswdCheckBox.TabIndex = 3;
@@ -316,7 +317,7 @@
             // 
             this.PluginArgumentsTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             this.PluginArgumentsTextBox.Location = new System.Drawing.Point(151, 258);
-            this.PluginArgumentsTextBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.PluginArgumentsTextBox.Margin = new System.Windows.Forms.Padding(4);
             this.PluginArgumentsTextBox.MaxLength = 512;
             this.PluginArgumentsTextBox.Name = "PluginArgumentsTextBox";
             this.PluginArgumentsTextBox.Size = new System.Drawing.Size(235, 25);
@@ -351,7 +352,7 @@
             // 
             this.NeedPluginArgCheckBox.AutoSize = true;
             this.NeedPluginArgCheckBox.Location = new System.Drawing.Point(151, 231);
-            this.NeedPluginArgCheckBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.NeedPluginArgCheckBox.Margin = new System.Windows.Forms.Padding(4);
             this.NeedPluginArgCheckBox.Name = "NeedPluginArgCheckBox";
             this.NeedPluginArgCheckBox.Size = new System.Drawing.Size(189, 19);
             this.NeedPluginArgCheckBox.TabIndex = 10;
@@ -365,7 +366,7 @@
             this.panel2.AutoSize = true;
             this.panel2.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.panel2.Location = new System.Drawing.Point(206, 234);
-            this.panel2.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.panel2.Margin = new System.Windows.Forms.Padding(4);
             this.panel2.Name = "panel2";
             this.panel2.Size = new System.Drawing.Size(0, 0);
             this.panel2.TabIndex = 1;
@@ -441,7 +442,7 @@
             this.ServerGroupBox.Location = new System.Drawing.Point(223, 0);
             this.ServerGroupBox.Margin = new System.Windows.Forms.Padding(15, 0, 0, 0);
             this.ServerGroupBox.Name = "ServerGroupBox";
-            this.ServerGroupBox.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.ServerGroupBox.Padding = new System.Windows.Forms.Padding(4);
             this.ServerGroupBox.Size = new System.Drawing.Size(408, 405);
             this.ServerGroupBox.TabIndex = 0;
             this.ServerGroupBox.TabStop = false;
@@ -539,7 +540,7 @@
             this.tableLayoutPanel5.Location = new System.Drawing.Point(208, 405);
             this.tableLayoutPanel5.Margin = new System.Windows.Forms.Padding(0);
             this.tableLayoutPanel5.Name = "tableLayoutPanel5";
-            this.tableLayoutPanel5.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tableLayoutPanel5.Padding = new System.Windows.Forms.Padding(4);
             this.tableLayoutPanel5.RowCount = 2;
             this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle());
@@ -550,7 +551,7 @@
             // 
             this.ProxyPortTextBox.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.ProxyPortTextBox.Location = new System.Drawing.Point(103, 8);
-            this.ProxyPortTextBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.ProxyPortTextBox.Margin = new System.Windows.Forms.Padding(4);
             this.ProxyPortTextBox.MaxLength = 10;
             this.ProxyPortTextBox.Name = "ProxyPortTextBox";
             this.ProxyPortTextBox.Size = new System.Drawing.Size(140, 25);
@@ -574,7 +575,7 @@
             this.PortableModeCheckBox.AutoSize = true;
             this.tableLayoutPanel5.SetColumnSpan(this.PortableModeCheckBox, 2);
             this.PortableModeCheckBox.Location = new System.Drawing.Point(8, 48);
-            this.PortableModeCheckBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.PortableModeCheckBox.Margin = new System.Windows.Forms.Padding(4);
             this.PortableModeCheckBox.Name = "PortableModeCheckBox";
             this.PortableModeCheckBox.Size = new System.Drawing.Size(133, 19);
             this.PortableModeCheckBox.TabIndex = 11;
@@ -647,7 +648,7 @@
             this.Controls.Add(this.tableLayoutPanel2);
             this.Controls.Add(this.panel2);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
-            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.Margin = new System.Windows.Forms.Padding(4);
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "ConfigForm";
