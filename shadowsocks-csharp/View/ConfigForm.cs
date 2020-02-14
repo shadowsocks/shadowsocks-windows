@@ -31,6 +31,10 @@ namespace Shadowsocks.View
                 "salsa20",
                 "chacha20",
                 "bf-cfb",
+
+                "rc4",
+                "plain",
+                "table",
             };
             private static string[] inuseMethod = new string[]
             {

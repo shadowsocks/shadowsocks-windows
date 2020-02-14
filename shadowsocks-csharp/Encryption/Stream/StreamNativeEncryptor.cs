@@ -8,12 +8,18 @@ namespace Shadowsocks.Encryption.Stream
 {
     public class StreamNativeEncryptor : StreamEncryptor
     {
-        bool md5;
+        const int Plain = 0;
+        const int Table = 1;
+        const int Rc4 = 2;
+        const int Rc4Md5 = 3;
+
+        string _password;
+
         byte[] realkey;
         byte[] sbox;
         public StreamNativeEncryptor(string method, string password) : base(method, password)
         {
-            md5 = method.ToLowerInvariant().IndexOf("md5") >= 0;
+            _password = password;
         }
 
         public override void Dispose()
@@ -24,37 +30,71 @@ namespace Shadowsocks.Encryption.Stream
         protected override void initCipher(byte[] iv, bool isEncrypt)
         {
             base.initCipher(iv, isEncrypt);
-            if (md5)
+            if (_cipher >= Rc4)
             {
-                byte[] temp = new byte[keyLen + ivLen];
-                Array.Copy(_key, 0, temp, 0, keyLen);
-                Array.Copy(iv, 0, temp, keyLen, ivLen);
-                realkey = MbedTLS.MD5(temp);
+                if (_cipher == Rc4Md5)
+                {
+                    byte[] temp = new byte[keyLen + ivLen];
+                    Array.Copy(_key, 0, temp, 0, keyLen);
+                    Array.Copy(iv, 0, temp, keyLen, ivLen);
+                    realkey = MbedTLS.MD5(temp);
+                }
+                else
+                {
+                    realkey = _key;
+                }
+                sbox = SBox(realkey);
             }
-            else
+            else if (_cipher == Table)
             {
-                realkey = _key;
+                ulong a = BitConverter.ToUInt64(MbedTLS.MD5(Encoding.UTF8.GetBytes(_password)), 0);
+                for (int i = 0; i < 256; i++)
+                {
+                    _encryptTable[i] = (byte)i;
+                }
+                for (int i = 1; i < 1024; i++)
+                {
+                    _encryptTable = MergeSort(_encryptTable, a, i);
+                }
+                for (int i = 0; i < 256; i++)
+                {
+                    _decryptTable[_encryptTable[i]] = (byte)i;
+                }
             }
-            sbox = EncryptInitalize(realkey);
         }
 
         protected override void cipherUpdate(bool isEncrypt, int length, byte[] buf, byte[] outbuf)
         {
-            var ctx = isEncrypt ? enc_ctx : dec_ctx;
+            if (_cipher == Table)
+            {
+                var table = isEncrypt ? _encryptTable : _decryptTable;
+                for (int i = 0; i < length; i++)
+                {
+                    outbuf[i] = table[buf[i]];
+                }
+            }
+            else if (_cipher == Plain)
+            {
+                Array.Copy(buf, outbuf, length);
+            }
+            else
+            {
+                var ctx = isEncrypt ? enc_ctx : dec_ctx;
 
-            byte[] t = new byte[length];
-            Array.Copy(buf, t, length);
+                byte[] t = new byte[length];
+                Array.Copy(buf, t, length);
 
-            EncryptOutput(ctx, sbox, t, length);
-            Array.Copy(t, outbuf, length);
+                RC4(ctx, sbox, t, length);
+                Array.Copy(t, outbuf, length);
+            }
         }
 
         private static readonly Dictionary<string, EncryptorInfo> _ciphers = new Dictionary<string, EncryptorInfo>
         {
-           { "rc4", new EncryptorInfo("RC4", 16, 16, 1) },
-           { "rc4-md5", new EncryptorInfo("RC4", 16, 16, 1) },
-            // it's using ivLen=16, not compatible
-            //{ "chacha20-ietf", new EncryptorInfo("chacha20", 32, 12, CIPHER_CHACHA20_IETF) }
+            {"plain", new EncryptorInfo("PLAIN", 0, 0, Plain) },
+            {"table", new EncryptorInfo("TABLE", 0, 0, Table) },
+            { "rc4", new EncryptorInfo("RC4", 16, 16, Rc4) },
+            { "rc4-md5", new EncryptorInfo("RC4", 16, 16, Rc4Md5) },
         };
 
         public static IEnumerable<string> SupportedCiphers()
@@ -67,6 +107,57 @@ namespace Shadowsocks.Encryption.Stream
             return _ciphers;
         }
 
+        #region Table
+        private byte[] _encryptTable = new byte[256];
+        private byte[] _decryptTable = new byte[256];
+
+        private static long Compare(byte x, byte y, ulong a, int i)
+        {
+            return (long)(a % (ulong)(x + i)) - (long)(a % (ulong)(y + i));
+        }
+
+        private byte[] MergeSort(byte[] array, ulong a, int j)
+        {
+            if (array.Length == 1)
+            {
+                return array;
+            }
+            int middle = array.Length / 2;
+            byte[] left = new byte[middle];
+            for (int i = 0; i < middle; i++)
+            {
+                left[i] = array[i];
+            }
+            byte[] right = new byte[array.Length - middle];
+            for (int i = 0; i < array.Length - middle; i++)
+            {
+                right[i] = array[i + middle];
+            }
+            left = MergeSort(left, a, j);
+            right = MergeSort(right, a, j);
+
+            int leftptr = 0;
+            int rightptr = 0;
+
+            byte[] sorted = new byte[array.Length];
+            for (int k = 0; k < array.Length; k++)
+            {
+                if (rightptr == right.Length || ((leftptr < left.Length) && (Compare(left[leftptr], right[rightptr], a, j) <= 0)))
+                {
+                    sorted[k] = left[leftptr];
+                    leftptr++;
+                }
+                else if (leftptr == left.Length || ((rightptr < right.Length) && (Compare(right[rightptr], left[leftptr], a, j)) <= 0))
+                {
+                    sorted[k] = right[rightptr];
+                    rightptr++;
+                }
+            }
+            return sorted;
+        }
+        #endregion
+
+        #region RC4
         class Context
         {
             public int index1 = 0;
@@ -76,7 +167,7 @@ namespace Shadowsocks.Encryption.Stream
         private Context enc_ctx = new Context();
         private Context dec_ctx = new Context();
 
-        private byte[] EncryptInitalize(byte[] key)
+        private byte[] SBox(byte[] key)
         {
             byte[] s = new byte[256];
 
@@ -95,7 +186,7 @@ namespace Shadowsocks.Encryption.Stream
             return s;
         }
 
-        private void EncryptOutput(Context ctx, byte[] s, byte[] data, int length)
+        private void RC4(Context ctx, byte[] s, byte[] data, int length)
         {
             for (int n = 0; n < length; n++)
             {
@@ -117,5 +208,6 @@ namespace Shadowsocks.Encryption.Stream
             s[i] = s[j];
             s[j] = c;
         }
+        #endregion
     }
 }
