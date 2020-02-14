@@ -49,12 +49,22 @@ namespace Shadowsocks.Encryption.Stream
             Array.Copy(t, outbuf, length);
         }
 
+        private static readonly Dictionary<string, EncryptorInfo> _ciphers = new Dictionary<string, EncryptorInfo>
+        {
+           { "rc4", new EncryptorInfo("RC4", 16, 16, 1) },
+           { "rc4-md5", new EncryptorInfo("RC4", 16, 16, 1) },
+            // it's using ivLen=16, not compatible
+            //{ "chacha20-ietf", new EncryptorInfo("chacha20", 32, 12, CIPHER_CHACHA20_IETF) }
+        };
+
+        public static IEnumerable<string> SupportedCiphers()
+        {
+            return _ciphers.Keys;
+        }
+
         protected override Dictionary<string, EncryptorInfo> getCiphers()
         {
-            return new Dictionary<string, EncryptorInfo>()
-            {
-                { "rc4-md5", new EncryptorInfo("rc4", 16, 16, 1) }
-            };
+            return _ciphers;
         }
 
         class Context
