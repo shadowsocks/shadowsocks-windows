@@ -116,6 +116,7 @@
     <Compile Include="Controller\System\Hotkeys\HotkeyCallbacks.cs" />
     <Compile Include="Encryption\AEAD\AEADEncryptor.cs" />
     <Compile Include="Encryption\AEAD\AEADMbedTLSEncryptor.cs" />
+    <Compile Include="Encryption\AEAD\AEADNativeEncryptor.cs" />
     <Compile Include="Encryption\AEAD\AEADOpenSSLEncryptor.cs" />
     <Compile Include="Encryption\AEAD\AEADSodiumEncryptor.cs" />
     <Compile Include="Encryption\CircularBuffer\ByteCircularBuffer.cs" />

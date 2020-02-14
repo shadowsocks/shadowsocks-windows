@@ -52,6 +52,11 @@ namespace Shadowsocks.Encryption
                     _registeredEncryptors.Add(method, typeof(StreamMbedTLSEncryptor));
             }
 
+            foreach (string method in AEADNativeEncryptor.SupportedCiphers())
+            {
+                if (!_registeredEncryptors.ContainsKey(method))
+                    _registeredEncryptors.Add(method, typeof(AEADNativeEncryptor));
+            }
 
             foreach (string method in AEADOpenSSLEncryptor.SupportedCiphers())
             {

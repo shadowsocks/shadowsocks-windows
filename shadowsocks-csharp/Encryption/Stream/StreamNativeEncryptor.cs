@@ -93,7 +93,7 @@ namespace Shadowsocks.Encryption.Stream
         {
             {"plain", new EncryptorInfo("PLAIN", 0, 0, Plain) },
             {"table", new EncryptorInfo("TABLE", 0, 0, Table) },
-            { "rc4", new EncryptorInfo("RC4", 16, 16, Rc4) },
+            { "rc4", new EncryptorInfo("RC4", 16, 0, Rc4) }, // original RC4 doesn't use IV
             { "rc4-md5", new EncryptorInfo("RC4", 16, 16, Rc4Md5) },
         };
 
