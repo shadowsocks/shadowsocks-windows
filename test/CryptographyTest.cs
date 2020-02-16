@@ -231,6 +231,50 @@ namespace Shadowsocks.Test
         }
 
         [TestMethod]
+        public void TestBouncyCastleEncryption()
+        {
+            encryptionFailed = false;
+            // run it once before the multi-threading test to initialize global tables
+            RunSingleBouncyCastleEncryptionThread();
+            List<Thread> threads = new List<Thread>();
+            for (int i = 0; i < 10; i++)
+            {
+                Thread t = new Thread(new ThreadStart(RunSingleBouncyCastleEncryptionThread));
+                threads.Add(t);
+                t.Start();
+            }
+            foreach (Thread t in threads)
+            {
+                t.Join();
+            }
+            RNG.Close();
+            Assert.IsFalse(encryptionFailed);
+        }
+
+        private void RunSingleBouncyCastleEncryptionThread()
+        {
+            try
+            {
+                for (int i = 0; i < 10; i++)
+                {
+                    var random = new Random();
+                    IEncryptor encryptor;
+                    IEncryptor decryptor;
+                    encryptor = new Encryption.AEAD.AEADBouncyCastleEncryptor("aes-256-gcm", "barfoo!");
+                    encryptor.AddrBufLength = 1 + 4 + 2;// ADDR_ATYP_LEN + 4 + ADDR_PORT_LEN;
+                    decryptor = new Encryption.AEAD.AEADBouncyCastleEncryptor("aes-256-gcm", "barfoo!");
+                    decryptor.AddrBufLength = 1 + 4 + 2;// ADDR_ATYP_LEN + 4 + ADDR_PORT_LEN;
+                    RunEncryptionRound(encryptor, decryptor);
+                }
+            }
+            catch
+            {
+                encryptionFailed = true;
+                throw;
+            }
+        }
+
+        [TestMethod]
         public void TestOpenSSLAEADEncryption()
         {
             encryptionFailed = false;

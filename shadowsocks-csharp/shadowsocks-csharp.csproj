@@ -68,6 +68,9 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="BouncyCastle.Crypto, Version=1.8.5.0, Culture=neutral, PublicKeyToken=0e99375e54769942">
+      <HintPath>..\packages\BouncyCastle.1.8.5\lib\BouncyCastle.Crypto.dll</HintPath>
+    </Reference>
     <Reference Include="Caseless, Version=1.8.3.0, Culture=neutral, PublicKeyToken=409b3227471b0f0d, processorArchitecture=MSIL">
       <HintPath>..\packages\Caseless.Fody.1.8.3\lib\net452\Caseless.dll</HintPath>
     </Reference>
@@ -114,6 +117,7 @@
     <Compile Include="Controller\LoggerExtension.cs" />
     <Compile Include="Controller\Service\PACDaemon.cs" />
     <Compile Include="Controller\System\Hotkeys\HotkeyCallbacks.cs" />
+    <Compile Include="Encryption\AEAD\AEADBouncyCastleEncryptor.cs" />
     <Compile Include="Encryption\AEAD\AEADEncryptor.cs" />
     <Compile Include="Encryption\AEAD\AEADMbedTLSEncryptor.cs" />
     <Compile Include="Encryption\AEAD\AEADOpenSSLEncryptor.cs" />
