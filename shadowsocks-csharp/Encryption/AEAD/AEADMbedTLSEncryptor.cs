@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using Org.BouncyCastle.Crypto.Engines;
+using Org.BouncyCastle.Crypto.Modes;
+using Org.BouncyCastle.Crypto.Parameters;
 using Shadowsocks.Encryption.Exception;
 
 namespace Shadowsocks.Encryption.AEAD
@@ -80,19 +83,45 @@ namespace Shadowsocks.Encryption.AEAD
                 case CIPHER_AES:
                     ret = MbedTLS.cipher_auth_encrypt(_encryptCtx,
                         /* nonce */
-                        _encNonce, (uint) nonceLen,
+                        _encNonce, (uint)nonceLen,
                         /* AD */
                         IntPtr.Zero, 0,
                         /* plain */
                         plaintext, plen,
                         /* cipher */
                         ciphertext, ref olen,
-                        tagbuf, (uint) tagLen);
+                        tagbuf, (uint)tagLen);
                     if (ret != 0) throw new CryptoErrorException(String.Format("ret is {0}", ret));
                     Debug.Assert(olen == plen);
                     // attach tag to ciphertext
-                    Array.Copy(tagbuf, 0, ciphertext, (int) plen, tagLen);
-                    clen = olen + (uint) tagLen;
+                    Array.Copy(tagbuf, 0, ciphertext, (int)plen, tagLen);
+                    clen = olen + (uint)tagLen;
+
+                    /////////
+
+                    GcmBlockCipher cipher = new GcmBlockCipher(new AesEngine());
+                    AeadParameters parameters = new AeadParameters(new KeyParameter(_sessionKey), tagLen * 8, _encNonce);
+
+                    cipher.Init(true, parameters);
+                    var ciphertext2 = new byte[cipher.GetOutputSize((int)plen)];
+                    var len = cipher.ProcessBytes(plaintext, 0, (int)plen, ciphertext2, 0);
+                    cipher.DoFinal(ciphertext2, len);
+                    var clen2 = (uint)(ciphertext2.Length);
+
+                    if (clen != clen2) throw new System.Exception();
+                    for (int i = 0; i < ciphertext.Length; i++)
+                    {
+                        if (ciphertext[i] != ciphertext2[i])
+                        {
+                            throw new System.Exception();
+                        }
+                    }
+                    //overwrite
+                    ciphertext = ciphertext2;
+                    clen = clen2;
+
+                    /////////
+
                     break;
                 default:
                     throw new System.Exception("not implemented");
@@ -112,14 +141,41 @@ namespace Shadowsocks.Encryption.AEAD
             {
                 case CIPHER_AES:
                     ret = MbedTLS.cipher_auth_decrypt(_decryptCtx,
-                        _decNonce, (uint) nonceLen,
+                        _decNonce, (uint)nonceLen,
                         IntPtr.Zero, 0,
-                        ciphertext, (uint) (clen - tagLen),
+                        ciphertext, (uint)(clen - tagLen),
                         plaintext, ref olen,
-                        tagbuf, (uint) tagLen);
+                        tagbuf, (uint)tagLen);
                     if (ret != 0) throw new CryptoErrorException(String.Format("ret is {0}", ret));
                     Debug.Assert(olen == clen - tagLen);
                     plen = olen;
+
+                    /////////
+
+                    GcmBlockCipher cipher = new GcmBlockCipher(new AesEngine());
+                    AeadParameters parameters = new AeadParameters(new KeyParameter(_sessionKey), tagLen * 8, _decNonce);
+
+                    cipher.Init(false, parameters);
+                    var plaintext2 = new byte[cipher.GetOutputSize((int)clen)];
+                    var len = cipher.ProcessBytes(ciphertext, 0, (int)clen, plaintext2, 0);
+                    cipher.DoFinal(plaintext2, len);
+                    var plen2 = (uint)(plaintext2.Length);
+
+                    if (plen != plen2) throw new System.Exception();
+                    for (int i = 0; i < plaintext.Length; i++)
+                    {
+                        if (plaintext[i] != plaintext2[i])
+                        {
+                            throw new System.Exception();
+                        }
+                    }
+
+                    //overwrite
+                    plaintext = plaintext2;
+                    plen = plen2;
+
+                    /////////
+
                     break;
                 default:
                     throw new System.Exception("not implemented");
