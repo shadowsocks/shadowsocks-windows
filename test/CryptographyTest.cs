@@ -31,7 +31,7 @@ namespace Shadowsocks.Test
         {
             RNG.Reload();
             byte[] plain = new byte[16384];
-            byte[] cipher = new byte[plain.Length + 16];
+            byte[] cipher = new byte[plain.Length + 100];// AEAD with IPv4 address type needs +100
             byte[] plain2 = new byte[plain.Length + 16];
             int outLen = 0;
             int outLen2 = 0;
@@ -220,6 +220,94 @@ namespace Shadowsocks.Test
                     IEncryptor decryptor;
                     encryptor = new StreamOpenSSLEncryptor("aes-256-cfb", "barfoo!");
                     decryptor = new StreamOpenSSLEncryptor("aes-256-cfb", "barfoo!");
+                    RunEncryptionRound(encryptor, decryptor);
+                }
+            }
+            catch
+            {
+                encryptionFailed = true;
+                throw;
+            }
+        }
+
+        [TestMethod]
+        public void TestOpenSSLAEADEncryption()
+        {
+            encryptionFailed = false;
+            // run it once before the multi-threading test to initialize global tables
+            RunSingleOpenSSLAEADEncryptionThread();
+            List<Thread> threads = new List<Thread>();
+            for (int i = 0; i < 10; i++)
+            {
+                Thread t = new Thread(new ThreadStart(RunSingleOpenSSLAEADEncryptionThread));
+                threads.Add(t);
+                t.Start();
+            }
+            foreach (Thread t in threads)
+            {
+                t.Join();
+            }
+            RNG.Close();
+            Assert.IsFalse(encryptionFailed);
+        }
+
+        private void RunSingleOpenSSLAEADEncryptionThread()
+        {
+            try
+            {
+                for (int i = 0; i < 10; i++)
+                {
+                    var random = new Random();
+                    IEncryptor encryptor;
+                    IEncryptor decryptor;
+                    encryptor = new Encryption.AEAD.AEADOpenSSLEncryptor("aes-256-gcm", "barfoo!");
+                    encryptor.AddrBufLength = 1 + 4 + 2;// ADDR_ATYP_LEN + 4 + ADDR_PORT_LEN;
+                    decryptor = new Encryption.AEAD.AEADOpenSSLEncryptor("aes-256-gcm", "barfoo!");
+                    decryptor.AddrBufLength = 1 + 4 + 2;// ADDR_ATYP_LEN + 4 + ADDR_PORT_LEN;
+                    RunEncryptionRound(encryptor, decryptor);
+                }
+            }
+            catch
+            {
+                encryptionFailed = true;
+                throw;
+            }
+        }
+
+        [TestMethod]
+        public void TestMBedTLSAEADEncryption()
+        {
+            encryptionFailed = false;
+            // run it once before the multi-threading test to initialize global tables
+            RunSingleMBedTLSAEADEncryptionThread();
+            List<Thread> threads = new List<Thread>();
+            for (int i = 0; i < 10; i++)
+            {
+                Thread t = new Thread(new ThreadStart(RunSingleMBedTLSAEADEncryptionThread));
+                threads.Add(t);
+                t.Start();
+            }
+            foreach (Thread t in threads)
+            {
+                t.Join();
+            }
+            RNG.Close();
+            Assert.IsFalse(encryptionFailed);
+        }
+
+        private void RunSingleMBedTLSAEADEncryptionThread()
+        {
+            try
+            {
+                for (int i = 0; i < 10; i++)
+                {
+                    var random = new Random();
+                    IEncryptor encryptor;
+                    IEncryptor decryptor;
+                    encryptor = new Encryption.AEAD.AEADMbedTLSEncryptor("aes-256-gcm", "barfoo!");
+                    encryptor.AddrBufLength = 1 + 4 + 2;// ADDR_ATYP_LEN + 4 + ADDR_PORT_LEN;
+                    decryptor = new Encryption.AEAD.AEADMbedTLSEncryptor("aes-256-gcm", "barfoo!");
+                    decryptor.AddrBufLength = 1 + 4 + 2;// ADDR_ATYP_LEN + 4 + ADDR_PORT_LEN;
                     RunEncryptionRound(encryptor, decryptor);
                 }
             }
