@@ -44,20 +44,20 @@ namespace Shadowsocks.Test
             {
                 Assert.AreEqual(plain[j], plain2[j]);
             }
-            //encryptor.Encrypt(plain, 1000, cipher, out outLen);
-            //decryptor.Decrypt(cipher, outLen, plain2, out outLen2);
-            //Assert.AreEqual(1000, outLen2);
-            //for (int j = 0; j < outLen2; j++)
-            //{
-            //    Assert.AreEqual(plain[j], plain2[j]);
-            //}
-            //encryptor.Encrypt(plain, 12333, cipher, out outLen);
-            //decryptor.Decrypt(cipher, outLen, plain2, out outLen2);
-            //Assert.AreEqual(12333, outLen2);
-            //for (int j = 0; j < outLen2; j++)
-            //{
-            //    Assert.AreEqual(plain[j], plain2[j]);
-            //}
+            encryptor.Encrypt(plain, 1000, cipher, out outLen);
+            decryptor.Decrypt(cipher, outLen, plain2, out outLen2);
+            Assert.AreEqual(1000, outLen2);
+            for (int j = 0; j < outLen2; j++)
+            {
+                Assert.AreEqual(plain[j], plain2[j]);
+            }
+            encryptor.Encrypt(plain, 12333, cipher, out outLen);
+            decryptor.Decrypt(cipher, outLen, plain2, out outLen2);
+            Assert.AreEqual(12333, outLen2);
+            for (int j = 0; j < outLen2; j++)
+            {
+                Assert.AreEqual(plain[j], plain2[j]);
+            }
         }
 
         private static bool encryptionFailed = false;
@@ -231,15 +231,15 @@ namespace Shadowsocks.Test
         }
 
         [TestMethod]
-        public void TestBouncyCastleEncryption()
+        public void TestBouncyCastleAEADEncryption()
         {
             encryptionFailed = false;
             // run it once before the multi-threading test to initialize global tables
-            RunSingleBouncyCastleEncryptionThread();
+            RunSingleBouncyCastleAEADEncryptionThread();
             List<Thread> threads = new List<Thread>();
             for (int i = 0; i < 10; i++)
             {
-                Thread t = new Thread(new ThreadStart(RunSingleBouncyCastleEncryptionThread));
+                Thread t = new Thread(new ThreadStart(RunSingleBouncyCastleAEADEncryptionThread));
                 threads.Add(t);
                 t.Start();
             }
@@ -251,11 +251,11 @@ namespace Shadowsocks.Test
             Assert.IsFalse(encryptionFailed);
         }
 
-        private void RunSingleBouncyCastleEncryptionThread()
+        private void RunSingleBouncyCastleAEADEncryptionThread()
         {
             try
             {
-                for (int i = 0; i < 10; i++)
+                for (int i = 0; i < 100; i++)
                 {
                     var random = new Random();
                     IEncryptor encryptor;
@@ -299,7 +299,7 @@ namespace Shadowsocks.Test
         {
             try
             {
-                for (int i = 0; i < 10; i++)
+                for (int i = 0; i < 100; i++)
                 {
                     var random = new Random();
                     IEncryptor encryptor;
@@ -343,7 +343,7 @@ namespace Shadowsocks.Test
         {
             try
             {
-                for (int i = 0; i < 10; i++)
+                for (int i = 0; i < 100; i++)
                 {
                     var random = new Random();
                     IEncryptor encryptor;

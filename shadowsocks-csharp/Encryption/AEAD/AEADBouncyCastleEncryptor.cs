@@ -9,14 +9,16 @@ using System.Threading.Tasks;
 
 namespace Shadowsocks.Encryption.AEAD
 {
-    public class AEADBouncyCastleEncryptor : AEADEncryptor//, IDisposable
+    public class AEADBouncyCastleEncryptor : AEADEncryptor, IDisposable
     {
+        static int CIPHER_AES = 1;  // dummy
+
         public AEADBouncyCastleEncryptor(string method, string password)
     : base(method, password)
         {
         }
 
-        static int CIPHER_AES=1;
+
         private static readonly Dictionary<string, EncryptorInfo> _ciphers = new Dictionary<string, EncryptorInfo>
         {
             {"aes-128-gcm", new EncryptorInfo("AES-128-GCM", 16, 16, 12, 16, CIPHER_AES)},
@@ -29,35 +31,6 @@ namespace Shadowsocks.Encryption.AEAD
             return _ciphers;
         }
 
-        public override void cipherDecrypt(byte[] ciphertext, uint clen, byte[] plaintext, ref uint plen)
-        {
-            GcmBlockCipher cipher = new GcmBlockCipher(new AesEngine());
-            AeadParameters parameters = new AeadParameters(new KeyParameter(_sessionKey), tagLen * 8, _decNonce);
-
-            cipher.Init(false, parameters);
-            plaintext = new byte[cipher.GetOutputSize((int)clen)];
-            var len = cipher.ProcessBytes(ciphertext, 0, (int)clen, plaintext, 0);
-            cipher.DoFinal(plaintext, len);
-            plen = (uint)(plaintext.Length);
-        }
-
-        public override void cipherEncrypt(byte[] plaintext, uint plen, byte[] ciphertext, ref uint clen)
-        {
-            GcmBlockCipher cipher = new GcmBlockCipher(new AesEngine());
-            AeadParameters parameters = new AeadParameters(new KeyParameter(_sessionKey), tagLen * 8, _encNonce);
-
-            cipher.Init(true, parameters);
-            ciphertext = new byte[cipher.GetOutputSize((int)plen)];
-            var len = cipher.ProcessBytes(plaintext, 0, (int)plen, ciphertext, 0);
-            cipher.DoFinal(ciphertext, len);
-            clen = (uint)(ciphertext.Length);
-        }
-
-        public override void Dispose()
-        {
-            //throw new NotImplementedException();
-        }
-
         public override void InitCipher(byte[] salt, bool isEncrypt, bool isUdp)
         {
             base.InitCipher(salt, isEncrypt, isUdp);
@@ -66,9 +39,39 @@ namespace Shadowsocks.Encryption.AEAD
                  _Masterkey, _sessionKey);
         }
 
+        public override void cipherDecrypt(byte[] ciphertext, uint clen, byte[] plaintext, ref uint plen)
+        {
+            var cipher = new GcmBlockCipher(new AesEngine());
+            AeadParameters parameters = new AeadParameters(new KeyParameter(_sessionKey), tagLen * 8, _decNonce);
+
+            cipher.Init(false, parameters);
+            var plaintextBC = new byte[cipher.GetOutputSize((int)clen)];
+            var len = cipher.ProcessBytes(ciphertext, 0, (int)clen, plaintextBC, 0);
+            cipher.DoFinal(plaintextBC, len);
+            plen = (uint)(plaintextBC.Length);
+            Array.Copy(plaintextBC, 0, plaintext, 0, plen);
+        }
+
+        public override void cipherEncrypt(byte[] plaintext, uint plen, byte[] ciphertext, ref uint clen)
+        {
+            var cipher = new GcmBlockCipher(new AesEngine());
+            AeadParameters parameters = new AeadParameters(new KeyParameter(_sessionKey), tagLen * 8, _encNonce);
+
+            cipher.Init(true, parameters);
+            var ciphertextBC = new byte[cipher.GetOutputSize((int)plen)];
+            var len = cipher.ProcessBytes(plaintext, 0, (int)plen, ciphertextBC, 0);
+            cipher.DoFinal(ciphertextBC, len);
+            clen = (uint)(ciphertextBC.Length);
+            Array.Copy(ciphertextBC, 0, ciphertext, 0, clen);
+        }
+
         public static List<string> SupportedCiphers()
         {
             return new List<string>(_ciphers.Keys);
+        }
+
+        public override void Dispose()
+        {
         }
     }
 }
