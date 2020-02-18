@@ -31,14 +31,6 @@ namespace Shadowsocks.View
                 "salsa20",
                 "chacha20",
                 "bf-cfb",
-            };
-            private static string[] inuseMethod = new string[]
-            {
-                "aes-256-gcm",
-                "aes-192-gcm",
-                "aes-128-gcm",
-                "chacha20-ietf-poly1305",
-                "xchacha20-ietf-poly1305",
                 "chacha20-ietf",
                 "aes-256-cfb",
                 "aes-192-cfb",
@@ -49,6 +41,14 @@ namespace Shadowsocks.View
                 "camellia-256-cfb",
                 "camellia-192-cfb",
                 "camellia-128-cfb",
+            };
+            private static string[] inuseMethod = new string[]
+            {
+                "aes-256-gcm",
+                "aes-192-gcm",
+                "aes-128-gcm",
+                "chacha20-ietf-poly1305",
+                "xchacha20-ietf-poly1305",
             };
             public static EncryptionMethod[] AllMethods
             {
