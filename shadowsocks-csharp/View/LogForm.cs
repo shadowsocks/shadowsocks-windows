@@ -175,7 +175,7 @@ namespace Shadowsocks.View
 
         private void InitContent()
         {
-            if (string.IsNullOrEmpty(filename))
+            if (string.IsNullOrEmpty(filename) || !File.Exists(filename))
                 return;
             using (StreamReader reader = new StreamReader(new FileStream(filename,
                      FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
@@ -203,7 +203,7 @@ namespace Shadowsocks.View
             this.Text = I18N.GetString("Log Viewer") +
                         $" [in: {Utils.FormatBytes(controller.InboundCounter)}, out: {Utils.FormatBytes(controller.OutboundCounter)}]";
 
-            if (string.IsNullOrEmpty(filename))
+            if (string.IsNullOrEmpty(filename) || !File.Exists(filename))
                 return;
             try
             {
