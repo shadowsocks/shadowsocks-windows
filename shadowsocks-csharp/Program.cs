@@ -30,7 +30,7 @@ namespace Shadowsocks
             Model.NLogConfig.TouchAndApplyNLogConfig();
 
             // .NET Framework 4.7.2 on Win7 compatibility
-            System.Net.ServicePointManager.SecurityProtocol |= 
+            System.Net.ServicePointManager.SecurityProtocol |=
                 System.Net.SecurityProtocolType.Tls | System.Net.SecurityProtocolType.Tls11 | System.Net.SecurityProtocolType.Tls12;
 
             // store args for further use
@@ -83,6 +83,7 @@ namespace Shadowsocks
                     return;
                 }
                 Directory.SetCurrentDirectory(Application.StartupPath);
+                
 #if DEBUG
                 // truncate privoxy log file while debugging
                 string privoxyLogFilename = Utils.GetTempPath("privoxy.log");
@@ -91,6 +92,7 @@ namespace Shadowsocks
 #endif
                 MainController = new ShadowsocksController();
                 MenuController = new MenuViewController(MainController);
+
                 HotKeys.Init(MainController);
                 MainController.Start();
                 Application.Run();

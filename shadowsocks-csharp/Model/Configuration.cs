@@ -45,9 +45,14 @@ namespace Shadowsocks.Model
         NLogConfig nLogConfig;
 
         private static readonly string CONFIG_FILE = "gui-config.json";
+
+        [JsonIgnore]
+        public bool updated = false;
+
         [JsonIgnore]
         public string localHost => GetLocalHost();
-        private string GetLocalHost() {
+        private string GetLocalHost()
+        {
             return isIPv6Enabled ? "[::1]" : "127.0.0.1";
         }
         public Server GetCurrentServer()
@@ -86,6 +91,10 @@ namespace Shadowsocks.Model
                 string configContent = File.ReadAllText(CONFIG_FILE);
                 Configuration config = JsonConvert.DeserializeObject<Configuration>(configContent);
                 config.isDefault = false;
+                if (UpdateChecker.Asset.CompareVersion(UpdateChecker.Version, config.version ?? "0") > 0)
+                {
+                    config.updated = true;
+                }
 
                 if (config.configs == null)
                     config.configs = new List<Server>();
@@ -101,7 +110,8 @@ namespace Shadowsocks.Model
                     config.proxy = new ProxyConfig();
                 if (config.hotkey == null)
                     config.hotkey = new HotkeyConfig();
-                if (!System.Net.Sockets.Socket.OSSupportsIPv6) {
+                if (!System.Net.Sockets.Socket.OSSupportsIPv6)
+                {
                     config.isIPv6Enabled = false; // disable IPv6 if os not support
                 }
                 //TODO if remote host(server) do not support IPv6 (or DNS resolve AAAA TYPE record) disable IPv6?

@@ -54,6 +54,12 @@ namespace Shadowsocks.Controller
             public string Path;
         }
 
+        public class UpdatedEventArgs : EventArgs
+        {
+            public string OldVersion;
+            public string NewVersion;
+        }
+
         public class TrafficPerSecond
         {
             public long inboundCounter;
@@ -80,6 +86,9 @@ namespace Shadowsocks.Controller
 
         public event ErrorEventHandler Errored;
 
+        // Invoked when controller.Start();
+        public event EventHandler<UpdatedEventArgs> ProgramUpdated;
+
         public ShadowsocksController()
         {
             _config = Configuration.Load();
@@ -88,10 +97,25 @@ namespace Shadowsocks.Controller
             _pluginsByServer = new ConcurrentDictionary<Server, Sip003Plugin>();
             StartReleasingMemory();
             StartTrafficStatistics(61);
+
+            ProgramUpdated += (o, e) =>
+            {
+                logger.Info($"Updated from {e.OldVersion} to {e.NewVersion}");
+            };
         }
 
         public void Start(bool regHotkeys = true)
         {
+            if (_config.updated && regHotkeys)
+            {
+                _config.updated = false;
+                ProgramUpdated.Invoke(this, new UpdatedEventArgs()
+                {
+                    OldVersion = _config.version,
+                    NewVersion = UpdateChecker.Version,
+                });
+                Configuration.Save(_config);
+            }
             Reload();
             if (regHotkeys)
             {
