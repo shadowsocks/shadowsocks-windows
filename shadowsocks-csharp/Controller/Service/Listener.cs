@@ -4,13 +4,15 @@ using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
-
+using NLog;
 using Shadowsocks.Model;
 
 namespace Shadowsocks.Controller
 {
     public class Listener
     {
+        private static Logger logger = LogManager.GetCurrentClassLogger();
+
         public interface IService
         {
             bool Handle(byte[] firstPacket, int length, Socket socket, object state);
@@ -80,11 +82,8 @@ namespace Shadowsocks.Controller
                 _tcpSocket.Listen(1024);
 
                 // Start an asynchronous socket to listen for connections.
-                Logging.Info($"Shadowsocks started ({UpdateChecker.Version})");
-                if (_config.isVerboseLogging)
-                {
-                    Logging.Info(Encryption.EncryptorFactory.DumpRegisteredEncryptor());
-                }
+                logger.Info($"Shadowsocks started ({UpdateChecker.Version})");
+                logger.Debug(Encryption.EncryptorFactory.DumpRegisteredEncryptor());
                 _tcpSocket.BeginAccept(new AsyncCallback(AcceptCallback), _tcpSocket);
                 UDPState udpState = new UDPState(_udpSocket);
                 _udpSocket.BeginReceiveFrom(udpState.buffer, 0, udpState.buffer.Length, 0, ref udpState.remoteEndPoint, new AsyncCallback(RecvFromCallback), udpState);
@@ -132,7 +131,7 @@ namespace Shadowsocks.Controller
             }
             catch (Exception ex)
             {
-                Logging.Debug(ex);
+                logger.Debug(ex);
             }
             finally
             {
@@ -171,7 +170,7 @@ namespace Shadowsocks.Controller
             }
             catch (Exception e)
             {
-                Logging.LogUsefulException(e);
+                logger.LogUsefulException(e);
             }
             finally
             {
@@ -187,7 +186,7 @@ namespace Shadowsocks.Controller
                 }
                 catch (Exception e)
                 {
-                    Logging.LogUsefulException(e);
+                    logger.LogUsefulException(e);
                 }
             }
         }
@@ -218,7 +217,7 @@ namespace Shadowsocks.Controller
             }
             catch (Exception e)
             {
-                Logging.LogUsefulException(e);
+                logger.LogUsefulException(e);
                 conn.Close();
             }
         }

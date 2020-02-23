@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Windows.Forms;
-
+using NLog;
 using Shadowsocks.Controller.Hotkeys;
 using Shadowsocks.Model;
 
@@ -9,6 +9,7 @@ namespace Shadowsocks.Controller
 {
     static class HotkeyReg
     {
+        private static Logger logger = LogManager.GetCurrentClassLogger();
         public static void RegAllHotkeys()
         {
             var hotkeyConfig = Configuration.Load().hotkey;
@@ -60,7 +61,7 @@ namespace Shadowsocks.Controller
                 var hotkey = HotKeys.Str2HotKey(hotkeyStr);
                 if (hotkey == null)
                 {
-                    Logging.Error($"Cannot parse hotkey: {hotkeyStr}");
+                    logger.Error($"Cannot parse hotkey: {hotkeyStr}");
                     onComplete?.Invoke(RegResult.ParseError);
                     return false;
                 }

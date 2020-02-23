@@ -5,12 +5,15 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using Microsoft.Win32;
+using NLog;
 using Shadowsocks.Util;
 
 namespace Shadowsocks.Controller
 {
     static class AutoStartup
     {
+        private static Logger logger = LogManager.GetCurrentClassLogger();
+
         // Don't use Application.ExecutablePath
         // see https://stackoverflow.com/questions/12945805/odd-c-sharp-path-issue
         private static readonly string ExecutablePath = Assembly.GetEntryAssembly().Location;
@@ -25,7 +28,7 @@ namespace Shadowsocks.Controller
                 runKey = Utils.OpenRegKey(@"Software\Microsoft\Windows\CurrentVersion\Run", true);
                 if (runKey == null)
                 {
-                    Logging.Error(@"Cannot find HKCU\Software\Microsoft\Windows\CurrentVersion\Run");
+                    logger.Error(@"Cannot find HKCU\Software\Microsoft\Windows\CurrentVersion\Run");
                     return false;
                 }
                 if (enabled)
@@ -42,7 +45,7 @@ namespace Shadowsocks.Controller
             }
             catch (Exception e)
             {
-                Logging.LogUsefulException(e);
+                logger.LogUsefulException(e);
                 return false;
             }
             finally
@@ -55,7 +58,7 @@ namespace Shadowsocks.Controller
                         runKey.Dispose();
                     }
                     catch (Exception e)
-                    { Logging.LogUsefulException(e); }
+                    { logger.LogUsefulException(e); }
                 }
             }
         }
@@ -68,7 +71,7 @@ namespace Shadowsocks.Controller
                 runKey = Utils.OpenRegKey(@"Software\Microsoft\Windows\CurrentVersion\Run", true);
                 if (runKey == null)
                 {
-                    Logging.Error(@"Cannot find HKCU\Software\Microsoft\Windows\CurrentVersion\Run");
+                    logger.Error(@"Cannot find HKCU\Software\Microsoft\Windows\CurrentVersion\Run");
                     return false;
                 }
                 string[] runList = runKey.GetValueNames();
@@ -91,7 +94,7 @@ namespace Shadowsocks.Controller
             }
             catch (Exception e)
             {
-                Logging.LogUsefulException(e);
+                logger.LogUsefulException(e);
                 return false;
             }
             finally
@@ -104,7 +107,7 @@ namespace Shadowsocks.Controller
                         runKey.Dispose();
                     }
                     catch (Exception e)
-                    { Logging.LogUsefulException(e); }
+                    { logger.LogUsefulException(e); }
                 }
             }
         }
@@ -140,13 +143,13 @@ namespace Shadowsocks.Controller
                 // first parameter is process command line parameter
                 // needn't include the name of the executable in the command line
                 RegisterApplicationRestart(cmdline, (int)(ApplicationRestartFlags.RESTART_NO_CRASH | ApplicationRestartFlags.RESTART_NO_HANG));
-                Logging.Debug("Register restart after system reboot, command line:" + cmdline);
+                logger.Debug("Register restart after system reboot, command line:" + cmdline);
             }
             // requested unregister, which has no side effect
             else if (!register)
             {
                 UnregisterApplicationRestart();
-                Logging.Debug("Unregister restart after system reboot");
+                logger.Debug("Unregister restart after system reboot");
             }
         }
     }

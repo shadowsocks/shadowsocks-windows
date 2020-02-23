@@ -9,7 +9,7 @@ using System.Text;
 using System.Threading;
 using System.Web;
 using System.Windows.Forms;
-
+using NLog;
 using Shadowsocks.Controller.Service;
 using Shadowsocks.Controller.Strategy;
 using Shadowsocks.Model;
@@ -19,6 +19,8 @@ namespace Shadowsocks.Controller
 {
     public class ShadowsocksController
     {
+        private static Logger logger = LogManager.GetCurrentClassLogger();
+
         // controller:
         // handle user actions
         // manipulates UI
@@ -95,6 +97,11 @@ namespace Shadowsocks.Controller
             _pluginsByServer = new ConcurrentDictionary<Server, Sip003Plugin>();
             StartReleasingMemory();
             StartTrafficStatistics(61);
+
+            ProgramUpdated += (o, e) =>
+            {
+                logger.Info($"Updated from {e.OldVersion} to {e.NewVersion}");
+            };
         }
 
         public void Start(bool regHotkeys = true)
@@ -184,13 +191,13 @@ namespace Shadowsocks.Controller
             {
                 if (plugin.StartIfNeeded())
                 {
-                    Logging.Info(
+                    logger.Info(
                         $"Started SIP003 plugin for {server.Identifier()} on {plugin.LocalEndPoint} - PID: {plugin.ProcessId}");
                 }
             }
             catch (Exception ex)
             {
-                Logging.Error("Failed to start SIP003 plugin: " + ex.Message);
+                logger.Error("Failed to start SIP003 plugin: " + ex.Message);
                 throw;
             }
 
@@ -232,7 +239,7 @@ namespace Shadowsocks.Controller
             }
             catch (Exception e)
             {
-                Logging.LogUsefulException(e);
+                logger.LogUsefulException(e);
                 return false;
             }
         }
@@ -271,6 +278,7 @@ namespace Shadowsocks.Controller
         {
             _config.isVerboseLogging = enabled;
             SaveConfig(_config);
+            NLogConfig.LoadConfiguration(); // reload nlog
 
             VerboseLoggingStatusChanged?.Invoke(this, new EventArgs());
         }
@@ -494,6 +502,9 @@ namespace Shadowsocks.Controller
             Encryption.RNG.Reload();
             // some logic in configuration updated the config when saving, we need to read it again
             _config = Configuration.Load();
+
+            NLogConfig.LoadConfiguration();
+
             StatisticsConfiguration = StatisticsStrategyConfiguration.Load();
 
             privoxyRunner = privoxyRunner ?? new PrivoxyRunner();
@@ -552,7 +563,7 @@ namespace Shadowsocks.Controller
                         e = new Exception(I18N.GetString("Port {0} is reserved by system", _config.localPort), e);
                     }
                 }
-                Logging.LogUsefulException(e);
+                logger.LogUsefulException(e);
                 ReportError(e);
             }
 

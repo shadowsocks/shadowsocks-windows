@@ -82,12 +82,21 @@
     <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.12.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
+    <Reference Include="NLog, Version=4.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c, processorArchitecture=MSIL">
+      <HintPath>..\packages\NLog.4.6.8\lib\net45\NLog.dll</HintPath>
+    </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="System" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.IO.Compression" />
     <Reference Include="System.Management" />
     <Reference Include="System.Net" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.ServiceModel" />
+    <Reference Include="System.Transactions" />
     <Reference Include="System.Web" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Windows.Forms.DataVisualization" />
@@ -102,6 +111,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Controller\HotkeyReg.cs" />
+    <Compile Include="Controller\LoggerExtension.cs" />
     <Compile Include="Controller\Service\PACDaemon.cs" />
     <Compile Include="Controller\System\Hotkeys\HotkeyCallbacks.cs" />
     <Compile Include="Encryption\AEAD\AEADEncryptor.cs" />
@@ -122,6 +132,7 @@
     <Compile Include="Encryption\Stream\StreamOpenSSLEncryptor.cs" />
     <Compile Include="Encryption\Stream\StreamSodiumEncryptor.cs" />
     <Compile Include="Model\HotKeyConfig.cs" />
+    <Compile Include="Model\NLogConfig.cs" />
     <Compile Include="Model\ProxyConfig.cs" />
     <Compile Include="Model\SysproxyConfig.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
@@ -145,7 +156,6 @@
     <Compile Include="Controller\Service\GFWListUpdater.cs" />
     <Compile Include="Controller\I18N.cs" />
     <Compile Include="Controller\Service\Listener.cs" />
-    <Compile Include="Controller\Logging.cs" />
     <Compile Include="Controller\Service\PortForwarder.cs" />
     <Compile Include="Controller\Service\UDPRelay.cs" />
     <Compile Include="Controller\Service\UpdateChecker.cs" />
@@ -257,6 +267,7 @@
     </None>
     <None Include="Data\i18n.csv" />
     <None Include="Data\libsscrypto.dll.gz" />
+    <None Include="Data\NLog.config" />
     <None Include="Data\privoxy.exe.gz" />
   </ItemGroup>
   <ItemGroup>

@@ -6,6 +6,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Windows.Forms;
+using NLog;
 using Shadowsocks.Model;
 using Shadowsocks.Properties;
 using Shadowsocks.Util;
@@ -15,6 +16,8 @@ namespace Shadowsocks.Controller
 {
     class PrivoxyRunner
     {
+        private static Logger logger = LogManager.GetCurrentClassLogger();
+
         private static int _uid;
         private static string _uniqueConfigFile;
         private static Job _privoxyJob;
@@ -33,7 +36,7 @@ namespace Shadowsocks.Controller
             }
             catch (IOException e)
             {
-                Logging.LogUsefulException(e);
+                logger.LogUsefulException(e);
             }
         }
 
@@ -106,7 +109,7 @@ namespace Shadowsocks.Controller
             }
             catch (Exception e)
             {
-                Logging.LogUsefulException(e);
+                logger.LogUsefulException(e);
             }
         }
 
@@ -139,7 +142,7 @@ namespace Shadowsocks.Controller
                  * are already dead, and that will cause exceptions here.
                  * We could simply ignore those exceptions.
                  */
-                Logging.LogUsefulException(ex);
+                logger.LogUsefulException(ex);
                 return false;
             }
         }
@@ -159,7 +162,7 @@ namespace Shadowsocks.Controller
             catch (Exception e)
             {
                 // in case access denied
-                Logging.LogUsefulException(e);
+                logger.LogUsefulException(e);
                 return defaultPort;
             }
         }

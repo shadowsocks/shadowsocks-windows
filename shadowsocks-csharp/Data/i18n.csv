@@ -1,4 +1,4 @@
-en,ru-RU,zh-CN,zh-TW,ja
+﻿en,ru-RU,zh-CN,zh-TW,ja
 #Restart program to apply translation,,,,
 #This is comment line,,,,
 #Always keep language name at head of file,,,,
@@ -75,6 +75,7 @@ Apply,Применить,应用,應用,適用
 New server,Новый сервер,未配置的服务器,新伺服器,新規サーバー
 Move &Up,Выше,上移(&U),上移 (&U),上に移動 (&U)
 Move D&own,Ниже,下移(&O),下移 (&O),下に移動 (&O)
+deprecated,Устаревшее,不推荐,不推薦,非推奨
 ,,,,
 #Statistics Config,,,,
 ,,,,
