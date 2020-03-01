@@ -120,6 +120,7 @@
     <Compile Include="Encryption\AEAD\AEADBouncyCastleEncryptor.cs" />
     <Compile Include="Encryption\AEAD\AEADEncryptor.cs" />
     <Compile Include="Encryption\AEAD\AEADMbedTLSEncryptor.cs" />
+    <Compile Include="Encryption\AEAD\AEADNativeEncryptor.cs" />
     <Compile Include="Encryption\AEAD\AEADOpenSSLEncryptor.cs" />
     <Compile Include="Encryption\AEAD\AEADSodiumEncryptor.cs" />
     <Compile Include="Encryption\CircularBuffer\ByteCircularBuffer.cs" />
@@ -133,6 +134,7 @@
     <Compile Include="Encryption\Sodium.cs" />
     <Compile Include="Encryption\Stream\StreamEncryptor.cs" />
     <Compile Include="Encryption\Stream\StreamMbedTLSEncryptor.cs" />
+    <Compile Include="Encryption\Stream\StreamNativeEncryptor.cs" />
     <Compile Include="Encryption\Stream\StreamOpenSSLEncryptor.cs" />
     <Compile Include="Encryption\Stream\StreamSodiumEncryptor.cs" />
     <Compile Include="Model\HotKeyConfig.cs" />

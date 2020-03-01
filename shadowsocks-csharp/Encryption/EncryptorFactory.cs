@@ -28,6 +28,12 @@ namespace Shadowsocks.Encryption
             }
 
             // XXX: sequence matters, OpenSSL > Sodium > MbedTLS
+            foreach (string method in StreamNativeEncryptor.SupportedCiphers())
+            {
+                if (!_registeredEncryptors.ContainsKey(method))
+                    _registeredEncryptors.Add(method, typeof(StreamNativeEncryptor));
+            }
+
             foreach (string method in StreamOpenSSLEncryptor.SupportedCiphers())
             {
                 if (!_registeredEncryptors.ContainsKey(method))
@@ -46,6 +52,11 @@ namespace Shadowsocks.Encryption
                     _registeredEncryptors.Add(method, typeof(StreamMbedTLSEncryptor));
             }
 
+            foreach (string method in AEADNativeEncryptor.SupportedCiphers())
+            {
+                if (!_registeredEncryptors.ContainsKey(method))
+                    _registeredEncryptors.Add(method, typeof(AEADNativeEncryptor));
+            }
 
             foreach (string method in AEADOpenSSLEncryptor.SupportedCiphers())
             {
