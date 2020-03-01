@@ -1,10 +1,9 @@
-﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Shadowsocks.Encryption;
-using System.Threading;
-using System.Collections.Generic;
 using Shadowsocks.Encryption.Stream;
-using System.Diagnostics;
+using System;
+using System.Collections.Generic;
+using System.Threading;
 
 namespace Shadowsocks.Test
 {
@@ -22,10 +21,71 @@ namespace Shadowsocks.Test
                 var random = new Random();
                 random.NextBytes(bytes);
                 string md5str = Convert.ToBase64String(md5.ComputeHash(bytes));
-                string md5str2 = Convert.ToBase64String(MbedTLS.MD5(bytes));
+                string md5str2 = Convert.ToBase64String(CryptoUtils.MD5(bytes));
+                string md5str3 = Convert.ToBase64String(MbedTLS.MD5(bytes));
                 Assert.IsTrue(md5str == md5str2);
+                Assert.IsTrue(md5str == md5str3);
             }
         }
+
+        [TestMethod]
+        public void TestHKDF()
+        {
+            int keylen = 32;
+            int saltlen = 32;
+            byte[] master = new byte[keylen];
+            byte[] info = new byte[8];
+            byte[] salt = new byte[saltlen];
+            Random r = new Random();
+            r.NextBytes(master);
+            r.NextBytes(info);
+            r.NextBytes(salt);
+            string bchkdf = Convert.ToBase64String(CryptoUtils.HKDF(keylen, master, salt, info));
+            string mbhkdf = Convert.ToBase64String(MbedTLShkdf(keylen, master, salt, info));
+
+            Assert.IsTrue(bchkdf == mbhkdf);
+        }
+
+        private byte[] MbedTLShkdf(int keylen, byte[] master, byte[] salt, byte[] info)
+        {
+            byte[] sessionKey = new byte[keylen];
+            MbedTLS.hkdf(salt, salt.Length, master, keylen, info, info.Length, sessionKey, keylen);
+            return sessionKey;
+        }
+
+        [TestMethod]
+        public void TestSodiumIncrement()
+        {
+            byte[] full255 = new byte[32];
+            for (int i = 0; i < full255.Length; i++)
+            {
+                full255[i] = 255;
+            }
+
+            byte[] zero255 = new byte[32];
+            zero255[0] = 255;
+
+            byte[] rd = new byte[32];
+            new Random().NextBytes(rd);
+            RunSodiumIncrement(full255);
+            RunSodiumIncrement(zero255);
+            RunSodiumIncrement(rd);
+
+        }
+
+        private void RunSodiumIncrement(byte[] data)
+        {
+            byte[] data2 = new byte[data.Length];
+            data.CopyTo(data2, 0);
+            CryptoUtils.SodiumIncrement(data);
+            Sodium.sodium_increment(data2, data2.Length);
+
+            for (int i = 0; i < data.Length; i++)
+            {
+                Assert.AreEqual(data[i], data2[i]);
+            }
+        }
+
 
         private void RunEncryptionRound(IEncryptor encryptor, IEncryptor decryptor)
         {
@@ -239,7 +299,7 @@ namespace Shadowsocks.Test
             List<Thread> threads = new List<Thread>();
             for (int i = 0; i < 10; i++)
             {
-                Thread t = new Thread(new ThreadStart(RunSingleBouncyCastleAEADEncryptionThread));threads.Add(t);
+                Thread t = new Thread(new ThreadStart(RunSingleBouncyCastleAEADEncryptionThread)); threads.Add(t);
                 t.Start();
             }
             foreach (Thread t in threads)
