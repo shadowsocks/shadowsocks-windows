@@ -79,7 +79,14 @@ namespace Shadowsocks.View
             public static EncryptionMethod GetMethod(string name)
             {
                 if (!init) Init();
-                return methodByName[name];
+                bool success = methodByName.TryGetValue(name, out EncryptionMethod method);
+                if (!success)
+                {
+                    string defaultMethod = Server.DefaultMethod;
+                    MessageBox.Show(I18N.GetString("Encryption method {0} not exist, will replace with {1}", name, defaultMethod), I18N.GetString("Shadowsocks"));
+                    return methodByName[defaultMethod];
+                }
+                return method;
             }
 
             private EncryptionMethod(string name, bool deprecated)
