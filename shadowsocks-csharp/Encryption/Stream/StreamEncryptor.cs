@@ -75,11 +75,11 @@ namespace Shadowsocks.Encryption.Stream
             byte[] md5sum = null;
             while (i < keylen) {
                 if (i == 0) {
-                    md5sum = MbedTLS.MD5(password);
+                    md5sum = CryptoUtils.MD5(password);
                 } else {
                     Array.Copy(md5sum, 0, result, 0, MD5_LEN);
                     Array.Copy(password, 0, result, MD5_LEN, password.Length);
-                    md5sum = MbedTLS.MD5(result);
+                    md5sum = CryptoUtils.MD5(result);
                 }
                 Array.Copy(md5sum, 0, key, i, Math.Min(MD5_LEN, keylen - i));
                 i += MD5_LEN;

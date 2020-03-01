@@ -119,24 +119,16 @@
     <Compile Include="Controller\System\Hotkeys\HotkeyCallbacks.cs" />
     <Compile Include="Encryption\AEAD\AEADBouncyCastleEncryptor.cs" />
     <Compile Include="Encryption\AEAD\AEADEncryptor.cs" />
-    <Compile Include="Encryption\AEAD\AEADMbedTLSEncryptor.cs" />
     <Compile Include="Encryption\AEAD\AEADNativeEncryptor.cs" />
-    <Compile Include="Encryption\AEAD\AEADOpenSSLEncryptor.cs" />
-    <Compile Include="Encryption\AEAD\AEADSodiumEncryptor.cs" />
     <Compile Include="Encryption\CircularBuffer\ByteCircularBuffer.cs" />
+    <Compile Include="Encryption\CryptoUtils.cs" />
     <Compile Include="Encryption\EncryptorBase.cs" />
     <Compile Include="Encryption\EncryptorFactory.cs" />
     <Compile Include="Encryption\Exception\CryptoException.cs" />
     <Compile Include="Encryption\IEncryptor.cs" />
-    <Compile Include="Encryption\MbedTLS.cs" />
-    <Compile Include="Encryption\OpenSSL.cs" />
     <Compile Include="Encryption\RNG.cs" />
-    <Compile Include="Encryption\Sodium.cs" />
     <Compile Include="Encryption\Stream\StreamEncryptor.cs" />
-    <Compile Include="Encryption\Stream\StreamMbedTLSEncryptor.cs" />
     <Compile Include="Encryption\Stream\StreamNativeEncryptor.cs" />
-    <Compile Include="Encryption\Stream\StreamOpenSSLEncryptor.cs" />
-    <Compile Include="Encryption\Stream\StreamSodiumEncryptor.cs" />
     <Compile Include="Model\HotKeyConfig.cs" />
     <Compile Include="Model\NLogConfig.cs" />
     <Compile Include="Model\ProxyConfig.cs" />
@@ -272,7 +264,6 @@
       <SubType>Designer</SubType>
     </None>
     <None Include="Data\i18n.csv" />
-    <None Include="Data\libsscrypto.dll.gz" />
     <None Include="Data\NLog.config" />
     <None Include="Data\privoxy.exe.gz" />
   </ItemGroup>

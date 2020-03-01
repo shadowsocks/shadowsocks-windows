@@ -37,7 +37,7 @@ namespace Shadowsocks.Encryption.Stream
                     byte[] temp = new byte[keyLen + ivLen];
                     Array.Copy(_key, 0, temp, 0, keyLen);
                     Array.Copy(iv, 0, temp, keyLen, ivLen);
-                    realkey = MbedTLS.MD5(temp);
+                    realkey = CryptoUtils.MD5(temp);
                 }
                 else
                 {
@@ -47,7 +47,7 @@ namespace Shadowsocks.Encryption.Stream
             }
             else if (_cipher == Table)
             {
-                ulong a = BitConverter.ToUInt64(MbedTLS.MD5(Encoding.UTF8.GetBytes(_password)), 0);
+                ulong a = BitConverter.ToUInt64(CryptoUtils.MD5(Encoding.UTF8.GetBytes(_password)), 0);
                 for (int i = 0; i < 256; i++)
                 {
                     _encryptTable[i] = (byte)i;

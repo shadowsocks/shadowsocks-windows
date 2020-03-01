@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Shadowsocks.Encryption.AEAD
 {
@@ -33,7 +30,7 @@ namespace Shadowsocks.Encryption.AEAD
 
         private static Dictionary<string, EncryptorInfo> _ciphers = new Dictionary<string, EncryptorInfo>()
         {
-            {"plain-aeadfmt",new EncryptorInfo("PLAIN",0,0,0,0,0) }
+            {"plain-fake-aead",new EncryptorInfo("PLAIN_AEAD",0,0,0,0,0) }
         };
 
 
