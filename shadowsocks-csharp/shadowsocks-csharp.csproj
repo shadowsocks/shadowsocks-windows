@@ -1,7 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="..\packages\Costura.Fody.3.3.3\build\Costura.Fody.props" Condition="Exists('..\packages\Costura.Fody.3.3.3\build\Costura.Fody.props')" />
-  <Import Project="..\packages\Caseless.Fody.1.8.3\build\Caseless.Fody.props" Condition="Exists('..\packages\Caseless.Fody.1.8.3\build\Caseless.Fody.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -68,12 +66,6 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Caseless, Version=1.8.3.0, Culture=neutral, PublicKeyToken=409b3227471b0f0d, processorArchitecture=MSIL">
-      <HintPath>..\packages\Caseless.Fody.1.8.3\lib\net452\Caseless.dll</HintPath>
-    </Reference>
-    <Reference Include="Costura, Version=3.3.3.0, Culture=neutral, PublicKeyToken=9919ef960d84173d, processorArchitecture=MSIL">
-      <HintPath>..\packages\Costura.Fody.3.3.3\lib\net40\Costura.dll</HintPath>
-    </Reference>
     <Reference Include="GlobalHotKey, Version=1.1.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\GlobalHotKey.1.1.0\lib\GlobalHotKey.dll</HintPath>
     </Reference>
@@ -82,12 +74,21 @@
     <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.12.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
+    <Reference Include="NLog, Version=4.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c, processorArchitecture=MSIL">
+      <HintPath>..\packages\NLog.4.6.8\lib\net45\NLog.dll</HintPath>
+    </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="System" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.IO.Compression" />
     <Reference Include="System.Management" />
     <Reference Include="System.Net" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.ServiceModel" />
+    <Reference Include="System.Transactions" />
     <Reference Include="System.Web" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Windows.Forms.DataVisualization" />
@@ -102,6 +103,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Controller\HotkeyReg.cs" />
+    <Compile Include="Controller\LoggerExtension.cs" />
     <Compile Include="Controller\Service\PACDaemon.cs" />
     <Compile Include="Controller\System\Hotkeys\HotkeyCallbacks.cs" />
     <Compile Include="Encryption\AEAD\AEADEncryptor.cs" />
@@ -122,6 +124,7 @@
     <Compile Include="Encryption\Stream\StreamOpenSSLEncryptor.cs" />
     <Compile Include="Encryption\Stream\StreamSodiumEncryptor.cs" />
     <Compile Include="Model\HotKeyConfig.cs" />
+    <Compile Include="Model\NLogConfig.cs" />
     <Compile Include="Model\ProxyConfig.cs" />
     <Compile Include="Model\SysproxyConfig.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
@@ -145,7 +148,6 @@
     <Compile Include="Controller\Service\GFWListUpdater.cs" />
     <Compile Include="Controller\I18N.cs" />
     <Compile Include="Controller\Service\Listener.cs" />
-    <Compile Include="Controller\Logging.cs" />
     <Compile Include="Controller\Service\PortForwarder.cs" />
     <Compile Include="Controller\Service\UDPRelay.cs" />
     <Compile Include="Controller\Service\UpdateChecker.cs" />
@@ -267,42 +269,43 @@
     <ContentWithTargetPath Include="Data\abp.js">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <TargetPath>abp.js</TargetPath>
-    </ContentWithTargetPath >
+    </ContentWithTargetPath>
     <ContentWithTargetPath Include="Data\default-abp-rule.js">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <TargetPath>default-abp-rule.js</TargetPath>
-    </ContentWithTargetPath >
+    </ContentWithTargetPath>
     <ContentWithTargetPath Include="Data\i18n.csv">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <TargetPath>i18n.csv</TargetPath>
-    </ContentWithTargetPath >
+    </ContentWithTargetPath>
     <ContentWithTargetPath Include="Data\libsscrypto.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <TargetPath>libsscrypto.dll</TargetPath>
-    </ContentWithTargetPath >
+    </ContentWithTargetPath>
     <ContentWithTargetPath Include="Data\privoxy.exe">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <TargetPath>privoxy.exe</TargetPath>
-    </ContentWithTargetPath >
+    </ContentWithTargetPath>
     <ContentWithTargetPath Include="Data\privoxy_conf.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <TargetPath>privoxy_conf.txt</TargetPath>
-    </ContentWithTargetPath >
+    </ContentWithTargetPath>
     <ContentWithTargetPath Include="Data\sysproxy.exe">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <TargetPath>sysproxy.exe</TargetPath>
-    </ContentWithTargetPath >
+    </ContentWithTargetPath>
     <ContentWithTargetPath Include="Data\sysproxy64.exe">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <TargetPath>sysproxy64.exe</TargetPath>
-    </ContentWithTargetPath >
+    </ContentWithTargetPath>
     <ContentWithTargetPath Include="Data\user-rule.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <TargetPath>user-rule.txt</TargetPath>
-    </ContentWithTargetPath >
-    <None Include="FodyWeavers.xml">
-      <SubType>Designer</SubType>
-    </None>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath Include="Data\nlog.config">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>nlog.config</TargetPath>
+    </ContentWithTargetPath>
     <Content Include="Resources\ss32Fill.png" />
     <Content Include="Resources\ss32In.png" />
     <Content Include="Resources\ss32Out.png" />
@@ -337,14 +340,10 @@
     </BootstrapperPackage>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <Import Project="..\packages\Fody.4.2.1\build\Fody.targets" Condition="Exists('..\packages\Fody.4.2.1\build\Fody.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
-    <Error Condition="!Exists('..\packages\Fody.4.2.1\build\Fody.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Fody.4.2.1\build\Fody.targets'))" />
-    <Error Condition="!Exists('..\packages\Caseless.Fody.1.8.3\build\Caseless.Fody.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Caseless.Fody.1.8.3\build\Caseless.Fody.props'))" />
-    <Error Condition="!Exists('..\packages\Costura.Fody.3.3.3\build\Costura.Fody.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Costura.Fody.3.3.3\build\Costura.Fody.props'))" />
   </Target>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

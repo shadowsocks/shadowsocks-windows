@@ -4,7 +4,7 @@ using System.Net;
 using System.Text.RegularExpressions;
 
 using Newtonsoft.Json.Linq;
-
+using NLog;
 using Shadowsocks.Model;
 using Shadowsocks.Util;
 
@@ -12,17 +12,17 @@ namespace Shadowsocks.Controller
 {
     public class UpdateChecker
     {
+        private static Logger logger = LogManager.GetCurrentClassLogger();
+
         private const string UpdateURL = "https://api.github.com/repos/shadowsocks/shadowsocks-windows/releases";
         private const string UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.121 Safari/537.36";
 
-        private Configuration config;
         public bool NewVersionFound;
         public string LatestVersionNumber;
         public string LatestVersionSuffix;
         public string LatestVersionName;
         public string LatestVersionURL;
         public string LatestVersionLocalName;
-        public event EventHandler CheckUpdateCompleted;
 
         public const string Version = "4.1.9.2";
 

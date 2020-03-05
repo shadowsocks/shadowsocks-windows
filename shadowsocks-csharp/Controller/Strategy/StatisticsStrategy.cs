@@ -5,7 +5,7 @@ using System.Net;
 using System.Threading;
 
 using Newtonsoft.Json;
-
+using NLog;
 using Shadowsocks.Model;
 
 namespace Shadowsocks.Controller.Strategy
@@ -14,6 +14,8 @@ namespace Shadowsocks.Controller.Strategy
 
     internal class StatisticsStrategy : IStrategy, IDisposable
     {
+        private static Logger logger = LogManager.GetCurrentClassLogger();
+
         private readonly ShadowsocksController _controller;
         private Server _currentServer;
         private readonly Timer _timer;
@@ -34,7 +36,7 @@ namespace Shadowsocks.Controller.Strategy
 
         private void ReloadStatisticsAndChooseAServer(object obj)
         {
-            Logging.Debug("Reloading statistics and choose a new server....");
+            logger.Debug("Reloading statistics and choose a new server....");
             var servers = _controller.GetCurrentConfiguration().configs;
             LoadStatistics();
             ChooseNewServer(servers);
@@ -74,7 +76,7 @@ namespace Shadowsocks.Controller.Strategy
 
             if (score != null)
             {
-                Logging.Debug($"Highest score: {score} {JsonConvert.SerializeObject(averageRecord, Formatting.Indented)}");
+                logger.Debug($"Highest score: {score} {JsonConvert.SerializeObject(averageRecord, Formatting.Indented)}");
             }
             return score;
         }
@@ -112,7 +114,7 @@ namespace Shadowsocks.Controller.Strategy
             }
             catch (Exception e)
             {
-                Logging.LogUsefulException(e);
+                logger.LogUsefulException(e);
             }
         }
 
@@ -145,7 +147,7 @@ namespace Shadowsocks.Controller.Strategy
 
         public void SetFailure(Server server)
         {
-            Logging.Debug($"failure: {server.FriendlyName()}");
+            logger.Debug($"failure: {server.FriendlyName()}");
         }
 
         public void UpdateLastRead(Server server)

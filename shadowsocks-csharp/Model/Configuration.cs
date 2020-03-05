@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using Newtonsoft.Json;
+using NLog;
 using Shadowsocks.Controller;
 
 namespace Shadowsocks.Model
@@ -9,6 +10,9 @@ namespace Shadowsocks.Model
     [Serializable]
     public class Configuration
     {
+        [JsonIgnore]
+        private static Logger logger = LogManager.GetCurrentClassLogger();
+
         public string version;
 
         public List<Server> configs;
@@ -32,14 +36,23 @@ namespace Shadowsocks.Model
         public bool autoCheckUpdate;
         public bool checkPreRelease;
         public bool isVerboseLogging;
+        //public NLogConfig.LogLevel logLevel;
         public LogViewerConfig logViewer;
         public ProxyConfig proxy;
         public HotkeyConfig hotkey;
 
+        [JsonIgnore]
+        NLogConfig nLogConfig;
+
         private static readonly string CONFIG_FILE = "gui-config.json";
+
+        [JsonIgnore]
+        public bool updated = false;
+
         [JsonIgnore]
         public string localHost => GetLocalHost();
-        private string GetLocalHost() {
+        private string GetLocalHost()
+        {
             return isIPv6Enabled ? "[::1]" : "127.0.0.1";
         }
         public Server GetCurrentServer()
@@ -78,6 +91,10 @@ namespace Shadowsocks.Model
                 string configContent = File.ReadAllText(CONFIG_FILE);
                 Configuration config = JsonConvert.DeserializeObject<Configuration>(configContent);
                 config.isDefault = false;
+                if (UpdateChecker.Asset.CompareVersion(UpdateChecker.Version, config.version ?? "0") > 0)
+                {
+                    config.updated = true;
+                }
 
                 if (config.configs == null)
                     config.configs = new List<Server>();
@@ -93,19 +110,43 @@ namespace Shadowsocks.Model
                     config.proxy = new ProxyConfig();
                 if (config.hotkey == null)
                     config.hotkey = new HotkeyConfig();
-                if (!System.Net.Sockets.Socket.OSSupportsIPv6) {
+                if (!System.Net.Sockets.Socket.OSSupportsIPv6)
+                {
                     config.isIPv6Enabled = false; // disable IPv6 if os not support
                 }
                 //TODO if remote host(server) do not support IPv6 (or DNS resolve AAAA TYPE record) disable IPv6?
 
                 config.proxy.CheckConfig();
 
+                try
+                {
+                    config.nLogConfig = NLogConfig.LoadXML();
+                    switch (config.nLogConfig.GetLogLevel())
+                    {
+                        case NLogConfig.LogLevel.Fatal:
+                        case NLogConfig.LogLevel.Error:
+                        case NLogConfig.LogLevel.Warn:
+                        case NLogConfig.LogLevel.Info:
+                            config.isVerboseLogging = false;
+                            break;
+                        case NLogConfig.LogLevel.Debug:
+                        case NLogConfig.LogLevel.Trace:
+                            config.isVerboseLogging = true;
+                            break;
+                    }
+                }
+                catch (Exception e)
+                {
+                    // todo: route the error to UI since there is no log file in this scenario
+                    logger.Error(e, "Cannot get the log level from NLog config file. Please check if the nlog config file exists with corresponding XML nodes.");
+                }
+
                 return config;
             }
             catch (Exception e)
             {
                 if (!(e is FileNotFoundException))
-                    Logging.LogUsefulException(e);
+                    logger.LogUsefulException(e);
                 return new Configuration
                 {
                     index = 0,
@@ -118,7 +159,7 @@ namespace Shadowsocks.Model
                     },
                     logViewer = new LogViewerConfig(),
                     proxy = new ProxyConfig(),
-                    hotkey = new HotkeyConfig()
+                    hotkey = new HotkeyConfig(),
                 };
             }
         }
@@ -141,10 +182,20 @@ namespace Shadowsocks.Model
                     sw.Write(jsonString);
                     sw.Flush();
                 }
+                try
+                {             
+                    // apply changs to NLog.config
+                    config.nLogConfig.SetLogLevel(config.isVerboseLogging? NLogConfig.LogLevel.Trace: NLogConfig.LogLevel.Info);
+                    NLogConfig.SaveXML(config.nLogConfig);
+                }
+                catch(Exception e)
+                {
+                    logger.Error(e, "Cannot set the log level to NLog config file. Please check if the nlog config file exists with corresponding XML nodes.");
+                }
             }
             catch (IOException e)
             {
-                Logging.LogUsefulException(e);
+                logger.LogUsefulException(e);
             }
         }
 

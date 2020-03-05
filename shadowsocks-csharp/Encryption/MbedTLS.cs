@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Runtime.InteropServices;
+using NLog;
 using Shadowsocks.Controller;
 using Shadowsocks.Properties;
 using Shadowsocks.Util;
@@ -9,6 +10,8 @@ namespace Shadowsocks.Encryption
 {
     public static class MbedTLS
     {
+        private static Logger logger = LogManager.GetCurrentClassLogger();
+
         private const string DLLNAME = "libsscrypto.dll";
 
         public const int MBEDTLS_ENCRYPT = 1;

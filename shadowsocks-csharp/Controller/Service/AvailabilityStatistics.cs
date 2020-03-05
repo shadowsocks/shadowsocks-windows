@@ -9,6 +9,7 @@ using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using NLog;
 using Shadowsocks.Model;
 using Shadowsocks.Util;
 
@@ -18,6 +19,8 @@ namespace Shadowsocks.Controller
 
     public sealed class AvailabilityStatistics : IDisposable
     {
+        private static Logger logger = LogManager.GetCurrentClassLogger();
+
         public const string DateTimePattern = "yyyy-MM-dd HH:mm:ss";
         private const string StatisticsFilesName = "shadowsocks.availability.json";
         public static string AvailabilityStatisticsFile;
@@ -111,7 +114,7 @@ namespace Shadowsocks.Controller
             }
             catch (Exception e)
             {
-                Logging.LogUsefulException(e);
+                logger.LogUsefulException(e);
             }
         }
 
@@ -155,7 +158,7 @@ namespace Shadowsocks.Controller
                 inR.Add(inboundSpeed);
                 outR.Add(outboundSpeed);
 
-                Logging.Debug(
+                logger.Debug(
                     $"{id}: current/max inbound {inboundSpeed}/{inR.Max()} KiB/s, current/max outbound {outboundSpeed}/{outR.Max()} KiB/s");
             }
         }
@@ -213,7 +216,7 @@ namespace Shadowsocks.Controller
                 }
                 catch (Exception e)
                 {
-                    Logging.Debug("config changed asynchrously, just ignore this server");
+                    logger.Debug("config changed asynchrously, just ignore this server");
                 }
             }
 
@@ -235,7 +238,7 @@ namespace Shadowsocks.Controller
             {
                 AppendRecord(server.Identifier(), record);
             }
-            Logging.Debug($"Ping {server.FriendlyName()} {e.RoundtripTime.Count} times, {(100 - record.PackageLoss * 100)}% packages loss, min {record.MinResponse} ms, max {record.MaxResponse} ms, avg {record.AverageResponse} ms");
+            logger.Debug($"Ping {server.FriendlyName()} {e.RoundtripTime.Count} times, {(100 - record.PackageLoss * 100)}% packages loss, min {record.MinResponse} ms, max {record.MaxResponse} ms, avg {record.AverageResponse} ms");
             if (Interlocked.Decrement(ref state.counter) == 0)
             {
                 Save();
@@ -260,13 +263,13 @@ namespace Shadowsocks.Controller
             }
             catch (Exception e)
             {
-                Logging.LogUsefulException(e);
+                logger.LogUsefulException(e);
             }
         }
 
         private void Save()
         {
-            Logging.Debug($"save statistics to {AvailabilityStatisticsFile}");
+            logger.Debug($"save statistics to {AvailabilityStatisticsFile}");
             if (RawStatistics.Count == 0)
             {
                 return;
@@ -283,7 +286,7 @@ namespace Shadowsocks.Controller
             }
             catch (IOException e)
             {
-                Logging.LogUsefulException(e);
+                logger.LogUsefulException(e);
             }
         }
 
@@ -300,7 +303,7 @@ namespace Shadowsocks.Controller
         {
             try
             {
-                Logging.Debug("filter raw statistics");
+                logger.Debug("filter raw statistics");
                 if (RawStatistics == null) return;
                 var filteredStatistics = new Statistics();
 
@@ -315,7 +318,7 @@ namespace Shadowsocks.Controller
             }
             catch (Exception e)
             {
-                Logging.LogUsefulException(e);
+                logger.LogUsefulException(e);
             }
         }
 
@@ -324,7 +327,7 @@ namespace Shadowsocks.Controller
             try
             {
                 var path = AvailabilityStatisticsFile;
-                Logging.Debug($"loading statistics from {path}");
+                logger.Debug($"loading statistics from {path}");
                 if (!File.Exists(path))
                 {
                     using (File.Create(path))
@@ -337,7 +340,7 @@ namespace Shadowsocks.Controller
             }
             catch (Exception e)
             {
-                Logging.LogUsefulException(e);
+                logger.LogUsefulException(e);
                 Console.WriteLine($"failed to load statistics; use runtime statistics, some data may be lost");
             }
         }
@@ -411,6 +414,8 @@ namespace Shadowsocks.Controller
 
         class MyPing
         {
+            private static Logger logger = LogManager.GetCurrentClassLogger();
+
             //arguments for ICMP tests
             public const int TimeoutMilliseconds = 500;
 
@@ -445,7 +450,7 @@ namespace Shadowsocks.Controller
             {
                 try
                 {
-                    Logging.Debug($"Ping {server.FriendlyName()}");
+                    logger.Debug($"Ping {server.FriendlyName()}");
                     if (ip == null)
                     {
                         ip = Dns.GetHostAddresses(server.server)
@@ -461,8 +466,8 @@ namespace Shadowsocks.Controller
                 }
                 catch (Exception e)
                 {
-                    Logging.Error($"An exception occured while eveluating {server.FriendlyName()}");
-                    Logging.LogUsefulException(e);
+                    logger.Error($"An exception occured while eveluating {server.FriendlyName()}");
+                    logger.LogUsefulException(e);
                     FireCompleted(e, userstate);
                 }
             }
@@ -473,20 +478,20 @@ namespace Shadowsocks.Controller
                 {
                     if (e.Reply.Status == IPStatus.Success)
                     {
-                        Logging.Debug($"Ping {server.FriendlyName()} {e.Reply.RoundtripTime} ms");
+                        logger.Debug($"Ping {server.FriendlyName()} {e.Reply.RoundtripTime} ms");
                         RoundtripTime.Add((int?)e.Reply.RoundtripTime);
                     }
                     else
                     {
-                        Logging.Debug($"Ping {server.FriendlyName()} timeout");
+                        logger.Debug($"Ping {server.FriendlyName()} timeout");
                         RoundtripTime.Add(null);
                     }
                     TestNext(e.UserState);
                 }
                 catch (Exception ex)
                 {
-                    Logging.Error($"An exception occured while eveluating {server.FriendlyName()}");
-                    Logging.LogUsefulException(ex);
+                    logger.Error($"An exception occured while eveluating {server.FriendlyName()}");
+                    logger.LogUsefulException(ex);
                     FireCompleted(ex, e.UserState);
                 }
             }

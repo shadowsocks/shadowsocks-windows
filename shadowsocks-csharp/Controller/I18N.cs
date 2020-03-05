@@ -1,4 +1,5 @@
 ﻿using Microsoft.VisualBasic.FileIO;
+using NLog;
 using Shadowsocks.Properties;
 using Shadowsocks.Util;
 using System.Collections.Generic;
@@ -11,6 +12,8 @@ namespace Shadowsocks.Controller
 {
     public static class I18N
     {
+        private static Logger logger = LogManager.GetCurrentClassLogger();
+
         public const string I18N_FILE = "i18n.csv";
 
         private static Dictionary<string, string> _strings = new Dictionary<string, string>();
@@ -46,12 +49,12 @@ namespace Shadowsocks.Controller
                     }
                     if (targetIndex != -1 && enIndex != targetIndex)
                     {
-                        Logging.Info($"Using {localeNames[targetIndex]} translation for {locale}");
+                        logger.Info($"Using {localeNames[targetIndex]} translation for {locale}");
                     }
                     else
                     {
                         // Still not found, exit
-                        Logging.Info($"Translation for {locale} not found");
+                        logger.Info($"Translation for {locale} not found");
                         return;
                     }
                 }
@@ -77,7 +80,7 @@ namespace Shadowsocks.Controller
         {
             string locale = CultureInfo.CurrentCulture.Name;
             string i18n = File.ReadAllText(I18N_FILE, Encoding.UTF8);
-            Logging.Info("Current language is: " + locale);
+            logger.Info("Current language is: " + locale);
             Init(i18n, locale);
         }
 

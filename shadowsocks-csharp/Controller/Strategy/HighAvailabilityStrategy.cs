@@ -1,4 +1,5 @@
-﻿using Shadowsocks.Model;
+﻿using NLog;
+using Shadowsocks.Model;
 using System;
 using System.Collections.Generic;
 using System.Net;
@@ -8,6 +9,8 @@ namespace Shadowsocks.Controller.Strategy
 {
     class HighAvailabilityStrategy : IStrategy
     {
+        private static Logger logger = LogManager.GetCurrentClassLogger();
+
         protected ServerStatus _currentServer;
         protected Dictionary<Server, ServerStatus> _serverStatus;
         ShadowsocksController _controller;
@@ -111,7 +114,7 @@ namespace Shadowsocks.Controller.Strategy
                     100 * 1000 * Math.Min(5 * 60, (now - status.lastFailure).TotalSeconds)
                     -2 * 5 * (Math.Min(2000, status.latency.TotalMilliseconds) / (1 + (now - status.lastTimeDetectLatency).TotalSeconds / 30 / 10) +
                     -0.5 * 200 * Math.Min(5, (status.lastRead - status.lastWrite).TotalSeconds));
-                Logging.Debug(String.Format("server: {0} latency:{1} score: {2}", status.server.FriendlyName(), status.latency, status.score));
+                logger.Debug(String.Format("server: {0} latency:{1} score: {2}", status.server.FriendlyName(), status.latency, status.score));
             }
             ServerStatus max = null;
             foreach (var status in servers)
@@ -133,14 +136,14 @@ namespace Shadowsocks.Controller.Strategy
                 if (_currentServer == null || max.score - _currentServer.score > 200)
                 {
                     _currentServer = max;
-                    Logging.Info($"HA switching to server: {_currentServer.server.FriendlyName()}");
+                    logger.Info($"HA switching to server: {_currentServer.server.FriendlyName()}");
                 }
             }
         }
 
         public void UpdateLatency(Model.Server server, TimeSpan latency)
         {
-            Logging.Debug($"latency: {server.FriendlyName()} {latency}");
+            logger.Debug($"latency: {server.FriendlyName()} {latency}");
 
             ServerStatus status;
             if (_serverStatus.TryGetValue(server, out status))
@@ -152,7 +155,7 @@ namespace Shadowsocks.Controller.Strategy
 
         public void UpdateLastRead(Model.Server server)
         {
-            Logging.Debug($"last read: {server.FriendlyName()}");
+            logger.Debug($"last read: {server.FriendlyName()}");
 
             ServerStatus status;
             if (_serverStatus.TryGetValue(server, out status))
@@ -163,7 +166,7 @@ namespace Shadowsocks.Controller.Strategy
 
         public void UpdateLastWrite(Model.Server server)
         {
-            Logging.Debug($"last write: {server.FriendlyName()}");
+            logger.Debug($"last write: {server.FriendlyName()}");
 
             ServerStatus status;
             if (_serverStatus.TryGetValue(server, out status))
@@ -174,7 +177,7 @@ namespace Shadowsocks.Controller.Strategy
 
         public void SetFailure(Model.Server server)
         {
-            Logging.Debug($"failure: {server.FriendlyName()}");
+            logger.Debug($"failure: {server.FriendlyName()}");
 
             ServerStatus status;
             if (_serverStatus.TryGetValue(server, out status))
