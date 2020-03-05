@@ -125,9 +125,6 @@ especially for feature development.
 #### Open Source Components / Libraries
 
 ```
-Caseless.Fody (MIT)    https://github.com/Fody/Caseless
-Costura.Fody (MIT)     https://github.com/Fody/Costura
-Fody (MIT)             https://github.com/Fody/Fody
 GlobalHotKey (GPLv3)   https://github.com/kirmir/GlobalHotKey
 Newtonsoft.Json (MIT)  https://www.newtonsoft.com/json
 StringEx.CS ()         https://github.com/LazyMode/StringEx
