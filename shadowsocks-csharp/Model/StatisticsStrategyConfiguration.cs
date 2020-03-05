@@ -5,7 +5,7 @@ using System.Linq;
 using System.Reflection;
 
 using Newtonsoft.Json;
-
+using NLog;
 using Shadowsocks.Controller;
 
 namespace Shadowsocks.Model
@@ -13,6 +13,8 @@ namespace Shadowsocks.Model
     [Serializable]
     public class StatisticsStrategyConfiguration
     {
+        private static Logger logger = LogManager.GetCurrentClassLogger();
+
         public static readonly string ID = "com.shadowsocks.strategy.statistics";
         public bool StatisticsEnabled { get; set; } = false;
         public bool ByHourOfDay { get; set; } = true;
@@ -39,7 +41,7 @@ namespace Shadowsocks.Model
             }
             catch (Exception e)
             {
-                Logging.LogUsefulException(e);
+                logger.LogUsefulException(e);
                 return new StatisticsStrategyConfiguration();
             }
         }
@@ -53,7 +55,7 @@ namespace Shadowsocks.Model
             }
             catch (Exception e)
             {
-                Logging.LogUsefulException(e);
+                logger.LogUsefulException(e);
             }
         }
 

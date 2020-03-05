@@ -4,6 +4,7 @@ using System.Net.Sockets;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
+using NLog;
 using Shadowsocks.Controller;
 using Shadowsocks.Util.Sockets;
 
@@ -11,6 +12,8 @@ namespace Shadowsocks.Proxy
 {
     public class HttpProxy : IProxy
     {
+        private static Logger logger = LogManager.GetCurrentClassLogger();
+
         private class FakeAsyncResult : IAsyncResult
         {
             public readonly HttpState innerState;
@@ -179,7 +182,7 @@ namespace Shadowsocks.Proxy
 
         private bool OnLineRead(string line, object state)
         {
-            Logging.Debug(line);
+            logger.Debug(line);
 
             if (_respondLineCount == 0)
             {

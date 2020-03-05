@@ -5,7 +5,7 @@ using System.Net;
 using System.Text;
 
 using Newtonsoft.Json;
-
+using NLog;
 using Shadowsocks.Model;
 using Shadowsocks.Properties;
 using Shadowsocks.Util;
@@ -14,6 +14,8 @@ namespace Shadowsocks.Controller
 {
     public class GFWListUpdater
     {
+        private static Logger logger = LogManager.GetCurrentClassLogger();
+
         private const string GFWLIST_URL = "https://raw.githubusercontent.com/gfwlist/gfwlist/master/gfwlist.txt";
 
         public event EventHandler<ResultEventArgs> UpdateCompleted;
@@ -93,10 +95,10 @@ var __RULES__ = {JsonConvert.SerializeObject(gfwLines, Formatting.Indented)};
             string gfwListUrl = GFWLIST_URL;
             if (!string.IsNullOrWhiteSpace(config.gfwListUrl))
             {
-                Logging.Info("Found custom GFWListURL in config file");
+                logger.Info("Found custom GFWListURL in config file");
                 gfwListUrl = config.gfwListUrl;
             }
-            Logging.Info($"Checking GFWList from {gfwListUrl}");
+            logger.Info($"Checking GFWList from {gfwListUrl}");
             WebClient http = new WebClient();
             if (config.enabled)
             {

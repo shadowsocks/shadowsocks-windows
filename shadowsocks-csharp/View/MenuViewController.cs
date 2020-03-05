@@ -1,4 +1,5 @@
-﻿using Shadowsocks.Controller;
+﻿using NLog;
+using Shadowsocks.Controller;
 using Shadowsocks.Model;
 using Shadowsocks.Properties;
 using Shadowsocks.Util;
@@ -17,6 +18,7 @@ namespace Shadowsocks.View
 {
     public class MenuViewController
     {
+        private static Logger logger = LogManager.GetCurrentClassLogger();
         // yes this is just a menu view controller
         // when config form is closed, it moves away from RAM
         // and it should just do anything related to the config form
@@ -220,7 +222,7 @@ namespace Shadowsocks.View
         {
             Color colorMask = Color.White;
 
-            Utils.WindowsThemeMode currentWindowsThemeMode = Utils.GetWindows10SystemThemeSetting(controller.GetCurrentConfiguration().isVerboseLogging);
+            Utils.WindowsThemeMode currentWindowsThemeMode = Utils.GetWindows10SystemThemeSetting();
 
             if (isProxyEnabled)
             {
@@ -372,7 +374,7 @@ namespace Shadowsocks.View
         {
             string argument = @"/select, " + e.Path;
 
-            System.Diagnostics.Process.Start("explorer.exe", argument);
+            Process.Start("explorer.exe", argument);
         }
 
         void ShowBalloonTip(string title, string content, ToolTipIcon icon, int timeout)
@@ -386,7 +388,7 @@ namespace Shadowsocks.View
         void controller_UpdatePACFromGFWListError(object sender, System.IO.ErrorEventArgs e)
         {
             ShowBalloonTip(I18N.GetString("Failed to update PAC file"), e.GetException().Message, ToolTipIcon.Error, 5000);
-            Logging.LogUsefulException(e.GetException());
+            logger.LogUsefulException(e.GetException());
         }
 
         void controller_UpdatePACFromGFWListCompleted(object sender, GFWListUpdater.ResultEventArgs e)
@@ -415,10 +417,10 @@ namespace Shadowsocks.View
             if (updateChecker.NewVersionFound)
             {
                 updateChecker.NewVersionFound = false; /* Reset the flag */
-                if (System.IO.File.Exists(updateChecker.LatestVersionLocalName))
+                if (File.Exists(updateChecker.LatestVersionLocalName))
                 {
                     string argument = "/select, \"" + updateChecker.LatestVersionLocalName + "\"";
-                    System.Diagnostics.Process.Start("explorer.exe", argument);
+                    Process.Start("explorer.exe", argument);
                 }
             }
         }
@@ -454,30 +456,30 @@ namespace Shadowsocks.View
             {
                 items.RemoveAt(0);
             }
-            int i = 0;
+            int strategyCount = 0;
             foreach (var strategy in controller.GetStrategies())
             {
                 MenuItem item = new MenuItem(strategy.Name);
                 item.Tag = strategy.ID;
                 item.Click += AStrategyItem_Click;
-                items.Add(i, item);
-                i++;
+                items.Add(strategyCount, item);
+                strategyCount++;
             }
 
             // user wants a seperator item between strategy and servers menugroup
-            items.Add(i++, new MenuItem("-"));
+            items.Add(strategyCount++, new MenuItem("-"));
 
-            int strategyCount = i;
+            int serverCount = 0;
             Configuration configuration = controller.GetConfigurationCopy();
             foreach (var server in configuration.configs)
             {
                 if (Configuration.ChecksServer(server))
                 {
                     MenuItem item = new MenuItem(server.FriendlyName());
-                    item.Tag = i - strategyCount;
+                    item.Tag = configuration.configs.FindIndex(s => s == server);
                     item.Click += AServerItem_Click;
-                    items.Add(i, item);
-                    i++;
+                    items.Add(strategyCount + serverCount, item);
+                    serverCount++;
                 }
             }
 
@@ -543,7 +545,7 @@ namespace Shadowsocks.View
             }
             else
             {
-                logForm = new LogForm(controller, Logging.LogFilePath);
+                logForm = new LogForm(controller);
                 logForm.Show();
                 logForm.Activate();
                 logForm.FormClosed += logForm_FormClosed;
@@ -565,7 +567,12 @@ namespace Shadowsocks.View
             if (_isFirstRun)
             {
                 CheckUpdateForFirstRun();
-                ShowFirstTimeBalloon();
+                ShowBalloonTip(
+                    I18N.GetString("Shadowsocks is here"),
+                    I18N.GetString("You can turn on/off Shadowsocks in the context menu"),
+                    ToolTipIcon.Info,
+                    0
+                );
                 _isFirstRun = false;
             }
         }
@@ -602,14 +609,6 @@ namespace Shadowsocks.View
             if (config.isDefault) return;
             _isStartupChecking = true;
             updateChecker.CheckUpdate(config, 3000);
-        }
-
-        private void ShowFirstTimeBalloon()
-        {
-            _notifyIcon.BalloonTipTitle = I18N.GetString("Shadowsocks is here");
-            _notifyIcon.BalloonTipText = I18N.GetString("You can turn on/off Shadowsocks in the context menu");
-            _notifyIcon.BalloonTipIcon = ToolTipIcon.Info;
-            _notifyIcon.ShowBalloonTip(0);
         }
 
         private void AboutItem_Click(object sender, EventArgs e)
