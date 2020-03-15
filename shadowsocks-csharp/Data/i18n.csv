@@ -76,6 +76,7 @@ New server,Новый сервер,未配置的服务器,新伺服器,新規サ�
 Move &Up,Выше,上移(&U),上移 (&U),上に移動 (&U)
 Move D&own,Ниже,下移(&O),下移 (&O),下に移動 (&O)
 deprecated,Устаревшее,不推荐,不推薦,非推奨
+"Encryption method {0} not exist, will replace with {1}",,"加密方法{0}不存在，将使用{1}代替",,
 ,,,,
 #Statistics Config,,,,
 ,,,,
