@@ -43,6 +43,8 @@ clone_depth: 5                      # clone entire repository history if not def
 
 # environment variables
 environment:
+  DNVer: net472
+  DNCVer: netcoreapp3.1
   # my_var1: value1
   # # this is how to set encrypted variable. Go to "Settings" -> "Encrypt YAML" page in account menu to encrypt data.
   # my_secure_var1:
@@ -115,11 +117,11 @@ after_build:
 
     $WorkingFolder = "$env:APPVEYOR_BUILD_FOLDER\working"
     $ExeFileName = "Shadowsocks-$env:APPVEYOR_BUILD_VERSION-$env:CONFIGURATION.exe"
-    $ExeFile = "$WorkingFolder\$ExeFileName"
+    $ExeFile = "$WorkingFolder\$DNVer\$ExeFileName"
     $ExeHashFile = "$Exefile.hash"
 
     New-Item $WorkingFolder -ItemType Directory -Force
-    Copy-Item $env:APPVEYOR_BUILD_FOLDER\shadowsocks-csharp\bin\$env:PLATFORM\$env:CONFIGURATION\Shadowsocks.exe $WorkingFolder\Shadowsocks.exe
+    Copy-Item $env:APPVEYOR_BUILD_FOLDER\shadowsocks-csharp\bin\$env:PLATFORM\$env:CONFIGURATION\$DNVer\Shadowsocks.exe $WorkingFolder\Shadowsocks.exe
     Copy-Item $WorkingFolder\Shadowsocks.exe $ExeFile
 
     CalculateHash -file $Exefile | Out-File -FilePath $ExeHashFile
