@@ -43,17 +43,17 @@ namespace Shadowsocks
                 return;
             }
 
-            // Check .NET Framework version
-            if (!Utils.IsSupportedRuntimeVersion())
-            {
-                if (DialogResult.OK == MessageBox.Show(I18N.GetString("Unsupported .NET Framework, please update to {0} or later.", "4.7.2"),
-                "Shadowsocks Error", MessageBoxButtons.OKCancel, MessageBoxIcon.Error))
-                {
-                    //Process.Start("https://www.microsoft.com/download/details.aspx?id=53344");    // 4.6.2
-                    Process.Start("https://dotnet.microsoft.com/download/dotnet-framework/net472");
-                }
-                return;
-            }
+            //// Check .NET Framework version
+            //if (!Utils.IsSupportedRuntimeVersion())
+            //{
+            //    if (DialogResult.OK == MessageBox.Show(I18N.GetString("Unsupported .NET Framework, please update to {0} or later.", "4.7.2"),
+            //    "Shadowsocks Error", MessageBoxButtons.OKCancel, MessageBoxIcon.Error))
+            //    {
+            //        //Process.Start("https://www.microsoft.com/download/details.aspx?id=53344");    // 4.6.2
+            //        Process.Start("https://dotnet.microsoft.com/download/dotnet-framework/net472");
+            //    }
+            //    return;
+            //}
 
             Utils.ReleaseMemory(true);
             using (Mutex mutex = new Mutex(false, $"Global\\Shadowsocks_{Application.StartupPath.GetHashCode()}"))
@@ -67,6 +67,7 @@ namespace Shadowsocks
                 SystemEvents.PowerModeChanged += SystemEvents_PowerModeChanged;
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
+                Application.SetHighDpiMode(HighDpiMode.SystemAware);
                 AutoStartup.RegisterForRestart(true);
 
                 if (!mutex.WaitOne(0, false))

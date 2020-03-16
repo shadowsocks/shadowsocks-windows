@@ -10,8 +10,13 @@
     <Product>Shadowsocks</Product>
     <Version>4.1.9.2</Version>
     <AssemblyName>Shadowsocks</AssemblyName>
-    <ApplicationIcon />
+    <ApplicationIcon>shadowsocks.ico</ApplicationIcon>
     <StartupObject />
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <Prefer32Bit>true</Prefer32Bit>
+    <PlatformTarget>x86</PlatformTarget>
   </PropertyGroup>
 
   <ItemGroup>
@@ -59,14 +64,10 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="System.Data.SqlClient" Version="4.8.1" />
     <PackageReference Include="System.Management" Version="4.7.0" />
+    <PackageReference Include="System.Windows.Forms.DataVisualization" Version="1.0.0-prerelease.20110.1" />
     <PackageReference Include="ZXing.Net" Version="0.16.5" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Reference Include="System.Windows.Forms.DataVisualization">
-      <HintPath>C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0\System.Windows.Forms.DataVisualization.dll</HintPath>
-    </Reference>
   </ItemGroup>
 
   <ItemGroup>
