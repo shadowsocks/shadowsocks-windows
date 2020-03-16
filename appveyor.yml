@@ -121,7 +121,7 @@ after_build:
     $ExeHashFile = "$Exefile.hash"
 
     New-Item $WorkingFolder -ItemType Directory -Force
-    Copy-Item $env:APPVEYOR_BUILD_FOLDER\shadowsocks-csharp\bin\$env:PLATFORM\$env:CONFIGURATION\$DNVer\Shadowsocks.exe $WorkingFolder\Shadowsocks.exe
+    Copy-Item $env:APPVEYOR_BUILD_FOLDER\shadowsocks-csharp\bin\$env:PLATFORM\$env:CONFIGURATION\$env:$DNVer\Shadowsocks.exe $WorkingFolder\Shadowsocks.exe
     Copy-Item $WorkingFolder\Shadowsocks.exe $ExeFile
 
     CalculateHash -file $Exefile | Out-File -FilePath $ExeHashFile
