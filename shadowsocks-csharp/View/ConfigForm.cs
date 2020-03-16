@@ -575,21 +575,18 @@ namespace Shadowsocks.View
 
         private void MoveConfigItem(int step)
         {
-            int index = ServersListBox.SelectedIndex;
-            Server server = _modifiedConfiguration.configs[index];
-            object item = ServersListBox.Items[index];
+            var server = _modifiedConfiguration.configs[_lastSelectedIndex];
+            var newIndex = _lastSelectedIndex + step;
 
-            _modifiedConfiguration.configs.Remove(server);
-            _modifiedConfiguration.configs.Insert(index + step, server);
-            _modifiedConfiguration.index += step;
+            _modifiedConfiguration.configs.RemoveAt(_lastSelectedIndex);
+            _modifiedConfiguration.configs.Insert(newIndex, server);
 
             ServersListBox.BeginUpdate();
-            ServersListBox.Enabled = false;
-            _lastSelectedIndex = index + step;
-            ServersListBox.Items.Remove(item);
-            ServersListBox.Items.Insert(index + step, item);
-            ServersListBox.Enabled = true;
-            ServersListBox.SelectedIndex = index + step;
+
+            LoadServerNameListToUI(_modifiedConfiguration);
+
+            _lastSelectedIndex = newIndex;
+            ServersListBox.SelectedIndex = newIndex;
             ServersListBox.EndUpdate();
 
             UpdateButtons();
