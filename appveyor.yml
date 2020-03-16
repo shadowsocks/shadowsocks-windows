@@ -50,12 +50,8 @@ environment:
   matrix:
     - platform: x86
       configuration: Debug
-      DNVer: net472
-      DNCVer: netcoreapp3.1
     - platform: x86
       configuration: Release
-      DNVer: net472
-      DNCVer: netcoreapp3.1
 
 # this is how to allow failing jobs in the matrix
 matrix:
@@ -123,7 +119,7 @@ after_build:
     $ExeHashFile = "$Exefile.hash"
 
     New-Item $WorkingFolder -ItemType Directory -Force
-    Copy-Item $env:APPVEYOR_BUILD_FOLDER\shadowsocks-csharp\bin\$env:PLATFORM\$env:CONFIGURATION\$env:$DNVer\Shadowsocks.exe $WorkingFolder\Shadowsocks.exe
+    Copy-Item $env:APPVEYOR_BUILD_FOLDER\shadowsocks-csharp\bin\$env:PLATFORM\$env:CONFIGURATION\net472\Shadowsocks.exe $WorkingFolder\Shadowsocks.exe
     Copy-Item $WorkingFolder\Shadowsocks.exe $ExeFile
 
     CalculateHash -file $Exefile | Out-File -FilePath $ExeHashFile
