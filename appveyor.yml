@@ -30,7 +30,7 @@
 #---------------------------------#
 
 # Build worker image (VM template)
-image: Visual Studio 2017
+image: Visual Studio 2019
 
 # scripts that are called at very beginning, before repo cloning
 # init:
@@ -115,11 +115,11 @@ after_build:
 
     $WorkingFolder = "$env:APPVEYOR_BUILD_FOLDER\working"
     $ExeFileName = "Shadowsocks-$env:APPVEYOR_BUILD_VERSION-$env:CONFIGURATION.exe"
-    $ExeFile = "$WorkingFolder\$ExeFileName"
+    $ExeFile = "$WorkingFolder\$DNVer\$ExeFileName"
     $ExeHashFile = "$Exefile.hash"
 
     New-Item $WorkingFolder -ItemType Directory -Force
-    Copy-Item $env:APPVEYOR_BUILD_FOLDER\shadowsocks-csharp\bin\$env:PLATFORM\$env:CONFIGURATION\Shadowsocks.exe $WorkingFolder\Shadowsocks.exe
+    Copy-Item $env:APPVEYOR_BUILD_FOLDER\shadowsocks-csharp\bin\$env:CONFIGURATION\net472\Shadowsocks.exe $WorkingFolder\Shadowsocks.exe
     Copy-Item $WorkingFolder\Shadowsocks.exe $ExeFile
 
     CalculateHash -file $Exefile | Out-File -FilePath $ExeHashFile
