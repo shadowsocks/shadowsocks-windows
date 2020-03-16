@@ -43,8 +43,6 @@ clone_depth: 5                      # clone entire repository history if not def
 
 # environment variables
 environment:
-  DNVer: net472
-  DNCVer: netcoreapp3.1
   # my_var1: value1
   # # this is how to set encrypted variable. Go to "Settings" -> "Encrypt YAML" page in account menu to encrypt data.
   # my_secure_var1:
@@ -52,8 +50,12 @@ environment:
   matrix:
     - platform: x86
       configuration: Debug
+      DNVer: net472
+      DNCVer: netcoreapp3.1
     - platform: x86
       configuration: Release
+      DNVer: net472
+      DNCVer: netcoreapp3.1
 
 # this is how to allow failing jobs in the matrix
 matrix:
