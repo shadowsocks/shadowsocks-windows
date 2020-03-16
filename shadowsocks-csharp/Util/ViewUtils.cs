@@ -22,15 +22,25 @@ namespace Shadowsocks.Util
             return children.SelectMany(GetChildControls<TControl>).Concat(children);
         }
 
-        public static IEnumerable<MenuItem> GetMenuItems(Menu m)
+        public static IEnumerable<ToolStripMenuItem> GetToolStripMenuItems(MenuStrip m)
         {
-            if (m?.MenuItems == null || m.MenuItems.Count == 0) return Enumerable.Empty<MenuItem>();
-            var children = new List<MenuItem>();
-            foreach (var item in m.MenuItems)
+            if (m?.Items   == null || m.Items.Count == 0) return Enumerable.Empty<ToolStripMenuItem>();
+            var children = new List<ToolStripMenuItem>();
+            foreach (var item in m.Items)
             {
-                children.Add((MenuItem)item);
+                children.Add((ToolStripMenuItem)item);
             }
-            return children.SelectMany(GetMenuItems).Concat(children);
+            return children.SelectMany(GetToolStripMenuItems).Concat(children);
+        }
+        public static IEnumerable<ToolStripMenuItem> GetToolStripMenuItems(ToolStripMenuItem m)
+        {
+            if (m?.DropDownItems == null || m.DropDownItems.Count == 0) return Enumerable.Empty<ToolStripMenuItem>();
+            var children = new List<ToolStripMenuItem>();
+            foreach (var item in m.DropDownItems)
+            {
+                children.Add((ToolStripMenuItem)item);
+            }
+            return children.SelectMany(GetToolStripMenuItems).Concat(children);
         }
 
         // Workaround NotifyIcon's 63 chars limit

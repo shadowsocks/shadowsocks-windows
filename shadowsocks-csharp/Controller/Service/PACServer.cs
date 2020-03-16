@@ -24,7 +24,7 @@ namespace Shadowsocks.Controller
                 {
                     var rd = new byte[32];
                     RNG.GetBytes(rd);
-                    _cachedPacSecret = HttpServerUtility.UrlTokenEncode(rd);
+                    _cachedPacSecret = HttpServerUtilityUrlToken.Encode(rd);
                 }
                 return _cachedPacSecret;
             }
@@ -51,7 +51,7 @@ namespace Shadowsocks.Controller
 
         private static string GetHash(string content)
         {
-            return HttpServerUtility.UrlTokenEncode(MbedTLS.MD5(Encoding.ASCII.GetBytes(content)));
+            return   HttpServerUtilityUrlToken.Encode(MbedTLS.MD5(Encoding.ASCII.GetBytes(content)));
         }
 
         public override bool Handle(byte[] firstPacket, int length, Socket socket, object state)

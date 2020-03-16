@@ -34,17 +34,17 @@
             System.Windows.Forms.DataVisualization.Charting.Series series1 = new System.Windows.Forms.DataVisualization.Charting.Series();
             System.Windows.Forms.DataVisualization.Charting.Series series2 = new System.Windows.Forms.DataVisualization.Charting.Series();
             this.LogMessageTextBox = new System.Windows.Forms.TextBox();
-            this.MainMenu = new System.Windows.Forms.MainMenu(this.components);
-            this.FileMenuItem = new System.Windows.Forms.MenuItem();
-            this.OpenLocationMenuItem = new System.Windows.Forms.MenuItem();
-            this.ExitMenuItem = new System.Windows.Forms.MenuItem();
-            this.ViewMenuItem = new System.Windows.Forms.MenuItem();
-            this.ClearLogsMenuItem = new System.Windows.Forms.MenuItem();
-            this.ChangeFontMenuItem = new System.Windows.Forms.MenuItem();
-            this.WrapTextMenuItem = new System.Windows.Forms.MenuItem();
-            this.TopMostMenuItem = new System.Windows.Forms.MenuItem();
-            this.MenuItemSeparater = new System.Windows.Forms.MenuItem();
-            this.ShowToolbarMenuItem = new System.Windows.Forms.MenuItem();
+            this.MainMenu = new System.Windows.Forms.MenuStrip();
+            this.FileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.OpenLocationToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.ExitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.ViewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.ClearLogsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.ChangeFontToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.WrapTextToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.TopMostToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.ToolStripMenuItemSeparater = new System.Windows.Forms.ToolStripMenuItem();
+            this.ShowToolbarToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.TopMostCheckBox = new System.Windows.Forms.CheckBox();
             this.ChangeFontButton = new System.Windows.Forms.Button();
             this.ClearLogsButton = new System.Windows.Forms.Button();
@@ -79,76 +79,66 @@
             // 
             // MainMenu
             // 
-            this.MainMenu.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
-            this.FileMenuItem,
-            this.ViewMenuItem});
+            this.MainMenu.Items.AddRange(new System.Windows.Forms.ToolStripMenuItem[] {
+            this.FileToolStripMenuItem,
+            this.ViewToolStripMenuItem});
             // 
-            // FileMenuItem
+            // FileToolStripMenuItem
             // 
-            this.FileMenuItem.Index = 0;
-            this.FileMenuItem.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
-            this.OpenLocationMenuItem,
-            this.ExitMenuItem});
-            this.FileMenuItem.Text = "&File";
+            this.FileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripMenuItem[] {
+            this.OpenLocationToolStripMenuItem,
+            this.ExitToolStripMenuItem});
+            this.FileToolStripMenuItem.Text = "&File";
             // 
-            // OpenLocationMenuItem
+            // OpenLocationToolStripMenuItem
             // 
-            this.OpenLocationMenuItem.Index = 0;
-            this.OpenLocationMenuItem.Text = "&Open Location";
-            this.OpenLocationMenuItem.Click += new System.EventHandler(this.OpenLocationMenuItem_Click);
+            this.OpenLocationToolStripMenuItem.Text = "&Open Location";
+            this.OpenLocationToolStripMenuItem.Click += new System.EventHandler(this.OpenLocationToolStripMenuItem_Click);
             // 
-            // ExitMenuItem
+            // ExitToolStripMenuItem
             // 
-            this.ExitMenuItem.Index = 1;
-            this.ExitMenuItem.Text = "E&xit";
-            this.ExitMenuItem.Click += new System.EventHandler(this.ExitMenuItem_Click);
+            this.ExitToolStripMenuItem.Text = "E&xit";
+            this.ExitToolStripMenuItem.Click += new System.EventHandler(this.ExitToolStripMenuItem_Click);
             // 
-            // ViewMenuItem
+            // ViewToolStripMenuItem
             // 
-            this.ViewMenuItem.Index = 1;
-            this.ViewMenuItem.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
-            this.ClearLogsMenuItem,
-            this.ChangeFontMenuItem,
-            this.WrapTextMenuItem,
-            this.TopMostMenuItem,
-            this.MenuItemSeparater,
-            this.ShowToolbarMenuItem});
-            this.ViewMenuItem.Text = "&View";
+            this.ViewToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripMenuItem[] {
+            this.ClearLogsToolStripMenuItem,
+            this.ChangeFontToolStripMenuItem,
+            this.WrapTextToolStripMenuItem,
+            this.TopMostToolStripMenuItem,
+            this.ToolStripMenuItemSeparater,
+            this.ShowToolbarToolStripMenuItem});
+            this.ViewToolStripMenuItem.Text = "&View";
             // 
-            // ClearLogsMenuItem
+            // ClearLogsToolStripMenuItem
             // 
-            this.ClearLogsMenuItem.Index = 0;
-            this.ClearLogsMenuItem.Text = "&Clear Logs";
-            this.ClearLogsMenuItem.Click += new System.EventHandler(this.ClearLogsMenuItem_Click);
+            this.ClearLogsToolStripMenuItem.Text = "&Clear Logs";
+            this.ClearLogsToolStripMenuItem.Click += new System.EventHandler(this.ClearLogsToolStripMenuItem_Click);
             // 
-            // ChangeFontMenuItem
+            // ChangeFontToolStripMenuItem
             // 
-            this.ChangeFontMenuItem.Index = 1;
-            this.ChangeFontMenuItem.Text = "Change &Font";
-            this.ChangeFontMenuItem.Click += new System.EventHandler(this.ChangeFontMenuItem_Click);
+            this.ChangeFontToolStripMenuItem.Text = "Change &Font";
+            this.ChangeFontToolStripMenuItem.Click += new System.EventHandler(this.ChangeFontToolStripMenuItem_Click);
             // 
-            // WrapTextMenuItem
+            // WrapTextToolStripMenuItem
             // 
-            this.WrapTextMenuItem.Index = 2;
-            this.WrapTextMenuItem.Text = "&Wrap Text";
-            this.WrapTextMenuItem.Click += new System.EventHandler(this.WrapTextMenuItem_Click);
+            this.WrapTextToolStripMenuItem.Text = "&Wrap Text";
+            this.WrapTextToolStripMenuItem.Click += new System.EventHandler(this.WrapTextToolStripMenuItem_Click);
             // 
-            // TopMostMenuItem
+            // TopMostToolStripMenuItem
             // 
-            this.TopMostMenuItem.Index = 3;
-            this.TopMostMenuItem.Text = "&Top Most";
-            this.TopMostMenuItem.Click += new System.EventHandler(this.TopMostMenuItem_Click);
+            this.TopMostToolStripMenuItem.Text = "&Top Most";
+            this.TopMostToolStripMenuItem.Click += new System.EventHandler(this.TopMostToolStripMenuItem_Click);
             // 
-            // MenuItemSeparater
+            // ToolStripMenuItemSeparater
             // 
-            this.MenuItemSeparater.Index = 4;
-            this.MenuItemSeparater.Text = "-";
+            this.ToolStripMenuItemSeparater.Text = "-";
             // 
-            // ShowToolbarMenuItem
+            // ShowToolbarToolStripMenuItem
             // 
-            this.ShowToolbarMenuItem.Index = 5;
-            this.ShowToolbarMenuItem.Text = "&Show Toolbar";
-            this.ShowToolbarMenuItem.Click += new System.EventHandler(this.ShowToolbarMenuItem_Click);
+            this.ShowToolbarToolStripMenuItem.Text = "&Show Toolbar";
+            this.ShowToolbarToolStripMenuItem.Click += new System.EventHandler(this.ShowToolbarToolStripMenuItem_Click);
             // 
             // TopMostCheckBox
             // 
@@ -294,7 +284,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.ClientSize = new System.Drawing.Size(384, 161);
             this.Controls.Add(this.tableLayoutPanel1);
-            this.Menu = this.MainMenu;
+            this.MainMenuStrip = this.MainMenu;
             this.MinimumSize = new System.Drawing.Size(400, 200);
             this.Name = "LogForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
@@ -319,23 +309,23 @@
         #endregion
 
         private System.Windows.Forms.TextBox LogMessageTextBox;
-        private System.Windows.Forms.MainMenu MainMenu;
-        private System.Windows.Forms.MenuItem FileMenuItem;
-        private System.Windows.Forms.MenuItem OpenLocationMenuItem;
-        private System.Windows.Forms.MenuItem ExitMenuItem;
+        private System.Windows.Forms.MenuStrip   MainMenu;
+        private System.Windows.Forms.ToolStripMenuItem FileToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem OpenLocationToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem ExitToolStripMenuItem;
         private System.Windows.Forms.CheckBox WrapTextCheckBox;
         private System.Windows.Forms.Button ClearLogsButton;
         private System.Windows.Forms.Button ChangeFontButton;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
         private System.Windows.Forms.CheckBox TopMostCheckBox;
-        private System.Windows.Forms.MenuItem ViewMenuItem;
-        private System.Windows.Forms.MenuItem ClearLogsMenuItem;
-        private System.Windows.Forms.MenuItem ChangeFontMenuItem;
-        private System.Windows.Forms.MenuItem WrapTextMenuItem;
-        private System.Windows.Forms.MenuItem TopMostMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem ViewToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem ClearLogsToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem ChangeFontToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem WrapTextToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem TopMostToolStripMenuItem;
         private System.Windows.Forms.FlowLayoutPanel ToolbarFlowLayoutPanel;
-        private System.Windows.Forms.MenuItem MenuItemSeparater;
-        private System.Windows.Forms.MenuItem ShowToolbarMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItemSeparater;
+        private System.Windows.Forms.ToolStripMenuItem ShowToolbarToolStripMenuItem;
         private System.Windows.Forms.SplitContainer splitContainer1;
         private System.Windows.Forms.DataVisualization.Charting.Chart trafficChart;
     }

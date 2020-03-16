@@ -256,14 +256,14 @@ namespace Shadowsocks.View
             }
 
             topMostTriggerLock = true;
-            TopMost = TopMostMenuItem.Checked = TopMostCheckBox.Checked = topMostTrigger;
+            TopMost = TopMostToolStripMenuItem.Checked = TopMostCheckBox.Checked = topMostTrigger;
             topMostTriggerLock = false;
 
             wrapTextTriggerLock = true;
-            LogMessageTextBox.WordWrap = WrapTextMenuItem.Checked = WrapTextCheckBox.Checked = wrapTextTrigger;
+            LogMessageTextBox.WordWrap = WrapTextToolStripMenuItem.Checked = WrapTextCheckBox.Checked = wrapTextTrigger;
             wrapTextTriggerLock = false;
 
-            ToolbarFlowLayoutPanel.Visible = ShowToolbarMenuItem.Checked = toolbarTrigger;
+            ToolbarFlowLayoutPanel.Visible = ShowToolbarToolStripMenuItem.Checked = toolbarTrigger;
         }
 
         private void LogForm_FormClosing(object sender, FormClosingEventArgs e)
@@ -288,14 +288,14 @@ namespace Shadowsocks.View
             controller.SaveLogViewerConfig(config);
         }
 
-        private void OpenLocationMenuItem_Click(object sender, EventArgs e)
+        private void OpenLocationToolStripMenuItem_Click(object sender, EventArgs e)
         {
             string argument = "/select, \"" + filename + "\"";
             logger.Debug(argument);
             System.Diagnostics.Process.Start("explorer.exe", argument);
         }
 
-        private void ExitMenuItem_Click(object sender, EventArgs e)
+        private void ExitToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Close();
         }
@@ -317,7 +317,7 @@ namespace Shadowsocks.View
             LogMessageTextBox.Clear();
         }
 
-        private void ClearLogsMenuItem_Click(object sender, EventArgs e)
+        private void ClearLogsToolStripMenuItem_Click(object sender, EventArgs e)
         {
             DoClearLogs();
         }
@@ -347,7 +347,7 @@ namespace Shadowsocks.View
             }
         }
 
-        private void ChangeFontMenuItem_Click(object sender, EventArgs e)
+        private void ChangeFontToolStripMenuItem_Click(object sender, EventArgs e)
         {
             DoChangeFont();
         }
@@ -369,12 +369,12 @@ namespace Shadowsocks.View
             wrapTextTrigger = !wrapTextTrigger;
             LogMessageTextBox.WordWrap = wrapTextTrigger;
             LogMessageTextBox.ScrollToCaret();
-            WrapTextMenuItem.Checked = WrapTextCheckBox.Checked = wrapTextTrigger;
+            WrapTextToolStripMenuItem.Checked = WrapTextCheckBox.Checked = wrapTextTrigger;
 
             wrapTextTriggerLock = false;
         }
 
-        private void WrapTextMenuItem_Click(object sender, EventArgs e)
+        private void WrapTextToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (!wrapTextTriggerLock)
             {
@@ -401,7 +401,7 @@ namespace Shadowsocks.View
 
             topMostTrigger = !topMostTrigger;
             TopMost = topMostTrigger;
-            TopMostMenuItem.Checked = TopMostCheckBox.Checked = topMostTrigger;
+            TopMostToolStripMenuItem.Checked = TopMostCheckBox.Checked = topMostTrigger;
 
             topMostTriggerLock = false;
         }
@@ -414,7 +414,7 @@ namespace Shadowsocks.View
             }
         }
 
-        private void TopMostMenuItem_Click(object sender, EventArgs e)
+        private void TopMostToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (!topMostTriggerLock)
             {
@@ -425,11 +425,11 @@ namespace Shadowsocks.View
 
         private bool toolbarTrigger = false;
 
-        private void ShowToolbarMenuItem_Click(object sender, EventArgs e)
+        private void ShowToolbarToolStripMenuItem_Click(object sender, EventArgs e)
         {
             toolbarTrigger = !toolbarTrigger;
             ToolbarFlowLayoutPanel.Visible = toolbarTrigger;
-            ShowToolbarMenuItem.Checked = toolbarTrigger;
+            ShowToolbarToolStripMenuItem.Checked = toolbarTrigger;
         }
 
         private class TrafficInfo
