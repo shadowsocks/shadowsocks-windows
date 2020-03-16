@@ -1,4 +1,5 @@
 ﻿using Shadowsocks.Controller;
+using Shadowsocks.View;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -115,6 +116,22 @@ namespace Shadowsocks.Util
             int dpi = (int)graphics.DpiX;
             graphics.Dispose();
             return dpi;
+        }
+
+        public static string InputBox(string Prompt, string Title = "", string DefaultResponse = "", int XPos = -1, int YPos = -1)
+        {
+            var result = DefaultResponse;
+            var box = new InputBox()
+            {
+                Prompt = Prompt,
+                Text = Title ?? "Input",
+                Response = DefaultResponse
+            };
+            if (box.ShowDialog()== DialogResult.OK)
+            {
+                result = box.Response;
+            }
+            return result;
         }
     }
 }
