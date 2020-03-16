@@ -19,6 +19,10 @@ namespace Shadowsocks
         public static ShadowsocksController MainController { get; private set; }
         public static MenuViewController MenuController { get; private set; }
         public static string[] Args { get; private set; }
+
+        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        private static extern bool SetProcessDPIAware();
+
         /// <summary>
         /// 应用程序的主入口点。
         /// </summary>
@@ -42,19 +46,22 @@ namespace Shadowsocks
                 "Shadowsocks Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
-
-            //// Check .NET Framework version
-            //if (!Utils.IsSupportedRuntimeVersion())
-            //{
-            //    if (DialogResult.OK == MessageBox.Show(I18N.GetString("Unsupported .NET Framework, please update to {0} or later.", "4.7.2"),
-            //    "Shadowsocks Error", MessageBoxButtons.OKCancel, MessageBoxIcon.Error))
-            //    {
-            //        //Process.Start("https://www.microsoft.com/download/details.aspx?id=53344");    // 4.6.2
-            //        Process.Start("https://dotnet.microsoft.com/download/dotnet-framework/net472");
-            //    }
-            //    return;
-            //}
-
+#if NET472
+            // Check .NET Framework version
+            if (!Utils.IsSupportedRuntimeVersion())
+            {
+                if (DialogResult.OK == MessageBox.Show(I18N.GetString("Unsupported .NET Framework, please update to {0} or later.", "4.7.2"),
+                "Shadowsocks Error", MessageBoxButtons.OKCancel, MessageBoxIcon.Error))
+                {
+                    //Process.Start("https://www.microsoft.com/download/details.aspx?id=53344");    // 4.6.2
+                    Process.Start("https://dotnet.microsoft.com/download/dotnet-framework/net472");
+                }
+                return;
+            }
+            if (Environment.OSVersion.Version.Major >= 6) SetProcessDPIAware();
+#else
+                 Application.SetHighDpiMode(HighDpiMode.SystemAware);
+#endif
             Utils.ReleaseMemory(true);
             using (Mutex mutex = new Mutex(false, $"Global\\Shadowsocks_{Application.StartupPath.GetHashCode()}"))
             {
@@ -67,7 +74,7 @@ namespace Shadowsocks
                 SystemEvents.PowerModeChanged += SystemEvents_PowerModeChanged;
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
-                Application.SetHighDpiMode(HighDpiMode.SystemAware);
+           
                 AutoStartup.RegisterForRestart(true);
 
                 if (!mutex.WaitOne(0, false))

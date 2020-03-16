@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFrameworks>netcoreapp3.1;net472</TargetFrameworks>
     <RootNamespace>Shadowsocks</RootNamespace>
     <UseWindowsForms>true</UseWindowsForms>
     <Authors>clowwindy &amp; community 2020</Authors>
@@ -48,7 +48,19 @@
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
-
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net472' ">
+    <PackageReference Include="GlobalHotKey" Version="1.1.0" />
+    <Reference Include="System.Windows.Forms.DataVisualization" />
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+    <Reference Include="System.Web" />
+    <Reference Include="WindowsBase" />
+    
+  </ItemGroup>
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp3.1' ">
+    <PackageReference Include="System.Windows.Forms.DataVisualization" Version="1.0.0-prerelease.20110.1" />
+    <PackageReference Include="GlobalHotKeyCore" Version="1.2.0" />
+  </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Caseless.Fody" Version="1.9.0" />
     <PackageReference Include="Costura.Fody" Version="4.1.0" />
@@ -56,7 +68,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="GlobalHotKeyCore" Version="1.2.0" />
+   
     <PackageReference Include="Microsoft.VisualBasic" Version="10.3.0" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
     <PackageReference Include="NLog" Version="4.6.8" />
@@ -66,7 +78,7 @@
     </PackageReference>
     <PackageReference Include="System.Data.SqlClient" Version="4.8.1" />
     <PackageReference Include="System.Management" Version="4.7.0" />
-    <PackageReference Include="System.Windows.Forms.DataVisualization" Version="1.0.0-prerelease.20110.1" />
+
     <PackageReference Include="ZXing.Net" Version="0.16.5" />
   </ItemGroup>
 
