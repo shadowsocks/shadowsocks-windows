@@ -40,6 +40,8 @@ image: Visual Studio 2019
 # set clone depth
 clone_depth: 5                      # clone entire repository history if not defined
 
+on_finish:
+  ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
 
 # environment variables
 environment:
