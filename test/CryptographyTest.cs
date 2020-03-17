@@ -1,10 +1,9 @@
-﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Shadowsocks.Encryption;
-using System.Threading;
-using System.Collections.Generic;
 using Shadowsocks.Encryption.Stream;
-using System.Diagnostics;
+using System;
+using System.Collections.Generic;
+using System.Threading;
 
 namespace Shadowsocks.Test
 {
@@ -22,7 +21,7 @@ namespace Shadowsocks.Test
                 var random = new Random();
                 random.NextBytes(bytes);
                 string md5str = Convert.ToBase64String(md5.ComputeHash(bytes));
-                string md5str2 = Convert.ToBase64String(MbedTLS.MD5(bytes));
+                string md5str2 = Convert.ToBase64String(CryptoUtils.MD5(bytes));
                 Assert.IsTrue(md5str == md5str2);
             }
         }
@@ -31,7 +30,7 @@ namespace Shadowsocks.Test
         {
             RNG.Reload();
             byte[] plain = new byte[16384];
-            byte[] cipher = new byte[plain.Length + 16];
+            byte[] cipher = new byte[plain.Length + 100];// AEAD with IPv4 address type needs +100
             byte[] plain2 = new byte[plain.Length + 16];
             int outLen = 0;
             int outLen2 = 0;
@@ -64,15 +63,35 @@ namespace Shadowsocks.Test
         private static object locker = new object();
 
         [TestMethod]
-        public void TestMbedTLSEncryption()
+        public void TestBouncyCastleAEADEncryption()
         {
             encryptionFailed = false;
             // run it once before the multi-threading test to initialize global tables
-            RunSingleMbedTLSEncryptionThread();
+            RunSingleBouncyCastleAEADEncryptionThread();
             List<Thread> threads = new List<Thread>();
             for (int i = 0; i < 10; i++)
             {
-                Thread t = new Thread(new ThreadStart(RunSingleMbedTLSEncryptionThread));
+                Thread t = new Thread(new ThreadStart(RunSingleBouncyCastleAEADEncryptionThread)); threads.Add(t);
+                t.Start();
+            }
+            foreach (Thread t in threads)
+            {
+                t.Join();
+            }
+            RNG.Close();
+            Assert.IsFalse(encryptionFailed);
+        }
+
+        [TestMethod]
+        public void TestNativeEncryption()
+        {
+            encryptionFailed = false;
+            // run it once before the multi-threading test to initialize global tables
+            RunSingleNativeEncryptionThread();
+            List<Thread> threads = new List<Thread>();
+            for (int i = 0; i < 10; i++)
+            {
+                Thread t = new Thread(new ThreadStart(RunSingleNativeEncryptionThread));
                 threads.Add(t);
                 t.Start();
             }
@@ -84,17 +103,17 @@ namespace Shadowsocks.Test
             Assert.IsFalse(encryptionFailed);
         }
 
-        private void RunSingleMbedTLSEncryptionThread()
+        private void RunSingleNativeEncryptionThread()
         {
             try
             {
                 for (int i = 0; i < 100; i++)
                 {
-                    IEncryptor encryptor;
-                    IEncryptor decryptor;
-                    encryptor = new StreamMbedTLSEncryptor("aes-256-cfb", "barfoo!");
-                    decryptor = new StreamMbedTLSEncryptor("aes-256-cfb", "barfoo!");
-                    RunEncryptionRound(encryptor, decryptor);
+                    IEncryptor encryptorN;
+                    IEncryptor decryptorN;
+                    encryptorN = new StreamNativeEncryptor("rc4-md5", "barfoo!");
+                    decryptorN = new StreamNativeEncryptor("rc4-md5", "barfoo!");
+                    RunEncryptionRound(encryptorN, decryptorN);
                 }
             }
             catch
@@ -104,28 +123,7 @@ namespace Shadowsocks.Test
             }
         }
 
-        [TestMethod]
-        public void TestRC4Encryption()
-        {
-            encryptionFailed = false;
-            // run it once before the multi-threading test to initialize global tables
-            RunSingleRC4EncryptionThread();
-            List<Thread> threads = new List<Thread>();
-            for (int i = 0; i < 10; i++)
-            {
-                Thread t = new Thread(new ThreadStart(RunSingleRC4EncryptionThread));
-                threads.Add(t);
-                t.Start();
-            }
-            foreach (Thread t in threads)
-            {
-                t.Join();
-            }
-            RNG.Close();
-            Assert.IsFalse(encryptionFailed);
-        }
-
-        private void RunSingleRC4EncryptionThread()
+        private void RunSingleBouncyCastleAEADEncryptionThread()
         {
             try
             {
@@ -134,92 +132,10 @@ namespace Shadowsocks.Test
                     var random = new Random();
                     IEncryptor encryptor;
                     IEncryptor decryptor;
-                    encryptor = new StreamMbedTLSEncryptor("rc4-md5", "barfoo!");
-                    decryptor = new StreamMbedTLSEncryptor("rc4-md5", "barfoo!");
-                    RunEncryptionRound(encryptor, decryptor);
-                }
-            }
-            catch
-            {
-                encryptionFailed = true;
-                throw;
-            }
-        }
-
-        [TestMethod]
-        public void TestSodiumEncryption()
-        {
-            encryptionFailed = false;
-            // run it once before the multi-threading test to initialize global tables
-            RunSingleSodiumEncryptionThread();
-            List<Thread> threads = new List<Thread>();
-            for (int i = 0; i < 10; i++)
-            {
-                Thread t = new Thread(new ThreadStart(RunSingleSodiumEncryptionThread));
-                threads.Add(t);
-                t.Start();
-            }
-            foreach (Thread t in threads)
-            {
-                t.Join();
-            }
-            RNG.Close();
-            Assert.IsFalse(encryptionFailed);
-        }
-
-        private void RunSingleSodiumEncryptionThread()
-        {
-            try
-            {
-                for (int i = 0; i < 100; i++)
-                {
-                    var random = new Random();
-                    IEncryptor encryptor;
-                    IEncryptor decryptor;
-                    encryptor = new StreamSodiumEncryptor("salsa20", "barfoo!");
-                    decryptor = new StreamSodiumEncryptor("salsa20", "barfoo!");
-                    RunEncryptionRound(encryptor, decryptor);
-                }
-            }
-            catch
-            {
-                encryptionFailed = true;
-                throw;
-            }
-        }
-
-        [TestMethod]
-        public void TestOpenSSLEncryption()
-        {
-            encryptionFailed = false;
-            // run it once before the multi-threading test to initialize global tables
-            RunSingleOpenSSLEncryptionThread();
-            List<Thread> threads = new List<Thread>();
-            for (int i = 0; i < 10; i++)
-            {
-                Thread t = new Thread(new ThreadStart(RunSingleOpenSSLEncryptionThread));
-                threads.Add(t);
-                t.Start();
-            }
-            foreach (Thread t in threads)
-            {
-                t.Join();
-            }
-            RNG.Close();
-            Assert.IsFalse(encryptionFailed);
-        }
-
-        private void RunSingleOpenSSLEncryptionThread()
-        {
-            try
-            {
-                for (int i = 0; i < 100; i++)
-                {
-                    var random = new Random();
-                    IEncryptor encryptor;
-                    IEncryptor decryptor;
-                    encryptor = new StreamOpenSSLEncryptor("aes-256-cfb", "barfoo!");
-                    decryptor = new StreamOpenSSLEncryptor("aes-256-cfb", "barfoo!");
+                    encryptor = new Encryption.AEAD.AEADBouncyCastleEncryptor("aes-256-gcm", "barfoo!");
+                    encryptor.AddrBufLength = 1 + 4 + 2;// ADDR_ATYP_LEN + 4 + ADDR_PORT_LEN;
+                    decryptor = new Encryption.AEAD.AEADBouncyCastleEncryptor("aes-256-gcm", "barfoo!");
+                    decryptor.AddrBufLength = 1 + 4 + 2;// ADDR_ATYP_LEN + 4 + ADDR_PORT_LEN;
                     RunEncryptionRound(encryptor, decryptor);
                 }
             }

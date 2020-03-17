@@ -14,11 +14,6 @@
     <StartupObject />
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <Prefer32Bit>true</Prefer32Bit>
-    <PlatformTarget>x86</PlatformTarget>
-  </PropertyGroup>
-
   <ItemGroup>
     <None Remove="app.config" />
     <None Remove="app.manifest" />
@@ -62,6 +57,7 @@
     <PackageReference Include="GlobalHotKeyCore" Version="1.2.0" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="BouncyCastle.NetCore" Version="1.8.5" />
     <PackageReference Include="Caseless.Fody" Version="1.9.0" />
     <PackageReference Include="Costura.Fody" Version="4.1.0" />
     <PackageReference Include="Fody" Version="6.1.1">
@@ -86,7 +82,6 @@
     <Resource Include="Data\abp.js" />
     <Resource Include="Data\default-abp-rule.js" />
     <Resource Include="Data\i18n.csv" />
-    <Resource Include="Data\libsscrypto.dll.gz" />
     <Resource Include="Data\NLog.config" />
     <Resource Include="Data\privoxy.exe.gz" />
     <Resource Include="Data\privoxy_conf.txt" />
