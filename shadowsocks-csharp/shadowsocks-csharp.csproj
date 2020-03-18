@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFrameworks>net472;netcoreapp3.1</TargetFrameworks>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
     <RootNamespace>Shadowsocks</RootNamespace>
     <UseWindowsForms>true</UseWindowsForms>
     <Authors>clowwindy &amp; community 2020</Authors>
