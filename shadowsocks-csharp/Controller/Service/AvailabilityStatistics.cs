@@ -216,7 +216,7 @@ namespace Shadowsocks.Controller
                 }
                 catch (Exception e)
                 {
-                    logger.Debug("config changed asynchrously, just ignore this server");
+                    logger.Debug(e,"config changed asynchrously, just ignore this server");
                 }
             }
 
