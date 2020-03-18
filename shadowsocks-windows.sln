@@ -10,6 +10,19 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ShadowsocksTest", "test\Sha
 		{8C02D2F7-7CDB-4D55-9F25-CD03EF4AA062} = {8C02D2F7-7CDB-4D55-9F25-CD03EF4AA062}
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{7BD54B24-BBD7-4DD8-99EF-DAEE6684B673}"
+	ProjectSection(SolutionItems) = preProject
+		.gitignore = .gitignore
+		appveyor.yml = appveyor.yml
+		appveyor.yml.obsolete = appveyor.yml.obsolete
+		appveyor.yml.sample = appveyor.yml.sample
+		CHANGES = CHANGES
+		CONTRIBUTING.md = CONTRIBUTING.md
+		LICENSE.txt = LICENSE.txt
+		OPENSSL-GUIDE = OPENSSL-GUIDE
+		README.md = README.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
