@@ -103,15 +103,13 @@ namespace Shadowsocks.Encryption.AEAD
 
         public void DeriveSessionKey(byte[] salt, byte[] masterKey, byte[] sessionKey)
         {
-            int ret = MbedTLS.hkdf(salt, saltLen, masterKey, keyLen, InfoBytes, InfoBytes.Length, sessionKey,
-                keyLen);
-            if (ret != 0) throw new System.Exception("failed to generate session key");
+            CryptoUtils.HKDF(keyLen, masterKey, salt, InfoBytes).CopyTo(sessionKey,0);
         }
 
         protected void IncrementNonce(bool isEncrypt)
         {
             lock (_nonceIncrementLock) {
-                Sodium.sodium_increment(isEncrypt ? _encNonce : _decNonce, nonceLen);
+                CryptoUtils.SodiumIncrement(isEncrypt ? _encNonce : _decNonce);
             }
         }
 

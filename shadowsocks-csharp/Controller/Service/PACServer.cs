@@ -51,7 +51,8 @@ namespace Shadowsocks.Controller
 
         private static string GetHash(string content)
         {
-            return   HttpServerUtilityUrlToken.Encode(MbedTLS.MD5(Encoding.ASCII.GetBytes(content)));
+            
+            return HttpServerUtilityUrlToken.Encode(CryptoUtils.MD5(Encoding.ASCII.GetBytes(content)));
         }
 
         public override bool Handle(byte[] firstPacket, int length, Socket socket, object state)
