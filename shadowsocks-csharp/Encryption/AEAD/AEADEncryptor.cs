@@ -37,18 +37,19 @@ namespace Shadowsocks.Encryption.AEAD
         protected string _innerLibName;
         protected EncryptorInfo CipherInfo;
         protected static byte[] _Masterkey = null;
-        protected byte[] _sessionKey;
+        protected byte[] sessionKey;
         protected int keyLen;
         protected int saltLen;
         protected int tagLen;
         protected int nonceLen;
 
-        protected byte[] _encryptSalt;
-        protected byte[] _decryptSalt;
+        protected byte[] encryptSalt;
+        protected byte[] decryptSalt;
 
         protected object _nonceIncrementLock = new object();
-        protected byte[] _encNonce;
-        protected byte[] _decNonce;
+        protected byte[] encNonce;
+        protected byte[] decNonce;
+
         // Is first packet
         protected bool _decryptSaltReceived;
         protected bool _encryptSaltSent;
@@ -62,8 +63,8 @@ namespace Shadowsocks.Encryption.AEAD
             InitEncryptorInfo(method);
             InitKey(password);
             // Initialize all-zero nonce for each connection
-            _encNonce = new byte[nonceLen];
-            _decNonce = new byte[nonceLen];
+            encNonce = new byte[nonceLen];
+            decNonce = new byte[nonceLen];
         }
 
         protected abstract Dictionary<string, EncryptorInfo> getCiphers();
@@ -93,7 +94,7 @@ namespace Shadowsocks.Encryption.AEAD
             if (_Masterkey.Length != keyLen) Array.Resize(ref _Masterkey, keyLen);
             DeriveKey(passbuf, _Masterkey, keyLen);
             // init session key
-            if (_sessionKey == null) _sessionKey = new byte[keyLen];
+            if (sessionKey == null) sessionKey = new byte[keyLen];
         }
 
         public void DeriveKey(byte[] password, byte[] key, int keylen)
@@ -109,23 +110,21 @@ namespace Shadowsocks.Encryption.AEAD
         protected void IncrementNonce(bool isEncrypt)
         {
             lock (_nonceIncrementLock) {
-                CryptoUtils.SodiumIncrement(isEncrypt ? _encNonce : _decNonce);
+                CryptoUtils.SodiumIncrement(isEncrypt ? encNonce : decNonce);
             }
         }
 
         public virtual void InitCipher(byte[] salt, bool isEncrypt, bool isUdp)
         {
             if (isEncrypt) {
-                _encryptSalt = new byte[saltLen];
-                Array.Copy(salt, _encryptSalt, saltLen);
+                encryptSalt = new byte[saltLen];
+                Array.Copy(salt, encryptSalt, saltLen);
             } else {
-                _decryptSalt = new byte[saltLen];
-                Array.Copy(salt, _decryptSalt, saltLen);
+                decryptSalt = new byte[saltLen];
+                Array.Copy(salt, decryptSalt, saltLen);
             }
             logger.Dump("Salt", salt, saltLen);
         }
-
-        public static void randBytes(byte[] buf, int length) { RNG.GetBytes(buf, length); }
 
         public abstract void cipherEncrypt(byte[] plaintext, uint plen, byte[] ciphertext, ref uint clen);
 
@@ -144,7 +143,7 @@ namespace Shadowsocks.Encryption.AEAD
                 _encryptSaltSent = true;
                 // Generate salt
                 byte[] saltBytes = new byte[saltLen];
-                randBytes(saltBytes, saltLen);
+                RNG.GetBytes(saltBytes, saltLen);
                 InitCipher(saltBytes, true, false);
                 Array.Copy(saltBytes, 0, outbuf, 0, saltLen);
                 outlength = saltLen;
@@ -289,7 +288,7 @@ namespace Shadowsocks.Encryption.AEAD
         public override void EncryptUDP(byte[] buf, int length, byte[] outbuf, out int outlength)
         {
             // Generate salt
-            randBytes(outbuf, saltLen);
+            RNG.GetBytes(outbuf, saltLen);
             InitCipher(outbuf, true, true);
             uint olen = 0;
             lock (_udpTmpBuf) {

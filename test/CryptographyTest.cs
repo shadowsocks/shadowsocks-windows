@@ -111,8 +111,8 @@ namespace Shadowsocks.Test
                 {
                     IEncryptor encryptorN;
                     IEncryptor decryptorN;
-                    encryptorN = new StreamNativeEncryptor("rc4-md5", "barfoo!");
-                    decryptorN = new StreamNativeEncryptor("rc4-md5", "barfoo!");
+                    encryptorN = new StreamRc4NativeEncryptor("rc4-md5", "barfoo!");
+                    decryptorN = new StreamRc4NativeEncryptor("rc4-md5", "barfoo!");
                     RunEncryptionRound(encryptorN, decryptorN);
                 }
             }
@@ -134,7 +134,7 @@ namespace Shadowsocks.Test
                     IEncryptor decryptor;
                     encryptor = new Encryption.AEAD.AEADBouncyCastleEncryptor("aes-256-gcm", "barfoo!");
                     encryptor.AddrBufLength = 1 + 4 + 2;// ADDR_ATYP_LEN + 4 + ADDR_PORT_LEN;
-                    decryptor = new Encryption.AEAD.AEADBouncyCastleEncryptor("aes-256-gcm", "barfoo!");
+                    decryptor = new Encryption.AEAD.AEADAesGcmNativeEncryptor("aes-256-gcm", "barfoo!");
                     decryptor.AddrBufLength = 1 + 4 + 2;// ADDR_ATYP_LEN + 4 + ADDR_PORT_LEN;
                     RunEncryptionRound(encryptor, decryptor);
                 }

@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Shadowsocks.Encryption.AEAD
 {
-    public class AEADBouncyCastleEncryptor : AEADEncryptor, IDisposable
+    public class AEADBouncyCastleEncryptor : AEADEncryptor
     {
         static int CIPHER_AES = 1;  // dummy
 
@@ -35,14 +35,14 @@ namespace Shadowsocks.Encryption.AEAD
         {
             base.InitCipher(salt, isEncrypt, isUdp);
 
-            DeriveSessionKey(isEncrypt ? _encryptSalt : _decryptSalt,
-                 _Masterkey, _sessionKey);
+            DeriveSessionKey(isEncrypt ? encryptSalt : decryptSalt,
+                 _Masterkey, sessionKey);
         }
 
         public override void cipherDecrypt(byte[] ciphertext, uint clen, byte[] plaintext, ref uint plen)
         {
             var cipher = new GcmBlockCipher(new AesEngine());
-            AeadParameters parameters = new AeadParameters(new KeyParameter(_sessionKey), tagLen * 8, _decNonce);
+            AeadParameters parameters = new AeadParameters(new KeyParameter(sessionKey), tagLen * 8, decNonce);
 
             cipher.Init(false, parameters);
             var plaintextBC = new byte[cipher.GetOutputSize((int)clen)];
@@ -55,7 +55,7 @@ namespace Shadowsocks.Encryption.AEAD
         public override void cipherEncrypt(byte[] plaintext, uint plen, byte[] ciphertext, ref uint clen)
         {
             var cipher = new GcmBlockCipher(new AesEngine());
-            AeadParameters parameters = new AeadParameters(new KeyParameter(_sessionKey), tagLen * 8, _encNonce);
+            AeadParameters parameters = new AeadParameters(new KeyParameter(sessionKey), tagLen * 8, encNonce);
 
             cipher.Init(true, parameters);
             var ciphertextBC = new byte[cipher.GetOutputSize((int)plen)];

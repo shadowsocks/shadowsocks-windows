@@ -15,10 +15,10 @@ namespace Shadowsocks.Encryption
 
         static EncryptorFactory()
         {
-            foreach (string method in StreamNativeEncryptor.SupportedCiphers())
+            foreach (string method in StreamTableNativeEncryptor.SupportedCiphers())
             {
                 if (!_registeredEncryptors.ContainsKey(method))
-                    _registeredEncryptors.Add(method, typeof(StreamNativeEncryptor));
+                    _registeredEncryptors.Add(method, typeof(StreamTableNativeEncryptor));
             }
 
             foreach (string method in AEADNativeEncryptor.SupportedCiphers())

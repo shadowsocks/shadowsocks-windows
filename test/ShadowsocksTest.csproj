@@ -6,6 +6,10 @@
     <IsPackable>false</IsPackable>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <WarningLevel>0</WarningLevel>
+  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="GlobalHotKeyCore" Version="1.2.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.5.0" />
