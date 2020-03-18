@@ -33,7 +33,6 @@ namespace Shadowsocks.Encryption.AEAD
             {"plain-fake-aead",new EncryptorInfo("PLAIN_AEAD",0,0,0,0,0) }
         };
 
-
         protected override Dictionary<string, EncryptorInfo> getCiphers()
         {
             return _ciphers;
@@ -44,5 +43,14 @@ namespace Shadowsocks.Encryption.AEAD
             return _ciphers.Keys;
         }
 
+        public override byte[] CipherEncrypt2(byte[] plain)
+        {
+            return plain;
+        }
+
+        public override byte[] CipherDecrypt2(byte[] cipher)
+        {
+            return cipher;
+        }
     }
 }

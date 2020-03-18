@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Shadowsocks.Encryption.AEAD
 {
-    public class AEADAesGcmNativeEncryptor : AEADNativeEncryptor
+    public class AEADAesGcmNativeEncryptor : AEADEncryptor
     {
 
         public AEADAesGcmNativeEncryptor(string method, string password) : base(method, password)
@@ -77,6 +77,29 @@ namespace Shadowsocks.Encryption.AEAD
             cipher.DoFinal(ciphertextBC, len);
             clen = (uint)(ciphertextBC.Length);
             Array.Copy(ciphertextBC, 0, ciphertext, 0, clen);*/
+        }
+
+        public override byte[] CipherDecrypt2(byte[] cipher)
+        {
+            var (cipherMem, tagMem) = GetCipherTextAndTagMem(cipher);
+            Span<byte> plainMem = new Span<byte>(new byte[cipherMem.Length]);
+
+            using var aes = new AesGcm(sessionKey);
+            aes.Decrypt(decNonce.AsSpan(), cipherMem.Span, tagMem.Span, plainMem);
+            return plainMem.ToArray();
+        }
+
+        public override byte[] CipherEncrypt2(byte[] plain)
+        {
+            Span<byte> d = new Span<byte>(new byte[plain.Length + tagLen]);
+
+            //Span<byte> cipherMem = new Span<byte>(new byte[plain.Length]);
+            //Span<byte> tagMem = new Span<byte>(new byte[tagLen]);
+
+            using var aes = new AesGcm(sessionKey);
+            aes.Encrypt(encNonce.AsSpan(), plain.AsSpan(), d.Slice(0, plain.Length), d.Slice(plain.Length));
+
+            return d.ToArray();
         }
 
         public static List<string> SupportedCiphers()

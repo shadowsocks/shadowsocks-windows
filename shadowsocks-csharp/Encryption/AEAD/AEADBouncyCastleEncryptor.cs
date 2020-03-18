@@ -45,11 +45,11 @@ namespace Shadowsocks.Encryption.AEAD
             AeadParameters parameters = new AeadParameters(new KeyParameter(sessionKey), tagLen * 8, decNonce);
 
             cipher.Init(false, parameters);
-            var plaintextBC = new byte[cipher.GetOutputSize((int)clen)];
-            var len = cipher.ProcessBytes(ciphertext, 0, (int)clen, plaintextBC, 0);
-            cipher.DoFinal(plaintextBC, len);
-            plen = (uint)(plaintextBC.Length);
-            Array.Copy(plaintextBC, 0, plaintext, 0, plen);
+            //var plaintextBC = new byte[cipher.GetOutputSize(ciphertext.Length)];
+            var len = cipher.ProcessBytes(ciphertext, 0, ciphertext.Length, plaintext, 0);
+            cipher.DoFinal(plaintext, len);
+            //plen = (uint)(plaintext.Length);
+            //Array.Copy(plaintextBC, 0, plaintext, 0, plaintext.Length);
         }
 
         public override void cipherEncrypt(byte[] plaintext, uint plen, byte[] ciphertext, ref uint clen)
@@ -65,6 +65,32 @@ namespace Shadowsocks.Encryption.AEAD
             Array.Copy(ciphertextBC, 0, ciphertext, 0, clen);
         }
 
+        public override byte[] CipherDecrypt2(byte[] cipher)
+        {
+            var aes = new GcmBlockCipher(new AesEngine());
+            AeadParameters parameters = new AeadParameters(new KeyParameter(sessionKey), tagLen * 8, decNonce);
+
+            aes.Init(false, parameters);
+            byte[] plain = new byte[aes.GetOutputSize(cipher.Length)];
+            var len = aes.ProcessBytes(cipher, 0, cipher.Length, plain, 0);
+            aes.DoFinal(plain, len);
+
+            return plain;
+        }
+
+        public override byte[] CipherEncrypt2(byte[] plain)
+        {
+            var aes = new GcmBlockCipher(new AesEngine());
+            AeadParameters parameters = new AeadParameters(new KeyParameter(sessionKey), tagLen * 8, encNonce);
+
+            aes.Init(true, parameters);
+            var cipher = new byte[aes.GetOutputSize(plain.Length)];
+
+            var len = aes.ProcessBytes(plain, 0, plain.Length, cipher, 0);
+            aes.DoFinal(cipher, len);
+            return cipher;
+        }
+        
         public static List<string> SupportedCiphers()
         {
             return new List<string>(_ciphers.Keys);
