@@ -148,7 +148,9 @@ namespace Shadowsocks.Controller
         private TCPRelay _tcprelay;
         private Socket _connection;
 
-        private IEncryptor _encryptor;
+        private IEncryptor encryptor;
+        // workaround
+        private IEncryptor decryptor;
         private Server _server;
 
         private AsyncSession _currentRemoteSession;
@@ -216,13 +218,14 @@ namespace Shadowsocks.Controller
             if (server == null || server.server == "")
                 throw new ArgumentException("No server configured");
 
-            _encryptor = EncryptorFactory.GetEncryptor(server.method, server.password);
-
+            encryptor = EncryptorFactory.GetEncryptor(server.method, server.password);
+            decryptor = EncryptorFactory.GetEncryptor(server.method, server.password);
             this._server = server;
 
             /* prepare address buffer length for AEAD */
             Logger.Debug($"_addrBufLength={_addrBufLength}");
-            _encryptor.AddrBufLength = _addrBufLength;
+            encryptor.AddrBufLength = _addrBufLength;
+            decryptor.AddrBufLength = _addrBufLength;
         }
 
         public void Start(byte[] firstPacket, int length)
@@ -277,7 +280,8 @@ namespace Shadowsocks.Controller
             {
                 lock (_decryptionLock)
                 {
-                    _encryptor?.Dispose();
+                    encryptor?.Dispose();
+                    decryptor?.Dispose();
                 }
             }
         }
@@ -825,7 +829,7 @@ namespace Shadowsocks.Controller
                     {
                         try
                         {
-                            _encryptor.Decrypt(_remoteRecvBuffer, bytesRead, _remoteSendBuffer, out bytesToSend);
+                            decryptor.Decrypt(_remoteRecvBuffer, bytesRead, _remoteSendBuffer, out bytesToSend);
                         }
                         catch (CryptoErrorException)
                         {
@@ -898,7 +902,7 @@ namespace Shadowsocks.Controller
             {
                 try
                 {
-                    _encryptor.Encrypt(_connetionRecvBuffer, length, _connetionSendBuffer, out bytesToSend);
+                    encryptor.Encrypt(_connetionRecvBuffer, length, _connetionSendBuffer, out bytesToSend);
                 }
                 catch (CryptoErrorException)
                 {
