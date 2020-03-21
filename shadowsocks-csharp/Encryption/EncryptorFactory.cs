@@ -10,27 +10,51 @@ namespace Shadowsocks.Encryption
     public static class EncryptorFactory
     {
         private static Dictionary<string, Type> _registeredEncryptors = new Dictionary<string, Type>();
-
+        private static Dictionary<string, CipherInfo> ciphers = new Dictionary<string, CipherInfo>();
         private static readonly Type[] ConstructorTypes = { typeof(string), typeof(string) };
 
         static EncryptorFactory()
         {
-            foreach (string method in StreamTableNativeEncryptor.SupportedCiphers())
+            foreach (var method in StreamTableNativeEncryptor.SupportedCiphers())
             {
-                if (!_registeredEncryptors.ContainsKey(method))
-                    _registeredEncryptors.Add(method, typeof(StreamTableNativeEncryptor));
+                if (!_registeredEncryptors.ContainsKey(method.Key))
+                {
+                    ciphers.Add(method.Key, method.Value);
+                    _registeredEncryptors.Add(method.Key, typeof(StreamTableNativeEncryptor));
+                }
+            }
+            foreach (var method in StreamRc4NativeEncryptor.SupportedCiphers())
+            {
+                if (!_registeredEncryptors.ContainsKey(method.Key))
+                {
+                    ciphers.Add(method.Key, method.Value);
+                    _registeredEncryptors.Add(method.Key, typeof(StreamRc4NativeEncryptor));
+                }
             }
 
-            foreach (string method in AEADNativeEncryptor.SupportedCiphers())
+            foreach (var method in AEADAesGcmNativeEncryptor.SupportedCiphers())
             {
-                if (!_registeredEncryptors.ContainsKey(method))
-                    _registeredEncryptors.Add(method, typeof(AEADNativeEncryptor));
+                if (!_registeredEncryptors.ContainsKey(method.Key))
+                {
+                    ciphers.Add(method.Key, method.Value);
+                    _registeredEncryptors.Add(method.Key, typeof(AEADAesGcmNativeEncryptor));
+                }
             }
-
-            foreach (string method in AEADBouncyCastleEncryptor.SupportedCiphers())
+            foreach (var method in AEADNaClEncryptor.SupportedCiphers())
             {
-                if (!_registeredEncryptors.ContainsKey(method))
-                    _registeredEncryptors.Add(method, typeof(AEADBouncyCastleEncryptor));
+                if (!_registeredEncryptors.ContainsKey(method.Key))
+                {
+                    ciphers.Add(method.Key, method.Value);
+                    _registeredEncryptors.Add(method.Key, typeof(AEADNaClEncryptor));
+                }
+            }
+            foreach (var method in StreamRc4NativeEncryptor.SupportedCiphers())
+            {
+                if (!_registeredEncryptors.ContainsKey(method.Key))
+                {
+                    ciphers.Add(method.Key, method.Value);
+                    _registeredEncryptors.Add(method.Key, typeof(StreamRc4NativeEncryptor));
+                }
             }
 
         }

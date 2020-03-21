@@ -13,16 +13,15 @@ namespace Shadowsocks.Encryption.AEAD
         public AEADAesGcmNativeEncryptor(string method, string password) : base(method, password)
         {
         }
-        static int CIPHER_AES = 1;  // dummy
 
-        private static readonly Dictionary<string, EncryptorInfo> _ciphers = new Dictionary<string, EncryptorInfo>
+        private static readonly Dictionary<string, CipherInfo> _ciphers = new Dictionary<string, CipherInfo>
         {
-            {"aes-128-gcm", new EncryptorInfo("AES-128-GCM", 16, 16, 12, 16, CIPHER_AES)},
-            {"aes-192-gcm", new EncryptorInfo("AES-192-GCM", 24, 24, 12, 16, CIPHER_AES)},
-            {"aes-256-gcm", new EncryptorInfo("AES-256-GCM", 32, 32, 12, 16, CIPHER_AES)},
+            {"aes-128-gcm", new CipherInfo("AES-128-GCM", 16, 16, 12, 16, CipherFamily.AesGcm)},
+            {"aes-192-gcm", new CipherInfo("AES-192-GCM", 24, 24, 12, 16, CipherFamily.AesGcm)},
+            {"aes-256-gcm", new CipherInfo("AES-256-GCM", 32, 32, 12, 16, CipherFamily.AesGcm)},
         };
 
-        protected override Dictionary<string, EncryptorInfo> getCiphers()
+        protected override Dictionary<string, CipherInfo> getCiphers()
         {
             return _ciphers;
         }
@@ -102,13 +101,9 @@ namespace Shadowsocks.Encryption.AEAD
             return d.ToArray();
         }
 
-        public static List<string> SupportedCiphers()
+        public static Dictionary<string, CipherInfo> SupportedCiphers()
         {
-            return new List<string>(_ciphers.Keys);
-        }
-
-        public override void Dispose()
-        {
+            return _ciphers;
         }
     }
 }

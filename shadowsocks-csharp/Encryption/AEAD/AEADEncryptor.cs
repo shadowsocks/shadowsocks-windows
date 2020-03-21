@@ -11,8 +11,7 @@ using Shadowsocks.Encryption.Stream;
 
 namespace Shadowsocks.Encryption.AEAD
 {
-    public abstract class AEADEncryptor
-        : EncryptorBase
+    public abstract class AEADEncryptor : EncryptorBase
     {
         private static Logger logger = LogManager.GetCurrentClassLogger();
         // We are using the same saltLen and keyLen
@@ -29,13 +28,13 @@ namespace Shadowsocks.Encryption.AEAD
         public const int CHUNK_LEN_BYTES = 2;
         public const uint CHUNK_LEN_MASK = 0x3FFFu;
 
-        protected Dictionary<string, EncryptorInfo> ciphers;
+        protected Dictionary<string, CipherInfo> ciphers;
 
         protected string _method;
-        protected int _cipher;
+        protected CipherFamily _cipher;
         // internal name in the crypto library
         protected string _innerLibName;
-        protected EncryptorInfo CipherInfo;
+        protected CipherInfo CipherInfo;
         protected static byte[] _Masterkey = null;
         protected byte[] sessionKey;
         protected int keyLen;
@@ -67,7 +66,7 @@ namespace Shadowsocks.Encryption.AEAD
             decNonce = new byte[nonceLen];
         }
 
-        protected abstract Dictionary<string, EncryptorInfo> getCiphers();
+        protected abstract Dictionary<string, CipherInfo> getCiphers();
 
         protected void InitEncryptorInfo(string method)
         {
@@ -75,16 +74,12 @@ namespace Shadowsocks.Encryption.AEAD
             _method = method;
             ciphers = getCiphers();
             CipherInfo = ciphers[_method];
-            _innerLibName = CipherInfo.InnerLibName;
             _cipher = CipherInfo.Type;
-            if (_cipher == 0)
-            {
-                throw new System.Exception("method not found");
-            }
-            keyLen = CipherInfo.KeySize;
-            saltLen = CipherInfo.SaltSize;
-            tagLen = CipherInfo.TagSize;
-            nonceLen = CipherInfo.NonceSize;
+            var parameter = (AEADCipherParameter)CipherInfo.CipherParameter;
+            keyLen = parameter.KeySize;
+            saltLen = parameter.SaltSize;
+            tagLen = parameter.TagSize;
+            nonceLen = parameter.NonceSize;
         }
 
         protected void InitKey(string password)
@@ -196,10 +191,10 @@ namespace Shadowsocks.Encryption.AEAD
                 _tcpRequestSent = true;
                 // The first TCP request
                 int encAddrBufLength;
-                byte[] encAddrBufBytes = new byte[AddrBufLength + tagLen * 2 + CHUNK_LEN_BYTES];
-                byte[] addrBytes = _encCircularBuffer.Get(AddrBufLength);
-                ChunkEncrypt(addrBytes, AddrBufLength, encAddrBufBytes, out encAddrBufLength);
-                Debug.Assert(encAddrBufLength == AddrBufLength + tagLen * 2 + CHUNK_LEN_BYTES);
+                byte[] encAddrBufBytes = new byte[AddressBufferLength + tagLen * 2 + CHUNK_LEN_BYTES];
+                byte[] addrBytes = _encCircularBuffer.Get(AddressBufferLength);
+                ChunkEncrypt(addrBytes, AddressBufferLength, encAddrBufBytes, out encAddrBufLength);
+                Debug.Assert(encAddrBufLength == AddressBufferLength + tagLen * 2 + CHUNK_LEN_BYTES);
                 Array.Copy(encAddrBufBytes, 0, outbuf, outlength, encAddrBufLength);
                 outlength += encAddrBufLength;
                 logger.Debug($"_tcpRequestSent outlength {outlength}");

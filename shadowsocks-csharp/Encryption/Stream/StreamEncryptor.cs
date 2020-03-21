@@ -7,8 +7,7 @@ using Shadowsocks.Controller;
 
 namespace Shadowsocks.Encryption.Stream
 {
-    public abstract class StreamEncryptor
-        : EncryptorBase
+    public abstract class StreamEncryptor : EncryptorBase
     {
         // for UDP only
         protected static byte[] _udpTmpBuf = new byte[65536];
@@ -17,7 +16,7 @@ namespace Shadowsocks.Encryption.Stream
         private ByteCircularBuffer _encCircularBuffer = new ByteCircularBuffer(TCPHandler.BufferSize * 2);
         private ByteCircularBuffer _decCircularBuffer = new ByteCircularBuffer(TCPHandler.BufferSize * 2);
 
-        protected Dictionary<string, EncryptorInfo> ciphers;
+        protected Dictionary<string, CipherInfo> ciphers;
 
         protected byte[] _encryptIV;
         protected byte[] _decryptIV;
@@ -27,10 +26,10 @@ namespace Shadowsocks.Encryption.Stream
         protected bool _encryptIVSent;
 
         protected string _method;
-        protected int _cipher;
+        protected CipherFamily _cipher;
         // internal name in the crypto library
         protected string _innerLibName;
-        protected EncryptorInfo CipherInfo;
+        protected CipherInfo CipherInfo;
         // long-time master key
         protected static byte[] _key = null;
         protected int keyLen;
@@ -43,7 +42,7 @@ namespace Shadowsocks.Encryption.Stream
             InitKey(password);
         }
 
-        protected abstract Dictionary<string, EncryptorInfo> getCiphers();
+        protected abstract Dictionary<string, CipherInfo> getCiphers();
 
         private void InitEncryptorInfo(string method)
         {
@@ -51,14 +50,10 @@ namespace Shadowsocks.Encryption.Stream
             _method = method;
             ciphers = getCiphers();
             CipherInfo = ciphers[_method];
-            _innerLibName = CipherInfo.InnerLibName;
             _cipher = CipherInfo.Type;
-            if (_cipher == 0)
-            {
-                throw new System.Exception("method not found");
-            }
-            keyLen = CipherInfo.KeySize;
-            ivLen = CipherInfo.IvSize;
+            var parameter = (StreamCipherParameter)CipherInfo.CipherParameter;
+            keyLen = parameter.KeySize;
+            ivLen = parameter.IvSize;
         }
 
         private void InitKey(string password)

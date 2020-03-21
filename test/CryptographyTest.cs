@@ -11,7 +11,7 @@ namespace Shadowsocks.Test
     [TestClass]
     public class CryptographyTest
     {
-
+        Random random = new Random();
         [TestMethod]
         public void TestMD5()
         {
@@ -19,7 +19,6 @@ namespace Shadowsocks.Test
             {
                 System.Security.Cryptography.MD5 md5 = System.Security.Cryptography.MD5.Create();
                 byte[] bytes = new byte[len];
-                var random = new Random();
                 random.NextBytes(bytes);
                 string md5str = Convert.ToBase64String(md5.ComputeHash(bytes));
                 string md5str2 = Convert.ToBase64String(CryptoUtils.MD5(bytes));
@@ -33,12 +32,12 @@ namespace Shadowsocks.Test
             byte[] plain = new byte[16384];
             byte[] cipher = new byte[plain.Length + 100];// AEAD with IPv4 address type needs +100
             byte[] plain2 = new byte[plain.Length + 16];
-            int outLen = 0;
-            int outLen2 = 0;
-            var random = new Random();
+
+            //random = new Random();
+
             random.NextBytes(plain);
-            encryptor.Encrypt(plain, plain.Length, cipher, out outLen);
-            decryptor.Decrypt(cipher, outLen, plain2, out outLen2);
+            encryptor.Encrypt(plain, plain.Length, cipher, out int outLen);
+            decryptor.Decrypt(cipher, outLen, plain2, out int outLen2);
             Assert.AreEqual(plain.Length, outLen2);
             for (int j = 0; j < plain.Length; j++)
             {
@@ -66,15 +65,16 @@ namespace Shadowsocks.Test
         {
             var ector = enc.GetConstructor(new Type[] { typeof(string), typeof(string) });
             var dctor = dec.GetConstructor(new Type[] { typeof(string), typeof(string) });
-
             try
             {
-                for (int i = 0; i < 100; i++)
+                IEncryptor encryptor = (IEncryptor)ector.Invoke(new object[] { method, password });
+                IEncryptor decryptor = (IEncryptor)dctor.Invoke(new object[] { method, password });
+                encryptor.AddressBufferLength = 1 + 4 + 2;// ADDR_ATYP_LEN + 4 + ADDR_PORT_LEN;
+                decryptor.AddressBufferLength = 1 + 4 + 2;// ADDR_ATYP_LEN + 4 + ADDR_PORT_LEN;
+
+
+                for (int i = 0; i < 16; i++)
                 {
-                    IEncryptor encryptor = (IEncryptor)ector.Invoke(new object[] { method, password });
-                    IEncryptor decryptor = (IEncryptor)dctor.Invoke(new object[] { method, password });
-                    encryptor.AddrBufLength = 1 + 4 + 2;// ADDR_ATYP_LEN + 4 + ADDR_PORT_LEN;
-                    decryptor.AddrBufLength = 1 + 4 + 2;// ADDR_ATYP_LEN + 4 + ADDR_PORT_LEN;
                     RunEncryptionRound(encryptor, decryptor);
                 }
             }
@@ -98,7 +98,7 @@ namespace Shadowsocks.Test
             // run it once before the multi-threading test to initialize global tables
             RunSingleEncryptionThread(enc, dec, method);
             List<Thread> threads = new List<Thread>();
-            for (int i = 0; i < 10; i++)
+            for (int i = 0; i < 8; i++)
             {
                 Thread t = new Thread(new ThreadStart(() => RunSingleEncryptionThread(enc, dec, method))); threads.Add(t);
                 t.Start();
@@ -114,20 +114,41 @@ namespace Shadowsocks.Test
         [TestMethod]
         public void TestBouncyCastleAEADEncryption()
         {
+            TestEncryptionMethod(typeof(AEADBouncyCastleEncryptor), "aes-128-gcm");
+            TestEncryptionMethod(typeof(AEADBouncyCastleEncryptor), "aes-192-gcm");
             TestEncryptionMethod(typeof(AEADBouncyCastleEncryptor), "aes-256-gcm");
+        }
+
+        [TestMethod]
+        public void TestAesGcmNativeAEADEncryption()
+        {
+            TestEncryptionMethod(typeof(AEADAesGcmNativeEncryptor), "aes-128-gcm");
+            TestEncryptionMethod(typeof(AEADAesGcmNativeEncryptor), "aes-192-gcm");
+            TestEncryptionMethod(typeof(AEADAesGcmNativeEncryptor), "aes-256-gcm");
         }
 
         [TestMethod]
         public void TestNaClAEADEncryption()
         {
             TestEncryptionMethod(typeof(AEADNaClEncryptor), "chacha20-ietf-poly1305");
+            TestEncryptionMethod(typeof(AEADNaClEncryptor), "xchacha20-ietf-poly1305");
         }
 
         [TestMethod]
         public void TestNativeEncryption()
         {
-            //TestEncryptionMethod(typeof(StreamTableNativeEncryptor), "table");
+            TestEncryptionMethod(typeof(StreamTableNativeEncryptor), "plain");
+            TestEncryptionMethod(typeof(StreamRc4NativeEncryptor), "rc4");
             TestEncryptionMethod(typeof(StreamRc4NativeEncryptor), "rc4-md5");
+        }
+
+        [TestMethod]
+        public void TestNativeTableEncryption()
+        {
+            // Too slow, run once to save CPU
+            var enc = new StreamTableNativeEncryptor("table", "barfoo!");
+            var dec = new StreamTableNativeEncryptor("table", "barfoo!");
+            RunEncryptionRound(enc, dec);
         }
     }
 }

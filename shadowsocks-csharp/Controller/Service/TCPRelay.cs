@@ -224,8 +224,8 @@ namespace Shadowsocks.Controller
 
             /* prepare address buffer length for AEAD */
             Logger.Debug($"_addrBufLength={_addrBufLength}");
-            encryptor.AddrBufLength = _addrBufLength;
-            decryptor.AddrBufLength = _addrBufLength;
+            encryptor.AddressBufferLength = _addrBufLength;
+            decryptor.AddressBufferLength = _addrBufLength;
         }
 
         public void Start(byte[] firstPacket, int length)
@@ -273,15 +273,6 @@ namespace Shadowsocks.Controller
                 catch (Exception e)
                 {
                     Logger.LogUsefulException(e);
-                }
-            }
-
-            lock (_encryptionLock)
-            {
-                lock (_decryptionLock)
-                {
-                    encryptor?.Dispose();
-                    decryptor?.Dispose();
                 }
             }
         }

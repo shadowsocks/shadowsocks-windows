@@ -8,9 +8,6 @@ namespace Shadowsocks.Encryption.Stream
 {
     public class StreamTableNativeEncryptor : StreamEncryptor
     {
-        const int Plain = 0;
-        const int Table = 1;
-
         string _password;
 
         public StreamTableNativeEncryptor(string method, string password) : base(method, password)
@@ -18,15 +15,10 @@ namespace Shadowsocks.Encryption.Stream
             _password = password;
         }
 
-        public override void Dispose()
-        {
-            return;
-        }
-
         protected override void initCipher(byte[] iv, bool isEncrypt)
         {
             base.initCipher(iv, isEncrypt);
-            if (_cipher == Table)
+            if (_cipher == CipherFamily.Table)
             {
                 ulong a = BitConverter.ToUInt64(CryptoUtils.MD5(Encoding.UTF8.GetBytes(_password)), 0);
                 for (int i = 0; i < 256; i++)
@@ -46,7 +38,7 @@ namespace Shadowsocks.Encryption.Stream
 
         protected override void cipherUpdate(bool isEncrypt, int length, byte[] buf, byte[] outbuf)
         {
-            if (_cipher == Table)
+            if (_cipher == CipherFamily.Table)
             {
                 var table = isEncrypt ? _encryptTable : _decryptTable;
                 for (int i = 0; i < length; i++)
@@ -54,24 +46,24 @@ namespace Shadowsocks.Encryption.Stream
                     outbuf[i] = table[buf[i]];
                 }
             }
-            else if (_cipher == Plain)
+            else if (_cipher == CipherFamily.Plain)
             {
                 Array.Copy(buf, outbuf, length);
             }
         }
 
-        private static readonly Dictionary<string, EncryptorInfo> _ciphers = new Dictionary<string, EncryptorInfo>
+        private static readonly Dictionary<string, CipherInfo> _ciphers = new Dictionary<string, CipherInfo>
         {
-            {"plain", new EncryptorInfo("PLAIN", 0, 0, Plain) },
-            {"table", new EncryptorInfo("TABLE", 0, 0, Table) },
+            {"plain", new CipherInfo("plain", 0, 0, CipherFamily.Plain) },
+            {"table", new CipherInfo("table", 0, 0, CipherFamily.Table) },
         };
 
-        public static IEnumerable<string> SupportedCiphers()
+        public static Dictionary<string, CipherInfo> SupportedCiphers()
         {
-            return _ciphers.Keys;
+            return _ciphers;
         }
 
-        protected override Dictionary<string, EncryptorInfo> getCiphers()
+        protected override Dictionary<string, CipherInfo> getCiphers()
         {
             return _ciphers;
         }

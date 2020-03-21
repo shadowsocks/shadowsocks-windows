@@ -15,7 +15,6 @@ namespace Shadowsocks.Encryption.AEAD
         SnufflePoly1305 dec;
         public AEADNaClEncryptor(string method, string password) : base(method, password)
         {
-
         }
 
         public override void InitCipher(byte[] salt, bool isEncrypt, bool isUdp)
@@ -28,10 +27,10 @@ namespace Shadowsocks.Encryption.AEAD
             switch (_cipher)
             {
                 default:
-                case CipherChaCha20Poly1305:
+                case CipherFamily.Chacha20Poly1305:
                     tmp = new ChaCha20Poly1305(sessionKey);
                     break;
-                case CipherXChaCha20Poly1305:
+                case CipherFamily.XChacha20Poly1305:
                     tmp = new XChaCha20Poly1305(sessionKey);
                     break;
             }
@@ -53,28 +52,25 @@ namespace Shadowsocks.Encryption.AEAD
             clen = (uint)ct.Length;
         }
 
-        public override void Dispose()
+        private static readonly Dictionary<string, CipherInfo> _ciphers = new Dictionary<string, CipherInfo>
         {
-        }
-
-        const int CipherChaCha20Poly1305 = 1;
-        const int CipherXChaCha20Poly1305 = 2;
-
-        private static readonly Dictionary<string, EncryptorInfo> _ciphers = new Dictionary<string, EncryptorInfo>
-        {
-            {"chacha20-ietf-poly1305", new EncryptorInfo(32, 32, 12, 16, 1)},
-            {"xchacha20-ietf-poly1305", new EncryptorInfo(32, 32, 24, 16, 2)},
-            //{"aes-256-gcm", new EncryptorInfo(32, 32, 12, 16, CIPHER_AES256GCM)},
+            {"chacha20-ietf-poly1305", new CipherInfo("chacha20-ietf-poly1305",32, 32, 12, 16, CipherFamily.Chacha20Poly1305)},
+            {"xchacha20-ietf-poly1305", new CipherInfo("xchacha20-ietf-poly1305",32, 32, 24, 16, CipherFamily.XChacha20Poly1305)},
         };
 
-        protected override Dictionary<string, EncryptorInfo> getCiphers()
+        protected override Dictionary<string, CipherInfo> getCiphers()
+        {
+            return _ciphers;
+        }
+
+        public static Dictionary<string, CipherInfo> SupportedCiphers()
         {
             return _ciphers;
         }
 
         public override byte[] CipherEncrypt2(byte[] plain)
         {
-            return  enc.Encrypt(plain, null, encNonce);
+            return enc.Encrypt(plain, null, encNonce);
         }
 
         public override byte[] CipherDecrypt2(byte[] cipher)

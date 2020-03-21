@@ -8,27 +8,16 @@ namespace Shadowsocks.Encryption.Stream
 {
     public class StreamRc4NativeEncryptor : StreamEncryptor
     {
-        const int Rc4 = 0;
-        const int Rc4Md5 = 1;
-
-        string _password;
-
-        byte[] realkey;
-        byte[] sbox;
+        byte[] realkey = new byte[256];
+        byte[] sbox = new byte[256];
         public StreamRc4NativeEncryptor(string method, string password) : base(method, password)
         {
-            _password = password;
-        }
-
-        public override void Dispose()
-        {
-            return;
         }
 
         protected override void initCipher(byte[] iv, bool isEncrypt)
         {
             base.initCipher(iv, isEncrypt);
-            if (_cipher == Rc4Md5)
+            if (_cipher == CipherFamily.Rc4Md5)
             {
                 byte[] temp = new byte[keyLen + ivLen];
                 Array.Copy(_key, 0, temp, 0, keyLen);
@@ -54,19 +43,19 @@ namespace Shadowsocks.Encryption.Stream
             Array.Copy(t, outbuf, length);
         }
 
-        private static readonly Dictionary<string, EncryptorInfo> _ciphers = new Dictionary<string, EncryptorInfo>
+        private static readonly Dictionary<string, CipherInfo> _ciphers = new Dictionary<string, CipherInfo>
         {
             // original RC4 doesn't use IV
-            { "rc4", new EncryptorInfo("RC4", 16, 0, Rc4) },
-            { "rc4-md5", new EncryptorInfo("RC4", 16, 16, Rc4Md5) },
+            { "rc4", new CipherInfo("rc4", 16, 0, CipherFamily.Rc4) },
+            { "rc4-md5", new CipherInfo("rc4-md5", 16, 16, CipherFamily.Rc4Md5) },
         };
 
-        public static IEnumerable<string> SupportedCiphers()
+        public static Dictionary<string, CipherInfo> SupportedCiphers()
         {
-            return _ciphers.Keys;
+            return _ciphers;
         }
 
-        protected override Dictionary<string, EncryptorInfo> getCiphers()
+        protected override Dictionary<string, CipherInfo> getCiphers()
         {
             return _ciphers;
         }
