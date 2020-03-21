@@ -461,27 +461,35 @@ namespace Shadowsocks.View
             int strategyCount = 0;
             foreach (var strategy in controller.GetStrategies())
             {
-                ToolStripMenuItem item = new ToolStripMenuItem(strategy.Name);
-                item.Tag = strategy.ID;
-                item.Click += AStrategyItem_Click;
-                items.Add( item);
-                strategyCount++;
+                if (!items.OfType<ToolStripItem>().Any(ts=>ts.Text==strategy.Name))
+                {
+                    ToolStripMenuItem item = new ToolStripMenuItem(strategy.Name);
+                    item.Tag = strategy.ID;
+                    item.Click += AStrategyItem_Click;
+                    items.Add(item);
+                    strategyCount++;
+                }
             }
-
-            // user wants a seperator item between strategy and servers menugroup
-            items .Add(new ToolStripSeparator());
-
+            if (!items.OfType<ToolStripSeparator>().Any(ts => ts.Tag?.ToString() == "-server-"))
+            {
+                // user wants a seperator item between strategy and servers menugroup
+                items.Add(new ToolStripSeparator() { Tag = "-server-" });
+            }
             int serverCount = 0;
             Configuration configuration = controller.GetConfigurationCopy();
             foreach (var server in configuration.configs)
             {
                 if (Configuration.ChecksServer(server))
                 {
-                    ToolStripMenuItem item = new ToolStripMenuItem(server.FriendlyName());
-                    item.Tag = configuration.configs.FindIndex(s => s == server);
-                    item.Click += AServerItem_Click;
-                    items.Add( item);
-                    serverCount++;
+                    var name = server.FriendlyName();
+                    if (!items.OfType<ToolStripMenuItem>().Any(ts => ts.Text == name))
+                    {
+                        ToolStripMenuItem item = new ToolStripMenuItem(name);
+                        item.Tag = configuration.configs.FindIndex(s => s == server);
+                        item.Click += AServerItem_Click;
+                        items.Add(item);
+                        serverCount++;
+                    }
                 }
             }
 
