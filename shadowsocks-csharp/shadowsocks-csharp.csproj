@@ -66,6 +66,8 @@
     </PackageReference>
    
     <PackageReference Include="Microsoft.VisualBasic" Version="10.3.0" />
+   
+    <PackageReference Include="NaCl.Core" Version="1.2.0" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
     <PackageReference Include="NLog" Version="4.6.8" />
     <PackageReference Include="StringEx.CS" Version="0.3.1">

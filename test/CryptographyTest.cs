@@ -82,6 +82,72 @@ namespace Shadowsocks.Test
             Assert.IsFalse(encryptionFailed);
         }
 
+        private void RunSingleBouncyCastleAEADEncryptionThread()
+        {
+            try
+            {
+                for (int i = 0; i < 100; i++)
+                {
+                    var random = new Random();
+                    IEncryptor encryptor;
+                    IEncryptor decryptor;
+                    encryptor = new Encryption.AEAD.AEADBouncyCastleEncryptor("aes-256-gcm", "barfoo!");
+                    encryptor.AddrBufLength = 1 + 4 + 2;// ADDR_ATYP_LEN + 4 + ADDR_PORT_LEN;
+                    decryptor = new Encryption.AEAD.AEADBouncyCastleEncryptor("aes-256-gcm", "barfoo!");
+                    decryptor.AddrBufLength = 1 + 4 + 2;// ADDR_ATYP_LEN + 4 + ADDR_PORT_LEN;
+                    RunEncryptionRound(encryptor, decryptor);
+                }
+            }
+            catch
+            {
+                encryptionFailed = true;
+                throw;
+            }
+        }
+
+        [TestMethod]
+        public void TesNaClAEADEncryption()
+        {
+            encryptionFailed = false;
+            // run it once before the multi-threading test to initialize global tables
+            RunSingleNaClAEADEncryptionThread();
+            List<Thread> threads = new List<Thread>();
+            for (int i = 0; i < 10; i++)
+            {
+                Thread t = new Thread(new ThreadStart(RunSingleNaClAEADEncryptionThread)); threads.Add(t);
+                t.Start();
+            }
+            foreach (Thread t in threads)
+            {
+                t.Join();
+            }
+            RNG.Close();
+            Assert.IsFalse(encryptionFailed);
+        }
+
+        private void RunSingleNaClAEADEncryptionThread()
+        {
+            try
+            {
+                for (int i = 0; i < 100; i++)
+                {
+                    var random = new Random();
+                    IEncryptor encryptor;
+                    IEncryptor decryptor;
+                    encryptor = new Encryption.AEAD.AEADNaClEncryptor("chacha20-ietf-poly1305", "barfoo!");
+                    encryptor.AddrBufLength = 1 + 4 + 2;// ADDR_ATYP_LEN + 4 + ADDR_PORT_LEN;
+                    decryptor = new Encryption.AEAD.AEADNaClEncryptor("chacha20-ietf-poly1305", "barfoo!");
+                    decryptor.AddrBufLength = 1 + 4 + 2;// ADDR_ATYP_LEN + 4 + ADDR_PORT_LEN;
+                    RunEncryptionRound(encryptor, decryptor);
+                }
+            }
+            catch
+            {
+                encryptionFailed = true;
+                throw;
+            }
+        }
+
         [TestMethod]
         public void TestNativeEncryption()
         {
@@ -114,29 +180,6 @@ namespace Shadowsocks.Test
                     encryptorN = new StreamRc4NativeEncryptor("rc4-md5", "barfoo!");
                     decryptorN = new StreamRc4NativeEncryptor("rc4-md5", "barfoo!");
                     RunEncryptionRound(encryptorN, decryptorN);
-                }
-            }
-            catch
-            {
-                encryptionFailed = true;
-                throw;
-            }
-        }
-
-        private void RunSingleBouncyCastleAEADEncryptionThread()
-        {
-            try
-            {
-                for (int i = 0; i < 100; i++)
-                {
-                    var random = new Random();
-                    IEncryptor encryptor;
-                    IEncryptor decryptor;
-                    encryptor = new Encryption.AEAD.AEADBouncyCastleEncryptor("aes-256-gcm", "barfoo!");
-                    encryptor.AddrBufLength = 1 + 4 + 2;// ADDR_ATYP_LEN + 4 + ADDR_PORT_LEN;
-                    decryptor = new Encryption.AEAD.AEADAesGcmNativeEncryptor("aes-256-gcm", "barfoo!");
-                    decryptor.AddrBufLength = 1 + 4 + 2;// ADDR_ATYP_LEN + 4 + ADDR_PORT_LEN;
-                    RunEncryptionRound(encryptor, decryptor);
                 }
             }
             catch
