@@ -79,15 +79,25 @@ namespace Shadowsocks.Encryption
         {
             var sb = new StringBuilder();
             sb.Append(Environment.NewLine);
-            sb.AppendLine("=========================");
+            sb.AppendLine("-------------------------");
             sb.AppendLine("Registered Encryptor Info");
             foreach (var encryptor in _registeredEncryptors)
             {
                 sb.AppendLine(String.Format("{0}=>{1}", encryptor.Key, encryptor.Value.Name));
             }
-
-            sb.AppendLine("=========================");
+            // use ----- instead of =======, so when user paste it to Github, it won't became title
+            sb.AppendLine("-------------------------");
             return sb.ToString();
+        }
+
+        public static CipherInfo GetCipherInfo(string name)
+        {
+            return ciphers[name];
+        }
+
+        public static IEnumerable<CipherInfo> ListAvaliableCiphers()
+        {
+            return ciphers.Values;
         }
     }
 }

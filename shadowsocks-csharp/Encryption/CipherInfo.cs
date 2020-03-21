@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Shadowsocks.Controller;
+using System;
 
 namespace Shadowsocks.Encryption
 {
@@ -81,5 +82,10 @@ namespace Shadowsocks.Encryption
             };
         }
         #endregion
+
+        public override string ToString()
+        {
+            return StandardState == CipherStandardState.InUse ? Name : $"{Name} ({I18N.GetString("deprecated")})";
+        }
     }
 }

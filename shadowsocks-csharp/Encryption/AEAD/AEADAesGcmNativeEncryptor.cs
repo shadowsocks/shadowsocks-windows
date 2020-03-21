@@ -16,9 +16,9 @@ namespace Shadowsocks.Encryption.AEAD
 
         private static readonly Dictionary<string, CipherInfo> _ciphers = new Dictionary<string, CipherInfo>
         {
-            {"aes-128-gcm", new CipherInfo("AES-128-GCM", 16, 16, 12, 16, CipherFamily.AesGcm)},
-            {"aes-192-gcm", new CipherInfo("AES-192-GCM", 24, 24, 12, 16, CipherFamily.AesGcm)},
-            {"aes-256-gcm", new CipherInfo("AES-256-GCM", 32, 32, 12, 16, CipherFamily.AesGcm)},
+            {"aes-128-gcm", new CipherInfo("aes-128-gcm", 16, 16, 12, 16, CipherFamily.AesGcm)},
+            {"aes-192-gcm", new CipherInfo("aes-192-gcm", 24, 24, 12, 16, CipherFamily.AesGcm)},
+            {"aes-256-gcm", new CipherInfo("aes-256-gcm", 32, 32, 12, 16, CipherFamily.AesGcm)},
         };
 
         protected override Dictionary<string, CipherInfo> getCiphers()
