@@ -53,7 +53,8 @@ namespace Shadowsocks.Encryption.Stream
             CipherInfo = ciphers[_method];
             _innerLibName = CipherInfo.InnerLibName;
             _cipher = CipherInfo.Type;
-            if (_cipher == 0) {
+            if (_cipher == 0)
+            {
                 throw new System.Exception("method not found");
             }
             keyLen = CipherInfo.KeySize;
@@ -73,10 +74,14 @@ namespace Shadowsocks.Encryption.Stream
             byte[] result = new byte[password.Length + MD5_LEN];
             int i = 0;
             byte[] md5sum = null;
-            while (i < keylen) {
-                if (i == 0) {
+            while (i < keylen)
+            {
+                if (i == 0)
+                {
                     md5sum = CryptoUtils.MD5(password);
-                } else {
+                }
+                else
+                {
                     Array.Copy(md5sum, 0, result, 0, MD5_LEN);
                     Array.Copy(password, 0, result, MD5_LEN, password.Length);
                     md5sum = CryptoUtils.MD5(result);
@@ -88,10 +93,13 @@ namespace Shadowsocks.Encryption.Stream
 
         protected virtual void initCipher(byte[] iv, bool isEncrypt)
         {
-            if (isEncrypt) {
+            if (isEncrypt)
+            {
                 _encryptIV = new byte[ivLen];
                 Array.Copy(iv, _encryptIV, ivLen);
-            } else {
+            }
+            else
+            {
                 _decryptIV = new byte[ivLen];
                 Array.Copy(iv, _decryptIV, ivLen);
             }
@@ -108,12 +116,13 @@ namespace Shadowsocks.Encryption.Stream
             int cipherOffset = 0;
             Debug.Assert(_encCircularBuffer != null, "_encCircularBuffer != null");
             _encCircularBuffer.Put(buf, 0, length);
-            if (! _encryptIVSent) {
+            if (!_encryptIVSent)
+            {
                 // Generate IV
                 byte[] ivBytes = new byte[ivLen];
                 randBytes(ivBytes, ivLen);
                 initCipher(ivBytes, true);
-                
+
                 Array.Copy(ivBytes, 0, outbuf, 0, ivLen);
                 cipherOffset = ivLen;
                 _encryptIVSent = true;
@@ -130,16 +139,22 @@ namespace Shadowsocks.Encryption.Stream
         {
             Debug.Assert(_decCircularBuffer != null, "_circularBuffer != null");
             _decCircularBuffer.Put(buf, 0, length);
-            if (! _decryptIVReceived) {
-                if (_decCircularBuffer.Size <= ivLen) {
+            if (!_decryptIVReceived)
+            {
+                if (_decCircularBuffer.Size <= ivLen)
+                {
                     // we need more data
                     outlength = 0;
                     return;
                 }
                 // start decryption
                 _decryptIVReceived = true;
-                byte[] iv = _decCircularBuffer.Get(ivLen);
-                initCipher(iv, false);
+                if (ivLen > 0)
+                {
+                    byte[] iv = _decCircularBuffer.Get(ivLen);
+                    initCipher(iv, false);
+                }
+                else initCipher(Array.Empty<byte>(), false);
             }
             byte[] cipher = _decCircularBuffer.ToArray();
             cipherUpdate(false, cipher.Length, cipher, outbuf);
@@ -158,7 +173,8 @@ namespace Shadowsocks.Encryption.Stream
             // Generate IV
             randBytes(outbuf, ivLen);
             initCipher(outbuf, true);
-            lock (_udpTmpBuf) {
+            lock (_udpTmpBuf)
+            {
                 cipherUpdate(true, length, buf, _udpTmpBuf);
                 outlength = length + ivLen;
                 Buffer.BlockCopy(_udpTmpBuf, 0, outbuf, ivLen, length);
@@ -170,7 +186,8 @@ namespace Shadowsocks.Encryption.Stream
             // Get IV from first pos
             initCipher(buf, false);
             outlength = length - ivLen;
-            lock (_udpTmpBuf) {
+            lock (_udpTmpBuf)
+            {
                 // C# could be multi-threaded
                 Buffer.BlockCopy(buf, ivLen, _udpTmpBuf, 0, length - ivLen);
                 cipherUpdate(false, length - ivLen, _udpTmpBuf, outbuf);

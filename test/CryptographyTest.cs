@@ -1,6 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Shadowsocks.Encryption;
 using Shadowsocks.Encryption.Stream;
+using Shadowsocks.Encryption.AEAD;
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -59,134 +60,74 @@ namespace Shadowsocks.Test
             }
         }
 
+        const string password = "barfoo!";
+
+        private void RunSingleEncryptionThread(Type enc, Type dec, string method)
+        {
+            var ector = enc.GetConstructor(new Type[] { typeof(string), typeof(string) });
+            var dctor = dec.GetConstructor(new Type[] { typeof(string), typeof(string) });
+
+            try
+            {
+                for (int i = 0; i < 100; i++)
+                {
+                    IEncryptor encryptor = (IEncryptor)ector.Invoke(new object[] { method, password });
+                    IEncryptor decryptor = (IEncryptor)dctor.Invoke(new object[] { method, password });
+                    encryptor.AddrBufLength = 1 + 4 + 2;// ADDR_ATYP_LEN + 4 + ADDR_PORT_LEN;
+                    decryptor.AddrBufLength = 1 + 4 + 2;// ADDR_ATYP_LEN + 4 + ADDR_PORT_LEN;
+                    RunEncryptionRound(encryptor, decryptor);
+                }
+            }
+            catch
+            {
+                encryptionFailed = true;
+                throw;
+            }
+        }
+
         private static bool encryptionFailed = false;
-        private static object locker = new object();
+
+        private void TestEncryptionMethod(Type enc, string method)
+        {
+            TestEncryptionMethod(enc, enc, method);
+        }
+        private void TestEncryptionMethod(Type enc, Type dec, string method)
+        {
+            encryptionFailed = false;
+
+            // run it once before the multi-threading test to initialize global tables
+            RunSingleEncryptionThread(enc, dec, method);
+            List<Thread> threads = new List<Thread>();
+            for (int i = 0; i < 10; i++)
+            {
+                Thread t = new Thread(new ThreadStart(() => RunSingleEncryptionThread(enc, dec, method))); threads.Add(t);
+                t.Start();
+            }
+            foreach (Thread t in threads)
+            {
+                t.Join();
+            }
+            RNG.Close();
+            Assert.IsFalse(encryptionFailed);
+        }
 
         [TestMethod]
         public void TestBouncyCastleAEADEncryption()
         {
-            encryptionFailed = false;
-            // run it once before the multi-threading test to initialize global tables
-            RunSingleBouncyCastleAEADEncryptionThread();
-            List<Thread> threads = new List<Thread>();
-            for (int i = 0; i < 10; i++)
-            {
-                Thread t = new Thread(new ThreadStart(RunSingleBouncyCastleAEADEncryptionThread)); threads.Add(t);
-                t.Start();
-            }
-            foreach (Thread t in threads)
-            {
-                t.Join();
-            }
-            RNG.Close();
-            Assert.IsFalse(encryptionFailed);
-        }
-
-        private void RunSingleBouncyCastleAEADEncryptionThread()
-        {
-            try
-            {
-                for (int i = 0; i < 100; i++)
-                {
-                    var random = new Random();
-                    IEncryptor encryptor;
-                    IEncryptor decryptor;
-                    encryptor = new Encryption.AEAD.AEADBouncyCastleEncryptor("aes-256-gcm", "barfoo!");
-                    encryptor.AddrBufLength = 1 + 4 + 2;// ADDR_ATYP_LEN + 4 + ADDR_PORT_LEN;
-                    decryptor = new Encryption.AEAD.AEADBouncyCastleEncryptor("aes-256-gcm", "barfoo!");
-                    decryptor.AddrBufLength = 1 + 4 + 2;// ADDR_ATYP_LEN + 4 + ADDR_PORT_LEN;
-                    RunEncryptionRound(encryptor, decryptor);
-                }
-            }
-            catch
-            {
-                encryptionFailed = true;
-                throw;
-            }
+            TestEncryptionMethod(typeof(AEADBouncyCastleEncryptor), "aes-256-gcm");
         }
 
         [TestMethod]
-        public void TesNaClAEADEncryption()
+        public void TestNaClAEADEncryption()
         {
-            encryptionFailed = false;
-            // run it once before the multi-threading test to initialize global tables
-            RunSingleNaClAEADEncryptionThread();
-            List<Thread> threads = new List<Thread>();
-            for (int i = 0; i < 10; i++)
-            {
-                Thread t = new Thread(new ThreadStart(RunSingleNaClAEADEncryptionThread)); threads.Add(t);
-                t.Start();
-            }
-            foreach (Thread t in threads)
-            {
-                t.Join();
-            }
-            RNG.Close();
-            Assert.IsFalse(encryptionFailed);
-        }
-
-        private void RunSingleNaClAEADEncryptionThread()
-        {
-            try
-            {
-                for (int i = 0; i < 100; i++)
-                {
-                    var random = new Random();
-                    IEncryptor encryptor;
-                    IEncryptor decryptor;
-                    encryptor = new Encryption.AEAD.AEADNaClEncryptor("chacha20-ietf-poly1305", "barfoo!");
-                    encryptor.AddrBufLength = 1 + 4 + 2;// ADDR_ATYP_LEN + 4 + ADDR_PORT_LEN;
-                    decryptor = new Encryption.AEAD.AEADNaClEncryptor("chacha20-ietf-poly1305", "barfoo!");
-                    decryptor.AddrBufLength = 1 + 4 + 2;// ADDR_ATYP_LEN + 4 + ADDR_PORT_LEN;
-                    RunEncryptionRound(encryptor, decryptor);
-                }
-            }
-            catch
-            {
-                encryptionFailed = true;
-                throw;
-            }
+            TestEncryptionMethod(typeof(AEADNaClEncryptor), "chacha20-ietf-poly1305");
         }
 
         [TestMethod]
         public void TestNativeEncryption()
         {
-            encryptionFailed = false;
-            // run it once before the multi-threading test to initialize global tables
-            RunSingleNativeEncryptionThread();
-            List<Thread> threads = new List<Thread>();
-            for (int i = 0; i < 10; i++)
-            {
-                Thread t = new Thread(new ThreadStart(RunSingleNativeEncryptionThread));
-                threads.Add(t);
-                t.Start();
-            }
-            foreach (Thread t in threads)
-            {
-                t.Join();
-            }
-            RNG.Close();
-            Assert.IsFalse(encryptionFailed);
-        }
-
-        private void RunSingleNativeEncryptionThread()
-        {
-            try
-            {
-                for (int i = 0; i < 100; i++)
-                {
-                    IEncryptor encryptorN;
-                    IEncryptor decryptorN;
-                    encryptorN = new StreamRc4NativeEncryptor("rc4-md5", "barfoo!");
-                    decryptorN = new StreamRc4NativeEncryptor("rc4-md5", "barfoo!");
-                    RunEncryptionRound(encryptorN, decryptorN);
-                }
-            }
-            catch
-            {
-                encryptionFailed = true;
-                throw;
-            }
+            //TestEncryptionMethod(typeof(StreamTableNativeEncryptor), "table");
+            TestEncryptionMethod(typeof(StreamRc4NativeEncryptor), "rc4-md5");
         }
     }
 }
