@@ -35,6 +35,7 @@ namespace Shadowsocks.Encryption
     public class StreamCipherParameter : CipherParameter
     {
         public int IvSize;
+        public override string ToString() => $"stream (key:{KeySize * 8}, iv:{IvSize * 8})";
     }
 
     public class AEADCipherParameter : CipherParameter
@@ -42,6 +43,7 @@ namespace Shadowsocks.Encryption
         public int SaltSize;
         public int TagSize;
         public int NonceSize;
+        public override string ToString() => $"aead (key:{KeySize * 8}, salt:{SaltSize * 8}, tag:{TagSize * 8}, nonce:{NonceSize * 8})";
     }
 
     public class CipherInfo
@@ -86,6 +88,12 @@ namespace Shadowsocks.Encryption
         public override string ToString()
         {
             return StandardState == CipherStandardState.InUse ? Name : $"{Name} ({I18N.GetString("deprecated")})";
+        }
+        public string ToString(bool verbose)
+        {
+            if (!verbose) return ToString();
+
+            return $"{Name} {StandardState} {CipherParameter}";
         }
     }
 }

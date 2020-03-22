@@ -5,33 +5,35 @@ namespace Shadowsocks.Encryption
 {
     public static class RNG
     {
-        private static RNGCryptoServiceProvider _rng = null;
-
-        public static void Init()
-        {
-            _rng = _rng ?? new RNGCryptoServiceProvider();
-        }
-
-        public static void Close()
-        {
-            _rng?.Dispose();
-            _rng = null;
-        }
+        private static RNGCryptoServiceProvider _rng = new RNGCryptoServiceProvider();
 
         public static void Reload()
         {
-            Close();
-            Init();
+            _rng.Dispose();
+            _rng = new RNGCryptoServiceProvider();
         }
 
-        public static void GetBytes(byte[] buf)
+        public static void GetSpan(Span<byte> span)
         {
-            GetBytes(buf, buf.Length);
+            _rng.GetBytes(span);
+        }
+
+        public static Span<byte> GetSpan(int length)
+        {
+            Span<byte> span = new byte[length];
+            _rng.GetBytes(span);
+            return span;
+        }
+
+        public static byte[] GetBytes(int length)
+        {
+            byte[] buf = new byte[length];
+            _rng.GetBytes(buf);
+            return buf;
         }
 
         public static void GetBytes(byte[] buf, int len)
         {
-            if (_rng == null) Init();
             try
             {
                 _rng.GetBytes(buf, 0, len);

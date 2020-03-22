@@ -22,9 +22,7 @@ namespace Shadowsocks.Controller
             {
                 if (string.IsNullOrEmpty(_cachedPacSecret))
                 {
-                    var rd = new byte[32];
-                    RNG.GetBytes(rd);
-                    _cachedPacSecret = HttpServerUtilityUrlToken.Encode(rd);
+                    _cachedPacSecret = HttpServerUtilityUrlToken.Encode(RNG.GetBytes(32));
                 }
                 return _cachedPacSecret;
             }

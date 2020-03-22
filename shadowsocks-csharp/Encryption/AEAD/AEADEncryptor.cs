@@ -178,8 +178,7 @@ namespace Shadowsocks.Encryption.AEAD
             {
                 _encryptSaltSent = true;
                 // Generate salt
-                byte[] saltBytes = new byte[saltLen];
-                RNG.GetBytes(saltBytes, saltLen);
+                byte[] saltBytes = RNG.GetBytes(saltLen);
                 InitCipher(saltBytes, true, false);
                 Array.Copy(saltBytes, 0, outbuf, 0, saltLen);
                 outlength = saltLen;
@@ -336,11 +335,19 @@ namespace Shadowsocks.Encryption.AEAD
         #endregion
 
         #region UDP
-
+        /// <summary>
+        /// Perform AEAD UDP packet encryption
+        /// </summary>
+        /// payload => [salt][encrypted payload][tag]
+        /// <param name="buf"></param>
+        /// <param name="length"></param>
+        /// <param name="outbuf"></param>
+        /// <param name="outlength"></param>
         public override void EncryptUDP(byte[] buf, int length, byte[] outbuf, out int outlength)
         {
             // Generate salt
-            RNG.GetBytes(outbuf, saltLen);
+            //RNG.GetBytes(outbuf, saltLen);
+            RNG.GetSpan(outbuf.AsSpan().Slice(0, saltLen));
             InitCipher(outbuf, true, true);
             //uint olen = 0;
             lock (_udpTmpBuf)
@@ -351,7 +358,7 @@ namespace Shadowsocks.Encryption.AEAD
                 //Debug.Assert(olen == length + tagLen);
                 Buffer.BlockCopy(cipher, 0, outbuf, saltLen, length + tagLen);
                 //Buffer.BlockCopy(_udpTmpBuf, 0, outbuf, saltLen, (int)olen);
-                outlength = (int)(saltLen + cipher.Length);
+                outlength = saltLen + cipher.Length;
             }
         }
 

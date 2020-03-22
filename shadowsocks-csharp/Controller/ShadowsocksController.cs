@@ -325,7 +325,6 @@ namespace Shadowsocks.Controller
             {
                 SystemProxy.Update(_config, true, null);
             }
-            Encryption.RNG.Close();
         }
 
         private void StopPlugins()

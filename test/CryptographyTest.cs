@@ -107,7 +107,6 @@ namespace Shadowsocks.Test
             {
                 t.Join();
             }
-            RNG.Close();
             Assert.IsFalse(encryptionFailed);
         }
 

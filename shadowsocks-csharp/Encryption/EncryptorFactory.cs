@@ -9,6 +9,8 @@ namespace Shadowsocks.Encryption
 {
     public static class EncryptorFactory
     {
+        public static string DefaultCipher = "chacha20-ietf-poly1305";
+
         private static Dictionary<string, Type> _registeredEncryptors = new Dictionary<string, Type>();
         private static Dictionary<string, CipherInfo> ciphers = new Dictionary<string, CipherInfo>();
         private static readonly Type[] ConstructorTypes = { typeof(string), typeof(string) };
@@ -48,15 +50,6 @@ namespace Shadowsocks.Encryption
                     _registeredEncryptors.Add(method.Key, typeof(AEADNaClEncryptor));
                 }
             }
-            foreach (var method in StreamRc4NativeEncryptor.SupportedCiphers())
-            {
-                if (!_registeredEncryptors.ContainsKey(method.Key))
-                {
-                    ciphers.Add(method.Key, method.Value);
-                    _registeredEncryptors.Add(method.Key, typeof(StreamRc4NativeEncryptor));
-                }
-            }
-
         }
 
         public static IEncryptor GetEncryptor(string method, string password)
@@ -67,7 +60,11 @@ namespace Shadowsocks.Encryption
             }
 
             method = method.ToLowerInvariant();
-            Type t = _registeredEncryptors[method];
+            bool ok = _registeredEncryptors.TryGetValue(method, out Type t);
+            if (!ok)
+            {
+                t = _registeredEncryptors[DefaultCipher];
+            }
 
             ConstructorInfo c = t.GetConstructor(ConstructorTypes);
             if (c == null) throw new System.Exception("Invalid ctor");
@@ -83,7 +80,7 @@ namespace Shadowsocks.Encryption
             sb.AppendLine("Registered Encryptor Info");
             foreach (var encryptor in _registeredEncryptors)
             {
-                sb.AppendLine(String.Format("{0}=>{1}", encryptor.Key, encryptor.Value.Name));
+                sb.AppendLine($"{ciphers[encryptor.Key].ToString(true)} => {encryptor.Value.Name}");
             }
             // use ----- instead of =======, so when user paste it to Github, it won't became title
             sb.AppendLine("-------------------------");
@@ -92,6 +89,7 @@ namespace Shadowsocks.Encryption
 
         public static CipherInfo GetCipherInfo(string name)
         {
+            // TODO: Replace cipher when required not exist
             return ciphers[name];
         }
 
