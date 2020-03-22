@@ -32,27 +32,23 @@ namespace Shadowsocks.Encryption.AEAD
         {
             base.InitCipher(salt, isEncrypt, isUdp);
 
-            DeriveSessionKey(isEncrypt ? encryptSalt : decryptSalt,
-                 _Masterkey, sessionKey);
+            DeriveSessionKey(salt, masterKey, sessionKey);
         }
 
         public override void cipherDecrypt(byte[] ciphertext, uint clen, byte[] plaintext, ref uint plen)
         {
             var cipher = new GcmBlockCipher(new AesEngine());
-            AeadParameters parameters = new AeadParameters(new KeyParameter(sessionKey), tagLen * 8, decNonce);
+            AeadParameters parameters = new AeadParameters(new KeyParameter(sessionKey), tagLen * 8, nonce);
 
             cipher.Init(false, parameters);
-            //var plaintextBC = new byte[cipher.GetOutputSize(ciphertext.Length)];
             var len = cipher.ProcessBytes(ciphertext, 0, ciphertext.Length, plaintext, 0);
             cipher.DoFinal(plaintext, len);
-            //plen = (uint)(plaintext.Length);
-            //Array.Copy(plaintextBC, 0, plaintext, 0, plaintext.Length);
         }
 
         public override void cipherEncrypt(byte[] plaintext, uint plen, byte[] ciphertext, ref uint clen)
         {
             var cipher = new GcmBlockCipher(new AesEngine());
-            AeadParameters parameters = new AeadParameters(new KeyParameter(sessionKey), tagLen * 8, encNonce);
+            AeadParameters parameters = new AeadParameters(new KeyParameter(sessionKey), tagLen * 8, nonce);
 
             cipher.Init(true, parameters);
             var ciphertextBC = new byte[cipher.GetOutputSize((int)plen)];
@@ -65,7 +61,7 @@ namespace Shadowsocks.Encryption.AEAD
         public override byte[] CipherDecrypt2(byte[] cipher)
         {
             var aes = new GcmBlockCipher(new AesEngine());
-            AeadParameters parameters = new AeadParameters(new KeyParameter(sessionKey), tagLen * 8, decNonce);
+            AeadParameters parameters = new AeadParameters(new KeyParameter(sessionKey), tagLen * 8, nonce);
 
             aes.Init(false, parameters);
             byte[] plain = new byte[aes.GetOutputSize(cipher.Length)];
@@ -78,7 +74,7 @@ namespace Shadowsocks.Encryption.AEAD
         public override byte[] CipherEncrypt2(byte[] plain)
         {
             var aes = new GcmBlockCipher(new AesEngine());
-            AeadParameters parameters = new AeadParameters(new KeyParameter(sessionKey), tagLen * 8, encNonce);
+            AeadParameters parameters = new AeadParameters(new KeyParameter(sessionKey), tagLen * 8, nonce);
 
             aes.Init(true, parameters);
             var cipher = new byte[aes.GetOutputSize(plain.Length)];

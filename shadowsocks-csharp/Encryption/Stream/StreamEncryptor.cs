@@ -13,25 +13,20 @@ namespace Shadowsocks.Encryption.Stream
         protected static byte[] _udpTmpBuf = new byte[65536];
 
         // every connection should create its own buffer
-        private ByteCircularBuffer _encCircularBuffer = new ByteCircularBuffer(TCPHandler.BufferSize * 2);
-        private ByteCircularBuffer _decCircularBuffer = new ByteCircularBuffer(TCPHandler.BufferSize * 2);
+        private ByteCircularBuffer buffer = new ByteCircularBuffer(TCPHandler.BufferSize * 2);
 
         protected Dictionary<string, CipherInfo> ciphers;
 
-        protected byte[] _encryptIV;
-        protected byte[] _decryptIV;
 
         // Is first packet
-        protected bool _decryptIVReceived;
-        protected bool _encryptIVSent;
+        protected bool ivReady;
 
         protected string _method;
         protected CipherFamily _cipher;
-        // internal name in the crypto library
-        protected string _innerLibName;
         protected CipherInfo CipherInfo;
         // long-time master key
-        protected static byte[] _key = null;
+        protected static byte[] key = null;
+        protected byte[] iv;
         protected int keyLen;
         protected int ivLen;
 
@@ -59,9 +54,9 @@ namespace Shadowsocks.Encryption.Stream
         private void InitKey(string password)
         {
             byte[] passbuf = Encoding.UTF8.GetBytes(password);
-            if (_key == null) _key = new byte[keyLen];
-            if (_key.Length != keyLen) Array.Resize(ref _key, keyLen);
-            LegacyDeriveKey(passbuf, _key, keyLen);
+            key ??= new byte[keyLen];
+            if (key.Length != keyLen) Array.Resize(ref key, keyLen);
+            LegacyDeriveKey(passbuf, key, keyLen);
         }
 
         public static void LegacyDeriveKey(byte[] password, byte[] key, int keylen)
@@ -88,42 +83,36 @@ namespace Shadowsocks.Encryption.Stream
 
         protected virtual void initCipher(byte[] iv, bool isEncrypt)
         {
-            if (isEncrypt)
-            {
-                _encryptIV = new byte[ivLen];
-                Array.Copy(iv, _encryptIV, ivLen);
-            }
-            else
-            {
-                _decryptIV = new byte[ivLen];
-                Array.Copy(iv, _decryptIV, ivLen);
-            }
+            this.iv = new byte[ivLen];
+            Array.Copy(iv, this.iv, ivLen);
         }
 
         protected abstract void cipherUpdate(bool isEncrypt, int length, byte[] buf, byte[] outbuf);
 
-        protected static void randBytes(byte[] buf, int length) { RNG.GetBytes(buf, length); }
+        protected abstract int CipherEncrypt(Span<byte> plain, Span<byte> cipher);
+        protected abstract int CipherDecrypt(Span<byte> plain, Span<byte> cipher);
+
+        //protected static void randBytes(byte[] buf, int length) { RNG.GetBytes(buf, length); }
 
         #region TCP
 
         public override void Encrypt(byte[] buf, int length, byte[] outbuf, out int outlength)
         {
             int cipherOffset = 0;
-            Debug.Assert(_encCircularBuffer != null, "_encCircularBuffer != null");
-            _encCircularBuffer.Put(buf, 0, length);
-            if (!_encryptIVSent)
+            Debug.Assert(buffer != null, "_encCircularBuffer != null");
+            buffer.Put(buf, 0, length);
+            if (!ivReady)
             {
                 // Generate IV
-                byte[] ivBytes = new byte[ivLen];
-                randBytes(ivBytes, ivLen);
+                byte[] ivBytes = RNG.GetBytes(ivLen);
                 initCipher(ivBytes, true);
 
                 Array.Copy(ivBytes, 0, outbuf, 0, ivLen);
                 cipherOffset = ivLen;
-                _encryptIVSent = true;
+                ivReady = true;
             }
-            int size = _encCircularBuffer.Size;
-            byte[] plain = _encCircularBuffer.Get(size);
+            int size = buffer.Size;
+            byte[] plain = buffer.Get(size);
             byte[] cipher = new byte[size];
             cipherUpdate(true, size, plain, cipher);
             Buffer.BlockCopy(cipher, 0, outbuf, cipherOffset, size);
@@ -132,29 +121,29 @@ namespace Shadowsocks.Encryption.Stream
 
         public override void Decrypt(byte[] buf, int length, byte[] outbuf, out int outlength)
         {
-            Debug.Assert(_decCircularBuffer != null, "_circularBuffer != null");
-            _decCircularBuffer.Put(buf, 0, length);
-            if (!_decryptIVReceived)
+            Debug.Assert(buffer != null, "_circularBuffer != null");
+            buffer.Put(buf, 0, length);
+            if (!ivReady)
             {
-                if (_decCircularBuffer.Size <= ivLen)
+                if (buffer.Size <= ivLen)
                 {
                     // we need more data
                     outlength = 0;
                     return;
                 }
                 // start decryption
-                _decryptIVReceived = true;
+                ivReady = true;
                 if (ivLen > 0)
                 {
-                    byte[] iv = _decCircularBuffer.Get(ivLen);
+                    byte[] iv = buffer.Get(ivLen);
                     initCipher(iv, false);
                 }
                 else initCipher(Array.Empty<byte>(), false);
             }
-            byte[] cipher = _decCircularBuffer.ToArray();
+            byte[] cipher = buffer.ToArray();
             cipherUpdate(false, cipher.Length, cipher, outbuf);
             // move pointer only
-            _decCircularBuffer.Skip(_decCircularBuffer.Size);
+            buffer.Skip(buffer.Size);
             outlength = cipher.Length;
             // done the decryption
         }
@@ -166,7 +155,7 @@ namespace Shadowsocks.Encryption.Stream
         public override void EncryptUDP(byte[] buf, int length, byte[] outbuf, out int outlength)
         {
             // Generate IV
-            randBytes(outbuf, ivLen);
+            RNG.GetBytes(outbuf, ivLen);
             initCipher(outbuf, true);
             lock (_udpTmpBuf)
             {

@@ -52,6 +52,37 @@ namespace Shadowsocks.Encryption.Stream
             }
         }
 
+        protected override int CipherDecrypt(Span<byte> plain, Span<byte> cipher)
+        {
+            if (_cipher == CipherFamily.Plain)
+            {
+                cipher.CopyTo(plain);
+                return cipher.Length;
+            }
+
+            for (int i = 0; i < cipher.Length; i++)
+            {
+                plain[i] = _decryptTable[cipher[i]];
+            }
+            return cipher.Length;
+        }
+
+        protected override int CipherEncrypt(Span<byte> plain, Span<byte> cipher)
+        {
+            if (_cipher == CipherFamily.Plain)
+            {
+                plain.CopyTo(cipher);
+                return plain.Length;
+            }
+
+            for (int i = 0; i < plain.Length; i++)
+            {
+                cipher[i] = _decryptTable[plain[i]];
+            }
+            return plain.Length;
+        }
+
+        #region Cipher Info
         private static readonly Dictionary<string, CipherInfo> _ciphers = new Dictionary<string, CipherInfo>
         {
             {"plain", new CipherInfo("plain", 0, 0, CipherFamily.Plain) },
@@ -67,6 +98,7 @@ namespace Shadowsocks.Encryption.Stream
         {
             return _ciphers;
         }
+        #endregion
 
         #region Table
         private byte[] _encryptTable = new byte[256];

@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Shadowsocks.Encryption.Stream
 {
@@ -20,22 +17,19 @@ namespace Shadowsocks.Encryption.Stream
             if (_cipher == CipherFamily.Rc4Md5)
             {
                 byte[] temp = new byte[keyLen + ivLen];
-                Array.Copy(_key, 0, temp, 0, keyLen);
+                Array.Copy(key, 0, temp, 0, keyLen);
                 Array.Copy(iv, 0, temp, keyLen, ivLen);
                 realkey = CryptoUtils.MD5(temp);
             }
             else
             {
-                realkey = _key;
+                realkey = key;
             }
             sbox = SBox(realkey);
-
         }
 
         protected override void cipherUpdate(bool isEncrypt, int length, byte[] buf, byte[] outbuf)
         {
-            var ctx = isEncrypt ? enc_ctx : dec_ctx;
-
             byte[] t = new byte[length];
             Array.Copy(buf, t, length);
 
@@ -43,6 +37,24 @@ namespace Shadowsocks.Encryption.Stream
             Array.Copy(t, outbuf, length);
         }
 
+        protected override int CipherEncrypt(Span<byte> plain, Span<byte> cipher)
+        {
+            return DoRC4(plain, cipher);
+        }
+
+        protected override int CipherDecrypt(Span<byte> plain, Span<byte> cipher)
+        {
+            return DoRC4(cipher, plain);
+        }
+
+        private int DoRC4(Span<byte> i, Span<byte> o)
+        {
+            i.CopyTo(o);
+            RC4(ctx, sbox, o, o.Length);
+            return o.Length;
+        }
+
+        #region Ciphers
         private static readonly Dictionary<string, CipherInfo> _ciphers = new Dictionary<string, CipherInfo>
         {
             // original RC4 doesn't use IV
@@ -59,6 +71,7 @@ namespace Shadowsocks.Encryption.Stream
         {
             return _ciphers;
         }
+        #endregion
 
         #region RC4
         class Context
@@ -67,8 +80,7 @@ namespace Shadowsocks.Encryption.Stream
             public int index2 = 0;
         }
 
-        private Context enc_ctx = new Context();
-        private Context dec_ctx = new Context();
+        private Context ctx = new Context();
 
         private byte[] SBox(byte[] key)
         {
@@ -89,7 +101,7 @@ namespace Shadowsocks.Encryption.Stream
             return s;
         }
 
-        private void RC4(Context ctx, byte[] s, byte[] data, int length)
+        private void RC4(Context ctx, Span<byte> s, Span<byte> data, int length)
         {
             for (int n = 0; n < length; n++)
             {
@@ -99,12 +111,11 @@ namespace Shadowsocks.Encryption.Stream
                 ctx.index2 = (ctx.index2 + s[ctx.index1]) & 255;
 
                 Swap(s, ctx.index1, ctx.index2);
-
                 data[n] = (byte)(b ^ s[(s[ctx.index1] + s[ctx.index2]) & 255]);
             }
         }
 
-        private static void Swap(byte[] s, int i, int j)
+        private static void Swap(Span<byte> s, int i, int j)
         {
             byte c = s[i];
 

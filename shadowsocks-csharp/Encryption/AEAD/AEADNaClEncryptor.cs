@@ -12,7 +12,6 @@ namespace Shadowsocks.Encryption.AEAD
     {
 
         SnufflePoly1305 enc;
-        SnufflePoly1305 dec;
         public AEADNaClEncryptor(string method, string password) : base(method, password)
         {
         }
@@ -20,34 +19,30 @@ namespace Shadowsocks.Encryption.AEAD
         public override void InitCipher(byte[] salt, bool isEncrypt, bool isUdp)
         {
             base.InitCipher(salt, isEncrypt, isUdp);
-            DeriveSessionKey(isEncrypt ? encryptSalt : decryptSalt,
-                 _Masterkey, sessionKey);
+            DeriveSessionKey(salt, masterKey, sessionKey);
 
-            SnufflePoly1305 tmp;
             switch (_cipher)
             {
                 default:
                 case CipherFamily.Chacha20Poly1305:
-                    tmp = new ChaCha20Poly1305(sessionKey);
+                    enc = new ChaCha20Poly1305(sessionKey);
                     break;
                 case CipherFamily.XChacha20Poly1305:
-                    tmp = new XChaCha20Poly1305(sessionKey);
+                    enc = new XChaCha20Poly1305(sessionKey);
                     break;
             }
-            if (isEncrypt) enc = tmp;
-            else dec = tmp;
         }
 
         public override void cipherDecrypt(byte[] ciphertext, uint clen, byte[] plaintext, ref uint plen)
         {
-            var pt = dec.Decrypt(ciphertext, null, decNonce);
+            var pt = enc.Decrypt(ciphertext, null, nonce);
             pt.CopyTo(plaintext, 0);
             plen = (uint)pt.Length;
         }
 
         public override void cipherEncrypt(byte[] plaintext, uint plen, byte[] ciphertext, ref uint clen)
         {
-            var ct = enc.Encrypt(plaintext, null, encNonce);
+            var ct = enc.Encrypt(plaintext, null, nonce);
             ct.CopyTo(ciphertext, 0);
             clen = (uint)ct.Length;
         }
@@ -70,12 +65,12 @@ namespace Shadowsocks.Encryption.AEAD
 
         public override byte[] CipherEncrypt2(byte[] plain)
         {
-            return enc.Encrypt(plain, null, encNonce);
+            return enc.Encrypt(plain, null, nonce);
         }
 
         public override byte[] CipherDecrypt2(byte[] cipher)
         {
-            return dec.Decrypt(cipher, null, decNonce);
+            return enc.Decrypt(cipher, null, nonce);
         }
     }
 }
