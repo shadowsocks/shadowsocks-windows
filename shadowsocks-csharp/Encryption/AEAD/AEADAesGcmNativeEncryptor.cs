@@ -77,7 +77,7 @@ namespace Shadowsocks.Encryption.AEAD
         public override int CipherEncrypt(Span<byte> plain, Span<byte> cipher)
         {
             using var aes = new AesGcm(sessionKey);
-            aes.Encrypt(nonce.AsSpan(), plain, cipher.Slice(0, plain.Length), cipher.Slice(plain.Length));
+            aes.Encrypt(nonce.AsSpan(), plain, cipher.Slice(0, plain.Length), cipher.Slice(plain.Length, tagLen));
             return plain.Length + tagLen;
         }
 

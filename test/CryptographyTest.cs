@@ -111,14 +111,6 @@ namespace Shadowsocks.Test
         }
 
         [TestMethod]
-        public void TestBouncyCastleAEADEncryption()
-        {
-            TestEncryptionMethod(typeof(AEADBouncyCastleEncryptor), "aes-128-gcm");
-            TestEncryptionMethod(typeof(AEADBouncyCastleEncryptor), "aes-192-gcm");
-            TestEncryptionMethod(typeof(AEADBouncyCastleEncryptor), "aes-256-gcm");
-        }
-
-        [TestMethod]
         public void TestAesGcmNativeAEADEncryption()
         {
             TestEncryptionMethod(typeof(AEADAesGcmNativeEncryptor), "aes-128-gcm");

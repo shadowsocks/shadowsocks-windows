@@ -98,12 +98,9 @@ namespace Shadowsocks.Encryption.AEAD
             CryptoUtils.HKDF(keyLen, masterKey, salt, InfoBytes).CopyTo(sessionKey, 0);
         }
 
-        protected void IncrementNonce(bool isEncrypt)
+        protected void IncrementNonce()
         {
-            lock (_nonceIncrementLock)
-            {
-                CryptoUtils.SodiumIncrement(isEncrypt ? nonce : nonce);
-            }
+            CryptoUtils.SodiumIncrement(nonce);
         }
 
         public virtual void InitCipher(byte[] salt, bool isEncrypt, bool isUdp)
@@ -129,8 +126,10 @@ namespace Shadowsocks.Encryption.AEAD
         public abstract int CipherDecrypt(Span<byte> plain, Span<byte> cipher);
 
         // plain -> cipher + tag
+        [Obsolete]
         public abstract byte[] CipherEncrypt2(byte[] plain);
         // cipher + tag -> plain
+        [Obsolete]
         public abstract byte[] CipherDecrypt2(byte[] cipher);
 
         public (Memory<byte>, Memory<byte>) GetCipherTextAndTagMem(byte[] cipher)
@@ -181,10 +180,10 @@ namespace Shadowsocks.Encryption.AEAD
             {
                 tcpRequestSent = true;
                 // The first TCP request
-                int encAddrBufLength;
                 byte[] encAddrBufBytes = new byte[AddressBufferLength + tagLen * 2 + CHUNK_LEN_BYTES];
                 byte[] addrBytes = buffer.Get(AddressBufferLength);
-                ChunkEncrypt(addrBytes, AddressBufferLength, encAddrBufBytes, out encAddrBufLength);
+                int encAddrBufLength = ChunkEncrypt(addrBytes, encAddrBufBytes);
+                // ChunkEncrypt(addrBytes, AddressBufferLength, encAddrBufBytes, out encAddrBufLength);
                 Debug.Assert(encAddrBufLength == AddressBufferLength + tagLen * 2 + CHUNK_LEN_BYTES);
                 Array.Copy(encAddrBufBytes, 0, outbuf, outlength, encAddrBufLength);
                 outlength += encAddrBufLength;
@@ -198,9 +197,9 @@ namespace Shadowsocks.Encryption.AEAD
                 if (bufSize <= 0) return;
                 var chunklength = (int)Math.Min(bufSize, CHUNK_LEN_MASK);
                 byte[] chunkBytes = buffer.Get(chunklength);
-                int encChunkLength;
                 byte[] encChunkBytes = new byte[chunklength + tagLen * 2 + CHUNK_LEN_BYTES];
-                ChunkEncrypt(chunkBytes, chunklength, encChunkBytes, out encChunkLength);
+                int encChunkLength = ChunkEncrypt(chunkBytes, encChunkBytes);
+                // ChunkEncrypt(chunkBytes, chunklength, encChunkBytes, out encChunkLength);
                 Debug.Assert(encChunkLength == chunklength + tagLen * 2 + CHUNK_LEN_BYTES);
                 Buffer.BlockCopy(encChunkBytes, 0, outbuf, outlength, encChunkLength);
                 outlength += encChunkLength;
@@ -266,15 +265,9 @@ namespace Shadowsocks.Encryption.AEAD
                 #region Chunk Decryption
 
                 byte[] encLenBytes = buffer.Peek(CHUNK_LEN_BYTES + tagLen);
-                //uint decChunkLenLength = 0;
-                //byte[] decChunkLenBytes = new byte[CHUNK_LEN_BYTES];
+
                 // try to dec chunk len
-                //cipherDecrypt(encLenBytes, CHUNK_LEN_BYTES + (uint)tagLen, decChunkLenBytes, ref decChunkLenLength);
-
-
                 byte[] decChunkLenBytes = CipherDecrypt2(encLenBytes);
-                // Debug.Assert(decChunkLenLength == CHUNK_LEN_BYTES);
-                // finally we get the real chunk len
                 ushort chunkLen = (ushort)IPAddress.NetworkToHostOrder((short)BitConverter.ToUInt16(decChunkLenBytes, 0));
                 if (chunkLen > CHUNK_LEN_MASK)
                 {
@@ -289,18 +282,14 @@ namespace Shadowsocks.Encryption.AEAD
                     logger.Debug("No more data to decrypt one chunk");
                     return;
                 }
-                IncrementNonce(false);
+                IncrementNonce();
 
                 // we have enough data to decrypt one chunk
                 // drop chunk len and its tag from buffer
                 buffer.Skip(CHUNK_LEN_BYTES + tagLen);
                 byte[] encChunkBytes = buffer.Get(chunkLen + tagLen);
-                //byte[] decChunkBytes = new byte[chunkLen];
-                //uint decChunkLen = 0;
-                //cipherDecrypt(encChunkBytes, chunkLen + (uint)tagLen, decChunkBytes, ref decChunkLen);
                 byte[] decChunkBytes = CipherDecrypt2(encChunkBytes);
-                //Debug.Assert(decChunkLen == chunkLen);
-                IncrementNonce(false);
+                IncrementNonce();
 
                 #endregion
 
@@ -372,31 +361,21 @@ namespace Shadowsocks.Encryption.AEAD
 
         #endregion
 
-        // we know the plaintext length before encryption, so we can do it in one operation
-        // plain -> [len][data]
-        private void ChunkEncrypt(byte[] plaintext, int plainLen, byte[] ciphertext, out int cipherLen)
+        private int ChunkEncrypt(Span<byte> plain, Span<byte> cipher)
         {
-            if (plainLen > CHUNK_LEN_MASK)
+            if (plain.Length > CHUNK_LEN_MASK)
             {
                 logger.Error("enc chunk too big");
                 throw new CryptoErrorException();
             }
 
-            // encrypt len
-            // always 2 byte
-            byte[] lenbuf = BitConverter.GetBytes((ushort)IPAddress.HostToNetworkOrder((short)plainLen));
+            byte[] lenbuf = BitConverter.GetBytes((ushort)IPAddress.HostToNetworkOrder((short)plain.Length));
+            int cipherLenSize = CipherEncrypt(lenbuf, cipher);
+            IncrementNonce();
+            int cipherDataSize = CipherEncrypt(plain, cipher.Slice(cipherLenSize));
+            IncrementNonce();
 
-            byte[] encLenBytes = CipherEncrypt2(lenbuf);
-            IncrementNonce(true);
-
-            // encrypt corresponding data
-            byte[] encBytes = CipherEncrypt2(plaintext);
-            IncrementNonce(true);
-
-            // construct outbuf
-            encLenBytes.CopyTo(ciphertext, 0);
-            encBytes.CopyTo(ciphertext, encLenBytes.Length);
-            cipherLen = encLenBytes.Length + encBytes.Length;
+            return cipherLenSize + cipherDataSize;
         }
     }
 }
