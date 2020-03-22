@@ -268,34 +268,33 @@ namespace Shadowsocks.Util
         private static extern bool SetProcessWorkingSetSize(IntPtr process,
             UIntPtr minimumWorkingSetSize, UIntPtr maximumWorkingSetSize);
 
-
-        // See: https://msdn.microsoft.com/en-us/library/hh925568(v=vs.110).aspx
-        public static bool IsSupportedRuntimeVersion()
+        public static void OpenInBrowser(string url)
         {
-            /*
-             * +-----------------------------------------------------------------+----------------------------+
-             * | Version                                                         | Value of the Release DWORD |
-             * +-----------------------------------------------------------------+----------------------------+
-             * | .NET Framework 4.6.2 installed on Windows 10 Anniversary Update | 394802                     |
-             * | .NET Framework 4.6.2 installed on all other Windows OS versions | 394806                     |
-             * +-----------------------------------------------------------------+----------------------------+
-             */
-            const int minSupportedRelease = 394802;
-
-            const string subkey = @"SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\Full\";
-            using (var ndpKey = OpenRegKey(subkey, false, RegistryHive.LocalMachine))
+            try
             {
-                if (ndpKey?.GetValue("Release") != null)
+                Process.Start(url);
+            }
+            catch
+            {
+                // hack because of this: https://github.com/dotnet/corefx/issues/10361
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 {
-                    var releaseKey = (int)ndpKey.GetValue("Release");
-
-                    if (releaseKey >= minSupportedRelease)
-                    {
-                        return true;
-                    }
+                    url = url.Replace("&", "^&");
+                    Process.Start(new ProcessStartInfo("cmd", $"/c start {url}") { CreateNoWindow = true });
+                }
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                {
+                    Process.Start("xdg-open", url);
+                }
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                {
+                    Process.Start("open", url);
+                }
+                else
+                {
+                    throw;
                 }
             }
-            return false;
         }
     }
 }

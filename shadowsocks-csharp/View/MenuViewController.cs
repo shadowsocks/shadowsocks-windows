@@ -632,7 +632,7 @@ namespace Shadowsocks.View
 
         private void AboutItem_Click(object sender, EventArgs e)
         {
-            Process.Start("https://github.com/shadowsocks/shadowsocks-windows");
+            Utils.OpenInBrowser("https://github.com/shadowsocks/shadowsocks-windows");
         }
 
         private void notifyIcon1_Click(object sender, MouseEventArgs e)
@@ -854,7 +854,7 @@ namespace Shadowsocks.View
 
         void openURLFromQRCode(object sender, FormClosedEventArgs e)
         {
-            Process.Start(_urlToOpen);
+            Utils.OpenInBrowser(_urlToOpen);
         }
 
         private void AutoStartupItem_Click(object sender, EventArgs e)
