@@ -111,6 +111,8 @@ namespace Shadowsocks.Encryption.AEAD
             this.salt = new byte[saltLen];
             Array.Copy(salt, this.salt, saltLen);
             logger.Dump("Salt", salt, saltLen);
+
+            DeriveSessionKey(salt, masterKey, sessionKey);
         }
 
         /// <summary>
@@ -122,6 +124,9 @@ namespace Shadowsocks.Encryption.AEAD
         /// length = plaintext.Length + tagLen, [enc][tag] order</param>
         /// <param name="clen">Should be same as ciphertext.Length</param>
         public abstract void cipherEncrypt(byte[] plaintext, uint plen, byte[] ciphertext, ref uint clen);
+
+        public abstract int CipherEncrypt(Span<byte> plain, Span<byte> cipher);
+        public abstract int CipherDecrypt(Span<byte> plain, Span<byte> cipher);
 
         // plain -> cipher + tag
         public abstract byte[] CipherEncrypt2(byte[] plain);
@@ -378,29 +383,19 @@ namespace Shadowsocks.Encryption.AEAD
             }
 
             // encrypt len
-            //byte[] encLenBytes = new byte[CHUNK_LEN_BYTES + tagLen];
-            //uint encChunkLenLength = 0;
             // always 2 byte
             byte[] lenbuf = BitConverter.GetBytes((ushort)IPAddress.HostToNetworkOrder((short)plainLen));
-            //cipherEncrypt(lenbuf, CHUNK_LEN_BYTES, encLenBytes, ref encChunkLenLength);
 
             byte[] encLenBytes = CipherEncrypt2(lenbuf);
-            //Debug.Assert(encChunkLenLength == CHUNK_LEN_BYTES + tagLen);
             IncrementNonce(true);
 
             // encrypt corresponding data
-            //byte[] encBytes = new byte[plainLen + tagLen];
-            //uint encBufLength = 0;
-            //cipherEncrypt(plaintext, (uint)plainLen, encBytes, ref encBufLength);
             byte[] encBytes = CipherEncrypt2(plaintext);
-            //Debug.Assert(encBufLength == plainLen + tagLen);
             IncrementNonce(true);
 
             // construct outbuf
             encLenBytes.CopyTo(ciphertext, 0);
             encBytes.CopyTo(ciphertext, encLenBytes.Length);
-            //Array.Copy(encLenBytes, 0, ciphertext, 0, (int)encChunkLenLength);
-            //Buffer.BlockCopy(encBytes, 0, ciphertext, (int)encChunkLenLength, (int)encBufLength);
             cipherLen = encLenBytes.Length + encBytes.Length;
         }
     }

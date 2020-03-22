@@ -16,6 +16,7 @@ namespace Shadowsocks.Encryption.AEAD
         }
 
 
+        #region Cipher Info
         private static readonly Dictionary<string, CipherInfo> _ciphers = new Dictionary<string, CipherInfo>
         {
             {"aes-128-gcm", new CipherInfo("aes-128-gcm", 16, 16, 12, 16, CipherFamily.AesGcm)},
@@ -28,6 +29,11 @@ namespace Shadowsocks.Encryption.AEAD
             return _ciphers;
         }
 
+        public static Dictionary<string, CipherInfo> SupportedCiphers()
+        {
+            return _ciphers;
+        }
+        #endregion
         public override void InitCipher(byte[] salt, bool isEncrypt, bool isUdp)
         {
             base.InitCipher(salt, isEncrypt, isUdp);
@@ -84,9 +90,14 @@ namespace Shadowsocks.Encryption.AEAD
             return cipher;
         }
 
-        public static Dictionary<string, CipherInfo> SupportedCiphers()
+        public override int CipherEncrypt(Span<byte> plain, Span<byte> cipher)
         {
-            return _ciphers;
+            throw new NotImplementedException();
+        }
+
+        public override int CipherDecrypt(Span<byte> plain, Span<byte> cipher)
+        {
+            throw new NotImplementedException();
         }
     }
 }

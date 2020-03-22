@@ -9,11 +9,11 @@ namespace Shadowsocks.Encryption.AEAD
 {
     public class AEADAesGcmNativeEncryptor : AEADEncryptor
     {
-
         public AEADAesGcmNativeEncryptor(string method, string password) : base(method, password)
         {
         }
 
+        #region Cipher Info
         private static readonly Dictionary<string, CipherInfo> _ciphers = new Dictionary<string, CipherInfo>
         {
             {"aes-128-gcm", new CipherInfo("aes-128-gcm", 16, 16, 12, 16, CipherFamily.AesGcm)},
@@ -26,12 +26,11 @@ namespace Shadowsocks.Encryption.AEAD
             return _ciphers;
         }
 
-        public override void InitCipher(byte[] salt, bool isEncrypt, bool isUdp)
+        public static Dictionary<string, CipherInfo> SupportedCiphers()
         {
-            base.InitCipher(salt, isEncrypt, isUdp);
-
-            DeriveSessionKey(salt, masterKey, sessionKey);
+            return _ciphers;
         }
+        #endregion
 
         public override void cipherDecrypt(byte[] ciphertext, uint clen, byte[] plaintext, ref uint plen)
         {
@@ -75,10 +74,19 @@ namespace Shadowsocks.Encryption.AEAD
 
             return d.ToArray();
         }
-
-        public static Dictionary<string, CipherInfo> SupportedCiphers()
+        public override int CipherEncrypt(Span<byte> plain, Span<byte> cipher)
         {
-            return _ciphers;
+            using var aes = new AesGcm(sessionKey);
+            aes.Encrypt(nonce.AsSpan(), plain, cipher.Slice(0, plain.Length), cipher.Slice(plain.Length));
+            return plain.Length + tagLen;
+        }
+
+        public override int CipherDecrypt(Span<byte> plain, Span<byte> cipher)
+        {
+            int clen = cipher.Length - tagLen;
+            using var aes = new AesGcm(sessionKey);
+            aes.Decrypt(nonce.AsSpan(), plain, cipher.Slice(0, clen), cipher.Slice(clen));
+            return clen;
         }
     }
 }

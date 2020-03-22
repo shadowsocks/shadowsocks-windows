@@ -16,11 +16,27 @@ namespace Shadowsocks.Encryption.AEAD
         {
         }
 
+        #region Cipher Info
+        private static readonly Dictionary<string, CipherInfo> _ciphers = new Dictionary<string, CipherInfo>
+        {
+            {"chacha20-ietf-poly1305", new CipherInfo("chacha20-ietf-poly1305",32, 32, 12, 16, CipherFamily.Chacha20Poly1305)},
+            {"xchacha20-ietf-poly1305", new CipherInfo("xchacha20-ietf-poly1305",32, 32, 24, 16, CipherFamily.XChacha20Poly1305)},
+        };
+
+        protected override Dictionary<string, CipherInfo> getCiphers()
+        {
+            return _ciphers;
+        }
+
+        public static Dictionary<string, CipherInfo> SupportedCiphers()
+        {
+            return _ciphers;
+        }
+        #endregion
+
         public override void InitCipher(byte[] salt, bool isEncrypt, bool isUdp)
         {
             base.InitCipher(salt, isEncrypt, isUdp);
-            DeriveSessionKey(salt, masterKey, sessionKey);
-
             switch (_cipher)
             {
                 default:
@@ -47,22 +63,6 @@ namespace Shadowsocks.Encryption.AEAD
             clen = (uint)ct.Length;
         }
 
-        private static readonly Dictionary<string, CipherInfo> _ciphers = new Dictionary<string, CipherInfo>
-        {
-            {"chacha20-ietf-poly1305", new CipherInfo("chacha20-ietf-poly1305",32, 32, 12, 16, CipherFamily.Chacha20Poly1305)},
-            {"xchacha20-ietf-poly1305", new CipherInfo("xchacha20-ietf-poly1305",32, 32, 24, 16, CipherFamily.XChacha20Poly1305)},
-        };
-
-        protected override Dictionary<string, CipherInfo> getCiphers()
-        {
-            return _ciphers;
-        }
-
-        public static Dictionary<string, CipherInfo> SupportedCiphers()
-        {
-            return _ciphers;
-        }
-
         public override byte[] CipherEncrypt2(byte[] plain)
         {
             return enc.Encrypt(plain, null, nonce);
@@ -71,6 +71,20 @@ namespace Shadowsocks.Encryption.AEAD
         public override byte[] CipherDecrypt2(byte[] cipher)
         {
             return enc.Decrypt(cipher, null, nonce);
+        }
+
+        public override int CipherEncrypt(Span<byte> plain, Span<byte> cipher)
+        {
+            var ct = enc.Encrypt(plain, null, nonce);
+            ct.CopyTo(cipher);
+            return ct.Length;
+        }
+
+        public override int CipherDecrypt(Span<byte> plain, Span<byte> cipher)
+        {
+            var pt = enc.Decrypt(cipher, null, nonce);
+            pt.CopyTo(plain);
+            return pt.Length;
         }
     }
 }
