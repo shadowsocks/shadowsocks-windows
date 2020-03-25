@@ -12,6 +12,36 @@ namespace Shadowsocks.Test
     public class CryptographyTest
     {
         Random random = new Random();
+
+        private void ArrayEqual<T>(IEnumerable<T> expected, IEnumerable<T> actual, string msg = "")
+        {
+            var e1 = expected.GetEnumerator();
+            var e2 = actual.GetEnumerator();
+            int ctr = 0;
+            while (true)
+            {
+                var e1next = e1.MoveNext();
+                var e2next = e2.MoveNext();
+
+                if (e1next && e2next)
+                {
+                    Assert.AreEqual(e1.Current, e2.Current, "at " + ctr);
+                }
+                else if (!e1next && !e2next)
+                {
+                    return;
+                }
+                else if (!e1next)
+                {
+                    Assert.Fail($"actual longer than expected ({ctr}) {msg}");
+                }
+                else
+                {
+                    Assert.Fail($"actual shorter than expected ({ctr}) {msg}");
+                }
+            }
+        }
+
         [TestMethod]
         public void TestMD5()
         {
@@ -26,37 +56,26 @@ namespace Shadowsocks.Test
             }
         }
 
-        private void RunEncryptionRound(IEncryptor encryptor, IEncryptor decryptor)
+        private void SingleEncryptionTestCase(IEncryptor encryptor, IEncryptor decryptor, int length)
         {
             RNG.Reload();
-            byte[] plain = new byte[16384];
+            byte[] plain = new byte[length];
             byte[] cipher = new byte[plain.Length + 100];// AEAD with IPv4 address type needs +100
             byte[] plain2 = new byte[plain.Length + 16];
 
-            //random = new Random();
-
             random.NextBytes(plain);
-            encryptor.Encrypt(plain, plain.Length, cipher, out int outLen);
+            encryptor.Encrypt(plain, length, cipher, out int outLen);
             decryptor.Decrypt(cipher, outLen, plain2, out int outLen2);
-            Assert.AreEqual(plain.Length, outLen2);
-            for (int j = 0; j < plain.Length; j++)
-            {
-                Assert.AreEqual(plain[j], plain2[j]);
-            }
-            encryptor.Encrypt(plain, 1000, cipher, out outLen);
-            decryptor.Decrypt(cipher, outLen, plain2, out outLen2);
-            Assert.AreEqual(1000, outLen2);
-            for (int j = 0; j < outLen2; j++)
-            {
-                Assert.AreEqual(plain[j], plain2[j]);
-            }
-            encryptor.Encrypt(plain, 12333, cipher, out outLen);
-            decryptor.Decrypt(cipher, outLen, plain2, out outLen2);
-            Assert.AreEqual(12333, outLen2);
-            for (int j = 0; j < outLen2; j++)
-            {
-                Assert.AreEqual(plain[j], plain2[j]);
-            }
+            Assert.AreEqual(length, outLen2);
+            ArrayEqual<byte>(plain.AsSpan().Slice(0, length).ToArray(), plain2.AsSpan().Slice(0, length).ToArray());
+        }
+
+        private void RunEncryptionRound(IEncryptor encryptor, IEncryptor decryptor)
+        {
+            SingleEncryptionTestCase(encryptor, decryptor, 16384);
+            SingleEncryptionTestCase(encryptor, decryptor, 7);
+            SingleEncryptionTestCase(encryptor, decryptor, 1000);
+            SingleEncryptionTestCase(encryptor, decryptor, 12333);
         }
 
         const string password = "barfoo!";
@@ -140,6 +159,11 @@ namespace Shadowsocks.Test
             var enc = new StreamTableNativeEncryptor("table", "barfoo!");
             var dec = new StreamTableNativeEncryptor("table", "barfoo!");
             RunEncryptionRound(enc, dec);
+        }
+        [TestMethod]
+        public void TestStreamAesBouncyCastleEncryption()
+        {
+            TestEncryptionMethod(typeof(StreamAesBouncyCastleEncryptor), "aes-256-cfb");
         }
     }
 }

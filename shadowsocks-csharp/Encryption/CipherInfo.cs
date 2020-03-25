@@ -24,8 +24,10 @@ namespace Shadowsocks.Encryption
     public enum CipherStandardState
     {
         InUse,
-        Deprecated,
-        Hidden,
+        Deprecated, // popup warning when updated
+        Hidden,     // enabled by hidden flag in config file
+
+        Unstable,   // not in standard list or wip, only gui info
     }
 
     public class CipherParameter
@@ -55,11 +57,12 @@ namespace Shadowsocks.Encryption
         public CipherStandardState StandardState = CipherStandardState.InUse;
 
         #region Stream ciphers
-        public CipherInfo(string name, int keySize, int ivSize, CipherFamily type)
+        public CipherInfo(string name, int keySize, int ivSize, CipherFamily type, CipherStandardState state = CipherStandardState.Hidden)
         {
             Type = type;
             Name = name;
-            StandardState = CipherStandardState.Hidden;
+            StandardState = state;
+
             CipherParameter = new StreamCipherParameter
             {
                 KeySize = keySize,
@@ -70,10 +73,11 @@ namespace Shadowsocks.Encryption
         #endregion
 
         #region AEAD ciphers
-        public CipherInfo(string name, int keySize, int saltSize, int nonceSize, int tagSize, CipherFamily type)
+        public CipherInfo(string name, int keySize, int saltSize, int nonceSize, int tagSize, CipherFamily type, CipherStandardState state = CipherStandardState.InUse)
         {
             Type = type;
             Name = name;
+            StandardState = state;
 
             CipherParameter = new AEADCipherParameter
             {
@@ -87,7 +91,7 @@ namespace Shadowsocks.Encryption
 
         public override string ToString()
         {
-            return StandardState == CipherStandardState.InUse ? Name : $"{Name} ({I18N.GetString("deprecated")})";
+            return StandardState == CipherStandardState.InUse ? Name : $"{Name} ({I18N.GetString(StandardState.ToString().ToLower())})";
         }
         public string ToString(bool verbose)
         {

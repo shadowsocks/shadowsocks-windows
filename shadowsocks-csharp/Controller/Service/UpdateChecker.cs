@@ -39,6 +39,9 @@ namespace Shadowsocks.Controller
 
         public void CheckUpdate(Configuration config, int delay)
         {
+#if DEBUG
+            return;
+#endif
             CheckUpdateTimer timer = new CheckUpdateTimer(delay);
             timer.AutoReset = false;
             timer.Elapsed += Timer_Elapsed;
@@ -58,6 +61,10 @@ namespace Shadowsocks.Controller
 
         public void CheckUpdate(Configuration config)
         {
+#if DEBUG
+            return;
+#endif
+
             this.config = config;
 
             try

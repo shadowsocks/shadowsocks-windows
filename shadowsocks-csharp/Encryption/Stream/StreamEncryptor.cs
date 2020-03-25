@@ -4,11 +4,13 @@ using System.Diagnostics;
 using System.Text;
 using Shadowsocks.Encryption.CircularBuffer;
 using Shadowsocks.Controller;
+using NLog;
 
 namespace Shadowsocks.Encryption.Stream
 {
     public abstract class StreamEncryptor : EncryptorBase
     {
+        private static Logger logger = LogManager.GetCurrentClassLogger();
         // for UDP only
         protected static byte[] _udpTmpBuf = new byte[65536];
 
@@ -115,6 +117,7 @@ namespace Shadowsocks.Encryption.Stream
             byte[] plain = buffer.Get(size);
             byte[] cipher = new byte[size];
             cipherUpdate(true, size, plain, cipher);
+            
             Buffer.BlockCopy(cipher, 0, outbuf, cipherOffset, size);
             outlength = size + cipherOffset;
         }

@@ -33,6 +33,15 @@ namespace Shadowsocks.Encryption
                     _registeredEncryptors.Add(method.Key, typeof(StreamRc4NativeEncryptor));
                 }
             }
+            foreach (var method in StreamAesBouncyCastleEncryptor.SupportedCiphers())
+            {
+                if (!_registeredEncryptors.ContainsKey(method.Key))
+                {
+                    ciphers.Add(method.Key, method.Value);
+                    _registeredEncryptors.Add(method.Key, typeof(StreamAesBouncyCastleEncryptor));
+                }
+            }
+
 
             foreach (var method in AEADAesGcmNativeEncryptor.SupportedCiphers())
             {
@@ -66,7 +75,8 @@ namespace Shadowsocks.Encryption
                 t = _registeredEncryptors[DefaultCipher];
             }
 
-            ConstructorInfo c = t.GetConstructor(ConstructorTypes);
+            ConstructorInfo c = t?.GetConstructor(ConstructorTypes) ??
+                throw new TypeLoadException("can't load constructor");
             if (c == null) throw new System.Exception("Invalid ctor");
             IEncryptor result = (IEncryptor)c.Invoke(new object[] { method, password });
             return result;
