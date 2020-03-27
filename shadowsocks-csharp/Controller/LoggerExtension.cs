@@ -17,7 +17,7 @@ namespace NLog
             if (length == -1) length = arr.Length;
 
             if (!logger.IsTraceEnabled) return;
-            string hex = BitConverter.ToString(arr.AsSpan().Slice(0, length).ToArray()).Replace("-", "");
+            string hex = BitConverter.ToString(arr.AsSpan(0, length).ToArray()).Replace("-", "");
             string content = $@"
 {tag}:
 {hex}
@@ -31,7 +31,7 @@ namespace NLog
             if (length == -1) length = arr.Length;
 
             if (!logger.IsTraceEnabled) return;
-             string hex =Convert.ToBase64String(arr.AsSpan().Slice(0, length).ToArray());
+             string hex =Convert.ToBase64String(arr.AsSpan(0, length).ToArray());
             string content = $@"
 {tag}:
 {hex}

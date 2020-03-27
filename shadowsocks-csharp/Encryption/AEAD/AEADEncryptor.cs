@@ -328,13 +328,13 @@ namespace Shadowsocks.Encryption.AEAD
         {
             // Generate salt
             //RNG.GetBytes(outbuf, saltLen);
-            RNG.GetSpan(outbuf.AsSpan().Slice(0, saltLen));
+            RNG.GetSpan(outbuf.AsSpan(0, saltLen));
             InitCipher(outbuf, true, true);
             //uint olen = 0;
             lock (_udpTmpBuf)
             {
                 //cipherEncrypt(buf, (uint)length, _udpTmpBuf, ref olen);
-                var plain = buf.AsSpan().Slice(0, length).ToArray(); // mmp
+                var plain = buf.AsSpan(0, length).ToArray(); // mmp
                 var cipher = CipherEncrypt2(plain);
                 //Debug.Assert(olen == length + tagLen);
                 Buffer.BlockCopy(cipher, 0, outbuf, saltLen, length + tagLen);
@@ -351,7 +351,7 @@ namespace Shadowsocks.Encryption.AEAD
             {
                 // copy remaining data to first pos
                 Buffer.BlockCopy(buf, saltLen, buf, 0, length - saltLen);
-                byte[] b = buf.AsSpan().Slice(0, length - saltLen).ToArray();
+                byte[] b = buf.AsSpan(0, length - saltLen).ToArray();
                 byte[] o = CipherDecrypt2(b);
                 //cipherDecrypt(buf, (uint)(length - saltLen), _udpTmpBuf, ref olen);
                 Buffer.BlockCopy(o, 0, outbuf, 0, o.Length);

@@ -25,7 +25,7 @@ namespace Shadowsocks.Encryption.Stream
 
         protected override void cipherUpdate(bool isEncrypt, int length, byte[] buf, byte[] outbuf)
         {
-            var i = buf.AsSpan().Slice(0, length);
+            var i = buf.AsSpan(0, length);
             if (isEncrypt) CipherEncrypt(i, outbuf);
             else CipherDecrypt(outbuf, i);
         }

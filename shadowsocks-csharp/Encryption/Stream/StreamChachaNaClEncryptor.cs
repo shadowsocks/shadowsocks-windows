@@ -6,29 +6,36 @@ namespace Shadowsocks.Encryption.Stream
 {
     public class StreamChachaNaClEncryptor : StreamEncryptor
     {
-        readonly ChaCha20 c;
+        // yes, they update over all saved data everytime...
+        byte[] chachaBuf = new byte[65536];
+        int ptr = 0;
         public StreamChachaNaClEncryptor(string method, string password) : base(method, password)
         {
-            c = new ChaCha20(key, 0);
         }
 
         protected override int CipherDecrypt(Span<byte> plain, Span<byte> cipher)
         {
-            var p = c.Decrypt(cipher, iv);
-            p.CopyTo(plain);
-            return p.Length;
+            int len = cipher.Length;
+            cipher.CopyTo(chachaBuf.AsSpan(ptr));
+            var p = new ChaCha20(key, 0).Decrypt(chachaBuf, iv);
+            p.AsSpan(ptr, len).CopyTo(plain);
+            ptr += len;
+            return len;
         }
 
         protected override int CipherEncrypt(Span<byte> plain, Span<byte> cipher)
         {
-            var e = c.Encrypt(plain, iv);
-            e.CopyTo(cipher);
-            return e.Length;
+            int len = plain.Length;
+            plain.CopyTo(chachaBuf.AsSpan(ptr));
+            var p = new ChaCha20(key, 0).Encrypt(chachaBuf, iv);
+            p.AsSpan(ptr, len).CopyTo(cipher);
+            ptr += len;
+            return len;
         }
 
         protected override void cipherUpdate(bool isEncrypt, int length, byte[] buf, byte[] outbuf)
         {
-            var i = buf.AsSpan().Slice(0, length);
+            var i = buf.AsSpan(0, length);
             if (isEncrypt)
             {
                 CipherEncrypt(i, outbuf);

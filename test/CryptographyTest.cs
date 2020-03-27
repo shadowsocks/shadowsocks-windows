@@ -67,7 +67,7 @@ namespace Shadowsocks.Test
             encryptor.Encrypt(plain, length, cipher, out int outLen);
             decryptor.Decrypt(cipher, outLen, plain2, out int outLen2);
             Assert.AreEqual(length, outLen2);
-            ArrayEqual<byte>(plain.AsSpan().Slice(0, length).ToArray(), plain2.AsSpan().Slice(0, length).ToArray());
+            ArrayEqual<byte>(plain.AsSpan(0, length).ToArray(), plain2.AsSpan(0, length).ToArray());
         }
 
         private void RunEncryptionRound(IEncryptor encryptor, IEncryptor decryptor)
