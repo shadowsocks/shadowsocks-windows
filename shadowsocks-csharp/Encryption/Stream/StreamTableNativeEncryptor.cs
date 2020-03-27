@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -25,11 +26,13 @@ namespace Shadowsocks.Encryption.Stream
             {
                 _encryptTable[i] = (byte)i;
             }
+            Span<byte> t = _encryptTable;
             // copy array 1024 times? excuse me?
             for (int i = 1; i < 1024; i++)
             {
-                _encryptTable = MergeSort(_encryptTable, a, i);
+                t = MergeSort(t, a, i);
             }
+            _encryptTable = t.ToArray();
             for (int i = 0; i < 256; i++)
             {
                 _decryptTable[_encryptTable[i]] = (byte)i;
@@ -103,37 +106,32 @@ namespace Shadowsocks.Encryption.Stream
         #region Table
         private byte[] _encryptTable = new byte[256];
         private byte[] _decryptTable = new byte[256];
+        private byte[] _tmp = new byte[256];
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static long Compare(byte x, byte y, ulong a, int i)
         {
             return (long)(a % (ulong)(x + i)) - (long)(a % (ulong)(y + i));
         }
 
-        private byte[] MergeSort(byte[] array, ulong a, int j)
+        byte[] buf = new byte[1024];
+        private Span<byte> MergeSort(Span<byte> array, ulong a, int j)
         {
             if (array.Length == 1)
             {
                 return array;
             }
             int middle = array.Length / 2;
-            byte[] left = new byte[middle];
-            for (int i = 0; i < middle; i++)
-            {
-                left[i] = array[i];
-            }
-            byte[] right = new byte[array.Length - middle];
-            for (int i = 0; i < array.Length - middle; i++)
-            {
-                right[i] = array[i + middle];
-            }
-            left = MergeSort(left, a, j);
-            right = MergeSort(right, a, j);
+
+            Span<byte> left = MergeSort(array.Slice(0, middle), a, j);;
+            Span<byte> right = MergeSort(array.Slice(middle), a, j);
 
             int leftptr = 0;
             int rightptr = 0;
 
             // why a new array?
-            byte[] sorted = new byte[array.Length];
+            Span<byte> sorted = new byte[array.Length];// buf.AsSpan().Slice(0,array.Length); // // _tmp;
+                        
             for (int k = 0; k < array.Length; k++)
             {
                 if (rightptr == right.Length || ((leftptr < left.Length) && (Compare(left[leftptr], right[rightptr], a, j) <= 0)))

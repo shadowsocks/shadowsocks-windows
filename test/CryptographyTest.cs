@@ -155,10 +155,7 @@ namespace Shadowsocks.Test
         [TestMethod]
         public void TestNativeTableEncryption()
         {
-            // Too slow, run once to save CPU
-            var enc = new StreamTableNativeEncryptor("table", "barfoo!");
-            var dec = new StreamTableNativeEncryptor("table", "barfoo!");
-            RunEncryptionRound(enc, dec);
+            TestEncryptionMethod(typeof(StreamTableNativeEncryptor), "table");
         }
         [TestMethod]
         public void TestStreamAesBouncyCastleEncryption()
