@@ -38,7 +38,7 @@ namespace Shadowsocks.View
         private ToolStripMenuItem disableItem;
         private ToolStripMenuItem AutoStartupItem;
         private ToolStripMenuItem ShareOverLANItem;
-        private ToolStripSeparator  SeperatorItem;
+        private ToolStripSeparator SeperatorItem;
         private ToolStripMenuItem ConfigItem;
         private ToolStripMenuItem ServersItem;
         private ToolStripMenuItem globalModeItem;
@@ -277,12 +277,12 @@ namespace Shadowsocks.View
 
         private ToolStripMenuItem CreateToolStripMenuItem(string text, EventHandler click)
         {
-            return new ToolStripMenuItem(I18N.GetString(text),null, click);
+            return new ToolStripMenuItem(I18N.GetString(text), null, click);
         }
 
         private ToolStripMenuItem CreateMenuGroup(string text, ToolStripItem[] items)
         {
-            return new ToolStripMenuItem(I18N.GetString(text), null,items);
+            return new ToolStripMenuItem(I18N.GetString(text), null, items);
         }
 
         private void LoadMenu()
@@ -461,7 +461,7 @@ namespace Shadowsocks.View
             int strategyCount = 0;
             foreach (var strategy in controller.GetStrategies())
             {
-                if (!items.OfType<ToolStripItem>().Any(ts=>ts.Text==strategy.Name))
+                if (!items.OfType<ToolStripItem>().Any(ts => ts.Text == strategy.Name))
                 {
                     ToolStripMenuItem item = new ToolStripMenuItem(strategy.Name);
                     item.Tag = strategy.ID;
@@ -496,9 +496,17 @@ namespace Shadowsocks.View
             foreach (var item in items)
             {
                 var menuItem = item as ToolStripMenuItem;
-                if (menuItem != null && menuItem.Tag != null && (menuItem.Tag.ToString() == configuration.index.ToString() || menuItem.Tag.ToString() == configuration.strategy))
+                if (menuItem == null || menuItem.Tag == null) continue;
+
+                if (
+                    menuItem.Tag.ToString() == configuration.index.ToString()
+                    || menuItem.Tag.ToString() == configuration.strategy
+                    )
                 {
                     menuItem.Checked = true;
+                } else
+                {
+                    menuItem.Checked = false;
                 }
             }
         }
@@ -624,7 +632,7 @@ namespace Shadowsocks.View
 
         private void AboutItem_Click(object sender, EventArgs e)
         {
-            Process.Start("https://github.com/shadowsocks/shadowsocks-windows");
+            Utils.OpenInBrowser("https://github.com/shadowsocks/shadowsocks-windows");
         }
 
         private void notifyIcon1_Click(object sender, MouseEventArgs e)
@@ -846,7 +854,7 @@ namespace Shadowsocks.View
 
         void openURLFromQRCode(object sender, FormClosedEventArgs e)
         {
-            Process.Start(_urlToOpen);
+            Utils.OpenInBrowser(_urlToOpen);
         }
 
         private void AutoStartupItem_Click(object sender, EventArgs e)
