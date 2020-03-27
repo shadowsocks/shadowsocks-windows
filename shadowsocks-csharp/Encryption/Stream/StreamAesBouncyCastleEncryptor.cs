@@ -14,20 +14,12 @@ namespace Shadowsocks.Encryption.Stream
         public StreamAesBouncyCastleEncryptor(string method, string password) : base(method, password)
         {
             c = new BufferedBlockCipher(new CfbBlockCipher(new AesEngine(), 128));
-            // c = CipherUtilities.GetCipher("AES/CFB/NoPadding");
         }
 
         protected override void initCipher(byte[] iv, bool isEncrypt)
         {
             base.initCipher(iv, isEncrypt);
             c.Init(isEncrypt, new ParametersWithIV(new KeyParameter(key), iv));
-        }
-
-        protected override void cipherUpdate(bool isEncrypt, int length, byte[] buf, byte[] outbuf)
-        {
-            var i = buf.AsSpan(0, length);
-            if (isEncrypt) CipherEncrypt(i, outbuf);
-            else CipherDecrypt(outbuf, i);
         }
 
         protected override int CipherEncrypt(Span<byte> plain, Span<byte> cipher)
@@ -42,9 +34,9 @@ namespace Shadowsocks.Encryption.Stream
             return cipher.Length;
         }
 
-
         private void CipherUpdate(Span<byte> i, Span<byte> o)
         {
+            // there's some secret in OpenSSL's EVP context.
             var ob = new byte[o.Length];
             int blklen = c.ProcessBytes(i.ToArray(), 0, i.Length, ob, 0);
             int restlen = i.Length - blklen;
@@ -55,9 +47,11 @@ namespace Shadowsocks.Encryption.Stream
             ob.CopyTo(o);
         }
 
-        #region Ciphers
+        #region Cipher Info
         private static readonly Dictionary<string, CipherInfo> _ciphers = new Dictionary<string, CipherInfo>
         {
+            {"aes-128-cfb",new CipherInfo("aes-128-cfb", 16, 16, CipherFamily.AesCfb, CipherStandardState.Unstable)},
+            {"aes-192-cfb",new CipherInfo("aes-192-cfb", 24, 16, CipherFamily.AesCfb, CipherStandardState.Unstable)},
             {"aes-256-cfb",new CipherInfo("aes-256-cfb", 32, 16, CipherFamily.AesCfb, CipherStandardState.Unstable)},
         };
 

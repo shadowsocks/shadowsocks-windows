@@ -7,11 +7,15 @@ namespace Shadowsocks.Encryption.Stream
     public class StreamChachaNaClEncryptor : StreamEncryptor
     {
         const int BlockSize = 64;
-        // when new data arrive, put it in correct offset of chunk
+        // tcp is stream, which can split into chunks at unexpected position...
+        // so we need some special handling, as we can't read all data before encrypt
+
+        // when new data arrive, put it on correct offset
         // and update it, ignore other data, get it in correct offset...
-        byte[] chachaBuf = new byte[32768 + BlockSize];
+        byte[] chachaBuf = new byte[MaxInputSize + BlockSize];
+        // the 'correct offset', always in 0~BlockSize range, so input data always fit into buffer
         int remain = 0;
-        // increase counter only when a chunk fully recieved
+        // increase counter manually...
         int ic = 0;
         public StreamChachaNaClEncryptor(string method, string password) : base(method, password)
         {
@@ -41,20 +45,7 @@ namespace Shadowsocks.Encryption.Stream
             return len;
         }
 
-        protected override void cipherUpdate(bool isEncrypt, int length, byte[] buf, byte[] outbuf)
-        {
-            var i = buf.AsSpan(0, length);
-            if (isEncrypt)
-            {
-                CipherEncrypt(i, outbuf);
-            }
-            else
-            {
-                CipherDecrypt(outbuf, i);
-            }
-        }
-
-        #region Ciphers
+        #region Cipher Info
         private static readonly Dictionary<string, CipherInfo> _ciphers = new Dictionary<string, CipherInfo>
         {
             { "chacha20-ietf", new CipherInfo("chacha20-ietf", 32, 12, CipherFamily.Chacha20) },

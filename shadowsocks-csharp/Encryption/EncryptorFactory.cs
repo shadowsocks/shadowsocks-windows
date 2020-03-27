@@ -17,12 +17,12 @@ namespace Shadowsocks.Encryption
 
         static EncryptorFactory()
         {
-            foreach (var method in StreamTableNativeEncryptor.SupportedCiphers())
+            foreach (var method in StreamPlainNativeEncryptor.SupportedCiphers())
             {
                 if (!_registeredEncryptors.ContainsKey(method.Key))
                 {
                     ciphers.Add(method.Key, method.Value);
-                    _registeredEncryptors.Add(method.Key, typeof(StreamTableNativeEncryptor));
+                    _registeredEncryptors.Add(method.Key, typeof(StreamPlainNativeEncryptor));
                 }
             }
             foreach (var method in StreamRc4NativeEncryptor.SupportedCiphers())

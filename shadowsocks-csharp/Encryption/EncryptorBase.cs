@@ -4,7 +4,7 @@
     {
         private static int _currentId = 0;
 
-        public const int MAX_INPUT_SIZE = 32768;
+        public const int MaxInputSize = 32768;
 
         public const int MAX_DOMAIN_LEN = 255;
         public const int ADDR_PORT_LEN = 2;
@@ -14,7 +14,7 @@
         public const int ATYP_DOMAIN = 0x03;
         public const int ATYP_IPv6 = 0x04;
 
-        public const int MD5_LEN = 16;
+        public const int MD5Length = 16;
 
         // for debugging only, give it a number to trace data stream
         public readonly int instanceId;

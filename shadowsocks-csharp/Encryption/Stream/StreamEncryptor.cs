@@ -1,10 +1,10 @@
-﻿using System;
+﻿using NLog;
+using Shadowsocks.Controller;
+using Shadowsocks.Encryption.CircularBuffer;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
-using Shadowsocks.Encryption.CircularBuffer;
-using Shadowsocks.Controller;
-using NLog;
 
 namespace Shadowsocks.Encryption.Stream
 {
@@ -54,7 +54,7 @@ namespace Shadowsocks.Encryption.Stream
 
         public static void LegacyDeriveKey(byte[] password, byte[] key, int keylen)
         {
-            byte[] result = new byte[password.Length + MD5_LEN];
+            byte[] result = new byte[password.Length + MD5Length];
             int i = 0;
             byte[] md5sum = Array.Empty<byte>();
             while (i < keylen)
@@ -65,12 +65,12 @@ namespace Shadowsocks.Encryption.Stream
                 }
                 else
                 {
-                    Array.Copy(md5sum, 0, result, 0, MD5_LEN);
-                    Array.Copy(password, 0, result, MD5_LEN, password.Length);
+                    Array.Copy(md5sum, 0, result, 0, MD5Length);
+                    Array.Copy(password, 0, result, MD5Length, password.Length);
                     md5sum = CryptoUtils.MD5(result);
                 }
-                Array.Copy(md5sum, 0, key, i, Math.Min(MD5_LEN, keylen - i));
-                i += MD5_LEN;
+                Array.Copy(md5sum, 0, key, i, Math.Min(MD5Length, keylen - i));
+                i += MD5Length;
             }
         }
 
@@ -81,12 +81,8 @@ namespace Shadowsocks.Encryption.Stream
             Array.Copy(iv, this.iv, ivLen);
         }
 
-        protected abstract void cipherUpdate(bool isEncrypt, int length, byte[] buf, byte[] outbuf);
-
         protected abstract int CipherEncrypt(Span<byte> plain, Span<byte> cipher);
         protected abstract int CipherDecrypt(Span<byte> plain, Span<byte> cipher);
-
-        //protected static void randBytes(byte[] buf, int length) { RNG.GetBytes(buf, length); }
 
         #region TCP
 
@@ -109,7 +105,8 @@ namespace Shadowsocks.Encryption.Stream
             int size = buffer.Size;
             byte[] plain = buffer.Get(size);
             byte[] cipher = new byte[size];
-            cipherUpdate(true, size, plain, cipher);
+            CipherEncrypt(plain, cipher);
+
             logger.DumpBase64($"plain {instanceId}", plain, size);
             logger.DumpBase64($"cipher {instanceId}", cipher, cipher.Length);
             logger.Dump($"iv {instanceId}", iv, ivLen);
@@ -140,7 +137,7 @@ namespace Shadowsocks.Encryption.Stream
                 else initCipher(Array.Empty<byte>(), false);
             }
             byte[] cipher = buffer.ToArray();
-            cipherUpdate(false, cipher.Length, cipher, outbuf);
+            CipherDecrypt(outbuf, cipher);
             logger.DumpBase64($"cipher {instanceId}", cipher, cipher.Length);
             logger.DumpBase64($"plain {instanceId}", outbuf, cipher.Length);
             logger.Dump($"iv {instanceId}", iv, ivLen);
@@ -162,7 +159,7 @@ namespace Shadowsocks.Encryption.Stream
             initCipher(outbuf, true);
             lock (udpBuffer)
             {
-                cipherUpdate(true, length, buf, udpBuffer);
+                CipherEncrypt(buf, udpBuffer);
                 outlength = length + ivLen;
                 Buffer.BlockCopy(udpBuffer, 0, outbuf, ivLen, length);
             }
@@ -177,7 +174,7 @@ namespace Shadowsocks.Encryption.Stream
             {
                 // C# could be multi-threaded
                 Buffer.BlockCopy(buf, ivLen, udpBuffer, 0, length - ivLen);
-                cipherUpdate(false, length - ivLen, udpBuffer, outbuf);
+                CipherDecrypt(outbuf, udpBuffer);
             }
         }
 

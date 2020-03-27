@@ -14,6 +14,7 @@ namespace Shadowsocks.Encryption.Stream
         protected override void initCipher(byte[] iv, bool isEncrypt)
         {
             base.initCipher(iv, isEncrypt);
+            // rc4-md5 is rc4 with md5 based session key
             if (cipherFamily == CipherFamily.Rc4Md5)
             {
                 byte[] temp = new byte[keyLen + ivLen];
@@ -28,33 +29,27 @@ namespace Shadowsocks.Encryption.Stream
             sbox = SBox(realkey);
         }
 
-        protected override void cipherUpdate(bool isEncrypt, int length, byte[] buf, byte[] outbuf)
-        {
-            byte[] t = new byte[length];
-            Array.Copy(buf, t, length);
-
-            RC4(ctx, sbox, t, length);
-            Array.Copy(t, outbuf, length);
-        }
-
         protected override int CipherEncrypt(Span<byte> plain, Span<byte> cipher)
         {
-            return DoRC4(plain, cipher);
+            return CipherUpdate(plain, cipher);
         }
 
         protected override int CipherDecrypt(Span<byte> plain, Span<byte> cipher)
         {
-            return DoRC4(cipher, plain);
+            return CipherUpdate(cipher, plain);
         }
 
-        private int DoRC4(Span<byte> i, Span<byte> o)
+        private int CipherUpdate(Span<byte> i, Span<byte> o)
         {
-            i.CopyTo(o);
-            RC4(ctx, sbox, o, o.Length);
-            return o.Length;
+            // don't know why we need third array, but it works...
+            Span<byte> t = new byte[i.Length];
+            i.CopyTo(t);
+            RC4(ctx, sbox, t, t.Length);
+            t.CopyTo(o);
+            return t.Length;
         }
 
-        #region Ciphers
+        #region Cipher Info
         private static readonly Dictionary<string, CipherInfo> _ciphers = new Dictionary<string, CipherInfo>
         {
             // original RC4 doesn't use IV

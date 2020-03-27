@@ -147,16 +147,11 @@ namespace Shadowsocks.Test
         [TestMethod]
         public void TestNativeEncryption()
         {
-            TestEncryptionMethod(typeof(StreamTableNativeEncryptor), "plain");
-            TestEncryptionMethod(typeof(StreamRc4NativeEncryptor), "rc4");
+            TestEncryptionMethod(typeof(StreamPlainNativeEncryptor), "plain");
+            // TestEncryptionMethod(typeof(StreamRc4NativeEncryptor), "rc4");
             TestEncryptionMethod(typeof(StreamRc4NativeEncryptor), "rc4-md5");
         }
 
-        [TestMethod]
-        public void TestNativeTableEncryption()
-        {
-            TestEncryptionMethod(typeof(StreamTableNativeEncryptor), "table");
-        }
         [TestMethod]
         public void TestStreamAesBouncyCastleEncryption()
         {

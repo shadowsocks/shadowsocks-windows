@@ -133,10 +133,10 @@ namespace Shadowsocks.Controller
         public const int RecvSize = 2048;
 
         // overhead of one chunk, reserved for AEAD ciphers
-        public const int ChunkOverheadSize = 16 * 2 /* two tags */ + AEADEncryptor.CHUNK_LEN_BYTES;
+        public const int ChunkOverheadSize = 16 * 2 /* two tags */ + AEADEncryptor.ChunkLengthBytes;
 
         // max chunk size
-        public const uint MaxChunkSize = AEADEncryptor.CHUNK_LEN_MASK + AEADEncryptor.CHUNK_LEN_BYTES + 16 * 2;
+        public const uint MaxChunkSize = AEADEncryptor.ChunkLengthMask + AEADEncryptor.ChunkLengthBytes + 16 * 2;
 
         // In general, the ciphertext length, we should take overhead into account
         public const int BufferSize = RecvSize + (int)MaxChunkSize + 32 /* max salt len */;

@@ -22,11 +22,10 @@ namespace Shadowsocks.Encryption.AEAD
         protected static byte[] _udpTmpBuf = new byte[65536];
 
         // every connection should create its own buffer
-        private ByteCircularBuffer buffer = new ByteCircularBuffer(MAX_INPUT_SIZE * 2);
-        // private ByteCircularBuffer buffer = new ByteCircularBuffer(MAX_INPUT_SIZE * 2);
+        private ByteCircularBuffer buffer = new ByteCircularBuffer(MaxInputSize * 2);
 
-        public const int CHUNK_LEN_BYTES = 2;
-        public const uint CHUNK_LEN_MASK = 0x3FFFu;
+        public const int ChunkLengthBytes = 2;
+        public const uint ChunkLengthMask = 0x3FFFu;
 
         protected Dictionary<string, CipherInfo> ciphers;
 
@@ -180,11 +179,11 @@ namespace Shadowsocks.Encryption.AEAD
             {
                 tcpRequestSent = true;
                 // The first TCP request
-                byte[] encAddrBufBytes = new byte[AddressBufferLength + tagLen * 2 + CHUNK_LEN_BYTES];
+                byte[] encAddrBufBytes = new byte[AddressBufferLength + tagLen * 2 + ChunkLengthBytes];
                 byte[] addrBytes = buffer.Get(AddressBufferLength);
                 int encAddrBufLength = ChunkEncrypt(addrBytes, encAddrBufBytes);
                 // ChunkEncrypt(addrBytes, AddressBufferLength, encAddrBufBytes, out encAddrBufLength);
-                Debug.Assert(encAddrBufLength == AddressBufferLength + tagLen * 2 + CHUNK_LEN_BYTES);
+                Debug.Assert(encAddrBufLength == AddressBufferLength + tagLen * 2 + ChunkLengthBytes);
                 Array.Copy(encAddrBufBytes, 0, outbuf, outlength, encAddrBufLength);
                 outlength += encAddrBufLength;
                 logger.Debug($"_tcpRequestSent outlength {outlength}");
@@ -195,12 +194,12 @@ namespace Shadowsocks.Encryption.AEAD
             {
                 uint bufSize = (uint)buffer.Size;
                 if (bufSize <= 0) return;
-                var chunklength = (int)Math.Min(bufSize, CHUNK_LEN_MASK);
+                var chunklength = (int)Math.Min(bufSize, ChunkLengthMask);
                 byte[] chunkBytes = buffer.Get(chunklength);
-                byte[] encChunkBytes = new byte[chunklength + tagLen * 2 + CHUNK_LEN_BYTES];
+                byte[] encChunkBytes = new byte[chunklength + tagLen * 2 + ChunkLengthBytes];
                 int encChunkLength = ChunkEncrypt(chunkBytes, encChunkBytes);
                 // ChunkEncrypt(chunkBytes, chunklength, encChunkBytes, out encChunkLength);
-                Debug.Assert(encChunkLength == chunklength + tagLen * 2 + CHUNK_LEN_BYTES);
+                Debug.Assert(encChunkLength == chunklength + tagLen * 2 + ChunkLengthBytes);
                 Buffer.BlockCopy(encChunkBytes, 0, outbuf, outlength, encChunkLength);
                 outlength += encChunkLength;
                 logger.Debug("chunks enc outlength " + outlength);
@@ -256,7 +255,7 @@ namespace Shadowsocks.Encryption.AEAD
                 }
 
                 // first get chunk length
-                if (bufSize <= CHUNK_LEN_BYTES + tagLen)
+                if (bufSize <= ChunkLengthBytes + tagLen)
                 {
                     // so we only have chunk length and its tag?
                     return;
@@ -264,12 +263,12 @@ namespace Shadowsocks.Encryption.AEAD
 
                 #region Chunk Decryption
 
-                byte[] encLenBytes = buffer.Peek(CHUNK_LEN_BYTES + tagLen);
+                byte[] encLenBytes = buffer.Peek(ChunkLengthBytes + tagLen);
 
                 // try to dec chunk len
                 byte[] decChunkLenBytes = CipherDecrypt2(encLenBytes);
                 ushort chunkLen = (ushort)IPAddress.NetworkToHostOrder((short)BitConverter.ToUInt16(decChunkLenBytes, 0));
-                if (chunkLen > CHUNK_LEN_MASK)
+                if (chunkLen > ChunkLengthMask)
                 {
                     // we get invalid chunk
                     logger.Error($"Invalid chunk length: {chunkLen}");
@@ -277,7 +276,7 @@ namespace Shadowsocks.Encryption.AEAD
                 }
                 logger.Debug("Get the real chunk len:" + chunkLen);
                 bufSize = buffer.Size;
-                if (bufSize < CHUNK_LEN_BYTES + tagLen /* we haven't remove them */+ chunkLen + tagLen)
+                if (bufSize < ChunkLengthBytes + tagLen /* we haven't remove them */+ chunkLen + tagLen)
                 {
                     logger.Debug("No more data to decrypt one chunk");
                     return;
@@ -286,7 +285,7 @@ namespace Shadowsocks.Encryption.AEAD
 
                 // we have enough data to decrypt one chunk
                 // drop chunk len and its tag from buffer
-                buffer.Skip(CHUNK_LEN_BYTES + tagLen);
+                buffer.Skip(ChunkLengthBytes + tagLen);
                 byte[] encChunkBytes = buffer.Get(chunkLen + tagLen);
                 byte[] decChunkBytes = CipherDecrypt2(encChunkBytes);
                 IncrementNonce();
@@ -363,7 +362,7 @@ namespace Shadowsocks.Encryption.AEAD
 
         private int ChunkEncrypt(Span<byte> plain, Span<byte> cipher)
         {
-            if (plain.Length > CHUNK_LEN_MASK)
+            if (plain.Length > ChunkLengthMask)
             {
                 logger.Error("enc chunk too big");
                 throw new CryptoErrorException();
