@@ -8,18 +8,23 @@ using System.Collections.Generic;
 
 namespace Shadowsocks.Encryption.Stream
 {
+
     public class StreamAesBouncyCastleEncryptor : StreamEncryptor
     {
-        IBufferedCipher c;
+        byte[] cfbBuf = new byte[MaxInputSize + 128];
+        int ptr = 0;
+        //ExtendedCfbBufferedBlockCipher c;
+        ExtendedCfbBlockCipher b;
         public StreamAesBouncyCastleEncryptor(string method, string password) : base(method, password)
         {
-            c = new BufferedBlockCipher(new CfbBlockCipher(new AesEngine(), 128));
+            b = new ExtendedCfbBlockCipher(new AesEngine(), 128);
+            // c = new ExtendedCfbBufferedBlockCipher(b);
         }
 
         protected override void initCipher(byte[] iv, bool isEncrypt)
         {
             base.initCipher(iv, isEncrypt);
-            c.Init(isEncrypt, new ParametersWithIV(new KeyParameter(key), iv));
+            b.Init(isEncrypt, new ParametersWithIV(new KeyParameter(key), iv));
         }
 
         protected override int CipherEncrypt(Span<byte> plain, Span<byte> cipher)
@@ -36,15 +41,32 @@ namespace Shadowsocks.Encryption.Stream
 
         private void CipherUpdate(Span<byte> i, Span<byte> o)
         {
-            // there's some secret in OpenSSL's EVP context.
-            var ob = new byte[o.Length];
-            int blklen = c.ProcessBytes(i.ToArray(), 0, i.Length, ob, 0);
-            int restlen = i.Length - blklen;
-            if (restlen != 0)
+            Span<byte> ob = new byte[o.Length + 128];
+            i.CopyTo(cfbBuf.AsSpan(ptr));
+            // TODO: standard CFB
+            int total = i.Length + ptr;
+
+            int blkSize = b.GetBlockSize();
+
+            int blkCount = total / blkSize;
+            int restSize = total % blkSize;
+            int readPtr = 0;
+
+            byte[] tmp = new byte[blkSize];
+            for (int j = 0; j < blkCount; j++)
             {
-                c.DoFinal(ob, blklen);
+                b.ProcessBlock(cfbBuf, readPtr, tmp, 0);
+                tmp.CopyTo(ob.Slice(readPtr));
+                readPtr += blkSize;
             }
-            ob.CopyTo(o);
+            if (readPtr != blkSize * blkCount) throw new System.Exception();
+            b.ProcessBlock(cfbBuf, readPtr, tmp, 0, false);
+            tmp.CopyTo(ob.Slice(readPtr));
+            Array.Copy(cfbBuf, readPtr, cfbBuf, 0, restSize);
+            ob.Slice(ptr, o.Length).CopyTo(o);
+            ptr = restSize;
+
+
         }
 
         #region Cipher Info
