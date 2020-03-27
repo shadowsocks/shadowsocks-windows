@@ -37,7 +37,7 @@ namespace Shadowsocks.Encryption.AEAD
         public override void InitCipher(byte[] salt, bool isEncrypt, bool isUdp)
         {
             base.InitCipher(salt, isEncrypt, isUdp);
-            switch (_cipher)
+            switch (cipherFamily)
             {
                 default:
                 case CipherFamily.Chacha20Poly1305:
@@ -48,31 +48,7 @@ namespace Shadowsocks.Encryption.AEAD
                     break;
             }
         }
-
-        public override void cipherDecrypt(byte[] ciphertext, uint clen, byte[] plaintext, ref uint plen)
-        {
-            var pt = enc.Decrypt(ciphertext, null, nonce);
-            pt.CopyTo(plaintext, 0);
-            plen = (uint)pt.Length;
-        }
-
-        public override void cipherEncrypt(byte[] plaintext, uint plen, byte[] ciphertext, ref uint clen)
-        {
-            var ct = enc.Encrypt(plaintext, null, nonce);
-            ct.CopyTo(ciphertext, 0);
-            clen = (uint)ct.Length;
-        }
-
-        public override byte[] CipherEncrypt2(byte[] plain)
-        {
-            return enc.Encrypt(plain, null, nonce);
-        }
-
-        public override byte[] CipherDecrypt2(byte[] cipher)
-        {
-            return enc.Decrypt(cipher, null, nonce);
-        }
-
+        
         public override int CipherEncrypt(Span<byte> plain, Span<byte> cipher)
         {
             var ct = enc.Encrypt(plain, null, nonce);

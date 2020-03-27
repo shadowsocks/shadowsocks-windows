@@ -18,9 +18,6 @@ namespace Shadowsocks.Encryption.AEAD
         private const string Info = "ss-subkey";
         private static readonly byte[] InfoBytes = Encoding.ASCII.GetBytes(Info);
 
-        // for UDP only
-        protected static byte[] _udpTmpBuf = new byte[65536];
-
         // every connection should create its own buffer
         private ByteCircularBuffer buffer = new ByteCircularBuffer(MaxInputSize * 2);
 
@@ -29,19 +26,16 @@ namespace Shadowsocks.Encryption.AEAD
 
         protected Dictionary<string, CipherInfo> ciphers;
 
-        protected string _method;
-        protected CipherFamily _cipher;
+        protected CipherFamily cipherFamily;
         protected CipherInfo CipherInfo;
-        protected static byte[] masterKey = null;
-        protected byte[] sessionKey;
+        protected static byte[] masterKey = Array.Empty<byte>();
+        protected byte[] sessionKey = Array.Empty<byte>();
         protected int keyLen;
         protected int saltLen;
         protected int tagLen;
         protected int nonceLen;
 
         protected byte[] salt;
-
-        protected object _nonceIncrementLock = new object();
         protected byte[] nonce;
 
         // Is first packet
@@ -53,28 +47,20 @@ namespace Shadowsocks.Encryption.AEAD
         public AEADEncryptor(string method, string password)
             : base(method, password)
         {
-            InitEncryptorInfo(method);
-            InitKey(password);
-            // Initialize all-zero nonce for each connection
-            nonce = new byte[nonceLen];
-            nonce = new byte[nonceLen];
-        }
-
-        protected abstract Dictionary<string, CipherInfo> getCiphers();
-
-        protected void InitEncryptorInfo(string method)
-        {
-            method = method.ToLower();
-            _method = method;
-            ciphers = getCiphers();
-            CipherInfo = ciphers[_method];
-            _cipher = CipherInfo.Type;
+            CipherInfo = getCiphers()[method.ToLower()];
+            cipherFamily = CipherInfo.Type;
             var parameter = (AEADCipherParameter)CipherInfo.CipherParameter;
             keyLen = parameter.KeySize;
             saltLen = parameter.SaltSize;
             tagLen = parameter.TagSize;
             nonceLen = parameter.NonceSize;
+
+            InitKey(password);
+            // Initialize all-zero nonce for each connection
+            nonce = new byte[nonceLen];
         }
+
+        protected abstract Dictionary<string, CipherInfo> getCiphers();
 
         protected void InitKey(string password)
         {
@@ -84,7 +70,7 @@ namespace Shadowsocks.Encryption.AEAD
             if (masterKey.Length != keyLen) Array.Resize(ref masterKey, keyLen);
             DeriveKey(passbuf, masterKey, keyLen);
             // init session key
-            if (sessionKey == null) sessionKey = new byte[keyLen];
+            sessionKey = new byte[keyLen];
         }
 
         public void DeriveKey(byte[] password, byte[] key, int keylen)
@@ -111,49 +97,8 @@ namespace Shadowsocks.Encryption.AEAD
             DeriveSessionKey(salt, masterKey, sessionKey);
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="plaintext">Input, plain text</param>
-        /// <param name="plen">plaintext.Length</param>
-        /// <param name="ciphertext">Output, allocated by caller, tag space included,
-        /// length = plaintext.Length + tagLen, [enc][tag] order</param>
-        /// <param name="clen">Should be same as ciphertext.Length</param>
-        public abstract void cipherEncrypt(byte[] plaintext, uint plen, byte[] ciphertext, ref uint clen);
-
         public abstract int CipherEncrypt(Span<byte> plain, Span<byte> cipher);
         public abstract int CipherDecrypt(Span<byte> plain, Span<byte> cipher);
-
-        // plain -> cipher + tag
-        [Obsolete]
-        public abstract byte[] CipherEncrypt2(byte[] plain);
-        // cipher + tag -> plain
-        [Obsolete]
-        public abstract byte[] CipherDecrypt2(byte[] cipher);
-
-        public (Memory<byte>, Memory<byte>) GetCipherTextAndTagMem(byte[] cipher)
-        {
-            var mc = cipher.AsMemory();
-            var clen = mc.Length - tagLen;
-            var c = mc.Slice(0, clen);
-            var t = mc.Slice(clen);
-
-            return (c, t);
-        }
-        public (byte[], byte[]) GetCipherTextAndTag(byte[] cipher)
-        {
-            var (c, t) = GetCipherTextAndTagMem(cipher);
-            return (c.ToArray(), t.ToArray());
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="ciphertext">Cipher text in [enc][tag] order</param>
-        /// <param name="clen">ciphertext.Length</param>
-        /// <param name="plaintext">Output plain text may with additional data allocated by caller</param>
-        /// <param name="plen">Output, should be used plain text length</param>
-        public abstract void cipherDecrypt(byte[] ciphertext, uint clen, byte[] plaintext, ref uint plen);
 
         #region TCP
 
@@ -266,7 +211,8 @@ namespace Shadowsocks.Encryption.AEAD
                 byte[] encLenBytes = buffer.Peek(ChunkLengthBytes + tagLen);
 
                 // try to dec chunk len
-                byte[] decChunkLenBytes = CipherDecrypt2(encLenBytes);
+                byte[] decChunkLenBytes = new byte[ChunkLengthBytes];
+                CipherDecrypt(decChunkLenBytes, encLenBytes);
                 ushort chunkLen = (ushort)IPAddress.NetworkToHostOrder((short)BitConverter.ToUInt16(decChunkLenBytes, 0));
                 if (chunkLen > ChunkLengthMask)
                 {
@@ -287,15 +233,17 @@ namespace Shadowsocks.Encryption.AEAD
                 // drop chunk len and its tag from buffer
                 buffer.Skip(ChunkLengthBytes + tagLen);
                 byte[] encChunkBytes = buffer.Get(chunkLen + tagLen);
-                byte[] decChunkBytes = CipherDecrypt2(encChunkBytes);
+                // byte[] decChunkBytes = CipherDecrypt2(encChunkBytes);
+
+                int len =  CipherDecrypt(outbuf.AsSpan().Slice(outlength), encChunkBytes);
                 IncrementNonce();
 
                 #endregion
 
                 // output to outbuf
-                decChunkBytes.CopyTo(outbuf, outlength);
+                // decChunkBytes.CopyTo(outbuf, outlength);
                 // Buffer.BlockCopy(decChunkBytes, 0, outbuf, outlength, (int)decChunkLen);
-                outlength += decChunkBytes.Length;
+                outlength += len;
                 logger.Debug("aead dec outlength " + outlength);
                 if (outlength + 100 > TCPHandler.BufferSize)
                 {
@@ -326,36 +274,18 @@ namespace Shadowsocks.Encryption.AEAD
         public override void EncryptUDP(byte[] buf, int length, byte[] outbuf, out int outlength)
         {
             // Generate salt
-            //RNG.GetBytes(outbuf, saltLen);
             RNG.GetSpan(outbuf.AsSpan(0, saltLen));
             InitCipher(outbuf, true, true);
-            //uint olen = 0;
-            lock (_udpTmpBuf)
-            {
-                //cipherEncrypt(buf, (uint)length, _udpTmpBuf, ref olen);
-                var plain = buf.AsSpan(0, length).ToArray(); // mmp
-                var cipher = CipherEncrypt2(plain);
-                //Debug.Assert(olen == length + tagLen);
-                Buffer.BlockCopy(cipher, 0, outbuf, saltLen, length + tagLen);
-                //Buffer.BlockCopy(_udpTmpBuf, 0, outbuf, saltLen, (int)olen);
-                outlength = saltLen + cipher.Length;
-            }
+            outlength = saltLen + CipherEncrypt(
+                buf.AsSpan(0, length),
+                outbuf.AsSpan(saltLen, length + tagLen));
+
         }
 
         public override void DecryptUDP(byte[] buf, int length, byte[] outbuf, out int outlength)
         {
             InitCipher(buf, false, true);
-            //uint olen = 0;
-            lock (_udpTmpBuf)
-            {
-                // copy remaining data to first pos
-                Buffer.BlockCopy(buf, saltLen, buf, 0, length - saltLen);
-                byte[] b = buf.AsSpan(0, length - saltLen).ToArray();
-                byte[] o = CipherDecrypt2(b);
-                //cipherDecrypt(buf, (uint)(length - saltLen), _udpTmpBuf, ref olen);
-                Buffer.BlockCopy(o, 0, outbuf, 0, o.Length);
-                outlength = o.Length;
-            }
+            outlength = CipherDecrypt(outbuf, buf.AsSpan(saltLen, length - saltLen));
         }
 
         #endregion
