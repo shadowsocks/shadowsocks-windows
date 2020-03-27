@@ -54,9 +54,9 @@ environment:
   # my_secure_var1:
   #   secure: FW3tJ3fMncxvs58/ifSP7w==
   matrix:
-    - platform: x86
+    - platform: Any CPU
       configuration: Debug
-    - platform: x86
+    - platform: Any CPU
       configuration: Release
 
 # this is how to allow failing jobs in the matrix
@@ -132,7 +132,7 @@ after_build:
     Copy-Item $env:APPVEYOR_BUILD_FOLDER\shadowsocks-csharp\bin\$env:CONFIGURATION\netcoreapp3.1\Shadowsocks.dll $WorkingFolder\Shadowsocks.dll
     
     Copy-Item $WorkingFolder\Shadowsocks.exe $ExeFile
-    Copy-Item $WorkingFolder\Shadowsocks.dll $DllFile
+    # Copy-Item $WorkingFolder\Shadowsocks.dll $DllFile
 
     CalculateHash -file $Exefile | Out-File -FilePath $ExeHashFile
     CalculateHash -file $DllFile | Out-File -FilePath $DllHashFile
