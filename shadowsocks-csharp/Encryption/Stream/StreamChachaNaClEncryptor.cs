@@ -6,30 +6,38 @@ namespace Shadowsocks.Encryption.Stream
 {
     public class StreamChachaNaClEncryptor : StreamEncryptor
     {
-        // yes, they update over all saved data everytime...
-        byte[] chachaBuf = new byte[65536];
-        int ptr = 0;
+        const int BlockSize = 64;
+        // when new data arrive, put it in correct offset of chunk
+        // and update it, ignore other data, get it in correct offset...
+        byte[] chachaBuf = new byte[32768 + BlockSize];
+        int remain = 0;
+        // increase counter only when a chunk fully recieved
+        int ic = 0;
         public StreamChachaNaClEncryptor(string method, string password) : base(method, password)
         {
         }
 
         protected override int CipherDecrypt(Span<byte> plain, Span<byte> cipher)
         {
-            int len = cipher.Length;
-            cipher.CopyTo(chachaBuf.AsSpan(ptr));
-            var p = new ChaCha20(key, 0).Decrypt(chachaBuf, iv);
-            p.AsSpan(ptr, len).CopyTo(plain);
-            ptr += len;
-            return len;
+            return CipherUpdate(cipher, plain, false);
         }
 
         protected override int CipherEncrypt(Span<byte> plain, Span<byte> cipher)
         {
-            int len = plain.Length;
-            plain.CopyTo(chachaBuf.AsSpan(ptr));
-            var p = new ChaCha20(key, 0).Encrypt(chachaBuf, iv);
-            p.AsSpan(ptr, len).CopyTo(cipher);
-            ptr += len;
+            return CipherUpdate(plain, cipher, true);
+        }
+
+        private int CipherUpdate(Span<byte> i, Span<byte> o, bool enc)
+        {
+            int len = i.Length;
+            int pad = remain;
+            i.CopyTo(chachaBuf.AsSpan(pad));
+            var chacha = new ChaCha20(key, ic);
+            var p = enc ? chacha.Encrypt(chachaBuf, iv) : chacha.Decrypt(chachaBuf, iv);
+            p.AsSpan(pad, len).CopyTo(o);
+            pad += len;
+            ic += pad / BlockSize;
+            remain = pad % BlockSize;
             return len;
         }
 
