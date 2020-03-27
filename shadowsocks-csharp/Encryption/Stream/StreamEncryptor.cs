@@ -10,48 +10,39 @@ namespace Shadowsocks.Encryption.Stream
 {
     public abstract class StreamEncryptor : EncryptorBase
     {
-        private static Logger logger = LogManager.GetCurrentClassLogger();
+        private static readonly Logger logger = LogManager.GetCurrentClassLogger();
         // for UDP only
-        protected static byte[] _udpTmpBuf = new byte[65536];
+        protected static byte[] udpBuffer = new byte[65536];
 
         // every connection should create its own buffer
-        private ByteCircularBuffer buffer = new ByteCircularBuffer(TCPHandler.BufferSize * 2);
-
-        protected Dictionary<string, CipherInfo> ciphers;
-
+        private readonly ByteCircularBuffer buffer = new ByteCircularBuffer(TCPHandler.BufferSize * 2);
 
         // Is first packet
         protected bool ivReady;
 
-        protected string _method;
-        protected CipherFamily _cipher;
+        protected CipherFamily cipherFamily;
         protected CipherInfo CipherInfo;
         // long-time master key
-        protected static byte[] key = null;
-        protected byte[] iv;
+        protected static byte[] key = Array.Empty<byte>();
+        protected byte[] iv = Array.Empty<byte>();
         protected int keyLen;
         protected int ivLen;
 
         public StreamEncryptor(string method, string password)
             : base(method, password)
         {
-            InitEncryptorInfo(method);
-            InitKey(password);
-        }
-
-        protected abstract Dictionary<string, CipherInfo> getCiphers();
-
-        private void InitEncryptorInfo(string method)
-        {
-            method = method.ToLower();
-            _method = method;
-            ciphers = getCiphers();
-            CipherInfo = ciphers[_method];
-            _cipher = CipherInfo.Type;
+            CipherInfo = getCiphers()[method.ToLower()];
+            cipherFamily = CipherInfo.Type;
             var parameter = (StreamCipherParameter)CipherInfo.CipherParameter;
             keyLen = parameter.KeySize;
             ivLen = parameter.IvSize;
+
+            InitKey(password);
+
+            logger.Dump($"key {instanceId}", key, keyLen);
         }
+
+        protected abstract Dictionary<string, CipherInfo> getCiphers();
 
         private void InitKey(string password)
         {
@@ -65,7 +56,7 @@ namespace Shadowsocks.Encryption.Stream
         {
             byte[] result = new byte[password.Length + MD5_LEN];
             int i = 0;
-            byte[] md5sum = null;
+            byte[] md5sum = Array.Empty<byte>();
             while (i < keylen)
             {
                 if (i == 0)
@@ -85,6 +76,7 @@ namespace Shadowsocks.Encryption.Stream
 
         protected virtual void initCipher(byte[] iv, bool isEncrypt)
         {
+            if (ivLen == 0) return;
             this.iv = new byte[ivLen];
             Array.Copy(iv, this.iv, ivLen);
         }
@@ -103,6 +95,7 @@ namespace Shadowsocks.Encryption.Stream
             int cipherOffset = 0;
             Debug.Assert(buffer != null, "_encCircularBuffer != null");
             buffer.Put(buf, 0, length);
+            logger.Trace($"{instanceId} encrypt TCP, generate iv: {!ivReady}");
             if (!ivReady)
             {
                 // Generate IV
@@ -117,7 +110,9 @@ namespace Shadowsocks.Encryption.Stream
             byte[] plain = buffer.Get(size);
             byte[] cipher = new byte[size];
             cipherUpdate(true, size, plain, cipher);
-            
+            logger.DumpBase64($"plain {instanceId}", plain, size);
+            logger.DumpBase64($"cipher {instanceId}", cipher, cipher.Length);
+            logger.Dump($"iv {instanceId}", iv, ivLen);
             Buffer.BlockCopy(cipher, 0, outbuf, cipherOffset, size);
             outlength = size + cipherOffset;
         }
@@ -126,6 +121,7 @@ namespace Shadowsocks.Encryption.Stream
         {
             Debug.Assert(buffer != null, "_circularBuffer != null");
             buffer.Put(buf, 0, length);
+            logger.Trace($"{instanceId} decrypt TCP, read iv: {!ivReady}");
             if (!ivReady)
             {
                 if (buffer.Size <= ivLen)
@@ -145,6 +141,10 @@ namespace Shadowsocks.Encryption.Stream
             }
             byte[] cipher = buffer.ToArray();
             cipherUpdate(false, cipher.Length, cipher, outbuf);
+            logger.DumpBase64($"cipher {instanceId}", cipher, cipher.Length);
+            logger.DumpBase64($"plain {instanceId}", outbuf, cipher.Length);
+            logger.Dump($"iv {instanceId}", iv, ivLen);
+
             // move pointer only
             buffer.Skip(buffer.Size);
             outlength = cipher.Length;
@@ -160,11 +160,11 @@ namespace Shadowsocks.Encryption.Stream
             // Generate IV
             RNG.GetBytes(outbuf, ivLen);
             initCipher(outbuf, true);
-            lock (_udpTmpBuf)
+            lock (udpBuffer)
             {
-                cipherUpdate(true, length, buf, _udpTmpBuf);
+                cipherUpdate(true, length, buf, udpBuffer);
                 outlength = length + ivLen;
-                Buffer.BlockCopy(_udpTmpBuf, 0, outbuf, ivLen, length);
+                Buffer.BlockCopy(udpBuffer, 0, outbuf, ivLen, length);
             }
         }
 
@@ -173,11 +173,11 @@ namespace Shadowsocks.Encryption.Stream
             // Get IV from first pos
             initCipher(buf, false);
             outlength = length - ivLen;
-            lock (_udpTmpBuf)
+            lock (udpBuffer)
             {
                 // C# could be multi-threaded
-                Buffer.BlockCopy(buf, ivLen, _udpTmpBuf, 0, length - ivLen);
-                cipherUpdate(false, length - ivLen, _udpTmpBuf, outbuf);
+                Buffer.BlockCopy(buf, ivLen, udpBuffer, 0, length - ivLen);
+                cipherUpdate(false, length - ivLen, udpBuffer, outbuf);
             }
         }
 

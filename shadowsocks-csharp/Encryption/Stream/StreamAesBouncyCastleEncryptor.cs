@@ -45,13 +45,11 @@ namespace Shadowsocks.Encryption.Stream
 
         private void CipherUpdate(Span<byte> i, Span<byte> o)
         {
-            // c.Reset();
             var ob = new byte[o.Length];
             int blklen = c.ProcessBytes(i.ToArray(), 0, i.Length, ob, 0);
             int restlen = i.Length - blklen;
             if (restlen != 0)
             {
-                // may be problem, c is block cipher?
                 c.DoFinal(ob, blklen);
             }
             ob.CopyTo(o);

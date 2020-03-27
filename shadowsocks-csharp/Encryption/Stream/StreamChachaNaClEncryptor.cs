@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using NaCl.Core;
 
 namespace Shadowsocks.Encryption.Stream
 {
     public class StreamChachaNaClEncryptor : StreamEncryptor
     {
-        ChaCha20 c;
+        readonly ChaCha20 c;
         public StreamChachaNaClEncryptor(string method, string password) : base(method, password)
         {
             c = new ChaCha20(key, 0);

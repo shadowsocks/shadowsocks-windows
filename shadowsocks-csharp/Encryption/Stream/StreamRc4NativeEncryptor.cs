@@ -14,7 +14,7 @@ namespace Shadowsocks.Encryption.Stream
         protected override void initCipher(byte[] iv, bool isEncrypt)
         {
             base.initCipher(iv, isEncrypt);
-            if (_cipher == CipherFamily.Rc4Md5)
+            if (cipherFamily == CipherFamily.Rc4Md5)
             {
                 byte[] temp = new byte[keyLen + ivLen];
                 Array.Copy(key, 0, temp, 0, keyLen);

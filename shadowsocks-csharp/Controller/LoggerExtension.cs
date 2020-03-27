@@ -11,20 +11,35 @@ namespace NLog
 {
     public static class LoggerExtension
     {
-        public static void Dump(this Logger logger, string tag, byte[] arr, int length)
+        // for key, iv, etc...
+        public static void Dump(this Logger logger, string tag, byte[] arr, int length = -1)
         {
-            if (logger.IsTraceEnabled)
-            {
-                var sb = new StringBuilder($"{Environment.NewLine}{tag}: ");
-                for (int i = 0; i < length - 1; i++)
-                {
-                    sb.Append($"0x{arr[i]:X2}, ");
-                }
-                sb.Append($"0x{arr[length - 1]:X2}");
-                sb.Append(Environment.NewLine);
-                logger.Trace(sb.ToString());
-            }
+            if (length == -1) length = arr.Length;
+
+            if (!logger.IsTraceEnabled) return;
+            string hex = BitConverter.ToString(arr.AsSpan().Slice(0, length).ToArray()).Replace("-", "");
+            string content = $@"
+{tag}:
+{hex}
+
+";
+            logger.Trace(content);
         }
+        // for cipher and plain text, so we can use openssl to test
+        public static void DumpBase64(this Logger logger, string tag, byte[] arr, int length = -1)
+        {
+            if (length == -1) length = arr.Length;
+
+            if (!logger.IsTraceEnabled) return;
+             string hex =Convert.ToBase64String(arr.AsSpan().Slice(0, length).ToArray());
+            string content = $@"
+{tag}:
+{hex}
+
+";
+            logger.Trace(content);
+        }
+
 
         public static void Debug(this Logger logger, EndPoint local, EndPoint remote, int len, string header = null, string tailer = null)
         {
