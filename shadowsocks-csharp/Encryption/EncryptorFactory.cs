@@ -41,6 +41,14 @@ namespace Shadowsocks.Encryption
                     _registeredEncryptors.Add(method.Key, typeof(StreamAesBouncyCastleEncryptor));
                 }
             }
+            foreach (var method in StreamChachaNaClEncryptor.SupportedCiphers())
+            {
+                if (!_registeredEncryptors.ContainsKey(method.Key))
+                {
+                    ciphers.Add(method.Key, method.Value);
+                    _registeredEncryptors.Add(method.Key, typeof(StreamChachaNaClEncryptor));
+                }
+            }
 
 
             foreach (var method in AEADAesGcmNativeEncryptor.SupportedCiphers())

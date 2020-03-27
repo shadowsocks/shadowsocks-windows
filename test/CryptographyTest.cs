@@ -165,5 +165,10 @@ namespace Shadowsocks.Test
         {
             TestEncryptionMethod(typeof(StreamAesBouncyCastleEncryptor), "aes-256-cfb");
         }
+        [TestMethod]
+        public void TestStreamChachaNaClEncryption()
+        {
+            TestEncryptionMethod(typeof(StreamChachaNaClEncryptor), "chacha20-ietf");
+        }
     }
 }
