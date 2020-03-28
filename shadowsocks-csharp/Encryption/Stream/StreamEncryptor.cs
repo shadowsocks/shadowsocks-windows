@@ -1,6 +1,4 @@
 ﻿using NLog;
-using Shadowsocks.Controller;
-using Shadowsocks.Encryption.CircularBuffer;
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
