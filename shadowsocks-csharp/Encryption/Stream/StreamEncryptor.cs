@@ -3,7 +3,7 @@ using Shadowsocks.Controller;
 using Shadowsocks.Encryption.CircularBuffer;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace Shadowsocks.Encryption.Stream
@@ -11,11 +11,9 @@ namespace Shadowsocks.Encryption.Stream
     public abstract class StreamEncryptor : EncryptorBase
     {
         private static readonly Logger logger = LogManager.GetCurrentClassLogger();
-        // for UDP only
-        protected static byte[] udpBuffer = new byte[65536];
 
-        // every connection should create its own buffer
-        private readonly ByteCircularBuffer buffer = new ByteCircularBuffer(TCPHandler.BufferSize * 2);
+        // shared by TCP decrypt UDP encrypt and decrypt
+        protected static byte[] sharedBuffer = new byte[65536];
 
         // Is first packet
         protected bool ivReady;
@@ -85,12 +83,11 @@ namespace Shadowsocks.Encryption.Stream
         protected abstract int CipherDecrypt(Span<byte> plain, Span<byte> cipher);
 
         #region TCP
-
+        [MethodImpl(MethodImplOptions.Synchronized)]
         public override void Encrypt(byte[] buf, int length, byte[] outbuf, out int outlength)
         {
             int cipherOffset = 0;
-            Debug.Assert(buffer != null, "_encCircularBuffer != null");
-            buffer.Put(buf, 0, length);
+            Span<byte> tmp = buf.AsSpan(0, length);
             logger.Trace($"{instanceId} encrypt TCP, generate iv: {!ivReady}");
             if (!ivReady)
             {
@@ -102,28 +99,35 @@ namespace Shadowsocks.Encryption.Stream
                 cipherOffset = ivLen;
                 ivReady = true;
             }
-            int size = buffer.Size;
-            byte[] plain = buffer.Get(size);
-            byte[] cipher = new byte[size];
-            CipherEncrypt(plain, cipher);
+            int size = tmp.Length;
 
-            logger.DumpBase64($"plain {instanceId}", plain, size);
+            byte[] cipher = new byte[size];
+            CipherEncrypt(tmp, cipher);
+
+            logger.DumpBase64($"plain {instanceId}", tmp.ToArray(), size);
             logger.DumpBase64($"cipher {instanceId}", cipher, cipher.Length);
             logger.Dump($"iv {instanceId}", iv, ivLen);
             Buffer.BlockCopy(cipher, 0, outbuf, cipherOffset, size);
             outlength = size + cipherOffset;
         }
 
+        private int recieveCtr = 0;
+        [MethodImpl(MethodImplOptions.Synchronized)]
         public override void Decrypt(byte[] buf, int length, byte[] outbuf, out int outlength)
         {
-            Debug.Assert(buffer != null, "_circularBuffer != null");
-            buffer.Put(buf, 0, length);
+            Span<byte> tmp = buf.AsSpan(0, length);
             logger.Trace($"{instanceId} decrypt TCP, read iv: {!ivReady}");
+            
+            // is first packet, need read iv
             if (!ivReady)
             {
-                if (buffer.Size <= ivLen)
+                // push to buffer in case of not enough data
+                tmp.CopyTo(sharedBuffer.AsSpan(recieveCtr));
+                recieveCtr += tmp.Length;
+
+                // not enough data for read iv, return 0 byte data
+                if (recieveCtr <= ivLen)
                 {
-                    // we need more data
                     outlength = 0;
                     return;
                 }
@@ -131,50 +135,50 @@ namespace Shadowsocks.Encryption.Stream
                 ivReady = true;
                 if (ivLen > 0)
                 {
-                    byte[] iv = buffer.Get(ivLen);
+                    // read iv
+                    byte[] iv = sharedBuffer.AsSpan(0, ivLen).ToArray();
                     initCipher(iv, false);
                 }
                 else initCipher(Array.Empty<byte>(), false);
+                tmp = sharedBuffer.AsSpan(ivLen, recieveCtr - ivLen);
             }
-            byte[] cipher = buffer.ToArray();
-            CipherDecrypt(outbuf, cipher);
-            logger.DumpBase64($"cipher {instanceId}", cipher, cipher.Length);
-            logger.DumpBase64($"plain {instanceId}", outbuf, cipher.Length);
-            logger.Dump($"iv {instanceId}", iv, ivLen);
 
-            // move pointer only
-            buffer.Skip(buffer.Size);
-            outlength = cipher.Length;
-            // done the decryption
+            // read all data from buffer
+            CipherDecrypt(outbuf, tmp);
+            logger.DumpBase64($"cipher {instanceId}", tmp.ToArray(), tmp.Length);
+            logger.DumpBase64($"plain {instanceId}", outbuf, tmp.Length);
+            logger.Dump($"iv {instanceId}", iv, ivLen);
+            outlength = tmp.Length;
         }
 
         #endregion
 
         #region UDP
-
+        [MethodImpl(MethodImplOptions.Synchronized)]
         public override void EncryptUDP(byte[] buf, int length, byte[] outbuf, out int outlength)
         {
             // Generate IV
             RNG.GetBytes(outbuf, ivLen);
             initCipher(outbuf, true);
-            lock (udpBuffer)
+            lock (sharedBuffer)
             {
-                CipherEncrypt(buf, udpBuffer);
+                CipherEncrypt(buf, sharedBuffer);
                 outlength = length + ivLen;
-                Buffer.BlockCopy(udpBuffer, 0, outbuf, ivLen, length);
+                Buffer.BlockCopy(sharedBuffer, 0, outbuf, ivLen, length);
             }
         }
 
+        [MethodImpl(MethodImplOptions.Synchronized)]
         public override void DecryptUDP(byte[] buf, int length, byte[] outbuf, out int outlength)
         {
             // Get IV from first pos
             initCipher(buf, false);
             outlength = length - ivLen;
-            lock (udpBuffer)
+            lock (sharedBuffer)
             {
                 // C# could be multi-threaded
-                Buffer.BlockCopy(buf, ivLen, udpBuffer, 0, length - ivLen);
-                CipherDecrypt(outbuf, udpBuffer);
+                Buffer.BlockCopy(buf, ivLen, sharedBuffer, 0, length - ivLen);
+                CipherDecrypt(outbuf, sharedBuffer);
             }
         }
 
