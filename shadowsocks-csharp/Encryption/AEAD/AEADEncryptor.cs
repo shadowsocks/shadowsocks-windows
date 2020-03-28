@@ -104,8 +104,8 @@ namespace Shadowsocks.Encryption.AEAD
             DeriveSessionKey(salt, masterKey, sessionKey);
         }
 
-        public abstract int CipherEncrypt(Span<byte> plain, Span<byte> cipher);
-        public abstract int CipherDecrypt(Span<byte> plain, Span<byte> cipher);
+        public abstract int CipherEncrypt(ReadOnlySpan<byte> plain, Span<byte> cipher);
+        public abstract int CipherDecrypt(Span<byte> plain, ReadOnlySpan<byte> cipher);
 
         #region TCP
 
@@ -328,7 +328,7 @@ namespace Shadowsocks.Encryption.AEAD
 
         #endregion
 
-        private int ChunkEncrypt(Span<byte> plain, Span<byte> cipher)
+        private int ChunkEncrypt(ReadOnlySpan<byte> plain, Span<byte> cipher)
         {
             if (plain.Length > ChunkLengthMask)
             {
@@ -343,6 +343,26 @@ namespace Shadowsocks.Encryption.AEAD
             IncrementNonce();
 
             return cipherLenSize + cipherDataSize;
+        }
+
+        public override int Encrypt(ReadOnlySpan<byte> plain, Span<byte> cipher)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override int Decrypt(Span<byte> plain, ReadOnlySpan<byte> cipher)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override int EncryptUDP(ReadOnlySpan<byte> plain, Span<byte> cipher)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override int DecryptUDP(Span<byte> plain, ReadOnlySpan<byte> cipher)
+        {
+            throw new NotImplementedException();
         }
     }
 }

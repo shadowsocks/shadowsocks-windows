@@ -85,8 +85,8 @@ namespace Shadowsocks.Encryption.Stream
             Array.Copy(iv, this.iv, ivLen);
         }
 
-        protected abstract int CipherEncrypt(Span<byte> plain, Span<byte> cipher);
-        protected abstract int CipherDecrypt(Span<byte> plain, Span<byte> cipher);
+        protected abstract int CipherEncrypt(ReadOnlySpan<byte> plain, Span<byte> cipher);
+        protected abstract int CipherDecrypt(Span<byte> plain, ReadOnlySpan<byte> cipher);
 
         #region TCP
         [MethodImpl(MethodImplOptions.Synchronized)]
@@ -193,5 +193,25 @@ namespace Shadowsocks.Encryption.Stream
         }
 
         #endregion
+
+        public override int Encrypt(ReadOnlySpan<byte> plain, Span<byte> cipher)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override int Decrypt(Span<byte> plain, ReadOnlySpan<byte> cipher)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override int EncryptUDP(ReadOnlySpan<byte> plain, Span<byte> cipher)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override int DecryptUDP(Span<byte> plain, ReadOnlySpan<byte> cipher)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

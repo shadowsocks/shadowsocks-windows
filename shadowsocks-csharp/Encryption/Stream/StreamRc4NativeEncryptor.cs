@@ -29,17 +29,17 @@ namespace Shadowsocks.Encryption.Stream
             sbox = SBox(realkey);
         }
 
-        protected override int CipherEncrypt(Span<byte> plain, Span<byte> cipher)
+        protected override int CipherEncrypt(ReadOnlySpan<byte> plain, Span<byte> cipher)
         {
             return CipherUpdate(plain, cipher);
         }
 
-        protected override int CipherDecrypt(Span<byte> plain, Span<byte> cipher)
+        protected override int CipherDecrypt(Span<byte> plain, ReadOnlySpan<byte> cipher)
         {
             return CipherUpdate(cipher, plain);
         }
 
-        private int CipherUpdate(Span<byte> i, Span<byte> o)
+        private int CipherUpdate(ReadOnlySpan<byte> i, Span<byte> o)
         {
             // don't know why we need third array, but it works...
             Span<byte> t = new byte[i.Length];

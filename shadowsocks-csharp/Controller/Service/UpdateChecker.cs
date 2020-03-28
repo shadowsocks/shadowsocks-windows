@@ -41,6 +41,7 @@ namespace Shadowsocks.Controller
         {
 #if DEBUG
             return;
+#pragma warning disable CS0162 // 检测到无法访问的代码
 #endif
             CheckUpdateTimer timer = new CheckUpdateTimer(delay);
             timer.AutoReset = false;

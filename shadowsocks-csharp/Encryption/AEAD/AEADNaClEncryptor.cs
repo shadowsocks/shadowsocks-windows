@@ -46,14 +46,14 @@ namespace Shadowsocks.Encryption.AEAD
             }
         }
 
-        public override int CipherEncrypt(Span<byte> plain, Span<byte> cipher)
+        public override int CipherEncrypt(ReadOnlySpan<byte> plain, Span<byte> cipher)
         {
             byte[] ct = enc.Encrypt(plain, null, nonce);
             ct.CopyTo(cipher);
             return ct.Length;
         }
 
-        public override int CipherDecrypt(Span<byte> plain, Span<byte> cipher)
+        public override int CipherDecrypt(Span<byte> plain, ReadOnlySpan<byte> cipher)
         {
             byte[] pt = enc.Decrypt(cipher, null, nonce);
             pt.CopyTo(plain);

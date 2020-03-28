@@ -1,4 +1,6 @@
-﻿namespace Shadowsocks.Encryption
+﻿using System;
+
+namespace Shadowsocks.Encryption
 {
     public abstract class EncryptorBase : IEncryptor
     {
@@ -43,6 +45,11 @@
         {
             return $"{instanceId}({Method},{Password})";
         }
+
+        public abstract int Encrypt(ReadOnlySpan<byte> plain, Span<byte> cipher);
+        public abstract int Decrypt(Span<byte> plain, ReadOnlySpan<byte> cipher);
+        public abstract int EncryptUDP(ReadOnlySpan<byte> plain, Span<byte> cipher);
+        public abstract int DecryptUDP(Span<byte> plain, ReadOnlySpan<byte> cipher);
 
         public int AddressBufferLength { get; set; } = -1;
     }

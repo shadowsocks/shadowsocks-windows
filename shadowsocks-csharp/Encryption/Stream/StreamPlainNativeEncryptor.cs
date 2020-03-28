@@ -10,13 +10,13 @@ namespace Shadowsocks.Encryption.Stream
         {
         }
 
-        protected override int CipherDecrypt(Span<byte> plain, Span<byte> cipher)
+        protected override int CipherDecrypt(Span<byte> plain, ReadOnlySpan<byte> cipher)
         {
             cipher.CopyTo(plain);
             return cipher.Length;
         }
 
-        protected override int CipherEncrypt(Span<byte> plain, Span<byte> cipher)
+        protected override int CipherEncrypt(ReadOnlySpan<byte> plain, Span<byte> cipher)
         {
             plain.CopyTo(cipher);
             return plain.Length;

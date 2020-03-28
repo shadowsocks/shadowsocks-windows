@@ -23,19 +23,19 @@ namespace Shadowsocks.Encryption.Stream
             b.Init(isEncrypt, new ParametersWithIV(new KeyParameter(key), iv));
         }
 
-        protected override int CipherEncrypt(Span<byte> plain, Span<byte> cipher)
+        protected override int CipherEncrypt(ReadOnlySpan<byte> plain, Span<byte> cipher)
         {
             CipherUpdate(plain, cipher);
             return plain.Length;
         }
 
-        protected override int CipherDecrypt(Span<byte> plain, Span<byte> cipher)
+        protected override int CipherDecrypt(Span<byte> plain, ReadOnlySpan<byte> cipher)
         {
             CipherUpdate(cipher, plain);
             return cipher.Length;
         }
 
-        private void CipherUpdate(Span<byte> i, Span<byte> o)
+        private void CipherUpdate(ReadOnlySpan<byte> i, Span<byte> o)
         {
             Span<byte> ob = new byte[o.Length + 128];
             i.CopyTo(cfbBuf.AsSpan(ptr));

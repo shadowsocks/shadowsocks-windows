@@ -24,17 +24,17 @@ namespace Shadowsocks.Encryption.Stream
         {
         }
 
-        protected override int CipherDecrypt(Span<byte> plain, Span<byte> cipher)
+        protected override int CipherDecrypt(Span<byte> plain, ReadOnlySpan<byte> cipher)
         {
             return CipherUpdate(cipher, plain, false);
         }
 
-        protected override int CipherEncrypt(Span<byte> plain, Span<byte> cipher)
+        protected override int CipherEncrypt(ReadOnlySpan<byte> plain, Span<byte> cipher)
         {
             return CipherUpdate(plain, cipher, true);
         }
 
-        private int CipherUpdate(Span<byte> i, Span<byte> o, bool enc)
+        private int CipherUpdate(ReadOnlySpan<byte> i, Span<byte> o, bool enc)
         {
             int len = i.Length;
             int pad = remain;
