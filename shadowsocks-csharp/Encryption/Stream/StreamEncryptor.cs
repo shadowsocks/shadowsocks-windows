@@ -1,7 +1,6 @@
 ﻿using NLog;
 using System;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace Shadowsocks.Encryption.Stream
@@ -89,34 +88,6 @@ namespace Shadowsocks.Encryption.Stream
         protected abstract int CipherDecrypt(Span<byte> plain, ReadOnlySpan<byte> cipher);
 
         #region TCP
-        [MethodImpl(MethodImplOptions.Synchronized)]
-        public override void Encrypt(byte[] buf, int length, byte[] outbuf, out int outlength)
-        {
-            int cipherOffset = 0;
-            Span<byte> tmp = buf.AsSpan(0, length);
-            logger.Trace($"{instanceId} encrypt TCP, generate iv: {!ivReady}");
-            if (!ivReady)
-            {
-                // Generate IV
-                byte[] ivBytes = RNG.GetBytes(ivLen);
-                initCipher(ivBytes, true);
-
-                Array.Copy(ivBytes, 0, outbuf, 0, ivLen);
-                cipherOffset = ivLen;
-                ivReady = true;
-            }
-            int size = tmp.Length;
-
-            byte[] cipher = new byte[size];
-            CipherEncrypt(tmp, cipher);
-
-            logger.DumpBase64($"plain {instanceId}", tmp.ToArray(), size);
-            logger.DumpBase64($"cipher {instanceId}", cipher, cipher.Length);
-            logger.Dump($"iv {instanceId}", iv, ivLen);
-            Buffer.BlockCopy(cipher, 0, outbuf, cipherOffset, size);
-            outlength = size + cipherOffset;
-        }
-
         public override int Encrypt(ReadOnlySpan<byte> plain, Span<byte> cipher)
         {
             int cipherOffset = 0;
@@ -134,55 +105,12 @@ namespace Shadowsocks.Encryption.Stream
             int clen = CipherEncrypt(plain, cipher);
 
             logger.DumpBase64($"plain {instanceId}", plain);
-            logger.DumpBase64($"cipher {instanceId}", cipher);
+            logger.DumpBase64($"cipher {instanceId}", cipher.Slice(0, clen));
             logger.Dump($"iv {instanceId}", iv, ivLen);
             return clen + cipherOffset;
         }
 
         private int recieveCtr = 0;
-        [MethodImpl(MethodImplOptions.Synchronized)]
-        public override void Decrypt(byte[] buf, int length, byte[] outbuf, out int outlength)
-        {
-            Span<byte> tmp = buf.AsSpan(0, length);
-            logger.Trace($"{instanceId} decrypt TCP, read iv: {!ivReady}");
-
-            // is first packet, need read iv
-            if (!ivReady)
-            {
-                // push to buffer in case of not enough data
-                tmp.CopyTo(sharedBuffer.AsSpan(recieveCtr));
-                recieveCtr += tmp.Length;
-
-                // not enough data for read iv, return 0 byte data
-                if (recieveCtr <= ivLen)
-                {
-                    outlength = 0;
-                    return;
-                }
-                // start decryption
-                ivReady = true;
-                if (ivLen > 0)
-                {
-                    // read iv
-                    byte[] iv = sharedBuffer.AsSpan(0, ivLen).ToArray();
-                    initCipher(iv, false);
-                }
-                else
-                {
-                    initCipher(Array.Empty<byte>(), false);
-                }
-
-                tmp = sharedBuffer.AsSpan(ivLen, recieveCtr - ivLen);
-            }
-
-            // read all data from buffer
-            CipherDecrypt(outbuf, tmp);
-            logger.DumpBase64($"cipher {instanceId}", tmp.ToArray(), tmp.Length);
-            logger.DumpBase64($"plain {instanceId}", outbuf, tmp.Length);
-            logger.Dump($"iv {instanceId}", iv, ivLen);
-            outlength = tmp.Length;
-        }
-
         public override int Decrypt(Span<byte> plain, ReadOnlySpan<byte> cipher)
         {
             Span<byte> tmp;// = cipher;
@@ -220,7 +148,7 @@ namespace Shadowsocks.Encryption.Stream
             // read all data from buffer
             int len = CipherDecrypt(plain, cipher.Slice(cipherOffset));
             logger.DumpBase64($"cipher {instanceId}", cipher.Slice(cipherOffset));
-            logger.DumpBase64($"plain {instanceId}", plain);
+            logger.DumpBase64($"plain {instanceId}", plain.Slice(0, len));
             logger.Dump($"iv {instanceId}", iv, ivLen);
             return len;
         }
@@ -228,40 +156,12 @@ namespace Shadowsocks.Encryption.Stream
         #endregion
 
         #region UDP
-        [MethodImpl(MethodImplOptions.Synchronized)]
-        public override void EncryptUDP(byte[] buf, int length, byte[] outbuf, out int outlength)
-        {
-            // Generate IV
-            RNG.GetBytes(outbuf, ivLen);
-            initCipher(outbuf, true);
-            lock (sharedBuffer)
-            {
-                CipherEncrypt(buf, sharedBuffer);
-                outlength = length + ivLen;
-                Buffer.BlockCopy(sharedBuffer, 0, outbuf, ivLen, length);
-            }
-        }
-
         public override int EncryptUDP(ReadOnlySpan<byte> plain, Span<byte> cipher)
         {
             byte[] iv = RNG.GetBytes(ivLen);
             iv.CopyTo(cipher);
             initCipher(iv, true);
             return ivLen + CipherEncrypt(plain, cipher.Slice(ivLen));
-        }
-
-        [MethodImpl(MethodImplOptions.Synchronized)]
-        public override void DecryptUDP(byte[] buf, int length, byte[] outbuf, out int outlength)
-        {
-            // Get IV from first pos
-            initCipher(buf, false);
-            outlength = length - ivLen;
-            lock (sharedBuffer)
-            {
-                // C# could be multi-threaded
-                Buffer.BlockCopy(buf, ivLen, sharedBuffer, 0, length - ivLen);
-                CipherDecrypt(outbuf, sharedBuffer);
-            }
         }
 
         public override int DecryptUDP(Span<byte> plain, ReadOnlySpan<byte> cipher)

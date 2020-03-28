@@ -339,7 +339,7 @@ namespace Shadowsocks.Controller
                 if (bytesRead >= 5)
                 {
                     _command = _connetionRecvBuffer[1];
-                    switch(_command)
+                    switch (_command)
                     {
                         case CMD_CONNECT:
 
@@ -467,7 +467,7 @@ namespace Shadowsocks.Controller
                             break;
                     }
 
-                     Logger.Debug($"connect to {dstAddr}:{dstPort}");
+                    Logger.Debug($"connect to {dstAddr}:{dstPort}");
 
                     _destEndPoint = SocketUtil.GetEndPoint(dstAddr, dstPort);
 
@@ -820,7 +820,8 @@ namespace Shadowsocks.Controller
                     {
                         try
                         {
-                            decryptor.Decrypt(_remoteRecvBuffer, bytesRead, _remoteSendBuffer, out bytesToSend);
+                            bytesToSend = decryptor.Decrypt(_remoteSendBuffer, _remoteRecvBuffer.AsSpan(0, bytesRead));
+                            // decryptor.Decrypt(_remoteRecvBuffer, bytesRead, _remoteSendBuffer, out bytesToSend);
                         }
                         catch (CryptoErrorException)
                         {
@@ -893,7 +894,8 @@ namespace Shadowsocks.Controller
             {
                 try
                 {
-                    encryptor.Encrypt(_connetionRecvBuffer, length, _connetionSendBuffer, out bytesToSend);
+                    bytesToSend = encryptor.Encrypt(_connetionRecvBuffer.AsSpan(0, length), _connetionSendBuffer);
+                    // encryptor.Encrypt(_connetionRecvBuffer, length, _connetionSendBuffer, out bytesToSend);
                 }
                 catch (CryptoErrorException)
                 {

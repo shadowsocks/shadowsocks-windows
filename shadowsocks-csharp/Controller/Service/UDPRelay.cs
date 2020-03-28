@@ -96,11 +96,11 @@ namespace Shadowsocks.Controller
             public void Send(byte[] data, int length)
             {
                 IEncryptor encryptor = EncryptorFactory.GetEncryptor(_server.method, _server.password);
-                byte[] dataIn = new byte[length - 3];
-                Array.Copy(data, 3, dataIn, 0, length - 3);
+                // byte[] dataIn = new byte[length - 3];
+                // Array.Copy(data, 3, dataIn, 0, length - 3);
                 byte[] dataOut = new byte[65536];  // enough space for AEAD ciphers
-                int outlen;
-                encryptor.EncryptUDP(dataIn, length - 3, dataOut, out outlen);
+                // encryptor.EncryptUDP(dataIn, length - 3, dataOut, out outlen);
+                int outlen = encryptor.EncryptUDP(data.AsSpan(3), dataOut);
                 logger.Debug(_localEndPoint, _remoteEndPoint, outlen, "UDP Relay");
                 _remote?.SendTo(dataOut, outlen, SocketFlags.None, _remoteEndPoint);
             }
@@ -124,8 +124,8 @@ namespace Shadowsocks.Controller
                     int outlen;
 
                     IEncryptor encryptor = EncryptorFactory.GetEncryptor(_server.method, _server.password);
-                    encryptor.DecryptUDP(_buffer, bytesRead, dataOut, out outlen);
-
+                    // encryptor.DecryptUDP(_buffer, bytesRead, dataOut, out outlen);
+                    outlen = encryptor.DecryptUDP(dataOut, _buffer.AsSpan(0, bytesRead));
                     byte[] sendBuf = new byte[outlen + 3];
                     Array.Copy(dataOut, 0, sendBuf, 3, outlen);
 
