@@ -37,8 +37,10 @@ namespace Shadowsocks.Test
             byte[] plain2 = new byte[plain.Length + 16];
 
             random.NextBytes(plain);
-            encryptor.Encrypt(plain, length, cipher, out int outLen);
-            decryptor.Decrypt(cipher, outLen, plain2, out int outLen2);
+            int outLen = encryptor.Encrypt(plain, cipher);
+            int outLen2 = decryptor.Decrypt(plain2, cipher.AsSpan(0, outLen));
+            //encryptor.Encrypt(plain, length, cipher, out int outLen);
+            //decryptor.Decrypt(cipher, outLen, plain2, out int outLen2);
             Assert.AreEqual(length, outLen2);
             ArrayEqual<byte>(plain.AsSpan(0, length).ToArray(), plain2.AsSpan(0, length).ToArray());
         }
@@ -123,16 +125,16 @@ namespace Shadowsocks.Test
             Assert.IsFalse(encryptionFailed);
         }
         #endregion
-        
+
         // encryption test cases
         private void RunEncryptionRound(IEncryptor encryptor, IEncryptor decryptor)
         {
-            SingleEncryptionTestCase(encryptor, decryptor, 16384);
             SingleEncryptionTestCase(encryptor, decryptor, 7);      // for not aligned data
             SingleEncryptionTestCase(encryptor, decryptor, 1000);
             SingleEncryptionTestCase(encryptor, decryptor, 12333);
+            SingleEncryptionTestCase(encryptor, decryptor, 16384);
         }
-        
+
         [TestMethod]
         public void TestAEADAesGcmNativeEncryption()
         {

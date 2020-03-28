@@ -12,6 +12,10 @@ namespace NLog
     public static class LoggerExtension
     {
         // for key, iv, etc...
+        public static void Dump(this Logger logger, string tag, ReadOnlySpan<byte> arr)
+        {
+            logger.Dump(tag, arr.ToArray(), arr.Length);
+        }
         public static void Dump(this Logger logger, string tag, byte[] arr, int length = -1)
         {
             if (length == -1) length = arr.Length;
@@ -26,6 +30,10 @@ namespace NLog
             logger.Trace(content);
         }
         // for cipher and plain text, so we can use openssl to test
+        public static void DumpBase64(this Logger logger, string tag, ReadOnlySpan<byte> arr)
+        {
+            logger.DumpBase64(tag, arr.ToArray(), arr.Length);
+        }
         public static void DumpBase64(this Logger logger, string tag, byte[] arr, int length = -1)
         {
             if (length == -1) length = arr.Length;

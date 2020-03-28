@@ -117,6 +117,28 @@ namespace Shadowsocks.Encryption.Stream
             outlength = size + cipherOffset;
         }
 
+        public override int Encrypt(ReadOnlySpan<byte> plain, Span<byte> cipher)
+        {
+            int cipherOffset = 0;
+            logger.Trace($"{instanceId} encrypt TCP, generate iv: {!ivReady}");
+            if (!ivReady)
+            {
+                // Generate IV
+                byte[] ivBytes = RNG.GetBytes(ivLen);
+                initCipher(ivBytes, true);
+                ivBytes.CopyTo(cipher);
+                cipherOffset = ivLen;
+                cipher = cipher.Slice(cipherOffset);
+                ivReady = true;
+            }
+            int clen = CipherEncrypt(plain, cipher);
+
+            logger.DumpBase64($"plain {instanceId}", plain);
+            logger.DumpBase64($"cipher {instanceId}", cipher);
+            logger.Dump($"iv {instanceId}", iv, ivLen);
+            return clen + cipherOffset;
+        }
+
         private int recieveCtr = 0;
         [MethodImpl(MethodImplOptions.Synchronized)]
         public override void Decrypt(byte[] buf, int length, byte[] outbuf, out int outlength)
@@ -161,6 +183,48 @@ namespace Shadowsocks.Encryption.Stream
             outlength = tmp.Length;
         }
 
+        public override int Decrypt(Span<byte> plain, ReadOnlySpan<byte> cipher)
+        {
+            Span<byte> tmp;// = cipher;
+            logger.Trace($"{instanceId} decrypt TCP, read iv: {!ivReady}");
+
+            int cipherOffset = 0;
+            // is first packet, need read iv
+            if (!ivReady)
+            {
+                // push to buffer in case of not enough data
+                cipher.CopyTo(sharedBuffer.AsSpan(recieveCtr));
+                recieveCtr += cipher.Length;
+
+                // not enough data for read iv, return 0 byte data
+                if (recieveCtr <= ivLen)
+                {
+                    return 0;
+                }
+                // start decryption
+                ivReady = true;
+                if (ivLen > 0)
+                {
+                    // read iv
+                    byte[] iv = sharedBuffer.AsSpan(0, ivLen).ToArray();
+                    initCipher(iv, false);
+                }
+                else
+                {
+                    initCipher(Array.Empty<byte>(), false);
+                }
+                cipherOffset += ivLen;
+                tmp = sharedBuffer.AsSpan(ivLen, recieveCtr - ivLen);
+            }
+
+            // read all data from buffer
+            int len = CipherDecrypt(plain, cipher.Slice(cipherOffset));
+            logger.DumpBase64($"cipher {instanceId}", cipher.Slice(cipherOffset));
+            logger.DumpBase64($"plain {instanceId}", plain);
+            logger.Dump($"iv {instanceId}", iv, ivLen);
+            return len;
+        }
+
         #endregion
 
         #region UDP
@@ -178,6 +242,14 @@ namespace Shadowsocks.Encryption.Stream
             }
         }
 
+        public override int EncryptUDP(ReadOnlySpan<byte> plain, Span<byte> cipher)
+        {
+            byte[] iv = RNG.GetBytes(ivLen);
+            iv.CopyTo(cipher);
+            initCipher(iv, true);
+            return ivLen + CipherEncrypt(plain, cipher.Slice(ivLen));
+        }
+
         [MethodImpl(MethodImplOptions.Synchronized)]
         public override void DecryptUDP(byte[] buf, int length, byte[] outbuf, out int outlength)
         {
@@ -192,26 +264,12 @@ namespace Shadowsocks.Encryption.Stream
             }
         }
 
-        #endregion
-
-        public override int Encrypt(ReadOnlySpan<byte> plain, Span<byte> cipher)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override int Decrypt(Span<byte> plain, ReadOnlySpan<byte> cipher)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override int EncryptUDP(ReadOnlySpan<byte> plain, Span<byte> cipher)
-        {
-            throw new NotImplementedException();
-        }
-
         public override int DecryptUDP(Span<byte> plain, ReadOnlySpan<byte> cipher)
         {
-            throw new NotImplementedException();
+            initCipher(cipher.Slice(0, ivLen).ToArray(), false);
+            return CipherDecrypt(plain, cipher.Slice(ivLen));
         }
+
+        #endregion
     }
 }
