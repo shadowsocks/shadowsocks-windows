@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Security.Cryptography;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Shadowsocks.Encryption.AEAD
 {
@@ -34,7 +31,7 @@ namespace Shadowsocks.Encryption.AEAD
 
         public override int CipherEncrypt(Span<byte> plain, Span<byte> cipher)
         {
-            using var aes = new AesGcm(sessionKey);
+            using AesGcm aes = new AesGcm(sessionKey);
             aes.Encrypt(nonce.AsSpan(), plain, cipher.Slice(0, plain.Length), cipher.Slice(plain.Length, tagLen));
             return plain.Length + tagLen;
         }
@@ -42,9 +39,9 @@ namespace Shadowsocks.Encryption.AEAD
         public override int CipherDecrypt(Span<byte> plain, Span<byte> cipher)
         {
             int clen = cipher.Length - tagLen;
-            using var aes = new AesGcm(sessionKey);
-            var ciphertxt = cipher.Slice(0, clen);
-            var tag = cipher.Slice(clen);
+            using AesGcm aes = new AesGcm(sessionKey);
+            Span<byte> ciphertxt = cipher.Slice(0, clen);
+            Span<byte> tag = cipher.Slice(clen);
             aes.Decrypt(nonce.AsSpan(), ciphertxt, tag, plain.Slice(0, clen));
             return clen;
         }

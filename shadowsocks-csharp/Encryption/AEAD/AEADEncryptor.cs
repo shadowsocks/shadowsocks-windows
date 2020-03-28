@@ -1,11 +1,11 @@
 ﻿using NLog;
+using Shadowsocks.Controller;
+using Shadowsocks.Encryption.Exception;
+using Shadowsocks.Encryption.Stream;
 using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Text;
-using Shadowsocks.Controller;
-using Shadowsocks.Encryption.Exception;
-using Shadowsocks.Encryption.Stream;
 
 namespace Shadowsocks.Encryption.AEAD
 {
@@ -48,7 +48,7 @@ namespace Shadowsocks.Encryption.AEAD
         {
             CipherInfo = getCiphers()[method.ToLower()];
             cipherFamily = CipherInfo.Type;
-            var parameter = (AEADCipherParameter)CipherInfo.CipherParameter;
+            AEADCipherParameter parameter = (AEADCipherParameter)CipherInfo.CipherParameter;
             keyLen = parameter.KeySize;
             saltLen = parameter.SaltSize;
             tagLen = parameter.TagSize;
@@ -65,8 +65,16 @@ namespace Shadowsocks.Encryption.AEAD
         {
             byte[] passbuf = Encoding.UTF8.GetBytes(password);
             // init master key
-            if (masterKey == null) masterKey = new byte[keyLen];
-            if (masterKey.Length != keyLen) Array.Resize(ref masterKey, keyLen);
+            if (masterKey == null)
+            {
+                masterKey = new byte[keyLen];
+            }
+
+            if (masterKey.Length != keyLen)
+            {
+                Array.Resize(ref masterKey, keyLen);
+            }
+
             DeriveKey(passbuf, masterKey, keyLen);
             // init session key
             sessionKey = new byte[keyLen];
@@ -142,8 +150,12 @@ namespace Shadowsocks.Encryption.AEAD
             {
                 // calculate next chunk size
                 int bufSize = tmp.Length;
-                if (bufSize <= 0) return;
-                var chunklength = (int)Math.Min(bufSize, ChunkLengthMask);
+                if (bufSize <= 0)
+                {
+                    return;
+                }
+
+                int chunklength = (int)Math.Min(bufSize, ChunkLengthMask);
                 // read next chunk
                 byte[] chunkBytes = tmp.Slice(0, chunklength).ToArray();
                 tmp = tmp.Slice(chunklength);

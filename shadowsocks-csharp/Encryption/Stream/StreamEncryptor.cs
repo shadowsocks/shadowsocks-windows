@@ -29,7 +29,7 @@ namespace Shadowsocks.Encryption.Stream
         {
             CipherInfo = getCiphers()[method.ToLower()];
             cipherFamily = CipherInfo.Type;
-            var parameter = (StreamCipherParameter)CipherInfo.CipherParameter;
+            StreamCipherParameter parameter = (StreamCipherParameter)CipherInfo.CipherParameter;
             keyLen = parameter.KeySize;
             ivLen = parameter.IvSize;
 
@@ -44,7 +44,11 @@ namespace Shadowsocks.Encryption.Stream
         {
             byte[] passbuf = Encoding.UTF8.GetBytes(password);
             key ??= new byte[keyLen];
-            if (key.Length != keyLen) Array.Resize(ref key, keyLen);
+            if (key.Length != keyLen)
+            {
+                Array.Resize(ref key, keyLen);
+            }
+
             LegacyDeriveKey(passbuf, key, keyLen);
         }
 
@@ -72,7 +76,11 @@ namespace Shadowsocks.Encryption.Stream
 
         protected virtual void initCipher(byte[] iv, bool isEncrypt)
         {
-            if (ivLen == 0) return;
+            if (ivLen == 0)
+            {
+                return;
+            }
+
             this.iv = new byte[ivLen];
             Array.Copy(iv, this.iv, ivLen);
         }
@@ -115,7 +123,7 @@ namespace Shadowsocks.Encryption.Stream
         {
             Span<byte> tmp = buf.AsSpan(0, length);
             logger.Trace($"{instanceId} decrypt TCP, read iv: {!ivReady}");
-            
+
             // is first packet, need read iv
             if (!ivReady)
             {
@@ -137,7 +145,11 @@ namespace Shadowsocks.Encryption.Stream
                     byte[] iv = sharedBuffer.AsSpan(0, ivLen).ToArray();
                     initCipher(iv, false);
                 }
-                else initCipher(Array.Empty<byte>(), false);
+                else
+                {
+                    initCipher(Array.Empty<byte>(), false);
+                }
+
                 tmp = sharedBuffer.AsSpan(ivLen, recieveCtr - ivLen);
             }
 

@@ -54,7 +54,10 @@ namespace Shadowsocks.Encryption
             bool o = true; // overflow flag
             for (int i = 0; i < salt.Length; i++)
             {
-                if (!o) continue;
+                if (!o)
+                {
+                    continue;
+                }
 
                 salt[i]++;
                 o = salt[i] == 0;
@@ -66,7 +69,11 @@ namespace Shadowsocks.Encryption
             bool o = true; // overflow flag
             for (int i = 0; i < salt.Length; i++)
             {
-                if (!o) continue;
+                if (!o)
+                {
+                    continue;
+                }
+
                 salt[i]++;
                 o = salt[i] == 0;
             }

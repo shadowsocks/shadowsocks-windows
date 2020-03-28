@@ -1,8 +1,6 @@
-﻿using Org.BouncyCastle.Crypto;
-using Org.BouncyCastle.Crypto.Engines;
+﻿using Org.BouncyCastle.Crypto.Engines;
 using Org.BouncyCastle.Crypto.Modes;
 using Org.BouncyCastle.Crypto.Parameters;
-using Org.BouncyCastle.Security;
 using System;
 using System.Collections.Generic;
 
@@ -13,12 +11,10 @@ namespace Shadowsocks.Encryption.Stream
     {
         byte[] cfbBuf = new byte[MaxInputSize + 128];
         int ptr = 0;
-        //ExtendedCfbBufferedBlockCipher c;
-        ExtendedCfbBlockCipher b;
+        readonly ExtendedCfbBlockCipher b;
         public StreamAesBouncyCastleEncryptor(string method, string password) : base(method, password)
         {
             b = new ExtendedCfbBlockCipher(new AesEngine(), 128);
-            // c = new ExtendedCfbBufferedBlockCipher(b);
         }
 
         protected override void initCipher(byte[] iv, bool isEncrypt)
@@ -59,14 +55,18 @@ namespace Shadowsocks.Encryption.Stream
                 tmp.CopyTo(ob.Slice(readPtr));
                 readPtr += blkSize;
             }
-            if (readPtr != blkSize * blkCount) throw new System.Exception();
-            b.ProcessBlock(cfbBuf, readPtr, tmp, 0, false);
-            tmp.CopyTo(ob.Slice(readPtr));
-            Array.Copy(cfbBuf, readPtr, cfbBuf, 0, restSize);
+            if (restSize != 0)
+            {
+                readPtr = blkSize * blkCount;
+                // process last (partial) block without update state
+                b.ProcessBlock(cfbBuf, readPtr, tmp, 0, false);
+                tmp.CopyTo(ob.Slice(readPtr));
+                // write back the partial block block
+                Array.Copy(cfbBuf, readPtr, cfbBuf, 0, restSize);
+            }
+            // cut correct part to output
             ob.Slice(ptr, o.Length).CopyTo(o);
             ptr = restSize;
-
-
         }
 
         #region Cipher Info

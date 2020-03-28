@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using NaCl.Core;
+﻿using NaCl.Core;
 using NaCl.Core.Base;
+using System;
+using System.Collections.Generic;
 
 namespace Shadowsocks.Encryption.AEAD
 {
@@ -48,17 +45,17 @@ namespace Shadowsocks.Encryption.AEAD
                     break;
             }
         }
-        
+
         public override int CipherEncrypt(Span<byte> plain, Span<byte> cipher)
         {
-            var ct = enc.Encrypt(plain, null, nonce);
+            byte[] ct = enc.Encrypt(plain, null, nonce);
             ct.CopyTo(cipher);
             return ct.Length;
         }
 
         public override int CipherDecrypt(Span<byte> plain, Span<byte> cipher)
         {
-            var pt = enc.Decrypt(cipher, null, nonce);
+            byte[] pt = enc.Decrypt(cipher, null, nonce);
             pt.CopyTo(plain);
             return pt.Length;
         }

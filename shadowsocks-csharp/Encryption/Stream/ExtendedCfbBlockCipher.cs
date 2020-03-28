@@ -2,9 +2,8 @@
 // changes: 5th parameter for ProcessBlock, to process without change internal state
 
 
-using System;
-
 using Org.BouncyCastle.Crypto.Parameters;
+using System;
 
 namespace Org.BouncyCastle.Crypto.Modes
 {
@@ -34,10 +33,10 @@ namespace Org.BouncyCastle.Crypto.Modes
             int bitBlockSize)
         {
             this.cipher = cipher;
-            this.blockSize = bitBlockSize / 8;
-            this.IV = new byte[cipher.GetBlockSize()];
-            this.cfbV = new byte[cipher.GetBlockSize()];
-            this.cfbOutV = new byte[cipher.GetBlockSize()];
+            blockSize = bitBlockSize / 8;
+            IV = new byte[cipher.GetBlockSize()];
+            cfbV = new byte[cipher.GetBlockSize()];
+            cfbOutV = new byte[cipher.GetBlockSize()];
         }
         /**
         * return the underlying block cipher that we are wrapping.
@@ -63,7 +62,7 @@ namespace Org.BouncyCastle.Crypto.Modes
             bool forEncryption,
             ICipherParameters parameters)
         {
-            this.encrypting = forEncryption;
+            encrypting = forEncryption;
             if (parameters is ParametersWithIV)
             {
                 ParametersWithIV ivParam = (ParametersWithIV)parameters;
@@ -89,15 +88,9 @@ namespace Org.BouncyCastle.Crypto.Modes
         * @return the name of the underlying algorithm followed by "/CFB"
         * and the block size in bits.
         */
-        public string AlgorithmName
-        {
-            get { return cipher.AlgorithmName + "/CFB" + (blockSize * 8); }
-        }
+        public string AlgorithmName => cipher.AlgorithmName + "/CFB" + (blockSize * 8);
 
-        public bool IsPartialBlockOkay
-        {
-            get { return true; }
-        }
+        public bool IsPartialBlockOkay => true;
 
         /**
         * return the block size we are operating at.

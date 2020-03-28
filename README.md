@@ -125,17 +125,18 @@ especially for feature development.
 #### Open Source Components / Libraries
 
 ```
-Caseless.Fody (MIT)    https://github.com/Fody/Caseless
-Costura.Fody (MIT)     https://github.com/Fody/Costura
-Fody (MIT)             https://github.com/Fody/Fody
-GlobalHotKey (GPLv3)   https://github.com/kirmir/GlobalHotKey
-Newtonsoft.Json (MIT)  https://www.newtonsoft.com/json
-StringEx.CS ()         https://github.com/LazyMode/StringEx
-ZXing.Net (Apache 2.0) https://github.com/micjahn/ZXing.Net
+Caseless.Fody (MIT)        https://github.com/Fody/Caseless
+Costura.Fody (MIT)         https://github.com/Fody/Costura
+Fody (MIT)                 https://github.com/Fody/Fody
+GlobalHotKey (GPLv3)       https://github.com/kirmir/GlobalHotKey
+Newtonsoft.Json (MIT)      https://www.newtonsoft.com/json
+StringEx.CS ()             https://github.com/LazyMode/StringEx
+ZXing.Net (Apache 2.0)     https://github.com/micjahn/ZXing.Net
 
-libsscrypto (GPLv2)    https://github.com/shadowsocks/libsscrypto
-Privoxy (GPLv2)        https://www.privoxy.org
-Sysproxy ()            https://github.com/Noisyfox/sysproxy
+BouncyCastle.NetCore (MIT) https://github.com/chrishaly/bc-csharp
+NaCl.Core (MIT)            https://github.com/idaviddesmet/NaCl.Core
+Privoxy (GPLv2)            https://www.privoxy.org
+Sysproxy ()                https://github.com/Noisyfox/sysproxy
 ```
 
 

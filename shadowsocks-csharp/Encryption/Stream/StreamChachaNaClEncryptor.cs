@@ -9,6 +9,9 @@ namespace Shadowsocks.Encryption.Stream
         const int BlockSize = 64;
         // tcp is stream, which can split into chunks at unexpected position...
         // so we need some special handling, as we can't read all data before encrypt
+        
+        // we did it in AEADEncryptor.cs for AEAD, it can operate at block level
+        // but we need do it ourselves in stream cipher.
 
         // when new data arrive, put it on correct offset
         // and update it, ignore other data, get it in correct offset...
