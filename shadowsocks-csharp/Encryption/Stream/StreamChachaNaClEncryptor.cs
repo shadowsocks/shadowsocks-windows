@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using NaCl.Core;
 
 namespace Shadowsocks.Encryption.Stream
@@ -7,15 +8,16 @@ namespace Shadowsocks.Encryption.Stream
     public class StreamChachaNaClEncryptor : StreamEncryptor
     {
         const int BlockSize = 64;
+
         // tcp is stream, which can split into chunks at unexpected position...
         // so we need some special handling, as we can't read all data before encrypt
-        
+
         // we did it in AEADEncryptor.cs for AEAD, it can operate at block level
         // but we need do it ourselves in stream cipher.
 
         // when new data arrive, put it on correct offset
         // and update it, ignore other data, get it in correct offset...
-        byte[] chachaBuf = new byte[MaxInputSize + BlockSize];
+        readonly byte[] chachaBuf = new byte[MaxInputSize + BlockSize];
         // the 'correct offset', always in 0~BlockSize range, so input data always fit into buffer
         int remain = 0;
         // increase counter manually...
@@ -34,6 +36,7 @@ namespace Shadowsocks.Encryption.Stream
             return CipherUpdate(plain, cipher, true);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining)]
         private int CipherUpdate(ReadOnlySpan<byte> i, Span<byte> o, bool enc)
         {
             int len = i.Length;
@@ -58,7 +61,7 @@ namespace Shadowsocks.Encryption.Stream
             return _ciphers;
         }
 
-        protected override Dictionary<string, CipherInfo> getCiphers()
+        protected override Dictionary<string, CipherInfo> GetCiphers()
         {
             return _ciphers;
         }

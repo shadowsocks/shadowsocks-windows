@@ -18,7 +18,7 @@ namespace Shadowsocks.Encryption.AEAD
             {"aes-256-gcm", new CipherInfo("aes-256-gcm", 32, 32, 12, 16, CipherFamily.AesGcm)},
         };
 
-        protected override Dictionary<string, CipherInfo> getCiphers()
+        protected override Dictionary<string, CipherInfo> GetCiphers()
         {
             return _ciphers;
         }
@@ -32,7 +32,7 @@ namespace Shadowsocks.Encryption.AEAD
         public override int CipherEncrypt(ReadOnlySpan<byte> plain, Span<byte> cipher)
         {
             using AesGcm aes = new AesGcm(sessionKey);
-            aes.Encrypt(nonce.AsSpan(), plain, cipher.Slice(0, plain.Length), cipher.Slice(plain.Length, tagLen));
+            aes.Encrypt(nonce, plain, cipher.Slice(0, plain.Length), cipher.Slice(plain.Length, tagLen));
             return plain.Length + tagLen;
         }
 
@@ -42,7 +42,7 @@ namespace Shadowsocks.Encryption.AEAD
             using AesGcm aes = new AesGcm(sessionKey);
             ReadOnlySpan<byte> ciphertxt = cipher.Slice(0, clen);
             ReadOnlySpan<byte> tag = cipher.Slice(clen);
-            aes.Decrypt(nonce.AsSpan(), ciphertxt, tag, plain.Slice(0, clen));
+            aes.Decrypt(nonce, ciphertxt, tag, plain.Slice(0, clen));
             return clen;
         }
     }

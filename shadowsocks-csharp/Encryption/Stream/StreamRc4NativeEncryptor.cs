@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
 namespace Shadowsocks.Encryption.Stream
 {
@@ -11,9 +12,9 @@ namespace Shadowsocks.Encryption.Stream
         {
         }
 
-        protected override void initCipher(byte[] iv, bool isEncrypt)
+        protected override void InitCipher(byte[] iv, bool isEncrypt)
         {
-            base.initCipher(iv, isEncrypt);
+            base.InitCipher(iv, isEncrypt);
             // rc4-md5 is rc4 with md5 based session key
             if (cipherFamily == CipherFamily.Rc4Md5)
             {
@@ -39,6 +40,7 @@ namespace Shadowsocks.Encryption.Stream
             return CipherUpdate(cipher, plain);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private int CipherUpdate(ReadOnlySpan<byte> i, Span<byte> o)
         {
             // don't know why we need third array, but it works...
@@ -62,7 +64,7 @@ namespace Shadowsocks.Encryption.Stream
             return _ciphers;
         }
 
-        protected override Dictionary<string, CipherInfo> getCiphers()
+        protected override Dictionary<string, CipherInfo> GetCiphers()
         {
             return _ciphers;
         }
@@ -75,7 +77,7 @@ namespace Shadowsocks.Encryption.Stream
             public int index2 = 0;
         }
 
-        private Context ctx = new Context();
+        private readonly Context ctx = new Context();
 
         private byte[] SBox(byte[] key)
         {
@@ -96,6 +98,7 @@ namespace Shadowsocks.Encryption.Stream
             return s;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         private void RC4(Context ctx, Span<byte> s, Span<byte> data, int length)
         {
             for (int n = 0; n < length; n++)
@@ -110,6 +113,7 @@ namespace Shadowsocks.Encryption.Stream
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static void Swap(Span<byte> s, int i, int j)
         {
             byte c = s[i];

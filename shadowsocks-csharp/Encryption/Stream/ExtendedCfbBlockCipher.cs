@@ -13,9 +13,9 @@ namespace Org.BouncyCastle.Crypto.Modes
     public class ExtendedCfbBlockCipher
         : IBlockCipher
     {
-        private byte[] IV;
-        private byte[] cfbV;
-        private byte[] cfbOutV;
+        private readonly byte[] IV;
+        private readonly byte[] cfbV;
+        private readonly byte[] cfbOutV;
         private bool encrypting;
 
         private readonly int blockSize;
@@ -63,9 +63,8 @@ namespace Org.BouncyCastle.Crypto.Modes
             ICipherParameters parameters)
         {
             encrypting = forEncryption;
-            if (parameters is ParametersWithIV)
+            if (parameters is ParametersWithIV ivParam)
             {
-                ParametersWithIV ivParam = (ParametersWithIV)parameters;
                 byte[] iv = ivParam.GetIV();
                 int diff = IV.Length - iv.Length;
                 Array.Copy(iv, 0, IV, diff, iv.Length);

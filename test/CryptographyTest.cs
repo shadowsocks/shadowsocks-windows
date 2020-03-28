@@ -11,7 +11,7 @@ namespace Shadowsocks.Test
     [TestClass]
     public class CryptographyTest
     {
-        Random random = new Random();
+        readonly Random random = new Random();
 
 
         [TestMethod]
@@ -161,9 +161,9 @@ namespace Shadowsocks.Test
         [TestMethod]
         public void TestStreamAesCfbBouncyCastleEncryption()
         {
-            TestEncryptionMethod(typeof(StreamAesBouncyCastleEncryptor), "aes-128-cfb");
-            TestEncryptionMethod(typeof(StreamAesBouncyCastleEncryptor), "aes-192-cfb");
-            TestEncryptionMethod(typeof(StreamAesBouncyCastleEncryptor), "aes-256-cfb");
+            TestEncryptionMethod(typeof(StreamAesCfbBouncyCastleEncryptor), "aes-128-cfb");
+            TestEncryptionMethod(typeof(StreamAesCfbBouncyCastleEncryptor), "aes-192-cfb");
+            TestEncryptionMethod(typeof(StreamAesCfbBouncyCastleEncryptor), "aes-256-cfb");
         }
         [TestMethod]
         public void TestStreamChachaNaClEncryption()

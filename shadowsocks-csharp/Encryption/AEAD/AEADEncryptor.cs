@@ -5,25 +5,24 @@ using Shadowsocks.Encryption.Stream;
 using System;
 using System.Collections.Generic;
 using System.Net;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace Shadowsocks.Encryption.AEAD
 {
     public abstract class AEADEncryptor : EncryptorBase
     {
-        private static Logger logger = LogManager.GetCurrentClassLogger();
+        private static readonly Logger logger = LogManager.GetCurrentClassLogger();
         // We are using the same saltLen and keyLen
         private const string Info = "ss-subkey";
         private static readonly byte[] InfoBytes = Encoding.ASCII.GetBytes(Info);
 
         // every connection should create its own buffer
-        private byte[] sharedBuffer = new byte[65536];
+        private readonly byte[] buffer = new byte[65536];
         private int bufPtr = 0;
 
         public const int ChunkLengthBytes = 2;
         public const uint ChunkLengthMask = 0x3FFFu;
-
-        protected Dictionary<string, CipherInfo> ciphers;
 
         protected CipherFamily cipherFamily;
         protected CipherInfo CipherInfo;
@@ -46,7 +45,7 @@ namespace Shadowsocks.Encryption.AEAD
         public AEADEncryptor(string method, string password)
             : base(method, password)
         {
-            CipherInfo = getCiphers()[method.ToLower()];
+            CipherInfo = GetCiphers()[method.ToLower()];
             cipherFamily = CipherInfo.Type;
             AEADCipherParameter parameter = (AEADCipherParameter)CipherInfo.CipherParameter;
             keyLen = parameter.KeySize;
@@ -55,13 +54,15 @@ namespace Shadowsocks.Encryption.AEAD
             nonceLen = parameter.NonceSize;
 
             InitKey(password);
+
+            salt = new byte[saltLen];
             // Initialize all-zero nonce for each connection
             nonce = new byte[nonceLen];
             logger.Dump($"masterkey {instanceId}", masterKey, keyLen);
             logger.Dump($"nonce {instanceId}", nonce, keyLen);
         }
 
-        protected abstract Dictionary<string, CipherInfo> getCiphers();
+        protected abstract Dictionary<string, CipherInfo> GetCiphers();
 
         protected void InitKey(string password)
         {
@@ -77,32 +78,18 @@ namespace Shadowsocks.Encryption.AEAD
                 Array.Resize(ref masterKey, keyLen);
             }
 
-            DeriveKey(passbuf, masterKey, keyLen);
+            StreamEncryptor.LegacyDeriveKey(passbuf, masterKey, keyLen);
             // init session key
             sessionKey = new byte[keyLen];
         }
 
-        public void DeriveKey(byte[] password, byte[] key, int keylen)
-        {
-            StreamEncryptor.LegacyDeriveKey(password, key, keylen);
-        }
-
-        public void DeriveSessionKey(byte[] salt, byte[] masterKey, byte[] sessionKey)
-        {
-            CryptoUtils.HKDF(keyLen, masterKey, salt, InfoBytes).CopyTo(sessionKey, 0);
-        }
-
-        protected void IncrementNonce()
-        {
-            CryptoUtils.SodiumIncrement(nonce);
-        }
-
-        public virtual void InitCipher(byte[] salt, bool isEncrypt, bool isUdp)
+        public virtual void InitCipher(byte[] salt, bool isEncrypt)
         {
             this.salt = new byte[saltLen];
             Array.Copy(salt, this.salt, saltLen);
 
-            DeriveSessionKey(salt, masterKey, sessionKey);
+            CryptoUtils.HKDF(keyLen, masterKey, salt, InfoBytes).CopyTo(sessionKey, 0);
+
             logger.Dump($"salt {instanceId}", salt, saltLen);
             logger.Dump($"sessionkey {instanceId}", sessionKey, keyLen);
         }
@@ -112,10 +99,11 @@ namespace Shadowsocks.Encryption.AEAD
 
         #region TCP
 
+        [MethodImpl(MethodImplOptions.Synchronized | MethodImplOptions.AggressiveOptimization)]
         public override int Encrypt(ReadOnlySpan<byte> plain, Span<byte> cipher)
         {
             // push data
-            Span<byte> tmp = sharedBuffer.AsSpan(0, plain.Length + bufPtr);
+            Span<byte> tmp = buffer.AsSpan(0, plain.Length + bufPtr);
             plain.CopyTo(tmp.Slice(bufPtr));
 
             int outlength = 0;
@@ -124,7 +112,7 @@ namespace Shadowsocks.Encryption.AEAD
                 saltReady = true;
                 // Generate salt
                 byte[] saltBytes = RNG.GetBytes(saltLen);
-                InitCipher(saltBytes, true, false);
+                InitCipher(saltBytes, true);
                 saltBytes.CopyTo(cipher);
                 outlength = saltLen;
             }
@@ -162,7 +150,7 @@ namespace Shadowsocks.Encryption.AEAD
                     logger.Debug("enc outbuf almost full, giving up");
 
                     // write rest data to head of shared buffer
-                    tmp.CopyTo(sharedBuffer);
+                    tmp.CopyTo(buffer);
                     bufPtr = tmp.Length;
 
                     return outlength;
@@ -177,11 +165,12 @@ namespace Shadowsocks.Encryption.AEAD
             }
         }
 
+        [MethodImpl(MethodImplOptions.Synchronized | MethodImplOptions.AggressiveOptimization)]
         public override int Decrypt(Span<byte> plain, ReadOnlySpan<byte> cipher)
         {
             int outlength = 0;
             // drop all into buffer
-            Span<byte> tmp = sharedBuffer.AsSpan(0, cipher.Length + bufPtr);
+            Span<byte> tmp = buffer.AsSpan(0, cipher.Length + bufPtr);
             cipher.CopyTo(tmp.Slice(bufPtr));
             int bufSize = tmp.Length;
 
@@ -192,7 +181,7 @@ namespace Shadowsocks.Encryption.AEAD
                 if (bufSize <= saltLen)
                 {
                     // need more, write back cache
-                    tmp.CopyTo(sharedBuffer);
+                    tmp.CopyTo(buffer);
                     bufPtr = tmp.Length;
                     return outlength;
                 }
@@ -202,7 +191,7 @@ namespace Shadowsocks.Encryption.AEAD
                 byte[] salt = tmp.Slice(0, saltLen).ToArray();
                 tmp = tmp.Slice(saltLen);
 
-                InitCipher(salt, false, false);
+                InitCipher(salt, false);
                 logger.Debug("get salt len " + saltLen);
             }
 
@@ -222,7 +211,7 @@ namespace Shadowsocks.Encryption.AEAD
                 {
                     // so we only have chunk length and its tag?
                     // wait more
-                    tmp.CopyTo(sharedBuffer);
+                    tmp.CopyTo(buffer);
                     bufPtr = tmp.Length;
                     return outlength;
                 }
@@ -231,7 +220,7 @@ namespace Shadowsocks.Encryption.AEAD
                 if (len <= 0)
                 {
                     // no chunk decrypted
-                    tmp.CopyTo(sharedBuffer);
+                    tmp.CopyTo(buffer);
                     bufPtr = tmp.Length;
                     return outlength;
                 }
@@ -243,7 +232,7 @@ namespace Shadowsocks.Encryption.AEAD
                 if (outlength + 100 > TCPHandler.BufferSize)
                 {
                     logger.Debug("dec outbuf almost full, giving up");
-                    tmp.CopyTo(sharedBuffer);
+                    tmp.CopyTo(buffer);
                     bufPtr = tmp.Length;
                     return outlength;
                 }
@@ -260,21 +249,24 @@ namespace Shadowsocks.Encryption.AEAD
         #endregion
 
         #region UDP
+        [MethodImpl(MethodImplOptions.Synchronized | MethodImplOptions.AggressiveOptimization)]
         public override int EncryptUDP(ReadOnlySpan<byte> plain, Span<byte> cipher)
         {
             RNG.GetSpan(cipher.Slice(0, saltLen));
-            InitCipher(cipher.Slice(0, saltLen).ToArray(), true, true);
+            InitCipher(cipher.Slice(0, saltLen).ToArray(), true);
             return saltLen + CipherEncrypt(plain, cipher.Slice(saltLen));
         }
 
+        [MethodImpl(MethodImplOptions.Synchronized | MethodImplOptions.AggressiveOptimization)]
         public override int DecryptUDP(Span<byte> plain, ReadOnlySpan<byte> cipher)
         {
-            InitCipher(cipher.Slice(0, saltLen).ToArray(), false, true);
+            InitCipher(cipher.Slice(0, saltLen).ToArray(), false);
             return CipherDecrypt(plain, cipher.Slice(saltLen));
         }
 
         #endregion
 
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         private int ChunkEncrypt(ReadOnlySpan<byte> plain, Span<byte> cipher)
         {
             if (plain.Length > ChunkLengthMask)
@@ -285,13 +277,14 @@ namespace Shadowsocks.Encryption.AEAD
 
             byte[] lenbuf = BitConverter.GetBytes((ushort)IPAddress.HostToNetworkOrder((short)plain.Length));
             int cipherLenSize = CipherEncrypt(lenbuf, cipher);
-            IncrementNonce();
+            CryptoUtils.SodiumIncrement(nonce);
             int cipherDataSize = CipherEncrypt(plain, cipher.Slice(cipherLenSize));
-            IncrementNonce();
+            CryptoUtils.SodiumIncrement(nonce);
 
             return cipherLenSize + cipherDataSize;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         private int ChunkDecrypt(Span<byte> plain, ReadOnlySpan<byte> cipher)
         {
             // try to dec chunk len
@@ -311,11 +304,11 @@ namespace Shadowsocks.Encryption.AEAD
                 logger.Debug("No data to decrypt one chunk");
                 return 0;
             }
-            IncrementNonce();
+            CryptoUtils.SodiumIncrement(nonce);
             // we have enough data to decrypt one chunk
             // drop chunk len and its tag from buffer
             int len = CipherDecrypt(plain, cipher.Slice(ChunkLengthBytes + tagLen, chunkLength + tagLen));
-            IncrementNonce();
+            CryptoUtils.SodiumIncrement(nonce);
             return len;
         }
     }

@@ -8,7 +8,7 @@ namespace Shadowsocks.Encryption.AEAD
     public class AEADNaClEncryptor : AEADEncryptor
     {
 
-        SnufflePoly1305 enc;
+        SnufflePoly1305? enc;
         public AEADNaClEncryptor(string method, string password) : base(method, password)
         {
         }
@@ -20,7 +20,7 @@ namespace Shadowsocks.Encryption.AEAD
             {"xchacha20-ietf-poly1305", new CipherInfo("xchacha20-ietf-poly1305",32, 32, 24, 16, CipherFamily.XChacha20Poly1305)},
         };
 
-        protected override Dictionary<string, CipherInfo> getCiphers()
+        protected override Dictionary<string, CipherInfo> GetCiphers()
         {
             return _ciphers;
         }
@@ -31,31 +31,26 @@ namespace Shadowsocks.Encryption.AEAD
         }
         #endregion
 
-        public override void InitCipher(byte[] salt, bool isEncrypt, bool isUdp)
+        public override void InitCipher(byte[] salt, bool isEncrypt)
         {
-            base.InitCipher(salt, isEncrypt, isUdp);
-            switch (cipherFamily)
+            base.InitCipher(salt, isEncrypt);
+            enc = cipherFamily switch
             {
-                default:
-                case CipherFamily.Chacha20Poly1305:
-                    enc = new ChaCha20Poly1305(sessionKey);
-                    break;
-                case CipherFamily.XChacha20Poly1305:
-                    enc = new XChaCha20Poly1305(sessionKey);
-                    break;
-            }
+                CipherFamily.XChacha20Poly1305 => new XChaCha20Poly1305(sessionKey),
+                _ => new ChaCha20Poly1305(sessionKey),
+            };
         }
 
         public override int CipherEncrypt(ReadOnlySpan<byte> plain, Span<byte> cipher)
         {
-            byte[] ct = enc.Encrypt(plain, null, nonce);
+            byte[] ct = enc!.Encrypt(plain, null, nonce);
             ct.CopyTo(cipher);
             return ct.Length;
         }
 
         public override int CipherDecrypt(Span<byte> plain, ReadOnlySpan<byte> cipher)
         {
-            byte[] pt = enc.Decrypt(cipher, null, nonce);
+            byte[] pt = enc!.Decrypt(cipher, null, nonce);
             pt.CopyTo(plain);
             return pt.Length;
         }

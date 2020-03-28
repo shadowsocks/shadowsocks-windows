@@ -1,6 +1,7 @@
 ﻿using NLog;
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace Shadowsocks.Encryption.Stream
@@ -26,7 +27,7 @@ namespace Shadowsocks.Encryption.Stream
         public StreamEncryptor(string method, string password)
             : base(method, password)
         {
-            CipherInfo = getCiphers()[method.ToLower()];
+            CipherInfo = GetCiphers()[method.ToLower()];
             cipherFamily = CipherInfo.Type;
             StreamCipherParameter parameter = (StreamCipherParameter)CipherInfo.CipherParameter;
             keyLen = parameter.KeySize;
@@ -37,7 +38,7 @@ namespace Shadowsocks.Encryption.Stream
             logger.Dump($"key {instanceId}", key, keyLen);
         }
 
-        protected abstract Dictionary<string, CipherInfo> getCiphers();
+        protected abstract Dictionary<string, CipherInfo> GetCiphers();
 
         private void InitKey(string password)
         {
@@ -51,6 +52,7 @@ namespace Shadowsocks.Encryption.Stream
             LegacyDeriveKey(passbuf, key, keyLen);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void LegacyDeriveKey(byte[] password, byte[] key, int keylen)
         {
             byte[] result = new byte[password.Length + MD5Length];
@@ -73,7 +75,7 @@ namespace Shadowsocks.Encryption.Stream
             }
         }
 
-        protected virtual void initCipher(byte[] iv, bool isEncrypt)
+        protected virtual void InitCipher(byte[] iv, bool isEncrypt)
         {
             if (ivLen == 0)
             {
@@ -88,6 +90,7 @@ namespace Shadowsocks.Encryption.Stream
         protected abstract int CipherDecrypt(Span<byte> plain, ReadOnlySpan<byte> cipher);
 
         #region TCP
+        [MethodImpl(MethodImplOptions.Synchronized | MethodImplOptions.AggressiveOptimization)]
         public override int Encrypt(ReadOnlySpan<byte> plain, Span<byte> cipher)
         {
             int cipherOffset = 0;
@@ -96,7 +99,7 @@ namespace Shadowsocks.Encryption.Stream
             {
                 // Generate IV
                 byte[] ivBytes = RNG.GetBytes(ivLen);
-                initCipher(ivBytes, true);
+                InitCipher(ivBytes, true);
                 ivBytes.CopyTo(cipher);
                 cipherOffset = ivLen;
                 cipher = cipher.Slice(cipherOffset);
@@ -111,9 +114,9 @@ namespace Shadowsocks.Encryption.Stream
         }
 
         private int recieveCtr = 0;
+        [MethodImpl(MethodImplOptions.Synchronized | MethodImplOptions.AggressiveOptimization)]
         public override int Decrypt(Span<byte> plain, ReadOnlySpan<byte> cipher)
         {
-            Span<byte> tmp;// = cipher;
             logger.Trace($"{instanceId} decrypt TCP, read iv: {!ivReady}");
 
             int cipherOffset = 0;
@@ -135,14 +138,13 @@ namespace Shadowsocks.Encryption.Stream
                 {
                     // read iv
                     byte[] iv = sharedBuffer.AsSpan(0, ivLen).ToArray();
-                    initCipher(iv, false);
+                    InitCipher(iv, false);
                 }
                 else
                 {
-                    initCipher(Array.Empty<byte>(), false);
+                    InitCipher(Array.Empty<byte>(), false);
                 }
                 cipherOffset += ivLen;
-                tmp = sharedBuffer.AsSpan(ivLen, recieveCtr - ivLen);
             }
 
             // read all data from buffer
@@ -156,17 +158,19 @@ namespace Shadowsocks.Encryption.Stream
         #endregion
 
         #region UDP
+        [MethodImpl(MethodImplOptions.Synchronized | MethodImplOptions.AggressiveOptimization)]
         public override int EncryptUDP(ReadOnlySpan<byte> plain, Span<byte> cipher)
         {
             byte[] iv = RNG.GetBytes(ivLen);
             iv.CopyTo(cipher);
-            initCipher(iv, true);
+            InitCipher(iv, true);
             return ivLen + CipherEncrypt(plain, cipher.Slice(ivLen));
         }
 
+        [MethodImpl(MethodImplOptions.Synchronized | MethodImplOptions.AggressiveOptimization)]
         public override int DecryptUDP(Span<byte> plain, ReadOnlySpan<byte> cipher)
         {
-            initCipher(cipher.Slice(0, ivLen).ToArray(), false);
+            InitCipher(cipher.Slice(0, ivLen).ToArray(), false);
             return CipherDecrypt(plain, cipher.Slice(ivLen));
         }
 

@@ -11,8 +11,8 @@ namespace Shadowsocks.Encryption
     {
         public static string DefaultCipher = "chacha20-ietf-poly1305";
 
-        private static Dictionary<string, Type> _registeredEncryptors = new Dictionary<string, Type>();
-        private static Dictionary<string, CipherInfo> ciphers = new Dictionary<string, CipherInfo>();
+        private static readonly Dictionary<string, Type> _registeredEncryptors = new Dictionary<string, Type>();
+        private static readonly Dictionary<string, CipherInfo> ciphers = new Dictionary<string, CipherInfo>();
         private static readonly Type[] ConstructorTypes = { typeof(string), typeof(string) };
 
         static EncryptorFactory()
@@ -33,12 +33,12 @@ namespace Shadowsocks.Encryption
                     _registeredEncryptors.Add(method.Key, typeof(StreamRc4NativeEncryptor));
                 }
             }
-            foreach (var method in StreamAesBouncyCastleEncryptor.SupportedCiphers())
+            foreach (var method in StreamAesCfbBouncyCastleEncryptor.SupportedCiphers())
             {
                 if (!_registeredEncryptors.ContainsKey(method.Key))
                 {
                     ciphers.Add(method.Key, method.Value);
-                    _registeredEncryptors.Add(method.Key, typeof(StreamAesBouncyCastleEncryptor));
+                    _registeredEncryptors.Add(method.Key, typeof(StreamAesCfbBouncyCastleEncryptor));
                 }
             }
             foreach (var method in StreamChachaNaClEncryptor.SupportedCiphers())
@@ -77,7 +77,7 @@ namespace Shadowsocks.Encryption
             }
 
             method = method.ToLowerInvariant();
-            bool ok = _registeredEncryptors.TryGetValue(method, out Type t);
+            bool ok = _registeredEncryptors.TryGetValue(method, out Type? t);
             if (!ok)
             {
                 t = _registeredEncryptors[DefaultCipher];

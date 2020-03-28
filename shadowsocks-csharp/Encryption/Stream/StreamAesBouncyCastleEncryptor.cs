@@ -3,23 +3,24 @@ using Org.BouncyCastle.Crypto.Modes;
 using Org.BouncyCastle.Crypto.Parameters;
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
 namespace Shadowsocks.Encryption.Stream
 {
 
-    public class StreamAesBouncyCastleEncryptor : StreamEncryptor
+    public class StreamAesCfbBouncyCastleEncryptor : StreamEncryptor
     {
-        byte[] cfbBuf = new byte[MaxInputSize + 128];
+        readonly byte[] cfbBuf = new byte[MaxInputSize + 128];
         int ptr = 0;
         readonly ExtendedCfbBlockCipher b;
-        public StreamAesBouncyCastleEncryptor(string method, string password) : base(method, password)
+        public StreamAesCfbBouncyCastleEncryptor(string method, string password) : base(method, password)
         {
             b = new ExtendedCfbBlockCipher(new AesEngine(), 128);
         }
 
-        protected override void initCipher(byte[] iv, bool isEncrypt)
+        protected override void InitCipher(byte[] iv, bool isEncrypt)
         {
-            base.initCipher(iv, isEncrypt);
+            base.InitCipher(iv, isEncrypt);
             b.Init(isEncrypt, new ParametersWithIV(new KeyParameter(key), iv));
         }
 
@@ -35,6 +36,7 @@ namespace Shadowsocks.Encryption.Stream
             return cipher.Length;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining)]
         private void CipherUpdate(ReadOnlySpan<byte> i, Span<byte> o)
         {
             Span<byte> ob = new byte[o.Length + 128];
@@ -82,7 +84,7 @@ namespace Shadowsocks.Encryption.Stream
             return _ciphers;
         }
 
-        protected override Dictionary<string, CipherInfo> getCiphers()
+        protected override Dictionary<string, CipherInfo> GetCiphers()
         {
             return _ciphers;
         }
