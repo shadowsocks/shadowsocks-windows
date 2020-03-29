@@ -25,6 +25,13 @@ namespace Shadowsocks.Controller
             this._controller = controller;
         }
 
+        public override bool Handle(CachedNetworkStream stream, object state)
+        {
+            byte[] fp = new byte[256];
+            int len = stream.ReadFirstBlock(fp);
+            return Handle(fp, len, stream.Socket, state);
+        }
+
         public override bool Handle(byte[] firstPacket, int length, Socket socket, object state)
         {
             if (socket.ProtocolType != ProtocolType.Udp)

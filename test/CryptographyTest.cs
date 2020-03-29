@@ -42,7 +42,7 @@ namespace Shadowsocks.Test
             //encryptor.Encrypt(plain, length, cipher, out int outLen);
             //decryptor.Decrypt(cipher, outLen, plain2, out int outLen2);
             Assert.AreEqual(length, outLen2);
-            ArrayEqual<byte>(plain.AsSpan(0, length).ToArray(), plain2.AsSpan(0, length).ToArray());
+            TestUtils.ArrayEqual<byte>(plain.AsSpan(0, length).ToArray(), plain2.AsSpan(0, length).ToArray());
         }
 
         const string password = "barfoo!";
@@ -70,36 +70,6 @@ namespace Shadowsocks.Test
                 throw;
             }
         }
-
-        private void ArrayEqual<T>(IEnumerable<T> expected, IEnumerable<T> actual, string msg = "")
-        {
-            var e1 = expected.GetEnumerator();
-            var e2 = actual.GetEnumerator();
-            int ctr = 0;
-            while (true)
-            {
-                var e1next = e1.MoveNext();
-                var e2next = e2.MoveNext();
-
-                if (e1next && e2next)
-                {
-                    Assert.AreEqual(e1.Current, e2.Current, "at " + ctr);
-                }
-                else if (!e1next && !e2next)
-                {
-                    return;
-                }
-                else if (!e1next)
-                {
-                    Assert.Fail($"actual longer than expected ({ctr}) {msg}");
-                }
-                else
-                {
-                    Assert.Fail($"actual shorter than expected ({ctr}) {msg}");
-                }
-            }
-        }
-
         private static bool encryptionFailed = false;
 
         private void TestEncryptionMethod(Type enc, string method)

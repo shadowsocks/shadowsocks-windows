@@ -24,6 +24,8 @@ namespace Shadowsocks.Controller
         {
             public abstract bool Handle(byte[] firstPacket, int length, Socket socket, object state);
 
+            public abstract bool Handle(CachedNetworkStream stream, object state);
+
             public virtual void Stop() { }
         }
 
