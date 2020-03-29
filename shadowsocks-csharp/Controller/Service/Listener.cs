@@ -9,6 +9,7 @@ using Shadowsocks.Model;
 
 namespace Shadowsocks.Controller
 {
+    // TODO: Stream/Dgram Listener, so we needn't put TCP/UDP service together
     public class Listener
     {
         private static Logger logger = LogManager.GetCurrentClassLogger();

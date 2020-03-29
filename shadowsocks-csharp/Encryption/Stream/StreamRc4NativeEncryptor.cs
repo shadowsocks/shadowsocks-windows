@@ -46,7 +46,7 @@ namespace Shadowsocks.Encryption.Stream
             // don't know why we need third array, but it works...
             Span<byte> t = new byte[i.Length];
             i.CopyTo(t);
-            RC4(ctx, sbox, t, t.Length);
+            RC4(sbox, t, t.Length);
             t.CopyTo(o);
             return t.Length;
         }
@@ -71,13 +71,9 @@ namespace Shadowsocks.Encryption.Stream
         #endregion
 
         #region RC4
-        class Context
-        {
-            public int index1 = 0;
-            public int index2 = 0;
-        }
 
-        private readonly Context ctx = new Context();
+        int index1 = 0;
+        int index2 = 0;
 
         private byte[] SBox(byte[] key)
         {
@@ -99,17 +95,17 @@ namespace Shadowsocks.Encryption.Stream
         }
 
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-        private void RC4(Context ctx, Span<byte> s, Span<byte> data, int length)
+        private void RC4(Span<byte> s, Span<byte> data, int length)
         {
             for (int n = 0; n < length; n++)
             {
                 byte b = data[n];
 
-                ctx.index1 = (ctx.index1 + 1) & 255;
-                ctx.index2 = (ctx.index2 + s[ctx.index1]) & 255;
+                index1 = (index1 + 1) & 255;
+                index2 = (index2 + s[index1]) & 255;
 
-                Swap(s, ctx.index1, ctx.index2);
-                data[n] = (byte)(b ^ s[(s[ctx.index1] + s[ctx.index2]) & 255]);
+                Swap(s, index1, index2);
+                data[n] = (byte)(b ^ s[(s[index1] + s[index2]) & 255]);
             }
         }
 

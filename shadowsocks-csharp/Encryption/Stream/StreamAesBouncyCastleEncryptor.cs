@@ -41,7 +41,7 @@ namespace Shadowsocks.Encryption.Stream
         {
             Span<byte> ob = new byte[o.Length + 128];
             i.CopyTo(cfbBuf.AsSpan(ptr));
-            // TODO: standard CFB
+            // TODO: standard CFB, maybe with native aes
             int total = i.Length + ptr;
 
             int blkSize = b.GetBlockSize();

@@ -575,14 +575,12 @@ namespace Shadowsocks.View
         {
             logForm.Dispose();
             logForm = null;
-            Utils.ReleaseMemory(true);
         }
 
         void configForm_FormClosed(object sender, FormClosedEventArgs e)
         {
             configForm.Dispose();
             configForm = null;
-            Utils.ReleaseMemory(true);
             if (_isFirstRun)
             {
                 CheckUpdateForFirstRun();
@@ -600,14 +598,12 @@ namespace Shadowsocks.View
         {
             proxyForm.Dispose();
             proxyForm = null;
-            Utils.ReleaseMemory(true);
         }
 
         void hotkeySettingsForm_FormClosed(object sender, FormClosedEventArgs e)
         {
             hotkeySettingsForm.Dispose();
             hotkeySettingsForm = null;
-            Utils.ReleaseMemory(true);
         }
 
         private void Config_Click(object sender, EventArgs e)

@@ -29,9 +29,15 @@ namespace Shadowsocks.Encryption.AEAD
         }
         #endregion
 
+        AesGcm aes;
+        public override void InitCipher(byte[] salt, bool isEncrypt)
+        {
+            base.InitCipher(salt, isEncrypt);
+            aes = new AesGcm(sessionKey);
+        }
+
         public override int CipherEncrypt(ReadOnlySpan<byte> plain, Span<byte> cipher)
         {
-            using AesGcm aes = new AesGcm(sessionKey);
             aes.Encrypt(nonce, plain, cipher.Slice(0, plain.Length), cipher.Slice(plain.Length, tagLen));
             return plain.Length + tagLen;
         }
@@ -39,7 +45,6 @@ namespace Shadowsocks.Encryption.AEAD
         public override int CipherDecrypt(Span<byte> plain, ReadOnlySpan<byte> cipher)
         {
             int clen = cipher.Length - tagLen;
-            using AesGcm aes = new AesGcm(sessionKey);
             ReadOnlySpan<byte> ciphertxt = cipher.Slice(0, clen);
             ReadOnlySpan<byte> tag = cipher.Slice(clen);
             aes.Decrypt(nonce, ciphertxt, tag, plain.Slice(0, clen));

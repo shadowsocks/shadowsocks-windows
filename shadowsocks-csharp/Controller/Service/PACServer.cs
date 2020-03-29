@@ -181,7 +181,6 @@ Connection: Close
 ";
                 byte[] response = Encoding.UTF8.GetBytes(responseHead + pacContent);
                 socket.BeginSend(response, 0, response.Length, 0, new AsyncCallback(SendCallback), socket);
-                Utils.ReleaseMemory(true);
             }
             catch (Exception e)
             {

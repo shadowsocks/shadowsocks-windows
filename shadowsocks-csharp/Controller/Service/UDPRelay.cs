@@ -25,6 +25,7 @@ namespace Shadowsocks.Controller
             this._controller = controller;
         }
 
+        // TODO: UDP is datagram protocol not stream protocol
         public override bool Handle(CachedNetworkStream stream, object state)
         {
             byte[] fp = new byte[256];

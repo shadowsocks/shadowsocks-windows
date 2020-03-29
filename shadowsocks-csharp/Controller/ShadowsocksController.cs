@@ -95,7 +95,6 @@ namespace Shadowsocks.Controller
             StatisticsConfiguration = StatisticsStrategyConfiguration.Load();
             _strategyManager = new StrategyManager(this);
             _pluginsByServer = new ConcurrentDictionary<Server, Sip003Plugin>();
-            StartReleasingMemory();
             StartTrafficStatistics(61);
 
             ProgramUpdated += (o, e) =>
@@ -568,7 +567,6 @@ namespace Shadowsocks.Controller
 
             ConfigChanged?.Invoke(this, new EventArgs());
             UpdateSystemProxy();
-            Utils.ReleaseMemory(true);
         }
 
         private void StartPlugin()
@@ -621,28 +619,6 @@ namespace Shadowsocks.Controller
         {
             Clipboard.SetDataObject(_pacServer.PacUrl);
         }
-
-        #region Memory Management
-
-        private void StartReleasingMemory()
-        {
-            _ramThread = new Thread(new ThreadStart(ReleaseMemory))
-            {
-                IsBackground = true
-            };
-            _ramThread.Start();
-        }
-
-        private void ReleaseMemory()
-        {
-            while (true)
-            {
-                Utils.ReleaseMemory(false);
-                Thread.Sleep(30 * 1000);
-            }
-        }
-
-        #endregion
 
         #region Traffic Statistics
 

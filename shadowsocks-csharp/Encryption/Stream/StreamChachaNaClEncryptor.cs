@@ -39,6 +39,12 @@ namespace Shadowsocks.Encryption.Stream
         [MethodImpl(MethodImplOptions.AggressiveOptimization | MethodImplOptions.AggressiveInlining)]
         private int CipherUpdate(ReadOnlySpan<byte> i, Span<byte> o, bool enc)
         {
+            // about performance problem:
+            // as a part of hacking for streaming, we need manually increase IC
+            // so we need new Chacha20
+            // and to get correct position, copy paste array everytime is required
+            // NaCl.Core has no int Encrypt(ReadOnlySpan<byte>,Span<byte>)...
+
             int len = i.Length;
             int pad = remain;
             i.CopyTo(chachaBuf.AsSpan(pad));
