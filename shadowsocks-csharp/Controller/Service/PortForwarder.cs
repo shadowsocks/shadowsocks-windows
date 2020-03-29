@@ -19,9 +19,16 @@ namespace Shadowsocks.Controller
         {
             byte[] fp = new byte[256];
             int len = stream.ReadFirstBlock(fp);
-            return Handle(fp, len, stream.Socket, state);
+
+            if (stream.Socket.ProtocolType != ProtocolType.Tcp)
+            {
+                return false;
+            }
+            new Handler().Start(fp, len, stream.Socket, _targetPort);
+            return true;
         }
 
+        [Obsolete]
         public override bool Handle(byte[] firstPacket, int length, Socket socket, object state)
         {
             if (socket.ProtocolType != ProtocolType.Tcp)

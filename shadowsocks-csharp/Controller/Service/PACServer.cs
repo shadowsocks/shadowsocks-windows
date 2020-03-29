@@ -60,6 +60,7 @@ namespace Shadowsocks.Controller
             return Handle(fp, len, stream.Socket, state);
         }
 
+        [Obsolete]
         public override bool Handle(byte[] firstPacket, int length, Socket socket, object state)
         {
             if (socket.ProtocolType != ProtocolType.Tcp)

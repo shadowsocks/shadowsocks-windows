@@ -15,13 +15,17 @@ namespace Shadowsocks.Controller
 
         public interface IService
         {
+            [Obsolete]
             bool Handle(byte[] firstPacket, int length, Socket socket, object state);
+
+            public abstract bool Handle(CachedNetworkStream stream, object state);
 
             void Stop();
         }
 
         public abstract class Service : IService
         {
+            [Obsolete]
             public abstract bool Handle(byte[] firstPacket, int length, Socket socket, object state);
 
             public abstract bool Handle(CachedNetworkStream stream, object state);

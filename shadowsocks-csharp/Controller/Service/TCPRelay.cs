@@ -35,11 +35,52 @@ namespace Shadowsocks.Controller
 
         public override bool Handle(CachedNetworkStream stream, object state)
         {
+            
             byte[] fp = new byte[256];
             int len = stream.ReadFirstBlock(fp);
-            return Handle(fp, len, stream.Socket, state);
+            
+            var socket = stream.Socket;
+            if (socket.ProtocolType != ProtocolType.Tcp
+                || (len < 2 || fp[0] != 5))
+                return false;
+
+            
+            socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, true);
+
+            TCPHandler handler = new TCPHandler(_controller, _config, this, socket);
+
+            IList<TCPHandler> handlersToClose = new List<TCPHandler>();
+            lock (Handlers)
+            {
+                Handlers.Add(handler);
+                DateTime now = DateTime.Now;
+                if (now - _lastSweepTime > TimeSpan.FromSeconds(1))
+                {
+                    _lastSweepTime = now;
+                    foreach (TCPHandler handler1 in Handlers)
+                        if (now - handler1.lastActivity > TimeSpan.FromSeconds(900))
+                            handlersToClose.Add(handler1);
+                }
+            }
+            foreach (TCPHandler handler1 in handlersToClose)
+            {
+                logger.Debug("Closing timed out TCP connection.");
+                handler1.Close();
+            }
+
+            /*
+             * Start after we put it into Handlers set. Otherwise if it failed in handler.Start()
+             * then it will call handler.Close() before we add it into the set.
+             * Then the handler will never release until the next Handle call. Sometimes it will
+             * cause odd problems (especially during memory profiling).
+             */
+            handler.Start(fp, len);
+
+            return true;
+            // return Handle(fp, len, stream.Socket, state);
         }
 
+        [Obsolete]
         public override bool Handle(byte[] firstPacket, int length, Socket socket, object state)
         {
             if (socket.ProtocolType != ProtocolType.Tcp

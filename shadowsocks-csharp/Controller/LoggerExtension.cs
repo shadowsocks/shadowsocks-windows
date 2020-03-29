@@ -18,10 +18,15 @@ namespace NLog
         }
         public static void Dump(this Logger logger, string tag, byte[] arr, int length = -1)
         {
+            if (arr == null) logger.Trace($@"
+{tag}: 
+(null)
+
+");
             if (length == -1) length = arr.Length;
 
             if (!logger.IsTraceEnabled) return;
-            string hex = BitConverter.ToString(arr.AsSpan(0, length).ToArray()).Replace("-", "");
+            string hex = BitConverter.ToString(arr.AsSpan(0, Math.Min(arr.Length, length)).ToArray()).Replace("-", "");
             string content = $@"
 {tag}:
 {hex}
@@ -36,10 +41,15 @@ namespace NLog
         }
         public static void DumpBase64(this Logger logger, string tag, byte[] arr, int length = -1)
         {
+            if (arr == null) logger.Trace($@"
+{tag}: 
+(null)
+
+");
             if (length == -1) length = arr.Length;
 
             if (!logger.IsTraceEnabled) return;
-             string hex =Convert.ToBase64String(arr.AsSpan(0, length).ToArray());
+            string hex = Convert.ToBase64String(arr.AsSpan(0, Math.Min(arr.Length, length)).ToArray());
             string content = $@"
 {tag}:
 {hex}
@@ -47,7 +57,6 @@ namespace NLog
 ";
             logger.Trace(content);
         }
-
 
         public static void Debug(this Logger logger, EndPoint local, EndPoint remote, int len, string header = null, string tailer = null)
         {

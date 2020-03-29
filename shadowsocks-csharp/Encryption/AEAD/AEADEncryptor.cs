@@ -174,7 +174,7 @@ namespace Shadowsocks.Encryption.AEAD
             cipher.CopyTo(tmp.Slice(bufPtr));
             int bufSize = tmp.Length;
 
-            logger.Debug("---Start Decryption");
+            logger.Debug($"{instanceId} decrypt tcp, read salt: {!saltReady}");
             if (!saltReady)
             {
                 // check if we get the leading salt
@@ -187,12 +187,10 @@ namespace Shadowsocks.Encryption.AEAD
                 }
                 saltReady = true;
 
-                // buffer.Get(saltLen);
                 byte[] salt = tmp.Slice(0, saltLen).ToArray();
                 tmp = tmp.Slice(saltLen);
 
                 InitCipher(salt, false);
-                logger.Debug("get salt len " + saltLen);
             }
 
             // handle chunks
@@ -202,7 +200,7 @@ namespace Shadowsocks.Encryption.AEAD
                 // check if we have any data
                 if (bufSize <= 0)
                 {
-                    logger.Debug("No data in buffer");
+                    logger.Trace("No data in buffer");
                     return outlength;
                 }
 
@@ -211,27 +209,32 @@ namespace Shadowsocks.Encryption.AEAD
                 {
                     // so we only have chunk length and its tag?
                     // wait more
+                    logger.Trace($"{instanceId} not enough data to decrypt chunk. write {tmp.Length} byte back to buffer.");
                     tmp.CopyTo(buffer);
                     bufPtr = tmp.Length;
                     return outlength;
                 }
-
+                logger.Trace($"{instanceId} try decrypt to offset {outlength}");
                 int len = ChunkDecrypt(plain.Slice(outlength), tmp);
                 if (len <= 0)
                 {
+                    logger.Trace($"{instanceId} no chunk decrypted, write {tmp.Length} byte back to buffer.");
+
                     // no chunk decrypted
                     tmp.CopyTo(buffer);
                     bufPtr = tmp.Length;
                     return outlength;
                 }
+                logger.Trace($"{instanceId} decrypted {len} to offset {outlength}");
+
                 // drop decrypted data
                 tmp = tmp.Slice(ChunkLengthBytes + tagLen + len + tagLen);
                 outlength += len;
 
-                logger.Debug("aead dec outlength " + outlength);
+                // logger.Debug("aead dec outlength " + outlength);
                 if (outlength + 100 > TCPHandler.BufferSize)
                 {
-                    logger.Debug("dec outbuf almost full, giving up");
+                    logger.Trace($"{instanceId} output almost full, write {tmp.Length} byte back to buffer.");
                     tmp.CopyTo(buffer);
                     bufPtr = tmp.Length;
                     return outlength;
@@ -240,7 +243,8 @@ namespace Shadowsocks.Encryption.AEAD
                 // check if we already done all of them
                 if (bufSize <= 0)
                 {
-                    logger.Debug("No data in _decCircularBuffer, already all done");
+                    bufPtr = 0;
+                    logger.Debug($"{instanceId} no data in buffer, already all done");
                     return outlength;
                 }
             }
@@ -266,7 +270,7 @@ namespace Shadowsocks.Encryption.AEAD
 
         #endregion
 
-        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+        [MethodImpl(MethodImplOptions.Synchronized | MethodImplOptions.AggressiveOptimization)]
         private int ChunkEncrypt(ReadOnlySpan<byte> plain, Span<byte> cipher)
         {
             if (plain.Length > ChunkLengthMask)
@@ -284,7 +288,7 @@ namespace Shadowsocks.Encryption.AEAD
             return cipherLenSize + cipherDataSize;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+        [MethodImpl(MethodImplOptions.Synchronized | MethodImplOptions.AggressiveOptimization)]
         private int ChunkDecrypt(Span<byte> plain, ReadOnlySpan<byte> cipher)
         {
             // try to dec chunk len
@@ -294,14 +298,14 @@ namespace Shadowsocks.Encryption.AEAD
             if (chunkLength > ChunkLengthMask)
             {
                 // we get invalid chunk
-                logger.Error($"Invalid chunk length: {chunkLength}");
+                logger.Error($"{instanceId} Invalid chunk length: {chunkLength}");
                 throw new CryptoErrorException();
             }
-            logger.Debug("Get the real chunk len:" + chunkLength);
+            // logger.Debug("Get the real chunk len:" + chunkLength);
             int bufSize = cipher.Length;
             if (bufSize < ChunkLengthBytes + tagLen /* we haven't remove them */+ chunkLength + tagLen)
             {
-                logger.Debug("No data to decrypt one chunk");
+                logger.Debug($"{instanceId} need {ChunkLengthBytes + tagLen + chunkLength + tagLen}, but have {cipher.Length}");
                 return 0;
             }
             CryptoUtils.SodiumIncrement(nonce);
@@ -309,6 +313,7 @@ namespace Shadowsocks.Encryption.AEAD
             // drop chunk len and its tag from buffer
             int len = CipherDecrypt(plain, cipher.Slice(ChunkLengthBytes + tagLen, chunkLength + tagLen));
             CryptoUtils.SodiumIncrement(nonce);
+            logger.Trace($"{instanceId} decrypted {len} byte chunk used {ChunkLengthBytes + tagLen + chunkLength + tagLen} from {cipher.Length}");
             return len;
         }
     }
