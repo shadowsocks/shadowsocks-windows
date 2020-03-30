@@ -16,7 +16,7 @@ using static Shadowsocks.Encryption.EncryptorBase;
 
 namespace Shadowsocks.Controller
 {
-    class TCPRelay : Listener.Service
+    class TCPRelay : StreamService
     {
         private static Logger logger = LogManager.GetCurrentClassLogger();
         private ShadowsocksController _controller;

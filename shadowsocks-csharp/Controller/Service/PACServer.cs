@@ -10,7 +10,7 @@ using NLog;
 
 namespace Shadowsocks.Controller
 {
-    public class PACServer : Listener.Service
+    public class PACServer : StreamService
     {
         private static Logger logger = LogManager.GetCurrentClassLogger();
 
@@ -49,7 +49,7 @@ namespace Shadowsocks.Controller
 
         private static string GetHash(string content)
         {
-            
+
             return HttpServerUtilityUrlToken.Encode(CryptoUtils.MD5(Encoding.ASCII.GetBytes(content)));
         }
 

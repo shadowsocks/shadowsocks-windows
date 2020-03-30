@@ -10,7 +10,7 @@ using Shadowsocks.Model;
 
 namespace Shadowsocks.Controller
 {
-    class UDPRelay : Listener.Service
+    class UDPRelay : DatagramService
     {
         private ShadowsocksController _controller;
 
@@ -44,7 +44,7 @@ namespace Shadowsocks.Controller
             {
                 return false;
             }
-            Listener.UDPState udpState = (Listener.UDPState)state;
+            UDPListener.UDPState udpState = (UDPListener.UDPState)state;
             IPEndPoint remoteEndPoint = (IPEndPoint)udpState.remoteEndPoint;
             UDPHandler handler = _cache.get(remoteEndPoint);
             if (handler == null)

@@ -26,10 +26,10 @@ namespace Shadowsocks.Controller
         // manipulates UI
         // interacts with low level logic
 
-        private Thread _ramThread;
         private Thread _trafficThread;
 
-        private Listener _listener;
+        private TCPListener _tcpListener;
+        private UDPListener _udpListener;
         private PACDaemon _pacDaemon;
         private PACServer _pacServer;
         private Configuration _config;
@@ -311,10 +311,8 @@ namespace Shadowsocks.Controller
                 return;
             }
             stopped = true;
-            if (_listener != null)
-            {
-                _listener.Stop();
-            }
+            _tcpListener?.Stop();
+            _udpListener?.Stop();
             StopPlugins();
             if (privoxyRunner != null)
             {
@@ -518,7 +516,8 @@ namespace Shadowsocks.Controller
             gfwListUpdater.Error += PacServer_PACUpdateError;
 
             availabilityStatistics.UpdateConfiguration(this);
-            _listener?.Stop();
+            _tcpListener?.Stop();
+            _udpListener?.Stop();
             StopPlugins();
 
             // don't put PrivoxyRunner.Start() before pacServer.Stop()
@@ -536,15 +535,18 @@ namespace Shadowsocks.Controller
 
                 TCPRelay tcpRelay = new TCPRelay(this, _config);
                 UDPRelay udpRelay = new UDPRelay(this);
-                List<Listener.IService> services = new List<Listener.IService>
+                _tcpListener = new TCPListener(_config, new List<IStreamService>
                 {
                     tcpRelay,
-                    udpRelay,
                     _pacServer,
-                    new PortForwarder(privoxyRunner.RunningPort)
-                };
-                _listener = new Listener(services);
-                _listener.Start(_config);
+                    new PortForwarder(privoxyRunner.RunningPort),
+                });
+                _tcpListener.Start();
+                _udpListener = new UDPListener(_config, new List<IDatagramService>
+                {
+                    udpRelay,
+                });
+                _udpListener.Start();
             }
             catch (Exception e)
             {

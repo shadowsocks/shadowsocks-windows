@@ -6,7 +6,7 @@ using Shadowsocks.Util.Sockets;
 
 namespace Shadowsocks.Controller
 {
-    class PortForwarder : Listener.Service
+    class PortForwarder : StreamService
     {
         private readonly int _targetPort;
 
