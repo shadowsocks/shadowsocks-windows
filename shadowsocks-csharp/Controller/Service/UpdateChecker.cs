@@ -24,7 +24,7 @@ namespace Shadowsocks.Controller
         public string LatestVersionURL;
         public string LatestVersionLocalName;
 
-        public const string Version = "4.1.9.2";
+        public const string Version = "4.1.9.3";
 
         public class Asset : IComparable<Asset>
         {
