@@ -1,6 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Shadowsocks.Encryption;
 using Shadowsocks.Encryption.Stream;
+using Shadowsocks.Encryption.AEAD;
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -10,7 +11,7 @@ namespace Shadowsocks.Test
     [TestClass]
     public class CryptographyTest
     {
-
+        Random random = new Random();
         [TestMethod]
         public void TestMD5()
         {
@@ -18,7 +19,6 @@ namespace Shadowsocks.Test
             {
                 System.Security.Cryptography.MD5 md5 = System.Security.Cryptography.MD5.Create();
                 byte[] bytes = new byte[len];
-                var random = new Random();
                 random.NextBytes(bytes);
                 string md5str = Convert.ToBase64String(md5.ComputeHash(bytes));
                 string md5str2 = Convert.ToBase64String(CryptoUtils.MD5(bytes));
@@ -32,12 +32,12 @@ namespace Shadowsocks.Test
             byte[] plain = new byte[16384];
             byte[] cipher = new byte[plain.Length + 100];// AEAD with IPv4 address type needs +100
             byte[] plain2 = new byte[plain.Length + 16];
-            int outLen = 0;
-            int outLen2 = 0;
-            var random = new Random();
+
+            //random = new Random();
+
             random.NextBytes(plain);
-            encryptor.Encrypt(plain, plain.Length, cipher, out outLen);
-            decryptor.Decrypt(cipher, outLen, plain2, out outLen2);
+            encryptor.Encrypt(plain, plain.Length, cipher, out int outLen);
+            decryptor.Decrypt(cipher, outLen, plain2, out int outLen2);
             Assert.AreEqual(plain.Length, outLen2);
             for (int j = 0; j < plain.Length; j++)
             {
@@ -59,83 +59,22 @@ namespace Shadowsocks.Test
             }
         }
 
-        private static bool encryptionFailed = false;
-        private static object locker = new object();
+        const string password = "barfoo!";
 
-        [TestMethod]
-        public void TestBouncyCastleAEADEncryption()
+        private void RunSingleEncryptionThread(Type enc, Type dec, string method)
         {
-            encryptionFailed = false;
-            // run it once before the multi-threading test to initialize global tables
-            RunSingleBouncyCastleAEADEncryptionThread();
-            List<Thread> threads = new List<Thread>();
-            for (int i = 0; i < 10; i++)
-            {
-                Thread t = new Thread(new ThreadStart(RunSingleBouncyCastleAEADEncryptionThread)); threads.Add(t);
-                t.Start();
-            }
-            foreach (Thread t in threads)
-            {
-                t.Join();
-            }
-            RNG.Close();
-            Assert.IsFalse(encryptionFailed);
-        }
-
-        [TestMethod]
-        public void TestNativeEncryption()
-        {
-            encryptionFailed = false;
-            // run it once before the multi-threading test to initialize global tables
-            RunSingleNativeEncryptionThread();
-            List<Thread> threads = new List<Thread>();
-            for (int i = 0; i < 10; i++)
-            {
-                Thread t = new Thread(new ThreadStart(RunSingleNativeEncryptionThread));
-                threads.Add(t);
-                t.Start();
-            }
-            foreach (Thread t in threads)
-            {
-                t.Join();
-            }
-            RNG.Close();
-            Assert.IsFalse(encryptionFailed);
-        }
-
-        private void RunSingleNativeEncryptionThread()
-        {
+            var ector = enc.GetConstructor(new Type[] { typeof(string), typeof(string) });
+            var dctor = dec.GetConstructor(new Type[] { typeof(string), typeof(string) });
             try
             {
-                for (int i = 0; i < 100; i++)
-                {
-                    IEncryptor encryptorN;
-                    IEncryptor decryptorN;
-                    encryptorN = new StreamNativeEncryptor("rc4-md5", "barfoo!");
-                    decryptorN = new StreamNativeEncryptor("rc4-md5", "barfoo!");
-                    RunEncryptionRound(encryptorN, decryptorN);
-                }
-            }
-            catch
-            {
-                encryptionFailed = true;
-                throw;
-            }
-        }
+                IEncryptor encryptor = (IEncryptor)ector.Invoke(new object[] { method, password });
+                IEncryptor decryptor = (IEncryptor)dctor.Invoke(new object[] { method, password });
+                encryptor.AddressBufferLength = 1 + 4 + 2;// ADDR_ATYP_LEN + 4 + ADDR_PORT_LEN;
+                decryptor.AddressBufferLength = 1 + 4 + 2;// ADDR_ATYP_LEN + 4 + ADDR_PORT_LEN;
 
-        private void RunSingleBouncyCastleAEADEncryptionThread()
-        {
-            try
-            {
-                for (int i = 0; i < 100; i++)
+
+                for (int i = 0; i < 16; i++)
                 {
-                    var random = new Random();
-                    IEncryptor encryptor;
-                    IEncryptor decryptor;
-                    encryptor = new Encryption.AEAD.AEADBouncyCastleEncryptor("aes-256-gcm", "barfoo!");
-                    encryptor.AddrBufLength = 1 + 4 + 2;// ADDR_ATYP_LEN + 4 + ADDR_PORT_LEN;
-                    decryptor = new Encryption.AEAD.AEADBouncyCastleEncryptor("aes-256-gcm", "barfoo!");
-                    decryptor.AddrBufLength = 1 + 4 + 2;// ADDR_ATYP_LEN + 4 + ADDR_PORT_LEN;
                     RunEncryptionRound(encryptor, decryptor);
                 }
             }
@@ -144,6 +83,72 @@ namespace Shadowsocks.Test
                 encryptionFailed = true;
                 throw;
             }
+        }
+
+        private static bool encryptionFailed = false;
+
+        private void TestEncryptionMethod(Type enc, string method)
+        {
+            TestEncryptionMethod(enc, enc, method);
+        }
+        private void TestEncryptionMethod(Type enc, Type dec, string method)
+        {
+            encryptionFailed = false;
+
+            // run it once before the multi-threading test to initialize global tables
+            RunSingleEncryptionThread(enc, dec, method);
+            List<Thread> threads = new List<Thread>();
+            for (int i = 0; i < 8; i++)
+            {
+                Thread t = new Thread(new ThreadStart(() => RunSingleEncryptionThread(enc, dec, method))); threads.Add(t);
+                t.Start();
+            }
+            foreach (Thread t in threads)
+            {
+                t.Join();
+            }
+            RNG.Close();
+            Assert.IsFalse(encryptionFailed);
+        }
+
+        [TestMethod]
+        public void TestBouncyCastleAEADEncryption()
+        {
+            TestEncryptionMethod(typeof(AEADBouncyCastleEncryptor), "aes-128-gcm");
+            TestEncryptionMethod(typeof(AEADBouncyCastleEncryptor), "aes-192-gcm");
+            TestEncryptionMethod(typeof(AEADBouncyCastleEncryptor), "aes-256-gcm");
+        }
+
+        [TestMethod]
+        public void TestAesGcmNativeAEADEncryption()
+        {
+            TestEncryptionMethod(typeof(AEADAesGcmNativeEncryptor), "aes-128-gcm");
+            TestEncryptionMethod(typeof(AEADAesGcmNativeEncryptor), "aes-192-gcm");
+            TestEncryptionMethod(typeof(AEADAesGcmNativeEncryptor), "aes-256-gcm");
+        }
+
+        [TestMethod]
+        public void TestNaClAEADEncryption()
+        {
+            TestEncryptionMethod(typeof(AEADNaClEncryptor), "chacha20-ietf-poly1305");
+            TestEncryptionMethod(typeof(AEADNaClEncryptor), "xchacha20-ietf-poly1305");
+        }
+
+        [TestMethod]
+        public void TestNativeEncryption()
+        {
+            TestEncryptionMethod(typeof(StreamTableNativeEncryptor), "plain");
+            TestEncryptionMethod(typeof(StreamRc4NativeEncryptor), "rc4");
+            TestEncryptionMethod(typeof(StreamRc4NativeEncryptor), "rc4-md5");
+        }
+
+        [TestMethod]
+        public void TestNativeTableEncryption()
+        {
+            // Too slow, run once to save CPU
+            var enc = new StreamTableNativeEncryptor("table", "barfoo!");
+            var dec = new StreamTableNativeEncryptor("table", "barfoo!");
+            RunEncryptionRound(enc, dec);
         }
     }
 }

@@ -121,14 +121,21 @@ after_build:
 
     $WorkingFolder = "$env:APPVEYOR_BUILD_FOLDER\working"
     $ExeFileName = "Shadowsocks-$env:APPVEYOR_BUILD_VERSION-$env:CONFIGURATION.exe"
+    $DllFileName = "Shadowsocks.dll"
     $ExeFile = "$WorkingFolder\$DNVer\$ExeFileName"
+    $DllFile = "$WorkingFolder\$DNVer\$DllFileName"
     $ExeHashFile = "$Exefile.hash"
+    $DllHashFile = "$DllFile.hash"
 
     New-Item $WorkingFolder -ItemType Directory -Force
-    Copy-Item $env:APPVEYOR_BUILD_FOLDER\shadowsocks-csharp\bin\$env:CONFIGURATION\net472\Shadowsocks.exe $WorkingFolder\Shadowsocks.exe
+    Copy-Item $env:APPVEYOR_BUILD_FOLDER\shadowsocks-csharp\bin\$env:CONFIGURATION\netcoreapp3.1\Shadowsocks.exe $WorkingFolder\Shadowsocks.exe
+    Copy-Item $env:APPVEYOR_BUILD_FOLDER\shadowsocks-csharp\bin\$env:CONFIGURATION\netcoreapp3.1\Shadowsocks.dll $WorkingFolder\Shadowsocks.dll
+    
     Copy-Item $WorkingFolder\Shadowsocks.exe $ExeFile
+    Copy-Item $WorkingFolder\Shadowsocks.dll $DllFile
 
     CalculateHash -file $Exefile | Out-File -FilePath $ExeHashFile
+    CalculateHash -file $DllFile | Out-File -FilePath $DllHashFile
 
     Push-AppveyorArtifact $ExeFile
     Push-AppveyorArtifact $ExeHashFile
@@ -137,13 +144,17 @@ after_build:
     if ($env:configuration -eq 'Release')
     {
         $ReleaseFile = "$WorkingFolder\Shadowsocks.exe"
+        $ReleaseFile2 = "$WorkingFolder\Shadowsocks.dll"
         $HashFile = "$ReleaseFile.hash"
+        $HashFile2 = "$ReleaseFile2.hash"
         $ZipFile = "$WorkingFolder\Shadowsocks-$env:APPVEYOR_BUILD_VERSION.zip"
         $ZipHashFile = "$ZipFile.hash"
         # Calculate exe Hash and archieve both exe and hash to zip
         CalculateHash -file $ReleaseFile | Out-File -FilePath $hashFile
         7z a $ZipFile $ReleaseFile
+        7z a $ZipFile $ReleaseFile2
         7z a $ZipFile $HashFile
+        7z a $ZipFile $HashFile2
         Push-AppveyorArtifact $ZipFile
         # Calculate zip Hash
         CalculateHash -file $ZipFile | Out-File -FilePath $ZipHashFile

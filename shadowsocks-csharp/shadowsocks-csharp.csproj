@@ -11,7 +11,12 @@
     <Version>4.1.9.2</Version>
     <AssemblyName>Shadowsocks</AssemblyName>
     <ApplicationIcon>shadowsocks.ico</ApplicationIcon>
-    <StartupObject />
+    <StartupObject>Shadowsocks.Program</StartupObject>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DefineConstants>TRACE</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>
@@ -58,6 +63,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="BouncyCastle.NetCore" Version="1.8.5" />
+    <!--TODO: Remove Fody related stuff, as they're either not actually used or has NET Core built-in alternate-->
     <PackageReference Include="Caseless.Fody" Version="1.9.0" />
     <PackageReference Include="Costura.Fody" Version="4.1.0" />
     <PackageReference Include="Fody" Version="6.1.1">
@@ -66,16 +72,17 @@
     </PackageReference>
    
     <PackageReference Include="Microsoft.VisualBasic" Version="10.3.0" />
+   
+    <PackageReference Include="NaCl.Core" Version="1.2.0" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
     <PackageReference Include="NLog" Version="4.6.8" />
+    <PackageReference Include="System.Data.SqlClient" Version="4.8.1" />
+    <PackageReference Include="ZXing.Net" Version="0.16.5" />
     <PackageReference Include="StringEx.CS" Version="0.3.1">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="System.Data.SqlClient" Version="4.8.1" />
     <PackageReference Include="System.Management" Version="4.7.0" />
-
-    <PackageReference Include="ZXing.Net" Version="0.16.5" />
   </ItemGroup>
 
   <ItemGroup>

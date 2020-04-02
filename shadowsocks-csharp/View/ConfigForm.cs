@@ -1,4 +1,5 @@
 using Shadowsocks.Controller;
+using Shadowsocks.Encryption;
 using Shadowsocks.Model;
 using Shadowsocks.Properties;
 using System;
@@ -19,98 +20,11 @@ namespace Shadowsocks.View
 
         private bool isChange = false;
 
-        private class EncryptionMethod
-        {
-            public readonly string name;
-            public readonly bool deprecated;
-
-            // Edit here to add/delete encryption method displayed in UI
-            private static string[] deprecatedMethod = new string[]
-            {
-                "rc4-md5",
-                "salsa20",
-                "chacha20",
-                "bf-cfb",
-
-                "rc4",
-                "plain",
-                "table",
-            };
-            private static string[] inuseMethod = new string[]
-            {
-                "aes-256-gcm",
-                "aes-192-gcm",
-                "aes-128-gcm",
-                "chacha20-ietf-poly1305",
-                "xchacha20-ietf-poly1305",
-                "chacha20-ietf",
-                "aes-256-cfb",
-                "aes-192-cfb",
-                "aes-128-cfb",
-                "aes-256-ctr",
-                "aes-192-ctr",
-                "aes-128-ctr",
-                "camellia-256-cfb",
-                "camellia-192-cfb",
-                "camellia-128-cfb",
-            };
-
-            public static EncryptionMethod[] AllMethods
-            {
-                get
-                {
-                    if (!init) Init();
-                    return allMethods;
-                }
-            }
-            private static bool init = false;
-            private static EncryptionMethod[] allMethods;
-            private static Dictionary<string, EncryptionMethod> methodByName = new Dictionary<string, EncryptionMethod>();
-            private static void Init()
-            {
-                var all = new List<EncryptionMethod>();
-
-                all.AddRange(inuseMethod.Select(i => new EncryptionMethod(i, false)));
-                all.AddRange(deprecatedMethod.Select(d => new EncryptionMethod(d, true)));
-
-                allMethods = all.ToArray();
-                foreach (var item in all)
-                {
-                    methodByName[item.name] = item;
-                }
-                init = true;
-            }
-
-            public static EncryptionMethod GetMethod(string name)
-            {
-                if (!init) Init();
-                bool success = methodByName.TryGetValue(name, out EncryptionMethod method);
-                if (!success)
-                {
-                    string defaultMethod = Server.DefaultMethod;
-                    MessageBox.Show(I18N.GetString("Encryption method {0} not exist, will replace with {1}", name, defaultMethod), I18N.GetString("Shadowsocks"));
-                    return methodByName[defaultMethod];
-                }
-                return method;
-            }
-
-            private EncryptionMethod(string name, bool deprecated)
-            {
-                this.name = name;
-                this.deprecated = deprecated;
-            }
-
-            public override string ToString()
-            {
-                return deprecated ? $"{name} ({I18N.GetString("deprecated")})" : name;
-            }
-        }
-
         public ConfigForm(ShadowsocksController controller)
         {
             Font = SystemFonts.MessageBoxFont;
             InitializeComponent();
-            EncryptionSelect.Items.AddRange(EncryptionMethod.AllMethods);
+            EncryptionSelect.Items.AddRange(EncryptorFactory.ListAvaliableCiphers().ToArray());
 
             // a dirty hack
             ServersListBox.Dock = DockStyle.Fill;
@@ -205,7 +119,7 @@ namespace Shadowsocks.View
                     server = address,
                     server_port = addressPort.Value,
                     password = serverPassword,
-                    method = ((EncryptionMethod)EncryptionSelect.SelectedItem).name,
+                    method = ((CipherInfo)EncryptionSelect.SelectedItem).Name,
                     plugin = PluginTextBox.Text,
                     plugin_opts = PluginOptionsTextBox.Text,
                     plugin_args = PluginArgumentsTextBox.Text,
@@ -406,7 +320,7 @@ namespace Shadowsocks.View
             IPTextBox.Text = server.server;
             ServerPortTextBox.Text = server.server_port.ToString();
             PasswordTextBox.Text = server.password;
-            EncryptionSelect.SelectedItem = EncryptionMethod.GetMethod(server.method ?? Server.DefaultMethod);
+            EncryptionSelect.SelectedItem = EncryptorFactory.GetCipherInfo(server.method ?? Server.DefaultMethod);
             PluginTextBox.Text = server.plugin;
             PluginOptionsTextBox.Text = server.plugin_opts;
             PluginArgumentsTextBox.Text = server.plugin_args;
