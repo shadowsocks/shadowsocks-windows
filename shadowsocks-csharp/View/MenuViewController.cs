@@ -38,7 +38,7 @@ namespace Shadowsocks.View
         private ToolStripMenuItem disableItem;
         private ToolStripMenuItem AutoStartupItem;
         private ToolStripMenuItem ShareOverLANItem;
-        private ToolStripSeparator SeperatorItem;
+        private ToolStripSeparator  SeperatorItem;
         private ToolStripMenuItem ConfigItem;
         private ToolStripMenuItem ServersItem;
         private ToolStripMenuItem globalModeItem;

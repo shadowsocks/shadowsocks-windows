@@ -1,3 +1,15 @@
+4.1.9.3 2020-03-31
+- Set default method to chacha20-ietf-poly1305
+- Using hash in PAC URL (#2759)
+- Rename and translate title of statistics form (#2768)
+- Russian translation (#2767)
+- Refine Updated Notification logic
+- Using NLog (#2783)
+- Bug fix: wrong server in tray menu (#2782)
+- Deprecate unsafe encryption method (#2757, #2801)
+- Bug fix: server config is overwritten by others when moving up/down (#2830)
+- Other minor bug fixes and improvements
+
 4.1.9.2 2019-12-25
 - Fix i18n issues (#2740, #2741)
 
