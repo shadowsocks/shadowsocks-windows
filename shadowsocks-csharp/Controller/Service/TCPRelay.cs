@@ -221,7 +221,7 @@ namespace Shadowsocks.Controller
             this._server = server;
 
             /* prepare address buffer length for AEAD */
-            Logger.Debug($"_addrBufLength={_addrBufLength}");
+            Logger.Trace($"_addrBufLength={_addrBufLength}");
             _encryptor.AddrBufLength = _addrBufLength;
         }
 
@@ -798,7 +798,7 @@ namespace Shadowsocks.Controller
                     PipeRemoteReceiveCallback, session);
 
                 TryReadAvailableData();
-                Logger.Debug($"_firstPacketLength = {_firstPacketLength}");
+                Logger.Trace($"_firstPacketLength = {_firstPacketLength}");
                 SendToServer(_firstPacketLength, session);
             }
             catch (Exception e)
@@ -837,12 +837,12 @@ namespace Shadowsocks.Controller
                     if (bytesToSend == 0)
                     {
                         // need more to decrypt
-                        Logger.Debug("Need more to decrypt");
+                        Logger.Trace("Need more to decrypt");
                         session.Remote.BeginReceive(_remoteRecvBuffer, 0, RecvSize, SocketFlags.None,
                             PipeRemoteReceiveCallback, session);
                         return;
                     }
-                    Logger.Debug($"start sending {bytesToSend}");
+                    Logger.Trace($"start sending {bytesToSend}");
                     _connection.BeginSend(_remoteSendBuffer, 0, bytesToSend, SocketFlags.None,
                         PipeConnectionSendCallback, new object[] { session, bytesToSend });
                     IStrategy strategy = _controller.GetCurrentStrategy();
