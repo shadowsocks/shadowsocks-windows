@@ -1,5 +1,5 @@
 ﻿using Newtonsoft.Json;
-using Shadowsocks.Model;
+using NLog;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -92,7 +92,7 @@ namespace Shadowsocks.Util.SystemProxy
         public int OptionError;
 
         // List of INTERNET_PER_CONN_OPTIONs.
-        public System.IntPtr pOptions;
+        public IntPtr pOptions;
 
         public void Dispose()
         {
@@ -128,11 +128,37 @@ namespace Shadowsocks.Util.SystemProxy
 
     public class WinINet
     {
+        private static readonly Logger logger = LogManager.GetCurrentClassLogger();
+
         private const string SettingFile = "wininet-setting.json";
         private static WinINetSetting initialSetting;
 
+        public static bool operational { get; private set; } = true;
         static WinINet()
         {
+            try
+            {
+                Query();
+            }
+            catch (DllNotFoundException)
+            {
+                operational = false;
+                // Not on windows
+                logger.Info("You are not running on Windows platform, system proxy will disable");
+            }
+            catch (Win32Exception we)
+            {
+                if (we.NativeErrorCode == 12178)
+                {
+                    logger.Warn("WPAD service is not running, system proxy will disable");
+                    // WPAD not running
+                }
+                else
+                {
+                    throw we;
+                }
+            }
+
             Load();
         }
 
@@ -191,7 +217,7 @@ namespace Shadowsocks.Util.SystemProxy
                     sw.Flush();
                 }
             }
-            catch (IOException e)
+            catch (IOException)
             {
                 // logger.LogUsefulException(e);
             }
@@ -229,6 +255,11 @@ namespace Shadowsocks.Util.SystemProxy
 
         public static WinINetSetting Query()
         {
+            if (!operational)
+            {
+                return new WinINetSetting();
+            }
+
             List<InternetPerConnectionOption> options = new List<InternetPerConnectionOption>
             {
                 new InternetPerConnectionOption{dwOption = (int)InternetPerConnectionOptionEnum.FlagsUI},
@@ -237,11 +268,14 @@ namespace Shadowsocks.Util.SystemProxy
                 new InternetPerConnectionOption{dwOption = (int)InternetPerConnectionOptionEnum.AutoConfigUrl},
             };
 
-            var (unmanagedList, listSize) = PrepareOptionList(options, null);
+            (IntPtr unmanagedList, int listSize) = PrepareOptionList(options, null);
             bool ok = InternetQueryOption(IntPtr.Zero, (int)InternetOptions.PerConnectionOption, unmanagedList, ref listSize);
-            if (!ok) throw new Exception();
+            if (!ok)
+            {
+                throw new Win32Exception(Marshal.GetLastWin32Error());
+            }
 
-            var proxy = new WinINetSetting();
+            WinINetSetting proxy = new WinINetSetting();
 
             InternetPerConnectionOptionList ret = Marshal.PtrToStructure<InternetPerConnectionOptionList>(unmanagedList);
             IntPtr p = ret.pOptions;
@@ -249,12 +283,12 @@ namespace Shadowsocks.Util.SystemProxy
             List<InternetPerConnectionOption> outOptions = new List<InternetPerConnectionOption>();
             for (int i = 0; i < nOption; i++)
             {
-                var o = Marshal.PtrToStructure<InternetPerConnectionOption>(p);
+                InternetPerConnectionOption o = Marshal.PtrToStructure<InternetPerConnectionOption>(p);
                 outOptions.Add(o);
                 p += Marshal.SizeOf(o);
             }
 
-            foreach (var o in outOptions)
+            foreach (InternetPerConnectionOption o in outOptions)
             {
                 switch ((InternetPerConnectionOptionEnum)o.dwOption)
                 {
@@ -315,7 +349,7 @@ namespace Shadowsocks.Util.SystemProxy
             IntPtr buf = Marshal.AllocCoTaskMem(len);
             IntPtr cur = buf;
 
-            foreach (var o in options)
+            foreach (InternetPerConnectionOption o in options)
             {
                 Marshal.StructureToPtr(o, cur, false);
                 cur += Marshal.SizeOf(o);
@@ -351,7 +385,7 @@ namespace Shadowsocks.Util.SystemProxy
             Record();
 
             Exec(options, null);
-            foreach (var conn in RAS.GetAllConnections())
+            foreach (string conn in RAS.GetAllConnections())
             {
                 Exec(options, conn);
             }
@@ -361,7 +395,12 @@ namespace Shadowsocks.Util.SystemProxy
 
         private static void Exec(List<InternetPerConnectionOption> options, string connName)
         {
-            var (unmanagedList, listSize) = PrepareOptionList(options, connName);
+            if (!operational)
+            {
+                return;
+            }
+
+            (IntPtr unmanagedList, int listSize) = PrepareOptionList(options, connName);
 
             bool ok = InternetSetOption(
                 IntPtr.Zero,
@@ -372,8 +411,7 @@ namespace Shadowsocks.Util.SystemProxy
 
             if (!ok)
             {
-                int errno = Marshal.GetLastWin32Error();
-                throw new Win32Exception(errno);
+                throw new Win32Exception(Marshal.GetLastWin32Error());
             }
             ClearOptionList(unmanagedList);
             ok = InternetSetOption(
@@ -382,22 +420,28 @@ namespace Shadowsocks.Util.SystemProxy
                 IntPtr.Zero,
                 0
             );
-            if (!ok) throw new Exception();
+            if (!ok)
+            {
+                throw new Win32Exception(Marshal.GetLastWin32Error());
+            }
+
             ok = InternetSetOption(
                 IntPtr.Zero,
                 (int)InternetOptions.Refresh,
                 IntPtr.Zero,
                 0
             );
-            if (!ok) throw new Exception();
-
+            if (!ok)
+            {
+                throw new Win32Exception(Marshal.GetLastWin32Error());
+            }
         }
 
         [DllImport("wininet.dll", CharSet = CharSet.Auto, SetLastError = true)]
         public static extern bool InternetSetOption(IntPtr hInternet, int dwOption, IntPtr lpBuffer, int dwBufferLength);
 
         [DllImport("wininet.dll", CharSet = CharSet.Auto, SetLastError = true)]
-        static extern bool InternetQueryOption(IntPtr hInternet, uint dwOption, IntPtr lpBuffer, ref int lpdwBufferLength);
+        private static extern bool InternetQueryOption(IntPtr hInternet, uint dwOption, IntPtr lpBuffer, ref int lpdwBufferLength);
 
     }
 }
