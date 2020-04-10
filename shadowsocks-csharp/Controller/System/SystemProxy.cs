@@ -31,7 +31,7 @@ namespace Shadowsocks.Controller
                 {
                     if (global)
                     {
-                        Sysproxy.SetIEProxy(true, true, "localhost:" + config.localPort.ToString(), null);
+                        WinINet.ProxyGlobal("localhost:" + config.localPort.ToString(), "<local>");
                     }
                     else
                     {
@@ -45,12 +45,12 @@ namespace Shadowsocks.Controller
 
                             pacUrl = pacSrv.PacUrl;
                         }
-                        Sysproxy.SetIEProxy(true, false, null, pacUrl);
+                        WinINet.ProxyPAC(pacUrl);
                     }
                 }
                 else
                 {
-                    Sysproxy.SetIEProxy(false, false, null, null);
+                    WinINet.Restore();
                 }
             }
             catch (ProxyException ex)
@@ -61,7 +61,7 @@ namespace Shadowsocks.Controller
                     var ret = MessageBox.Show(I18N.GetString("Error occured when process proxy setting, do you want reset current setting and retry?"), I18N.GetString("Shadowsocks"), MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
                     if (ret == DialogResult.Yes)
                     {
-                        Sysproxy.ResetIEProxy();
+                        WinINet.Reset();
                         Update(config, forceDisable, pacSrv, true);
                     }
                 }
