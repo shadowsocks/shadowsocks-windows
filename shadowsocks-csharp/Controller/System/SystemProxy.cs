@@ -10,17 +10,12 @@ namespace Shadowsocks.Controller
     {
         private static Logger logger = LogManager.GetCurrentClassLogger();
 
-        private static string GetTimestamp(DateTime value)
-        {
-            return value.ToString("yyyyMMddHHmmssfff");
-        }
-
         public static void Update(Configuration config, bool forceDisable, PACServer pacSrv, bool noRetry = false)
         {
             bool global = config.global;
             bool enabled = config.enabled;
 
-            if (forceDisable)
+            if (forceDisable || WinINet.operational)
             {
                 enabled = false;
             }
