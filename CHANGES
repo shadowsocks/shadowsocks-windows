@@ -1,3 +1,7 @@
+4.1.10.0 2020-4-11
+- Fix NLog config file issue (#2841, #2846)
+- Tweak log level
+
 4.1.9.3 2020-03-31
 - Set default method to chacha20-ietf-poly1305
 - Using hash in PAC URL (#2759)
