@@ -45,6 +45,13 @@ namespace Shadowsocks.Model
         NLogConfig nLogConfig;
 
         private static readonly string CONFIG_FILE = "gui-config.json";
+        private static readonly NLogConfig.LogLevel verboseLogLevel =
+#if DEBUG
+        NLogConfig.LogLevel.Trace;
+#else
+        NLogConfig.LogLevel.Debug;
+#endif
+
 
         [JsonIgnore]
         public bool updated = false;
@@ -185,10 +192,10 @@ namespace Shadowsocks.Model
                 try
                 {             
                     // apply changs to NLog.config
-                    config.nLogConfig.SetLogLevel(config.isVerboseLogging? NLogConfig.LogLevel.Trace: NLogConfig.LogLevel.Info);
+                    config.nLogConfig.SetLogLevel(config.isVerboseLogging? verboseLogLevel : NLogConfig.LogLevel.Info);
                     NLogConfig.SaveXML(config.nLogConfig);
                 }
-                catch(Exception e)
+                catch (Exception e)
                 {
                     logger.Error(e, "Cannot set the log level to NLog config file. Please check if the nlog config file exists with corresponding XML nodes.");
                 }

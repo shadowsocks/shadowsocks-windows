@@ -26,7 +26,7 @@ namespace Shadowsocks.Controller
         public string LatestVersionLocalName;
         public event EventHandler CheckUpdateCompleted;
 
-        public const string Version = "4.1.9.3";
+        public const string Version = "4.1.10.0";
 
         private class CheckUpdateTimer : System.Timers.Timer
         {
@@ -62,7 +62,7 @@ namespace Shadowsocks.Controller
 
             try
             {
-                logger.Debug("Checking updates...");
+                logger.Info("Checking updates...");
                 WebClient http = CreateWebClient();
                 http.DownloadStringCompleted += http_DownloadStringCompleted;
                 http.DownloadStringAsync(new Uri(UpdateURL));
@@ -119,7 +119,7 @@ namespace Shadowsocks.Controller
                 }
                 else
                 {
-                    logger.Debug("No update is available");
+                    logger.Info("No update is available");
                     if (CheckUpdateCompleted != null)
                     {
                         CheckUpdateCompleted(this, new EventArgs());
@@ -156,7 +156,7 @@ namespace Shadowsocks.Controller
                     logger.LogUsefulException(e.Error);
                     return;
                 }
-                logger.Debug($"New version {LatestVersionNumber}{LatestVersionSuffix} found: {LatestVersionLocalName}");
+                logger.Info($"New version {LatestVersionNumber}{LatestVersionSuffix} found: {LatestVersionLocalName}");
                 if (CheckUpdateCompleted != null)
                 {
                     CheckUpdateCompleted(this, new EventArgs());
