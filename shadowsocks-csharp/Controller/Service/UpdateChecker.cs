@@ -23,6 +23,7 @@ namespace Shadowsocks.Controller
         public string LatestVersionName;
         public string LatestVersionURL;
         public string LatestVersionLocalName;
+        public event EventHandler CheckUpdateCompleted;
 
         public const string Version = "4.1.9.3";
 

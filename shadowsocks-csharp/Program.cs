@@ -26,6 +26,7 @@ namespace Shadowsocks
         [STAThread]
         static void Main(string[] args)
         {
+            Directory.SetCurrentDirectory(Application.StartupPath);
             // todo: initialize the NLog configuartion
             Model.NLogConfig.TouchAndApplyNLogConfig();
 

@@ -141,7 +141,7 @@ namespace Shadowsocks.Encryption.AEAD
 
             _encCircularBuffer.Put(buf, 0, length);
             outlength = 0;
-            logger.Debug("---Start Encryption");
+            logger.Trace("---Start Encryption");
             if (! _encryptSaltSent) {
                 _encryptSaltSent = true;
                 // Generate salt
@@ -150,7 +150,7 @@ namespace Shadowsocks.Encryption.AEAD
                 InitCipher(saltBytes, true, false);
                 Array.Copy(saltBytes, 0, outbuf, 0, saltLen);
                 outlength = saltLen;
-                logger.Debug($"_encryptSaltSent outlength {outlength}");
+                logger.Trace($"_encryptSaltSent outlength {outlength}");
             }
 
             if (! _tcpRequestSent) {
@@ -163,7 +163,7 @@ namespace Shadowsocks.Encryption.AEAD
                 Debug.Assert(encAddrBufLength == AddrBufLength + tagLen * 2 + CHUNK_LEN_BYTES);
                 Array.Copy(encAddrBufBytes, 0, outbuf, outlength, encAddrBufLength);
                 outlength += encAddrBufLength;
-                logger.Debug($"_tcpRequestSent outlength {outlength}");
+                logger.Trace($"_tcpRequestSent outlength {outlength}");
             }
 
             // handle other chunks
@@ -178,15 +178,15 @@ namespace Shadowsocks.Encryption.AEAD
                 Debug.Assert(encChunkLength == chunklength + tagLen * 2 + CHUNK_LEN_BYTES);
                 Buffer.BlockCopy(encChunkBytes, 0, outbuf, outlength, encChunkLength);
                 outlength += encChunkLength;
-                logger.Debug("chunks enc outlength " + outlength);
+                logger.Trace("chunks enc outlength " + outlength);
                 // check if we have enough space for outbuf
                 if (outlength + TCPHandler.ChunkOverheadSize > TCPHandler.BufferSize) {
-                    logger.Debug("enc outbuf almost full, giving up");
+                    logger.Trace("enc outbuf almost full, giving up");
                     return;
                 }
                 bufSize = (uint)_encCircularBuffer.Size;
                 if (bufSize <= 0) {
-                    logger.Debug("No more data to encrypt, leaving");
+                    logger.Trace("No more data to encrypt, leaving");
                     return;
                 }
             }
@@ -201,7 +201,7 @@ namespace Shadowsocks.Encryption.AEAD
             // drop all into buffer
             _decCircularBuffer.Put(buf, 0, length);
 
-            logger.Debug("---Start Decryption");
+            logger.Trace("---Start Decryption");
             if (! _decryptSaltReceived) {
                 bufSize = _decCircularBuffer.Size;
                 // check if we get the leading salt
@@ -212,7 +212,7 @@ namespace Shadowsocks.Encryption.AEAD
                 _decryptSaltReceived = true;
                 byte[] salt = _decCircularBuffer.Get(saltLen);
                 InitCipher(salt, false, false);
-                logger.Debug("get salt len " + saltLen);
+                logger.Trace("get salt len " + saltLen);
             }
 
             // handle chunks
@@ -220,7 +220,7 @@ namespace Shadowsocks.Encryption.AEAD
                 bufSize = _decCircularBuffer.Size;
                 // check if we have any data
                 if (bufSize <= 0) {
-                    logger.Debug("No data in _decCircularBuffer");
+                    logger.Trace("No data in _decCircularBuffer");
                     return;
                 }
 
@@ -246,10 +246,10 @@ namespace Shadowsocks.Encryption.AEAD
                     logger.Error($"Invalid chunk length: {chunkLen}");
                     throw new CryptoErrorException();
                 }
-                logger.Debug("Get the real chunk len:" + chunkLen);
+                logger.Trace("Get the real chunk len:" + chunkLen);
                 bufSize = _decCircularBuffer.Size;
                 if (bufSize < CHUNK_LEN_BYTES + tagLen /* we haven't remove them */+ chunkLen + tagLen) {
-                    logger.Debug("No more data to decrypt one chunk");
+                    logger.Trace("No more data to decrypt one chunk");
                     return;
                 }
                 IncrementNonce(false);
@@ -269,16 +269,16 @@ namespace Shadowsocks.Encryption.AEAD
                 // output to outbuf
                 Buffer.BlockCopy(decChunkBytes, 0, outbuf, outlength, (int) decChunkLen);
                 outlength += (int)decChunkLen;
-                logger.Debug("aead dec outlength " + outlength);
+                logger.Trace("aead dec outlength " + outlength);
                 if (outlength + 100 > TCPHandler.BufferSize)
                 {
-                    logger.Debug("dec outbuf almost full, giving up");
+                    logger.Trace("dec outbuf almost full, giving up");
                     return;
                 }
                 bufSize = _decCircularBuffer.Size;
                 // check if we already done all of them
                 if (bufSize <= 0) {
-                    logger.Debug("No data in _decCircularBuffer, already all done");
+                    logger.Trace("No data in _decCircularBuffer, already all done");
                     return;
                 }
             }
