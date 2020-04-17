@@ -10,6 +10,12 @@ using Shadowsocks.Controller;
 using Shadowsocks.Controller.Hotkeys;
 using Shadowsocks.Util;
 using Shadowsocks.View;
+using System.Linq;
+using System.IO.Pipes;
+using System.Text;
+using System.Net;
+using System.Threading.Tasks;
+using System.Collections.Generic;
 
 namespace Shadowsocks
 {
@@ -55,22 +61,36 @@ namespace Shadowsocks
                 }
                 return;
             }
+            string pipename = $"Shadowsocks\\{Application.StartupPath.GetHashCode()}";
 
-            Utils.ReleaseMemory(true);
-            using (Mutex mutex = new Mutex(false, $"Global\\Shadowsocks_{Application.StartupPath.GetHashCode()}"))
+            using (NamedPipeClientStream pipe = new NamedPipeClientStream(pipename))
             {
-                Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
-                // handle UI exceptions
-                Application.ThreadException += Application_ThreadException;
-                // handle non-UI exceptions
-                AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
-                Application.ApplicationExit += Application_ApplicationExit;
-                SystemEvents.PowerModeChanged += SystemEvents_PowerModeChanged;
-                Application.EnableVisualStyles();
-                Application.SetCompatibleTextRenderingDefault(false);
-                AutoStartup.RegisterForRestart(true);
+                bool pipeExist = false;
+                try
+                {
+                    pipe.Connect(10);
+                    pipeExist = true;
+                }
+                catch (TimeoutException)
+                {
+                    pipeExist = false;
+                }
 
-                if (!mutex.WaitOne(0, false))
+                var alist = Args.ToList();
+                int urlidx = alist.IndexOf("--open-url") + 1;
+                if (urlidx > 0)
+                {
+                    if (Args.Length <= urlidx) return;
+                    if (!pipeExist) return;
+
+                    byte[] b = Encoding.UTF8.GetBytes(Args[urlidx]);
+                    byte[] blen = BitConverter.GetBytes(IPAddress.HostToNetworkOrder(b.Length));
+                    pipe.Write(blen, 0, 4);
+                    pipe.Write(b, 0, b.Length);
+                    pipe.Close();
+                    return;
+                }
+                else if (pipeExist)
                 {
                     Process[] oldProcesses = Process.GetProcessesByName("Shadowsocks");
                     if (oldProcesses.Length > 0)
@@ -83,21 +103,37 @@ namespace Shadowsocks
                         I18N.GetString("Shadowsocks is already running."));
                     return;
                 }
-                Directory.SetCurrentDirectory(Application.StartupPath);
-                
-#if DEBUG
-                // truncate privoxy log file while debugging
-                string privoxyLogFilename = Utils.GetTempPath("privoxy.log");
-                if (File.Exists(privoxyLogFilename))
-                    using (new FileStream(privoxyLogFilename, FileMode.Truncate)) { }
-#endif
-                MainController = new ShadowsocksController();
-                MenuController = new MenuViewController(MainController);
-
-                HotKeys.Init(MainController);
-                MainController.Start();
-                Application.Run();
             }
+
+            Task.Run(() => new PipeServer().Run(pipename));
+
+            Utils.ReleaseMemory(true);
+
+            Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
+            // handle UI exceptions
+            Application.ThreadException += Application_ThreadException;
+            // handle non-UI exceptions
+            AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
+            Application.ApplicationExit += Application_ApplicationExit;
+            SystemEvents.PowerModeChanged += SystemEvents_PowerModeChanged;
+            Application.EnableVisualStyles();
+            Application.SetCompatibleTextRenderingDefault(false);
+            AutoStartup.RegisterForRestart(true);
+
+            Directory.SetCurrentDirectory(Application.StartupPath);
+
+#if DEBUG
+            // truncate privoxy log file while debugging
+            string privoxyLogFilename = Utils.GetTempPath("privoxy.log");
+            if (File.Exists(privoxyLogFilename))
+                using (new FileStream(privoxyLogFilename, FileMode.Truncate)) { }
+#endif
+            MainController = new ShadowsocksController();
+            MenuController = new MenuViewController(MainController);
+
+            HotKeys.Init(MainController);
+            MainController.Start();
+            Application.Run();
         }
 
         private static int exited = 0;
