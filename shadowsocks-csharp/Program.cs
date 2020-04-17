@@ -84,7 +84,9 @@ namespace Shadowsocks
                     if (!pipeExist) return;
 
                     byte[] b = Encoding.UTF8.GetBytes(Args[urlidx]);
+                    byte[] opAddUrl = BitConverter.GetBytes(IPAddress.HostToNetworkOrder(1));
                     byte[] blen = BitConverter.GetBytes(IPAddress.HostToNetworkOrder(b.Length));
+                    pipe.Write(opAddUrl, 0, 4); // opcode addurl
                     pipe.Write(blen, 0, 4);
                     pipe.Write(b, 0, b.Length);
                     pipe.Close();
@@ -104,8 +106,6 @@ namespace Shadowsocks
                     return;
                 }
             }
-
-            Task.Run(() => new PipeServer().Run(pipename));
 
             Utils.ReleaseMemory(true);
 
@@ -133,6 +133,11 @@ namespace Shadowsocks
 
             HotKeys.Init(MainController);
             MainController.Start();
+
+            PipeServer pipeServer = new PipeServer();
+            Task.Run(() => pipeServer.Run(pipename));
+            pipeServer.AddUrlRequested += (_1, e) => MainController.AddServerBySSURL(e.Url);
+
             Application.Run();
         }
 
