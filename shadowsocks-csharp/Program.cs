@@ -136,7 +136,14 @@ namespace Shadowsocks
 
             PipeServer pipeServer = new PipeServer();
             Task.Run(() => pipeServer.Run(pipename));
-            pipeServer.AddUrlRequested += (_1, e) => MainController.AddServerBySSURL(e.Url);
+            pipeServer.AddUrlRequested += (_1, e) =>
+            {
+                var dr = MessageBox.Show($"Open url: {e.Url} ?", "Shadowsocks", MessageBoxButtons.YesNo);
+                if (dr == DialogResult.Yes)
+                {
+                    MainController.AddServerBySSURL(e.Url);
+                }
+            };
 
             Application.Run();
         }
