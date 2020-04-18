@@ -855,7 +855,7 @@ namespace Shadowsocks.View
             ProtocolHandlerItem.Checked = !ProtocolHandlerItem.Checked;
             if (!ProtocolHandler.Set(ProtocolHandlerItem.Checked))
             {
-                MessageBox.Show(I18N.GetString("Failed to update registry. Try running as administrator."));
+                MessageBox.Show(I18N.GetString("Failed to update registry"));
             }
             LoadCurrentConfiguration();
         }

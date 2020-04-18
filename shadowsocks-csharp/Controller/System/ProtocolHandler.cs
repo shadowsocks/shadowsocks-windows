@@ -21,29 +21,27 @@ namespace Shadowsocks.Controller
         // TODO: Elevate when necessary
         public static bool Set(bool enabled)
         {
-            RegistryKey runKey = null;
+            RegistryKey ssURLAssociation = null;
             try
             {
-                RegistryKey hkcr = RegistryKey.OpenBaseKey(RegistryHive.ClassesRoot,
-                        Environment.Is64BitOperatingSystem ? RegistryView.Registry64 : RegistryView.Registry32);
-
-                runKey = hkcr.CreateSubKey("ss",RegistryKeyPermissionCheck.ReadWriteSubTree);
-                if (runKey == null)
+                ssURLAssociation = Registry.CurrentUser.CreateSubKey(@"SOFTWARE\Classes\ss", RegistryKeyPermissionCheck.ReadWriteSubTree);
+                if (ssURLAssociation == null)
                 {
-                    logger.Error(@"Cannot find HKCR\ss");
+                    logger.Error(@"Failed to create HKCU\SOFTWARE\Classes\ss");
                     return false;
                 }
                 if (enabled)
                 {
-                    runKey.SetValue("", "URL:Shadowsocks");
-                    runKey.SetValue("URL Protocol", "");
-                    var shellOpen = runKey.CreateSubKey("shell").CreateSubKey("open").CreateSubKey("command");
+                    ssURLAssociation.SetValue("", "URL:Shadowsocks");
+                    ssURLAssociation.SetValue("URL Protocol", "");
+                    var shellOpen = ssURLAssociation.CreateSubKey("shell").CreateSubKey("open").CreateSubKey("command");
                     shellOpen.SetValue("", $"{ExecutablePath} --open-url %1");
-
+                    logger.Info(@"Successfully added ss:// association.");
                 }
                 else
                 {
-                    hkcr.DeleteSubKeyTree("ss");
+                    Registry.CurrentUser.DeleteSubKeyTree(@"SOFTWARE\Classes\ss");
+                    logger.Info(@"Successfully removed ss:// association.");
                 }
                 return true;
             }
@@ -54,12 +52,12 @@ namespace Shadowsocks.Controller
             }
             finally
             {
-                if (runKey != null)
+                if (ssURLAssociation != null)
                 {
                     try
                     {
-                        runKey.Close();
-                        runKey.Dispose();
+                        ssURLAssociation.Close();
+                        ssURLAssociation.Dispose();
                     }
                     catch (Exception e)
                     { logger.LogUsefulException(e); }
@@ -69,17 +67,17 @@ namespace Shadowsocks.Controller
 
         public static bool Check()
         {
-            RegistryKey runKey = null;
+            RegistryKey ssURLAssociation = null;
             try
             {
-                runKey = Utils.OpenRegKey(@"ss", true, RegistryHive.ClassesRoot);
-                if (runKey == null)
+                ssURLAssociation = Registry.CurrentUser.OpenSubKey(@"SOFTWARE\Classes\ss", true);
+                if (ssURLAssociation == null)
                 {
-                    logger.Error(@"Cannot find HKCR\ss");
+                    //logger.Info(@"ss:// links not associated.");
                     return false;
                 }
 
-                var shellOpen = runKey.OpenSubKey("shell").OpenSubKey("open").OpenSubKey("command");
+                var shellOpen = ssURLAssociation.OpenSubKey("shell").OpenSubKey("open").OpenSubKey("command");
                 return (string)shellOpen.GetValue("") == $"{ExecutablePath} --open-url %1";
             }
             catch (Exception e)
@@ -89,12 +87,12 @@ namespace Shadowsocks.Controller
             }
             finally
             {
-                if (runKey != null)
+                if (ssURLAssociation != null)
                 {
                     try
                     {
-                        runKey.Close();
-                        runKey.Dispose();
+                        ssURLAssociation.Close();
+                        ssURLAssociation.Dispose();
                     }
                     catch (Exception e)
                     { logger.LogUsefulException(e); }
