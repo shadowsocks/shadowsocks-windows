@@ -220,7 +220,7 @@ namespace Shadowsocks.Controller
 
         public void AskAddServerBySSURL(string ssURL)
         {
-            var dr = MessageBox.Show(I18N.GetString("Open url: {0} ?", ssURL), I18N.GetString("Shadowsocks"), MessageBoxButtons.YesNo);
+            var dr = MessageBox.Show(I18N.GetString("Import from URL: {0} ?", ssURL), I18N.GetString("Shadowsocks"), MessageBoxButtons.YesNo);
             if (dr == DialogResult.Yes)
             {
                 AddServerBySSURL(ssURL);
