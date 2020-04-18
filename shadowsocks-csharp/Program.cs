@@ -1,27 +1,26 @@
-﻿using System;
-using System.Diagnostics;
-using System.IO;
-using System.Threading;
-using System.Windows.Forms;
+﻿using Microsoft.Win32;
 using NLog;
-using Microsoft.Win32;
-
 using Shadowsocks.Controller;
 using Shadowsocks.Controller.Hotkeys;
 using Shadowsocks.Util;
 using Shadowsocks.View;
-using System.Linq;
-using System.IO.Pipes;
-using System.Text;
-using System.Net;
-using System.Threading.Tasks;
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.IO.Pipes;
+using System.Linq;
+using System.Net;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace Shadowsocks
 {
-    static class Program
+    internal static class Program
     {
-        private static Logger logger = LogManager.GetCurrentClassLogger();
+        private static readonly Logger logger = LogManager.GetCurrentClassLogger();
         public static ShadowsocksController MainController { get; private set; }
         public static MenuViewController MenuController { get; private set; }
         public static string[] Args { get; private set; }
@@ -30,15 +29,15 @@ namespace Shadowsocks
         /// </summary>
         /// </summary>
         [STAThread]
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
             Directory.SetCurrentDirectory(Application.StartupPath);
             // todo: initialize the NLog configuartion
             Model.NLogConfig.TouchAndApplyNLogConfig();
 
             // .NET Framework 4.7.2 on Win7 compatibility
-            System.Net.ServicePointManager.SecurityProtocol |=
-                System.Net.SecurityProtocolType.Tls | System.Net.SecurityProtocolType.Tls11 | System.Net.SecurityProtocolType.Tls12;
+            ServicePointManager.SecurityProtocol |=
+                SecurityProtocolType.Tls | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12;
 
             // store args for further use
             Args = args;
@@ -56,12 +55,13 @@ namespace Shadowsocks
                 if (DialogResult.OK == MessageBox.Show(I18N.GetString("Unsupported .NET Framework, please update to {0} or later.", "4.7.2"),
                 "Shadowsocks Error", MessageBoxButtons.OKCancel, MessageBoxIcon.Error))
                 {
-                    //Process.Start("https://www.microsoft.com/download/details.aspx?id=53344");    // 4.6.2
                     Process.Start("https://dotnet.microsoft.com/download/dotnet-framework/net472");
                 }
                 return;
             }
             string pipename = $"Shadowsocks\\{Application.StartupPath.GetHashCode()}";
+
+            string addedUrl = null;
 
             using (NamedPipeClientStream pipe = new NamedPipeClientStream(pipename))
             {
@@ -76,22 +76,36 @@ namespace Shadowsocks
                     pipeExist = false;
                 }
 
-                var alist = Args.ToList();
+                // TODO: switch to better argv parser when it's getting complicate
+                List<string> alist = Args.ToList();
+                // check --open-url param
                 int urlidx = alist.IndexOf("--open-url") + 1;
                 if (urlidx > 0)
                 {
-                    if (Args.Length <= urlidx) return;
-                    if (!pipeExist) return;
+                    if (Args.Length <= urlidx)
+                    {
+                        return;
+                    }
 
-                    byte[] b = Encoding.UTF8.GetBytes(Args[urlidx]);
-                    byte[] opAddUrl = BitConverter.GetBytes(IPAddress.HostToNetworkOrder(1));
-                    byte[] blen = BitConverter.GetBytes(IPAddress.HostToNetworkOrder(b.Length));
-                    pipe.Write(opAddUrl, 0, 4); // opcode addurl
-                    pipe.Write(blen, 0, 4);
-                    pipe.Write(b, 0, b.Length);
-                    pipe.Close();
-                    return;
+                    // --open-url exist, and no other instance, add it later
+                    if (!pipeExist)
+                    {
+                        addedUrl = Args[urlidx];
+                    }
+                    // has other instance, send url via pipe then exit
+                    else
+                    {
+                        byte[] b = Encoding.UTF8.GetBytes(Args[urlidx]);
+                        byte[] opAddUrl = BitConverter.GetBytes(IPAddress.HostToNetworkOrder(1));
+                        byte[] blen = BitConverter.GetBytes(IPAddress.HostToNetworkOrder(b.Length));
+                        pipe.Write(opAddUrl, 0, 4); // opcode addurl
+                        pipe.Write(blen, 0, 4);
+                        pipe.Write(b, 0, b.Length);
+                        pipe.Close();
+                        return;
+                    }
                 }
+                // has another instance, and no need to communicate with it return
                 else if (pipeExist)
                 {
                     Process[] oldProcesses = Process.GetProcessesByName("Shadowsocks");
@@ -136,14 +150,11 @@ namespace Shadowsocks
 
             PipeServer pipeServer = new PipeServer();
             Task.Run(() => pipeServer.Run(pipename));
-            pipeServer.AddUrlRequested += (_1, e) =>
+            pipeServer.AddUrlRequested += (_1, e) => MainController.AskAddServerBySSURL(e.Url);
+            if (!addedUrl.IsNullOrEmpty())
             {
-                var dr = MessageBox.Show($"Open url: {e.Url} ?", "Shadowsocks", MessageBoxButtons.YesNo);
-                if (dr == DialogResult.Yes)
-                {
-                    MainController.AddServerBySSURL(e.Url);
-                }
-            };
+                MainController.AskAddServerBySSURL(addedUrl);
+            }
 
             Application.Run();
         }
@@ -183,7 +194,7 @@ namespace Shadowsocks
                     logger.Info("os wake up");
                     if (MainController != null)
                     {
-                        System.Threading.Tasks.Task.Factory.StartNew(() =>
+                        Task.Factory.StartNew(() =>
                         {
                             Thread.Sleep(10 * 1000);
                             try

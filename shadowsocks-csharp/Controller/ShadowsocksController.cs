@@ -218,6 +218,16 @@ namespace Shadowsocks.Controller
             StatisticsStrategyConfiguration.Save(configuration);
         }
 
+        public void AskAddServerBySSURL(string ssURL)
+        {
+            var dr = MessageBox.Show(I18N.GetString("Open url: {0} ?", ssURL), I18N.GetString("Shadowsocks"), MessageBoxButtons.YesNo);
+            if (dr == DialogResult.Yes)
+            {
+                AddServerBySSURL(ssURL);
+            }
+        }
+
+
         public bool AddServerBySSURL(string ssURL)
         {
             try

@@ -316,7 +316,7 @@ namespace Shadowsocks.View
                 this.proxyItem = CreateMenuItem("Forward Proxy...", new EventHandler(this.proxyItem_Click)),
                 new MenuItem("-"),
                 this.AutoStartupItem = CreateMenuItem("Start on Boot", new EventHandler(this.AutoStartupItem_Click)),
-                this.ProtocolHandlerItem = CreateMenuItem("Start on Boot", new EventHandler(this.ProtocolHandlerItem_Click)),
+                this.ProtocolHandlerItem = CreateMenuItem("Register ss:// protocol", new EventHandler(this.ProtocolHandlerItem_Click)),
                 this.ShareOverLANItem = CreateMenuItem("Allow other Devices to connect", new EventHandler(this.ShareOverLANItem_Click)),
                 new MenuItem("-"),
                 this.hotKeyItem = CreateMenuItem("Edit Hotkeys...", new EventHandler(this.hotKeyItem_Click)),
@@ -855,7 +855,7 @@ namespace Shadowsocks.View
             ProtocolHandlerItem.Checked = !ProtocolHandlerItem.Checked;
             if (!ProtocolHandler.Set(ProtocolHandlerItem.Checked))
             {
-                MessageBox.Show(I18N.GetString("Failed to update registry"));
+                MessageBox.Show(I18N.GetString("Failed to update registry, try run as Admin"));
             }
             LoadCurrentConfiguration();
         }
