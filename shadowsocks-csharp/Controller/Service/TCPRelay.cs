@@ -924,6 +924,12 @@ namespace Shadowsocks.Controller
                 var session = (AsyncSession)container[0];
                 var bytesShouldSend = (int)container[1];
                 int bytesSent = session.Remote.EndSend(ar);
+
+                if (bytesSent > 0)
+                {
+                    lastActivity = DateTime.Now;
+                }
+
                 int bytesRemaining = bytesShouldSend - bytesSent;
                 if (bytesRemaining > 0)
                 {
