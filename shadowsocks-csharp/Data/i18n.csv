@@ -186,6 +186,8 @@ Find Shadowsocks icon in your notify tray.,Значок Shadowsocks можно �
 Failed to decode QRCode,Не удалось распознать QRCode,无法解析二维码,QR 碼解碼失敗,QR コードの読み取りに失敗しました。,QR코드를 해석하는데에 실패했습니다.
 Failed to update registry,Не удалось обновить запись в реестре,无法修改注册表,無法修改登錄檔,レジストリの更新に失敗しました。,레지스트리를 업데이트하는데에 실패했습니다.
 Import from URL: {0} ?,импортировать из адреса: {0} ?,从URL导入: {0} ?,從URL匯入: {0} ?,,
+Successfully imported from {0},Успешно импортировано из {0},导入成功：{0},導入成功：{0},,
+Failed to import. Please check if the link is valid.,,导入失败，请检查链接是否有效。,導入失敗，請檢查鏈接是否有效。,,
 System Proxy On: ,Системный прокси:,系统代理已启用：,系統 Proxy 已啟用：,システム プロキシが有効：,시스템 프록시 활성화됨: 
 Running: Port {0},Запущен на порту {0},正在运行：端口 {0},正在執行：連接埠號碼 {0},実行中：ポート {0},실행 중: 포트 {0}번
 "Unexpected error, shadowsocks will exit. Please report to","Непредвиденная ошибка, пожалуйста сообщите на",非预期错误，Shadowsocks将退出。请提交此错误到,非預期錯誤，Shadowsocks 將結束。請報告此錯誤至,予想外のエラーが発生したため、Shadowsocks を終了します。詳しくは下記までお問い合わせ下さい：,알 수 없는 오류로 Shadowsocks가 종료될 것입니다. 오류를 제보해주세요:

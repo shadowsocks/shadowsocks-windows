@@ -218,13 +218,22 @@ namespace Shadowsocks.Controller
             StatisticsStrategyConfiguration.Save(configuration);
         }
 
-        public void AskAddServerBySSURL(string ssURL)
+        public bool AskAddServerBySSURL(string ssURL)
         {
             var dr = MessageBox.Show(I18N.GetString("Import from URL: {0} ?", ssURL), I18N.GetString("Shadowsocks"), MessageBoxButtons.YesNo);
             if (dr == DialogResult.Yes)
             {
-                AddServerBySSURL(ssURL);
+                if (AddServerBySSURL(ssURL))
+                {
+                    MessageBox.Show(I18N.GetString("Successfully imported from {0}", ssURL));
+                    return true;
+                }
+                else
+                {
+                    MessageBox.Show(I18N.GetString("Failed to import. Please check if the link is valid."));
+                }
             }
+            return false;
         }
 
 
