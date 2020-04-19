@@ -113,7 +113,7 @@
     <Compile Include="Controller\HotkeyReg.cs" />
     <Compile Include="Controller\LoggerExtension.cs" />
     <Compile Include="Controller\Service\PACDaemon.cs" />
-    <Compile Include="Controller\Service\PipeServer.cs" />
+    <Compile Include="Controller\Service\NamedPipeServer.cs" />
     <Compile Include="Controller\System\ProtocolHandler.cs" />
     <Compile Include="Controller\System\Hotkeys\HotkeyCallbacks.cs" />
     <Compile Include="Encryption\AEAD\AEADEncryptor.cs" />

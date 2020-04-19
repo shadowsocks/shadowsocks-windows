@@ -16,8 +16,7 @@ namespace Shadowsocks.Controller
         }
     }
 
-
-    internal class PipeServer
+    internal class NamedPipeServer
     {
         public event EventHandler<RequestAddUrlEventArgs> AddUrlRequested;
         public async void Run(string path)

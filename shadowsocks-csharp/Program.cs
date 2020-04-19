@@ -148,9 +148,9 @@ namespace Shadowsocks
             HotKeys.Init(MainController);
             MainController.Start();
 
-            PipeServer pipeServer = new PipeServer();
-            Task.Run(() => pipeServer.Run(pipename));
-            pipeServer.AddUrlRequested += (_1, e) => MainController.AskAddServerBySSURL(e.Url);
+            NamedPipeServer namedPipeServer = new NamedPipeServer();
+            Task.Run(() => namedPipeServer.Run(pipename));
+            namedPipeServer.AddUrlRequested += (_1, e) => MainController.AskAddServerBySSURL(e.Url);
             if (!addedUrl.IsNullOrEmpty())
             {
                 MainController.AskAddServerBySSURL(addedUrl);
