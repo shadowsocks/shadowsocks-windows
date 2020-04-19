@@ -12,6 +12,8 @@ namespace Shadowsocks.Controller
 {
     static class ProtocolHandler
     {
+        const string ssURLRegKey = @"SOFTWARE\Classes\ss";
+
         private static Logger logger = LogManager.GetCurrentClassLogger();
 
         // Don't use Application.ExecutablePath
@@ -22,12 +24,13 @@ namespace Shadowsocks.Controller
         public static bool Set(bool enabled)
         {
             RegistryKey ssURLAssociation = null;
+
             try
             {
-                ssURLAssociation = Registry.CurrentUser.CreateSubKey(@"SOFTWARE\Classes\ss", RegistryKeyPermissionCheck.ReadWriteSubTree);
+                ssURLAssociation = Registry.CurrentUser.CreateSubKey(ssURLRegKey, RegistryKeyPermissionCheck.ReadWriteSubTree);
                 if (ssURLAssociation == null)
                 {
-                    logger.Error(@"Failed to create HKCU\SOFTWARE\Classes\ss");
+                    logger.Error(@"Failed to create HKCU\SOFTWARE\Classes\ss to register ss:// association.");
                     return false;
                 }
                 if (enabled)
@@ -40,7 +43,7 @@ namespace Shadowsocks.Controller
                 }
                 else
                 {
-                    Registry.CurrentUser.DeleteSubKeyTree(@"SOFTWARE\Classes\ss");
+                    Registry.CurrentUser.DeleteSubKeyTree(ssURLRegKey);
                     logger.Info(@"Successfully removed ss:// association.");
                 }
                 return true;
@@ -70,7 +73,7 @@ namespace Shadowsocks.Controller
             RegistryKey ssURLAssociation = null;
             try
             {
-                ssURLAssociation = Registry.CurrentUser.OpenSubKey(@"SOFTWARE\Classes\ss", true);
+                ssURLAssociation = Registry.CurrentUser.OpenSubKey(ssURLRegKey, true);
                 if (ssURLAssociation == null)
                 {
                     //logger.Info(@"ss:// links not associated.");
