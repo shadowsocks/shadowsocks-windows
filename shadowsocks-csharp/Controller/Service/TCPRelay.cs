@@ -39,7 +39,15 @@ namespace Shadowsocks.Controller
                 || (length < 2 || firstPacket[0] != 5))
                 return false;
             socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, true);
-            TCPHandler handler = new TCPHandler(_controller, _config, this, socket);
+            TCPHandler handler = new TCPHandler(_controller, _config, socket);
+
+            handler.OnConnected += (_, arg) => UpdateLatency(arg.server, arg.latency);
+            handler.OnInbound += (_, arg) => UpdateInboundCounter(arg.server, arg.length);
+            handler.OnOutbound += (_, arg) => UpdateOutboundCounter(arg.server, arg.length);
+            handler.OnClosed += (_, arg) =>
+            {
+                lock (Handlers) { Handlers.Remove(arg.handler); }
+            };
 
             IList<TCPHandler> handlersToClose = new List<TCPHandler>();
             lock (Handlers)
@@ -93,6 +101,8 @@ namespace Shadowsocks.Controller
 
         public void UpdateLatency(Server server, TimeSpan latency)
         {
+            IStrategy strategy = _controller.GetCurrentStrategy();
+            strategy?.UpdateLatency(server, latency);
             _controller.UpdateLatency(server, latency);
         }
     }
@@ -199,7 +209,6 @@ namespace Shadowsocks.Controller
 
         private ShadowsocksController _controller;
         private Configuration _config;
-        private TCPRelay _tcprelay;
         private Socket _connection;
 
         private IEncryptor _encryptor;
@@ -251,11 +260,10 @@ namespace Shadowsocks.Controller
 
         private EndPoint _destEndPoint = null;
 
-        public TCPHandler(ShadowsocksController controller, Configuration config, TCPRelay tcprelay, Socket socket)
+        public TCPHandler(ShadowsocksController controller, Configuration config, Socket socket)
         {
             _controller = controller;
             _config = config;
-            _tcprelay = tcprelay;
             _connection = socket;
             _proxyTimeout = config.proxy.proxyTimeout * 1000;
             _serverTimeout = config.GetCurrentServer().timeout * 1000;
@@ -302,10 +310,6 @@ namespace Shadowsocks.Controller
 
             OnClosed?.Invoke(this, new SSTCPClosedEventArgs(_server, this));
 
-            lock (_tcprelay.Handlers)
-            {
-                _tcprelay.Handlers.Remove(this);
-            }
             try
             {
                 _connection.Shutdown(SocketShutdown.Both);
@@ -815,10 +819,6 @@ namespace Shadowsocks.Controller
 
                 OnConnected?.Invoke(this, new SSTCPConnectedEventArgs(_server, latency));
 
-                IStrategy strategy = _controller.GetCurrentStrategy();
-                strategy?.UpdateLatency(_server, latency);
-                _tcprelay.UpdateLatency(_server, latency);
-
                 StartPipe(session);
             }
             catch (ArgumentException)
@@ -878,8 +878,6 @@ namespace Shadowsocks.Controller
                 _totalRead += bytesRead;
 
                 OnInbound?.Invoke(this, new SSInboundEventArgs(_server, bytesRead));
-
-                _tcprelay.UpdateInboundCounter(_server, bytesRead);
                 if (bytesRead > 0)
                 {
                     lastActivity = DateTime.Now;
@@ -972,7 +970,6 @@ namespace Shadowsocks.Controller
             }
 
             OnOutbound?.Invoke(this, new SSOutboundEventArgs(_server, bytesToSend));
-            _tcprelay.UpdateOutboundCounter(_server, bytesToSend);
             _startSendingTime = DateTime.Now;
             session.Remote.BeginSend(_connetionSendBuffer, 0, bytesToSend, SocketFlags.None,
                 PipeRemoteSendCallback, new object[] { session, bytesToSend });
