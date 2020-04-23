@@ -178,7 +178,7 @@ namespace Shadowsocks.Controller
         public DateTime lastActivity;
 
         private ShadowsocksController _controller;
-        private Configuration _config;
+        private ProxyConfig _config;
         private Socket _connection;
 
         private IEncryptor _encryptor;
@@ -233,7 +233,7 @@ namespace Shadowsocks.Controller
         public TCPHandler(ShadowsocksController controller, Configuration config, Socket socket)
         {
             _controller = controller;
-            _config = config;
+            _config = config.proxy;
             _connection = socket;
             _proxyTimeout = config.proxy.proxyTimeout * 1000;
             _serverTimeout = config.GetCurrentServer().timeout * 1000;
@@ -615,9 +615,9 @@ namespace Shadowsocks.Controller
                     serverEP = pluginEP;
                     remote = new DirectConnect();
                 }
-                else if (_config.proxy.useProxy)
+                else if (_config.useProxy)
                 {
-                    switch (_config.proxy.proxyType)
+                    switch (_config.proxyType)
                     {
                         case ProxyConfig.PROXY_SOCKS5:
                             remote = new Socks5Proxy();
@@ -628,7 +628,7 @@ namespace Shadowsocks.Controller
                         default:
                             throw new NotSupportedException("Unknown forward proxy.");
                     }
-                    proxyEP = SocketUtil.GetEndPoint(_config.proxy.proxyServer, _config.proxy.proxyPort);
+                    proxyEP = SocketUtil.GetEndPoint(_config.proxyServer, _config.proxyPort);
                 }
                 else
                 {
@@ -725,9 +725,9 @@ namespace Shadowsocks.Controller
                 _destConnected = false;
 
                 NetworkCredential auth = null;
-                if (_config.proxy.useAuth)
+                if (_config.useAuth)
                 {
-                    auth = new NetworkCredential(_config.proxy.authUser, _config.proxy.authPwd);
+                    auth = new NetworkCredential(_config.authUser, _config.authPwd);
                 }
 
                 // Connect to the remote endpoint.
