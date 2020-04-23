@@ -97,8 +97,62 @@ namespace Shadowsocks.Controller
         }
     }
 
+    class SSRelayEventArgs : EventArgs
+    {
+        public readonly Server server;
+
+        public SSRelayEventArgs(Server server)
+        {
+            this.server = server;
+        }
+    }
+
+    class SSInboundEventArgs : SSRelayEventArgs
+    {
+        public readonly long length;
+        public SSInboundEventArgs(Server server, long length) : base(server)
+        {
+            this.length = length;
+        }
+    }
+
+    class SSOutboundEventArgs : SSRelayEventArgs
+    {
+        public readonly long length;
+
+        public SSOutboundEventArgs(Server server, long length) : base(server)
+        {
+            this.length = length;
+        }
+    }
+
+    class SSTCPConnectedEventArgs : SSRelayEventArgs
+    {
+        public readonly TimeSpan latency;
+
+        public SSTCPConnectedEventArgs(Server server, TimeSpan latency) : base(server)
+        {
+            this.latency = latency;
+        }
+    }
+
+    class SSTCPClosedEventArgs : SSRelayEventArgs
+    {
+        public readonly TCPHandler handler;
+
+        public SSTCPClosedEventArgs(Server server, TCPHandler handler) : base(server)
+        {
+            this.handler = handler;
+        }
+    }
+
     internal class TCPHandler
     {
+        public event EventHandler<SSTCPConnectedEventArgs> OnConnected;
+        public event EventHandler<SSInboundEventArgs> OnInbound;
+        public event EventHandler<SSOutboundEventArgs> OnOutbound;
+        public event EventHandler<SSTCPClosedEventArgs> OnClosed;
+
         class AsyncSession
         {
             public IProxy Remote { get; }
@@ -245,6 +299,9 @@ namespace Shadowsocks.Controller
                 if (_closed) return;
                 _closed = true;
             }
+
+            OnClosed?.Invoke(this, new SSTCPClosedEventArgs(_server, this));
+
             lock (_tcprelay.Handlers)
             {
                 _tcprelay.Handlers.Remove(this);
@@ -344,7 +401,7 @@ namespace Shadowsocks.Controller
                 if (bytesRead >= 5)
                 {
                     _command = _connetionRecvBuffer[1];
-                    switch(_command)
+                    switch (_command)
                     {
                         case CMD_CONNECT:
 
@@ -472,7 +529,7 @@ namespace Shadowsocks.Controller
                             break;
                     }
 
-                     Logger.Debug($"connect to {dstAddr}:{dstPort}");
+                    Logger.Debug($"connect to {dstAddr}:{dstPort}");
 
                     _destEndPoint = SocketUtil.GetEndPoint(dstAddr, dstPort);
 
@@ -755,6 +812,9 @@ namespace Shadowsocks.Controller
                 Logger.Debug($"Socket connected to ss server: {_server.FriendlyName()}");
 
                 var latency = DateTime.Now - _startConnectTime;
+
+                OnConnected?.Invoke(this, new SSTCPConnectedEventArgs(_server, latency));
+
                 IStrategy strategy = _controller.GetCurrentStrategy();
                 strategy?.UpdateLatency(_server, latency);
                 _tcprelay.UpdateLatency(_server, latency);
@@ -816,6 +876,9 @@ namespace Shadowsocks.Controller
                 var session = (AsyncSession)ar.AsyncState;
                 int bytesRead = session.Remote.EndReceive(ar);
                 _totalRead += bytesRead;
+
+                OnInbound?.Invoke(this, new SSInboundEventArgs(_server, bytesRead));
+
                 _tcprelay.UpdateInboundCounter(_server, bytesRead);
                 if (bytesRead > 0)
                 {
@@ -907,6 +970,8 @@ namespace Shadowsocks.Controller
                     return;
                 }
             }
+
+            OnOutbound?.Invoke(this, new SSOutboundEventArgs(_server, bytesToSend));
             _tcprelay.UpdateOutboundCounter(_server, bytesToSend);
             _startSendingTime = DateTime.Now;
             session.Remote.BeginSend(_connetionSendBuffer, 0, bytesToSend, SocketFlags.None,
