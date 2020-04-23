@@ -36,6 +36,7 @@ namespace Shadowsocks.View
         private ContextMenu contextMenu1;
         private MenuItem disableItem;
         private MenuItem AutoStartupItem;
+        private MenuItem ProtocolHandlerItem;
         private MenuItem ShareOverLANItem;
         private MenuItem SeperatorItem;
         private MenuItem ConfigItem;
@@ -315,6 +316,7 @@ namespace Shadowsocks.View
                 this.proxyItem = CreateMenuItem("Forward Proxy...", new EventHandler(this.proxyItem_Click)),
                 new MenuItem("-"),
                 this.AutoStartupItem = CreateMenuItem("Start on Boot", new EventHandler(this.AutoStartupItem_Click)),
+                this.ProtocolHandlerItem = CreateMenuItem("Associate ss:// Links", new EventHandler(this.ProtocolHandlerItem_Click)),
                 this.ShareOverLANItem = CreateMenuItem("Allow other Devices to connect", new EventHandler(this.ShareOverLANItem_Click)),
                 new MenuItem("-"),
                 this.hotKeyItem = CreateMenuItem("Edit Hotkeys...", new EventHandler(this.hotKeyItem_Click)),
@@ -442,6 +444,7 @@ namespace Shadowsocks.View
             VerboseLoggingToggleItem.Checked = config.isVerboseLogging;
             ShowPluginOutputToggleItem.Checked = config.showPluginOutput;
             AutoStartupItem.Checked = AutoStartup.Check();
+            ProtocolHandlerItem.Checked = ProtocolHandler.Check();
             onlinePACItem.Checked = onlinePACItem.Enabled && config.useOnlinePac;
             localPACItem.Checked = !onlinePACItem.Checked;
             secureLocalPacUrlToggleItem.Checked = config.secureLocalPac;
@@ -821,8 +824,7 @@ namespace Shadowsocks.View
 
         private void ImportURLItem_Click(object sender, EventArgs e)
         {
-            var success = controller.AddServerBySSURL(Clipboard.GetText(TextDataFormat.Text));
-            if (success)
+            if (controller.AskAddServerBySSURL(Clipboard.GetText(TextDataFormat.Text)))
             {
                 ShowConfigForm();
             }
@@ -845,6 +847,16 @@ namespace Shadowsocks.View
             {
                 MessageBox.Show(I18N.GetString("Failed to update registry"));
             }
+            LoadCurrentConfiguration();
+        }
+        private void ProtocolHandlerItem_Click(object sender, EventArgs e)
+        {
+            ProtocolHandlerItem.Checked = !ProtocolHandlerItem.Checked;
+            if (!ProtocolHandler.Set(ProtocolHandlerItem.Checked))
+            {
+                MessageBox.Show(I18N.GetString("Failed to update registry"));
+            }
+            LoadCurrentConfiguration();
         }
 
         private void LocalPACItem_Click(object sender, EventArgs e)
