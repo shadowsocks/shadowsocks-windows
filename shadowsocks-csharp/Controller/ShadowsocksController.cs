@@ -490,29 +490,32 @@ namespace Shadowsocks.Controller
             ConfigChanged?.Invoke(this, new EventArgs());
         }
 
-        public void UpdateLatency(Server server, TimeSpan latency)
+        public void UpdateLatency(object sender, SSTCPConnectedEventArgs args)
         {
+            GetCurrentStrategy()?.UpdateLatency(args.server, args.latency);
             if (_config.availabilityStatistics)
             {
-                availabilityStatistics.UpdateLatency(server, (int)latency.TotalMilliseconds);
+                availabilityStatistics.UpdateLatency(args.server, (int)args.latency.TotalMilliseconds);
             }
         }
 
-        public void UpdateInboundCounter(Server server, long n)
+        public void UpdateInboundCounter(object sender, SSTransmitEventArgs args)
         {
-            Interlocked.Add(ref _inboundCounter, n);
+            GetCurrentStrategy()?.UpdateLastRead(args.server);
+            Interlocked.Add(ref _inboundCounter, args.length);
             if (_config.availabilityStatistics)
             {
-                availabilityStatistics.UpdateInboundCounter(server, n);
+                availabilityStatistics.UpdateInboundCounter(args.server, args.length);
             }
         }
 
-        public void UpdateOutboundCounter(Server server, long n)
+        public void UpdateOutboundCounter(object sender, SSTransmitEventArgs args)
         {
-            Interlocked.Add(ref _outboundCounter, n);
+            GetCurrentStrategy()?.UpdateLastWrite(args.server);
+            Interlocked.Add(ref _outboundCounter, args.length);
             if (_config.availabilityStatistics)
             {
-                availabilityStatistics.UpdateOutboundCounter(server, n);
+                availabilityStatistics.UpdateOutboundCounter(args.server, args.length);
             }
         }
 
@@ -556,6 +559,11 @@ namespace Shadowsocks.Controller
                 privoxyRunner.Start(_config);
 
                 TCPRelay tcpRelay = new TCPRelay(this, _config);
+                tcpRelay.OnConnected += UpdateLatency;
+                tcpRelay.OnInbound += UpdateInboundCounter;
+                tcpRelay.OnOutbound += UpdateOutboundCounter;
+                tcpRelay.OnFailed += (o, e) => GetCurrentStrategy()?.SetFailure(e.server);
+
                 UDPRelay udpRelay = new UDPRelay(this);
                 List<Listener.IService> services = new List<Listener.IService>
                 {

@@ -18,6 +18,11 @@ namespace Shadowsocks.Controller
 {
     class TCPRelay : Listener.Service
     {
+        public event EventHandler<SSTCPConnectedEventArgs> OnConnected;
+        public event EventHandler<SSTransmitEventArgs> OnInbound;
+        public event EventHandler<SSTransmitEventArgs> OnOutbound;
+        public event EventHandler<SSRelayEventArgs> OnFailed;
+
         private static Logger logger = LogManager.GetCurrentClassLogger();
         private ShadowsocksController _controller;
         private DateTime _lastSweepTime;
@@ -41,12 +46,13 @@ namespace Shadowsocks.Controller
             socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, true);
             TCPHandler handler = new TCPHandler(_controller, _config, socket);
 
-            handler.OnConnected += (_, arg) => UpdateLatency(arg.server, arg.latency);
-            handler.OnInbound += (_, arg) => UpdateInboundCounter(arg.server, arg.length);
-            handler.OnOutbound += (_, arg) => UpdateOutboundCounter(arg.server, arg.length);
-            handler.OnClosed += (_, arg) =>
+            handler.OnConnected += OnConnected;
+            handler.OnInbound += OnInbound;
+            handler.OnOutbound += OnOutbound;
+            handler.OnFailed += OnFailed;
+            handler.OnClosed += (h, arg) =>
             {
-                lock (Handlers) { Handlers.Remove(arg.handler); }
+                lock (Handlers) { Handlers.Remove(handler); }
             };
 
             IList<TCPHandler> handlersToClose = new List<TCPHandler>();
@@ -88,26 +94,9 @@ namespace Shadowsocks.Controller
             }
             handlersToClose.ForEach(h => h.Close());
         }
-
-        public void UpdateInboundCounter(Server server, long n)
-        {
-            _controller.UpdateInboundCounter(server, n);
-        }
-
-        public void UpdateOutboundCounter(Server server, long n)
-        {
-            _controller.UpdateOutboundCounter(server, n);
-        }
-
-        public void UpdateLatency(Server server, TimeSpan latency)
-        {
-            IStrategy strategy = _controller.GetCurrentStrategy();
-            strategy?.UpdateLatency(server, latency);
-            _controller.UpdateLatency(server, latency);
-        }
     }
 
-    class SSRelayEventArgs : EventArgs
+    public class SSRelayEventArgs : EventArgs
     {
         public readonly Server server;
 
@@ -117,26 +106,16 @@ namespace Shadowsocks.Controller
         }
     }
 
-    class SSInboundEventArgs : SSRelayEventArgs
+    public class SSTransmitEventArgs : SSRelayEventArgs
     {
         public readonly long length;
-        public SSInboundEventArgs(Server server, long length) : base(server)
+        public SSTransmitEventArgs(Server server, long length) : base(server)
         {
             this.length = length;
         }
     }
 
-    class SSOutboundEventArgs : SSRelayEventArgs
-    {
-        public readonly long length;
-
-        public SSOutboundEventArgs(Server server, long length) : base(server)
-        {
-            this.length = length;
-        }
-    }
-
-    class SSTCPConnectedEventArgs : SSRelayEventArgs
+    public class SSTCPConnectedEventArgs : SSRelayEventArgs
     {
         public readonly TimeSpan latency;
 
@@ -146,22 +125,13 @@ namespace Shadowsocks.Controller
         }
     }
 
-    class SSTCPClosedEventArgs : SSRelayEventArgs
-    {
-        public readonly TCPHandler handler;
-
-        public SSTCPClosedEventArgs(Server server, TCPHandler handler) : base(server)
-        {
-            this.handler = handler;
-        }
-    }
-
     internal class TCPHandler
     {
         public event EventHandler<SSTCPConnectedEventArgs> OnConnected;
-        public event EventHandler<SSInboundEventArgs> OnInbound;
-        public event EventHandler<SSOutboundEventArgs> OnOutbound;
-        public event EventHandler<SSTCPClosedEventArgs> OnClosed;
+        public event EventHandler<SSTransmitEventArgs> OnInbound;
+        public event EventHandler<SSTransmitEventArgs> OnOutbound;
+        public event EventHandler<SSRelayEventArgs> OnClosed;
+        public event EventHandler<SSRelayEventArgs> OnFailed;
 
         class AsyncSession
         {
@@ -308,7 +278,7 @@ namespace Shadowsocks.Controller
                 _closed = true;
             }
 
-            OnClosed?.Invoke(this, new SSTCPClosedEventArgs(_server, this));
+            OnClosed?.Invoke(this, new SSRelayEventArgs(_server));
 
             try
             {
@@ -788,8 +758,7 @@ namespace Shadowsocks.Controller
 
             var session = timer.Session;
             Server server = timer.Server;
-            IStrategy strategy = _controller.GetCurrentStrategy();
-            strategy?.SetFailure(server);
+            OnFailed?.Invoke(this, new SSRelayEventArgs(_server));
             Logger.Info($"{server.FriendlyName()} timed out");
             session.Remote.Close();
             Close();
@@ -828,8 +797,7 @@ namespace Shadowsocks.Controller
             {
                 if (_server != null)
                 {
-                    IStrategy strategy = _controller.GetCurrentStrategy();
-                    strategy?.SetFailure(_server);
+                    OnFailed?.Invoke(this, new SSRelayEventArgs(_server));
                 }
                 Logger.LogUsefulException(e);
                 Close();
@@ -877,7 +845,7 @@ namespace Shadowsocks.Controller
                 int bytesRead = session.Remote.EndReceive(ar);
                 _totalRead += bytesRead;
 
-                OnInbound?.Invoke(this, new SSInboundEventArgs(_server, bytesRead));
+                OnInbound?.Invoke(this, new SSTransmitEventArgs(_server, bytesRead));
                 if (bytesRead > 0)
                 {
                     lastActivity = DateTime.Now;
@@ -906,8 +874,6 @@ namespace Shadowsocks.Controller
                     Logger.Trace($"start sending {bytesToSend}");
                     _connection.BeginSend(_remoteSendBuffer, 0, bytesToSend, SocketFlags.None,
                         PipeConnectionSendCallback, new object[] { session, bytesToSend });
-                    IStrategy strategy = _controller.GetCurrentStrategy();
-                    strategy?.UpdateLastRead(_server);
                 }
                 else
                 {
@@ -969,12 +935,10 @@ namespace Shadowsocks.Controller
                 }
             }
 
-            OnOutbound?.Invoke(this, new SSOutboundEventArgs(_server, bytesToSend));
+            OnOutbound?.Invoke(this, new SSTransmitEventArgs(_server, bytesToSend));
             _startSendingTime = DateTime.Now;
             session.Remote.BeginSend(_connetionSendBuffer, 0, bytesToSend, SocketFlags.None,
                 PipeRemoteSendCallback, new object[] { session, bytesToSend });
-            IStrategy strategy = _controller.GetCurrentStrategy();
-            strategy?.UpdateLastWrite(_server);
         }
 
         private void PipeRemoteSendCallback(IAsyncResult ar)
