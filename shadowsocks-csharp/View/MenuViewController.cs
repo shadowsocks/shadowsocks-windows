@@ -40,6 +40,7 @@ namespace Shadowsocks.View
         private ToolStripMenuItem ShareOverLANItem;
         private ToolStripSeparator  SeperatorItem;
         private ToolStripMenuItem ConfigItem;
+        private ToolStripMenuItem ProtocolHandlerItem;
         private ToolStripMenuItem ServersItem;
         private ToolStripMenuItem globalModeItem;
         private ToolStripMenuItem PACModeItem;
@@ -314,23 +315,23 @@ namespace Shadowsocks.View
                     CreateToolStripMenuItem("Copy Local PAC URL", new EventHandler(this.CopyLocalPacUrlItem_Click)),
                     this.editOnlinePACItem = CreateToolStripMenuItem("Edit Online PAC URL...", new EventHandler(this.UpdateOnlinePACURLItem_Click)),
                 }),
-                this.proxyItem = CreateMenuItem("Forward Proxy...", new EventHandler(this.proxyItem_Click)),
-                new MenuItem("-"),
-                this.AutoStartupItem = CreateMenuItem("Start on Boot", new EventHandler(this.AutoStartupItem_Click)),
-                this.ProtocolHandlerItem = CreateMenuItem("Associate ss:// Links", new EventHandler(this.ProtocolHandlerItem_Click)),
-                this.ShareOverLANItem = CreateMenuItem("Allow other Devices to connect", new EventHandler(this.ShareOverLANItem_Click)),
-                new MenuItem("-"),
-                this.hotKeyItem = CreateMenuItem("Edit Hotkeys...", new EventHandler(this.hotKeyItem_Click)),
-                CreateMenuGroup("Help", new MenuItem[] {
-                    CreateMenuItem("Show Logs...", new EventHandler(this.ShowLogItem_Click)),
-                    this.VerboseLoggingToggleItem = CreateMenuItem( "Verbose Logging", new EventHandler(this.VerboseLoggingToggleItem_Click) ),
-                    this.ShowPluginOutputToggleItem = CreateMenuItem("Show Plugin Output", new EventHandler(this.ShowPluginOutputToggleItem_Click)),
-                    this.WriteI18NFileItem = CreateMenuItem("Write translation template",new EventHandler(WriteI18NFileItem_Click)),
-                    CreateMenuGroup("Updates...", new MenuItem[] {
-                        CreateMenuItem("Check for Updates...", new EventHandler(this.checkUpdatesItem_Click)),
-                        new MenuItem("-"),
-                        this.autoCheckUpdatesToggleItem = CreateMenuItem("Check for Updates at Startup", new EventHandler(this.autoCheckUpdatesToggleItem_Click)),
-                        this.checkPreReleaseToggleItem = CreateMenuItem("Check Pre-release Version", new EventHandler(this.checkPreReleaseToggleItem_Click)),
+                this.proxyItem = CreateToolStripMenuItem("Forward Proxy...", new EventHandler(this.proxyItem_Click)),
+                new ToolStripSeparator(  ),
+                this.AutoStartupItem = CreateToolStripMenuItem("Start on Boot", new EventHandler(this.AutoStartupItem_Click)),
+                this.ProtocolHandlerItem = CreateToolStripMenuItem("Associate ss:// Links", new EventHandler(this.ProtocolHandlerItem_Click)),
+                this.ShareOverLANItem = CreateToolStripMenuItem("Allow other Devices to connect", new EventHandler(this.ShareOverLANItem_Click)),
+                new ToolStripSeparator( ),
+                this.hotKeyItem = CreateToolStripMenuItem("Edit Hotkeys...", new EventHandler(this.hotKeyItem_Click)),
+                CreateMenuGroup("Help", new ToolStripItem[] {
+                    CreateToolStripMenuItem("Show Logs...", new EventHandler(this.ShowLogItem_Click)),
+                    this.VerboseLoggingToggleItem = CreateToolStripMenuItem( "Verbose Logging", new EventHandler(this.VerboseLoggingToggleItem_Click) ),
+                    this.ShowPluginOutputToggleItem = CreateToolStripMenuItem("Show Plugin Output", new EventHandler(this.ShowPluginOutputToggleItem_Click)),
+                    this.WriteI18NFileItem = CreateToolStripMenuItem("Write translation template",new EventHandler(WriteI18NFileItem_Click)),
+                    CreateMenuGroup("Updates...", new ToolStripItem[] {
+                        CreateToolStripMenuItem("Check for Updates...", new EventHandler(this.checkUpdatesItem_Click)),
+                        new ToolStripSeparator(),
+                        this.autoCheckUpdatesToggleItem = CreateToolStripMenuItem("Check for Updates at Startup", new EventHandler(this.autoCheckUpdatesToggleItem_Click)),
+                        this.checkPreReleaseToggleItem = CreateToolStripMenuItem("Check Pre-release Version", new EventHandler(this.checkPreReleaseToggleItem_Click)),
                     }),
                     CreateToolStripMenuItem("About...", new EventHandler(this.AboutItem_Click)),
                 }),
