@@ -26,7 +26,7 @@ namespace Shadowsocks.Encryption.AEAD
             _sodiumDecSubkey = new byte[keyLen];
         }
 
-        private static readonly Dictionary<string, EncryptorInfo> _ciphers = new Dictionary<string, EncryptorInfo>
+        private static readonly Dictionary<string, EncryptorInfo> _ciphers = new Dictionary<string, EncryptorInfo>(3)
         {
             {"chacha20-ietf-poly1305", new EncryptorInfo(32, 32, 12, 16, CIPHER_CHACHA20IETFPOLY1305)},
             {"xchacha20-ietf-poly1305", new EncryptorInfo(32, 32, 24, 16, CIPHER_XCHACHA20IETFPOLY1305)},
@@ -60,12 +60,12 @@ namespace Shadowsocks.Encryption.AEAD
             ulong encClen = 0;
             logger.Dump("_encNonce before enc", _encNonce, nonceLen);
             logger.Dump("_sodiumEncSubkey", _sodiumEncSubkey, keyLen);
-            logger.Dump("before cipherEncrypt: plain", plaintext, (int) plen);
+            logger.Dump("before cipherEncrypt: plain", plaintext, (int)plen);
             switch (_cipher)
             {
                 case CIPHER_CHACHA20IETFPOLY1305:
                     ret = Sodium.crypto_aead_chacha20poly1305_ietf_encrypt(ciphertext, ref encClen,
-                        plaintext, (ulong) plen,
+                        plaintext, (ulong)plen,
                         null, 0,
                         null, _encNonce,
                         _sodiumEncSubkey);
@@ -88,8 +88,8 @@ namespace Shadowsocks.Encryption.AEAD
                     throw new System.Exception("not implemented");
             }
             if (ret != 0) throw new CryptoErrorException(String.Format("ret is {0}", ret));
-            logger.Dump("after cipherEncrypt: cipher", ciphertext, (int) encClen);
-            clen = (uint) encClen;
+            logger.Dump("after cipherEncrypt: cipher", ciphertext, (int)encClen);
+            clen = (uint)encClen;
         }
 
         public override void cipherDecrypt(byte[] ciphertext, uint clen, byte[] plaintext, ref uint plen)
@@ -101,13 +101,13 @@ namespace Shadowsocks.Encryption.AEAD
             ulong decPlen = 0;
             logger.Dump("_decNonce before dec", _decNonce, nonceLen);
             logger.Dump("_sodiumDecSubkey", _sodiumDecSubkey, keyLen);
-            logger.Dump("before cipherDecrypt: cipher", ciphertext, (int) clen);
+            logger.Dump("before cipherDecrypt: cipher", ciphertext, (int)clen);
             switch (_cipher)
             {
                 case CIPHER_CHACHA20IETFPOLY1305:
                     ret = Sodium.crypto_aead_chacha20poly1305_ietf_decrypt(plaintext, ref decPlen,
                         null,
-                        ciphertext, (ulong) clen,
+                        ciphertext, (ulong)clen,
                         null, 0,
                         _decNonce, _sodiumDecSubkey);
                     break;
@@ -130,8 +130,8 @@ namespace Shadowsocks.Encryption.AEAD
             }
 
             if (ret != 0) throw new CryptoErrorException(String.Format("ret is {0}", ret));
-            logger.Dump("after cipherDecrypt: plain", plaintext, (int) decPlen);
-            plen = (uint) decPlen;
+            logger.Dump("after cipherDecrypt: plain", plaintext, (int)decPlen);
+            plen = (uint)decPlen;
         }
 
         public override void Dispose()

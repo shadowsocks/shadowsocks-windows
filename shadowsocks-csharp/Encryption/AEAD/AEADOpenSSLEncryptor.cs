@@ -25,7 +25,7 @@ namespace Shadowsocks.Encryption.AEAD
             _opensslDecSubkey = new byte[keyLen];
         }
 
-        private static readonly Dictionary<string, EncryptorInfo> _ciphers = new Dictionary<string, EncryptorInfo>
+        private static readonly Dictionary<string, EncryptorInfo> _ciphers = new Dictionary<string, EncryptorInfo>(4)
         {
             {"aes-128-gcm", new EncryptorInfo("aes-128-gcm", 16, 16, 12, 16, CIPHER_AES)},
             {"aes-192-gcm", new EncryptorInfo("aes-192-gcm", 24, 24, 12, 16, CIPHER_AES)},
@@ -93,9 +93,9 @@ namespace Shadowsocks.Encryption.AEAD
             var tagBuf = new byte[tagLen];
 
             ret = OpenSSL.EVP_CipherUpdate(_encryptCtx, ciphertext, out tmpLen,
-                plaintext, (int) plen);
+                plaintext, (int)plen);
             if (ret != 1) throw new CryptoErrorException("openssl: fail to encrypt AEAD");
-            clen += (uint) tmpLen;
+            clen += (uint)tmpLen;
             // For AEAD cipher, it should not output anything
             ret = OpenSSL.EVP_CipherFinal_ex(_encryptCtx, ciphertext, ref tmpLen);
             if (ret != 1) throw new CryptoErrorException("openssl: fail to finalize AEAD");
@@ -106,7 +106,7 @@ namespace Shadowsocks.Encryption.AEAD
 
             OpenSSL.AEADGetTag(_encryptCtx, tagBuf, tagLen);
             Array.Copy(tagBuf, 0, ciphertext, clen, tagLen);
-            clen += (uint) tagLen;
+            clen += (uint)tagLen;
         }
 
         public override void cipherDecrypt(byte[] ciphertext, uint clen, byte[] plaintext, ref uint plen)
@@ -120,13 +120,13 @@ namespace Shadowsocks.Encryption.AEAD
 
             // split tag
             byte[] tagbuf = new byte[tagLen];
-            Array.Copy(ciphertext, (int) (clen - tagLen), tagbuf, 0, tagLen);
+            Array.Copy(ciphertext, (int)(clen - tagLen), tagbuf, 0, tagLen);
             OpenSSL.AEADSetTag(_decryptCtx, tagbuf, tagLen);
 
             ret = OpenSSL.EVP_CipherUpdate(_decryptCtx,
-                plaintext, out tmpLen, ciphertext, (int) (clen - tagLen));
+                plaintext, out tmpLen, ciphertext, (int)(clen - tagLen));
             if (ret != 1) throw new CryptoErrorException("openssl: fail to decrypt AEAD");
-            plen += (uint) tmpLen;
+            plen += (uint)tmpLen;
 
             // For AEAD cipher, it should not output anything
             ret = OpenSSL.EVP_CipherFinal_ex(_decryptCtx, plaintext, ref tmpLen);

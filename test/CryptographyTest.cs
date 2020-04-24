@@ -69,7 +69,7 @@ namespace Shadowsocks.Test
             encryptionFailed = false;
             // run it once before the multi-threading test to initialize global tables
             RunSingleMbedTLSEncryptionThread();
-            List<Thread> threads = new List<Thread>();
+            List<Thread> threads = new List<Thread>(10);
             for (int i = 0; i < 10; i++)
             {
                 Thread t = new Thread(new ThreadStart(RunSingleMbedTLSEncryptionThread));
@@ -110,7 +110,7 @@ namespace Shadowsocks.Test
             encryptionFailed = false;
             // run it once before the multi-threading test to initialize global tables
             RunSingleRC4EncryptionThread();
-            List<Thread> threads = new List<Thread>();
+            List<Thread> threads = new List<Thread>(10);
             for (int i = 0; i < 10; i++)
             {
                 Thread t = new Thread(new ThreadStart(RunSingleRC4EncryptionThread));
@@ -152,7 +152,7 @@ namespace Shadowsocks.Test
             encryptionFailed = false;
             // run it once before the multi-threading test to initialize global tables
             RunSingleSodiumEncryptionThread();
-            List<Thread> threads = new List<Thread>();
+            List<Thread> threads = new List<Thread>(10);
             for (int i = 0; i < 10; i++)
             {
                 Thread t = new Thread(new ThreadStart(RunSingleSodiumEncryptionThread));
@@ -194,7 +194,7 @@ namespace Shadowsocks.Test
             encryptionFailed = false;
             // run it once before the multi-threading test to initialize global tables
             RunSingleOpenSSLEncryptionThread();
-            List<Thread> threads = new List<Thread>();
+            List<Thread> threads = new List<Thread>(10);
             for (int i = 0; i < 10; i++)
             {
                 Thread t = new Thread(new ThreadStart(RunSingleOpenSSLEncryptionThread));

@@ -104,7 +104,7 @@ namespace Shadowsocks.Model
                 }
 
                 if (config.configs == null)
-                    config.configs = new List<Server>();
+                    config.configs = new List<Server>(1);
                 if (config.configs.Count == 0)
                     config.configs.Add(GetDefaultServer());
                 if (config.localPort == 0)
@@ -190,9 +190,9 @@ namespace Shadowsocks.Model
                     sw.Flush();
                 }
                 try
-                {             
-                    // apply changs to NLog.config
-                    config.nLogConfig.SetLogLevel(config.isVerboseLogging? verboseLogLevel : NLogConfig.LogLevel.Info);
+                {
+                    // apply changes to NLog.config
+                    config.nLogConfig.SetLogLevel(config.isVerboseLogging ? verboseLogLevel : NLogConfig.LogLevel.Info);
                     NLogConfig.SaveXML(config.nLogConfig);
                 }
                 catch (Exception e)

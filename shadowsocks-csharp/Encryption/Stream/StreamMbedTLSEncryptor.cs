@@ -21,7 +21,7 @@ namespace Shadowsocks.Encryption.Stream
         {
         }
 
-        private static Dictionary<string, EncryptorInfo> _ciphers = new Dictionary<string, EncryptorInfo> {
+        private static Dictionary<string, EncryptorInfo> _ciphers = new Dictionary<string, EncryptorInfo>(11) {
             { "aes-128-cfb", new EncryptorInfo("AES-128-CFB128", 16, 16, CIPHER_AES) },
             { "aes-192-cfb", new EncryptorInfo("AES-192-CFB128", 24, 16, CIPHER_AES) },
             { "aes-256-cfb", new EncryptorInfo("AES-256-CFB128", 32, 16, CIPHER_AES) },
@@ -70,7 +70,7 @@ namespace Shadowsocks.Encryption.Stream
                 realkey = _key;
             }
             MbedTLS.cipher_init(ctx);
-            if (MbedTLS.cipher_setup( ctx, MbedTLS.cipher_info_from_string( _innerLibName ) ) != 0 )
+            if (MbedTLS.cipher_setup(ctx, MbedTLS.cipher_info_from_string(_innerLibName)) != 0)
                 throw new System.Exception("Cannot initialize mbed TLS cipher context");
             /*
              * MbedTLS takes key length by bit
@@ -84,7 +84,7 @@ namespace Shadowsocks.Encryption.Stream
              *  
              */
             if (MbedTLS.cipher_setkey(ctx, realkey, keyLen * 8,
-                isEncrypt ? MbedTLS.MBEDTLS_ENCRYPT : MbedTLS.MBEDTLS_DECRYPT) != 0 )
+                isEncrypt ? MbedTLS.MBEDTLS_ENCRYPT : MbedTLS.MBEDTLS_DECRYPT) != 0)
                 throw new System.Exception("Cannot set mbed TLS cipher key");
             if (MbedTLS.cipher_set_iv(ctx, iv, ivLen) != 0)
                 throw new System.Exception("Cannot set mbed TLS cipher IV");
@@ -100,7 +100,7 @@ namespace Shadowsocks.Encryption.Stream
                 throw new ObjectDisposedException(this.ToString());
             }
             if (MbedTLS.cipher_update(isEncrypt ? _encryptCtx : _decryptCtx,
-                buf, length, outbuf, ref length) != 0 )
+                buf, length, outbuf, ref length) != 0)
                 throw new CryptoErrorException();
         }
 

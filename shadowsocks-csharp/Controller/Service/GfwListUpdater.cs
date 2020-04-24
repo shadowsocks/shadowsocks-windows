@@ -81,8 +81,7 @@ namespace Shadowsocks.Controller
                 userruleLines = ParseToValidList(userrulesString);
             }
 
-            List<string> gfwLines = new List<string>();
-            gfwLines = ParseBase64ToValidList(gfwListResult);
+            List<string> gfwLines = ParseBase64ToValidList(gfwListResult);
             abpContent =
 $@"var __USERRULES__ = {JsonConvert.SerializeObject(userruleLines, Formatting.Indented)};
 var __RULES__ = {JsonConvert.SerializeObject(gfwLines, Formatting.Indented)};

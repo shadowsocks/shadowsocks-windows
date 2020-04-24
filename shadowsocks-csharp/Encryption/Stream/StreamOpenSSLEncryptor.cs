@@ -24,7 +24,7 @@ namespace Shadowsocks.Encryption.Stream
         }
 
         // XXX: name=RC4,blkSz=1,keyLen=16,ivLen=0, do NOT pass IV to it
-        private static readonly Dictionary<string, EncryptorInfo> _ciphers = new Dictionary<string, EncryptorInfo>
+        private static readonly Dictionary<string, EncryptorInfo> _ciphers = new Dictionary<string, EncryptorInfo>(11)
         {
             { "aes-128-cfb", new EncryptorInfo("AES-128-CFB", 16, 16, CIPHER_AES) },
             { "aes-192-cfb", new EncryptorInfo("AES-192-CFB", 24, 16, CIPHER_AES) },
@@ -58,7 +58,7 @@ namespace Shadowsocks.Encryption.Stream
             if (cipherInfo == IntPtr.Zero) throw new System.Exception("openssl: cipher not found");
             IntPtr ctx = OpenSSL.EVP_CIPHER_CTX_new();
             if (ctx == IntPtr.Zero) throw new System.Exception("fail to create ctx");
-            
+
             if (isEncrypt)
             {
                 _encryptCtx = ctx;
@@ -80,8 +80,8 @@ namespace Shadowsocks.Encryption.Stream
             {
                 realkey = _key;
             }
-            
-            var ret = OpenSSL.EVP_CipherInit_ex(ctx, cipherInfo, IntPtr.Zero, null,null,
+
+            var ret = OpenSSL.EVP_CipherInit_ex(ctx, cipherInfo, IntPtr.Zero, null, null,
                 isEncrypt ? OpenSSL.OPENSSL_ENCRYPT : OpenSSL.OPENSSL_DECRYPT);
             if (ret != 1) throw new System.Exception("openssl: fail to set key length");
             ret = OpenSSL.EVP_CIPHER_CTX_set_key_length(ctx, keyLen);

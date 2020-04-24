@@ -557,7 +557,7 @@ namespace Shadowsocks.Controller
 
                 TCPRelay tcpRelay = new TCPRelay(this, _config);
                 UDPRelay udpRelay = new UDPRelay(this);
-                List<Listener.IService> services = new List<Listener.IService>
+                List<Listener.IService> services = new List<Listener.IService>(4)
                 {
                     tcpRelay,
                     udpRelay,

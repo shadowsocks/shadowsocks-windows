@@ -201,8 +201,8 @@ namespace Shadowsocks.Test
 
         [TestMethod]
         public void TestUrlGenerate()
-        { 
-            var generateUrlCases = new Dictionary<string, Server>
+        {
+            var generateUrlCases = new Dictionary<string, Server>(4)
             {
                 [server1CanonUrl] = server1,
                 [server1WithRemarkCanonUrl] = server1WithRemark,
