@@ -182,7 +182,7 @@ namespace Shadowsocks.Proxy
 
         private bool OnLineRead(string line, object state)
         {
-            logger.Debug(line);
+            logger.Trace(line);
 
             if (_respondLineCount == 0)
             {
