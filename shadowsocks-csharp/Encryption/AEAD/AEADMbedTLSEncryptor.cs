@@ -80,19 +80,19 @@ namespace Shadowsocks.Encryption.AEAD
                 case CIPHER_AES:
                     ret = MbedTLS.cipher_auth_encrypt(_encryptCtx,
                         /* nonce */
-                        _encNonce, (uint)nonceLen,
+                        _encNonce, (uint) nonceLen,
                         /* AD */
                         IntPtr.Zero, 0,
                         /* plain */
                         plaintext, plen,
                         /* cipher */
                         ciphertext, ref olen,
-                        tagbuf, (uint)tagLen);
+                        tagbuf, (uint) tagLen);
                     if (ret != 0) throw new CryptoErrorException(String.Format("ret is {0}", ret));
                     Debug.Assert(olen == plen);
                     // attach tag to ciphertext
-                    Array.Copy(tagbuf, 0, ciphertext, (int)plen, tagLen);
-                    clen = olen + (uint)tagLen;
+                    Array.Copy(tagbuf, 0, ciphertext, (int) plen, tagLen);
+                    clen = olen + (uint) tagLen;
                     break;
                 default:
                     throw new System.Exception("not implemented");
@@ -107,16 +107,16 @@ namespace Shadowsocks.Encryption.AEAD
             uint olen = 0;
             // split tag
             byte[] tagbuf = new byte[tagLen];
-            Array.Copy(ciphertext, (int)(clen - tagLen), tagbuf, 0, tagLen);
+            Array.Copy(ciphertext, (int) (clen - tagLen), tagbuf, 0, tagLen);
             switch (_cipher)
             {
                 case CIPHER_AES:
                     ret = MbedTLS.cipher_auth_decrypt(_decryptCtx,
-                        _decNonce, (uint)nonceLen,
+                        _decNonce, (uint) nonceLen,
                         IntPtr.Zero, 0,
-                        ciphertext, (uint)(clen - tagLen),
+                        ciphertext, (uint) (clen - tagLen),
                         plaintext, ref olen,
-                        tagbuf, (uint)tagLen);
+                        tagbuf, (uint) tagLen);
                     if (ret != 0) throw new CryptoErrorException(String.Format("ret is {0}", ret));
                     Debug.Assert(olen == clen - tagLen);
                     plen = olen;

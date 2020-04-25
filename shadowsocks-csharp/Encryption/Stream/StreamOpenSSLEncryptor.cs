@@ -81,7 +81,7 @@ namespace Shadowsocks.Encryption.Stream
                 realkey = _key;
             }
 
-            var ret = OpenSSL.EVP_CipherInit_ex(ctx, cipherInfo, IntPtr.Zero, null, null,
+            var ret = OpenSSL.EVP_CipherInit_ex(ctx, cipherInfo, IntPtr.Zero, null,null,
                 isEncrypt ? OpenSSL.OPENSSL_ENCRYPT : OpenSSL.OPENSSL_DECRYPT);
             if (ret != 1) throw new System.Exception("openssl: fail to set key length");
             ret = OpenSSL.EVP_CIPHER_CTX_set_key_length(ctx, keyLen);

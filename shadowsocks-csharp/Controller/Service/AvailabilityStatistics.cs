@@ -120,7 +120,7 @@ namespace Shadowsocks.Controller
 
         private void OperationsPerSecond(object state)
         {
-            lock (state)
+            lock(state)
             {
                 var counter = state as Counter;
                 if (counter.count % _monitorInterval.TotalSeconds == 0)
@@ -196,7 +196,6 @@ namespace Shadowsocks.Controller
                     _outboundSpeedRecords.TryGetValue(id, out outboundSpeedRecords);
                     _latencyRecords.TryGetValue(id, out latencyRecords);
                     StatisticsRecord record = new StatisticsRecord(id, inboundSpeedRecords, outboundSpeedRecords, latencyRecords);
-                    /* duplicate server identifier */
                     records[id] = record;
 
                     if (isPing)
@@ -356,11 +355,8 @@ namespace Shadowsocks.Controller
 
         public void UpdateLatency(Server server, int latency)
         {
-            _latencyRecords.GetOrAdd(server.Identifier(), (k) =>
-            {
-                List<int> records = new List<int>(1) { latency };
-                return records;
-            });
+            _latencyRecords.GetOrAdd(server.Identifier(),
+                k => new List<int>(1) { latency });
         }
 
         public void UpdateInboundCounter(Server server, long n)
