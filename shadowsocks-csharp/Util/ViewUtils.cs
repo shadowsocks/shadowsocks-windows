@@ -25,7 +25,12 @@ namespace Shadowsocks.Util
         public static IEnumerable<MenuItem> GetMenuItems(Menu m)
         {
             if (m?.MenuItems == null || m.MenuItems.Count == 0) return Enumerable.Empty<MenuItem>();
-            var children = new List<MenuItem>(m.MenuItems.Select(item => (MenuItem)item));
+            var children = new List<MenuItem>(m.MenuItems.Count);
+            foreach (var item in m.MenuItems)
+            {
+                children.Add((MenuItem)item);
+            }
+
             return children.SelectMany(GetMenuItems).Concat(children);
         }
 
