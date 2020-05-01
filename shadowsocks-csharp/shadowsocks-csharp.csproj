@@ -302,7 +302,6 @@
     </None>
     <None Include="Resources\ssw128.png" />
     <Content Include="Data\abp.js" />
-    <Content Include="Data\default-abp-rule.js" />
     <Content Include="Data\privoxy_conf.txt" />
     <Content Include="Data\user-rule.txt" />
     <None Include="FodyWeavers.xml">

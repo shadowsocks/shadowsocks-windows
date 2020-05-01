@@ -622,14 +622,7 @@ namespace Shadowsocks.Controller
         private static readonly IEnumerable<char> IgnoredLineBegins = new[] { '!', '[' };
         private void PacDaemon_UserRuleFileChanged(object sender, EventArgs e)
         {
-            if (!File.Exists(Utils.GetTempPath("gfwlist.txt")))
-            {
-                UpdatePACFromGFWList();
-            }
-            else
-            {
-                GeositeUpdater.MergeAndWritePACFile();
-            }
+            GeositeUpdater.MergeAndWritePACFile();
             UpdateSystemProxy();
         }
 

@@ -97,7 +97,7 @@ namespace Shadowsocks.Controller
                     Error?.Invoke(null, new ErrorEventArgs(ex));
                 }
             };
-            http.DownloadStringAsync(new Uri(gfwListUrl));
+            http.DownloadDataAsync(new Uri(gfwListUrl));
         }
 
 

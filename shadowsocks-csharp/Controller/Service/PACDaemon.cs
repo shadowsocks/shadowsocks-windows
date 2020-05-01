@@ -42,7 +42,7 @@ namespace Shadowsocks.Controller
         {
             if (!File.Exists(PAC_FILE))
             {
-                File.WriteAllText(PAC_FILE, Resources.default_abp_rule + Resources.abp_js);
+                GeositeUpdater.MergeAndWritePACFile();
             }
             return PAC_FILE;
         }
@@ -58,14 +58,11 @@ namespace Shadowsocks.Controller
 
         internal string GetPACContent()
         {
-            if (File.Exists(PAC_FILE))
+            if (!File.Exists(PAC_FILE))
             {
-                return File.ReadAllText(PAC_FILE, Encoding.UTF8);
+                GeositeUpdater.MergeAndWritePACFile();
             }
-            else
-            {
-                return Resources.default_abp_rule + Resources.abp_js;
-            }
+            return File.ReadAllText(PAC_FILE, Encoding.UTF8);
         }
 
 

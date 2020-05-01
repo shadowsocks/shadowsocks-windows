@@ -85,36 +85,6 @@ namespace Shadowsocks.Properties {
         }
         
         /// <summary>
-        ///   查找类似 var __USERRULES__ = [];
-        ///var __RULES__ = [
-        ///    &quot;|http://85.17.73.31/&quot;,
-        ///    &quot;||agnesb.fr&quot;,
-        ///    &quot;||akiba-web.com&quot;,
-        ///    &quot;||altrec.com&quot;,
-        ///    &quot;||angela-merkel.de&quot;,
-        ///    &quot;||angola.org&quot;,
-        ///    &quot;||apartmentratings.com&quot;,
-        ///    &quot;||apartments.com&quot;,
-        ///    &quot;||arena.taipei&quot;,
-        ///    &quot;||asianspiss.com&quot;,
-        ///    &quot;||assimp.org&quot;,
-        ///    &quot;||athenaeizou.com&quot;,
-        ///    &quot;||azubu.tv&quot;,
-        ///    &quot;||bankmobilevibe.com&quot;,
-        ///    &quot;||banorte.com&quot;,
-        ///    &quot;||bash-hackers.org&quot;,
-        ///    &quot;||beeg.com&quot;,
-        ///    &quot;||global.bing.com&quot;,
-        ///    &quot;||bloombergview.com&quot;,
-        ///    &quot; [字符串的其余部分被截断]&quot;; 的本地化字符串。
-        /// </summary>
-        internal static string default_abp_rule {
-            get {
-                return ResourceManager.GetString("default_abp_rule", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   查找 System.Byte[] 类型的本地化资源。
         /// </summary>
         internal static byte[] dlc_dat {
