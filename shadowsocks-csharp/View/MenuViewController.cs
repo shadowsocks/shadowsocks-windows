@@ -393,7 +393,7 @@ namespace Shadowsocks.View
             logger.LogUsefulException(e.GetException());
         }
 
-        void controller_UpdatePACFromGFWListCompleted(object sender, GFWListUpdater.ResultEventArgs e)
+        void controller_UpdatePACFromGFWListCompleted(object sender, GeositeResultEventArgs e)
         {
             string result = e.Success
                 ? I18N.GetString("PAC updated")

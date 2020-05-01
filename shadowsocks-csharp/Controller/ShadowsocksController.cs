@@ -35,7 +35,6 @@ namespace Shadowsocks.Controller
         private Configuration _config;
         private StrategyManager _strategyManager;
         private PrivoxyRunner privoxyRunner;
-        private GFWListUpdater gfwListUpdater;
         private readonly ConcurrentDictionary<Server, Sip003Plugin> _pluginsByServer;
 
         public AvailabilityStatistics availabilityStatistics = AvailabilityStatistics.Instance;
@@ -80,7 +79,7 @@ namespace Shadowsocks.Controller
         public event EventHandler<PathEventArgs> PACFileReadyToOpen;
         public event EventHandler<PathEventArgs> UserRuleFileReadyToOpen;
 
-        public event EventHandler<GFWListUpdater.ResultEventArgs> UpdatePACFromGFWListCompleted;
+        public event EventHandler<GeositeResultEventArgs> UpdatePACFromGFWListCompleted;
 
         public event ErrorEventHandler UpdatePACFromGFWListError;
 
@@ -418,10 +417,7 @@ namespace Shadowsocks.Controller
 
         public void UpdatePACFromGFWList()
         {
-            if (gfwListUpdater != null)
-            {
-                gfwListUpdater.UpdatePACFromGFWList(_config);
-            }
+            GeositeUpdater.UpdatePACFromGeosite(_config);
         }
 
         public void UpdateStatisticsConfiguration(bool enabled)
@@ -534,9 +530,9 @@ namespace Shadowsocks.Controller
             _pacServer = _pacServer ?? new PACServer(_pacDaemon);
             _pacServer.UpdatePACURL(_config); // So PACServer works when system proxy disabled.
 
-            gfwListUpdater = gfwListUpdater ?? new GFWListUpdater();
-            gfwListUpdater.UpdateCompleted += PacServer_PACUpdateCompleted;
-            gfwListUpdater.Error += PacServer_PACUpdateError;
+            GeositeUpdater.ResetEvent();
+            GeositeUpdater.UpdateCompleted += PacServer_PACUpdateCompleted;
+            GeositeUpdater.Error += PacServer_PACUpdateError;
 
             availabilityStatistics.UpdateConfiguration(this);
             _listener?.Stop();
@@ -613,7 +609,7 @@ namespace Shadowsocks.Controller
             UpdateSystemProxy();
         }
 
-        private void PacServer_PACUpdateCompleted(object sender, GFWListUpdater.ResultEventArgs e)
+        private void PacServer_PACUpdateCompleted(object sender, GeositeResultEventArgs e)
         {
             UpdatePACFromGFWListCompleted?.Invoke(this, e);
         }
@@ -632,7 +628,7 @@ namespace Shadowsocks.Controller
             }
             else
             {
-                GFWListUpdater.MergeAndWritePACFile(FileManager.NonExclusiveReadAllText(Utils.GetTempPath("gfwlist.txt")));
+                GeositeUpdater.MergeAndWritePACFile();
             }
             UpdateSystemProxy();
         }

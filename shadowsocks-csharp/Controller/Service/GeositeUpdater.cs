@@ -14,21 +14,22 @@ using System.Net;
 
 namespace Shadowsocks.Controller
 {
-    static class GeositeUpdater
+    public class GeositeResultEventArgs : EventArgs
+    {
+        public bool Success;
+
+        public GeositeResultEventArgs(bool success)
+        {
+            this.Success = success;
+        }
+    }
+
+    public static class GeositeUpdater
     {
         private static Logger logger = LogManager.GetCurrentClassLogger();
 
-        public static event EventHandler<ResultEventArgs> UpdateCompleted;
+        public static event EventHandler<GeositeResultEventArgs> UpdateCompleted;
 
-        public class ResultEventArgs : EventArgs
-        {
-            public bool Success;
-
-            public ResultEventArgs(bool success)
-            {
-                this.Success = success;
-            }
-        }
         public static event ErrorEventHandler Error;
 
         private static readonly string DATABASE_PATH = Utils.GetTempPath("dlc.dat");
@@ -57,6 +58,12 @@ namespace Shadowsocks.Controller
             }
         }
 
+        public static void ResetEvent()
+        {
+            UpdateCompleted = null;
+            Error = null;
+        }
+
         public static void UpdatePACFromGeosite(Configuration config)
         {
             string gfwListUrl = GEOSITE_URL;
@@ -83,7 +90,7 @@ namespace Shadowsocks.Controller
                     LoadGeositeList();
 
                     bool pacFileChanged = MergeAndWritePACFile();
-                    UpdateCompleted?.Invoke(null, new ResultEventArgs(pacFileChanged));
+                    UpdateCompleted?.Invoke(null, new GeositeResultEventArgs(pacFileChanged));
                 }
                 catch (Exception ex)
                 {
