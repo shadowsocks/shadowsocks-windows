@@ -12,22 +12,22 @@ Shadowsocks,Shadowsocks,Shadowsocks,Shadowsocks,Shadowsocks,Shadowsocks,Shadowso
 ,,,,,,
 System Proxy,Системный прокси-сервер,系统代理,系統代理,システムプロキシ,시스템 프록시,Proxy système
 Disable,Отключен,禁用,禁用,無効,비활성화,Désactiver
-PAC,Сценарий настройки (PAC),PAC 模式,PAC 模式,PAC,PAC,PAC
+PAC,Сценарий настройки (PAC),PAC 模式,PAC 模式,PAC,프록시 자동 구성 (PAC),PAC
 Global,Для всей системы,全局模式,全局模式,全般,전역,Global
 Servers,Серверы,服务器,伺服器,サーバー,서버,Serveurs
 Edit Servers...,Редактировать серверы…,编辑服务器...,編輯伺服器...,サーバーの編集...,서버 수정…,Éditer serveurs…
 Statistics Config...,Настройки статистики…,统计配置...,統計設定檔...,統計情報の設定...,통계 설정,Configuration des statistiques…
 Start on Boot,Автозагрузка,开机启动,開機啟動,システムと同時に起動,시스템 시작 시에 시작하기,Démarrage automatique
-Associate ss:// Links,Ассоциированный ss:// Ссылки,关联 ss:// 链接,關聯 ss:// 鏈接,,,
+Associate ss:// Links,Ассоциированный ss:// Ссылки,关联 ss:// 链接,關聯 ss:// 鏈接,,ss:// 링크 연결,
 Forward Proxy...,Прямой прокси…,正向代理设置...,正向 Proxy 設定...,フォワードプロキシの設定...,포워드 프록시,Forward-proxy…
 Allow other Devices to connect,Общий доступ к подключению,允许其他设备连入,允許其他裝置連入,他のデバイスからの接続を許可する,다른 기기에서 연결 허용,Autoriser d'autres appareils à se connecter
-Local PAC,Локальный PAC,使用本地 PAC,使用本機 PAC,ローカル PAC,로컬 PAC,PAC local
-Online PAC,Удаленный PAC,使用在线 PAC,使用線上 PAC,オンライン PAC,온라인 PAC,PAC en ligne
-Edit Local PAC File...,Редактировать локальный PAC…,编辑本地 PAC 文件...,編輯本機 PAC 檔案...,ローカル PAC ファイルの編集...,로컬 PAC 파일 수정,Modifier le fichier PAC local ...
-Update Local PAC from GFWList,Обновить локальный PAC из GFWList,从 GFWList 更新本地 PAC,從 GFWList 更新本機 PAC,GFWList からローカル PAC を更新,GFWList에서 로컬 PAC 파일 업데이트,Mettre à jour le PAC local à partir de GFWList
+Local PAC,Локальный PAC,使用本地 PAC,使用本機 PAC,ローカル PAC,로컬 프록시 자동 구성,PAC local
+Online PAC,Удаленный PAC,使用在线 PAC,使用線上 PAC,オンライン PAC,온라인 프록시 자동 구성,PAC en ligne
+Edit Local PAC File...,Редактировать локальный PAC…,编辑本地 PAC 文件...,編輯本機 PAC 檔案...,ローカル PAC ファイルの編集...,로컬 프록시 자동 구성 파일 수정,Modifier le fichier PAC local ...
+Update Local PAC from GFWList,Обновить локальный PAC из GFWList,从 GFWList 更新本地 PAC,從 GFWList 更新本機 PAC,GFWList からローカル PAC を更新,GFWList에서 로컬 프록시 자동 구성 파일 업데이트,Mettre à jour le PAC local à partir de GFWList
 Edit User Rule for GFWList...,Редактировать свои правила для GFWList,编辑 GFWList 的用户规则...,編輯 GFWList 的使用者規則...,ユーザールールの編集...,GFWList 사용자 수정,Modifier la règle utilisateur pour GFWList ...
-Secure Local PAC,Безопасный URL локального PAC,保护本地 PAC,安全本機 PAC,ローカル PAC を保護,로컬 PAC 암호화,Sécuriser PAC local
-Copy Local PAC URL,Копировать URL локального PAC,复制本地 PAC 网址,複製本機 PAC 網址,ローカル PAC URL をコピー,로컬 PAC 파일 URL 복사,Copier l'URL du PAC local
+Secure Local PAC,Безопасный URL локального PAC,保护本地 PAC,安全本機 PAC,ローカル PAC を保護,로컬 프록시 자동 구성 파일 암호화,Sécuriser PAC local
+Copy Local PAC URL,Копировать URL локального PAC,复制本地 PAC 网址,複製本機 PAC 網址,ローカル PAC URL をコピー,로컬 프록시 자동 구성 파일 URL 복사,Copier l'URL du PAC local
 Share Server Config...,Поделиться конфигурацией сервера…,分享服务器配置...,分享伺服器設定檔...,サーバーの設定を共有...,서버 설정 공유,Partager la configuration du serveur ...
 Scan QRCode from Screen...,Сканировать QRCode с экрана…,扫描屏幕上的二维码...,掃描螢幕上的 QR 碼...,画面から QR コードをスキャン...,화면에서 QR코드 스캔,Scanner le QRCode à partir de l'écran ...
 Import URL from Clipboard...,Импорт адреса из буфера обмена…,从剪贴板导入URL...,從剪貼簿匯入 URL...,クリップボードから URL をインポート...,클립보드에서 URL 가져오기…,Importer l'URL du presse-papiers ...
@@ -66,17 +66,17 @@ Plugin Options,Опции плагина,插件选项,外掛程式選項,プラ�
 Need Plugin Argument,Требуются аргументы,需要命令行参数,,,플러그인 인자가 필요함,Besoin d'un argument de plugin
 Plugin Arguments,Аргументы,插件参数,外掛程式參數,プラグインの引数,플러그인 인자,Arguments du plugin
 Proxy Port,Порт прокси,代理端口,Proxy 連接埠,プロキシポート,프록시 포트,Port proxy
-Portable Mode,Переносимый режим,便携模式,便攜模式,ポータブルモード,포터블(Portable) 모드,Mode portable
-Restart required,Требуется перезапуск программы,需要重新启动SS,需要重新啟動SS,再起動SSが必要,재시작 필요함,Redémarrage nécessaire
+Portable Mode,Переносимый режим,便携模式,便攜模式,ポータブルモード,포터블 모드,Mode portable
+Restart required,Требуется перезапуск программы,需要重新启动SS,需要重新啟動SS,再起動SSが必要,재시작이 필요합니다,Redémarrage nécessaire
 Remarks,Примечания,备注,註解,付記,알림,Remarques
-Timeout(Sec),Таймаут(сек),超时(秒),逾時 (秒),タイムアウト (秒),시간초과(Timeout) (초),Délai d'attente(sec)
+Timeout(Sec),Таймаут(сек),超时(秒),逾時 (秒),タイムアウト (秒),시간 초과 (초),Délai d'attente(sec)
 OK,ОК,确定,確定,OK,확인,OK
 Cancel,Отмена,取消,取消,キャンセル,취소,Annuler
 Apply,Применить,应用,應用,適用,적용,Appliquer
 New server,Новый сервер,未配置的服务器,新伺服器,新規サーバー,새 서버,Nouveau serveur
 Move &Up,Выше,上移(&U),上移 (&U),上に移動 (&U),위로 (&U),Monter
 Move D&own,Ниже,下移(&O),下移 (&O),下に移動 (&O),아래로 (&O),Descendre
-deprecated,Устаревшее,不推荐,不推薦,非推奨,폐기됨(deprecated),Obsolète
+deprecated,Устаревшее,不推荐,不推薦,非推奨,더 이상 사용되지 않음,Obsolète
 "Encryption method {0} not exist, will replace with {1}",,加密方法{0}不存在，将使用{1}代替,,,{0} 암호화 방식이 존재하지 않으므로 {1}로 대체될 것입니다.,"Méthode de chiffrement {0} n'existe pas, sera remplacée par {1}"
 ,,,,,,
 #Statistics Config,,,,,,
@@ -116,8 +116,8 @@ Use Proxy,Использовать прокси,使用代理,使用 Proxy,プロ
 Proxy Type,Тип прокси,代理类型,Proxy 類型,プロキシの種類,프록시 종류,Type de proxy
 Proxy Addr,Адрес прокси,代理地址,Proxy 位址,プロキシアドレス,프록시 주소,Adresse de proxy
 Proxy Port,Порт прокси,代理端口,Proxy 連接埠,プロキシポート,프록시 포트,Port de proxy
-"If server has a plugin, proxy will not be used","Если сервер использует плагины, прокси НЕ будет использоваться",若服务器含有插件，代理将不被使用,若伺服器含有外掛程式，Proxy 將不被使用,サーバーにプラグインがある場合、プロキシは利用されません,"만약 서버가 플러그인이 있다면, 프록시는용되지 않을 것입니다.","Si le serveur a un plugin, le proxy ne sera pas utilisé"
-Use Auth,Требуется авторизация,使用认证,使用認證,認証を利用する,서버 증명(Auth) 사용,Utiliser l'authentification
+"If server has a plugin, proxy will not be used","Если сервер использует плагины, прокси НЕ будет использоваться",若服务器含有插件，代理将不被使用,若伺服器含有外掛程式，Proxy 將不被使用,サーバーにプラグインがある場合、プロキシは利用されません,서버에 플러그인이 설치 되어 있는 경우 프록시를 사용할 수 없습니다.,"Si le serveur a un plugin, le proxy ne sera pas utilisé"
+Use Auth,Требуется авторизация,使用认证,使用認證,認証を利用する,서버 인증 사용,Utiliser l'authentification
 User Name,Пользователь,用户名,認證用戶,認証ユーザ,사용자 이름,Nom d'utilisateur
 Auth Pwd,Пароль,认证密码,認證口令,認証パスワード,비밀번호,Mot de passe d'authentification
 ,,,,,,
@@ -142,9 +142,9 @@ QRCode and URL,QRCode и URL,二维码与 URL,QR 碼與 URL,QR コードと URL,
 ,,,,,,
 # PAC Url Form,,,,,,
 ,,,,,,
-Edit Online PAC URL,Изменение URL удаленного PAC,编辑在线 PAC 网址,編輯線上 PAC 網址,オンライン PAC URL の編集,온라인 PAC URL 수정,Modifier l'URL du PAC en ligne
-Edit Online PAC URL...,Редактировать URL удаленного PAC…,编辑在线 PAC 网址...,編輯線上 PAC 網址...,オンライン PAC URL の編集...,온라인 PAC URL 수정…,Modifier l'URL du PAC en ligne ...
-Please input PAC Url,Введите URL адрес для PAC-файла,请输入 PAC 网址,請輸入 PAC 網址,PAC URLを入力して下さい,PAC URL을 입력하세요,Veuillez saisir l'URL PAC
+Edit Online PAC URL,Изменение URL удаленного PAC,编辑在线 PAC 网址,編輯線上 PAC 網址,オンライン PAC URL の編集,온라인 프록시 자동 구성 URL 수정,Modifier l'URL du PAC en ligne
+Edit Online PAC URL...,Редактировать URL удаленного PAC…,编辑在线 PAC 网址...,編輯線上 PAC 網址...,オンライン PAC URL の編集...,온라인 프록시 자동 구성 URL 수정…,Modifier l'URL du PAC en ligne ...
+Please input PAC Url,Введите URL адрес для PAC-файла,请输入 PAC 网址,請輸入 PAC 網址,PAC URLを入力して下さい,프록시 자동 구성 URL을 입력하세요,Veuillez saisir l'URL PAC
 ,,,,,,
 # HotkeySettings Form,,,,,,
 ,,,,,,
@@ -164,7 +164,7 @@ Port {0} already in use,Порт {0} уже используется,端口 {0} 
 Port {0} is reserved by system,Порт {0} зарезервирован системой,端口 {0} 是系统保留端口,連接埠號碼 {0} 由系統保留, ポート番号 {0} はシステムによって予約されています,{0}번 포트는 시스템에서 사용 중입니다.,Port {0} réservé par le système
 Invalid server address,Неверный адрес сервера,非法服务器地址,無效伺服器位址,サーバーアドレスが無効です。,올바르지 않은 서버 주소입니다.,Adresse de serveur non valide
 Illegal port number format,Неверный числовой формат порта,非法端口格式,無效連接埠號碼格式,ポート番号のフォーマットが無効です。,올바르지 않은 포트 번호 형식입니다.,Format de numéro de port illégal
-Illegal timeout format,Неверный формат таймаута,非法超时格式,無效逾時格式,タイムアウト値のフォーマットが無効です。,올바르지 않은 시간초과(Timeout) 형식입니다.,Format de délai d'attente illégal
+Illegal timeout format,Неверный формат таймаута,非法超时格式,無效逾時格式,タイムアウト値のフォーマットが無効です。,올바르지 않은 시간 초과 형식입니다.,Format de délai d'attente illégal
 Server IP can not be blank,IP-адрес сервера не может быть пустым,服务器 IP 不能为空,伺服器 IP 不能為空,サーバー IP が指定されていません。,서버 IP는 비어있으면 안됩니다.,L'adresse IP du serveur ne peut pas être vide
 Password can not be blank,Пароль не может быть пустым,密码不能为空,密碼不能為空,パスワードが指定されていません。,비밀번호는 비어있으면 안됩니다.,Le mot de passe ne peut pas être vide
 Port out of range,Порт выходит за допустимый диапазон,端口超出范围,連接埠號碼超出範圍,ポート番号は範囲外です。,올바른 포트 범위가 아닙니다.,Port hors de portée
@@ -176,8 +176,8 @@ Shadowsocks is here,Shadowsocks находится здесь,Shadowsocks 在这
 You can turn on/off Shadowsocks in the context menu,Вы можете управлять Shadowsocks из контекстного меню,可以在右键菜单中开关 Shadowsocks,可以在右鍵選項單中開關 Shadowsocks,コンテキストメニューを使って、Shadowsocks を有効または無効にすることができます。,프로그램 메뉴에서 Shadowsocks를 끄고 켤 수 있습니다.,Vous pouvez activer / désactiver Shadowsocks dans le menu contextuel
 System Proxy Enabled,Системный прокси включен,系统代理已启用,系統 Proxy 已啟用,システム プロキシが有効です。,시스템 프록시가 활성화되었습니다.,Proxy système activé
 System Proxy Disabled,Системный прокси отключен,系统代理未启用,系統 Proxy 未啟用,システム プロキシが無効です。,시스템 프록시가 비활성화되었습니다.,Proxy système désactivé
-Failed to update PAC file ,Не удалось обновить PAC файл,更新 PAC 文件失败,更新 PAC 檔案失敗,PAC の更新に失敗しました。,PAC 파일을 업데이트하는데 실패했습니다.,Impossible de mettre à jour le fichier PAC
-PAC updated,PAC файл обновлен,更新 PAC 成功,更新 PAC 成功,PAC を更新しました。,PAC 파일이 업데이트되었습니다.,PAC mis à jour
+Failed to update PAC file ,Не удалось обновить PAC файл,更新 PAC 文件失败,更新 PAC 檔案失敗,PAC の更新に失敗しました。,프록시 자동 구성 파일을 업데이트하는데 실패했습니다.,Impossible de mettre à jour le fichier PAC
+PAC updated,PAC файл обновлен,更新 PAC 成功,更新 PAC 成功,PAC を更新しました。,프록시 자동 구성 파일이 업데이트되었습니다.,PAC mis à jour
 No updates found. Please report to GFWList if you have problems with it.,Обновлений не найдено. Сообщите авторам GFWList если у вас возникли проблемы.,未发现更新。如有问题请提交给 GFWList。,未發現更新。如有問題請報告至 GFWList。,お使いのバージョンは最新です。問題がある場合は、GFWList に報告して下さい。,사용 가능한 업데이트를 찾지 못했습니다. 문제가 있다면 GFWList로 전송해주세요.,Aucune mise à jour trouvée. Veuillez signaler à GFWList si vous avez des problèmes concernant.
 No QRCode found. Try to zoom in or move it to the center of the screen.,QRCode не обнаружен. Попробуйте увеличить изображение или переместить его в центр экрана.,未发现二维码，尝试把它放大或移动到靠近屏幕中间的位置,未發現 QR 碼，嘗試把它放大或移動到靠近熒幕中間的位置,QR コードが見つかりませんでした。コードを大きくするか、画面の中央に移動して下さい。,QR코드를 찾을 수 없습니다. 가운데로 화면을 이동시키거나 확대해보세요.,Aucun QRCode trouvé. Essayez de zoomer ou de le déplacer vers le centre de l'écran.
 Shadowsocks is already running.,Shadowsocks уже запущен.,Shadowsocks 已经在运行。,Shadowsocks 已經在執行。,Shadowsocks 実行中,Shadowsocks가 이미 실행 중입니다.,Shadowsocks est déjà en cours d'exécution.
@@ -190,25 +190,25 @@ Successfully imported from {0},Успешно импортировано из {0
 Failed to import. Please check if the link is valid.,,导入失败，请检查链接是否有效。,導入失敗，請檢查鏈接是否有效。,,,
 System Proxy On: ,Системный прокси:,系统代理已启用：,系統 Proxy 已啟用：,システム プロキシが有効：,시스템 프록시 활성화됨: ,Proxy système activé:
 Running: Port {0},Запущен на порту {0},正在运行：端口 {0},正在執行：連接埠號碼 {0},実行中：ポート {0},실행 중: 포트 {0}번,En cours d'exécution: port {0}
-"Unexpected error, shadowsocks will exit. Please report to","Непредвиденная ошибка, пожалуйста сообщите на",非预期错误，Shadowsocks将退出。请提交此错误到,非預期錯誤，Shadowsocks 將結束。請報告此錯誤至,予想外のエラーが発生したため、Shadowsocks を終了します。詳しくは下記までお問い合わせ下さい：,알 수 없는 오류로 Shadowsocks가 종료될 것입니다. 오류를 제보해주세요:,Shadowsocks va quitter en présence d/érreur inattendue. Veuillez signaler à
-"Unsupported operating system, use Windows Vista at least.","Операционная система не поддерживается, минимальные системные требования: Windows Vista или выше.",不支持的操作系统版本，最低需求为Windows Vista。,不支援的作業系統版本，最低需求為 Windows Vista。,お使いの OS はサポートされていません。Windows Vista 以降の OS で実行して下さい。,"지원하지 않는 운영체제입니다, 최소한 Windows Vista가 필요합니다.","Système d'exploitation incompatible, veuillez utiliser Windows Vista ou ultérieure."
-"Unsupported .NET Framework, please update to {0} or later.","Версия .NET Framework не поддерживается, минимальные системные требования: {0} или выше.",当前 .NET Framework 版本过低，请升级至{0}或更新版本。,目前 .NET Framework 版本過低，最低需求為{0}。,お使いの .NET Framework はサポートされていません。{0} 以降のバンジョーをインストールして下さい。,"지원하지 않는 .NET 프레임워크입니다, {0} 또는 상위 버전으로 업데이트해주세요.",".NET Framework incompatible, veuillez mettre à jour vers {0} ou ultérieure."
+"Unexpected error, shadowsocks will exit. Please report to","Непредвиденная ошибка, пожалуйста сообщите на",非预期错误，Shadowsocks将退出。请提交此错误到,非預期錯誤，Shadowsocks 將結束。請報告此錯誤至,予想外のエラーが発生したため、Shadowsocks を終了します。詳しくは下記までお問い合わせ下さい：,알 수 없는 오류로 Shadowsocks가 종료될 것입니다. 오류를 여기로 제보해주세요:,Shadowsocks va quitter en présence d/érreur inattendue. Veuillez signaler à
+"Unsupported operating system, use Windows Vista at least.","Операционная система не поддерживается, минимальные системные требования: Windows Vista или выше.",不支持的操作系统版本，最低需求为Windows Vista。,不支援的作業系統版本，最低需求為 Windows Vista。,お使いの OS はサポートされていません。Windows Vista 以降の OS で実行して下さい。,지원하지 않는 운영체제입니다. 최소 Windows Vista가 필요합니다.,"Système d'exploitation incompatible, veuillez utiliser Windows Vista ou ultérieure."
+"Unsupported .NET Framework, please update to {0} or later.","Версия .NET Framework не поддерживается, минимальные системные требования: {0} или выше.",当前 .NET Framework 版本过低，请升级至{0}或更新版本。,目前 .NET Framework 版本過低，最低需求為{0}。,お使いの .NET Framework はサポートされていません。{0} 以降のバンジョーをインストールして下さい。,지원하지 않는 .NET 프레임워크입니다. {0} 또는 상위 버전으로 업데이트해주세요.,".NET Framework incompatible, veuillez mettre à jour vers {0} ou ultérieure."
 Proxy request failed,Не удалось выполнить запрос,代理请求失败,Proxy 要求失敗,プロキシ要求が失敗しました。,프록시 요청에 실패했습니다.,Échec de la demande de proxy
 Proxy handshake failed,Не удалось выполнить хэндшейк,代理握手失败,Proxy 交握失敗,プロキシ ハンドシェイクに失敗しました。,프록시 핸드쉐이크에 실패했습니다.,Échec de la prise de contact par proxy
 Register hotkey failed,Не удалось применить настройки горячих клавиш,注册快捷键失败,註冊快速鍵失敗,ホットキーの登錄に失敗しました。,단축키 등록에 실패했습니다.,Échec de l'enregistrement du raccourci clavier
 Cannot parse hotkey: {0},Не удалось распознать следующие горячие клавиши: {0},解析快捷键失败: {0},剖析快速鍵失敗: {0},ホットキーを解析できません: {0},단축키를 해석할 수 없습니다: {0},Impossible d'analyser le raccourci clavier: {0}
-"Timeout is invalid, it should not exceed {0}",Таймаут не может превышать значение {0},超时无效，不应超过 {0},逾時無效，不應超過 {0},タイムアウト値が無効です。{0} 以下の値を指定して下さい。,"올바르지 않은 시간초과(Timeout) 설정입니다, {0}을 초과하지 않아야 합니다.","Le délai d'attente invalide, il ne doit pas dépasser {0}"
+"Timeout is invalid, it should not exceed {0}",Таймаут не может превышать значение {0},超时无效，不应超过 {0},逾時無效，不應超過 {0},タイムアウト値が無効です。{0} 以下の値を指定して下さい。,올바르지 않은 시간 초과 설정입니다. {0}을 초과하지 않아야 합니다.,"Le délai d'attente invalide, il ne doit pas dépasser {0}"
 Cannot find the plugin program file,Файл плагина не найден,找不到插件程序文件,找不到外掛程式文件,,플러그인 프로그램 파일을 찾을 수 없습니다.,Impossible de trouver le fichier du programme du plugin
 ,,,,,,
 Operation failure,Операция завершилась неудачей,操作失败,,,작업에 실패했습니다.,Operation failure
 Auto save failed,Автоматическое сохранение не удалось,自动保存失败,,,자동 저장에 실패했습니다.,Échec de l'enregistrement automatique
-Whether to discard unconfigured servers,Внесенные изменения будут утеряны,是否丢弃未配置的服务器,,,완전하지 않은 서버 설정 변경 사항을 폐기하시겠습니까?,Eliminer les serveurs non configurés ou non
-"Invalid server address, Cannot automatically save or discard changes",Неверный адрес сервера. Невозможно сохранить или отменить изменения,非法服务器地址，无法自动保存，是否丢弃修改,,,"서버 주소가 올바르지 않아 자동저장할 수 없습니다, 변경 사항을 폐기하시겠습니까?","Adresse de serveur invalide, impossible d'enregistrer ou d'annuler automatiquement les modifications"
-"Illegal port number format, Cannot automatically save or discard changes",Неверный числовой адрес порта. Невозможно сохранить или отменить изменения,非法端口格式，无法自动保存，是否丢弃修改,,,"포트 번호가 올바르지 않아 자동저장할 수 없습니다, 변경 사항을 폐기하시겠습니까?","Format de numéro de port illégal, impossible d'enregistrer ou d'annuler automatiquement les modifications"
-"Password can not be blank, Cannot automatically save or discard changes",Пароль не может быть пустым. Невозможно сохранить или отменить изменения,密码不能为空，无法自动保存，是否丢弃修改,,,"비밀번호가 비어있어 자동저장할 수 없습니다, 변경 사항을 폐기하시겠습니까?","Le mot de passe ne peut pas être vide, impossible d'enregistrer ou d'annuler automatiquement les modifications"
-"Illegal timeout format, Cannot automatically save or discard changes",Неверный формат таймаута. Невозможно сохранить или отменить изменения,非法超时格式，无法自动保存，是否丢弃修改,,,"시간초과(Timeout) 형식이 올바르지 않아 자동저장할 수 없습니다, 변경 사항을 폐기하시겠습니까?","Format de délai d'attente illégal, impossible d'enregistrer ou d'annuler automatiquement les modifications"
+Whether to discard unconfigured servers,Внесенные изменения будут утеряны,是否丢弃未配置的服务器,,,구성되지 않은 서버 설정 변경 사항을 폐기하시겠습니까?,Eliminer les serveurs non configurés ou non
+"Invalid server address, Cannot automatically save or discard changes",Неверный адрес сервера. Невозможно сохранить или отменить изменения,非法服务器地址，无法自动保存，是否丢弃修改,,,"서버 주소가 올바르지 않아 자동 저장 할 수 없습니다, 변경 사항을 폐기하시겠습니까?","Adresse de serveur invalide, impossible d'enregistrer ou d'annuler automatiquement les modifications"
+"Illegal port number format, Cannot automatically save or discard changes",Неверный числовой адрес порта. Невозможно сохранить или отменить изменения,非法端口格式，无法自动保存，是否丢弃修改,,,"포트 번호가 올바르지 않아 자동 저장 할 수 없습니다, 변경 사항을 폐기하시겠습니까?","Format de numéro de port illégal, impossible d'enregistrer ou d'annuler automatiquement les modifications"
+"Password can not be blank, Cannot automatically save or discard changes",Пароль не может быть пустым. Невозможно сохранить или отменить изменения,密码不能为空，无法自动保存，是否丢弃修改,,,"비밀번호를 입력하지 않아 자동 저장 할 수 없습니다, 변경 사항을 폐기하시겠습니까?","Le mot de passe ne peut pas être vide, impossible d'enregistrer ou d'annuler automatiquement les modifications"
+"Illegal timeout format, Cannot automatically save or discard changes",Неверный формат таймаута. Невозможно сохранить или отменить изменения,非法超时格式，无法自动保存，是否丢弃修改,,,시간 초과 형식이 올바르지 않아 자동 저장 할 수 없습니다. 변경 사항을 폐기하시겠습니까?,"Format de délai d'attente illégal, impossible d'enregistrer ou d'annuler automatiquement les modifications"
 ,,,,,,
-"Error occured when process proxy setting, do you want reset current setting and retry?",Произошла ошибка при обработке настроек. Хотите сбросить текущие настройки и попробовать снова?,处理代理设置时发生错误，是否重置当前代理设置并重试？,,,프록시 설정을 처리하는데에 오류가 발생했습니다. 현재 설정을 폐기하고 다시시도하시겠습니까?,Une erreur s'est produite lors du processus de configuration du proxy. Voulez-vous réinitialiser le paramètre actuel et réessayer?
+"Error occured when process proxy setting, do you want reset current setting and retry?",Произошла ошибка при обработке настроек. Хотите сбросить текущие настройки и попробовать снова?,处理代理设置时发生错误，是否重置当前代理设置并重试？,,,프록시 설정을 처리하는데에 오류가 발생했습니다. 현재 설정을 폐기하고 다시 시도하시겠습니까?,Une erreur s'est produite lors du processus de configuration du proxy. Voulez-vous réinitialiser le paramètre actuel et réessayer?
 "Unrecoverable proxy setting error occured, see log for detail","Произошла серьезная ошибка, подробности можно узнать в журналах",发生不可恢复的代理设置错误，查看日志以取得详情,,,복구 불가능한 프록시 설정 오류가 발생했습니다. 자세한 정보는 로그를 참조하세요.,"Une erreur de paramètre de proxy irrécupérable s'est produite, consultez le journal pour plus de détails"
-Auth user can not be blank,Пользователь не может быть пустым,认证用户不能为空,認證用戶不能為空,認証ユーザが指定されていません。,증명 정보의 사용자 이름은 비어있을 수 없습니다.,L'utilisateur d'authentification ne peut pas être vide
-Auth pwd can not be blank,Пароль не может быть пустым,认证密码不能为空,認證口令不能為空,認証パスワードが指定されていません。,증명 정보의 비밀번호는 비어있을 수 없습니다.,Le mot de passe d'authentification ne peut pas être vide
+Auth user can not be blank,Пользователь не может быть пустым,认证用户不能为空,認證用戶不能為空,認証ユーザが指定されていません。,인증 정보의 사용자 이름은 비어있을 수 없습니다.,L'utilisateur d'authentification ne peut pas être vide
+Auth pwd can not be blank,Пароль не может быть пустым,认证密码不能为空,認證口令不能為空,認証パスワードが指定されていません。,인증 정보의 비밀번호는 비어있을 수 없습니다.,Le mot de passe d'authentification ne peut pas être vide
