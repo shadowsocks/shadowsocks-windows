@@ -79,9 +79,9 @@ namespace Shadowsocks.Controller
         public event EventHandler<PathEventArgs> PACFileReadyToOpen;
         public event EventHandler<PathEventArgs> UserRuleFileReadyToOpen;
 
-        public event EventHandler<GeositeResultEventArgs> UpdatePACFromGFWListCompleted;
+        public event EventHandler<GeositeResultEventArgs> UpdatePACFromGeositeCompleted;
 
-        public event ErrorEventHandler UpdatePACFromGFWListError;
+        public event ErrorEventHandler UpdatePACFromGeositeError;
 
         public event ErrorEventHandler Errored;
 
@@ -415,7 +415,7 @@ namespace Shadowsocks.Controller
             return $"ss://{url}{tag}";
         }
 
-        public void UpdatePACFromGFWList()
+        public void UpdatePACFromGeosite()
         {
             GeositeUpdater.UpdatePACFromGeosite(_config);
         }
@@ -611,12 +611,12 @@ namespace Shadowsocks.Controller
 
         private void PacServer_PACUpdateCompleted(object sender, GeositeResultEventArgs e)
         {
-            UpdatePACFromGFWListCompleted?.Invoke(this, e);
+            UpdatePACFromGeositeCompleted?.Invoke(this, e);
         }
 
         private void PacServer_PACUpdateError(object sender, ErrorEventArgs e)
         {
-            UpdatePACFromGFWListError?.Invoke(this, e);
+            UpdatePACFromGeositeError?.Invoke(this, e);
         }
 
         private static readonly IEnumerable<char> IgnoredLineBegins = new[] { '!', '[' };
