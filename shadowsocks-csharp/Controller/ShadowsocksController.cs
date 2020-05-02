@@ -524,7 +524,7 @@ namespace Shadowsocks.Controller
 
             privoxyRunner = privoxyRunner ?? new PrivoxyRunner();
 
-            _pacDaemon = _pacDaemon ?? new PACDaemon();
+            _pacDaemon = _pacDaemon ?? new PACDaemon(_config);
             _pacDaemon.PACFileChanged += PacDaemon_PACFileChanged;
             _pacDaemon.UserRuleFileChanged += PacDaemon_UserRuleFileChanged;
             _pacServer = _pacServer ?? new PACServer(_pacDaemon);
@@ -622,7 +622,7 @@ namespace Shadowsocks.Controller
         private static readonly IEnumerable<char> IgnoredLineBegins = new[] { '!', '[' };
         private void PacDaemon_UserRuleFileChanged(object sender, EventArgs e)
         {
-            GeositeUpdater.MergeAndWritePACFile();
+            GeositeUpdater.MergeAndWritePACFile(_config.geositeGroup, _config.geositeBlacklistMode);
             UpdateSystemProxy();
         }
 
