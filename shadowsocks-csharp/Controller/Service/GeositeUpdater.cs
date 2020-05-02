@@ -167,7 +167,10 @@ var __RULES__ = {JsonConvert.SerializeObject(gfwLines, Formatting.Indented)};
 
         private static List<string> ParseToValidList(IList<DomainObject> domains)
         {
-            List<string> ret = new List<string>(domains.Count + 100); // 100 overhead
+            List<string> ret = new List<string>(domains.Count + 100)// 100 overhead
+            {
+                "/.*/" // match any domain, so all non-cn domain go through proxy
+            }; 
             foreach (var d in domains)
             {
                 string domain = d.Value;
@@ -175,17 +178,17 @@ var __RULES__ = {JsonConvert.SerializeObject(gfwLines, Formatting.Indented)};
                 switch (d.Type)
                 {
                     case DomainObject.Types.Type.Plain:
-                        ret.Add(domain);
+                        ret.Add($"@@{domain}");
                         break;
                     case DomainObject.Types.Type.Regex:
-                        ret.Add($"/{domain}/");
+                        ret.Add($"@@/{domain}/");
                         break;
                     case DomainObject.Types.Type.Domain:
-                        ret.Add($"||{domain}");
+                        ret.Add($"@@||{domain}");
                         break;
                     case DomainObject.Types.Type.Full:
-                        ret.Add($"|http://{domain}");
-                        ret.Add($"|https://{domain}");
+                        ret.Add($"@@|http://{domain}");
+                        ret.Add($"@@|https://{domain}");
                         break;
                 }
             }
