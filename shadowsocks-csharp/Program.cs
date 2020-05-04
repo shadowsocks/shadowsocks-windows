@@ -10,6 +10,12 @@ using Shadowsocks.Controller;
 using Shadowsocks.Controller.Hotkeys;
 using Shadowsocks.Util;
 using Shadowsocks.View;
+using System.IO.Pipes;
+using System.Text;
+using System.Net;
+using System.Linq;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Shadowsocks
 {
@@ -47,22 +53,53 @@ namespace Shadowsocks
                 return;
             }
 
-                 Application.SetHighDpiMode(HighDpiMode.SystemAware);
-            using (Mutex mutex = new Mutex(false, $"Global\\Shadowsocks_{Application.StartupPath.GetHashCode()}"))
-            {
-                Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
-                // handle UI exceptions
-                Application.ThreadException += Application_ThreadException;
-                // handle non-UI exceptions
-                AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
-                Application.ApplicationExit += Application_ApplicationExit;
-                SystemEvents.PowerModeChanged += SystemEvents_PowerModeChanged;
-                Application.EnableVisualStyles();
-                Application.SetCompatibleTextRenderingDefault(false);
-           
-                AutoStartup.RegisterForRestart(true);
+            string pipename = $"Shadowsocks\\{Application.StartupPath.GetHashCode()}";
+            string addedUrl = null;
 
-                if (!mutex.WaitOne(0, false))
+            using (NamedPipeClientStream pipe = new NamedPipeClientStream(pipename))
+            {
+                bool pipeExist = false;
+                try
+                {
+                    pipe.Connect(10);
+                    pipeExist = true;
+                }
+                catch (TimeoutException)
+                {
+                    pipeExist = false;
+                }
+
+                // TODO: switch to better argv parser when it's getting complicate
+                List<string> alist = Args.ToList();
+                // check --open-url param
+                int urlidx = alist.IndexOf("--open-url") + 1;
+                if (urlidx > 0)
+                {
+                    if (Args.Length <= urlidx)
+                    {
+                        return;
+                    }
+
+                    // --open-url exist, and no other instance, add it later
+                    if (!pipeExist)
+                    {
+                        addedUrl = Args[urlidx];
+                    }
+                    // has other instance, send url via pipe then exit
+                    else
+                    {
+                        byte[] b = Encoding.UTF8.GetBytes(Args[urlidx]);
+                        byte[] opAddUrl = BitConverter.GetBytes(IPAddress.HostToNetworkOrder(1));
+                        byte[] blen = BitConverter.GetBytes(IPAddress.HostToNetworkOrder(b.Length));
+                        pipe.Write(opAddUrl, 0, 4); // opcode addurl
+                        pipe.Write(blen, 0, 4);
+                        pipe.Write(b, 0, b.Length);
+                        pipe.Close();
+                        return;
+                    }
+                }
+                // has another instance, and no need to communicate with it return
+                else if (pipeExist)
                 {
                     Process[] oldProcesses = Process.GetProcessesByName("Shadowsocks");
                     if (oldProcesses.Length > 0)
@@ -75,21 +112,42 @@ namespace Shadowsocks
                         I18N.GetString("Shadowsocks is already running."));
                     return;
                 }
-                Directory.SetCurrentDirectory(Application.StartupPath);
-                
-#if DEBUG
-                // truncate privoxy log file while debugging
-                string privoxyLogFilename = Utils.GetTempPath("privoxy.log");
-                if (File.Exists(privoxyLogFilename))
-                    using (new FileStream(privoxyLogFilename, FileMode.Truncate)) { }
-#endif
-                MainController = new ShadowsocksController();
-                MenuController = new MenuViewController(MainController);
-
-                HotKeys.Init(MainController);
-                MainController.Start();
-                Application.Run();
             }
+
+            Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
+            // handle UI exceptions
+            Application.ThreadException += Application_ThreadException;
+            // handle non-UI exceptions
+            AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
+            Application.ApplicationExit += Application_ApplicationExit;
+            SystemEvents.PowerModeChanged += SystemEvents_PowerModeChanged;
+            Application.EnableVisualStyles();
+            Application.SetCompatibleTextRenderingDefault(false);
+            AutoStartup.RegisterForRestart(true);
+
+            Directory.SetCurrentDirectory(Application.StartupPath);
+
+#if DEBUG
+            // truncate privoxy log file while debugging
+            string privoxyLogFilename = Utils.GetTempPath("privoxy.log");
+            if (File.Exists(privoxyLogFilename))
+                using (new FileStream(privoxyLogFilename, FileMode.Truncate)) { }
+#endif
+            MainController = new ShadowsocksController();
+            MenuController = new MenuViewController(MainController);
+
+            HotKeys.Init(MainController);
+            MainController.Start();
+
+            NamedPipeServer namedPipeServer = new NamedPipeServer();
+            Task.Run(() => namedPipeServer.Run(pipename));
+            namedPipeServer.AddUrlRequested += (_1, e) => MainController.AskAddServerBySSURL(e.Url);
+            if (!addedUrl.IsNullOrEmpty())
+            {
+                MainController.AskAddServerBySSURL(addedUrl);
+            }
+
+            Application.Run();
         }
 
         private static int exited = 0;
