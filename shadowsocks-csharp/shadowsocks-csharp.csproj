@@ -14,6 +14,7 @@
     <StartupObject>Shadowsocks.Program</StartupObject>
     <Nullable>disable</Nullable>
     <LangVersion>8.0</LangVersion>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
