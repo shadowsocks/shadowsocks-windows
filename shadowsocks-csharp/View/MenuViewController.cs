@@ -3,6 +3,7 @@ using Shadowsocks.Controller;
 using Shadowsocks.Model;
 using Shadowsocks.Properties;
 using Shadowsocks.Util;
+using Shadowsocks.Util.SystemProxy;
 using System;
 using System.Diagnostics;
 using System.Drawing;
@@ -38,7 +39,7 @@ namespace Shadowsocks.View
         private ToolStripMenuItem disableItem;
         private ToolStripMenuItem AutoStartupItem;
         private ToolStripMenuItem ShareOverLANItem;
-        private ToolStripSeparator  SeperatorItem;
+        private ToolStripSeparator SeperatorItem;
         private ToolStripMenuItem ConfigItem;
         private ToolStripMenuItem ProtocolHandlerItem;
         private ToolStripMenuItem ServersItem;
@@ -507,7 +508,8 @@ namespace Shadowsocks.View
                     )
                 {
                     menuItem.Checked = true;
-                } else
+                }
+                else
                 {
                     menuItem.Checked = false;
                 }
@@ -671,6 +673,9 @@ namespace Shadowsocks.View
                 globalModeItem.Checked = config.global;
                 PACModeItem.Checked = !config.global;
             }
+
+            globalModeItem.Enabled = WinINet.operational;
+            PACModeItem.Enabled = WinINet.operational;
         }
 
         private void GlobalModeItem_Click(object sender, EventArgs e)

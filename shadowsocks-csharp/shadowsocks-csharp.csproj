@@ -31,8 +31,6 @@
     <None Remove="Data\NLog.config" />
     <None Remove="Data\privoxy.exe.gz" />
     <None Remove="Data\privoxy_conf.txt" />
-    <None Remove="Data\sysproxy.exe.gz" />
-    <None Remove="Data\sysproxy64.exe.gz" />
     <None Remove="Data\user-rule.txt" />
     <None Remove="Resources\ss128.pdn" />
     <None Remove="Resources\ss32.pdn" />
@@ -95,8 +93,6 @@
     <Resource Include="Data\NLog.config" />
     <Resource Include="Data\privoxy.exe.gz" />
     <Resource Include="Data\privoxy_conf.txt" />
-    <Resource Include="Data\sysproxy.exe.gz" />
-    <Resource Include="Data\sysproxy64.exe.gz" />
     <Resource Include="Data\user-rule.txt" />
     <Resource Include="Resources\ss128.pdn" />
     <Resource Include="Resources\ss32.pdn" />
