@@ -1,14 +1,13 @@
-﻿using Newtonsoft.Json;
-using NLog;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using NLog;
 
 namespace Shadowsocks.Util.SystemProxy
 {
+    #region Windows API data structure definition
     public enum InternetOptions
     {
         Refresh = 37,
@@ -71,8 +70,6 @@ namespace Shadowsocks.Util.SystemProxy
         }
     }
 
-
-
     [StructLayout(LayoutKind.Sequential)]
     public struct InternetPerConnectionOption
     {
@@ -117,13 +114,14 @@ namespace Shadowsocks.Util.SystemProxy
             }
         }
     }
+    #endregion
 
     public class WinINetSetting
     {
         public InternetPerConnectionFlags Flags = InternetPerConnectionFlags.Direct;
-        public string ProxyServer;
-        public string ProxyBypass;
-        public string AutoConfigUrl;
+        public string ProxyServer = string.Empty;
+        public string ProxyBypass = string.Empty;
+        public string AutoConfigUrl = string.Empty;
     }
 
     public class WinINet
@@ -138,7 +136,7 @@ namespace Shadowsocks.Util.SystemProxy
         {
             try
             {
-                Query();
+                Record();
             }
             catch (DllNotFoundException)
             {
@@ -158,8 +156,6 @@ namespace Shadowsocks.Util.SystemProxy
                     throw we;
                 }
             }
-
-            Load();
         }
 
         public static void ProxyGlobal(string server, string bypass)
@@ -172,6 +168,7 @@ namespace Shadowsocks.Util.SystemProxy
             };
             Exec(options);
         }
+
         public static void ProxyPAC(string url)
         {
             List<InternetPerConnectionOption> options = new List<InternetPerConnectionOption>
@@ -181,6 +178,7 @@ namespace Shadowsocks.Util.SystemProxy
             };
             Exec(options);
         }
+
         public static void Direct()
         {
             List<InternetPerConnectionOption> options = new List<InternetPerConnectionOption>
@@ -190,42 +188,11 @@ namespace Shadowsocks.Util.SystemProxy
             Exec(options);
         }
 
-        private static void Load()
-        {
-            try
-            {
-                string configContent = File.ReadAllText(Utils.GetTempPath(SettingFile));
-                initialSetting = JsonConvert.DeserializeObject<WinINetSetting>(configContent);
-            }
-            catch (Exception)
-            {
-                // Suppress all exceptions. finally block will initialize new user config settings.
-            }
-            finally
-            {
-                initialSetting ??= new WinINetSetting();
-            }
-        }
-        private static void Save()
-        {
-            try
-            {
-                using (StreamWriter sw = new StreamWriter(File.Open(Utils.GetTempPath(SettingFile), FileMode.Create)))
-                {
-                    string jsonString = JsonConvert.SerializeObject(initialSetting, Formatting.Indented);
-                    sw.Write(jsonString);
-                    sw.Flush();
-                }
-            }
-            catch (IOException)
-            {
-                // logger.LogUsefulException(e);
-            }
-        }
         private static void Record()
         {
             initialSetting ??= Query();
         }
+
         public static void Restore()
         {
             Set(initialSetting);
@@ -242,17 +209,13 @@ namespace Shadowsocks.Util.SystemProxy
             };
             Exec(options);
         }
+
         public static void Reset()
         {
-            Set(new WinINetSetting
-            {
-                Flags = InternetPerConnectionFlags.Direct,
-                ProxyServer = "",
-                ProxyBypass = "",
-                AutoConfigUrl = "",
-            });
+            Set(new WinINetSetting());
         }
 
+        #region Windows API wrapper
         public static WinINetSetting Query()
         {
             if (!operational)
@@ -380,17 +343,11 @@ namespace Shadowsocks.Util.SystemProxy
 
         private static void Exec(List<InternetPerConnectionOption> options)
         {
-            // TODO: optimize load and save
-            Load();
-            Record();
-
             Exec(options, null);
             foreach (string conn in RAS.GetAllConnections())
             {
                 Exec(options, conn);
             }
-
-            Save();
         }
 
         private static void Exec(List<InternetPerConnectionOption> options, string connName)
@@ -442,6 +399,6 @@ namespace Shadowsocks.Util.SystemProxy
 
         [DllImport("wininet.dll", CharSet = CharSet.Auto, SetLastError = true)]
         private static extern bool InternetQueryOption(IntPtr hInternet, uint dwOption, IntPtr lpBuffer, ref int lpdwBufferLength);
-
+        #endregion
     }
 }

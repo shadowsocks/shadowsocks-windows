@@ -15,7 +15,7 @@ namespace Shadowsocks.Controller
             bool global = config.global;
             bool enabled = config.enabled;
 
-            if (forceDisable || WinINet.operational)
+            if (forceDisable || !WinINet.operational)
             {
                 enabled = false;
             }
