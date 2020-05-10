@@ -156,21 +156,7 @@ after_build:
 
 # providers: Local, FTP, WebDeploy, AzureCS, AzureBlob, S3, NuGet, Environment
 # provider names are case-sensitive!
-#deploy:
-
-#    # Deploy to GitHub Releases
-#  - provider: GitHub
-#    auth_token:
-#      secure: ZrRlVe3eWp1ccIVZcmFrI7vaCxwz5ewIMSmaPUTjMGyC1rVRlYm7nWWi6Pzkpe0A
-#    description: '%APPVEYOR_BUILD_VERSION%'
-#    artifact: Shadowsocks-%APPVEYOR_BUILD_VERSION%.zip, Shadowsocks-%APPVEYOR_BUILD_VERSION%.zip.hash
-#    draft: true
-#    prerelease: true
-#    on:
-#      branch: master                # release from master branch only
-#      configuration: Release
-#      APPVEYOR_REPO_TAG: true       # deploy on tag push only
-
+# deploy:
 
 # # scripts to run before deployment
 # before_deploy:
