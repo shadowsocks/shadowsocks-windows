@@ -155,7 +155,7 @@ namespace Shadowsocks
             {
                 MainController.AskAddServerBySSURL(addedUrl);
             }
-
+            Console.WriteLine(GeositeUpdater.List);
             Application.Run();
         }
 
