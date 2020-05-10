@@ -96,7 +96,7 @@ before_build:
 
 # scripts to run after build (working directory and environment changes are persisted from the previous steps)
 after_build:
-  ps: |
+- ps: |+
     function CalculateHash($file)
     {
         $newLine = "`r`n"
@@ -112,37 +112,36 @@ after_build:
         return $text
     }
 
-
     $WorkingFolder = "$env:APPVEYOR_BUILD_FOLDER\working"
     $ExeFileName = "Shadowsocks-$env:APPVEYOR_BUILD_VERSION-$env:CONFIGURATION.exe"
     $ExeFile = "$WorkingFolder\$ExeFileName"
     $ExeHashFile = "$Exefile.hash"
 
-    New-Item $WorkingFolder -ItemType Directory -Force
-    Copy-Item $env:APPVEYOR_BUILD_FOLDER\shadowsocks-csharp\bin\$env:PLATFORM\$env:CONFIGURATION\Shadowsocks.exe $WorkingFolder\Shadowsocks.exe
-    Copy-Item $WorkingFolder\Shadowsocks.exe $ExeFile
+    New-Item "$WorkingFolder" -ItemType Directory -Force
+    Copy-Item "$env:APPVEYOR_BUILD_FOLDER\shadowsocks-csharp\bin\$env:PLATFORM\$env:CONFIGURATION\Shadowsocks.exe" "$WorkingFolder\Shadowsocks.exe"
+    Copy-Item "$WorkingFolder\Shadowsocks.exe" "$ExeFile"
 
-    CalculateHash -file $Exefile | Out-File -FilePath $ExeHashFile
+    CalculateHash -file "$Exefile" | Out-File -FilePath "$ExeHashFile"
 
-    Push-AppveyorArtifact $ExeFile
-    Push-AppveyorArtifact $ExeHashFile
+    Push-AppveyorArtifact "$ExeFile"
+    Push-AppveyorArtifact "$ExeHashFile"
 
     # Create and deploy the release zip
-    if ($env:configuration -eq 'Release')
-    {
-        $ReleaseFile = "$WorkingFolder\Shadowsocks.exe"
-        $HashFile = "$ReleaseFile.hash"
-        $ZipFile = "$WorkingFolder\Shadowsocks-$env:APPVEYOR_BUILD_VERSION.zip"
-        $ZipHashFile = "$ZipFile.hash"
-        # Calculate exe Hash and archieve both exe and hash to zip
-        CalculateHash -file $ReleaseFile | Out-File -FilePath $hashFile
-        7z a $ZipFile $ReleaseFile
-        7z a $ZipFile $HashFile
-        Push-AppveyorArtifact $ZipFile
-        # Calculate zip Hash
-        CalculateHash -file $ZipFile | Out-File -FilePath $ZipHashFile
-        Push-AppveyorArtifact $ZipHashFile
-    }
+
+    $ReleaseFile = "$WorkingFolder\Shadowsocks.exe"
+    $ReleaseHashFile = "$ReleaseFile.hash"
+    $ZipFile = "$WorkingFolder\Shadowsocks-$env:APPVEYOR_BUILD_VERSION.zip"
+    $ZipHashFile = "$ZipFile.hash"
+
+    # Calculate exe Hash and archieve both exe and hash to zip
+    CalculateHash -file "$ReleaseFile" | Out-File -FilePath "$ReleaseHashFile"
+    7z a "$ZipFile" "$ReleaseFile" "$ReleaseHashFile"
+    Push-AppveyorArtifact "$ZipFile"
+
+    # Calculate packed zip Hash
+    CalculateHash -file "$ZipFile" | Out-File -FilePath "$ZipHashFile"
+    Push-AppveyorArtifact "$ZipHashFile"
+
 
 # scripts to run *after* solution is built and *before* automatic packaging occurs (web apps, NuGet packages, Azure Cloud Services)
 # before_package:
@@ -157,20 +156,20 @@ after_build:
 
 # providers: Local, FTP, WebDeploy, AzureCS, AzureBlob, S3, NuGet, Environment
 # provider names are case-sensitive!
-deploy:
+#deploy:
 
-    # Deploy to GitHub Releases
-  - provider: GitHub
-    auth_token:
-      secure: ZrRlVe3eWp1ccIVZcmFrI7vaCxwz5ewIMSmaPUTjMGyC1rVRlYm7nWWi6Pzkpe0A
-    description: '%APPVEYOR_BUILD_VERSION%'
-    artifact: Shadowsocks-%APPVEYOR_BUILD_VERSION%.zip, Shadowsocks-%APPVEYOR_BUILD_VERSION%.zip.hash
-    draft: true
-    prerelease: true
-    on:
-      branch: master                # release from master branch only
-      configuration: Release
-      APPVEYOR_REPO_TAG: true       # deploy on tag push only
+#    # Deploy to GitHub Releases
+#  - provider: GitHub
+#    auth_token:
+#      secure: ZrRlVe3eWp1ccIVZcmFrI7vaCxwz5ewIMSmaPUTjMGyC1rVRlYm7nWWi6Pzkpe0A
+#    description: '%APPVEYOR_BUILD_VERSION%'
+#    artifact: Shadowsocks-%APPVEYOR_BUILD_VERSION%.zip, Shadowsocks-%APPVEYOR_BUILD_VERSION%.zip.hash
+#    draft: true
+#    prerelease: true
+#    on:
+#      branch: master                # release from master branch only
+#      configuration: Release
+#      APPVEYOR_REPO_TAG: true       # deploy on tag push only
 
 
 # # scripts to run before deployment
