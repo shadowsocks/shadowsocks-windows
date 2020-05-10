@@ -27,16 +27,16 @@ public static partial class GeositeReflection {
           "YnV0ZRgDIAMoCzIXLkRvbWFpbk9iamVjdC5BdHRyaWJ1dGUaUgoJQXR0cmli",
           "dXRlEgsKA2tleRgBIAEoCRIUCgpib29sX3ZhbHVlGAIgASgISAASEwoJaW50",
           "X3ZhbHVlGAMgASgDSABCDQoLdHlwZWRfdmFsdWUiMgoEVHlwZRIJCgVQbGFp",
-          "bhAAEgkKBVJlZ2V4EAESCgoGRG9tYWluEAISCAoERnVsbBADIj4KB0dlb3Np",
-          "dGUSFAoMY291bnRyeV9jb2RlGAEgASgJEh0KBmRvbWFpbhgCIAMoCzINLkRv",
-          "bWFpbk9iamVjdCImCgtHZW9zaXRlTGlzdBIXCgVlbnRyeRgBIAMoCzIILkdl",
-          "b3NpdGViBnByb3RvMw=="));
+          "bhAAEgkKBVJlZ2V4EAESCgoGRG9tYWluEAISCAoERnVsbBADIj0KB0dlb3Np",
+          "dGUSEgoKZ3JvdXBfbmFtZRgBIAEoCRIeCgdkb21haW5zGAIgAygLMg0uRG9t",
+          "YWluT2JqZWN0IigKC0dlb3NpdGVMaXN0EhkKB2VudHJpZXMYASADKAsyCC5H",
+          "ZW9zaXRlYgZwcm90bzM="));
     descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
         new pbr::FileDescriptor[] { },
         new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
           new pbr::GeneratedClrTypeInfo(typeof(global::DomainObject), global::DomainObject.Parser, new[]{ "Type", "Value", "Attribute" }, null, new[]{ typeof(global::DomainObject.Types.Type) }, null, new pbr::GeneratedClrTypeInfo[] { new pbr::GeneratedClrTypeInfo(typeof(global::DomainObject.Types.Attribute), global::DomainObject.Types.Attribute.Parser, new[]{ "Key", "BoolValue", "IntValue" }, new[]{ "TypedValue" }, null, null, null)}),
-          new pbr::GeneratedClrTypeInfo(typeof(global::Geosite), global::Geosite.Parser, new[]{ "CountryCode", "Domain" }, null, null, null, null),
-          new pbr::GeneratedClrTypeInfo(typeof(global::GeositeList), global::GeositeList.Parser, new[]{ "Entry" }, null, null, null, null)
+          new pbr::GeneratedClrTypeInfo(typeof(global::Geosite), global::Geosite.Parser, new[]{ "GroupName", "Domains" }, null, null, null, null),
+          new pbr::GeneratedClrTypeInfo(typeof(global::GeositeList), global::GeositeList.Parser, new[]{ "Entries" }, null, null, null, null)
         }));
   }
   #endregion
@@ -502,8 +502,8 @@ public sealed partial class Geosite : pb::IMessage<Geosite> {
 
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
   public Geosite(Geosite other) : this() {
-    countryCode_ = other.countryCode_;
-    domain_ = other.domain_.Clone();
+    groupName_ = other.groupName_;
+    domains_ = other.domains_.Clone();
     _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
   }
 
@@ -512,25 +512,25 @@ public sealed partial class Geosite : pb::IMessage<Geosite> {
     return new Geosite(this);
   }
 
-  /// <summary>Field number for the "country_code" field.</summary>
-  public const int CountryCodeFieldNumber = 1;
-  private string countryCode_ = "";
+  /// <summary>Field number for the "group_name" field.</summary>
+  public const int GroupNameFieldNumber = 1;
+  private string groupName_ = "";
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-  public string CountryCode {
-    get { return countryCode_; }
+  public string GroupName {
+    get { return groupName_; }
     set {
-      countryCode_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+      groupName_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
     }
   }
 
-  /// <summary>Field number for the "domain" field.</summary>
-  public const int DomainFieldNumber = 2;
-  private static readonly pb::FieldCodec<global::DomainObject> _repeated_domain_codec
+  /// <summary>Field number for the "domains" field.</summary>
+  public const int DomainsFieldNumber = 2;
+  private static readonly pb::FieldCodec<global::DomainObject> _repeated_domains_codec
       = pb::FieldCodec.ForMessage(18, global::DomainObject.Parser);
-  private readonly pbc::RepeatedField<global::DomainObject> domain_ = new pbc::RepeatedField<global::DomainObject>();
+  private readonly pbc::RepeatedField<global::DomainObject> domains_ = new pbc::RepeatedField<global::DomainObject>();
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-  public pbc::RepeatedField<global::DomainObject> Domain {
-    get { return domain_; }
+  public pbc::RepeatedField<global::DomainObject> Domains {
+    get { return domains_; }
   }
 
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -546,16 +546,16 @@ public sealed partial class Geosite : pb::IMessage<Geosite> {
     if (ReferenceEquals(other, this)) {
       return true;
     }
-    if (CountryCode != other.CountryCode) return false;
-    if(!domain_.Equals(other.domain_)) return false;
+    if (GroupName != other.GroupName) return false;
+    if(!domains_.Equals(other.domains_)) return false;
     return Equals(_unknownFields, other._unknownFields);
   }
 
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
   public override int GetHashCode() {
     int hash = 1;
-    if (CountryCode.Length != 0) hash ^= CountryCode.GetHashCode();
-    hash ^= domain_.GetHashCode();
+    if (GroupName.Length != 0) hash ^= GroupName.GetHashCode();
+    hash ^= domains_.GetHashCode();
     if (_unknownFields != null) {
       hash ^= _unknownFields.GetHashCode();
     }
@@ -569,11 +569,11 @@ public sealed partial class Geosite : pb::IMessage<Geosite> {
 
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
   public void WriteTo(pb::CodedOutputStream output) {
-    if (CountryCode.Length != 0) {
+    if (GroupName.Length != 0) {
       output.WriteRawTag(10);
-      output.WriteString(CountryCode);
+      output.WriteString(GroupName);
     }
-    domain_.WriteTo(output, _repeated_domain_codec);
+    domains_.WriteTo(output, _repeated_domains_codec);
     if (_unknownFields != null) {
       _unknownFields.WriteTo(output);
     }
@@ -582,10 +582,10 @@ public sealed partial class Geosite : pb::IMessage<Geosite> {
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
   public int CalculateSize() {
     int size = 0;
-    if (CountryCode.Length != 0) {
-      size += 1 + pb::CodedOutputStream.ComputeStringSize(CountryCode);
+    if (GroupName.Length != 0) {
+      size += 1 + pb::CodedOutputStream.ComputeStringSize(GroupName);
     }
-    size += domain_.CalculateSize(_repeated_domain_codec);
+    size += domains_.CalculateSize(_repeated_domains_codec);
     if (_unknownFields != null) {
       size += _unknownFields.CalculateSize();
     }
@@ -597,10 +597,10 @@ public sealed partial class Geosite : pb::IMessage<Geosite> {
     if (other == null) {
       return;
     }
-    if (other.CountryCode.Length != 0) {
-      CountryCode = other.CountryCode;
+    if (other.GroupName.Length != 0) {
+      GroupName = other.GroupName;
     }
-    domain_.Add(other.domain_);
+    domains_.Add(other.domains_);
     _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
   }
 
@@ -613,11 +613,11 @@ public sealed partial class Geosite : pb::IMessage<Geosite> {
           _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
           break;
         case 10: {
-          CountryCode = input.ReadString();
+          GroupName = input.ReadString();
           break;
         }
         case 18: {
-          domain_.AddEntriesFrom(input, _repeated_domain_codec);
+          domains_.AddEntriesFrom(input, _repeated_domains_codec);
           break;
         }
       }
@@ -651,7 +651,7 @@ public sealed partial class GeositeList : pb::IMessage<GeositeList> {
 
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
   public GeositeList(GeositeList other) : this() {
-    entry_ = other.entry_.Clone();
+    entries_ = other.entries_.Clone();
     _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
   }
 
@@ -660,14 +660,14 @@ public sealed partial class GeositeList : pb::IMessage<GeositeList> {
     return new GeositeList(this);
   }
 
-  /// <summary>Field number for the "entry" field.</summary>
-  public const int EntryFieldNumber = 1;
-  private static readonly pb::FieldCodec<global::Geosite> _repeated_entry_codec
+  /// <summary>Field number for the "entries" field.</summary>
+  public const int EntriesFieldNumber = 1;
+  private static readonly pb::FieldCodec<global::Geosite> _repeated_entries_codec
       = pb::FieldCodec.ForMessage(10, global::Geosite.Parser);
-  private readonly pbc::RepeatedField<global::Geosite> entry_ = new pbc::RepeatedField<global::Geosite>();
+  private readonly pbc::RepeatedField<global::Geosite> entries_ = new pbc::RepeatedField<global::Geosite>();
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-  public pbc::RepeatedField<global::Geosite> Entry {
-    get { return entry_; }
+  public pbc::RepeatedField<global::Geosite> Entries {
+    get { return entries_; }
   }
 
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -683,14 +683,14 @@ public sealed partial class GeositeList : pb::IMessage<GeositeList> {
     if (ReferenceEquals(other, this)) {
       return true;
     }
-    if(!entry_.Equals(other.entry_)) return false;
+    if(!entries_.Equals(other.entries_)) return false;
     return Equals(_unknownFields, other._unknownFields);
   }
 
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
   public override int GetHashCode() {
     int hash = 1;
-    hash ^= entry_.GetHashCode();
+    hash ^= entries_.GetHashCode();
     if (_unknownFields != null) {
       hash ^= _unknownFields.GetHashCode();
     }
@@ -704,7 +704,7 @@ public sealed partial class GeositeList : pb::IMessage<GeositeList> {
 
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
   public void WriteTo(pb::CodedOutputStream output) {
-    entry_.WriteTo(output, _repeated_entry_codec);
+    entries_.WriteTo(output, _repeated_entries_codec);
     if (_unknownFields != null) {
       _unknownFields.WriteTo(output);
     }
@@ -713,7 +713,7 @@ public sealed partial class GeositeList : pb::IMessage<GeositeList> {
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
   public int CalculateSize() {
     int size = 0;
-    size += entry_.CalculateSize(_repeated_entry_codec);
+    size += entries_.CalculateSize(_repeated_entries_codec);
     if (_unknownFields != null) {
       size += _unknownFields.CalculateSize();
     }
@@ -725,7 +725,7 @@ public sealed partial class GeositeList : pb::IMessage<GeositeList> {
     if (other == null) {
       return;
     }
-    entry_.Add(other.entry_);
+    entries_.Add(other.entries_);
     _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
   }
 
@@ -738,7 +738,7 @@ public sealed partial class GeositeList : pb::IMessage<GeositeList> {
           _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
           break;
         case 10: {
-          entry_.AddEntriesFrom(input, _repeated_entry_codec);
+          entries_.AddEntriesFrom(input, _repeated_entries_codec);
           break;
         }
       }

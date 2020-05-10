@@ -34,10 +34,10 @@ message DomainObject {
 }
 
 message Geosite {
-  string country_code = 1;
-  repeated DomainObject domain = 2;
+  string group_name = 1;
+  repeated DomainObject domains = 2;
 }
 
 message GeositeList{
-  repeated Geosite entry = 1;
+  repeated Geosite entries = 1;
 }
