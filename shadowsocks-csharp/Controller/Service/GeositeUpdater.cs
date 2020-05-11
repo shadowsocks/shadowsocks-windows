@@ -6,8 +6,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
-using Google.Protobuf;
 using Newtonsoft.Json;
 using Shadowsocks.Model;
 using System.Net;
@@ -66,14 +64,9 @@ namespace Shadowsocks.Controller
         public static void UpdatePACFromGeosite(Configuration config)
         {
             string geositeUrl = GEOSITE_URL;
-            string group = "geolocation-!cn";
-            bool blacklist = true;
-            if (!string.IsNullOrWhiteSpace(config.geositeGroup))
-            {
-                group = config.geositeGroup;
-                blacklist = config.geositeBlacklistMode;
-            }
-
+            string group = config.geositeGroup;
+            bool blacklist = config.geositeBlacklistMode;
+            
             if (!string.IsNullOrWhiteSpace(config.geositeUrl))
             {
                 logger.Info("Found custom Geosite URL in config file");
@@ -170,7 +163,6 @@ var __RULES__ = {JsonConvert.SerializeObject(gfwLines, Formatting.Indented)};
         private static List<string> GeositeToGFWList(IList<DomainObject> domains, bool blacklist)
         {
             return blacklist ? GeositeToGFWListBlack(domains) : GeositeToGFWListWhite(domains);
-
         }
 
         private static List<string> GeositeToGFWListBlack(IList<DomainObject> domains)

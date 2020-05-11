@@ -30,8 +30,8 @@ namespace Shadowsocks.Model
         public bool showPluginOutput;
         public string pacUrl;
         public string geositeUrl;
-        public string geositeGroup;
-        public bool geositeBlacklistMode;
+        public string geositeGroup = "geolocation-!cn";
+        public bool geositeBlacklistMode = true;
 
         public bool useOnlinePac;
         public bool secureLocalPac = true;
