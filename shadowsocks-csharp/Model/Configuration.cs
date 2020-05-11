@@ -93,10 +93,11 @@ namespace Shadowsocks.Model
 
         public static Configuration Load()
         {
+            Configuration config;
             try
             {
                 string configContent = File.ReadAllText(CONFIG_FILE);
-                Configuration config = JsonConvert.DeserializeObject<Configuration>(configContent);
+                config = JsonConvert.DeserializeObject<Configuration>(configContent);
                 config.isDefault = false;
                 if (UpdateChecker.Asset.CompareVersion(UpdateChecker.Version, config.version ?? "0") > 0)
                 {
@@ -124,37 +125,12 @@ namespace Shadowsocks.Model
                 //TODO if remote host(server) do not support IPv6 (or DNS resolve AAAA TYPE record) disable IPv6?
 
                 config.proxy.CheckConfig();
-
-                try
-                {
-                    config.nLogConfig = NLogConfig.LoadXML();
-                    switch (config.nLogConfig.GetLogLevel())
-                    {
-                        case NLogConfig.LogLevel.Fatal:
-                        case NLogConfig.LogLevel.Error:
-                        case NLogConfig.LogLevel.Warn:
-                        case NLogConfig.LogLevel.Info:
-                            config.isVerboseLogging = false;
-                            break;
-                        case NLogConfig.LogLevel.Debug:
-                        case NLogConfig.LogLevel.Trace:
-                            config.isVerboseLogging = true;
-                            break;
-                    }
-                }
-                catch (Exception e)
-                {
-                    // todo: route the error to UI since there is no log file in this scenario
-                    logger.Error(e, "Cannot get the log level from NLog config file. Please check if the nlog config file exists with corresponding XML nodes.");
-                }
-
-                return config;
             }
             catch (Exception e)
             {
                 if (!(e is FileNotFoundException))
                     logger.LogUsefulException(e);
-                return new Configuration
+                config = new Configuration
                 {
                     index = 0,
                     isDefault = true,
@@ -169,6 +145,31 @@ namespace Shadowsocks.Model
                     hotkey = new HotkeyConfig(),
                 };
             }
+
+            try
+            {
+                config.nLogConfig = NLogConfig.LoadXML();
+                switch (config.nLogConfig.GetLogLevel())
+                {
+                    case NLogConfig.LogLevel.Fatal:
+                    case NLogConfig.LogLevel.Error:
+                    case NLogConfig.LogLevel.Warn:
+                    case NLogConfig.LogLevel.Info:
+                        config.isVerboseLogging = false;
+                        break;
+                    case NLogConfig.LogLevel.Debug:
+                    case NLogConfig.LogLevel.Trace:
+                        config.isVerboseLogging = true;
+                        break;
+                }
+            }
+            catch (Exception e)
+            {
+                // todo: route the error to UI since there is no log file in this scenario
+                logger.Error(e, "Cannot get the log level from NLog config file. Please check if the nlog config file exists with corresponding XML nodes.");
+            }
+
+            return config;
         }
 
         public static void Save(Configuration config)
