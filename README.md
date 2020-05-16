@@ -9,7 +9,7 @@
 
 1. System proxy configuration
 2. PAC mode and global mode
-3. [GFWList] and user rules
+3. [GeoSite] and user rules
 4. Supports HTTP proxy
 5. Supports server auto switching
 6. Supports UDP relay (see Usage)
@@ -37,7 +37,7 @@ port in `Servers -> Edit Servers`
 
 1. You can change PAC rules by editing the PAC file. When you save the PAC file
 with any editor, Shadowsocks will notify browsers about the change automatically
-2. You can also update PAC file from [GFWList] \(maintained by 3rd party)
+2. You can also update PAC file from [GeoSite] \(maintained by 3rd party)
 3. You can also use online PAC URL
 
 For Windows10 Store and related applications, please execute the following command under Admin privilege:
@@ -143,7 +143,7 @@ Sysproxy ()            https://github.com/Noisyfox/sysproxy
 [Appveyor]:     https://ci.appveyor.com/project/celeron533/shadowsocks-windows
 [Build Status]: https://ci.appveyor.com/api/projects/status/tfw57q6eecippsl5/branch/master?svg=true
 [release page]: https://github.com/shadowsocks/shadowsocks-csharp/releases
-[GFWList]:      https://github.com/gfwlist/gfwlist
+[GeoSite]:      https://github.com/v2ray/domain-list-community
 [Servers]:      https://github.com/shadowsocks/shadowsocks/wiki/Ports-and-Clients#linux--server-side
 [中文说明]:     https://github.com/shadowsocks/shadowsocks-windows/wiki/Shadowsocks-Windows-%E4%BD%BF%E7%94%A8%E8%AF%B4%E6%98%8E
 [Visual Studio 2017]:   https://www.visualstudio.com/downloads/
