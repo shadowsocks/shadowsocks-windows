@@ -155,7 +155,6 @@ namespace Shadowsocks
             {
                 MainController.AskAddServerBySSURL(addedUrl);
             }
-
             Application.Run();
         }
 

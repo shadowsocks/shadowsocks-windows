@@ -786,6 +786,10 @@ function FindProxyForURL(url, host) {
     if (userrulesMatcher.matchesAny(url, host) instanceof WhitelistFilter) {
         return direct;
     }
+    // Hack for Geosite, it provides a whitelist...
+    if (defaultMatcher.matchesAny(url, host) instanceof WhitelistFilter) {
+        return direct;
+    }
     if (defaultMatcher.matchesAny(url, host) instanceof BlockingFilter) {
         return proxy;
     }

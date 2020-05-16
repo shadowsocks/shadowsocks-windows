@@ -24,8 +24,8 @@ Allow other Devices to connect,Общий доступ к подключению
 Local PAC,Локальный PAC,使用本地 PAC,使用本機 PAC,ローカル PAC,로컬 프록시 자동 구성,PAC local
 Online PAC,Удаленный PAC,使用在线 PAC,使用線上 PAC,オンライン PAC,온라인 프록시 자동 구성,PAC en ligne
 Edit Local PAC File...,Редактировать локальный PAC…,编辑本地 PAC 文件...,編輯本機 PAC 檔案...,ローカル PAC ファイルの編集...,로컬 프록시 자동 구성 파일 수정,Modifier le fichier PAC local ...
-Update Local PAC from GFWList,Обновить локальный PAC из GFWList,从 GFWList 更新本地 PAC,從 GFWList 更新本機 PAC,GFWList からローカル PAC を更新,GFWList에서 로컬 프록시 자동 구성 파일 업데이트,Mettre à jour le PAC local à partir de GFWList
-Edit User Rule for GFWList...,Редактировать свои правила для GFWList,编辑 GFWList 的用户规则...,編輯 GFWList 的使用者規則...,ユーザールールの編集...,GFWList 사용자 수정,Modifier la règle utilisateur pour GFWList ...
+Update Local PAC from Geosite,Обновить локальный PAC из Geosite,从 Geosite 更新本地 PAC,從 Geosite 更新本機 PAC,Geosite からローカル PAC を更新,Geosite에서 로컬 프록시 자동 구성 파일 업데이트,Mettre à jour le PAC local à partir de Geosite
+Edit User Rule for Geosite...,Редактировать свои правила для Geosite,编辑 Geosite 的用户规则...,編輯 Geosite 的使用者規則...,ユーザールールの編集...,Geosite 사용자 수정,Modifier la règle utilisateur pour Geosite ...
 Secure Local PAC,Безопасный URL локального PAC,保护本地 PAC,安全本機 PAC,ローカル PAC を保護,로컬 프록시 자동 구성 파일 암호화,Sécuriser PAC local
 Copy Local PAC URL,Копировать URL локального PAC,复制本地 PAC 网址,複製本機 PAC 網址,ローカル PAC URL をコピー,로컬 프록시 자동 구성 파일 URL 복사,Copier l'URL du PAC local
 Share Server Config...,Поделиться конфигурацией сервера…,分享服务器配置...,分享伺服器設定檔...,サーバーの設定を共有...,서버 설정 공유,Partager la configuration du serveur ...
@@ -178,7 +178,7 @@ System Proxy Enabled,Системный прокси включен,系统代理
 System Proxy Disabled,Системный прокси отключен,系统代理未启用,系統 Proxy 未啟用,システム プロキシが無効です。,시스템 프록시가 비활성화되었습니다.,Proxy système désactivé
 Failed to update PAC file ,Не удалось обновить PAC файл,更新 PAC 文件失败,更新 PAC 檔案失敗,PAC の更新に失敗しました。,프록시 자동 구성 파일을 업데이트하는데 실패했습니다.,Impossible de mettre à jour le fichier PAC
 PAC updated,PAC файл обновлен,更新 PAC 成功,更新 PAC 成功,PAC を更新しました。,프록시 자동 구성 파일이 업데이트되었습니다.,PAC mis à jour
-No updates found. Please report to GFWList if you have problems with it.,Обновлений не найдено. Сообщите авторам GFWList если у вас возникли проблемы.,未发现更新。如有问题请提交给 GFWList。,未發現更新。如有問題請報告至 GFWList。,お使いのバージョンは最新です。問題がある場合は、GFWList に報告して下さい。,사용 가능한 업데이트를 찾지 못했습니다. 문제가 있다면 GFWList로 전송해주세요.,Aucune mise à jour trouvée. Veuillez signaler à GFWList si vous avez des problèmes concernant.
+No updates found. Please report to Geosite if you have problems with it.,Обновлений не найдено. Сообщите авторам Geosite если у вас возникли проблемы.,未发现更新。如有问题请提交给 Geosite。,未發現更新。如有問題請報告至 Geosite。,お使いのバージョンは最新です。問題がある場合は、Geosite に報告して下さい。,사용 가능한 업데이트를 찾지 못했습니다. 문제가 있다면 Geosite로 전송해주세요.,Aucune mise à jour trouvée. Veuillez signaler à Geosite si vous avez des problèmes concernant.
 No QRCode found. Try to zoom in or move it to the center of the screen.,QRCode не обнаружен. Попробуйте увеличить изображение или переместить его в центр экрана.,未发现二维码，尝试把它放大或移动到靠近屏幕中间的位置,未發現 QR 碼，嘗試把它放大或移動到靠近熒幕中間的位置,QR コードが見つかりませんでした。コードを大きくするか、画面の中央に移動して下さい。,QR코드를 찾을 수 없습니다. 가운데로 화면을 이동시키거나 확대해보세요.,Aucun QRCode trouvé. Essayez de zoomer ou de le déplacer vers le centre de l'écran.
 Shadowsocks is already running.,Shadowsocks уже запущен.,Shadowsocks 已经在运行。,Shadowsocks 已經在執行。,Shadowsocks 実行中,Shadowsocks가 이미 실행 중입니다.,Shadowsocks est déjà en cours d'exécution.
 Find Shadowsocks icon in your notify tray.,Значок Shadowsocks можно найти в области уведомлений.,请在任务栏里寻找 Shadowsocks 图标。,請在工作列裡尋找 Shadowsocks 圖示。,通知領域には Shadowsocks のアイコンがあります。,트레이에서 Shadowsocks를 찾아주세요.,Trouvez l'icône Shadowsocks dans votre barre de notification.

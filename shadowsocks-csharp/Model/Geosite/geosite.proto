@@ -1,0 +1,43 @@
+﻿syntax = "proto3";
+
+// DomainObject for routing decision.
+message DomainObject {
+  // Type of domain value.
+  enum Type {
+    // The value is used as is.
+    Plain = 0;
+    // The value is used as a regular expression.
+    Regex = 1;
+    // The value is a root domain.
+    Domain = 2;
+    // The value is a domain.
+    Full = 3;
+  }
+
+  // DomainObject matching type.
+  Type type = 1;
+
+  // DomainObject value.
+  string value = 2;
+
+  message Attribute {
+    string key = 1;
+
+    oneof typed_value {
+      bool bool_value = 2;
+      int64 int_value = 3;
+    }
+  }
+
+  // Attributes of this domain. May be used for filtering.
+  repeated Attribute attribute = 3;
+}
+
+message Geosite {
+  string group_name = 1;
+  repeated DomainObject domains = 2;
+}
+
+message GeositeList{
+  repeated Geosite entries = 1;
+}

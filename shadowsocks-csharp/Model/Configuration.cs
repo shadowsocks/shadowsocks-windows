@@ -29,7 +29,10 @@ namespace Shadowsocks.Model
         public bool portableMode = true;
         public bool showPluginOutput;
         public string pacUrl;
-        public string gfwListUrl;
+        public string geositeUrl;
+        public string geositeGroup = "geolocation-!cn";
+        public bool geositeBlacklistMode = true;
+
         public bool useOnlinePac;
         public bool secureLocalPac = true;
         public bool availabilityStatistics;

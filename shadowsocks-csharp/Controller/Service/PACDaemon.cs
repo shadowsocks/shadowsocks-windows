@@ -1,4 +1,5 @@
 ﻿using NLog;
+using Shadowsocks.Model;
 using Shadowsocks.Properties;
 using Shadowsocks.Util;
 using System;
@@ -21,6 +22,7 @@ namespace Shadowsocks.Controller
         public const string PAC_FILE = "pac.txt";
         public const string USER_RULE_FILE = "user-rule.txt";
         public const string USER_ABP_FILE = "abp.txt";
+        private Configuration config;
 
         FileSystemWatcher PACFileWatcher;
         FileSystemWatcher UserRuleFileWatcher;
@@ -28,8 +30,9 @@ namespace Shadowsocks.Controller
         public event EventHandler PACFileChanged;
         public event EventHandler UserRuleFileChanged;
 
-        public PACDaemon()
+        public PACDaemon(Configuration config)
         {
+            this.config = config;
             TouchPACFile();
             TouchUserRuleFile();
 
@@ -42,7 +45,7 @@ namespace Shadowsocks.Controller
         {
             if (!File.Exists(PAC_FILE))
             {
-                File.WriteAllText(PAC_FILE, Resources.default_abp_rule + Resources.abp_js);
+                GeositeUpdater.MergeAndWritePACFile(config.geositeGroup, config.geositeBlacklistMode);
             }
             return PAC_FILE;
         }
@@ -58,14 +61,11 @@ namespace Shadowsocks.Controller
 
         internal string GetPACContent()
         {
-            if (File.Exists(PAC_FILE))
+            if (!File.Exists(PAC_FILE))
             {
-                return File.ReadAllText(PAC_FILE, Encoding.UTF8);
+                GeositeUpdater.MergeAndWritePACFile(config.geositeGroup, config.geositeBlacklistMode);
             }
-            else
-            {
-                return Resources.default_abp_rule + Resources.abp_js;
-            }
+            return File.ReadAllText(PAC_FILE, Encoding.UTF8);
         }
 
 
