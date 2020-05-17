@@ -48,7 +48,7 @@ namespace Shadowsocks.View
         private ToolStripMenuItem localPACItem;
         private ToolStripMenuItem onlinePACItem;
         private ToolStripMenuItem editLocalPACItem;
-        private ToolStripMenuItem updateFromGFWListItem;
+        private ToolStripMenuItem updateFromGeositeItem;
         private ToolStripMenuItem editGFWUserRuleItem;
         private ToolStripMenuItem editOnlinePACItem;
         private ToolStripMenuItem secureLocalPacUrlToggleItem;
@@ -88,8 +88,8 @@ namespace Shadowsocks.View
             controller.ShowPluginOutputChanged += controller_ShowPluginOutputChanged;
             controller.EnableGlobalChanged += controller_EnableGlobalChanged;
             controller.Errored += controller_Errored;
-            controller.UpdatePACFromGFWListCompleted += controller_UpdatePACFromGFWListCompleted;
-            controller.UpdatePACFromGFWListError += controller_UpdatePACFromGFWListError;
+            controller.UpdatePACFromGeositeCompleted += controller_UpdatePACFromGeositeCompleted;
+            controller.UpdatePACFromGeositeError += controller_UpdatePACFromGeositeError;
 
             _notifyIcon = new NotifyIcon();
             UpdateTrayIconAndNotifyText();
@@ -310,8 +310,8 @@ namespace Shadowsocks.View
                     this.onlinePACItem = CreateToolStripMenuItem("Online PAC", new EventHandler(this.OnlinePACItem_Click)),
                     new ToolStripSeparator(),
                     this.editLocalPACItem = CreateToolStripMenuItem("Edit Local PAC File...", new EventHandler(this.EditPACFileItem_Click)),
-                    this.updateFromGFWListItem = CreateToolStripMenuItem("Update Local PAC from GFWList", new EventHandler(this.UpdatePACFromGFWListItem_Click)),
-                    this.editGFWUserRuleItem = CreateToolStripMenuItem("Edit User Rule for GFWList...", new EventHandler(this.EditUserRuleFileForGFWListItem_Click)),
+                    this.updateFromGeositeItem = CreateToolStripMenuItem("Update Local PAC from Geosite", new EventHandler(this.UpdatePACFromGeositeItem_Click)),
+                    this.editGFWUserRuleItem = CreateToolStripMenuItem("Edit User Rule for Geosite...", new EventHandler(this.EditUserRuleFileForGeositeItem_Click)),
                     this.secureLocalPacUrlToggleItem = CreateToolStripMenuItem("Secure Local PAC", new EventHandler(this.SecureLocalPacUrlToggleItem_Click)),
                     CreateToolStripMenuItem("Copy Local PAC URL", new EventHandler(this.CopyLocalPacUrlItem_Click)),
                     this.editOnlinePACItem = CreateToolStripMenuItem("Edit Online PAC URL...", new EventHandler(this.UpdateOnlinePACURLItem_Click)),
@@ -390,17 +390,17 @@ namespace Shadowsocks.View
             _notifyIcon.ShowBalloonTip(timeout);
         }
 
-        void controller_UpdatePACFromGFWListError(object sender, System.IO.ErrorEventArgs e)
+        void controller_UpdatePACFromGeositeError(object sender, System.IO.ErrorEventArgs e)
         {
             ShowBalloonTip(I18N.GetString("Failed to update PAC file"), e.GetException().Message, ToolTipIcon.Error, 5000);
             logger.LogUsefulException(e.GetException());
         }
 
-        void controller_UpdatePACFromGFWListCompleted(object sender, GFWListUpdater.ResultEventArgs e)
+        void controller_UpdatePACFromGeositeCompleted(object sender, GeositeResultEventArgs e)
         {
             string result = e.Success
                 ? I18N.GetString("PAC updated")
-                : I18N.GetString("No updates found. Please report to GFWList if you have problems with it.");
+                : I18N.GetString("No updates found. Please report to Geosite if you have problems with it.");
             ShowBalloonTip(I18N.GetString("Shadowsocks"), result, ToolTipIcon.Info, 1000);
         }
 
@@ -705,12 +705,12 @@ namespace Shadowsocks.View
             controller.TouchPACFile();
         }
 
-        private void UpdatePACFromGFWListItem_Click(object sender, EventArgs e)
+        private void UpdatePACFromGeositeItem_Click(object sender, EventArgs e)
         {
-            controller.UpdatePACFromGFWList();
+            controller.UpdatePACFromGeosite();
         }
 
-        private void EditUserRuleFileForGFWListItem_Click(object sender, EventArgs e)
+        private void EditUserRuleFileForGeositeItem_Click(object sender, EventArgs e)
         {
             controller.TouchUserRuleFile();
         }
@@ -944,14 +944,14 @@ namespace Shadowsocks.View
             if (this.localPACItem.Checked)
             {
                 this.editLocalPACItem.Enabled = true;
-                this.updateFromGFWListItem.Enabled = true;
+                this.updateFromGeositeItem.Enabled = true;
                 this.editGFWUserRuleItem.Enabled = true;
                 this.editOnlinePACItem.Enabled = false;
             }
             else
             {
                 this.editLocalPACItem.Enabled = false;
-                this.updateFromGFWListItem.Enabled = false;
+                this.updateFromGeositeItem.Enabled = false;
                 this.editGFWUserRuleItem.Enabled = false;
                 this.editOnlinePACItem.Enabled = true;
             }

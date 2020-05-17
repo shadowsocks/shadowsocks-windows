@@ -121,8 +121,8 @@
   <data name="abp_js" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Data\abp.js;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;gb2312</value>
   </data>
-  <data name="default_abp_rule" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Data\default-abp-rule.js;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+  <data name="dlc_dat" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\data\dlc.dat;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="i18n_csv" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Data\i18n.csv;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>

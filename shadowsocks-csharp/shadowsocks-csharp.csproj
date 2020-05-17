@@ -79,7 +79,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-   
+    <PackageReference Include="Google.Protobuf" Version="3.11.4" />
     <PackageReference Include="Microsoft.VisualBasic" Version="10.3.0" />
    
     <PackageReference Include="NaCl.Core" Version="1.2.0" />
@@ -96,7 +96,7 @@
 
   <ItemGroup>
     <Resource Include="Data\abp.js" />
-    <Resource Include="Data\default-abp-rule.js" />
+    <Resource Include="Data\dlc.dat" />
     <Resource Include="Data\i18n.csv" />
     <Resource Include="Data\NLog.config" />
     <Resource Include="Data\privoxy.exe.gz" />

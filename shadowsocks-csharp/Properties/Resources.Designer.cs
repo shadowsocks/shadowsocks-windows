@@ -85,51 +85,29 @@ namespace Shadowsocks.Properties {
         }
         
         /// <summary>
-        ///   查找类似 var __USERRULES__ = [];
-        ///var __RULES__ = [
-        ///    &quot;|http://85.17.73.31/&quot;,
-        ///    &quot;||agnesb.fr&quot;,
-        ///    &quot;||akiba-web.com&quot;,
-        ///    &quot;||altrec.com&quot;,
-        ///    &quot;||angela-merkel.de&quot;,
-        ///    &quot;||angola.org&quot;,
-        ///    &quot;||apartmentratings.com&quot;,
-        ///    &quot;||apartments.com&quot;,
-        ///    &quot;||arena.taipei&quot;,
-        ///    &quot;||asianspiss.com&quot;,
-        ///    &quot;||assimp.org&quot;,
-        ///    &quot;||athenaeizou.com&quot;,
-        ///    &quot;||azubu.tv&quot;,
-        ///    &quot;||bankmobilevibe.com&quot;,
-        ///    &quot;||banorte.com&quot;,
-        ///    &quot;||bash-hackers.org&quot;,
-        ///    &quot;||beeg.com&quot;,
-        ///    &quot;||global.bing.com&quot;,
-        ///    &quot;||bloombergview.com&quot;,
-        ///    &quot; [字符串的其余部分被截断]&quot;; 的本地化字符串。
+        ///   查找 System.Byte[] 类型的本地化资源。
         /// </summary>
-        internal static string default_abp_rule {
+        internal static byte[] dlc_dat {
             get {
-                return ResourceManager.GetString("default_abp_rule", resourceCulture);
+                object obj = ResourceManager.GetObject("dlc_dat", resourceCulture);
+                return ((byte[])(obj));
             }
         }
         
         /// <summary>
-        ///   查找类似 en,ru-RU,zh-CN,zh-TW,ja
-        ///#Restart program to apply translation,,,,
-        ///#This is comment line,,,,
-        ///#Always keep language name at head of file,,,,
-        ///#Language name is output in log,,,,
-        ///&quot;#You can find it by search &quot;&quot;Current language is:&quot;&quot;&quot;,,,,
-        ///#Please use UTF-8 with BOM encoding so we can edit it in Excel,,,,
-        ///,,,,
-        ///Shadowsocks,Shadowsocks,Shadowsocks,Shadowsocks,Shadowsocks
-        ///,,,,
-        ///#Menu,,,,
-        ///,,,,
-        ///System Proxy,Системный прокси-сервер,系统代理,系統代理,システムプロキシ
-        ///Disable,Отключен,禁用,禁用,無効
-        ///PAC,Сценарий настройки (PAC),PA [字符串的其余部分被截断]&quot;; 的本地化字符串。
+        ///   查找类似 en,ru-RU,zh-CN,zh-TW,ja,ko,fr
+        ///#Restart program to apply translation,,,,,,
+        ///#This is comment line,,,,,,
+        ///#Always keep language name at head of file,,,,,,
+        ///#Language name is output in log,,,,,,
+        ///&quot;#You can find it by search &quot;&quot;Current language is:&quot;&quot;&quot;,,,,,,
+        ///#Please use UTF-8 with BOM encoding so we can edit it in Excel,,,,,,
+        ///,,,,,,
+        ///Shadowsocks,Shadowsocks,Shadowsocks,Shadowsocks,Shadowsocks,Shadowsocks,Shadowsocks
+        ///,,,,,,
+        ///#Menu,,,,,,
+        ///,,,,,,
+        ///System Proxy,Системный прокси-сервер,系统代理,系統代理,システムプロキシ,시스템 프록시,P [字符串的其余部分被截断]&quot;; 的本地化字符串。
         /// </summary>
         internal static string i18n_csv {
             get {
