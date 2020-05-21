@@ -136,8 +136,8 @@ after_build:
     # Package into a self-contained single-file executable
     dotnet publish -f netcoreapp3.1 -r win-x64 -c $env:CONFIGURATION -p:PublishSingleFile=true -p:PublishTrimmed=true $env:APPVEYOR_BUILD_FOLDER\shadowsocks-csharp\shadowsocks-csharp.csproj
     dotnet publish -f netcoreapp3.1 -r win-x86 -c $env:CONFIGURATION -p:PublishSingleFile=true -p:PublishTrimmed=true $env:APPVEYOR_BUILD_FOLDER\shadowsocks-csharp\shadowsocks-csharp.csproj
-    $SingleExeX64 = "$env:APPVEYOR_BUILD_FOLDER\shadowsocks-csharp\bin\$env:CONFIGURATION\netcoreapp3.1\win-x64\publish\Shadowsocks.exe"
-    $SingleExeX86 = "$env:APPVEYOR_BUILD_FOLDER\shadowsocks-csharp\bin\$env:CONFIGURATION\netcoreapp3.1\win-x86\publish\Shadowsocks.exe"
+    $SingleExeX64 = "$env:APPVEYOR_BUILD_FOLDER\shadowsocks-csharp\bin\Any CPU\$env:CONFIGURATION\netcoreapp3.1\win-x64\publish\Shadowsocks.exe"
+    $SingleExeX86 = "$env:APPVEYOR_BUILD_FOLDER\shadowsocks-csharp\bin\Any CPU\$env:CONFIGURATION\netcoreapp3.1\win-x86\publish\Shadowsocks.exe"
     $ZipSingleExeX64 = "$WorkingFolder\Shadowsocks-$env:APPVEYOR_BUILD_VERSION-portable-x64.zip"
     $ZipSingleExeX86 = "$WorkingFolder\Shadowsocks-$env:APPVEYOR_BUILD_VERSION-portable-x86.zip"
     $HashZipX64 = "$ZipSingleExeX64.hash"
