@@ -371,7 +371,7 @@ namespace Shadowsocks.Controller
 
         public string GetServerURLForCurrentServer()
         {
-            return GetCurrentServer().URL;
+            return GetCurrentServer().GetURL(_config.generateLegacyUrl);
         }
 
         public void UpdatePACFromGeosite()

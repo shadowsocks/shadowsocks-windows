@@ -24,11 +24,13 @@ namespace Shadowsocks.Model
         public bool enabled;
         public bool shareOverLan;
         public bool isDefault;
+        // hidden
         public bool isIPv6Enabled = false;
         public int localPort;
         public bool portableMode = true;
         public bool showPluginOutput;
         public string pacUrl;
+        // geosite config is hidden
         public string geositeUrl;
         public string geositeGroup = "geolocation-!cn";
         public bool geositeBlacklistMode = true;
@@ -39,6 +41,10 @@ namespace Shadowsocks.Model
         public bool autoCheckUpdate;
         public bool checkPreRelease;
         public bool isVerboseLogging;
+
+        // hidden config
+        public bool generateLegacyUrl = false;
+
         //public NLogConfig.LogLevel logLevel;
         public LogViewerConfig logViewer;
         public ProxyConfig proxy;

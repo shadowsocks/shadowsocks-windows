@@ -243,7 +243,7 @@ namespace Shadowsocks.Test
                 string expected = testCase.Key;
                 Server config = testCase.Value;
 
-                var actual = config.URL;
+                var actual = config.GetURL(true);
                 Assert.AreEqual(expected, actual);
             }
         }

@@ -56,47 +56,50 @@ namespace Shadowsocks.Model
                 : $"{remarks} ({serverStr})";
         }
 
-        public string URL
+        public string GetURL(bool legacyUrl = false)
         {
-            get
-            {
-                string tag = string.Empty;
-                string url = string.Empty;
+            string tag = string.Empty;
+            string url = string.Empty;
 
-                if (string.IsNullOrWhiteSpace(plugin))
+            if (legacyUrl && string.IsNullOrWhiteSpace(plugin))
+            {
+                // For backwards compatiblity, if no plugin, use old url format
+                string parts = $"{method}:{password}@{server}:{server_port}";
+                string base64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(parts));
+                url = base64;
+            }
+            else
+            {
+                // SIP002
+                string parts = $"{method}:{password}";
+                string base64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(parts));
+                string websafeBase64 = base64.Replace('+', '-').Replace('/', '_').TrimEnd('=');
+
+                url = string.Format(
+                    "{0}@{1}:{2}/",
+                    websafeBase64,
+                    FormalHostName,
+                    server_port
+                    );
+
+                if (!plugin.IsNullOrWhiteSpace())
                 {
-                    // For backwards compatiblity, if no plugin, use old url format
-                    string parts = $"{method}:{password}@{server}:{server_port}";
-                    string base64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(parts));
-                    url = base64;
-                }
-                else
-                {
-                    // SIP002
-                    string parts = $"{method}:{password}";
-                    string base64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(parts));
-                    string websafeBase64 = base64.Replace('+', '-').Replace('/', '_').TrimEnd('=');
 
                     string pluginPart = plugin;
                     if (!string.IsNullOrWhiteSpace(plugin_opts))
                     {
                         pluginPart += ";" + plugin_opts;
                     }
-
-                    url = string.Format(
-                        "{0}@{1}:{2}/?plugin={3}",
-                        websafeBase64,
-                        FormalHostName,
-                        server_port,
-                        HttpUtility.UrlEncode(pluginPart, Encoding.UTF8));
+                    string pluginQuery = "?plugin=" + HttpUtility.UrlEncode(pluginPart, Encoding.UTF8);
+                    url += pluginQuery;
                 }
-
-                if (!remarks.IsNullOrEmpty())
-                {
-                    tag = $"#{HttpUtility.UrlEncode(remarks, Encoding.UTF8)}";
-                }
-                return $"ss://{url}{tag}";
             }
+
+            if (!remarks.IsNullOrEmpty())
+            {
+                tag = $"#{HttpUtility.UrlEncode(remarks, Encoding.UTF8)}";
+            }
+            return $"ss://{url}{tag}";
         }
 
         public string FormalHostName
