@@ -50,21 +50,67 @@ namespace Shadowsocks.Model
                 return I18N.GetString("New server");
             }
 
-            string serverStr = $"{FormatHostName(server)}:{server_port}";
+            string serverStr = $"{FormalHostName}:{server_port}";
             return remarks.IsNullOrEmpty()
                 ? serverStr
                 : $"{remarks} ({serverStr})";
         }
 
-        public string FormatHostName(string hostName)
+        public string URL
         {
-            // CheckHostName() won't do a real DNS lookup
-            switch (Uri.CheckHostName(hostName))
+            get
             {
-                case UriHostNameType.IPv6:  // Add square bracket when IPv6 (RFC3986)
-                    return $"[{hostName}]";
-                default:    // IPv4 or domain name
-                    return hostName;
+                string tag = string.Empty;
+                string url = string.Empty;
+
+                if (string.IsNullOrWhiteSpace(plugin))
+                {
+                    // For backwards compatiblity, if no plugin, use old url format
+                    string parts = $"{method}:{password}@{server}:{server_port}";
+                    string base64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(parts));
+                    url = base64;
+                }
+                else
+                {
+                    // SIP002
+                    string parts = $"{method}:{password}";
+                    string base64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(parts));
+                    string websafeBase64 = base64.Replace('+', '-').Replace('/', '_').TrimEnd('=');
+
+                    string pluginPart = plugin;
+                    if (!string.IsNullOrWhiteSpace(plugin_opts))
+                    {
+                        pluginPart += ";" + plugin_opts;
+                    }
+
+                    url = string.Format(
+                        "{0}@{1}:{2}/?plugin={3}",
+                        websafeBase64,
+                        FormalHostName,
+                        server_port,
+                        HttpUtility.UrlEncode(pluginPart, Encoding.UTF8));
+                }
+
+                if (!remarks.IsNullOrEmpty())
+                {
+                    tag = $"#{HttpUtility.UrlEncode(remarks, Encoding.UTF8)}";
+                }
+                return $"ss://{url}{tag}";
+            }
+        }
+
+        public string FormalHostName
+        {
+            get
+            {
+                // CheckHostName() won't do a real DNS lookup
+                switch (Uri.CheckHostName(server))
+                {
+                    case UriHostNameType.IPv6:  // Add square bracket when IPv6 (RFC3986)
+                        return $"[{server}]";
+                    default:    // IPv4 or domain name
+                        return server;
+                }
             }
         }
 
