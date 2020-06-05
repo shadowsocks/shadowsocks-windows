@@ -109,7 +109,7 @@ namespace Shadowsocks.Controller.Strategy
                 var bestResult = serversWithStatistics
                     .Aggregate((server1, server2) => server1.score > server2.score ? server1 : server2);
 
-                LogWhenEnabled($"Switch to server: {bestResult.server.FriendlyName()} by statistics: score {bestResult.score}");
+                LogWhenEnabled($"Switch to server: {bestResult.server.ToString()} by statistics: score {bestResult.score}");
                 _currentServer = bestResult.server;
             }
             catch (Exception e)
@@ -147,7 +147,7 @@ namespace Shadowsocks.Controller.Strategy
 
         public void SetFailure(Server server)
         {
-            logger.Debug($"failure: {server.FriendlyName()}");
+            logger.Debug($"failure: {server.ToString()}");
         }
 
         public void UpdateLastRead(Server server)

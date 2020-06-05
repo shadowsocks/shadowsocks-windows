@@ -15,9 +15,8 @@ namespace Shadowsocks.Model
         public const int DefaultPort = 8388;
 
         #region ParseLegacyURL
-        public static readonly Regex
-            UrlFinder = new Regex(@"ss://(?<base64>[A-Za-z0-9+-/=_]+)(?:#(?<tag>\S+))?", RegexOptions.IgnoreCase),
-            DetailsParser = new Regex(@"^((?<method>.+?):(?<password>.*)@(?<hostname>.+?):(?<port>\d+?))$", RegexOptions.IgnoreCase);
+        private static readonly Regex UrlFinder = new Regex(@"ss://(?<base64>[A-Za-z0-9+-/=_]+)(?:#(?<tag>\S+))?", RegexOptions.IgnoreCase);
+        private static readonly Regex DetailsParser = new Regex(@"^((?<method>.+?):(?<password>.*)@(?<hostname>.+?):(?<port>\d+?))$", RegexOptions.IgnoreCase);
         #endregion ParseLegacyURL
 
         private const int DefaultServerTimeoutSec = 5;
@@ -44,7 +43,7 @@ namespace Shadowsocks.Model
             return server == o2.server && server_port == o2.server_port;
         }
 
-        public string FriendlyName()
+        public override string ToString()
         {
             if (server.IsNullOrEmpty())
             {
