@@ -411,11 +411,6 @@ namespace Shadowsocks.Controller
             return $"ss://{url}{tag}";
         }
 
-        public void UpdatePACFromGeosite()
-        {
-            GeositeUpdater.UpdatePACFromGeosite(_config);
-        }
-
         public void UpdateStatisticsConfiguration(bool enabled)
         {
             if (availabilityStatistics != null)
