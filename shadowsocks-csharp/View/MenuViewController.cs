@@ -685,9 +685,9 @@ namespace Shadowsocks.View
             controller.TouchPACFile();
         }
 
-        private void UpdatePACFromGeositeItem_Click(object sender, EventArgs e)
+        private async void UpdatePACFromGeositeItem_Click(object sender, EventArgs e)
         {
-            controller.UpdatePACFromGeosite();
+            await GeositeUpdater.UpdatePACFromGeosite();
         }
 
         private void EditUserRuleFileForGeositeItem_Click(object sender, EventArgs e)
