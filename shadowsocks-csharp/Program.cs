@@ -26,12 +26,8 @@ namespace Shadowsocks
         public static MenuViewController MenuController { get; private set; }
         public static string[] Args { get; private set; }
 
-        [System.Runtime.InteropServices.DllImport("user32.dll")]
-        private static extern bool SetProcessDPIAware();
-
         /// <summary>
         /// 应用程序的主入口点。
-        /// </summary>
         /// </summary>
         [STAThread]
         static void Main(string[] args)
@@ -39,19 +35,8 @@ namespace Shadowsocks
             // todo: initialize the NLog configuartion
             Model.NLogConfig.TouchAndApplyNLogConfig();
 
-            // .NET Framework 4.7.2 on Win7 compatibility
-            System.Net.ServicePointManager.SecurityProtocol |=
-                System.Net.SecurityProtocolType.Tls | System.Net.SecurityProtocolType.Tls11 | System.Net.SecurityProtocolType.Tls12;
-
             // store args for further use
             Args = args;
-            // Check OS since we are using dual-mode socket
-            if (!Utils.IsWinVistaOrHigher())
-            {
-                MessageBox.Show(I18N.GetString("Unsupported operating system, use Windows Vista at least."),
-                "Shadowsocks Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
 
             string pipename = $"Shadowsocks\\{Application.StartupPath.GetHashCode()}";
             string addedUrl = null;
@@ -125,7 +110,9 @@ namespace Shadowsocks
             Application.SetCompatibleTextRenderingDefault(false);
             AutoStartup.RegisterForRestart(true);
 
-            Directory.SetCurrentDirectory(Application.StartupPath);
+            // See https://github.com/dotnet/runtime/issues/13051
+            // we have to do this for self-contained executables
+            Directory.SetCurrentDirectory(Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName));
 
 #if DEBUG
             // truncate privoxy log file while debugging

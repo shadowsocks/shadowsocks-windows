@@ -114,7 +114,7 @@ after_build:
         $text += 'SHA-256' + $newLine
         $text += (Get-FileHash $file -Algorithm SHA256).Hash + $newLine
         $text += 'SHA-512' + $newLine
-        $text += (Get-FileHash $file -Algorithm SHA512).Hash
+        $text += (Get-FileHash $file -Algorithm SHA512).Hash + $newLine
         return $text
     }
 
