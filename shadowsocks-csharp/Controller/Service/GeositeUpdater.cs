@@ -121,7 +121,7 @@ namespace Shadowsocks.Controller
                 // if already latest
                 if (geositeSha256sum == localDBHash)
                 {
-                    logger.Info("Local GeoSite DB is already the latest.");
+                    logger.Info("Local GeoSite DB is up to date.");
                     return;
                 }
 
@@ -134,12 +134,12 @@ namespace Shadowsocks.Controller
                 logger.Info($"Actual Sha256sum: {downloadedDBHash}");
                 if (geositeSha256sum != downloadedDBHash)
                 {
-                    logger.Info("Sha256sum mismatch. Updating aborted.");
+                    logger.Info("Sha256sum Verification: FAILED. Downloaded GeoSite DB is corrupted. Aborting the update.");
                     throw new Exception("Sha256sum mismatch");
                 }
                 else
                 {
-                    logger.Info("Sha256sum verification successful.");
+                    logger.Info("Sha256sum Verification: PASSED. Applying to local GeoSite DB.");
                 }
 
                 // write to geosite file
