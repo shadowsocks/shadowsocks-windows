@@ -20,7 +20,6 @@ namespace Shadowsocks.Controller
         // see https://stackoverflow.com/questions/12945805/odd-c-sharp-path-issue
         private static readonly string ExecutablePath = Assembly.GetEntryAssembly().Location;
 
-        // TODO: Elevate when necessary
         public static bool Set(bool enabled)
         {
             RegistryKey ssURLAssociation = null;

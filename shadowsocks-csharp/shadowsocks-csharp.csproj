@@ -71,20 +71,20 @@
     <PackageReference Include="GlobalHotKeyCore" Version="1.2.0" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="BouncyCastle.NetCore" Version="1.8.5" />
+    <PackageReference Include="BouncyCastle.NetCore" Version="1.8.6" />
     <!--TODO: Remove Fody related stuff, as they're either not actually used or has NET Core built-in alternate-->
     <PackageReference Include="Caseless.Fody" Version="1.9.0" />
     <PackageReference Include="Costura.Fody" Version="4.1.0" />
-    <PackageReference Include="Fody" Version="6.1.1">
+    <PackageReference Include="Fody" Version="6.2.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Google.Protobuf" Version="3.11.4" />
+    <PackageReference Include="Google.Protobuf" Version="3.12.3" />
     <PackageReference Include="Microsoft.VisualBasic" Version="10.3.0" />
    
     <PackageReference Include="NaCl.Core" Version="1.2.0" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
-    <PackageReference Include="NLog" Version="4.6.8" />
+    <PackageReference Include="NLog" Version="4.7.2" />
     <PackageReference Include="System.Data.SqlClient" Version="4.8.1" />
     <PackageReference Include="ZXing.Net" Version="0.16.5" />
     <PackageReference Include="StringEx.CS" Version="0.3.1">
