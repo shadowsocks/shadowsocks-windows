@@ -238,7 +238,7 @@ namespace Shadowsocks.Controller
             {
                 AppendRecord(server.Identifier(), record);
             }
-            logger.Debug($"Ping {server.FriendlyName()} {e.RoundtripTime.Count} times, {(100 - record.PackageLoss * 100)}% packages loss, min {record.MinResponse} ms, max {record.MaxResponse} ms, avg {record.AverageResponse} ms");
+            logger.Debug($"Ping {server} {e.RoundtripTime.Count} times, {(100 - record.PackageLoss * 100)}% packages loss, min {record.MinResponse} ms, max {record.MaxResponse} ms, avg {record.AverageResponse} ms");
             if (Interlocked.Decrement(ref state.counter) == 0)
             {
                 Save();
@@ -450,7 +450,7 @@ namespace Shadowsocks.Controller
             {
                 try
                 {
-                    logger.Debug($"Ping {server.FriendlyName()}");
+                    logger.Debug($"Ping {server}");
                     if (ip == null)
                     {
                         ip = Dns.GetHostAddresses(server.server)
@@ -466,7 +466,7 @@ namespace Shadowsocks.Controller
                 }
                 catch (Exception e)
                 {
-                    logger.Error($"An exception occured while eveluating {server.FriendlyName()}");
+                    logger.Error($"An exception occured while eveluating {server}");
                     logger.LogUsefulException(e);
                     FireCompleted(e, userstate);
                 }
@@ -478,19 +478,19 @@ namespace Shadowsocks.Controller
                 {
                     if (e.Reply.Status == IPStatus.Success)
                     {
-                        logger.Debug($"Ping {server.FriendlyName()} {e.Reply.RoundtripTime} ms");
+                        logger.Debug($"Ping {server} {e.Reply.RoundtripTime} ms");
                         RoundtripTime.Add((int?)e.Reply.RoundtripTime);
                     }
                     else
                     {
-                        logger.Debug($"Ping {server.FriendlyName()} timeout");
+                        logger.Debug($"Ping {server} timeout");
                         RoundtripTime.Add(null);
                     }
                     TestNext(e.UserState);
                 }
                 catch (Exception ex)
                 {
-                    logger.Error($"An exception occured while eveluating {server.FriendlyName()}");
+                    logger.Error($"An exception occured while eveluating {server}");
                     logger.LogUsefulException(ex);
                     FireCompleted(ex, e.UserState);
                 }

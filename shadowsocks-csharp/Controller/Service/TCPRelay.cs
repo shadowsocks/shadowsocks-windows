@@ -803,7 +803,7 @@ namespace Shadowsocks.Controller
             AsyncSession session = timer.Session;
             Server server = timer.Server;
             OnFailed?.Invoke(this, new SSRelayEventArgs(_server));
-            Logger.Info($"{server.FriendlyName()} timed out");
+            Logger.Info($"{server.ToString()} timed out");
             session.Remote.Close();
             Close();
         }
@@ -830,7 +830,7 @@ namespace Shadowsocks.Controller
 
                 _destConnected = true;
 
-                Logger.Debug($"Socket connected to ss server: {_server.FriendlyName()}");
+                Logger.Debug($"Socket connected to ss server: {_server.ToString()}");
 
                 TimeSpan latency = DateTime.Now - _startConnectTime;
 
