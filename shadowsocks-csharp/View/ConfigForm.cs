@@ -346,7 +346,7 @@ namespace Shadowsocks.View
             ServersListBox.Items.Clear();
             foreach (Server server in configuration.configs)
             {
-                ServersListBox.Items.Add(server.FriendlyName());
+                ServersListBox.Items.Add(server.ToString());
             }
         }
 
@@ -421,7 +421,7 @@ namespace Shadowsocks.View
             }
             if (_lastSelectedIndex >= 0 && _lastSelectedIndex < _modifiedConfiguration.configs.Count)
             {
-                ServersListBox.Items[_lastSelectedIndex] = _modifiedConfiguration.configs[_lastSelectedIndex].FriendlyName();
+                ServersListBox.Items[_lastSelectedIndex] = _modifiedConfiguration.configs[_lastSelectedIndex].ToString();
             }
             UpdateButtons();
             LoadSelectedServerDetails();

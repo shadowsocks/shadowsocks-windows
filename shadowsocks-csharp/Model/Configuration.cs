@@ -11,7 +11,7 @@ namespace Shadowsocks.Model
     public class Configuration
     {
         [JsonIgnore]
-        private static Logger logger = LogManager.GetCurrentClassLogger();
+        private static readonly Logger logger = LogManager.GetCurrentClassLogger();
 
         public string version;
 
@@ -24,14 +24,10 @@ namespace Shadowsocks.Model
         public bool enabled;
         public bool shareOverLan;
         public bool isDefault;
-        public bool isIPv6Enabled = false;
         public int localPort;
         public bool portableMode = true;
         public bool showPluginOutput;
         public string pacUrl;
-        public string geositeUrl;
-        public string geositeGroup = "geolocation-!cn";
-        public bool geositeBlacklistMode = true;
 
         public bool useOnlinePac;
         public bool secureLocalPac = true;
@@ -39,6 +35,15 @@ namespace Shadowsocks.Model
         public bool autoCheckUpdate;
         public bool checkPreRelease;
         public bool isVerboseLogging;
+
+        // hidden options
+        public bool isIPv6Enabled = false; // for experimental ipv6 support
+        public bool generateLegacyUrl = false; // for pre-sip002 url compatibility
+        public string geositeUrl; // for custom geosite source (and rule group)
+        public string geositeGroup = "geolocation-!cn";
+        public bool geositeBlacklistMode = true;
+
+
         //public NLogConfig.LogLevel logLevel;
         public LogViewerConfig logViewer;
         public ProxyConfig proxy;
@@ -48,11 +53,10 @@ namespace Shadowsocks.Model
         NLogConfig nLogConfig;
 
         private static readonly string CONFIG_FILE = "gui-config.json";
-        private static readonly NLogConfig.LogLevel verboseLogLevel =
 #if DEBUG
-        NLogConfig.LogLevel.Trace;
+        private static readonly NLogConfig.LogLevel verboseLogLevel = NLogConfig.LogLevel.Trace;
 #else
-        NLogConfig.LogLevel.Debug;
+        private static readonly NLogConfig.LogLevel verboseLogLevel =  NLogConfig.LogLevel.Debug;
 #endif
 
 
@@ -194,9 +198,9 @@ namespace Shadowsocks.Model
                     sw.Flush();
                 }
                 try
-                {             
-                    // apply changs to NLog.config
-                    config.nLogConfig.SetLogLevel(config.isVerboseLogging? verboseLogLevel : NLogConfig.LogLevel.Info);
+                {
+                    // apply changes to NLog.config
+                    config.nLogConfig.SetLogLevel(config.isVerboseLogging ? verboseLogLevel : NLogConfig.LogLevel.Info);
                     NLogConfig.SaveXML(config.nLogConfig);
                 }
                 catch (Exception e)
@@ -212,7 +216,7 @@ namespace Shadowsocks.Model
 
         public static Server AddDefaultServerOrServer(Configuration config, Server server = null, int? index = null)
         {
-            if (config != null && config.configs != null)
+            if (config?.configs != null)
             {
                 server = (server ?? GetDefaultServer());
 
@@ -229,12 +233,6 @@ namespace Shadowsocks.Model
         public static Server GetDefaultServer()
         {
             return new Server();
-        }
-
-        private static void Assert(bool condition)
-        {
-            if (!condition)
-                throw new Exception(I18N.GetString("assertion failure"));
         }
 
         public static void CheckPort(int port)

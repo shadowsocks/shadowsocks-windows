@@ -1,8 +1,4 @@
-﻿using System;
-using System.Diagnostics;
-using System.IO;
-using System.Threading;
-using System.Windows.Forms;
+﻿using Microsoft.Win32;
 using NLog;
 using Microsoft.Win32;
 
@@ -10,18 +6,23 @@ using Shadowsocks.Controller;
 using Shadowsocks.Controller.Hotkeys;
 using Shadowsocks.Util;
 using Shadowsocks.View;
-using System.IO.Pipes;
-using System.Text;
-using System.Net;
-using System.Linq;
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.IO.Pipes;
+using System.Linq;
+using System.Net;
+using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace Shadowsocks
 {
-    static class Program
+    internal static class Program
     {
-        private static Logger logger = LogManager.GetCurrentClassLogger();
+        private static readonly Logger logger = LogManager.GetCurrentClassLogger();
         public static ShadowsocksController MainController { get; private set; }
         public static MenuViewController MenuController { get; private set; }
         public static string[] Args { get; private set; }
@@ -53,7 +54,6 @@ namespace Shadowsocks
                 {
                     pipeExist = false;
                 }
-
                 // TODO: switch to better argv parser when it's getting complicate
                 List<string> alist = Args.ToList();
                 // check --open-url param
@@ -133,7 +133,6 @@ namespace Shadowsocks
             {
                 MainController.AskAddServerBySSURL(addedUrl);
             }
-
             Application.Run();
         }
 
@@ -172,7 +171,7 @@ namespace Shadowsocks
                     logger.Info("os wake up");
                     if (MainController != null)
                     {
-                        System.Threading.Tasks.Task.Factory.StartNew(() =>
+                        Task.Factory.StartNew(() =>
                         {
                             Thread.Sleep(10 * 1000);
                             try

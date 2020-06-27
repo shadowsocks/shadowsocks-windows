@@ -367,48 +367,7 @@ namespace Shadowsocks.Controller
 
         public string GetServerURLForCurrentServer()
         {
-            Server server = GetCurrentServer();
-            return GetServerURL(server);
-        }
-
-        public static string GetServerURL(Server server)
-        {
-            string tag = string.Empty;
-            string url = string.Empty;
-
-            if (string.IsNullOrWhiteSpace(server.plugin))
-            {
-                // For backwards compatiblity, if no plugin, use old url format
-                string parts = $"{server.method}:{server.password}@{server.server}:{server.server_port}";
-                string base64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(parts));
-                url = base64;
-            }
-            else
-            {
-                // SIP002
-                string parts = $"{server.method}:{server.password}";
-                string base64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(parts));
-                string websafeBase64 = base64.Replace('+', '-').Replace('/', '_').TrimEnd('=');
-
-                string pluginPart = server.plugin;
-                if (!string.IsNullOrWhiteSpace(server.plugin_opts))
-                {
-                    pluginPart += ";" + server.plugin_opts;
-                }
-
-                url = string.Format(
-                    "{0}@{1}:{2}/?plugin={3}",
-                    websafeBase64,
-                    server.FormatHostName(server.server),
-                    server.server_port,
-                    HttpUtility.UrlEncode(pluginPart, Encoding.UTF8));
-            }
-
-            if (!server.remarks.IsNullOrEmpty())
-            {
-                tag = $"#{HttpUtility.UrlEncode(server.remarks, Encoding.UTF8)}";
-            }
-            return $"ss://{url}{tag}";
+            return GetCurrentServer().GetURL(_config.generateLegacyUrl);
         }
 
         public void UpdateStatisticsConfiguration(bool enabled)

@@ -174,7 +174,7 @@ namespace Shadowsocks.View
             }
             else
             {
-                serverInfo = config.GetCurrentServer().FriendlyName();
+                serverInfo = config.GetCurrentServer().ToString();
             }
             // show more info by hacking the P/Invoke declaration for NOTIFYICONDATA inside Windows Forms
             string text = I18N.GetString("Shadowsocks") + " " + UpdateChecker.Version + "\n" +
@@ -485,7 +485,7 @@ namespace Shadowsocks.View
             {
                 if (Configuration.ChecksServer(server))
                 {
-                    var name = server.FriendlyName();
+                    var name = server.ToString();
                     if (!items.OfType<ToolStripMenuItem>().Any(ts => ts.Text == name))
                     {
                         ToolStripMenuItem item = new ToolStripMenuItem(name);
