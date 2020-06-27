@@ -9,6 +9,9 @@ using System.Text;
 using Newtonsoft.Json;
 using Shadowsocks.Model;
 using System.Net;
+using System.Net.Http;
+using System.Threading.Tasks;
+using System.Security.Cryptography;
 
 namespace Shadowsocks.Controller
 {
@@ -32,23 +35,37 @@ namespace Shadowsocks.Controller
 
         private static readonly string DATABASE_PATH = Utils.GetTempPath("dlc.dat");
 
+        private static HttpClientHandler httpClientHandler;
+        private static HttpClient httpClient;
         private static readonly string GEOSITE_URL = "https://github.com/v2ray/domain-list-community/raw/release/dlc.dat";
+        private static readonly string GEOSITE_SHA256SUM_URL = "https://github.com/v2ray/domain-list-community/raw/release/dlc.dat.sha256sum";
+        private static byte[] geositeDB;
 
         public static readonly Dictionary<string, IList<DomainObject>> Geosites = new Dictionary<string, IList<DomainObject>>();
 
         static GeositeUpdater()
         {
-            if (!File.Exists(DATABASE_PATH))
+            //socketsHttpHandler = new SocketsHttpHandler();
+            //httpClient = new HttpClient(socketsHttpHandler);
+            
+            if (File.Exists(DATABASE_PATH) && new FileInfo(DATABASE_PATH).Length > 0)
             {
+                geositeDB = File.ReadAllBytes(DATABASE_PATH);
+            }
+            else
+            {
+                geositeDB = Resources.dlc_dat;
                 File.WriteAllBytes(DATABASE_PATH, Resources.dlc_dat);
             }
             LoadGeositeList();
         }
 
-        static void LoadGeositeList(byte[] data = null)
+        /// <summary>
+        /// load new GeoSite data from geositeDB
+        /// </summary>
+        static void LoadGeositeList()
         {
-            data = data ?? File.ReadAllBytes(DATABASE_PATH);
-            var list = GeositeList.Parser.ParseFrom(data);
+            var list = GeositeList.Parser.ParseFrom(geositeDB);
             foreach (var item in list.Entries)
             {
                 Geosites[item.GroupName.ToLower()] = item.Domains;
@@ -61,9 +78,12 @@ namespace Shadowsocks.Controller
             Error = null;
         }
 
-        public static void UpdatePACFromGeosite(Configuration config)
+        public static async Task UpdatePACFromGeosite()
         {
             string geositeUrl = GEOSITE_URL;
+            string geositeSha256sumUrl = GEOSITE_SHA256SUM_URL;
+            SHA256 mySHA256 = SHA256.Create();
+            var config = Program.MainController.GetCurrentConfiguration();
             string group = config.geositeGroup;
             bool blacklist = config.geositeBlacklistMode;
             
@@ -73,31 +93,82 @@ namespace Shadowsocks.Controller
                 geositeUrl = config.geositeUrl;
             }
             logger.Info($"Checking Geosite from {geositeUrl}");
-            WebClient http = new WebClient();
+
+            // use System.Net.Http.HttpClient to download GeoSite db.
+            // NASTY workaround: new HttpClient every update
+            // because we can't change proxy on existing socketsHttpHandler instance
+            httpClientHandler = new HttpClientHandler();
+            httpClient = new HttpClient(httpClientHandler);
             if (config.enabled)
             {
-                http.Proxy = new WebProxy(
+                httpClientHandler.Proxy = new WebProxy(
                     config.isIPv6Enabled
                     ? $"[{IPAddress.IPv6Loopback}]"
                     : IPAddress.Loopback.ToString(),
                     config.localPort);
             }
-            http.DownloadDataCompleted += (o, e) =>
-            {
-                try
-                {
-                    File.WriteAllBytes(DATABASE_PATH, e.Result);
-                    LoadGeositeList();
 
-                    bool pacFileChanged = MergeAndWritePACFile(group, blacklist);
-                    UpdateCompleted?.Invoke(null, new GeositeResultEventArgs(pacFileChanged));
-                }
-                catch (Exception ex)
+            try
+            {
+                // download checksum first
+                var geositeSha256sum = await httpClient.GetStringAsync(geositeSha256sumUrl);
+                geositeSha256sum = geositeSha256sum.Substring(0, 64).ToUpper();
+                logger.Info($"Got Sha256sum: {geositeSha256sum}");
+                // compare downloaded checksum with local geositeDB
+                byte[] localDBHashBytes = mySHA256.ComputeHash(geositeDB);
+                string localDBHash = BitConverter.ToString(localDBHashBytes).Replace("-", String.Empty);
+                logger.Info($"Local Sha256sum: {localDBHash}");
+                // if already latest
+                if (geositeSha256sum == localDBHash)
                 {
-                    Error?.Invoke(null, new ErrorEventArgs(ex));
+                    logger.Info("Local GeoSite DB is up to date.");
+                    return;
                 }
-            };
-            http.DownloadDataAsync(new Uri(geositeUrl));
+
+                // not latest. download new DB
+                var downloadedBytes = await httpClient.GetByteArrayAsync(geositeUrl);
+
+                // verify sha256sum
+                byte[] downloadedDBHashBytes = mySHA256.ComputeHash(downloadedBytes);
+                string downloadedDBHash = BitConverter.ToString(downloadedDBHashBytes).Replace("-", String.Empty);
+                logger.Info($"Actual Sha256sum: {downloadedDBHash}");
+                if (geositeSha256sum != downloadedDBHash)
+                {
+                    logger.Info("Sha256sum Verification: FAILED. Downloaded GeoSite DB is corrupted. Aborting the update.");
+                    throw new Exception("Sha256sum mismatch");
+                }
+                else
+                {
+                    logger.Info("Sha256sum Verification: PASSED. Applying to local GeoSite DB.");
+                }
+
+                // write to geosite file
+                using (FileStream geositeFileStream = File.Create(DATABASE_PATH))
+                    await geositeFileStream.WriteAsync(downloadedBytes, 0, downloadedBytes.Length);
+
+                // update stuff
+                geositeDB = downloadedBytes;
+                LoadGeositeList();
+                bool pacFileChanged = MergeAndWritePACFile(group, blacklist);
+                UpdateCompleted?.Invoke(null, new GeositeResultEventArgs(pacFileChanged));
+            }
+            catch (Exception ex)
+            {
+                Error?.Invoke(null, new ErrorEventArgs(ex));
+            }
+            finally
+            {
+                if (httpClientHandler != null)
+                {
+                    httpClientHandler.Dispose();
+                    httpClientHandler = null;
+                }
+                if (httpClient != null)
+                {
+                    httpClient.Dispose();
+                    httpClient = null;
+                }
+            }
         }
 
         public static bool MergeAndWritePACFile(string group, bool blacklist)
