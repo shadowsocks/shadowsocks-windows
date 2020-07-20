@@ -143,7 +143,7 @@ Sysproxy ()            https://github.com/Noisyfox/sysproxy
 [Appveyor]:     https://ci.appveyor.com/project/celeron533/shadowsocks-windows
 [Build Status]: https://ci.appveyor.com/api/projects/status/tfw57q6eecippsl5/branch/master?svg=true
 [release page]: https://github.com/shadowsocks/shadowsocks-csharp/releases
-[GeoSite]:      https://github.com/v2ray/domain-list-community
+[GeoSite]:      https://github.com/v2fly/domain-list-community
 [Servers]:      https://github.com/shadowsocks/shadowsocks/wiki/Ports-and-Clients#linux--server-side
 [中文说明]:     https://github.com/shadowsocks/shadowsocks-windows/wiki/Shadowsocks-Windows-%E4%BD%BF%E7%94%A8%E8%AF%B4%E6%98%8E
 [Visual Studio 2017]:   https://www.visualstudio.com/downloads/

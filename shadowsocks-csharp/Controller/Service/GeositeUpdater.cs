@@ -37,8 +37,8 @@ namespace Shadowsocks.Controller
 
         private static HttpClientHandler httpClientHandler;
         private static HttpClient httpClient;
-        private static readonly string GEOSITE_URL = "https://github.com/v2ray/domain-list-community/raw/release/dlc.dat";
-        private static readonly string GEOSITE_SHA256SUM_URL = "https://github.com/v2ray/domain-list-community/raw/release/dlc.dat.sha256sum";
+        private static readonly string GEOSITE_URL = "https://github.com/v2fly/domain-list-community/raw/release/dlc.dat";
+        private static readonly string GEOSITE_SHA256SUM_URL = "https://github.com/v2fly/domain-list-community/raw/release/dlc.dat.sha256sum";
         private static byte[] geositeDB;
 
         public static readonly Dictionary<string, IList<DomainObject>> Geosites = new Dictionary<string, IList<DomainObject>>();
