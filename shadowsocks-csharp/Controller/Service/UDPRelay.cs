@@ -44,8 +44,8 @@ namespace Shadowsocks.Controller
             {
                 return false;
             }
-            UDPListener.UDPState udpState = (UDPListener.UDPState)state;
-            IPEndPoint remoteEndPoint = (IPEndPoint)udpState.remoteEndPoint;
+            // UDPListener.UDPState udpState = (UDPListener.UDPState)state;
+            IPEndPoint remoteEndPoint = (IPEndPoint)state;
             UDPHandler handler = _cache.get(remoteEndPoint);
             if (handler == null)
             {
@@ -70,16 +70,16 @@ namespace Shadowsocks.Controller
             private IPEndPoint _localEndPoint;
             private IPEndPoint _remoteEndPoint;
 
-            private IPAddress GetIPAddress()
+            private IPAddress ListenAddress
             {
-                switch (_remote.AddressFamily)
+                get
                 {
-                    case AddressFamily.InterNetwork:
-                        return IPAddress.Any;
-                    case AddressFamily.InterNetworkV6:
-                        return IPAddress.IPv6Any;
-                    default:
-                        return IPAddress.Any;
+                    return _remote.AddressFamily switch
+                    {
+                        AddressFamily.InterNetwork => IPAddress.Any,
+                        AddressFamily.InterNetworkV6 => IPAddress.IPv6Any,
+                        _ => throw new NotSupportedException(),
+                    };
                 }
             }
 
@@ -99,24 +99,23 @@ namespace Shadowsocks.Controller
                 }
                 _remoteEndPoint = new IPEndPoint(ipAddress, server.server_port);
                 _remote = new Socket(_remoteEndPoint.AddressFamily, SocketType.Dgram, ProtocolType.Udp);
-                _remote.Bind(new IPEndPoint(GetIPAddress(), 0));
+                _remote.Bind(new IPEndPoint(ListenAddress, 0));
             }
 
             public void Send(byte[] data, int length)
             {
                 IEncryptor encryptor = EncryptorFactory.GetEncryptor(_server.method, _server.password);
-                // byte[] dataIn = new byte[length - 3];
-                // Array.Copy(data, 3, dataIn, 0, length - 3);
-                byte[] dataOut = new byte[65536];  // enough space for AEAD ciphers
-                // encryptor.EncryptUDP(dataIn, length - 3, dataOut, out outlen);
-                int outlen = encryptor.EncryptUDP(data.AsSpan(3), dataOut);
+                var slicedData = data.AsSpan(0, length);
+                byte[] dataOut = new byte[slicedData.Length + 1000];
+                var dataToSend = slicedData[3..];
+                int outlen = encryptor.EncryptUDP(slicedData[3..], dataOut);
                 logger.Debug(_localEndPoint, _remoteEndPoint, outlen, "UDP Relay");
                 _remote?.SendTo(dataOut, outlen, SocketFlags.None, _remoteEndPoint);
             }
 
             public void Receive()
             {
-                EndPoint remoteEndPoint = new IPEndPoint(GetIPAddress(), 0);
+                EndPoint remoteEndPoint = new IPEndPoint(ListenAddress, 0);
                 logger.Debug($"++++++Receive Server Port, size:" + _buffer.Length);
                 _remote?.BeginReceiveFrom(_buffer, 0, _buffer.Length, 0, ref remoteEndPoint, new AsyncCallback(RecvFromCallback), null);
             }
@@ -126,7 +125,7 @@ namespace Shadowsocks.Controller
                 try
                 {
                     if (_remote == null) return;
-                    EndPoint remoteEndPoint = new IPEndPoint(GetIPAddress(), 0);
+                    EndPoint remoteEndPoint = new IPEndPoint(ListenAddress, 0);
                     int bytesRead = _remote.EndReceiveFrom(ar, ref remoteEndPoint);
 
                     byte[] dataOut = new byte[bytesRead];
