@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 using NLog;
 using Shadowsocks.Controller.Strategy;
 using Shadowsocks.Encryption;
@@ -114,48 +115,39 @@ namespace Shadowsocks.Controller
                 _remote?.SendTo(dataOut, outlen, SocketFlags.None, _remoteEndPoint);
             }
 
-            public void Receive()
+            public async Task ReceiveAsync()
             {
                 EndPoint remoteEndPoint = new IPEndPoint(ListenAddress, 0);
                 logger.Debug($"++++++Receive Server Port, size:" + _buffer.Length);
-                _remote?.BeginReceiveFrom(_buffer, 0, _buffer.Length, 0, ref remoteEndPoint, new AsyncCallback(RecvFromCallback), null);
-            }
-
-            public void RecvFromCallback(IAsyncResult ar)
-            {
                 try
                 {
-                    if (_remote == null) return;
-                    EndPoint remoteEndPoint = new IPEndPoint(ListenAddress, 0);
-                    int bytesRead = _remote.EndReceiveFrom(ar, ref remoteEndPoint);
 
-                    byte[] dataOut = new byte[bytesRead];
-                    int outlen;
+                    while (true)
+                    {
 
-                    IEncryptor encryptor = EncryptorFactory.GetEncryptor(_server.method, _server.password);
-                    // encryptor.DecryptUDP(_buffer, bytesRead, dataOut, out outlen);
-                    outlen = encryptor.DecryptUDP(dataOut, _buffer.AsSpan(0, bytesRead));
-                    byte[] sendBuf = new byte[outlen + 3];
-                    Array.Copy(dataOut, 0, sendBuf, 3, outlen);
+                        var result = await _remote.ReceiveFromAsync(_buffer, SocketFlags.None, remoteEndPoint);
+                        int bytesRead = result.ReceivedBytes;
+                        byte[] dataOut = new byte[bytesRead];
+                        int outlen;
 
-                    logger.Debug(_remoteEndPoint, _localEndPoint, outlen, "UDP Relay down");
-                    _local?.SendTo(sendBuf, outlen + 3, 0, _localEndPoint);
+                        IEncryptor encryptor = EncryptorFactory.GetEncryptor(_server.method, _server.password);
+                        outlen = encryptor.DecryptUDP(dataOut, _buffer.AsSpan(0, bytesRead));
+                        byte[] sendBuf = new byte[outlen + 3];
+                        Array.Copy(dataOut, 0, sendBuf, 3, outlen);
 
-                    Receive();
+                        logger.Debug(_remoteEndPoint, _localEndPoint, outlen, "UDP Relay down");
+                        await _local?.SendToAsync(sendBuf, SocketFlags.None, _localEndPoint);
+                    }
                 }
-                catch (ObjectDisposedException)
+                catch (Exception e)
                 {
-                    // TODO: handle the ObjectDisposedException
+                    logger.LogUsefulException(e);
                 }
-                catch (Exception)
-                {
-                    // TODO: need more think about handle other Exceptions, or should remove this catch().
-                }
-                finally
-                {
-                    // No matter success or failed, we keep receiving
+            }
 
-                }
+            public void Receive()
+            {
+                _ = ReceiveAsync();
             }
 
             public void Close()
