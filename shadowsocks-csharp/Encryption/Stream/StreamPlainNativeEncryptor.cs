@@ -26,6 +26,7 @@ namespace Shadowsocks.Encryption.Stream
         private static readonly Dictionary<string, CipherInfo> _ciphers = new Dictionary<string, CipherInfo>
         {
             {"plain", new CipherInfo("plain", 0, 0, CipherFamily.Plain) },
+            {"none", new CipherInfo("none", 0, 0, CipherFamily.Plain) },
         };
 
         public static Dictionary<string, CipherInfo> SupportedCiphers()
