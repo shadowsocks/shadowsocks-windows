@@ -101,7 +101,7 @@ namespace Shadowsocks.Controller
                 var len = result.ReceivedBytes;
                 foreach (IDatagramService service in _services)
                 {
-                    if (service.Handle(buffer, len, _udpSocket, remote))
+                    if (service.Handle(buffer, len, _udpSocket, result.RemoteEndPoint))
                     {
                         break;
                     }

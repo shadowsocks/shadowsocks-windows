@@ -46,6 +46,7 @@ namespace Shadowsocks.Controller
             }
             // UDPListener.UDPState udpState = (UDPListener.UDPState)state;
             IPEndPoint remoteEndPoint = (IPEndPoint)state;
+            // IPEndPoint remoteEndPoint = (IPEndPoint)socket.RemoteEndPoint;
             UDPHandler handler = _cache.get(remoteEndPoint);
             if (handler == null)
             {
@@ -109,7 +110,7 @@ namespace Shadowsocks.Controller
                 byte[] dataOut = new byte[slicedData.Length + 1000];
                 var dataToSend = slicedData[3..];
                 int outlen = encryptor.EncryptUDP(slicedData[3..], dataOut);
-                logger.Debug(_localEndPoint, _remoteEndPoint, outlen, "UDP Relay");
+                logger.Debug(_localEndPoint, _remoteEndPoint, outlen, "UDP Relay up");
                 _remote?.SendTo(dataOut, outlen, SocketFlags.None, _remoteEndPoint);
             }
 
@@ -137,7 +138,7 @@ namespace Shadowsocks.Controller
                     byte[] sendBuf = new byte[outlen + 3];
                     Array.Copy(dataOut, 0, sendBuf, 3, outlen);
 
-                    logger.Debug(_localEndPoint, _remoteEndPoint, outlen, "UDP Relay");
+                    logger.Debug(_remoteEndPoint, _localEndPoint, outlen, "UDP Relay down");
                     _local?.SendTo(sendBuf, outlen + 3, 0, _localEndPoint);
 
                     Receive();
