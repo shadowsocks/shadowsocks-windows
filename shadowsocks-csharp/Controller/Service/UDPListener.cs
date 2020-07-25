@@ -13,20 +13,14 @@ namespace Shadowsocks.Controller
 {
     public interface IDatagramService
     {
-        [Obsolete]
-        bool Handle(byte[] firstPacket, int length, Socket socket, object state);
-
-        public abstract bool Handle(CachedNetworkStream stream, object state);
+        public abstract Task< bool> Handle(Memory<byte> packet, Socket socket, EndPoint client);
 
         void Stop();
     }
 
     public abstract class DatagramService : IDatagramService
     {
-        [Obsolete]
-        public abstract bool Handle(byte[] firstPacket, int length, Socket socket, object state);
-
-        public abstract bool Handle(CachedNetworkStream stream, object state);
+        public abstract Task<bool> Handle(Memory<byte> packet, Socket socket, EndPoint client);
 
         public virtual void Stop() { }
     }
@@ -101,7 +95,7 @@ namespace Shadowsocks.Controller
                 var len = result.ReceivedBytes;
                 foreach (IDatagramService service in _services)
                 {
-                    if (service.Handle(buffer, len, _udpSocket, result.RemoteEndPoint))
+                    if (await service.Handle(new Memory<byte>(buffer)[..len], _udpSocket, result.RemoteEndPoint))
                     {
                         break;
                     }
