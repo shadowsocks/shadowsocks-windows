@@ -1,8 +1,11 @@
 ﻿using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 using NLog;
 using Shadowsocks.Controller.Strategy;
 using Shadowsocks.Encryption;
@@ -25,27 +28,17 @@ namespace Shadowsocks.Controller
             this._controller = controller;
         }
 
-        // TODO: UDP is datagram protocol not stream protocol
-        public override bool Handle(CachedNetworkStream stream, object state)
-        {
-            byte[] fp = new byte[256];
-            int len = stream.ReadFirstBlock(fp);
-            return Handle(fp, len, stream.Socket, state);
-        }
-
-        [Obsolete]
-        public override bool Handle(byte[] firstPacket, int length, Socket socket, object state)
+        public override async Task<bool> Handle(Memory<byte> packet, Socket socket, EndPoint client)
         {
             if (socket.ProtocolType != ProtocolType.Udp)
             {
                 return false;
             }
-            if (length < 4)
+            if (packet.Length < 4)
             {
                 return false;
             }
-            UDPListener.UDPState udpState = (UDPListener.UDPState)state;
-            IPEndPoint remoteEndPoint = (IPEndPoint)udpState.remoteEndPoint;
+            IPEndPoint remoteEndPoint = (IPEndPoint)client;
             UDPHandler handler = _cache.get(remoteEndPoint);
             if (handler == null)
             {
@@ -53,14 +46,14 @@ namespace Shadowsocks.Controller
                 handler.Receive();
                 _cache.add(remoteEndPoint, handler);
             }
-            handler.Send(firstPacket, length);
+            await handler.SendAsync(packet);
             return true;
         }
 
         public class UDPHandler
         {
             private static Logger logger = LogManager.GetCurrentClassLogger();
-
+            private static MemoryPool<byte> pool = MemoryPool<byte>.Shared;
             private Socket _local;
             private Socket _remote;
 
@@ -70,16 +63,16 @@ namespace Shadowsocks.Controller
             private IPEndPoint _localEndPoint;
             private IPEndPoint _remoteEndPoint;
 
-            private IPAddress GetIPAddress()
+            private IPAddress ListenAddress
             {
-                switch (_remote.AddressFamily)
+                get
                 {
-                    case AddressFamily.InterNetwork:
-                        return IPAddress.Any;
-                    case AddressFamily.InterNetworkV6:
-                        return IPAddress.IPv6Any;
-                    default:
-                        return IPAddress.Any;
+                    return _remote.AddressFamily switch
+                    {
+                        AddressFamily.InterNetwork => IPAddress.Any,
+                        AddressFamily.InterNetworkV6 => IPAddress.IPv6Any,
+                        _ => throw new NotSupportedException(),
+                    };
                 }
             }
 
@@ -90,8 +83,7 @@ namespace Shadowsocks.Controller
                 _localEndPoint = localEndPoint;
 
                 // TODO async resolving
-                IPAddress ipAddress;
-                bool parsed = IPAddress.TryParse(server.server, out ipAddress);
+                bool parsed = IPAddress.TryParse(server.server, out IPAddress ipAddress);
                 if (!parsed)
                 {
                     IPHostEntry ipHostInfo = Dns.GetHostEntry(server.server);
@@ -99,63 +91,58 @@ namespace Shadowsocks.Controller
                 }
                 _remoteEndPoint = new IPEndPoint(ipAddress, server.server_port);
                 _remote = new Socket(_remoteEndPoint.AddressFamily, SocketType.Dgram, ProtocolType.Udp);
-                _remote.Bind(new IPEndPoint(GetIPAddress(), 0));
+                _remote.Bind(new IPEndPoint(ListenAddress, 0));
             }
 
-            public void Send(byte[] data, int length)
+            public async Task SendAsync(ReadOnlyMemory<byte> data)
             {
                 IEncryptor encryptor = EncryptorFactory.GetEncryptor(_server.method, _server.password);
-                // byte[] dataIn = new byte[length - 3];
-                // Array.Copy(data, 3, dataIn, 0, length - 3);
-                byte[] dataOut = new byte[65536];  // enough space for AEAD ciphers
-                // encryptor.EncryptUDP(dataIn, length - 3, dataOut, out outlen);
-                int outlen = encryptor.EncryptUDP(data.AsSpan(3), dataOut);
-                logger.Debug(_localEndPoint, _remoteEndPoint, outlen, "UDP Relay");
-                _remote?.SendTo(dataOut, outlen, SocketFlags.None, _remoteEndPoint);
+                using IMemoryOwner<byte> mem = pool.Rent(data.Length + 1000);
+
+                // byte[] dataOut = new byte[slicedData.Length + 1000];
+                int outlen = encryptor.EncryptUDP(data.Span[3..], mem.Memory.Span);
+                logger.Debug(_localEndPoint, _remoteEndPoint, outlen, "UDP Relay up");
+                if (!MemoryMarshal.TryGetArray(mem.Memory[..outlen], out ArraySegment<byte> outData))
+                {
+                    throw new InvalidOperationException("Can't extract underly array segment");
+                };
+                await _remote?.SendToAsync(outData, SocketFlags.None, _remoteEndPoint);
+            }
+
+            public async Task ReceiveAsync()
+            {
+                EndPoint remoteEndPoint = new IPEndPoint(ListenAddress, 0);
+                logger.Debug($"++++++Receive Server Port, size:" + _buffer.Length);
+                try
+                {
+                    while (true)
+                    {
+                        var result = await _remote.ReceiveFromAsync(_buffer, SocketFlags.None, remoteEndPoint);
+                        int bytesRead = result.ReceivedBytes;
+
+                        using IMemoryOwner<byte> owner = pool.Rent(bytesRead + 3);
+                        Memory<byte> o = owner.Memory;
+
+                        IEncryptor encryptor = EncryptorFactory.GetEncryptor(_server.method, _server.password);
+                        int outlen = encryptor.DecryptUDP(o.Span[3..], _buffer.AsSpan(0, bytesRead));
+                        logger.Debug(_remoteEndPoint, _localEndPoint, outlen, "UDP Relay down");
+                        if (!MemoryMarshal.TryGetArray(o[..(outlen + 3)], out ArraySegment<byte> data))
+                        {
+                            throw new InvalidOperationException("Can't extract underly array segment");
+                        };
+                        await _local?.SendToAsync(data, SocketFlags.None, _localEndPoint);
+
+                    }
+                }
+                catch (Exception e)
+                {
+                    logger.LogUsefulException(e);
+                }
             }
 
             public void Receive()
             {
-                EndPoint remoteEndPoint = new IPEndPoint(GetIPAddress(), 0);
-                logger.Debug($"++++++Receive Server Port, size:" + _buffer.Length);
-                _remote?.BeginReceiveFrom(_buffer, 0, _buffer.Length, 0, ref remoteEndPoint, new AsyncCallback(RecvFromCallback), null);
-            }
-
-            public void RecvFromCallback(IAsyncResult ar)
-            {
-                try
-                {
-                    if (_remote == null) return;
-                    EndPoint remoteEndPoint = new IPEndPoint(GetIPAddress(), 0);
-                    int bytesRead = _remote.EndReceiveFrom(ar, ref remoteEndPoint);
-
-                    byte[] dataOut = new byte[bytesRead];
-                    int outlen;
-
-                    IEncryptor encryptor = EncryptorFactory.GetEncryptor(_server.method, _server.password);
-                    // encryptor.DecryptUDP(_buffer, bytesRead, dataOut, out outlen);
-                    outlen = encryptor.DecryptUDP(dataOut, _buffer.AsSpan(0, bytesRead));
-                    byte[] sendBuf = new byte[outlen + 3];
-                    Array.Copy(dataOut, 0, sendBuf, 3, outlen);
-
-                    logger.Debug(_localEndPoint, _remoteEndPoint, outlen, "UDP Relay");
-                    _local?.SendTo(sendBuf, outlen + 3, 0, _localEndPoint);
-
-                    Receive();
-                }
-                catch (ObjectDisposedException)
-                {
-                    // TODO: handle the ObjectDisposedException
-                }
-                catch (Exception)
-                {
-                    // TODO: need more think about handle other Exceptions, or should remove this catch().
-                }
-                finally
-                {
-                    // No matter success or failed, we keep receiving
-
-                }
+                _ = ReceiveAsync();
             }
 
             public void Close()

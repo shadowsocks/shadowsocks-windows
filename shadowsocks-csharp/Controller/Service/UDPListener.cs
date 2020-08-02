@@ -4,6 +4,8 @@ using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
+using System.Threading;
+using System.Threading.Tasks;
 using NLog;
 using Shadowsocks.Model;
 
@@ -11,20 +13,14 @@ namespace Shadowsocks.Controller
 {
     public interface IDatagramService
     {
-        [Obsolete]
-        bool Handle(byte[] firstPacket, int length, Socket socket, object state);
-
-        public abstract bool Handle(CachedNetworkStream stream, object state);
+        public abstract Task< bool> Handle(Memory<byte> packet, Socket socket, EndPoint client);
 
         void Stop();
     }
 
     public abstract class DatagramService : IDatagramService
     {
-        [Obsolete]
-        public abstract bool Handle(byte[] firstPacket, int length, Socket socket, object state);
-
-        public abstract bool Handle(CachedNetworkStream stream, object state);
+        public abstract Task<bool> Handle(Memory<byte> packet, Socket socket, EndPoint client);
 
         public virtual void Stop() { }
     }
@@ -49,6 +45,7 @@ namespace Shadowsocks.Controller
         bool _shareOverLAN;
         Socket _udpSocket;
         IEnumerable<IDatagramService> _services;
+        CancellationTokenSource tokenSource = new CancellationTokenSource();
 
         public UDPListener(Configuration config, IEnumerable<IDatagramService> services)
         {
@@ -84,54 +81,35 @@ namespace Shadowsocks.Controller
             logger.Info($"Shadowsocks started UDP ({UpdateChecker.Version})");
             logger.Debug(Encryption.EncryptorFactory.DumpRegisteredEncryptor());
             UDPState udpState = new UDPState(_udpSocket);
-            _udpSocket.BeginReceiveFrom(udpState.buffer, 0, udpState.buffer.Length, 0, ref udpState.remoteEndPoint, new AsyncCallback(RecvFromCallback), udpState);
-
+            // _udpSocket.BeginReceiveFrom(udpState.buffer, 0, udpState.buffer.Length, 0, ref udpState.remoteEndPoint, new AsyncCallback(RecvFromCallback), udpState);
+            Task.Run(() => WorkLoop(tokenSource.Token));
         }
 
-        public void Stop()
+        private async Task WorkLoop(CancellationToken token)
         {
-            _udpSocket?.Close();
-            foreach (var s in _services)
+            byte[] buffer = new byte[4096];
+            EndPoint remote = new IPEndPoint(_udpSocket.AddressFamily == AddressFamily.InterNetworkV6 ? IPAddress.IPv6Any : IPAddress.Any, 0);
+            while (!token.IsCancellationRequested)
             {
-                s.Stop();
-            }
-        }
-
-        public void RecvFromCallback(IAsyncResult ar)
-        {
-            UDPState state = (UDPState)ar.AsyncState;
-            var socket = state.socket;
-            try
-            {
-                int bytesRead = socket.EndReceiveFrom(ar, ref state.remoteEndPoint);
+                var result = await _udpSocket.ReceiveFromAsync(buffer, SocketFlags.None, remote);
+                var len = result.ReceivedBytes;
                 foreach (IDatagramService service in _services)
                 {
-                    if (service.Handle(state.buffer, bytesRead, socket, state))
+                    if (await service.Handle(new Memory<byte>(buffer)[..len], _udpSocket, result.RemoteEndPoint))
                     {
                         break;
                     }
                 }
             }
-            catch (ObjectDisposedException)
+        }
+
+        public void Stop()
+        {
+            tokenSource.Cancel();
+            _udpSocket?.Close();
+            foreach (var s in _services)
             {
-            }
-            catch (Exception ex)
-            {
-                logger.Debug(ex);
-            }
-            finally
-            {
-                try
-                {
-                    socket.BeginReceiveFrom(state.buffer, 0, state.buffer.Length, 0, ref state.remoteEndPoint, new AsyncCallback(RecvFromCallback), state);
-                }
-                catch (ObjectDisposedException)
-                {
-                    // do nothing
-                }
-                catch (Exception)
-                {
-                }
+                s.Stop();
             }
         }
     }
