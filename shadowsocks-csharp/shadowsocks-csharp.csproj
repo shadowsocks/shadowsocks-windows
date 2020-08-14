@@ -71,6 +71,9 @@
     <Reference Include="Caseless, Version=1.8.3.0, Culture=neutral, PublicKeyToken=409b3227471b0f0d, processorArchitecture=MSIL">
       <HintPath>..\packages\Caseless.Fody.1.8.3\lib\net452\Caseless.dll</HintPath>
     </Reference>
+    <Reference Include="CommandLine, Version=2.8.0.0, Culture=neutral, PublicKeyToken=5a870481e358d379, processorArchitecture=MSIL">
+      <HintPath>..\packages\CommandLineParser.2.8.0\lib\net461\CommandLine.dll</HintPath>
+    </Reference>
     <Reference Include="Costura, Version=3.3.3.0, Culture=neutral, PublicKeyToken=9919ef960d84173d, processorArchitecture=MSIL">
       <HintPath>..\packages\Costura.Fody.3.3.3\lib\net40\Costura.dll</HintPath>
     </Reference>
@@ -162,6 +165,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CommandLineOption.cs" />
     <Compile Include="Controller\HotkeyReg.cs" />
     <Compile Include="Controller\LoggerExtension.cs" />
     <Compile Include="Controller\Service\GeositeUpdater.cs" />
