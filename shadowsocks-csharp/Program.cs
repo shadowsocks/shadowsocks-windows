@@ -67,48 +67,21 @@ namespace Shadowsocks
                 }
                 return;
             }
-            string pipename = $"Shadowsocks\\{ExecutablePath.GetHashCode()}";
 
-            using (NamedPipeClientStream pipe = new NamedPipeClientStream(pipename))
+            if (IPCService.AnotherInstanceRunning())
             {
-                bool pipeExist = false;
-                try
+                if (!string.IsNullOrWhiteSpace(Options.OpenUrl))
                 {
-                    pipe.Connect(10);
-                    pipeExist = true;
+                    IPCService.RequestOpenUrl(Options.OpenUrl);
                 }
-                catch (TimeoutException)
+                else
                 {
-                    pipeExist = false;
-                }
-
-                // --open-url exist, and no other instance, add it later
-                if (pipeExist && !string.IsNullOrWhiteSpace(Options.OpenUrl))
-                {
-                    byte[] b = Encoding.UTF8.GetBytes(Options.OpenUrl);
-                    byte[] opAddUrl = BitConverter.GetBytes(IPAddress.HostToNetworkOrder(1));
-                    byte[] blen = BitConverter.GetBytes(IPAddress.HostToNetworkOrder(b.Length));
-                    pipe.Write(opAddUrl, 0, 4); // opcode addurl
-                    pipe.Write(blen, 0, 4);
-                    pipe.Write(b, 0, b.Length);
-                    pipe.Close();
-                    return;
-                }
-
-                // has another instance, and no need to communicate with it return
-                else if (pipeExist)
-                {
-                    Process[] oldProcesses = Process.GetProcessesByName("Shadowsocks");
-                    if (oldProcesses.Length > 0)
-                    {
-                        Process oldProcess = oldProcesses[0];
-                    }
                     MessageBox.Show(I18N.GetString("Find Shadowsocks icon in your notify tray.")
-                        + Environment.NewLine
-                        + I18N.GetString("If you want to start multiple Shadowsocks, make a copy in another directory."),
+                                    + Environment.NewLine
+                                    + I18N.GetString("If you want to start multiple Shadowsocks, make a copy in another directory."),
                         I18N.GetString("Shadowsocks is already running."));
-                    return;
                 }
+                return;
             }
 
             Utils.ReleaseMemory(true);
@@ -136,9 +109,10 @@ namespace Shadowsocks
             HotKeys.Init(MainController);
             MainController.Start();
 
-            NamedPipeServer namedPipeServer = new NamedPipeServer();
-            Task.Run(() => namedPipeServer.Run(pipename));
-            namedPipeServer.AddUrlRequested += (_1, e) => MainController.AskAddServerBySSURL(e.Url);
+            IPCService ipcService = new IPCService();
+            Task.Run(() => ipcService.RunServer());
+            ipcService.OpenUrlRequested += (_1, e) => MainController.AskAddServerBySSURL(e.Url);
+
             if (!string.IsNullOrWhiteSpace(Options.OpenUrl))
             {
                 MainController.AskAddServerBySSURL(Options.OpenUrl);
