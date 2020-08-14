@@ -20,6 +20,7 @@ namespace Shadowsocks
     internal static class Program
     {
         private static readonly Logger logger = LogManager.GetCurrentClassLogger();
+
         public static ShadowsocksController MainController { get; private set; }
         public static MenuViewController MenuController { get; private set; }
         public static CommandLineOption Options { get; private set; }
@@ -28,6 +29,9 @@ namespace Shadowsocks
         // https://github.com/dotnet/runtime/issues/13051#issuecomment-510267727
         public static readonly string ExecutablePath = Process.GetCurrentProcess().MainModule?.FileName;
         public static readonly string WorkingDirectory = Path.GetDirectoryName(ExecutablePath);
+
+        private static readonly Mutex mutex = new Mutex(true, $"Shadowsocks_{ExecutablePath.GetHashCode()}");
+
         /// <summary>
         /// 应用程序的主入口点。
         /// </summary>
@@ -35,12 +39,33 @@ namespace Shadowsocks
         [STAThread]
         private static void Main(string[] args)
         {
+            #region Single Instance and IPC
+            bool hasAnotherInstance = !mutex.WaitOne(TimeSpan.Zero, true);
+
             // store args for further use
             Args = args;
             Parser.Default.ParseArguments<CommandLineOption>(args)
                 .WithParsed(opt => Options = opt)
                 .WithNotParsed(e => e.Output());
 
+            if (hasAnotherInstance)
+            {
+                if (!string.IsNullOrWhiteSpace(Options.OpenUrl))
+                {
+                    IPCService.RequestOpenUrl(Options.OpenUrl);
+                }
+                else
+                {
+                    MessageBox.Show(I18N.GetString("Find Shadowsocks icon in your notify tray.")
+                                    + Environment.NewLine
+                                    + I18N.GetString("If you want to start multiple Shadowsocks, make a copy in another directory."),
+                        I18N.GetString("Shadowsocks is already running."));
+                }
+                return;
+            }
+            #endregion
+
+            #region Enviroment Setup
             Directory.SetCurrentDirectory(WorkingDirectory);
             // todo: initialize the NLog configuartion
             Model.NLogConfig.TouchAndApplyNLogConfig();
@@ -48,7 +73,9 @@ namespace Shadowsocks
             // .NET Framework 4.7.2 on Win7 compatibility
             ServicePointManager.SecurityProtocol |=
                 SecurityProtocolType.Tls | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12;
+            #endregion
 
+            #region Compactibility Check
             // Check OS since we are using dual-mode socket
             if (!Utils.IsWinVistaOrHigher())
             {
@@ -67,23 +94,9 @@ namespace Shadowsocks
                 }
                 return;
             }
+            #endregion
 
-            if (IPCService.AnotherInstanceRunning())
-            {
-                if (!string.IsNullOrWhiteSpace(Options.OpenUrl))
-                {
-                    IPCService.RequestOpenUrl(Options.OpenUrl);
-                }
-                else
-                {
-                    MessageBox.Show(I18N.GetString("Find Shadowsocks icon in your notify tray.")
-                                    + Environment.NewLine
-                                    + I18N.GetString("If you want to start multiple Shadowsocks, make a copy in another directory."),
-                        I18N.GetString("Shadowsocks is already running."));
-                }
-                return;
-            }
-
+            #region Event Handlers Setup
             Utils.ReleaseMemory(true);
 
             Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
@@ -96,6 +109,7 @@ namespace Shadowsocks
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             AutoStartup.RegisterForRestart(true);
+            #endregion
 
 #if DEBUG
             // truncate privoxy log file while debugging
@@ -109,6 +123,7 @@ namespace Shadowsocks
             HotKeys.Init(MainController);
             MainController.Start();
 
+            #region IPC Handler and Arguement Process
             IPCService ipcService = new IPCService();
             Task.Run(() => ipcService.RunServer());
             ipcService.OpenUrlRequested += (_1, e) => MainController.AskAddServerBySSURL(e.Url);
@@ -117,7 +132,10 @@ namespace Shadowsocks
             {
                 MainController.AskAddServerBySSURL(Options.OpenUrl);
             }
+            #endregion
+            
             Application.Run();
+
         }
 
         private static int exited = 0;
