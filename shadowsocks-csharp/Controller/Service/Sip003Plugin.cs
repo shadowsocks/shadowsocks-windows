@@ -4,7 +4,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
-using System.Reflection;
 using Shadowsocks.Model;
 using Shadowsocks.Util.ProcessManagement;
 
@@ -55,8 +54,6 @@ namespace Shadowsocks.Controller.Service
                 throw new ArgumentOutOfRangeException("serverPort");
             }
 
-            var appPath = Path.GetDirectoryName(new Uri(Assembly.GetExecutingAssembly().GetName().CodeBase).LocalPath);
-
             _pluginProcess = new Process
             {
                 StartInfo = new ProcessStartInfo
@@ -67,7 +64,7 @@ namespace Shadowsocks.Controller.Service
                     CreateNoWindow = !showPluginOutput,
                     ErrorDialog = false,
                     WindowStyle = ProcessWindowStyle.Hidden,
-                    WorkingDirectory = appPath ?? Environment.CurrentDirectory,
+                    WorkingDirectory = Program.WorkingDirectory ?? Environment.CurrentDirectory,
                     Environment =
                     {
                         ["SS_REMOTE_HOST"] = serverAddress,

@@ -72,7 +72,7 @@ namespace Shadowsocks.Controller
         private void WatchPacFile()
         {
             PACFileWatcher?.Dispose();
-            PACFileWatcher = new FileSystemWatcher(Directory.GetCurrentDirectory());
+            PACFileWatcher = new FileSystemWatcher(Program.WorkingDirectory);
             PACFileWatcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.DirectoryName;
             PACFileWatcher.Filter = PAC_FILE;
             PACFileWatcher.Changed += PACFileWatcher_Changed;
@@ -85,7 +85,7 @@ namespace Shadowsocks.Controller
         private void WatchUserRuleFile()
         {
             UserRuleFileWatcher?.Dispose();
-            UserRuleFileWatcher = new FileSystemWatcher(Directory.GetCurrentDirectory());
+            UserRuleFileWatcher = new FileSystemWatcher(Program.WorkingDirectory);
             UserRuleFileWatcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.DirectoryName;
             UserRuleFileWatcher.Filter = USER_RULE_FILE;
             UserRuleFileWatcher.Changed += UserRuleFileWatcher_Changed;

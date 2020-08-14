@@ -28,7 +28,7 @@ namespace Shadowsocks.Controller
         {
             try
             {
-                _uid = Application.StartupPath.GetHashCode(); // Currently we use ss's StartupPath to identify different Privoxy instance.
+                _uid = Program.WorkingDirectory.GetHashCode(); // Currently we use ss's StartupPath to identify different Privoxy instance.
                 _uniqueConfigFile = $"privoxy_{_uid}.conf";
                 _privoxyJob = new Job();
 

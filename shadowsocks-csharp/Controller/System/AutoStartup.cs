@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using System.Runtime.InteropServices;
-using System.Windows.Forms;
 using Microsoft.Win32;
 using NLog;
 using Shadowsocks.Util;
@@ -16,9 +14,8 @@ namespace Shadowsocks.Controller
 
         // Don't use Application.ExecutablePath
         // see https://stackoverflow.com/questions/12945805/odd-c-sharp-path-issue
-        private static readonly string ExecutablePath = Assembly.GetEntryAssembly().Location;
-
-        private static string Key = "Shadowsocks_" + Application.StartupPath.GetHashCode();
+        
+        private static string Key = "Shadowsocks_" + Program.ExecutablePath.GetHashCode();
 
         public static bool Set(bool enabled)
         {
@@ -33,7 +30,7 @@ namespace Shadowsocks.Controller
                 }
                 if (enabled)
                 {
-                    runKey.SetValue(Key, ExecutablePath);
+                    runKey.SetValue(Key, Program.ExecutablePath);
                 }
                 else
                 {
@@ -82,10 +79,10 @@ namespace Shadowsocks.Controller
                     else if (item.Equals("Shadowsocks", StringComparison.OrdinalIgnoreCase)) // Compatibility with older versions
                     {
                         string value = Convert.ToString(runKey.GetValue(item));
-                        if (ExecutablePath.Equals(value, StringComparison.OrdinalIgnoreCase))
+                        if (Program.ExecutablePath.Equals(value, StringComparison.OrdinalIgnoreCase))
                         {
                             runKey.DeleteValue(item);
-                            runKey.SetValue(Key, ExecutablePath);
+                            runKey.SetValue(Key, Program.ExecutablePath);
                             return true;
                         }
                     }

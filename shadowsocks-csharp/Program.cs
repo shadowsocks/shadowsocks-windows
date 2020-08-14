@@ -24,6 +24,10 @@ namespace Shadowsocks
         public static ShadowsocksController MainController { get; private set; }
         public static MenuViewController MenuController { get; private set; }
         public static string[] Args { get; private set; }
+
+        // https://github.com/dotnet/runtime/issues/13051#issuecomment-510267727
+        public static readonly string ExecutablePath = Process.GetCurrentProcess().MainModule?.FileName;
+        public static readonly string WorkingDirectory = Path.GetDirectoryName(ExecutablePath);
         /// <summary>
         /// 应用程序的主入口点。
         /// </summary>
@@ -31,7 +35,7 @@ namespace Shadowsocks
         [STAThread]
         private static void Main(string[] args)
         {
-            Directory.SetCurrentDirectory(Application.StartupPath);
+            Directory.SetCurrentDirectory(WorkingDirectory);
             // todo: initialize the NLog configuartion
             Model.NLogConfig.TouchAndApplyNLogConfig();
 
@@ -59,7 +63,7 @@ namespace Shadowsocks
                 }
                 return;
             }
-            string pipename = $"Shadowsocks\\{Application.StartupPath.GetHashCode()}";
+            string pipename = $"Shadowsocks\\{ExecutablePath.GetHashCode()}";
 
             string addedUrl = null;
 
@@ -133,8 +137,6 @@ namespace Shadowsocks
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             AutoStartup.RegisterForRestart(true);
-
-            Directory.SetCurrentDirectory(Application.StartupPath);
 
 #if DEBUG
             // truncate privoxy log file while debugging
