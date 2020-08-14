@@ -6,6 +6,8 @@ using System.Web;
 using Shadowsocks.Controller;
 using System.Text.RegularExpressions;
 using System.Linq;
+using Newtonsoft.Json;
+using System.ComponentModel;
 
 namespace Shadowsocks.Model
 {
@@ -27,10 +29,21 @@ namespace Shadowsocks.Model
         public int server_port;
         public string password;
         public string method;
+
+        // optional fields
+        [DefaultValue("")]
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore, DefaultValueHandling = DefaultValueHandling.IgnoreAndPopulate)]
         public string plugin;
+        [DefaultValue("")]
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore, DefaultValueHandling = DefaultValueHandling.IgnoreAndPopulate)]
         public string plugin_opts;
+        [DefaultValue("")]
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore, DefaultValueHandling = DefaultValueHandling.IgnoreAndPopulate)]
         public string plugin_args;
+        [DefaultValue("")]
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore, DefaultValueHandling = DefaultValueHandling.IgnoreAndPopulate)]
         public string remarks;
+        
         public int timeout;
 
         public override int GetHashCode()
@@ -103,6 +116,7 @@ namespace Shadowsocks.Model
             return $"ss://{url}{tag}";
         }
 
+        [JsonIgnore]
         public string FormalHostName
         {
             get
