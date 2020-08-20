@@ -46,9 +46,9 @@ namespace Shadowsocks.Test
                 server_port = server1.server_port,
                 password = server1.password,
                 method = server1.method,
-                remarks = "example-server"
+                remarks = "example-server 1"
             };
-            server1WithRemarkCanonUrl = "ss://YmYtY2ZiOnRlc3RAMTkyLjE2OC4xMDAuMTo4ODg4#example-server";
+            server1WithRemarkCanonUrl = "ss://YmYtY2ZiOnRlc3RAMTkyLjE2OC4xMDAuMTo4ODg4#example-server+1";
 
             server2WithRemark = new Server
             {
@@ -56,10 +56,10 @@ namespace Shadowsocks.Test
                 server_port = server2.server_port,
                 password = server2.password,
                 method = server2.method,
-                remarks = "example-server"
+                remarks = "example-server 2"
             };
 
-            server2WithRemarkCanonUrl = "ss://YmYtY2ZiOnRlc3RAMTkyLjE2OC4xLjE6ODM4OA==#example-server";
+            server2WithRemarkCanonUrl = "ss://YmYtY2ZiOnRlc3RAMTkyLjE2OC4xLjE6ODM4OA==#example-server+2";
 
             server1WithPlugin = new Server
             {
@@ -96,7 +96,7 @@ namespace Shadowsocks.Test
                 remarks = server1WithRemark.remarks
             };
             server1WithPluginAndRemarkCanonUrl =
-                "ss://YmYtY2ZiOnRlc3Q@192.168.100.1:8888/?plugin=obfs-local%3bobfs%3dhttp%3bobfs-host%3dgoogle.com#example-server";
+                "ss://YmYtY2ZiOnRlc3Q@192.168.100.1:8888/?plugin=obfs-local%3bobfs%3dhttp%3bobfs-host%3dgoogle.com#example-server+1";
 
             server2WithPluginAndRemark = new Server
             {
@@ -109,7 +109,7 @@ namespace Shadowsocks.Test
                 remarks = server2WithRemark.remarks
             };
             server2WithPluginAndRemarkCanonUrl =
-                "ss://YmYtY2ZiOnRlc3Q@192.168.1.1:8388/?plugin=obfs-local%3bobfs%3dhttp%3bobfs-host%3dgoogle.com#example-server";
+                "ss://YmYtY2ZiOnRlc3Q@192.168.1.1:8388/?plugin=obfs-local%3bobfs%3dhttp%3bobfs-host%3dgoogle.com#example-server+2";
         }
 
         [TestMethod]
@@ -122,7 +122,7 @@ namespace Shadowsocks.Test
                     "\r\n",
                     "ss://YmYtY2ZiOnRlc3RAMTkyLjE2OC4xMDAuMTo4ODg4/",
                     server1WithRemarkCanonUrl,
-                    "ss://YmYtY2ZiOnRlc3RAMTkyLjE2OC4xMDAuMTo4ODg4/#example-server"),
+                    "ss://YmYtY2ZiOnRlc3RAMTkyLjE2OC4xMDAuMTo4ODg4/#example-server+1"),
                 new[]
                 {
                     server1,
@@ -137,11 +137,11 @@ namespace Shadowsocks.Test
                     "ss://YmYtY2ZiOnRlc3Q@192.168.100.1:8888",
                     "\r\n",
                     "ss://YmYtY2ZiOnRlc3Q@192.168.100.1:8888/",
-                    "ss://YmYtY2ZiOnRlc3Q@192.168.100.1:8888#example-server",
-                    "ss://YmYtY2ZiOnRlc3Q@192.168.100.1:8888/#example-server",
+                    "ss://YmYtY2ZiOnRlc3Q@192.168.100.1:8888#example-server+1",
+                    "ss://YmYtY2ZiOnRlc3Q@192.168.100.1:8888/#example-server+1",
                     server1WithPluginCanonUrl,
                     server1WithPluginAndRemarkCanonUrl,
-                    "ss://YmYtY2ZiOnRlc3Q@192.168.100.1:8888/?plugin=obfs-local%3bobfs%3dhttp%3bobfs-host%3dgoogle.com&unsupported=1#example-server"),
+                    "ss://YmYtY2ZiOnRlc3Q@192.168.100.1:8888/?plugin=obfs-local%3bobfs%3dhttp%3bobfs-host%3dgoogle.com&unsupported=1#example-server+1"),
                 new[]
                 {
                     server1,
@@ -166,7 +166,7 @@ namespace Shadowsocks.Test
                     "\r\n",
                     "ss://YmYtY2ZiOnRlc3RAMTkyLjE2OC4xLjE6ODM4OA==/",
                     server2WithRemarkCanonUrl,
-                    "ss://YmYtY2ZiOnRlc3RAMTkyLjE2OC4xLjE6ODM4OA==/#example-server"),
+                    "ss://YmYtY2ZiOnRlc3RAMTkyLjE2OC4xLjE6ODM4OA==/#example-server+2"),
                 new[]
                 {
                     server2,
@@ -181,11 +181,11 @@ namespace Shadowsocks.Test
                     "ss://YmYtY2ZiOnRlc3Q@192.168.1.1:8388",
                     "\r\n",
                     "ss://YmYtY2ZiOnRlc3Q@192.168.1.1:8388/",
-                    "ss://YmYtY2ZiOnRlc3Q@192.168.1.1:8388#example-server",
-                    "ss://YmYtY2ZiOnRlc3Q@192.168.1.1:8388/#example-server",
+                    "ss://YmYtY2ZiOnRlc3Q@192.168.1.1:8388#example-server+2",
+                    "ss://YmYtY2ZiOnRlc3Q@192.168.1.1:8388/#example-server+2",
                     server2WithPluginCanonUrl,
                     server2WithPluginAndRemarkCanonUrl,
-                    "ss://YmYtY2ZiOnRlc3Q@192.168.1.1:8388/?plugin=obfs-local%3bobfs%3dhttp%3bobfs-host%3dgoogle.com&unsupported=1#example-server"),
+                    "ss://YmYtY2ZiOnRlc3Q@192.168.1.1:8388/?plugin=obfs-local%3bobfs%3dhttp%3bobfs-host%3dgoogle.com&unsupported=1#example-server+2"),
                 new[]
                 {
                     server2,

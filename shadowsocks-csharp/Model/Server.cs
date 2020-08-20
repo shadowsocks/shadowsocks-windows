@@ -189,7 +189,8 @@ namespace Shadowsocks.Model
                 }
                 Server server = new Server
                 {
-                    remarks = parsedUrl.GetComponents(UriComponents.Fragment, UriFormat.Unescaped),
+                    remarks = HttpUtility.UrlDecode(parsedUrl.GetComponents(
+                        UriComponents.Fragment, UriFormat.Unescaped), Encoding.UTF8),
                     server = parsedUrl.IdnHost,
                     server_port = parsedUrl.Port,
                 };
