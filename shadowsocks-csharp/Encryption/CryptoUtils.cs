@@ -49,33 +49,14 @@ namespace Shadowsocks.Encryption
             return ret.AsSpan();
         }
 
-        public static void SodiumIncrement(byte[] salt)
-        {
-            bool o = true; // overflow flag
-            for (int i = 0; i < salt.Length; i++)
-            {
-                if (!o)
-                {
-                    continue;
-                }
-
-                salt[i]++;
-                o = salt[i] == 0;
-            }
-        }
-
         public static void SodiumIncrement(Span<byte> salt)
         {
-            bool o = true; // overflow flag
-            for (int i = 0; i < salt.Length; i++)
+            for (var i = 0; i < salt.Length; ++i)
             {
-                if (!o)
+                if (++salt[i] != 0)
                 {
-                    continue;
+                    break;
                 }
-
-                salt[i]++;
-                o = salt[i] == 0;
             }
         }
     }
