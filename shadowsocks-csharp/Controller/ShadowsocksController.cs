@@ -717,6 +717,12 @@ namespace Shadowsocks.Controller
             Configuration.Save(_config);
         }
 
+        public void SaveOnlineConfigSource(IEnumerable<string> vs)
+        {
+            _config.onlineConfigSource = vs.ToList();
+            SaveConfig(_config);
+        }
+
         #endregion
     }
 }
