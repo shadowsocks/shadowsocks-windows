@@ -7,6 +7,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Web;
 using System.Windows.Forms;
 using NLog;
@@ -449,7 +450,7 @@ namespace Shadowsocks.Controller
         #endregion
 
         #region Misc
-        
+
         public void ToggleVerboseLogging(bool enabled)
         {
             _config.isVerboseLogging = enabled;
@@ -490,7 +491,7 @@ namespace Shadowsocks.Controller
 
             ConfigChanged?.Invoke(this, new EventArgs());
         }
-        
+
         #endregion
 
         #region Statistic
@@ -567,7 +568,7 @@ namespace Shadowsocks.Controller
         #endregion
 
         #region SIP003
-        
+
         private void StartPlugin()
         {
             var server = _config.GetCurrentServer();
@@ -685,5 +686,37 @@ namespace Shadowsocks.Controller
 
         #endregion
 
+        #region SIP008
+
+        public async Task UpdateOnlineConfig(string url)
+        {
+            var selected = GetCurrentServer();
+            var onlineServer = await OnlineConfigResolver.GetOnline(url, _config.WebProxy);
+            _config.configs = Configuration.SortByOnlineConfig(
+                _config.configs
+                .Where(c => c.group != url)
+                .Concat(onlineServer)
+                );
+            _config.index = _config.configs.IndexOf(selected);
+            Configuration.Save(_config);
+        }
+
+        public async Task UpdateAllOnlineConfig()
+        {
+            var selected = GetCurrentServer();
+            var r = await Task.WhenAll(
+                _config.onlineConfigSource.Select(url => OnlineConfigResolver.GetOnline(url, _config.WebProxy))
+                );
+            var results = r.SelectMany(s => s);
+            _config.configs = Configuration.SortByOnlineConfig(
+                _config.configs
+                .Where(c => string.IsNullOrEmpty(c.group))
+                .Concat(r.SelectMany(s => s))
+                );
+            _config.index = _config.configs.IndexOf(selected);
+            Configuration.Save(_config);
+        }
+
+        #endregion
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net;
 using Newtonsoft.Json;
 using NLog;
@@ -197,6 +198,7 @@ namespace Shadowsocks.Model
 
         public static void Save(Configuration config)
         {
+            config.configs = SortByOnlineConfig(config.configs);
             config.version = UpdateChecker.Version;
             if (config.index >= config.configs.Count)
                 config.index = config.configs.Count - 1;
@@ -228,6 +230,15 @@ namespace Shadowsocks.Model
             {
                 logger.LogUsefulException(e);
             }
+        }
+
+        public static List<Server> SortByOnlineConfig(IEnumerable<Server> servers)
+        {
+            var groups = servers.GroupBy(s => s.group);
+            List<Server> ret = new List<Server>();
+            ret.AddRange(groups.Where(g => string.IsNullOrEmpty(g.Key)).SelectMany(g => g));
+            ret.AddRange(groups.Where(g => !string.IsNullOrEmpty(g.Key)).SelectMany(g => g));
+            return ret;
         }
 
         public static Server AddDefaultServerOrServer(Configuration config, Server server = null, int? index = null)
