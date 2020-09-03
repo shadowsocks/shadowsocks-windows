@@ -698,7 +698,7 @@ namespace Shadowsocks.Controller
                 .Concat(onlineServer)
                 );
             _config.index = _config.configs.IndexOf(selected);
-            Configuration.Save(_config);
+            SaveConfig(_config);
         }
 
         public async Task UpdateAllOnlineConfig()
@@ -714,7 +714,7 @@ namespace Shadowsocks.Controller
                 .Concat(r.SelectMany(s => s))
                 );
             _config.index = _config.configs.IndexOf(selected);
-            Configuration.Save(_config);
+            SaveConfig(_config);
         }
 
         public void SaveOnlineConfigSource(IEnumerable<string> vs)

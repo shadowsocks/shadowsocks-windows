@@ -29,7 +29,12 @@ namespace Shadowsocks.Controller.Service
             try
             {
                 string str = await httpClient.GetStringAsync(url);
-                return Get(str);
+                var ret = Get(str);
+                foreach (var item in ret)
+                {
+                    item.group = url;
+                }
+                return ret;
             }
             catch (Exception e)
             {
@@ -62,11 +67,9 @@ namespace Shadowsocks.Controller.Service
         {
             var l = new List<Server>();
             if (o == null) return l;
-            try
-            {
+            if (IsServerObject(o))
                 return new List<Server> { o.ToObject<Server>() };
-            }
-            catch { };
+
             foreach (var kv in o)
             {
                 JToken v = kv.Value;
@@ -86,6 +89,11 @@ namespace Shadowsocks.Controller.Service
                 case JTokenType.Array:
                     return SearchJArray(t as JArray);
             }
+        }
+
+        private static bool IsServerObject(JObject o)
+        {
+            return new[] { "server", "server_port", "password", "method" }.All(i => o.ContainsKey(i));
         }
     }
 }

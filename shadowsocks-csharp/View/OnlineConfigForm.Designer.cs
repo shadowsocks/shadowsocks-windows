@@ -35,8 +35,8 @@
             this.UpdateButton = new System.Windows.Forms.Button();
             this.AddButton = new System.Windows.Forms.Button();
             this.DeleteButton = new System.Windows.Forms.Button();
-            this.UpdateAllButton = new System.Windows.Forms.Button();
             this.OkButton = new System.Windows.Forms.Button();
+            this.UpdateAllButton = new System.Windows.Forms.Button();
             this.CancelButton = new System.Windows.Forms.Button();
             this.tableLayoutPanel1.SuspendLayout();
             this.SuspendLayout();
@@ -77,6 +77,7 @@
             this.UrlListBox.Name = "UrlListBox";
             this.UrlListBox.Size = new System.Drawing.Size(482, 344);
             this.UrlListBox.TabIndex = 0;
+            this.UrlListBox.SelectedIndexChanged += new System.EventHandler(this.UrlListBox_SelectedIndexChanged);
             // 
             // label1
             // 
@@ -110,6 +111,7 @@
             this.UpdateButton.TabIndex = 3;
             this.UpdateButton.Text = "Update";
             this.UpdateButton.UseVisualStyleBackColor = true;
+            this.UpdateButton.Click += new System.EventHandler(this.UpdateButton_Click);
             // 
             // AddButton
             // 
@@ -137,19 +139,7 @@
             this.DeleteButton.TabIndex = 5;
             this.DeleteButton.Text = "Delete";
             this.DeleteButton.UseVisualStyleBackColor = true;
-            // 
-            // UpdateAllButton
-            // 
-            this.UpdateAllButton.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.UpdateAllButton.Location = new System.Drawing.Point(20, 428);
-            this.UpdateAllButton.Margin = new System.Windows.Forms.Padding(20, 5, 20, 5);
-            this.UpdateAllButton.MaximumSize = new System.Drawing.Size(0, 32);
-            this.UpdateAllButton.MinimumSize = new System.Drawing.Size(0, 32);
-            this.UpdateAllButton.Name = "UpdateAllButton";
-            this.UpdateAllButton.Size = new System.Drawing.Size(122, 32);
-            this.UpdateAllButton.TabIndex = 6;
-            this.UpdateAllButton.Text = "Update all";
-            this.UpdateAllButton.UseVisualStyleBackColor = true;
+            this.DeleteButton.Click += new System.EventHandler(this.DeleteButton_Click);
             // 
             // OkButton
             // 
@@ -163,6 +153,20 @@
             this.OkButton.TabIndex = 7;
             this.OkButton.Text = "OK";
             this.OkButton.UseVisualStyleBackColor = true;
+            // 
+            // UpdateAllButton
+            // 
+            this.UpdateAllButton.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.UpdateAllButton.Location = new System.Drawing.Point(20, 428);
+            this.UpdateAllButton.Margin = new System.Windows.Forms.Padding(20, 5, 20, 5);
+            this.UpdateAllButton.MaximumSize = new System.Drawing.Size(0, 32);
+            this.UpdateAllButton.MinimumSize = new System.Drawing.Size(0, 32);
+            this.UpdateAllButton.Name = "UpdateAllButton";
+            this.UpdateAllButton.Size = new System.Drawing.Size(122, 32);
+            this.UpdateAllButton.TabIndex = 6;
+            this.UpdateAllButton.Text = "Update all";
+            this.UpdateAllButton.UseVisualStyleBackColor = true;
+            this.UpdateAllButton.Click += new System.EventHandler(this.UpdateAllButton_Click);
             // 
             // CancelButton
             // 

@@ -39,6 +39,12 @@ namespace Shadowsocks.View
 
             if (idx >= UrlListBox.Items.Count) idx = 0;
             UrlListBox.SelectedIndex = idx;
+            SelectItem();
+        }
+
+        private void SelectItem()
+        {
+            UrlTextBox.Text = (string)UrlListBox.SelectedItem;
         }
 
         private bool ValidateUrl()
@@ -57,10 +63,11 @@ namespace Shadowsocks.View
 
         private bool Commit()
         {
-            if (!ValidateUrl()) return false;
-            
-            UrlListBox.Items[UrlListBox.SelectedIndex] = UrlTextBox.Text;
-            controller.SaveOnlineConfigSource(UrlListBox.Items.OfType<string>().Where(s=>!string.IsNullOrWhiteSpace(s)));
+            if (ValidateUrl())
+            {
+                UrlListBox.Items[UrlListBox.SelectedIndex] = UrlTextBox.Text;
+            }
+            controller.SaveOnlineConfigSource(UrlListBox.Items.OfType<string>().Where(s => !string.IsNullOrWhiteSpace(s)));
             LoadConfig();
             return true;
         }
@@ -71,6 +78,35 @@ namespace Shadowsocks.View
             UrlListBox.Items.Add("");
             UrlTextBox.Text = DefaultPrefix;
             UrlListBox.SelectedIndex = UrlListBox.Items.Count - 1;
+        }
+
+        private void UpdateButton_Click(object sender, EventArgs e)
+        {
+            // update content, also update online config
+            Commit();
+
+            _ = controller.UpdateOnlineConfig(UrlTextBox.Text);
+        }
+
+        private void UrlListBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (!UrlListBox.CanSelect)
+            {
+                return;
+            }
+            SelectItem();
+        }
+
+        private void DeleteButton_Click(object sender, EventArgs e)
+        {
+            int idx = UrlListBox.SelectedIndex;
+            UrlListBox.Items.RemoveAt(idx);
+            Commit();
+        }
+
+        private void UpdateAllButton_Click(object sender, EventArgs e)
+        {
+            _ = controller.UpdateAllOnlineConfig();
         }
     }
 }
