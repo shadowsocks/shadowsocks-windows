@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Net;
 using Newtonsoft.Json;
 using NLog;
 using Shadowsocks.Controller;
@@ -16,6 +17,9 @@ namespace Shadowsocks.Model
         public string version;
 
         public List<Server> configs;
+
+        public List<string> onlineConfigSource;
+
 
         // when strategy is set, index is ignored
         public string strategy;
@@ -77,6 +81,15 @@ namespace Shadowsocks.Model
                 return GetDefaultServer();
         }
 
+        public WebProxy WebProxy => enabled
+            ? new WebProxy(
+                    isIPv6Enabled
+                    ? $"[{IPAddress.IPv6Loopback}]"
+                    : IPAddress.Loopback.ToString(),
+                    localPort)
+            : null;
+
+
         public static void CheckServer(Server server)
         {
             CheckServer(server.server);
@@ -113,6 +126,9 @@ namespace Shadowsocks.Model
 
                 if (config.configs == null)
                     config.configs = new List<Server>();
+                if (config.onlineConfigSource == null)
+                    config.onlineConfigSource = new List<string>();
+
                 if (config.configs.Count == 0)
                     config.configs.Add(GetDefaultServer());
                 if (config.localPort == 0)

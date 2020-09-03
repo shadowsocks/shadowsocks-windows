@@ -29,6 +29,9 @@ namespace Shadowsocks.Model
         public int server_port;
         public string password;
         public string method;
+        
+
+
 
         // optional fields
         [DefaultValue("")]
@@ -43,7 +46,11 @@ namespace Shadowsocks.Model
         [DefaultValue("")]
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore, DefaultValueHandling = DefaultValueHandling.IgnoreAndPopulate)]
         public string remarks;
-        
+
+        [DefaultValue("")]
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore, DefaultValueHandling = DefaultValueHandling.IgnoreAndPopulate)]
+        public string group;
+
         public int timeout;
 
         public override int GetHashCode()

@@ -169,6 +169,7 @@
     <Compile Include="Controller\HotkeyReg.cs" />
     <Compile Include="Controller\LoggerExtension.cs" />
     <Compile Include="Controller\Service\GeositeUpdater.cs" />
+    <Compile Include="Controller\Service\OnlineConfigResolver.cs" />
     <Compile Include="Controller\Service\PACDaemon.cs" />
     <Compile Include="Controller\Service\IPCService.cs" />
     <Compile Include="Controller\System\ProtocolHandler.cs" />

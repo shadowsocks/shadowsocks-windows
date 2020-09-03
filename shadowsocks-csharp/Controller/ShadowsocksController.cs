@@ -25,7 +25,7 @@ namespace Shadowsocks.Controller
         // handle user actions
         // manipulates UI
         // interacts with low level logic
-
+        #region Members definition
         private Thread _ramThread;
         private Thread _trafficThread;
 
@@ -87,6 +87,7 @@ namespace Shadowsocks.Controller
 
         // Invoked when controller.Start();
         public event EventHandler<UpdatedEventArgs> ProgramUpdated;
+        #endregion
 
         public ShadowsocksController()
         {
@@ -102,6 +103,8 @@ namespace Shadowsocks.Controller
                 logger.Info($"Updated from {e.OldVersion} to {e.NewVersion}");
             };
         }
+
+        #region Basic
 
         public void Start(bool regHotkeys = true)
         {
@@ -120,207 +123,6 @@ namespace Shadowsocks.Controller
             {
                 HotkeyReg.RegAllHotkeys();
             }
-        }
-
-        protected void ReportError(Exception e)
-        {
-            Errored?.Invoke(this, new ErrorEventArgs(e));
-        }
-
-        public Server GetCurrentServer()
-        {
-            return _config.GetCurrentServer();
-        }
-
-        // always return copy
-        public Configuration GetConfigurationCopy()
-        {
-            return Configuration.Load();
-        }
-
-        // always return current instance
-        public Configuration GetCurrentConfiguration()
-        {
-            return _config;
-        }
-
-        public IList<IStrategy> GetStrategies()
-        {
-            return _strategyManager.GetStrategies();
-        }
-
-        public IStrategy GetCurrentStrategy()
-        {
-            foreach (var strategy in _strategyManager.GetStrategies())
-            {
-                if (strategy.ID == _config.strategy)
-                {
-                    return strategy;
-                }
-            }
-            return null;
-        }
-
-        public Server GetAServer(IStrategyCallerType type, IPEndPoint localIPEndPoint, EndPoint destEndPoint)
-        {
-            IStrategy strategy = GetCurrentStrategy();
-            if (strategy != null)
-            {
-                return strategy.GetAServer(type, localIPEndPoint, destEndPoint);
-            }
-            if (_config.index < 0)
-            {
-                _config.index = 0;
-            }
-            return GetCurrentServer();
-        }
-
-        public EndPoint GetPluginLocalEndPointIfConfigured(Server server)
-        {
-            var plugin = _pluginsByServer.GetOrAdd(
-                server,
-                x => Sip003Plugin.CreateIfConfigured(x, _config.showPluginOutput));
-
-            if (plugin == null)
-            {
-                return null;
-            }
-
-            try
-            {
-                if (plugin.StartIfNeeded())
-                {
-                    logger.Info(
-                        $"Started SIP003 plugin for {server.Identifier()} on {plugin.LocalEndPoint} - PID: {plugin.ProcessId}");
-                }
-            }
-            catch (Exception ex)
-            {
-                logger.Error("Failed to start SIP003 plugin: " + ex.Message);
-                throw;
-            }
-
-            return plugin.LocalEndPoint;
-        }
-
-        public void SaveServers(List<Server> servers, int localPort, bool portableMode)
-        {
-            _config.configs = servers;
-            _config.localPort = localPort;
-            _config.portableMode = portableMode;
-            Configuration.Save(_config);
-        }
-
-        public void SaveStrategyConfigurations(StatisticsStrategyConfiguration configuration)
-        {
-            StatisticsConfiguration = configuration;
-            StatisticsStrategyConfiguration.Save(configuration);
-        }
-
-        public bool AskAddServerBySSURL(string ssURL)
-        {
-            var dr = MessageBox.Show(I18N.GetString("Import from URL: {0} ?", ssURL), I18N.GetString("Shadowsocks"), MessageBoxButtons.YesNo);
-            if (dr == DialogResult.Yes)
-            {
-                if (AddServerBySSURL(ssURL))
-                {
-                    MessageBox.Show(I18N.GetString("Successfully imported from {0}", ssURL));
-                    return true;
-                }
-                else
-                {
-                    MessageBox.Show(I18N.GetString("Failed to import. Please check if the link is valid."));
-                }
-            }
-            return false;
-        }
-
-
-        public bool AddServerBySSURL(string ssURL)
-        {
-            try
-            {
-                if (ssURL.IsNullOrEmpty() || ssURL.IsWhiteSpace())
-                    return false;
-
-                var servers = Server.GetServers(ssURL);
-                if (servers == null || servers.Count == 0)
-                    return false;
-
-                foreach (var server in servers)
-                {
-                    _config.configs.Add(server);
-                }
-                _config.index = _config.configs.Count - 1;
-                SaveConfig(_config);
-                return true;
-            }
-            catch (Exception e)
-            {
-                logger.LogUsefulException(e);
-                return false;
-            }
-        }
-
-        public void ToggleEnable(bool enabled)
-        {
-            _config.enabled = enabled;
-            SaveConfig(_config);
-
-            EnableStatusChanged?.Invoke(this, new EventArgs());
-        }
-
-        public void ToggleGlobal(bool global)
-        {
-            _config.global = global;
-            SaveConfig(_config);
-
-            EnableGlobalChanged?.Invoke(this, new EventArgs());
-        }
-
-        public void ToggleShareOverLAN(bool enabled)
-        {
-            _config.shareOverLan = enabled;
-            SaveConfig(_config);
-
-            ShareOverLANStatusChanged?.Invoke(this, new EventArgs());
-        }
-
-        public void SaveProxy(ProxyConfig proxyConfig)
-        {
-            _config.proxy = proxyConfig;
-            SaveConfig(_config);
-        }
-
-        public void ToggleVerboseLogging(bool enabled)
-        {
-            _config.isVerboseLogging = enabled;
-            SaveConfig(_config);
-            NLogConfig.LoadConfiguration(); // reload nlog
-
-            VerboseLoggingStatusChanged?.Invoke(this, new EventArgs());
-        }
-
-        public void ToggleShowPluginOutput(bool enabled)
-        {
-            _config.showPluginOutput = enabled;
-            SaveConfig(_config);
-
-            ShowPluginOutputChanged?.Invoke(this, new EventArgs());
-        }
-
-        public void SelectServerIndex(int index)
-        {
-            _config.index = index;
-            _config.strategy = null;
-            SaveConfig(_config);
-        }
-
-        public void SelectStrategy(string strategyID)
-        {
-            _config.index = -1;
-            _config.strategy = strategyID;
-            SaveConfig(_config);
         }
 
         public void Stop()
@@ -344,129 +146,6 @@ namespace Shadowsocks.Controller
                 SystemProxy.Update(_config, true, null);
             }
             Encryption.RNG.Close();
-        }
-
-        private void StopPlugins()
-        {
-            foreach (var serverAndPlugin in _pluginsByServer)
-            {
-                serverAndPlugin.Value?.Dispose();
-            }
-            _pluginsByServer.Clear();
-        }
-
-        public void TouchPACFile()
-        {
-            string pacFilename = _pacDaemon.TouchPACFile();
-
-            PACFileReadyToOpen?.Invoke(this, new PathEventArgs() { Path = pacFilename });
-        }
-
-        public void TouchUserRuleFile()
-        {
-            string userRuleFilename = _pacDaemon.TouchUserRuleFile();
-
-            UserRuleFileReadyToOpen?.Invoke(this, new PathEventArgs() { Path = userRuleFilename });
-        }
-
-        public string GetServerURLForCurrentServer()
-        {
-            return GetCurrentServer().GetURL(_config.generateLegacyUrl);
-        }
-
-        public void UpdateStatisticsConfiguration(bool enabled)
-        {
-            if (availabilityStatistics != null)
-            {
-                availabilityStatistics.UpdateConfiguration(this);
-                _config.availabilityStatistics = enabled;
-                SaveConfig(_config);
-            }
-        }
-
-        public void SavePACUrl(string pacUrl)
-        {
-            _config.pacUrl = pacUrl;
-            SaveConfig(_config);
-
-            ConfigChanged?.Invoke(this, new EventArgs());
-        }
-
-        public void UseOnlinePAC(bool useOnlinePac)
-        {
-            _config.useOnlinePac = useOnlinePac;
-            SaveConfig(_config);
-
-            ConfigChanged?.Invoke(this, new EventArgs());
-        }
-
-        public void ToggleSecureLocalPac(bool enabled)
-        {
-            _config.secureLocalPac = enabled;
-            SaveConfig(_config);
-
-            ConfigChanged?.Invoke(this, new EventArgs());
-        }
-
-        public void ToggleCheckingUpdate(bool enabled)
-        {
-            _config.autoCheckUpdate = enabled;
-            Configuration.Save(_config);
-
-            ConfigChanged?.Invoke(this, new EventArgs());
-        }
-
-        public void ToggleCheckingPreRelease(bool enabled)
-        {
-            _config.checkPreRelease = enabled;
-            Configuration.Save(_config);
-            ConfigChanged?.Invoke(this, new EventArgs());
-        }
-
-        public void SaveLogViewerConfig(LogViewerConfig newConfig)
-        {
-            _config.logViewer = newConfig;
-            newConfig.SaveSize();
-            Configuration.Save(_config);
-
-            ConfigChanged?.Invoke(this, new EventArgs());
-        }
-
-        public void SaveHotkeyConfig(HotkeyConfig newConfig)
-        {
-            _config.hotkey = newConfig;
-            SaveConfig(_config);
-
-            ConfigChanged?.Invoke(this, new EventArgs());
-        }
-
-        public void UpdateLatency(object sender, SSTCPConnectedEventArgs args)
-        {
-            GetCurrentStrategy()?.UpdateLatency(args.server, args.latency);
-            if (_config.availabilityStatistics)
-            {
-                availabilityStatistics.UpdateLatency(args.server, (int)args.latency.TotalMilliseconds);
-            }
-        }
-
-        public void UpdateInboundCounter(object sender, SSTransmitEventArgs args)
-        {
-            GetCurrentStrategy()?.UpdateLastRead(args.server);
-            Interlocked.Add(ref _inboundCounter, args.length);
-            if (_config.availabilityStatistics)
-            {
-                availabilityStatistics.UpdateInboundCounter(args.server, args.length);
-            }
-        }
-
-        public void UpdateOutboundCounter(object sender, SSTransmitEventArgs args)
-        {
-            GetCurrentStrategy()?.UpdateLastWrite(args.server);
-            Interlocked.Add(ref _outboundCounter, args.length);
-            if (_config.availabilityStatistics)
-            {
-                availabilityStatistics.UpdateOutboundCounter(args.server, args.length);
-            }
         }
 
         protected void Reload()
@@ -549,22 +228,105 @@ namespace Shadowsocks.Controller
             Utils.ReleaseMemory(true);
         }
 
-        private void StartPlugin()
-        {
-            var server = _config.GetCurrentServer();
-            GetPluginLocalEndPointIfConfigured(server);
-        }
-
         protected void SaveConfig(Configuration newConfig)
         {
             Configuration.Save(newConfig);
             Reload();
         }
 
+        protected void ReportError(Exception e)
+        {
+            Errored?.Invoke(this, new ErrorEventArgs(e));
+        }
+
+        public Server GetCurrentServer()
+        {
+            return _config.GetCurrentServer();
+        }
+
+        // always return copy
+        public Configuration GetConfigurationCopy()
+        {
+            return Configuration.Load();
+        }
+
+        // always return current instance
+        public Configuration GetCurrentConfiguration()
+        {
+            return _config;
+        }
+
+        public Server GetAServer(IStrategyCallerType type, IPEndPoint localIPEndPoint, EndPoint destEndPoint)
+        {
+            IStrategy strategy = GetCurrentStrategy();
+            if (strategy != null)
+            {
+                return strategy.GetAServer(type, localIPEndPoint, destEndPoint);
+            }
+            if (_config.index < 0)
+            {
+                _config.index = 0;
+            }
+            return GetCurrentServer();
+        }
+
+        public void SaveServers(List<Server> servers, int localPort, bool portableMode)
+        {
+            _config.configs = servers;
+            _config.localPort = localPort;
+            _config.portableMode = portableMode;
+            Configuration.Save(_config);
+        }
+
+        public void SelectServerIndex(int index)
+        {
+            _config.index = index;
+            _config.strategy = null;
+            SaveConfig(_config);
+        }
+
+        public void ToggleShareOverLAN(bool enabled)
+        {
+            _config.shareOverLan = enabled;
+            SaveConfig(_config);
+
+            ShareOverLANStatusChanged?.Invoke(this, new EventArgs());
+        }
+
+        #endregion
+
+        #region OS Proxy
+
+        public void ToggleEnable(bool enabled)
+        {
+            _config.enabled = enabled;
+            SaveConfig(_config);
+
+            EnableStatusChanged?.Invoke(this, new EventArgs());
+        }
+
+        public void ToggleGlobal(bool global)
+        {
+            _config.global = global;
+            SaveConfig(_config);
+
+            EnableGlobalChanged?.Invoke(this, new EventArgs());
+        }
+
+        public void SaveProxy(ProxyConfig proxyConfig)
+        {
+            _config.proxy = proxyConfig;
+            SaveConfig(_config);
+        }
+
         private void UpdateSystemProxy()
         {
             SystemProxy.Update(_config, false, _pacServer);
         }
+
+        #endregion
+
+        #region PAC
 
         private void PacDaemon_PACFileChanged(object sender, EventArgs e)
         {
@@ -592,6 +354,272 @@ namespace Shadowsocks.Controller
         {
             Clipboard.SetDataObject(_pacServer.PacUrl);
         }
+
+        public void SavePACUrl(string pacUrl)
+        {
+            _config.pacUrl = pacUrl;
+            SaveConfig(_config);
+
+            ConfigChanged?.Invoke(this, new EventArgs());
+        }
+
+        public void UseOnlinePAC(bool useOnlinePac)
+        {
+            _config.useOnlinePac = useOnlinePac;
+            SaveConfig(_config);
+
+            ConfigChanged?.Invoke(this, new EventArgs());
+        }
+
+        public void TouchPACFile()
+        {
+            string pacFilename = _pacDaemon.TouchPACFile();
+
+            PACFileReadyToOpen?.Invoke(this, new PathEventArgs() { Path = pacFilename });
+        }
+
+        public void TouchUserRuleFile()
+        {
+            string userRuleFilename = _pacDaemon.TouchUserRuleFile();
+
+            UserRuleFileReadyToOpen?.Invoke(this, new PathEventArgs() { Path = userRuleFilename });
+        }
+
+        public void ToggleSecureLocalPac(bool enabled)
+        {
+            _config.secureLocalPac = enabled;
+            SaveConfig(_config);
+
+            ConfigChanged?.Invoke(this, new EventArgs());
+        }
+
+        #endregion
+
+        #region  SIP002
+
+        public bool AskAddServerBySSURL(string ssURL)
+        {
+            var dr = MessageBox.Show(I18N.GetString("Import from URL: {0} ?", ssURL), I18N.GetString("Shadowsocks"), MessageBoxButtons.YesNo);
+            if (dr == DialogResult.Yes)
+            {
+                if (AddServerBySSURL(ssURL))
+                {
+                    MessageBox.Show(I18N.GetString("Successfully imported from {0}", ssURL));
+                    return true;
+                }
+                else
+                {
+                    MessageBox.Show(I18N.GetString("Failed to import. Please check if the link is valid."));
+                }
+            }
+            return false;
+        }
+
+        public bool AddServerBySSURL(string ssURL)
+        {
+            try
+            {
+                if (ssURL.IsNullOrEmpty() || ssURL.IsWhiteSpace())
+                    return false;
+
+                var servers = Server.GetServers(ssURL);
+                if (servers == null || servers.Count == 0)
+                    return false;
+
+                foreach (var server in servers)
+                {
+                    _config.configs.Add(server);
+                }
+                _config.index = _config.configs.Count - 1;
+                SaveConfig(_config);
+                return true;
+            }
+            catch (Exception e)
+            {
+                logger.LogUsefulException(e);
+                return false;
+            }
+        }
+
+        public string GetServerURLForCurrentServer()
+        {
+            return GetCurrentServer().GetURL(_config.generateLegacyUrl);
+        }
+
+        #endregion
+
+        #region Misc
+        
+        public void ToggleVerboseLogging(bool enabled)
+        {
+            _config.isVerboseLogging = enabled;
+            SaveConfig(_config);
+            NLogConfig.LoadConfiguration(); // reload nlog
+
+            VerboseLoggingStatusChanged?.Invoke(this, new EventArgs());
+        }
+
+        public void ToggleCheckingUpdate(bool enabled)
+        {
+            _config.autoCheckUpdate = enabled;
+            Configuration.Save(_config);
+
+            ConfigChanged?.Invoke(this, new EventArgs());
+        }
+
+        public void ToggleCheckingPreRelease(bool enabled)
+        {
+            _config.checkPreRelease = enabled;
+            Configuration.Save(_config);
+            ConfigChanged?.Invoke(this, new EventArgs());
+        }
+
+        public void SaveLogViewerConfig(LogViewerConfig newConfig)
+        {
+            _config.logViewer = newConfig;
+            newConfig.SaveSize();
+            Configuration.Save(_config);
+
+            ConfigChanged?.Invoke(this, new EventArgs());
+        }
+
+        public void SaveHotkeyConfig(HotkeyConfig newConfig)
+        {
+            _config.hotkey = newConfig;
+            SaveConfig(_config);
+
+            ConfigChanged?.Invoke(this, new EventArgs());
+        }
+        
+        #endregion
+
+        #region Statistic
+
+        public void SelectStrategy(string strategyID)
+        {
+            _config.index = -1;
+            _config.strategy = strategyID;
+            SaveConfig(_config);
+        }
+
+        public void SaveStrategyConfigurations(StatisticsStrategyConfiguration configuration)
+        {
+            StatisticsConfiguration = configuration;
+            StatisticsStrategyConfiguration.Save(configuration);
+        }
+
+        public IList<IStrategy> GetStrategies()
+        {
+            return _strategyManager.GetStrategies();
+        }
+
+        public IStrategy GetCurrentStrategy()
+        {
+            foreach (var strategy in _strategyManager.GetStrategies())
+            {
+                if (strategy.ID == _config.strategy)
+                {
+                    return strategy;
+                }
+            }
+            return null;
+        }
+
+        public void UpdateStatisticsConfiguration(bool enabled)
+        {
+            if (availabilityStatistics != null)
+            {
+                availabilityStatistics.UpdateConfiguration(this);
+                _config.availabilityStatistics = enabled;
+                SaveConfig(_config);
+            }
+        }
+
+        public void UpdateLatency(object sender, SSTCPConnectedEventArgs args)
+        {
+            GetCurrentStrategy()?.UpdateLatency(args.server, args.latency);
+            if (_config.availabilityStatistics)
+            {
+                availabilityStatistics.UpdateLatency(args.server, (int)args.latency.TotalMilliseconds);
+            }
+        }
+
+        public void UpdateInboundCounter(object sender, SSTransmitEventArgs args)
+        {
+            GetCurrentStrategy()?.UpdateLastRead(args.server);
+            Interlocked.Add(ref _inboundCounter, args.length);
+            if (_config.availabilityStatistics)
+            {
+                availabilityStatistics.UpdateInboundCounter(args.server, args.length);
+            }
+        }
+
+        public void UpdateOutboundCounter(object sender, SSTransmitEventArgs args)
+        {
+            GetCurrentStrategy()?.UpdateLastWrite(args.server);
+            Interlocked.Add(ref _outboundCounter, args.length);
+            if (_config.availabilityStatistics)
+            {
+                availabilityStatistics.UpdateOutboundCounter(args.server, args.length);
+            }
+        }
+
+        #endregion
+
+        #region SIP003
+        
+        private void StartPlugin()
+        {
+            var server = _config.GetCurrentServer();
+            GetPluginLocalEndPointIfConfigured(server);
+        }
+
+        private void StopPlugins()
+        {
+            foreach (var serverAndPlugin in _pluginsByServer)
+            {
+                serverAndPlugin.Value?.Dispose();
+            }
+            _pluginsByServer.Clear();
+        }
+
+        public EndPoint GetPluginLocalEndPointIfConfigured(Server server)
+        {
+            var plugin = _pluginsByServer.GetOrAdd(
+                server,
+                x => Sip003Plugin.CreateIfConfigured(x, _config.showPluginOutput));
+
+            if (plugin == null)
+            {
+                return null;
+            }
+
+            try
+            {
+                if (plugin.StartIfNeeded())
+                {
+                    logger.Info(
+                        $"Started SIP003 plugin for {server.Identifier()} on {plugin.LocalEndPoint} - PID: {plugin.ProcessId}");
+                }
+            }
+            catch (Exception ex)
+            {
+                logger.Error("Failed to start SIP003 plugin: " + ex.Message);
+                throw;
+            }
+
+            return plugin.LocalEndPoint;
+        }
+
+        public void ToggleShowPluginOutput(bool enabled)
+        {
+            _config.showPluginOutput = enabled;
+            SaveConfig(_config);
+
+            ShowPluginOutputChanged?.Invoke(this, new EventArgs());
+        }
+
+        #endregion
 
         #region Memory Management
 
