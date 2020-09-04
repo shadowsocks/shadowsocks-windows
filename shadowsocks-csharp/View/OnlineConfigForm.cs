@@ -91,15 +91,19 @@ namespace Shadowsocks.View
 
         private async void UpdateButton_Click(object sender, EventArgs e)
         {
+            string old = (string)UrlListBox.SelectedItem;
             // update content, also update online config
             Commit();
+            string current = (string)UrlListBox.SelectedItem;
             if (UrlListBox.Items.Count == 0) return;
             tableLayoutPanel1.Enabled = false;
-            bool ok = await controller.UpdateOnlineConfig((string)UrlListBox.SelectedItem);
+            bool ok = await controller.UpdateOnlineConfig(current);
             if (!ok)
             {
                 MessageBox.Show(I18N.GetString("online config failed to update"));
+                return;
             }
+            if (old != current) controller.RemoveOnlineConfig(old);
             tableLayoutPanel1.Enabled = true;
         }
 
