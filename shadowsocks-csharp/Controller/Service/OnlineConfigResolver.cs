@@ -26,35 +26,21 @@ namespace Shadowsocks.Controller.Service
                 httpClientHandler.Proxy = proxy;
             }
 
-            try
+            _ = Task.Delay(2000).ContinueWith(_ => httpClient.CancelPendingRequests());
+            string str = await httpClient.GetStringAsync(url);
+
+            var ret = Get(str);
+            foreach (var item in ret)
             {
-                string str = await httpClient.GetStringAsync(url);
-                var ret = Get(str);
-                foreach (var item in ret)
-                {
-                    item.group = url;
-                }
-                return ret;
+                item.group = url;
             }
-            catch (Exception e)
-            {
-                logger.LogUsefulException(e);
-                return new List<Server>();
-            }
+            return ret;
         }
 
         public static List<Server> Get(string json)
         {
-            try
-            {
-                var t = JToken.Parse(json);
-                return SearchJToken(t).ToList();
-            }
-            catch (Exception e)
-            {
-                logger.LogUsefulException(e);
-                return new List<Server>();
-            }
+            var t = JToken.Parse(json);
+            return SearchJToken(t).ToList();
         }
 
         private static IEnumerable<Server> SearchJArray(JArray a)

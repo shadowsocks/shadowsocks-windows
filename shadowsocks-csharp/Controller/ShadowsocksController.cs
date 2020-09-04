@@ -688,38 +688,70 @@ namespace Shadowsocks.Controller
 
         #region SIP008
 
-        public async Task UpdateOnlineConfig(string url)
+
+        public async Task<int> UpdateOnlineConfigInternal(string url)
         {
-            var selected = GetCurrentServer();
             var onlineServer = await OnlineConfigResolver.GetOnline(url, _config.WebProxy);
             _config.configs = Configuration.SortByOnlineConfig(
                 _config.configs
                 .Where(c => c.group != url)
                 .Concat(onlineServer)
                 );
-            _config.index = _config.configs.IndexOf(selected);
-            SaveConfig(_config);
+            logger.Info($"updated {onlineServer.Count} server from {url}");
+            return onlineServer.Count;
         }
 
-        public async Task UpdateAllOnlineConfig()
+        public async Task<bool> UpdateOnlineConfig(string url)
         {
             var selected = GetCurrentServer();
-            var r = await Task.WhenAll(
-                _config.onlineConfigSource.Select(url => OnlineConfigResolver.GetOnline(url, _config.WebProxy))
-                );
-            var results = r.SelectMany(s => s);
-            _config.configs = Configuration.SortByOnlineConfig(
-                _config.configs
-                .Where(c => string.IsNullOrEmpty(c.group))
-                .Concat(r.SelectMany(s => s))
-                );
+            try
+            {
+                int count = await UpdateOnlineConfigInternal(url);
+            }
+            catch (Exception e)
+            {
+                logger.LogUsefulException(e);
+                return false;
+            }
             _config.index = _config.configs.IndexOf(selected);
             SaveConfig(_config);
+            return true;
+        }
+
+        public async Task<int> UpdateAllOnlineConfig()
+        {
+            var selected = GetCurrentServer();
+            int failCount = 0;
+            foreach (var url in _config.onlineConfigSource)
+            {
+                try
+                {
+                    await UpdateOnlineConfigInternal(url);
+                }
+                catch (Exception e)
+                {
+                    logger.LogUsefulException(e);
+                    failCount++;
+                }
+            }
+
+            _config.index = _config.configs.IndexOf(selected);
+            SaveConfig(_config);
+            return failCount;
         }
 
         public void SaveOnlineConfigSource(IEnumerable<string> vs)
         {
             _config.onlineConfigSource = vs.ToList();
+            SaveConfig(_config);
+        }
+
+        public void RemoveOnlineConfig(string url)
+        {
+            _config.onlineConfigSource.RemoveAll(v => v == url);
+            _config.configs = Configuration.SortByOnlineConfig(
+                _config.configs.Where(c => c.group != url)
+                );
             SaveConfig(_config);
         }
 

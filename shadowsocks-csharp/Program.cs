@@ -123,7 +123,14 @@ namespace Shadowsocks
             HotKeys.Init(MainController);
             MainController.Start();
 
-            #region IPC Handler and Arguement Process
+            // Update online config 
+            Task.Run(async () =>
+            {
+                await Task.Delay(10 * 1000);
+                await MainController.UpdateAllOnlineConfig();
+            });
+
+#region IPC Handler and Arguement Process
             IPCService ipcService = new IPCService();
             Task.Run(() => ipcService.RunServer());
             ipcService.OpenUrlRequested += (_1, e) => MainController.AskAddServerBySSURL(e.Url);
@@ -132,7 +139,7 @@ namespace Shadowsocks
             {
                 MainController.AskAddServerBySSURL(Options.OpenUrl);
             }
-            #endregion
+#endregion
             
             Application.Run();
 

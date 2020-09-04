@@ -1,14 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
-using System.Drawing;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using Shadowsocks.Controller;
 using Shadowsocks.Model;
+using Shadowsocks.Properties;
 
 namespace Shadowsocks.View
 {
@@ -17,13 +13,13 @@ namespace Shadowsocks.View
         private ShadowsocksController controller;
         private Configuration config;
 
-        private const string DefaultPrefix = "http://www.baidu.com/";
-
         public OnlineConfigForm(ShadowsocksController controller)
         {
             this.controller = controller;
             InitializeComponent();
             LoadConfig();
+            Icon = System.Drawing.Icon.FromHandle(Resources.ssw128.GetHicon());
+            I18N.TranslateForm(this);
         }
 
         private void LoadConfig()
@@ -38,6 +34,8 @@ namespace Shadowsocks.View
             }
 
             if (idx >= UrlListBox.Items.Count) idx = 0;
+            if (idx < 0 && UrlListBox.Items.Count > 0) idx = 0;
+            if (UrlListBox.Items.Count == 0) return;
             UrlListBox.SelectedIndex = idx;
             SelectItem();
         }
@@ -53,6 +51,7 @@ namespace Shadowsocks.View
             {
                 var scheme = new Uri(UrlTextBox.Text).Scheme;
                 if (scheme != "http" && scheme != "https") return false;
+                if (UrlListBox.Items.OfType<string>().Contains(UrlTextBox.Text)) return false;
             }
             catch
             {
@@ -61,31 +60,47 @@ namespace Shadowsocks.View
             return true;
         }
 
-        private bool Commit()
+        private void Commit()
         {
+            if (UrlListBox.SelectedIndex < 0) return;
+            if ((string)UrlListBox.SelectedItem == UrlTextBox.Text)
+            {
+                LoadConfig();
+                return;
+            }
+
             if (ValidateUrl())
             {
+
                 UrlListBox.Items[UrlListBox.SelectedIndex] = UrlTextBox.Text;
             }
-            controller.SaveOnlineConfigSource(UrlListBox.Items.OfType<string>().Where(s => !string.IsNullOrWhiteSpace(s)));
+            controller.SaveOnlineConfigSource(UrlListBox.Items.OfType<string>().Where(s => !string.IsNullOrWhiteSpace(s)).Distinct());
             LoadConfig();
-            return true;
+            return;
         }
 
         private void AddButton_Click(object sender, EventArgs e)
         {
+            if (string.IsNullOrWhiteSpace(UrlTextBox.Text)) return;
             Commit();
+            // string txt = UrlTextBox.Text;
             UrlListBox.Items.Add("");
-            UrlTextBox.Text = DefaultPrefix;
             UrlListBox.SelectedIndex = UrlListBox.Items.Count - 1;
+            UrlTextBox.Text = "";
         }
 
-        private void UpdateButton_Click(object sender, EventArgs e)
+        private async void UpdateButton_Click(object sender, EventArgs e)
         {
             // update content, also update online config
             Commit();
-
-            _ = controller.UpdateOnlineConfig(UrlTextBox.Text);
+            if (UrlListBox.Items.Count == 0) return;
+            tableLayoutPanel1.Enabled = false;
+            bool ok = await controller.UpdateOnlineConfig((string)UrlListBox.SelectedItem);
+            if (!ok)
+            {
+                MessageBox.Show(I18N.GetString("online config failed to update"));
+            }
+            tableLayoutPanel1.Enabled = true;
         }
 
         private void UrlListBox_SelectedIndexChanged(object sender, EventArgs e)
@@ -99,14 +114,36 @@ namespace Shadowsocks.View
 
         private void DeleteButton_Click(object sender, EventArgs e)
         {
-            int idx = UrlListBox.SelectedIndex;
-            UrlListBox.Items.RemoveAt(idx);
-            Commit();
+            if (UrlListBox.Items.Count == 0) return;
+            string url = (string)UrlListBox.SelectedItem;
+            if (!string.IsNullOrWhiteSpace(url))
+            {
+                controller.RemoveOnlineConfig(url);
+            }
+            LoadConfig();
         }
 
-        private void UpdateAllButton_Click(object sender, EventArgs e)
+        private async void UpdateAllButton_Click(object sender, EventArgs e)
         {
-            _ = controller.UpdateAllOnlineConfig();
+            if (UrlListBox.Items.Count == 0) return;
+            tableLayoutPanel1.Enabled = false;
+            int fail = await controller.UpdateAllOnlineConfig();
+            if (fail > 0)
+            {
+                MessageBox.Show(I18N.GetString("{0} online config failed to update", fail));
+            }
+            tableLayoutPanel1.Enabled = true;
+        }
+
+        private void OkButton_Click(object sender, EventArgs e)
+        {
+            Commit();
+            Close();
+        }
+
+        private void CancelButton_Click(object sender, EventArgs e)
+        {
+            Close();
         }
     }
 }
