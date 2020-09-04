@@ -107,9 +107,6 @@ namespace Shadowsocks.View
             InitializeComponent();
             EncryptionSelect.Items.AddRange(EncryptionMethod.AllMethods);
 
-            // a dirty hack
-            ServersListBox.Dock = DockStyle.Fill;
-            tableLayoutPanel5.Dock = DockStyle.Fill;
             PerformLayout();
 
             UpdateTexts();
@@ -412,6 +409,8 @@ namespace Shadowsocks.View
 
             RemarksTextBox.Text = server.remarks;
             TimeoutTextBox.Text = server.timeout.ToString();
+
+            GroupTextBox.Text = server.group;
 
             isChange = false;
         }
