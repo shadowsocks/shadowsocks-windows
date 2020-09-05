@@ -59,12 +59,13 @@
             this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 0);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
+            this.tableLayoutPanel1.Padding = new System.Windows.Forms.Padding(3);
             this.tableLayoutPanel1.RowCount = 4;
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(488, 465);
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(482, 453);
             this.tableLayoutPanel1.TabIndex = 0;
             // 
             // UrlListBox
@@ -73,9 +74,10 @@
             this.UrlListBox.Dock = System.Windows.Forms.DockStyle.Fill;
             this.UrlListBox.FormattingEnabled = true;
             this.UrlListBox.ItemHeight = 15;
-            this.UrlListBox.Location = new System.Drawing.Point(3, 3);
+            this.UrlListBox.Location = new System.Drawing.Point(13, 13);
+            this.UrlListBox.Margin = new System.Windows.Forms.Padding(10);
             this.UrlListBox.Name = "UrlListBox";
-            this.UrlListBox.Size = new System.Drawing.Size(482, 344);
+            this.UrlListBox.Size = new System.Drawing.Size(456, 334);
             this.UrlListBox.TabIndex = 0;
             this.UrlListBox.SelectedIndexChanged += new System.EventHandler(this.UrlListBox_SelectedIndexChanged);
             // 
@@ -83,31 +85,32 @@
             // 
             this.label1.AutoSize = true;
             this.label1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label1.Location = new System.Drawing.Point(3, 350);
+            this.label1.Location = new System.Drawing.Point(6, 357);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(156, 31);
+            this.label1.Size = new System.Drawing.Size(152, 31);
             this.label1.TabIndex = 1;
             this.label1.Text = "Online config URL";
-            this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
             // UrlTextBox
             // 
             this.tableLayoutPanel1.SetColumnSpan(this.UrlTextBox, 2);
             this.UrlTextBox.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.UrlTextBox.Location = new System.Drawing.Point(165, 353);
+            this.UrlTextBox.Location = new System.Drawing.Point(164, 360);
+            this.UrlTextBox.Margin = new System.Windows.Forms.Padding(3, 3, 15, 3);
             this.UrlTextBox.Name = "UrlTextBox";
-            this.UrlTextBox.Size = new System.Drawing.Size(320, 25);
+            this.UrlTextBox.Size = new System.Drawing.Size(300, 25);
             this.UrlTextBox.TabIndex = 2;
             // 
             // UpdateButton
             // 
             this.UpdateButton.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.UpdateButton.Location = new System.Drawing.Point(20, 386);
-            this.UpdateButton.Margin = new System.Windows.Forms.Padding(20, 5, 20, 5);
-            this.UpdateButton.MaximumSize = new System.Drawing.Size(0, 32);
-            this.UpdateButton.MinimumSize = new System.Drawing.Size(0, 32);
+            this.UpdateButton.Location = new System.Drawing.Point(23, 391);
+            this.UpdateButton.Margin = new System.Windows.Forms.Padding(20, 3, 20, 3);
+            this.UpdateButton.MaximumSize = new System.Drawing.Size(0, 25);
+            this.UpdateButton.MinimumSize = new System.Drawing.Size(0, 25);
             this.UpdateButton.Name = "UpdateButton";
-            this.UpdateButton.Size = new System.Drawing.Size(122, 32);
+            this.UpdateButton.Size = new System.Drawing.Size(118, 25);
             this.UpdateButton.TabIndex = 3;
             this.UpdateButton.Text = "Update";
             this.UpdateButton.UseVisualStyleBackColor = true;
@@ -116,12 +119,12 @@
             // AddButton
             // 
             this.AddButton.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.AddButton.Location = new System.Drawing.Point(182, 386);
-            this.AddButton.Margin = new System.Windows.Forms.Padding(20, 5, 20, 5);
-            this.AddButton.MaximumSize = new System.Drawing.Size(0, 32);
-            this.AddButton.MinimumSize = new System.Drawing.Size(0, 32);
+            this.AddButton.Location = new System.Drawing.Point(181, 391);
+            this.AddButton.Margin = new System.Windows.Forms.Padding(20, 3, 20, 3);
+            this.AddButton.MaximumSize = new System.Drawing.Size(0, 25);
+            this.AddButton.MinimumSize = new System.Drawing.Size(0, 25);
             this.AddButton.Name = "AddButton";
-            this.AddButton.Size = new System.Drawing.Size(122, 32);
+            this.AddButton.Size = new System.Drawing.Size(118, 25);
             this.AddButton.TabIndex = 4;
             this.AddButton.Text = "Add";
             this.AddButton.UseVisualStyleBackColor = true;
@@ -130,12 +133,12 @@
             // DeleteButton
             // 
             this.DeleteButton.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.DeleteButton.Location = new System.Drawing.Point(344, 386);
-            this.DeleteButton.Margin = new System.Windows.Forms.Padding(20, 5, 20, 5);
-            this.DeleteButton.MaximumSize = new System.Drawing.Size(0, 32);
-            this.DeleteButton.MinimumSize = new System.Drawing.Size(0, 32);
+            this.DeleteButton.Location = new System.Drawing.Point(339, 391);
+            this.DeleteButton.Margin = new System.Windows.Forms.Padding(20, 3, 20, 3);
+            this.DeleteButton.MaximumSize = new System.Drawing.Size(0, 25);
+            this.DeleteButton.MinimumSize = new System.Drawing.Size(0, 25);
             this.DeleteButton.Name = "DeleteButton";
-            this.DeleteButton.Size = new System.Drawing.Size(124, 32);
+            this.DeleteButton.Size = new System.Drawing.Size(120, 25);
             this.DeleteButton.TabIndex = 5;
             this.DeleteButton.Text = "Delete";
             this.DeleteButton.UseVisualStyleBackColor = true;
@@ -144,12 +147,12 @@
             // OkButton
             // 
             this.OkButton.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.OkButton.Location = new System.Drawing.Point(182, 428);
-            this.OkButton.Margin = new System.Windows.Forms.Padding(20, 5, 20, 5);
-            this.OkButton.MaximumSize = new System.Drawing.Size(0, 32);
-            this.OkButton.MinimumSize = new System.Drawing.Size(0, 32);
+            this.OkButton.Location = new System.Drawing.Point(181, 422);
+            this.OkButton.Margin = new System.Windows.Forms.Padding(20, 3, 20, 3);
+            this.OkButton.MaximumSize = new System.Drawing.Size(0, 25);
+            this.OkButton.MinimumSize = new System.Drawing.Size(0, 25);
             this.OkButton.Name = "OkButton";
-            this.OkButton.Size = new System.Drawing.Size(122, 32);
+            this.OkButton.Size = new System.Drawing.Size(118, 25);
             this.OkButton.TabIndex = 7;
             this.OkButton.Text = "OK";
             this.OkButton.UseVisualStyleBackColor = true;
@@ -158,12 +161,12 @@
             // UpdateAllButton
             // 
             this.UpdateAllButton.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.UpdateAllButton.Location = new System.Drawing.Point(20, 428);
-            this.UpdateAllButton.Margin = new System.Windows.Forms.Padding(20, 5, 20, 5);
-            this.UpdateAllButton.MaximumSize = new System.Drawing.Size(0, 32);
-            this.UpdateAllButton.MinimumSize = new System.Drawing.Size(0, 32);
+            this.UpdateAllButton.Location = new System.Drawing.Point(23, 422);
+            this.UpdateAllButton.Margin = new System.Windows.Forms.Padding(20, 3, 20, 3);
+            this.UpdateAllButton.MaximumSize = new System.Drawing.Size(0, 25);
+            this.UpdateAllButton.MinimumSize = new System.Drawing.Size(0, 25);
             this.UpdateAllButton.Name = "UpdateAllButton";
-            this.UpdateAllButton.Size = new System.Drawing.Size(122, 32);
+            this.UpdateAllButton.Size = new System.Drawing.Size(118, 25);
             this.UpdateAllButton.TabIndex = 6;
             this.UpdateAllButton.Text = "Update all";
             this.UpdateAllButton.UseVisualStyleBackColor = true;
@@ -172,12 +175,12 @@
             // CancelButton
             // 
             this.CancelButton.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.CancelButton.Location = new System.Drawing.Point(344, 428);
-            this.CancelButton.Margin = new System.Windows.Forms.Padding(20, 5, 20, 5);
-            this.CancelButton.MaximumSize = new System.Drawing.Size(0, 32);
-            this.CancelButton.MinimumSize = new System.Drawing.Size(0, 32);
+            this.CancelButton.Location = new System.Drawing.Point(339, 422);
+            this.CancelButton.Margin = new System.Windows.Forms.Padding(20, 3, 20, 3);
+            this.CancelButton.MaximumSize = new System.Drawing.Size(0, 25);
+            this.CancelButton.MinimumSize = new System.Drawing.Size(0, 25);
             this.CancelButton.Name = "CancelButton";
-            this.CancelButton.Size = new System.Drawing.Size(124, 32);
+            this.CancelButton.Size = new System.Drawing.Size(120, 25);
             this.CancelButton.TabIndex = 8;
             this.CancelButton.Text = "Cancel";
             this.CancelButton.UseVisualStyleBackColor = true;
@@ -187,8 +190,10 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(488, 465);
+            this.ClientSize = new System.Drawing.Size(482, 453);
             this.Controls.Add(this.tableLayoutPanel1);
+            this.MinimizeBox = false;
+            this.MinimumSize = new System.Drawing.Size(400, 400);
             this.Name = "OnlineConfigForm";
             this.Text = "Online config";
             this.tableLayoutPanel1.ResumeLayout(false);
