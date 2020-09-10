@@ -82,11 +82,10 @@ namespace Shadowsocks.View
         private void AddButton_Click(object sender, EventArgs e)
         {
             if (string.IsNullOrWhiteSpace(UrlTextBox.Text)) return;
-            Commit();
-            // string txt = UrlTextBox.Text;
-            UrlListBox.Items.Add("");
+            UrlListBox.Items.Add(UrlTextBox.Text);
             UrlListBox.SelectedIndex = UrlListBox.Items.Count - 1;
             UrlTextBox.Text = "";
+            Commit();
         }
 
         private async void UpdateButton_Click(object sender, EventArgs e)
@@ -101,6 +100,7 @@ namespace Shadowsocks.View
             if (!ok)
             {
                 MessageBox.Show(I18N.GetString("online config failed to update"));
+                tableLayoutPanel1.Enabled = true;
                 return;
             }
             if (old != current) controller.RemoveOnlineConfig(old);
