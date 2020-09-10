@@ -1,4 +1,18 @@
-4.1.10.0 2020-4-11
+4.2.0.0 2020-09-10
+- Update TCPHandler.lastActivity (#2858)
+- Add Franch translation (#2861)
+- New option for ss:// URL association (#2855)
+- Updated Korean Language (#2871)
+- Decouple statistic and TCPRelay (#2872)
+- Fix nLogConfig NullReferenceExceltion (#2887)
+- Use v2ray GeoSsite to replace GFWList (#2875)
+- Optimize the updater and downloader (#2910)
+- Update SIP002 (#2904)
+- Update Japanese translations
+- Fix improperly parsed remark section (#2935)
+- Other minor bug fixes and improvements
+
+4.1.10.0 2020-04-11
 - Fix NLog config file issue (#2841, #2846)
 - Tweak log level
 
