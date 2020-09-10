@@ -15,7 +15,7 @@ namespace Shadowsocks.Controller
         private static Logger logger = LogManager.GetCurrentClassLogger();
 
         private const string UpdateURL = "https://api.github.com/repos/shadowsocks/shadowsocks-windows/releases";
-        private const string UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.121 Safari/537.36";
+        private const string UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.83 Safari/537.36";
 
         private Configuration config;
         public bool NewVersionFound;
