@@ -4,7 +4,6 @@ using Shadowsocks.Util;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -15,10 +14,6 @@ namespace Shadowsocks.Controller
         const string ssURLRegKey = @"SOFTWARE\Classes\ss";
 
         private static Logger logger = LogManager.GetCurrentClassLogger();
-
-        // Don't use Application.ExecutablePath
-        // see https://stackoverflow.com/questions/12945805/odd-c-sharp-path-issue
-        private static readonly string ExecutablePath = Assembly.GetEntryAssembly().Location;
 
         public static bool Set(bool enabled)
         {
@@ -37,7 +32,7 @@ namespace Shadowsocks.Controller
                     ssURLAssociation.SetValue("", "URL:Shadowsocks");
                     ssURLAssociation.SetValue("URL Protocol", "");
                     var shellOpen = ssURLAssociation.CreateSubKey("shell").CreateSubKey("open").CreateSubKey("command");
-                    shellOpen.SetValue("", $"{ExecutablePath} --open-url %1");
+                    shellOpen.SetValue("", $"{Program.ExecutablePath} --open-url %1");
                     logger.Info(@"Successfully added ss:// association.");
                 }
                 else
@@ -80,7 +75,7 @@ namespace Shadowsocks.Controller
                 }
 
                 var shellOpen = ssURLAssociation.OpenSubKey("shell").OpenSubKey("open").OpenSubKey("command");
-                return (string)shellOpen.GetValue("") == $"{ExecutablePath} --open-url %1";
+                return (string)shellOpen.GetValue("") == $"{Program.ExecutablePath} --open-url %1";
             }
             catch (Exception e)
             {

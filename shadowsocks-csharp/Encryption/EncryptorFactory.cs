@@ -77,7 +77,7 @@ namespace Shadowsocks.Encryption
             }
 
             method = method.ToLowerInvariant();
-            bool ok = _registeredEncryptors.TryGetValue(method, out Type? t);
+            bool ok = _registeredEncryptors.TryGetValue(method, out Type t);
             if (!ok)
             {
                 t = _registeredEncryptors[DefaultCipher];

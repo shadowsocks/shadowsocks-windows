@@ -46,7 +46,7 @@ namespace Shadowsocks.Util
                     }
                     else
                     {
-                        _tempPath = Directory.CreateDirectory(Path.Combine(Path.GetTempPath(), @"Shadowsocks\ss_win_temp_" + Application.ExecutablePath.GetHashCode())).FullName;
+                        _tempPath = Directory.CreateDirectory(Path.Combine(Path.GetTempPath(), @"Shadowsocks\ss_win_temp_" + Program.ExecutablePath.GetHashCode())).FullName;
                     }
                 }
                 catch (Exception e)

@@ -8,7 +8,7 @@ namespace Shadowsocks.Encryption.AEAD
     public class AEADNaClEncryptor : AEADEncryptor
     {
 
-        SnufflePoly1305? enc;
+        SnufflePoly1305 enc;
         public AEADNaClEncryptor(string method, string password) : base(method, password)
         {
         }
