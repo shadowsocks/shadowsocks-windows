@@ -43,7 +43,7 @@ namespace Shadowsocks.Model
         [DefaultValue("")]
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore, DefaultValueHandling = DefaultValueHandling.IgnoreAndPopulate)]
         public string remarks;
-        
+
         public int timeout;
 
         public override int GetHashCode()
@@ -72,48 +72,37 @@ namespace Shadowsocks.Model
 
         public string GetURL(bool legacyUrl = false)
         {
-            string tag = string.Empty;
-            string url = string.Empty;
-
             if (legacyUrl && string.IsNullOrWhiteSpace(plugin))
             {
                 // For backwards compatiblity, if no plugin, use old url format
-                string parts = $"{method}:{password}@{server}:{server_port}";
-                string base64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(parts));
-                url = base64;
+                string p = $"{method}:{password}@{server}:{server_port}";
+                string base64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(p));
+                return string.IsNullOrEmpty(remarks)
+                    ? $"ss://{base64}"
+                    : $"ss://{base64}#{HttpUtility.UrlEncode(remarks, Encoding.UTF8)}";
             }
-            else
+
+            UriBuilder u = new UriBuilder("ss", null);
+            string b64 = Convert.ToBase64String(Encoding.UTF8.GetBytes($"{method}:{password}"));
+            u.UserName = b64.Replace('+', '-').Replace('/', '_').TrimEnd('=');
+            u.Host = server;
+            u.Port = server_port;
+            u.Fragment = HttpUtility.UrlEncode(remarks, Encoding.UTF8);
+
+            if (!plugin.IsNullOrWhiteSpace())
             {
-                // SIP002
-                string parts = $"{method}:{password}";
-                string base64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(parts));
-                string websafeBase64 = base64.Replace('+', '-').Replace('/', '_').TrimEnd('=');
+                NameValueCollection param = HttpUtility.ParseQueryString("");
 
-                url = string.Format(
-                    "{0}@{1}:{2}/",
-                    websafeBase64,
-                    FormalHostName,
-                    server_port
-                    );
-
-                if (!plugin.IsNullOrWhiteSpace())
+                string pluginPart = plugin;
+                if (!string.IsNullOrWhiteSpace(plugin_opts))
                 {
-
-                    string pluginPart = plugin;
-                    if (!string.IsNullOrWhiteSpace(plugin_opts))
-                    {
-                        pluginPart += ";" + plugin_opts;
-                    }
-                    string pluginQuery = "?plugin=" + HttpUtility.UrlEncode(pluginPart, Encoding.UTF8);
-                    url += pluginQuery;
+                    pluginPart += ";" + plugin_opts;
                 }
+                param["plugin"] = pluginPart;
+                u.Query = param.ToString();
             }
 
-            if (!remarks.IsNullOrEmpty())
-            {
-                tag = $"#{HttpUtility.UrlEncode(remarks, Encoding.UTF8)}";
-            }
-            return $"ss://{url}{tag}";
+            return u.ToString();
         }
 
         [JsonIgnore]
@@ -122,13 +111,13 @@ namespace Shadowsocks.Model
             get
             {
                 // CheckHostName() won't do a real DNS lookup
-                switch (Uri.CheckHostName(server))
+                return (Uri.CheckHostName(server)) switch
                 {
-                    case UriHostNameType.IPv6:  // Add square bracket when IPv6 (RFC3986)
-                        return $"[{server}]";
-                    default:    // IPv4 or domain name
-                        return server;
-                }
+                    // Add square bracket when IPv6 (RFC3986)
+                    UriHostNameType.IPv6 => $"[{server}]",
+                    // IPv4 or domain name
+                    _ => server,
+                };
             }
         }
 
@@ -158,7 +147,7 @@ namespace Shadowsocks.Model
             {
                 server.remarks = HttpUtility.UrlDecode(tag, Encoding.UTF8);
             }
-            Match details = null;
+            Match details;
             try
             {
                 details = DetailsParser.Match(Encoding.UTF8.GetString(Convert.FromBase64String(
@@ -212,7 +201,7 @@ namespace Shadowsocks.Model
                 // parse base64 UserInfo
                 string rawUserInfo = parsedUrl.GetComponents(UriComponents.UserInfo, UriFormat.Unescaped);
                 string base64 = rawUserInfo.Replace('-', '+').Replace('_', '/');    // Web-safe base64 to normal base64
-                string userInfo = "";
+                string userInfo;
                 try
                 {
                     userInfo = Encoding.UTF8.GetString(Convert.FromBase64String(
