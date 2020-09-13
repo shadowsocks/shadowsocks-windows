@@ -20,13 +20,13 @@ namespace Shadowsocks.Controller.Service
         {
             var httpClientHandler = new HttpClientHandler();
             var httpClient = new HttpClient(httpClientHandler);
+            httpClient.Timeout = TimeSpan.FromSeconds(15);
 
             if (proxy != null)
             {
                 httpClientHandler.Proxy = proxy;
             }
 
-            _ = Task.Delay(2000).ContinueWith(_ => httpClient.CancelPendingRequests());
             string str = await httpClient.GetStringAsync(url);
 
             var ret = Get(str);
