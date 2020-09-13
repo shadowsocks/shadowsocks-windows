@@ -112,7 +112,7 @@
             this.UpdateButton.Name = "UpdateButton";
             this.UpdateButton.Size = new System.Drawing.Size(118, 25);
             this.UpdateButton.TabIndex = 3;
-            this.UpdateButton.Text = "Update";
+            this.UpdateButton.Text = "&Update";
             this.UpdateButton.UseVisualStyleBackColor = true;
             this.UpdateButton.Click += new System.EventHandler(this.UpdateButton_Click);
             // 
@@ -126,7 +126,7 @@
             this.AddButton.Name = "AddButton";
             this.AddButton.Size = new System.Drawing.Size(118, 25);
             this.AddButton.TabIndex = 4;
-            this.AddButton.Text = "Add";
+            this.AddButton.Text = "&Add";
             this.AddButton.UseVisualStyleBackColor = true;
             this.AddButton.Click += new System.EventHandler(this.AddButton_Click);
             // 
@@ -140,7 +140,7 @@
             this.DeleteButton.Name = "DeleteButton";
             this.DeleteButton.Size = new System.Drawing.Size(120, 25);
             this.DeleteButton.TabIndex = 5;
-            this.DeleteButton.Text = "Delete";
+            this.DeleteButton.Text = "&Delete";
             this.DeleteButton.UseVisualStyleBackColor = true;
             this.DeleteButton.Click += new System.EventHandler(this.DeleteButton_Click);
             // 
@@ -168,7 +168,7 @@
             this.UpdateAllButton.Name = "UpdateAllButton";
             this.UpdateAllButton.Size = new System.Drawing.Size(118, 25);
             this.UpdateAllButton.TabIndex = 6;
-            this.UpdateAllButton.Text = "Update all";
+            this.UpdateAllButton.Text = "U&pdate All";
             this.UpdateAllButton.UseVisualStyleBackColor = true;
             this.UpdateAllButton.Click += new System.EventHandler(this.UpdateAllButton_Click);
             // 
