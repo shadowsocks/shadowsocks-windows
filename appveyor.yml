@@ -120,36 +120,29 @@ after_build:
 
     $WorkingFolder = "$env:APPVEYOR_BUILD_FOLDER\working"
     New-Item $WorkingFolder -ItemType Directory -Force
+    $HashFile = "all.hash"
 
-    # Create and deploy the release zip
-    $ReleaseFile = "$env:APPVEYOR_BUILD_FOLDER\shadowsocks-csharp\bin\$env:CONFIGURATION\netcoreapp3.1\Shadowsocks.exe"
-    $ReleaseFile2 = "$env:APPVEYOR_BUILD_FOLDER\shadowsocks-csharp\bin\$env:CONFIGURATION\netcoreapp3.1\Shadowsocks.dll"
-    $ReleaseFile3 = "$env:APPVEYOR_BUILD_FOLDER\shadowsocks-csharp\bin\$env:CONFIGURATION\netcoreapp3.1\Shadowsocks.runtimeconfig.json"
-    $ZipFile = "$WorkingFolder\Shadowsocks-$env:APPVEYOR_BUILD_VERSION-minimal.zip"
-    $ZipHashFile = "$ZipFile.hash"
-    7z a $ZipFile $ReleaseFile
-    7z a $ZipFile $ReleaseFile2
-    7z a $ZipFile $ReleaseFile3
-    Push-AppveyorArtifact $ZipFile
-    Calculate-Hash -file $ZipFile | Out-File -FilePath $ZipHashFile -Append
+    # Publish and deploy
 
+    # Normal package
+    dotnet publish -f netcoreapp3.1 -c $env:CONFIGURATION $env:APPVEYOR_BUILD_FOLDER\shadowsocks-csharp\shadowsocks-csharp.csproj
     # Package into a self-contained single-file executable
     dotnet publish -f netcoreapp3.1 -r win-x64 -c $env:CONFIGURATION -p:PublishSingleFile=true -p:PublishTrimmed=true $env:APPVEYOR_BUILD_FOLDER\shadowsocks-csharp\shadowsocks-csharp.csproj
     dotnet publish -f netcoreapp3.1 -r win-x86 -c $env:CONFIGURATION -p:PublishSingleFile=true -p:PublishTrimmed=true $env:APPVEYOR_BUILD_FOLDER\shadowsocks-csharp\shadowsocks-csharp.csproj
-    $SingleExeX64 = "$env:APPVEYOR_BUILD_FOLDER\shadowsocks-csharp\bin\Any CPU\$env:CONFIGURATION\netcoreapp3.1\win-x64\publish\Shadowsocks.exe"
-    $SingleExeX86 = "$env:APPVEYOR_BUILD_FOLDER\shadowsocks-csharp\bin\Any CPU\$env:CONFIGURATION\netcoreapp3.1\win-x86\publish\Shadowsocks.exe"
-    $ZipSingleExeX64 = "$WorkingFolder\Shadowsocks-$env:APPVEYOR_BUILD_VERSION-portable-x64.zip"
-    $ZipSingleExeX86 = "$WorkingFolder\Shadowsocks-$env:APPVEYOR_BUILD_VERSION-portable-x86.zip"
-    $HashZipX64 = "$ZipSingleExeX64.hash"
-    $HashZipX86 = "$ZipSingleExeX86.hash"
-    7z a $ZipSingleExeX64 $SingleExeX64
-    7z a $ZipSingleExeX86 $SingleExeX86
-    Calculate-Hash -file $ZipSingleExeX64 | Out-File -FilePath $ZipHashFile -Append
-    Calculate-Hash -file $ZipSingleExeX86 | Out-File -FilePath $ZipHashFile -Append
+    $ZipMinimal = "$WorkingFolder\shadowsocks-windows-$env:APPVEYOR_BUILD_VERSION-minimal.zip"
+    $ZipSingleExeX64 = "$WorkingFolder\shadowsocks-windows-$env:APPVEYOR_BUILD_VERSION-portable-x64.zip"
+    $ZipSingleExeX86 = "$WorkingFolder\shadowsocks-windows-$env:APPVEYOR_BUILD_VERSION-portable-x86.zip"
+    7z a $ZipMinimal "$env:APPVEYOR_BUILD_FOLDER\shadowsocks-csharp\bin\Any CPU\$env:CONFIGURATION\netcoreapp3.1\publish\*"
+    7z a $ZipSingleExeX64 "$env:APPVEYOR_BUILD_FOLDER\shadowsocks-csharp\bin\Any CPU\$env:CONFIGURATION\netcoreapp3.1\win-x64\publish\Shadowsocks.exe"
+    7z a $ZipSingleExeX86 "$env:APPVEYOR_BUILD_FOLDER\shadowsocks-csharp\bin\Any CPU\$env:CONFIGURATION\netcoreapp3.1\win-x86\publish\Shadowsocks.exe"
+    Calculate-Hash -file $ZipMinimal | Out-File -FilePath $HashFile -Append
+    Calculate-Hash -file $ZipSingleExeX64 | Out-File -FilePath $HashFile -Append
+    Calculate-Hash -file $ZipSingleExeX86 | Out-File -FilePath $HashFile -Append
+    Push-AppveyorArtifact $ZipMinimal
     Push-AppveyorArtifact $ZipSingleExeX64
     Push-AppveyorArtifact $ZipSingleExeX86
 
-    Push-AppveyorArtifact $ZipHashFile
+    Push-AppveyorArtifact $HashFile
 
 # scripts to run *after* solution is built and *before* automatic packaging occurs (web apps, NuGet packages, Azure Cloud Services)
 # before_package:
