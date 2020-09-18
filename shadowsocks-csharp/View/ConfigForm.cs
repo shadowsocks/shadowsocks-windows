@@ -203,6 +203,7 @@ namespace Shadowsocks.View
                     plugin_args = PluginArgumentsTextBox.Text,
                     remarks = RemarksTextBox.Text,
                     timeout = timeout.Value,
+                    group = GroupTextBox.Text
                 };
 
                 return true;
