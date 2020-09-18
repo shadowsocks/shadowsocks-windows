@@ -1,0 +1,36 @@
+﻿<UserControl x:Class="Shadowsocks.Views.ServerSharingView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Shadowsocks.Views"
+             mc:Ignorable="d" 
+             d:DesignHeight="320" d:DesignWidth="600">
+    <Grid Margin="8">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        <Image Grid.Row="0"
+               Grid.Column="0"
+               Margin="8"
+               Source="{Binding SelectedServerUrlImage}"/>
+        <ListBox Grid.Row="0"
+                 Grid.Column="1"
+                 Margin="8"
+                 ItemsSource="{Binding Servers}"
+                 SelectedItem="{Binding SelectedServer}"/>
+        <TextBox x:Name="urlTextBox"
+                 Grid.Row="1"
+                 Grid.Column="0"
+                 Grid.ColumnSpan="2"
+                 Margin="8"
+                 IsReadOnly="True"
+                 Text="{Binding SelectedServerUrl}"
+                 PreviewMouseDoubleClick="urlTextBox_PreviewMouseDoubleClick"/>
+    </Grid>
+</UserControl>

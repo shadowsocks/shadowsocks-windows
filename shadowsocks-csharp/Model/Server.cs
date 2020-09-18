@@ -58,11 +58,7 @@ namespace Shadowsocks.Model
             return server.GetHashCode() ^ server_port;
         }
 
-        public override bool Equals(object obj)
-        {
-            Server o2 = (Server)obj;
-            return server == o2.server && server_port == o2.server_port;
-        }
+        public override bool Equals(object obj) => obj is Server o2 && server == o2.server && server_port == o2.server_port;
 
         public override string ToString()
         {
