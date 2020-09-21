@@ -3,83 +3,78 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Text;
 using System.Threading.Tasks;
-using NLog;
-using Shadowsocks.Model;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Shadowsocks.Model;
 
 namespace Shadowsocks.Controller.Service
 {
     public class OnlineConfigResolver
     {
-        private static Logger logger = LogManager.GetCurrentClassLogger();
-
         public static async Task<List<Server>> GetOnline(string url, IWebProxy proxy = null)
         {
-            var httpClientHandler = new HttpClientHandler();
-            var httpClient = new HttpClient(httpClientHandler);
-            httpClient.Timeout = TimeSpan.FromSeconds(15);
-
-            if (proxy != null)
+            var httpClientHandler = new HttpClientHandler()
             {
-                httpClientHandler.Proxy = proxy;
+                Proxy = proxy
+            };
+            var httpClient = new HttpClient(httpClientHandler)
+            {
+                Timeout = TimeSpan.FromSeconds(15)
+            };
+
+            string server_json = await httpClient.GetStringAsync(url);
+
+            var servers = server_json.GetServers();
+
+            foreach (var server in servers)
+            {
+                server.group = url;
             }
 
-            string str = await httpClient.GetStringAsync(url);
+            return servers.ToList();
+        }
+    }
 
-            var ret = Get(str);
-            foreach (var item in ret)
+    internal static class OnlineConfigResolverEx
+    {
+        private static readonly string[] BASIC_FORMAT = new[] { "server", "server_port", "password", "method" };
+
+        private static readonly IEnumerable<Server> EMPTY_SERVERS = Array.Empty<Server>();
+
+        internal static IEnumerable<Server> GetServers(this string json) =>
+            JToken.Parse(json).SearchJToken().AsEnumerable();
+
+        private static IEnumerable<Server> SearchJArray(JArray array) =>
+            array == null ? EMPTY_SERVERS : array.SelectMany(SearchJToken).ToList();
+
+        private static IEnumerable<Server> SearchJObject(JObject obj)
+        {
+            if (obj == null)
+                return EMPTY_SERVERS;
+
+            if (BASIC_FORMAT.All(field => obj.ContainsKey(field)))
+                return new[] { obj.ToObject<Server>() };
+
+            var servers = new List<Server>();
+            foreach (var kv in obj)
             {
-                item.group = url;
+                var token = kv.Value;
+                servers.AddRange(SearchJToken(token));
             }
-            return ret;
+            return servers;
         }
 
-        public static List<Server> Get(string json)
+        private static IEnumerable<Server> SearchJToken(this JToken token)
         {
-            var t = JToken.Parse(json);
-            return SearchJToken(t).ToList();
-        }
-
-        private static IEnumerable<Server> SearchJArray(JArray a)
-        {
-            if (a == null) return Array.Empty<Server>();
-            return a.SelectMany(SearchJToken).ToList();
-        }
-
-        private static IEnumerable<Server> SearchJObject(JObject o)
-        {
-            var l = new List<Server>();
-            if (o == null) return l;
-            if (IsServerObject(o))
-                return new List<Server> { o.ToObject<Server>() };
-
-            foreach (var kv in o)
-            {
-                JToken v = kv.Value;
-                l.AddRange(SearchJToken(v));
-            }
-            return l;
-        }
-
-        private static IEnumerable<Server> SearchJToken(JToken t)
-        {
-            switch (t.Type)
+            switch (token.Type)
             {
                 default:
                     return Array.Empty<Server>();
                 case JTokenType.Object:
-                    return SearchJObject(t as JObject);
+                    return SearchJObject(token as JObject);
                 case JTokenType.Array:
-                    return SearchJArray(t as JArray);
+                    return SearchJArray(token as JArray);
             }
-        }
-
-        private static bool IsServerObject(JObject o)
-        {
-            return new[] { "server", "server_port", "password", "method" }.All(i => o.ContainsKey(i));
         }
     }
 }
