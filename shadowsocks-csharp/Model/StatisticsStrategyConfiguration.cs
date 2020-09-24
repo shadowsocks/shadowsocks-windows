@@ -6,6 +6,7 @@ using System.Reflection;
 
 using Newtonsoft.Json;
 using NLog;
+using Shadowsocks.Controller;
 
 namespace Shadowsocks.Model
 {

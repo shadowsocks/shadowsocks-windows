@@ -35,6 +35,7 @@ namespace Shadowsocks.Controller
         private Configuration _config;
         private StrategyManager _strategyManager;
         private PrivoxyRunner privoxyRunner;
+        private GFWListUpdater gfwListUpdater;
         private readonly ConcurrentDictionary<Server, Sip003Plugin> _pluginsByServer;
 
         public AvailabilityStatistics availabilityStatistics = AvailabilityStatistics.Instance;
@@ -79,9 +80,9 @@ namespace Shadowsocks.Controller
         public event EventHandler<PathEventArgs> PACFileReadyToOpen;
         public event EventHandler<PathEventArgs> UserRuleFileReadyToOpen;
 
-        public event EventHandler<GeositeResultEventArgs> UpdatePACFromGeositeCompleted;
+        public event EventHandler<GFWListUpdater.ResultEventArgs> UpdatePACFromGFWListCompleted;
 
-        public event ErrorEventHandler UpdatePACFromGeositeError;
+        public event ErrorEventHandler UpdatePACFromGFWListError;
 
         public event ErrorEventHandler Errored;
 
@@ -216,25 +217,6 @@ namespace Shadowsocks.Controller
             StatisticsConfiguration = configuration;
             StatisticsStrategyConfiguration.Save(configuration);
         }
-
-        public bool AskAddServerBySSURL(string ssURL)
-        {
-            var dr = MessageBox.Show(I18N.GetString("Import from URL: {0} ?", ssURL), I18N.GetString("Shadowsocks"), MessageBoxButtons.YesNo);
-            if (dr == DialogResult.Yes)
-            {
-                if (AddServerBySSURL(ssURL))
-                {
-                    MessageBox.Show(I18N.GetString("Successfully imported from {0}", ssURL));
-                    return true;
-                }
-                else
-                {
-                    MessageBox.Show(I18N.GetString("Failed to import. Please check if the link is valid."));
-                }
-            }
-            return false;
-        }
-
 
         public bool AddServerBySSURL(string ssURL)
         {
@@ -371,7 +353,56 @@ namespace Shadowsocks.Controller
 
         public string GetServerURLForCurrentServer()
         {
-            return GetCurrentServer().GetURL(_config.generateLegacyUrl);
+            Server server = GetCurrentServer();
+            return GetServerURL(server);
+        }
+
+        public static string GetServerURL(Server server)
+        {
+            string tag = string.Empty;
+            string url = string.Empty;
+
+            if (string.IsNullOrWhiteSpace(server.plugin))
+            {
+                // For backwards compatiblity, if no plugin, use old url format
+                string parts = $"{server.method}:{server.password}@{server.server}:{server.server_port}";
+                string base64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(parts));
+                url = base64;
+            }
+            else
+            {
+                // SIP002
+                string parts = $"{server.method}:{server.password}";
+                string base64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(parts));
+                string websafeBase64 = base64.Replace('+', '-').Replace('/', '_').TrimEnd('=');
+
+                string pluginPart = server.plugin;
+                if (!string.IsNullOrWhiteSpace(server.plugin_opts))
+                {
+                    pluginPart += ";" + server.plugin_opts;
+                }
+
+                url = string.Format(
+                    "{0}@{1}:{2}/?plugin={3}",
+                    websafeBase64,
+                    server.FormatHostName(server.server),
+                    server.server_port,
+                    HttpUtility.UrlEncode(pluginPart, Encoding.UTF8));
+            }
+
+            if (!server.remarks.IsNullOrEmpty())
+            {
+                tag = $"#{HttpUtility.UrlEncode(server.remarks, Encoding.UTF8)}";
+            }
+            return $"ss://{url}{tag}";
+        }
+
+        public void UpdatePACFromGFWList()
+        {
+            if (gfwListUpdater != null)
+            {
+                gfwListUpdater.UpdatePACFromGFWList(_config);
+            }
         }
 
         public void UpdateStatisticsConfiguration(bool enabled)
@@ -440,32 +471,29 @@ namespace Shadowsocks.Controller
             ConfigChanged?.Invoke(this, new EventArgs());
         }
 
-        public void UpdateLatency(object sender, SSTCPConnectedEventArgs args)
+        public void UpdateLatency(Server server, TimeSpan latency)
         {
-            GetCurrentStrategy()?.UpdateLatency(args.server, args.latency);
             if (_config.availabilityStatistics)
             {
-                availabilityStatistics.UpdateLatency(args.server, (int)args.latency.TotalMilliseconds);
+                availabilityStatistics.UpdateLatency(server, (int)latency.TotalMilliseconds);
             }
         }
 
-        public void UpdateInboundCounter(object sender, SSTransmitEventArgs args)
+        public void UpdateInboundCounter(Server server, long n)
         {
-            GetCurrentStrategy()?.UpdateLastRead(args.server);
-            Interlocked.Add(ref _inboundCounter, args.length);
+            Interlocked.Add(ref _inboundCounter, n);
             if (_config.availabilityStatistics)
             {
-                availabilityStatistics.UpdateInboundCounter(args.server, args.length);
+                availabilityStatistics.UpdateInboundCounter(server, n);
             }
         }
 
-        public void UpdateOutboundCounter(object sender, SSTransmitEventArgs args)
+        public void UpdateOutboundCounter(Server server, long n)
         {
-            GetCurrentStrategy()?.UpdateLastWrite(args.server);
-            Interlocked.Add(ref _outboundCounter, args.length);
+            Interlocked.Add(ref _outboundCounter, n);
             if (_config.availabilityStatistics)
             {
-                availabilityStatistics.UpdateOutboundCounter(args.server, args.length);
+                availabilityStatistics.UpdateOutboundCounter(server, n);
             }
         }
 
@@ -481,15 +509,15 @@ namespace Shadowsocks.Controller
 
             privoxyRunner = privoxyRunner ?? new PrivoxyRunner();
 
-            _pacDaemon = _pacDaemon ?? new PACDaemon(_config);
+            _pacDaemon = _pacDaemon ?? new PACDaemon();
             _pacDaemon.PACFileChanged += PacDaemon_PACFileChanged;
             _pacDaemon.UserRuleFileChanged += PacDaemon_UserRuleFileChanged;
             _pacServer = _pacServer ?? new PACServer(_pacDaemon);
             _pacServer.UpdatePACURL(_config); // So PACServer works when system proxy disabled.
 
-            GeositeUpdater.ResetEvent();
-            GeositeUpdater.UpdateCompleted += PacServer_PACUpdateCompleted;
-            GeositeUpdater.Error += PacServer_PACUpdateError;
+            gfwListUpdater = gfwListUpdater ?? new GFWListUpdater();
+            gfwListUpdater.UpdateCompleted += PacServer_PACUpdateCompleted;
+            gfwListUpdater.Error += PacServer_PACUpdateError;
 
             availabilityStatistics.UpdateConfiguration(this);
             _listener?.Stop();
@@ -509,11 +537,6 @@ namespace Shadowsocks.Controller
                 privoxyRunner.Start(_config);
 
                 TCPRelay tcpRelay = new TCPRelay(this, _config);
-                tcpRelay.OnConnected += UpdateLatency;
-                tcpRelay.OnInbound += UpdateInboundCounter;
-                tcpRelay.OnOutbound += UpdateOutboundCounter;
-                tcpRelay.OnFailed += (o, e) => GetCurrentStrategy()?.SetFailure(e.server);
-
                 UDPRelay udpRelay = new UDPRelay(this);
                 List<Listener.IService> services = new List<Listener.IService>
                 {
@@ -571,20 +594,27 @@ namespace Shadowsocks.Controller
             UpdateSystemProxy();
         }
 
-        private void PacServer_PACUpdateCompleted(object sender, GeositeResultEventArgs e)
+        private void PacServer_PACUpdateCompleted(object sender, GFWListUpdater.ResultEventArgs e)
         {
-            UpdatePACFromGeositeCompleted?.Invoke(this, e);
+            UpdatePACFromGFWListCompleted?.Invoke(this, e);
         }
 
         private void PacServer_PACUpdateError(object sender, ErrorEventArgs e)
         {
-            UpdatePACFromGeositeError?.Invoke(this, e);
+            UpdatePACFromGFWListError?.Invoke(this, e);
         }
 
         private static readonly IEnumerable<char> IgnoredLineBegins = new[] { '!', '[' };
         private void PacDaemon_UserRuleFileChanged(object sender, EventArgs e)
         {
-            GeositeUpdater.MergeAndWritePACFile(_config.geositeGroup, _config.geositeBlacklistMode);
+            if (!File.Exists(Utils.GetTempPath("gfwlist.txt")))
+            {
+                UpdatePACFromGFWList();
+            }
+            else
+            {
+                GFWListUpdater.MergeAndWritePACFile(FileManager.NonExclusiveReadAllText(Utils.GetTempPath("gfwlist.txt")));
+            }
             UpdateSystemProxy();
         }
 

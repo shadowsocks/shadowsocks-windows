@@ -1,3 +1,4 @@
+using MaxMind.GeoIP2.Model;
 using Shadowsocks.Controller;
 using Shadowsocks.Model;
 using Shadowsocks.Properties;
@@ -139,6 +140,7 @@ namespace Shadowsocks.View
             PluginOptionsTextBox.TextChanged += ConfigValueChanged;
             RemarksTextBox.TextChanged += ConfigValueChanged;
             TimeoutTextBox.TextChanged += ConfigValueChanged;
+            CountryTextBox.TextChanged += ConfigValueChanged;
             PortableModeCheckBox.CheckedChanged += ConfigValueChanged;
             ServerPortTextBox.TextChanged += ConfigValueChanged;
         }
@@ -168,7 +170,9 @@ namespace Shadowsocks.View
                 if (server != null)
                 {
                     if (isSave || isCopy)
+                    {
                         Configuration.CheckServer(server);
+                    }
 
                     _modifiedConfiguration.configs[_lastSelectedIndex] = server;
                 }
@@ -206,6 +210,7 @@ namespace Shadowsocks.View
                     plugin_args = PluginArgumentsTextBox.Text,
                     remarks = RemarksTextBox.Text,
                     timeout = timeout.Value,
+                    country = CountryTextBox.Text
                 };
 
                 return true;
@@ -412,6 +417,7 @@ namespace Shadowsocks.View
 
             RemarksTextBox.Text = server.remarks;
             TimeoutTextBox.Text = server.timeout.ToString();
+            CountryTextBox.Text = server.country;
 
             isChange = false;
         }
@@ -427,7 +433,7 @@ namespace Shadowsocks.View
             ServersListBox.Items.Clear();
             foreach (Server server in configuration.configs)
             {
-                ServersListBox.Items.Add(server.ToString());
+                ServersListBox.Items.Add(server.FriendlyName());
             }
         }
 
@@ -502,7 +508,7 @@ namespace Shadowsocks.View
             }
             if (_lastSelectedIndex >= 0 && _lastSelectedIndex < _modifiedConfiguration.configs.Count)
             {
-                ServersListBox.Items[_lastSelectedIndex] = _modifiedConfiguration.configs[_lastSelectedIndex].ToString();
+                ServersListBox.Items[_lastSelectedIndex] = _modifiedConfiguration.configs[_lastSelectedIndex].FriendlyName();
             }
             UpdateButtons();
             LoadSelectedServerDetails();

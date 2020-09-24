@@ -64,14 +64,14 @@ namespace Shadowsocks.View
 
         private void QRCodeForm_Load(object sender, EventArgs e)
         {
-            Configuration config = Configuration.Load();
-            List<KeyValuePair<string, string>> serverDatas = config.configs.Select(
+            var servers = Configuration.Load();
+            var serverDatas = servers.configs.Select(
                 server =>
-                    new KeyValuePair<string, string>(server.GetURL(config.generateLegacyUrl), server.ToString())
+                    new KeyValuePair<string, string>(ShadowsocksController.GetServerURL(server), server.FriendlyName())
                 ).ToList();
             listBox1.DataSource = serverDatas;
 
-            int selectIndex = serverDatas.FindIndex(serverData => serverData.Key.StartsWith(code));
+            var selectIndex = serverDatas.FindIndex(serverData => serverData.Key.StartsWith(code));
             if (selectIndex >= 0) listBox1.SetSelected(selectIndex, true);
         }
 

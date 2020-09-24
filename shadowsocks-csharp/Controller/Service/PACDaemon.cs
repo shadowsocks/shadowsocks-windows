@@ -1,5 +1,4 @@
 ﻿using NLog;
-using Shadowsocks.Model;
 using Shadowsocks.Properties;
 using Shadowsocks.Util;
 using System;
@@ -22,7 +21,6 @@ namespace Shadowsocks.Controller
         public const string PAC_FILE = "pac.txt";
         public const string USER_RULE_FILE = "user-rule.txt";
         public const string USER_ABP_FILE = "abp.txt";
-        private Configuration config;
 
         FileSystemWatcher PACFileWatcher;
         FileSystemWatcher UserRuleFileWatcher;
@@ -30,9 +28,8 @@ namespace Shadowsocks.Controller
         public event EventHandler PACFileChanged;
         public event EventHandler UserRuleFileChanged;
 
-        public PACDaemon(Configuration config)
+        public PACDaemon()
         {
-            this.config = config;
             TouchPACFile();
             TouchUserRuleFile();
 
@@ -45,7 +42,7 @@ namespace Shadowsocks.Controller
         {
             if (!File.Exists(PAC_FILE))
             {
-                GeositeUpdater.MergeAndWritePACFile(config.geositeGroup, config.geositeBlacklistMode);
+                File.WriteAllText(PAC_FILE, Resources.default_abp_rule + Resources.abp_js);
             }
             return PAC_FILE;
         }
@@ -61,18 +58,21 @@ namespace Shadowsocks.Controller
 
         internal string GetPACContent()
         {
-            if (!File.Exists(PAC_FILE))
+            if (File.Exists(PAC_FILE))
             {
-                GeositeUpdater.MergeAndWritePACFile(config.geositeGroup, config.geositeBlacklistMode);
+                return File.ReadAllText(PAC_FILE, Encoding.UTF8);
             }
-            return File.ReadAllText(PAC_FILE, Encoding.UTF8);
+            else
+            {
+                return Resources.default_abp_rule + Resources.abp_js;
+            }
         }
 
 
         private void WatchPacFile()
         {
             PACFileWatcher?.Dispose();
-            PACFileWatcher = new FileSystemWatcher(Program.WorkingDirectory);
+            PACFileWatcher = new FileSystemWatcher(Directory.GetCurrentDirectory());
             PACFileWatcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.DirectoryName;
             PACFileWatcher.Filter = PAC_FILE;
             PACFileWatcher.Changed += PACFileWatcher_Changed;
@@ -85,7 +85,7 @@ namespace Shadowsocks.Controller
         private void WatchUserRuleFile()
         {
             UserRuleFileWatcher?.Dispose();
-            UserRuleFileWatcher = new FileSystemWatcher(Program.WorkingDirectory);
+            UserRuleFileWatcher = new FileSystemWatcher(Directory.GetCurrentDirectory());
             UserRuleFileWatcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.DirectoryName;
             UserRuleFileWatcher.Filter = USER_RULE_FILE;
             UserRuleFileWatcher.Changed += UserRuleFileWatcher_Changed;
