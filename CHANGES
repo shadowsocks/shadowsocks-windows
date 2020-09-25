@@ -1,3 +1,6 @@
+4.2.0.1 2020-09-26
+- Fix domain rule handling in PAC script (#2956)
+
 4.2.0.0 2020-09-10
 - Update TCPHandler.lastActivity (#2858)
 - Add Franch translation (#2861)
