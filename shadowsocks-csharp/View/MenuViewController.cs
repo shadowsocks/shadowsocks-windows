@@ -65,6 +65,8 @@ namespace Shadowsocks.View
         private HotkeySettingsForm hotkeySettingsForm;
         private OnlineConfigForm onlineConfigForm;
 
+        private ServerSharingWindow serverSharingWindow;
+
         // color definition for icon color transformation
         private readonly Color colorMaskBlue = Color.FromArgb(255, 25, 125, 191);
         private readonly Color colorMaskDarkSilver = Color.FromArgb(128, 192, 192, 192);
@@ -741,10 +743,18 @@ namespace Shadowsocks.View
 
         private void QRCodeItem_Click(object sender, EventArgs e)
         {
-            QRCodeForm qrCodeForm = new QRCodeForm(controller.GetServerURLForCurrentServer());
-            //qrCodeForm.Icon = this.Icon;
-            // TODO
-            qrCodeForm.Show();
+            if (serverSharingWindow == null)
+            {
+                serverSharingWindow = new ServerSharingWindow();
+                serverSharingWindow.Closed += ServerSharingWindow_Closed;
+                serverSharingWindow.Show();
+            }
+            serverSharingWindow.Activate();
+        }
+
+        private void ServerSharingWindow_Closed(object sender, EventArgs e)
+        {
+            serverSharingWindow = null;
         }
 
         private void ScanQRCodeItem_Click(object sender, EventArgs e)
