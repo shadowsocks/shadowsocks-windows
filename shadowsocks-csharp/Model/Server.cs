@@ -44,6 +44,10 @@ namespace Shadowsocks.Model
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore, DefaultValueHandling = DefaultValueHandling.IgnoreAndPopulate)]
         public string remarks;
 
+        [DefaultValue("")]
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore, DefaultValueHandling = DefaultValueHandling.IgnoreAndPopulate)]
+        public string group;
+
         public int timeout;
 
         public override int GetHashCode()

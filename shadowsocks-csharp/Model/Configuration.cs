@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Net;
 using Newtonsoft.Json;
 using NLog;
 using Shadowsocks.Controller;
@@ -17,6 +19,8 @@ namespace Shadowsocks.Model
 
         public List<Server> configs;
 
+        public List<string> onlineConfigSource;
+
         // when strategy is set, index is ignored
         public string strategy;
         public int index;
@@ -25,29 +29,68 @@ namespace Shadowsocks.Model
         public bool shareOverLan;
         public bool isDefault;
         public int localPort;
-        public bool portableMode = true;
+        public bool portableMode;
         public bool showPluginOutput;
         public string pacUrl;
 
         public bool useOnlinePac;
-        public bool secureLocalPac = true;
+        public bool secureLocalPac;
         public bool availabilityStatistics;
         public bool autoCheckUpdate;
         public bool checkPreRelease;
         public bool isVerboseLogging;
 
         // hidden options
-        public bool isIPv6Enabled = false; // for experimental ipv6 support
+        public bool isIPv6Enabled; // for experimental ipv6 support
         public bool generateLegacyUrl = false; // for pre-sip002 url compatibility
         public string geositeUrl; // for custom geosite source (and rule group)
-        public string geositeGroup = "geolocation-!cn";
-        public bool geositeBlacklistMode = true;
-
+        public string geositeGroup;
+        public bool geositeBlacklistMode;
 
         //public NLogConfig.LogLevel logLevel;
         public LogViewerConfig logViewer;
         public ProxyConfig proxy;
         public HotkeyConfig hotkey;
+
+        [JsonIgnore]
+        public bool updated;
+
+        public Configuration()
+        {
+            version = UpdateChecker.Version;
+            strategy = "";
+            index = 0;
+            global = false;
+            enabled = false;
+            shareOverLan = false;
+            isDefault = true;
+            localPort = 1080;
+            portableMode = true;
+            showPluginOutput = false;
+            pacUrl = "";
+            useOnlinePac = false;
+            secureLocalPac = true;
+            availabilityStatistics = false;
+            autoCheckUpdate = false;
+            checkPreRelease = false;
+            isVerboseLogging = false;
+
+            // hidden options
+            isIPv6Enabled = false;
+            generateLegacyUrl = false;
+            geositeUrl = "";
+            geositeGroup = "geolocation-!cn";
+            geositeBlacklistMode = true;
+
+            logViewer = new LogViewerConfig();
+            proxy = new ProxyConfig();
+            hotkey = new HotkeyConfig();
+
+            updated = false;
+
+            configs = new List<Server>();
+            onlineConfigSource = new List<string>();
+        }
 
         [JsonIgnore]
         NLogConfig nLogConfig;
@@ -58,10 +101,6 @@ namespace Shadowsocks.Model
 #else
         private static readonly NLogConfig.LogLevel verboseLogLevel =  NLogConfig.LogLevel.Debug;
 #endif
-
-
-        [JsonIgnore]
-        public bool updated = false;
 
         [JsonIgnore]
         public string localHost => GetLocalHost();
@@ -76,6 +115,14 @@ namespace Shadowsocks.Model
             else
                 return GetDefaultServer();
         }
+
+        public WebProxy WebProxy => enabled
+            ? new WebProxy(
+                    isIPv6Enabled
+                    ? $"[{IPAddress.IPv6Loopback}]"
+                    : IPAddress.Loopback.ToString(),
+                    localPort)
+            : null;
 
         public static void CheckServer(Server server)
         {
@@ -111,20 +158,10 @@ namespace Shadowsocks.Model
                     config.updated = true;
                 }
 
-                if (config.configs == null)
-                    config.configs = new List<Server>();
                 if (config.configs.Count == 0)
                     config.configs.Add(GetDefaultServer());
-                if (config.localPort == 0)
-                    config.localPort = 1080;
-                if (config.index == -1 && config.strategy == null)
+                if (config.index == -1 && string.IsNullOrEmpty(config.strategy))
                     config.index = 0;
-                if (config.logViewer == null)
-                    config.logViewer = new LogViewerConfig();
-                if (config.proxy == null)
-                    config.proxy = new ProxyConfig();
-                if (config.hotkey == null)
-                    config.hotkey = new HotkeyConfig();
                 if (!System.Net.Sockets.Socket.OSSupportsIPv6)
                 {
                     config.isIPv6Enabled = false; // disable IPv6 if os not support
@@ -137,20 +174,8 @@ namespace Shadowsocks.Model
             {
                 if (!(e is FileNotFoundException))
                     logger.LogUsefulException(e);
-                config = new Configuration
-                {
-                    index = 0,
-                    isDefault = true,
-                    localPort = 1080,
-                    autoCheckUpdate = true,
-                    configs = new List<Server>()
-                    {
-                        GetDefaultServer()
-                    },
-                    logViewer = new LogViewerConfig(),
-                    proxy = new ProxyConfig(),
-                    hotkey = new HotkeyConfig(),
-                };
+                config = new Configuration();
+                config.configs.Add(GetDefaultServer());
             }
 
             try
@@ -181,12 +206,12 @@ namespace Shadowsocks.Model
 
         public static void Save(Configuration config)
         {
-            config.version = UpdateChecker.Version;
+            config.configs = SortByOnlineConfig(config.configs);
             if (config.index >= config.configs.Count)
                 config.index = config.configs.Count - 1;
             if (config.index < -1)
                 config.index = -1;
-            if (config.index == -1 && config.strategy == null)
+            if (config.index == -1 && string.IsNullOrEmpty(config.strategy))
                 config.index = 0;
             config.isDefault = false;
             try
@@ -212,6 +237,15 @@ namespace Shadowsocks.Model
             {
                 logger.LogUsefulException(e);
             }
+        }
+
+        public static List<Server> SortByOnlineConfig(IEnumerable<Server> servers)
+        {
+            var groups = servers.GroupBy(s => s.group);
+            List<Server> ret = new List<Server>();
+            ret.AddRange(groups.Where(g => string.IsNullOrEmpty(g.Key)).SelectMany(g => g));
+            ret.AddRange(groups.Where(g => !string.IsNullOrEmpty(g.Key)).SelectMany(g => g));
+            return ret;
         }
 
         public static Server AddDefaultServerOrServer(Configuration config, Server server = null, int? index = null)

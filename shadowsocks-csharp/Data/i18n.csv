@@ -17,6 +17,7 @@ Global,Для всей системы,全局模式,全局模式,グローバル�
 Servers,Серверы,服务器,伺服器,サーバー,서버,Serveurs
 Edit Servers...,Редактировать серверы…,编辑服务器...,編輯伺服器...,サーバーの編集...,서버 수정…,Éditer serveurs…
 Statistics Config...,Настройки статистики…,统计配置...,統計設定檔...,統計情報の設定...,통계 설정,Configuration des statistiques…
+Online Config...,,在线配置...,線上配置...,,,
 Start on Boot,Автозагрузка,开机启动,開機啟動,システム起動時に実行,시스템 시작 시에 시작하기,Démarrage automatique
 Associate ss:// Links,Ассоциированный ss:// Ссылки,关联 ss:// 链接,關聯 ss:// 鏈接,ss:// リンクの関連付け,ss:// 링크 연결,
 Forward Proxy...,Прямой прокси…,正向代理设置...,正向 Proxy 設定...,フォワードプロキシの設定...,포워드 프록시,Forward-proxy…
@@ -78,6 +79,13 @@ Move &Up,Выше,上移(&U),上移 (&U),上に移動 (&U),위로 (&U),Monter
 Move D&own,Ниже,下移(&O),下移 (&O),下に移動 (&O),아래로 (&O),Descendre
 deprecated,Устаревшее,不推荐,不推薦,非推奨,더 이상 사용되지 않음,Obsolète
 "Encryption method {0} not exist, will replace with {1}",,加密方法{0}不存在，将使用{1}代替,,暗号化方式{0}が存在しません，{1}に置換します,{0} 암호화 방식이 존재하지 않으므로 {1}로 대체될 것입니다.,"Méthode de chiffrement {0} n'existe pas, sera remplacée par {1}"
+,,,,,,
+# Online Config Form,,,,,,
+,,,,,,
+Online config,,在线配置,線上配置,,,
+Online config URL,,在线配置链接,線上配置鏈接,,,
+&Update,,更新,更新,,,
+U&pdate All,,全部更新,全部更新,,,
 ,,,,,,
 #Statistics Config,,,,,,
 ,,,,,,
