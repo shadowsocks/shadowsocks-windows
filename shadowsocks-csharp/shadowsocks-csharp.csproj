@@ -8,7 +8,7 @@
     <Authors>clowwindy &amp; community 2020</Authors>
     <PackageId>Shadowsocks</PackageId>
     <Product>Shadowsocks</Product>
-    <Version>4.2.0.0</Version>
+    <Version>4.2.0.1</Version>
     <AssemblyName>Shadowsocks</AssemblyName>
     <ApplicationIcon>shadowsocks.ico</ApplicationIcon>
     <StartupObject>Shadowsocks.Program</StartupObject>
