@@ -5,7 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:Shadowsocks.Views"
              mc:Ignorable="d" 
-             d:DesignHeight="320" d:DesignWidth="600">
+             d:DesignHeight="400" d:DesignWidth="660">
     <Grid Margin="8">
         <Grid.RowDefinitions>
             <RowDefinition Height="*" />

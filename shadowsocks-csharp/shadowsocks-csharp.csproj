@@ -41,6 +41,7 @@
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
+    <ProjectTypeGuids>{60DC8134-EBA5-43B8-BCC9-BB4BC16C2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
     <DebugSymbols>true</DebugSymbols>
@@ -256,6 +257,9 @@
     <Compile Include="Controller\Strategy\IStrategy.cs" />
     <Compile Include="Controller\Service\Sip003Plugin.cs" />
     <Compile Include="Proxy\Socks5Proxy.cs" />
+    <Compile Include="ServerSharingWindow.xaml.cs">
+      <DependentUpon>ServerSharingWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Settings.cs" />
     <Compile Include="Controller\System\Hotkeys\Hotkeys.cs" />
     <Compile Include="StringEx.cs" />
@@ -312,12 +316,6 @@
     <Compile Include="View\ProxyForm.Designer.cs">
       <DependentUpon>ProxyForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="View\QRCodeForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="View\QRCodeForm.Designer.cs">
-      <DependentUpon>QRCodeForm.cs</DependentUpon>
-    </Compile>
     <Compile Include="View\QRCodeSplashForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -353,9 +351,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="View\ProxyForm.resx">
       <DependentUpon>ProxyForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="View\QRCodeForm.resx">
-      <DependentUpon>QRCodeForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="View\StatisticsStrategyConfigurationForm.resx">
       <DependentUpon>StatisticsStrategyConfigurationForm.cs</DependentUpon>
@@ -421,6 +416,10 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
+    <Page Include="ServerSharingWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\ServerSharingView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
