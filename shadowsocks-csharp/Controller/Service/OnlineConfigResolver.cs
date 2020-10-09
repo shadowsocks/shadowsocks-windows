@@ -22,6 +22,9 @@ namespace Shadowsocks.Controller.Service
                 Timeout = TimeSpan.FromSeconds(15)
             };
 
+            string userAgent = "ShadowsocksWindows/" + UpdateChecker.Version;
+            httpClient.DefaultRequestHeaders.Add("User-Agent", userAgent);
+
             string server_json = await httpClient.GetStringAsync(url);
 
             var servers = server_json.GetServers();
