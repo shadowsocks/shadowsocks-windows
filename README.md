@@ -1,7 +1,7 @@
 <img src="shadowsocks-csharp/Resources/ssw128.png" alt="[logo]" width="48"/> Shadowsocks for Windows
 =======================
 
-[![Build Status]][Appveyor]
+[![Build Status]][Appveyor] [![Gitter Badge]][Gitter Community]
 
 [中文说明]
 
@@ -154,3 +154,5 @@ Sysproxy ()                https://github.com/Noisyfox/sysproxy
 [GPLv3]:        https://github.com/shadowsocks/shadowsocks-windows/blob/master/LICENSE.txt
 [Working with non SIP003 standard Plugin]: https://github.com/shadowsocks/shadowsocks-windows/wiki/Working-with-non-SIP003-standard-Plugin
 [Experimental Features]: https://github.com/shadowsocks/shadowsocks-windows/wiki/Experimental
+[Gitter Badge]: https://badges.gitter.im/shadowsocks-windows/community.svg
+[Gitter Community]: https://gitter.im/shadowsocks-windows/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge
