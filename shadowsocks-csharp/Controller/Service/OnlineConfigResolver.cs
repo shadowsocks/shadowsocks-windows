@@ -13,11 +13,12 @@ namespace Shadowsocks.Controller.Service
     {
         public static async Task<List<Server>> GetOnline(string url, IWebProxy proxy = null)
         {
-            var httpClientHandler = new HttpClientHandler()
+            var socketsHttpHandler = new SocketsHttpHandler()
             {
+                UseProxy = proxy != null,
                 Proxy = proxy
             };
-            var httpClient = new HttpClient(httpClientHandler)
+            var httpClient = new HttpClient(socketsHttpHandler)
             {
                 Timeout = TimeSpan.FromSeconds(15)
             };
