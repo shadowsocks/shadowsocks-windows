@@ -39,15 +39,18 @@ namespace Shadowsocks.Controller
         private static HttpClient httpClient;
         private static readonly string GEOSITE_URL = "https://github.com/v2fly/domain-list-community/raw/release/dlc.dat";
         private static readonly string GEOSITE_SHA256SUM_URL = "https://github.com/v2fly/domain-list-community/raw/release/dlc.dat.sha256sum";
+        private static readonly DomainObject.Types.Attribute geositeExcludeAttribute;
         private static byte[] geositeDB;
 
         public static readonly Dictionary<string, IList<DomainObject>> Geosites = new Dictionary<string, IList<DomainObject>>();
 
         static GeositeUpdater()
         {
-            //socketsHttpHandler = new SocketsHttpHandler();
-            //httpClient = new HttpClient(socketsHttpHandler);
-            
+            geositeExcludeAttribute = new DomainObject.Types.Attribute
+            {
+                Key = "cn",
+                BoolValue = true
+            };
             if (File.Exists(DATABASE_PATH) && new FileInfo(DATABASE_PATH).Length > 0)
             {
                 geositeDB = File.ReadAllBytes(DATABASE_PATH);
@@ -241,6 +244,9 @@ var __RULES__ = {JsonConvert.SerializeObject(gfwLines, Formatting.Indented)};
             List<string> ret = new List<string>(domains.Count + 100);// 100 overhead
             foreach (var d in domains)
             {
+                if (d.Attribute.Contains(geositeExcludeAttribute))
+                    continue;
+
                 string domain = d.Value;
 
                 switch (d.Type)
