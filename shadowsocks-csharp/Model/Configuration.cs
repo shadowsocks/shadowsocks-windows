@@ -46,6 +46,7 @@ namespace Shadowsocks.Model
         public string geositeUrl; // for custom geosite source (and rule group)
         public string geositeGroup;
         public bool geositeBlacklistMode;
+        public string userAgent;
 
         //public NLogConfig.LogLevel logLevel;
         public LogViewerConfig logViewer;
@@ -81,6 +82,7 @@ namespace Shadowsocks.Model
             geositeUrl = "";
             geositeGroup = "geolocation-!cn";
             geositeBlacklistMode = true;
+            userAgent = "ShadowsocksWindows/$version";
 
             logViewer = new LogViewerConfig();
             proxy = new ProxyConfig();
@@ -91,6 +93,9 @@ namespace Shadowsocks.Model
             configs = new List<Server>();
             onlineConfigSource = new List<string>();
         }
+
+        [JsonIgnore]
+        public string userAgentString; // $version substituted with numeral version in it
 
         [JsonIgnore]
         NLogConfig nLogConfig;
@@ -153,6 +158,7 @@ namespace Shadowsocks.Model
                 string configContent = File.ReadAllText(CONFIG_FILE);
                 config = JsonConvert.DeserializeObject<Configuration>(configContent);
                 config.isDefault = false;
+                config.version = UpdateChecker.Version;
                 if (UpdateChecker.Asset.CompareVersion(UpdateChecker.Version, config.version ?? "0") > 0)
                 {
                     config.updated = true;
@@ -200,6 +206,8 @@ namespace Shadowsocks.Model
                 // todo: route the error to UI since there is no log file in this scenario
                 logger.Error(e, "Cannot get the log level from NLog config file. Please check if the nlog config file exists with corresponding XML nodes.");
             }
+
+            config.userAgentString = config.userAgent.Replace("$version", config.version);
 
             return config;
         }

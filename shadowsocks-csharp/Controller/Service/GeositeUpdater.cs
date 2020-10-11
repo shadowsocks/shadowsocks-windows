@@ -102,6 +102,8 @@ namespace Shadowsocks.Controller
             // because we can't change proxy on existing socketsHttpHandler instance
             httpClientHandler = new HttpClientHandler();
             httpClient = new HttpClient(httpClientHandler);
+            if (!string.IsNullOrWhiteSpace(config.userAgentString))
+                httpClient.DefaultRequestHeaders.Add("User-Agent", config.userAgentString);
             if (config.enabled)
             {
                 httpClientHandler.Proxy = new WebProxy(

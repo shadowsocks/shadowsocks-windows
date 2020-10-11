@@ -691,7 +691,7 @@ namespace Shadowsocks.Controller
 
         public async Task<int> UpdateOnlineConfigInternal(string url)
         {
-            var onlineServer = await OnlineConfigResolver.GetOnline(url, _config.WebProxy);
+            var onlineServer = await OnlineConfigResolver.GetOnline(url, _config.userAgentString, _config.WebProxy);
             _config.configs = Configuration.SortByOnlineConfig(
                 _config.configs
                 .Where(c => c.group != url)
