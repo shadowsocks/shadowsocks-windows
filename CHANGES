@@ -1,3 +1,9 @@
+4.2.1.0 2020-10-12
+- SIP008 support (#2942)
+- Exclude @cn from PAC proxied list (#2982)
+- Transition to WPF: ReactiveUI and ServerSharingView (#2959)
+- User-Agent for OnlineConfigResolver and GeositeUpdater (#2978)
+
 4.2.0.1 2020-09-26
 - Fix domain rule handling in PAC script (#2956)
 
