@@ -868,11 +868,11 @@ namespace Shadowsocks.View
         {
             if (!onlinePACItem.Checked)
             {
-                if (controller.GetConfigurationCopy().pacUrl.IsNullOrEmpty())
+                if (string.IsNullOrEmpty(controller.GetConfigurationCopy().pacUrl))
                 {
                     UpdateOnlinePACURLItem_Click(sender, e);
                 }
-                if (!controller.GetConfigurationCopy().pacUrl.IsNullOrEmpty())
+                if (!string.IsNullOrEmpty(controller.GetConfigurationCopy().pacUrl))
                 {
                     localPACItem.Checked = false;
                     onlinePACItem.Checked = true;
@@ -889,7 +889,7 @@ namespace Shadowsocks.View
                 I18N.GetString("Please input PAC Url"),
                 I18N.GetString("Edit Online PAC URL"),
                 origPacUrl, -1, -1);
-            if (!pacUrl.IsNullOrEmpty() && pacUrl != origPacUrl)
+            if (!string.IsNullOrEmpty(pacUrl) && pacUrl != origPacUrl)
             {
                 controller.SavePACUrl(pacUrl);
             }

@@ -68,7 +68,7 @@ namespace Shadowsocks.Encryption
 
         public static IEncryptor GetEncryptor(string method, string password)
         {
-            if (method.IsNullOrEmpty())
+            if (string.IsNullOrEmpty(method))
             {
                 method = Model.Server.DefaultMethod;
             }

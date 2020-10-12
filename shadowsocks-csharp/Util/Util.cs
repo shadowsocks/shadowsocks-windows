@@ -238,7 +238,7 @@ namespace Shadowsocks.Util
             // we are building x86 binary for both x86 and x64, which will
             // cause problem when opening registry key
             // detect operating system instead of CPU
-            if (name.IsNullOrEmpty()) throw new ArgumentException(nameof(name));
+            if (string.IsNullOrEmpty(name)) throw new ArgumentException(nameof(name));
             try
             {
                 RegistryKey userKey = RegistryKey.OpenBaseKey(hive,

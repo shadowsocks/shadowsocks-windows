@@ -110,7 +110,7 @@ namespace Shadowsocks.Controller.Hotkeys
         {
             try
             {
-                if (s.IsNullOrEmpty()) return null;
+                if (string.IsNullOrEmpty(s)) return null;
                 int offset = s.LastIndexOf("+", StringComparison.OrdinalIgnoreCase);
                 if (offset <= 0) return null;
                 string modifierStr = s.Substring(0, offset).Trim();

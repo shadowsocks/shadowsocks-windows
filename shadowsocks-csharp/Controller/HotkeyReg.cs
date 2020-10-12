@@ -50,7 +50,7 @@ namespace Shadowsocks.Controller
 
             var callback = _callback as HotKeys.HotKeyCallBackHandler;
 
-            if (hotkeyStr.IsNullOrEmpty())
+            if (string.IsNullOrEmpty(hotkeyStr))
             {
                 HotKeys.UnregExistingHotkey(callback);
                 onComplete?.Invoke(RegResult.UnregSuccess);

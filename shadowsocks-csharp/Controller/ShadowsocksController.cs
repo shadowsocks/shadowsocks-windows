@@ -420,7 +420,7 @@ namespace Shadowsocks.Controller
         {
             try
             {
-                if (ssURL.IsNullOrEmpty() || ssURL.IsWhiteSpace())
+                if (string.IsNullOrWhiteSpace(ssURL))
                     return false;
 
                 var servers = Server.GetServers(ssURL);
