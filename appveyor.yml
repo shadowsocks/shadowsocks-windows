@@ -30,7 +30,7 @@
 #---------------------------------#
 
 # Build worker image (VM template)
-image: Visual Studio 2017
+image: Visual Studio 2019
 
 # scripts that are called at very beginning, before repo cloning
 # init:
