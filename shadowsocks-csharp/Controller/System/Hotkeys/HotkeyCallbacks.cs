@@ -23,7 +23,7 @@ namespace Shadowsocks.Controller.Hotkeys
         /// <returns></returns>
         public static Delegate GetCallback(string methodname)
         {
-            if (methodname.IsNullOrEmpty()) throw new ArgumentException(nameof(methodname));
+            if (string.IsNullOrEmpty(methodname)) throw new ArgumentException(nameof(methodname));
             MethodInfo dynMethod = typeof(HotkeyCallbacks).GetMethod(methodname,
                 BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.IgnoreCase);
             return dynMethod == null ? null : Delegate.CreateDelegate(typeof(HotKeys.HotKeyCallBackHandler), Instance, dynMethod);

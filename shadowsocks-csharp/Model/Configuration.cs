@@ -292,13 +292,13 @@ namespace Shadowsocks.Model
 
         private static void CheckPassword(string password)
         {
-            if (password.IsNullOrEmpty())
+            if (string.IsNullOrEmpty(password))
                 throw new ArgumentException(I18N.GetString("Password can not be blank"));
         }
 
         public static void CheckServer(string server)
         {
-            if (server.IsNullOrEmpty())
+            if (string.IsNullOrEmpty(server))
                 throw new ArgumentException(I18N.GetString("Server IP can not be blank"));
         }
 
@@ -311,13 +311,13 @@ namespace Shadowsocks.Model
 
         public static void CheckProxyAuthUser(string user)
         {
-            if (user.IsNullOrEmpty())
+            if (string.IsNullOrEmpty(user))
                 throw new ArgumentException(I18N.GetString("Auth user can not be blank"));
         }
 
         public static void CheckProxyAuthPwd(string pwd)
         {
-            if (pwd.IsNullOrEmpty())
+            if (string.IsNullOrEmpty(pwd))
                 throw new ArgumentException(I18N.GetString("Auth pwd can not be blank"));
         }
     }

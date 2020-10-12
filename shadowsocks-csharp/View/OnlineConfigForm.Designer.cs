@@ -213,6 +213,6 @@
         private System.Windows.Forms.Button DeleteButton;
         private System.Windows.Forms.Button OkButton;
         private System.Windows.Forms.Button UpdateAllButton;
-        private System.Windows.Forms.Button CancelButton;
+        private new System.Windows.Forms.Button CancelButton;
     }
 }

@@ -39,8 +39,6 @@ namespace Shadowsocks.Proxy
 
             public object AsyncState { get; set; }
 
-            public int BytesToRead;
-
             public Exception ex { get; set; }
         }
 
@@ -199,7 +197,7 @@ namespace Shadowsocks.Proxy
             }
             else
             {
-                if (line.IsNullOrEmpty())
+                if (string.IsNullOrEmpty(line))
                 {
                     return true;
                 }

@@ -212,7 +212,7 @@ namespace Shadowsocks.Util.SystemProxy
 
                     if (arguments == "query")
                     {
-                        if (stdout.IsNullOrWhiteSpace() || stdout.IsNullOrEmpty())
+                        if (string.IsNullOrWhiteSpace(stdout))
                         {
                             // we cannot get user settings
                             throw new ProxyException(ProxyExceptionType.QueryReturnEmpty);

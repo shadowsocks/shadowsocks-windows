@@ -214,7 +214,7 @@ namespace Shadowsocks.Controller
                         AppendRecord(id, record);
                     }
                 }
-                catch (Exception e)
+                catch
                 {
                     logger.Debug("config changed asynchrously, just ignore this server");
                 }
