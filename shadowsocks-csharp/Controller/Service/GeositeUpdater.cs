@@ -71,7 +71,7 @@ namespace Shadowsocks.Controller
             var list = GeositeList.Parser.ParseFrom(geositeDB);
             foreach (var item in list.Entries)
             {
-                Geosites[item.GroupName.ToLower()] = item.Domains;
+                Geosites[item.GroupName.ToLowerInvariant()] = item.Domains;
             }
         }
 
