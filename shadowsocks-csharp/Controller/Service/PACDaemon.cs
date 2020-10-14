@@ -45,7 +45,7 @@ namespace Shadowsocks.Controller
         {
             if (!File.Exists(PAC_FILE))
             {
-                GeositeUpdater.MergeAndWritePACFile(config.geositeGroup, config.geositeBlacklistMode);
+                GeositeUpdater.MergeAndWritePACFile(config.geositeDirectGroups, config.geositeProxiedGroups, config.geositePreferDirect);
             }
             return PAC_FILE;
         }
@@ -63,7 +63,7 @@ namespace Shadowsocks.Controller
         {
             if (!File.Exists(PAC_FILE))
             {
-                GeositeUpdater.MergeAndWritePACFile(config.geositeGroup, config.geositeBlacklistMode);
+                GeositeUpdater.MergeAndWritePACFile(config.geositeDirectGroups, config.geositeProxiedGroups, config.geositePreferDirect);
             }
             return File.ReadAllText(PAC_FILE, Encoding.UTF8);
         }

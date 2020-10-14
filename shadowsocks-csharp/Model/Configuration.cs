@@ -44,10 +44,11 @@ namespace Shadowsocks.Model
 
         // hidden options
         public bool isIPv6Enabled; // for experimental ipv6 support
-        public bool generateLegacyUrl = false; // for pre-sip002 url compatibility
+        public bool generateLegacyUrl; // for pre-sip002 url compatibility
         public string geositeUrl; // for custom geosite source (and rule group)
-        public string geositeGroup;
-        public bool geositeBlacklistMode;
+        public List<string> geositeDirectGroups;  // groups of domains that we connect without the proxy
+        public List<string> geositeProxiedGroups; // groups of domains that we connect via the proxy
+        public bool geositePreferDirect; // a.k.a blacklist mode
         public string userAgent;
 
         //public NLogConfig.LogLevel logLevel;
@@ -83,8 +84,16 @@ namespace Shadowsocks.Model
             isIPv6Enabled = false;
             generateLegacyUrl = false;
             geositeUrl = "";
-            geositeGroup = "geolocation-!cn";
-            geositeBlacklistMode = true;
+            geositeDirectGroups = new List<string>()
+            {
+                "cn",
+                "geolocation-!cn@cn"
+            };
+            geositeProxiedGroups = new List<string>()
+            {
+                "geolocation-!cn"
+            };
+            geositePreferDirect = false;
             userAgent = "ShadowsocksWindows/$version";
 
             logViewer = new LogViewerConfig();
@@ -154,7 +163,10 @@ namespace Shadowsocks.Model
                 try
                 {
                     string configContent = File.ReadAllText(CONFIG_FILE);
-                    config = JsonConvert.DeserializeObject<Configuration>(configContent);
+                    config = JsonConvert.DeserializeObject<Configuration>(configContent, new JsonSerializerSettings()
+                    {
+                        ObjectCreationHandling = ObjectCreationHandling.Replace
+                    });
                     return config;
                 }
                 catch (Exception e)
@@ -173,18 +185,12 @@ namespace Shadowsocks.Model
         /// <param name="config">A reference of Configuration object.</param>
         public static void Process(ref Configuration config)
         {
-            // Verify if the configured geosite group exists.
-            // Reset to default if no such group.
-            if (!GeositeUpdater.CheckGeositeGroup(config.geositeGroup))
-            {
-#if DEBUG
-                logger.Debug($"Current group: {config.geositeGroup}");
-                foreach (var group in GeositeUpdater.Geosites.Keys)
-                    logger.Debug($"{group}");
-#endif
-                config.geositeGroup = "geolocation-!cn";
-                logger.Warn("The specified Geosite group doesn't exist. Using default group.");
-            }
+            // Verify if the configured geosite groups exist.
+            // Reset to default if ANY one of the configured group doesn't exist.
+            if (!ValidateGeositeGroupList(config.geositeDirectGroups))
+                ResetGeositeDirectGroup(ref config.geositeDirectGroups);
+            if (!ValidateGeositeGroupList(config.geositeProxiedGroups))
+                ResetGeositeProxiedGroup(ref config.geositeProxiedGroups);
 
             // Mark the first run of a new version.
             if (UpdateChecker.Asset.CompareVersion(UpdateChecker.Version, config.version ?? "0") > 0)
@@ -271,6 +277,43 @@ namespace Shadowsocks.Model
             ret.AddRange(groups.Where(g => string.IsNullOrEmpty(g.Key)).SelectMany(g => g));
             ret.AddRange(groups.Where(g => !string.IsNullOrEmpty(g.Key)).SelectMany(g => g));
             return ret;
+        }
+
+        /// <summary>
+        /// Validates if the groups in the list are all valid.
+        /// </summary>
+        /// <param name="groups">The list of groups to validate.</param>
+        /// <returns>
+        /// True if all groups are valid.
+        /// False if any one of them is invalid.
+        /// </returns>
+        public static bool ValidateGeositeGroupList(List<string> groups)
+        {
+            foreach (var geositeGroup in groups)
+                if (!GeositeUpdater.CheckGeositeGroup(geositeGroup)) // found invalid group
+                {
+#if DEBUG
+                    logger.Debug($"Available groups:");
+                    foreach (var group in GeositeUpdater.Geosites.Keys)
+                        logger.Debug($"{group}");
+#endif
+                    logger.Warn($"The Geosite group {geositeGroup} doesn't exist. Resetting to default groups.");
+                    return false;
+                }
+            return true;
+        }
+
+        public static void ResetGeositeDirectGroup(ref List<string> geositeDirectGroups)
+        {
+            geositeDirectGroups.Clear();
+            geositeDirectGroups.Add("cn");
+            geositeDirectGroups.Add("geolocation-!cn@cn");
+        }
+
+        public static void ResetGeositeProxiedGroup(ref List<string> geositeProxiedGroups)
+        {
+            geositeProxiedGroups.Clear();
+            geositeProxiedGroups.Add("geolocation-!cn");
         }
 
         public static Server AddDefaultServerOrServer(Configuration config, Server server = null, int? index = null)
