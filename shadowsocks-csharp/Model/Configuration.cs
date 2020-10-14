@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Windows;
 using Newtonsoft.Json;
 using NLog;
 using Shadowsocks.Controller;
@@ -27,14 +28,15 @@ namespace Shadowsocks.Model
         public bool global;
         public bool enabled;
         public bool shareOverLan;
-        public bool isDefault;
+        public bool firstRun;
         public int localPort;
         public bool portableMode;
         public bool showPluginOutput;
         public string pacUrl;
 
         public bool useOnlinePac;
-        public bool secureLocalPac;
+        public bool secureLocalPac; // enable secret for PAC server
+        public bool regeneratePacOnUpdate; // regenerate pac.txt on version update
         public bool availabilityStatistics;
         public bool autoCheckUpdate;
         public bool checkPreRelease;
@@ -54,7 +56,7 @@ namespace Shadowsocks.Model
         public HotkeyConfig hotkey;
 
         [JsonIgnore]
-        public bool updated;
+        public bool firstRunOnNewVersion;
 
         public Configuration()
         {
@@ -64,13 +66,14 @@ namespace Shadowsocks.Model
             global = false;
             enabled = false;
             shareOverLan = false;
-            isDefault = true;
+            firstRun = true;
             localPort = 1080;
             portableMode = true;
             showPluginOutput = false;
             pacUrl = "";
             useOnlinePac = false;
             secureLocalPac = true;
+            regeneratePacOnUpdate = true;
             availabilityStatistics = false;
             autoCheckUpdate = false;
             checkPreRelease = false;
@@ -88,7 +91,7 @@ namespace Shadowsocks.Model
             proxy = new ProxyConfig();
             hotkey = new HotkeyConfig();
 
-            updated = false;
+            firstRunOnNewVersion = false;
 
             configs = new List<Server>();
             onlineConfigSource = new List<string>();
@@ -108,11 +111,8 @@ namespace Shadowsocks.Model
 #endif
 
         [JsonIgnore]
-        public string localHost => GetLocalHost();
-        private string GetLocalHost()
-        {
-            return isIPv6Enabled ? "[::1]" : "127.0.0.1";
-        }
+        public string LocalHost => isIPv6Enabled ? "[::1]" : "127.0.0.1";
+
         public Server GetCurrentServer()
         {
             if (index >= 0 && index < configs.Count)
@@ -129,6 +129,11 @@ namespace Shadowsocks.Model
                     localPort)
             : null;
 
+        /// <summary>
+        /// Used by multiple forms to validate a server.
+        /// Communication is done by throwing exceptions.
+        /// </summary>
+        /// <param name="server"></param>
         public static void CheckServer(Server server)
         {
             CheckServer(server.server);
@@ -137,53 +142,71 @@ namespace Shadowsocks.Model
             CheckTimeout(server.timeout, Server.MaxServerTimeoutSec);
         }
 
-        public static bool ChecksServer(Server server)
-        {
-            try
-            {
-                CheckServer(server);
-                return true;
-            }
-            catch (Exception)
-            {
-                return false;
-            }
-        }
-
+        /// <summary>
+        /// Loads the configuration from file.
+        /// </summary>
+        /// <returns>An Configuration object.</returns>
         public static Configuration Load()
         {
             Configuration config;
-            try
+            if (File.Exists(CONFIG_FILE))
             {
-                string configContent = File.ReadAllText(CONFIG_FILE);
-                config = JsonConvert.DeserializeObject<Configuration>(configContent);
-                config.isDefault = false;
-                config.version = UpdateChecker.Version;
-                if (UpdateChecker.Asset.CompareVersion(UpdateChecker.Version, config.version ?? "0") > 0)
+                try
                 {
-                    config.updated = true;
+                    string configContent = File.ReadAllText(CONFIG_FILE);
+                    config = JsonConvert.DeserializeObject<Configuration>(configContent);
+                    return config;
                 }
-
-                if (config.configs.Count == 0)
-                    config.configs.Add(GetDefaultServer());
-                if (config.index == -1 && string.IsNullOrEmpty(config.strategy))
-                    config.index = 0;
-                if (!System.Net.Sockets.Socket.OSSupportsIPv6)
+                catch (Exception e)
                 {
-                    config.isIPv6Enabled = false; // disable IPv6 if os not support
+                    if (!(e is FileNotFoundException))
+                        logger.LogUsefulException(e);
                 }
-                //TODO if remote host(server) do not support IPv6 (or DNS resolve AAAA TYPE record) disable IPv6?
-
-                config.proxy.CheckConfig();
             }
-            catch (Exception e)
+            config = new Configuration();
+            return config;
+        }
+
+        /// <summary>
+        /// Process the loaded configurations and set up things.
+        /// </summary>
+        /// <param name="config">A reference of Configuration object.</param>
+        public static void Process(ref Configuration config)
+        {
+            // Verify if the configured geosite group exists.
+            // Reset to default if no such group.
+            if (!GeositeUpdater.CheckGeositeGroup(config.geositeGroup))
             {
-                if (!(e is FileNotFoundException))
-                    logger.LogUsefulException(e);
-                config = new Configuration();
+#if DEBUG
+                logger.Debug($"Current group: {config.geositeGroup}");
+                foreach (var group in GeositeUpdater.Geosites.Keys)
+                    logger.Debug($"{group}");
+#endif
+                config.geositeGroup = "geolocation-!cn";
+                logger.Warn("The specified Geosite group doesn't exist. Using default group.");
+            }
+
+            // Mark the first run of a new version.
+            if (UpdateChecker.Asset.CompareVersion(UpdateChecker.Version, config.version ?? "0") > 0)
+            {
+                config.firstRunOnNewVersion = true;
+            }
+            // Add an empty server configuration
+            if (config.configs.Count == 0)
                 config.configs.Add(GetDefaultServer());
-            }
+            // Selected server
+            if (config.index == -1 && string.IsNullOrEmpty(config.strategy))
+                config.index = 0;
+            if (config.index >= config.configs.Count)
+                config.index = config.configs.Count - 1;
+            // Check OS IPv6 support
+            if (!System.Net.Sockets.Socket.OSSupportsIPv6)
+                config.isIPv6Enabled = false;
+            config.proxy.CheckConfig();
+            // Replace $version with the version number.
+            config.userAgentString = config.userAgent.Replace("$version", config.version);
 
+            // NLog log level
             try
             {
                 config.nLogConfig = NLogConfig.LoadXML();
@@ -203,47 +226,41 @@ namespace Shadowsocks.Model
             }
             catch (Exception e)
             {
-                // todo: route the error to UI since there is no log file in this scenario
-                logger.Error(e, "Cannot get the log level from NLog config file. Please check if the nlog config file exists with corresponding XML nodes.");
+                MessageBox.Show($"Cannot get the log level from NLog config file. Please check if the nlog config file exists with corresponding XML nodes.\n{e.Message}");
             }
-
-            config.userAgentString = config.userAgent.Replace("$version", config.version);
-
-            return config;
         }
 
+        /// <summary>
+        /// Saves the Configuration object to file.
+        /// </summary>
+        /// <param name="config">A Configuration object.</param>
         public static void Save(Configuration config)
         {
             config.configs = SortByOnlineConfig(config.configs);
-            if (config.index >= config.configs.Count)
-                config.index = config.configs.Count - 1;
-            if (config.index < -1)
-                config.index = -1;
-            if (config.index == -1 && string.IsNullOrEmpty(config.strategy))
-                config.index = 0;
-            config.isDefault = false;
+
+            FileStream configFileStream = null;
+            StreamWriter configStreamWriter = null;
             try
             {
-                using (StreamWriter sw = new StreamWriter(File.Open(CONFIG_FILE, FileMode.Create)))
-                {
-                    string jsonString = JsonConvert.SerializeObject(config, Formatting.Indented);
-                    sw.Write(jsonString);
-                    sw.Flush();
-                }
-                try
-                {
-                    // apply changes to NLog.config
-                    config.nLogConfig.SetLogLevel(config.isVerboseLogging ? verboseLogLevel : NLogConfig.LogLevel.Info);
-                    NLogConfig.SaveXML(config.nLogConfig);
-                }
-                catch (Exception e)
-                {
-                    logger.Error(e, "Cannot set the log level to NLog config file. Please check if the nlog config file exists with corresponding XML nodes.");
-                }
+                configFileStream = File.Open(CONFIG_FILE, FileMode.Create);
+                configStreamWriter = new StreamWriter(configFileStream);
+                var jsonString = JsonConvert.SerializeObject(config, Formatting.Indented);
+                configStreamWriter.Write(jsonString);
+                configStreamWriter.Flush();
+                // NLog
+                config.nLogConfig.SetLogLevel(config.isVerboseLogging ? verboseLogLevel : NLogConfig.LogLevel.Info);
+                NLogConfig.SaveXML(config.nLogConfig);
             }
-            catch (IOException e)
+            catch (Exception e)
             {
                 logger.LogUsefulException(e);
+            }
+            finally
+            {
+                if (configStreamWriter != null)
+                    configStreamWriter.Dispose();
+                if (configFileStream != null)
+                    configFileStream.Dispose();
             }
         }
 

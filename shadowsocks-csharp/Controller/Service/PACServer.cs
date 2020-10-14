@@ -45,7 +45,7 @@ namespace Shadowsocks.Controller
             _config = config;
             string usedSecret = _config.secureLocalPac ? $"&secret={PacSecret}" : "";
             string contentHash = GetHash(_pacDaemon.GetPACContent());
-            PacUrl = $"http://{config.localHost}:{config.localPort}/{RESOURCE_NAME}?hash={contentHash}{usedSecret}";
+            PacUrl = $"http://{config.LocalHost}:{config.localPort}/{RESOURCE_NAME}?hash={contentHash}{usedSecret}";
             logger.Debug("Set PAC URL:" + PacUrl);
         }
 
@@ -176,7 +176,6 @@ Connection: Close
 ";
                 byte[] response = Encoding.UTF8.GetBytes(responseHead + pacContent);
                 socket.BeginSend(response, 0, response.Length, 0, new AsyncCallback(SendCallback), socket);
-                Utils.ReleaseMemory(true);
             }
             catch (Exception e)
             {

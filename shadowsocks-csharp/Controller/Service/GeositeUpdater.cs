@@ -192,6 +192,13 @@ namespace Shadowsocks.Controller
             return true;
         }
 
+        /// <summary>
+        /// Checks if the specified group exists in GeoSite database.
+        /// </summary>
+        /// <param name="group">The group name to check for.</param>
+        /// <returns>True if the group exists. False if the group doesn't exist.</returns>
+        public static bool CheckGeositeGroup(string group) => Geosites.ContainsKey(group);
+
         private static string MergePACFile(IList<DomainObject> domains, bool blacklist)
         {
             string abpContent;

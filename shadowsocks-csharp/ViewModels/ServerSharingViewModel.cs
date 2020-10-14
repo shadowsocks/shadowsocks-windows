@@ -16,7 +16,7 @@ namespace Shadowsocks.ViewModels
         /// </summary>
         public ServerSharingViewModel()
         {
-            _config = Configuration.Load();
+            _config = Program.MainController.GetCurrentConfiguration();
             _servers = _config.configs;
             _selectedServer = _servers.First();
             //_selectedServerUrlImage = new BitmapImage();
