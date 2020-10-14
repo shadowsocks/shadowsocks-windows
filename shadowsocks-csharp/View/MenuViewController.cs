@@ -29,7 +29,6 @@ namespace Shadowsocks.View
         private NotifyIcon _notifyIcon;
         private Icon icon, icon_in, icon_out, icon_both, previousIcon;
 
-        private bool _isFirstRun;
         private bool _isStartupChecking;
         private string _urlToOpen;
 
@@ -50,6 +49,7 @@ namespace Shadowsocks.View
         private MenuItem editGFWUserRuleItem;
         private MenuItem editOnlinePACItem;
         private MenuItem secureLocalPacUrlToggleItem;
+        private MenuItem regenerateLocalPacOnUpdateItem;
         private MenuItem autoCheckUpdatesToggleItem;
         private MenuItem checkPreReleaseToggleItem;
         private MenuItem proxyItem;
@@ -108,9 +108,8 @@ namespace Shadowsocks.View
 
             Configuration config = controller.GetConfigurationCopy();
 
-            if (config.isDefault)
+            if (config.firstRun)
             {
-                _isFirstRun = true;
                 ShowConfigForm();
             }
             else if (config.autoCheckUpdate)
@@ -279,6 +278,7 @@ namespace Shadowsocks.View
                     this.updateFromGeositeItem = CreateMenuItem("Update Local PAC from Geosite", new EventHandler(this.UpdatePACFromGeositeItem_Click)),
                     this.editGFWUserRuleItem = CreateMenuItem("Edit User Rule for Geosite...", new EventHandler(this.EditUserRuleFileForGeositeItem_Click)),
                     this.secureLocalPacUrlToggleItem = CreateMenuItem("Secure Local PAC", new EventHandler(this.SecureLocalPacUrlToggleItem_Click)),
+                    this.regenerateLocalPacOnUpdateItem = CreateMenuItem("Regenerate local PAC on version update", new EventHandler(this.RegenerateLocalPacOnUpdateItem_Click)),
                     CreateMenuItem("Copy Local PAC URL", new EventHandler(this.CopyLocalPacUrlItem_Click)),
                     this.editOnlinePACItem = CreateMenuItem("Edit Online PAC URL...", new EventHandler(this.UpdateOnlinePACURLItem_Click)),
                 }),
@@ -336,7 +336,7 @@ namespace Shadowsocks.View
             }
         }
 
-        void controller_Errored(object sender, System.IO.ErrorEventArgs e)
+        void controller_Errored(object sender, ErrorEventArgs e)
         {
             MessageBox.Show(e.GetException().ToString(), I18N.GetString("Shadowsocks Error: {0}", e.GetException().Message));
         }
@@ -360,6 +360,7 @@ namespace Shadowsocks.View
             onlinePACItem.Checked = onlinePACItem.Enabled && config.useOnlinePac;
             localPACItem.Checked = !onlinePACItem.Checked;
             secureLocalPacUrlToggleItem.Checked = config.secureLocalPac;
+            regenerateLocalPacOnUpdateItem.Checked = config.regeneratePacOnUpdate;
             UpdatePACItemsEnabledStatus();
             UpdateUpdateMenu();
         }
@@ -446,15 +447,14 @@ namespace Shadowsocks.View
         {
             logForm.Dispose();
             logForm = null;
-            Utils.ReleaseMemory(true);
         }
 
         void configForm_FormClosed(object sender, FormClosedEventArgs e)
         {
             configForm.Dispose();
             configForm = null;
-            Utils.ReleaseMemory(true);
-            if (_isFirstRun)
+            var config = controller.GetCurrentConfiguration();
+            if (config.firstRun)
             {
                 CheckUpdateForFirstRun();
                 ShowBalloonTip(
@@ -463,7 +463,7 @@ namespace Shadowsocks.View
                     ToolTipIcon.Info,
                     0
                 );
-                _isFirstRun = false;
+                config.firstRun = false;
             }
         }
 
@@ -471,21 +471,18 @@ namespace Shadowsocks.View
         {
             proxyForm.Dispose();
             proxyForm = null;
-            Utils.ReleaseMemory(true);
         }
 
         void hotkeySettingsForm_FormClosed(object sender, FormClosedEventArgs e)
         {
             hotkeySettingsForm.Dispose();
             hotkeySettingsForm = null;
-            Utils.ReleaseMemory(true);
         }
 
         void onlineConfigForm_FormClosed(object sender, FormClosedEventArgs e)
         {
             onlineConfigForm.Dispose();
             onlineConfigForm = null;
-            Utils.ReleaseMemory(true);
         }
 
         #endregion
@@ -541,7 +538,8 @@ namespace Shadowsocks.View
         private void CheckUpdateForFirstRun()
         {
             Configuration config = controller.GetConfigurationCopy();
-            if (config.isDefault) return;
+            if (config.firstRun)
+                return;
             _isStartupChecking = true;
             updateChecker.CheckUpdate(config, 3000);
         }
@@ -689,13 +687,17 @@ namespace Shadowsocks.View
             Configuration configuration = controller.GetConfigurationCopy();
             foreach (var server in configuration.configs)
             {
-                if (Configuration.ChecksServer(server))
+                try
                 {
+                    Configuration.CheckServer(server);
                     MenuItem item = new MenuItem(server.ToString());
                     item.Tag = configuration.configs.FindIndex(s => s == server);
                     item.Click += AServerItem_Click;
                     items.Add(strategyCount + serverCount, item);
                     serverCount++;
+                }
+                catch
+                {
                 }
             }
 
@@ -899,6 +901,12 @@ namespace Shadowsocks.View
         {
             Configuration configuration = controller.GetConfigurationCopy();
             controller.ToggleSecureLocalPac(!configuration.secureLocalPac);
+        }
+
+        private void RegenerateLocalPacOnUpdateItem_Click(object sender, EventArgs e)
+        {
+            var config = controller.GetConfigurationCopy();
+            controller.ToggleRegeneratePacOnUpdate(!config.regeneratePacOnUpdate);
         }
 
         private void CopyLocalPacUrlItem_Click(object sender, EventArgs e)

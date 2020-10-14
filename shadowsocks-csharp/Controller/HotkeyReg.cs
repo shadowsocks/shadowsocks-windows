@@ -12,7 +12,7 @@ namespace Shadowsocks.Controller
         private static Logger logger = LogManager.GetCurrentClassLogger();
         public static void RegAllHotkeys()
         {
-            var hotkeyConfig = Configuration.Load().hotkey;
+            var hotkeyConfig = Program.MainController.GetCurrentConfiguration().hotkey;
 
             if (hotkeyConfig == null || !hotkeyConfig.RegHotkeysAtStartup)
                 return;

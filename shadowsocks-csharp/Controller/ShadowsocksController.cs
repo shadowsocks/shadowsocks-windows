@@ -27,7 +27,6 @@ namespace Shadowsocks.Controller
         // manipulates UI
         // interacts with low level logic
         #region Members definition
-        private Thread _ramThread;
         private Thread _trafficThread;
 
         private Listener _listener;
@@ -93,10 +92,10 @@ namespace Shadowsocks.Controller
         public ShadowsocksController()
         {
             _config = Configuration.Load();
+            Configuration.Process(ref _config);
             StatisticsConfiguration = StatisticsStrategyConfiguration.Load();
             _strategyManager = new StrategyManager(this);
             _pluginsByServer = new ConcurrentDictionary<Server, Sip003Plugin>();
-            StartReleasingMemory();
             StartTrafficStatistics(61);
 
             ProgramUpdated += (o, e) =>
@@ -107,23 +106,34 @@ namespace Shadowsocks.Controller
 
         #region Basic
 
-        public void Start(bool regHotkeys = true)
+        public void Start(bool systemWakeUp = false)
         {
-            if (_config.updated && regHotkeys)
+            if (_config.firstRunOnNewVersion && !systemWakeUp)
             {
-                _config.updated = false;
                 ProgramUpdated.Invoke(this, new UpdatedEventArgs()
                 {
                     OldVersion = _config.version,
                     NewVersion = UpdateChecker.Version,
                 });
+                // delete pac.txt when regeneratePacOnUpdate is true
+                if (_config.regeneratePacOnUpdate)
+                    try
+                    {
+                        File.Delete(PACDaemon.PAC_FILE);
+                        logger.Info("Deleted pac.txt from previous version.");
+                    }
+                    catch (Exception e)
+                    {
+                        logger.LogUsefulException(e);
+                    }
+                // finish up first run of new version
+                _config.firstRunOnNewVersion = false;
+                _config.version = UpdateChecker.Version;
                 Configuration.Save(_config);
             }
             Reload();
-            if (regHotkeys)
-            {
+            if (!systemWakeUp)
                 HotkeyReg.RegAllHotkeys();
-            }
         }
 
         public void Stop()
@@ -154,6 +164,7 @@ namespace Shadowsocks.Controller
             Encryption.RNG.Reload();
             // some logic in configuration updated the config when saving, we need to read it again
             _config = Configuration.Load();
+            Configuration.Process(ref _config);
 
             NLogConfig.LoadConfiguration();
 
@@ -226,7 +237,6 @@ namespace Shadowsocks.Controller
 
             ConfigChanged?.Invoke(this, new EventArgs());
             UpdateSystemProxy();
-            Utils.ReleaseMemory(true);
         }
 
         protected void SaveConfig(Configuration newConfig)
@@ -391,6 +401,13 @@ namespace Shadowsocks.Controller
             _config.secureLocalPac = enabled;
             SaveConfig(_config);
 
+            ConfigChanged?.Invoke(this, new EventArgs());
+        }
+
+        public void ToggleRegeneratePacOnUpdate(bool enabled)
+        {
+            _config.regeneratePacOnUpdate = enabled;
+            SaveConfig(_config);
             ConfigChanged?.Invoke(this, new EventArgs());
         }
 
@@ -618,28 +635,6 @@ namespace Shadowsocks.Controller
             SaveConfig(_config);
 
             ShowPluginOutputChanged?.Invoke(this, new EventArgs());
-        }
-
-        #endregion
-
-        #region Memory Management
-
-        private void StartReleasingMemory()
-        {
-            _ramThread = new Thread(new ThreadStart(ReleaseMemory))
-            {
-                IsBackground = true
-            };
-            _ramThread.Start();
-        }
-
-        private void ReleaseMemory()
-        {
-            while (true)
-            {
-                Utils.ReleaseMemory(false);
-                Thread.Sleep(30 * 1000);
-            }
         }
 
         #endregion

@@ -97,8 +97,6 @@ namespace Shadowsocks
             #endregion
 
             #region Event Handlers Setup
-            Utils.ReleaseMemory(true);
-
             Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
             // handle UI exceptions
             Application.ThreadException += Application_ThreadException;
@@ -185,7 +183,7 @@ namespace Shadowsocks
                             Thread.Sleep(10 * 1000);
                             try
                             {
-                                MainController.Start(false);
+                                MainController.Start(true);
                                 logger.Info("controller started");
                             }
                             catch (Exception ex)
