@@ -3,6 +3,7 @@ using Shadowsocks.Controller;
 using Shadowsocks.Model;
 using Shadowsocks.Properties;
 using Shadowsocks.Util;
+using Shadowsocks.Views;
 using System;
 using System.Diagnostics;
 using System.Drawing;
@@ -65,7 +66,7 @@ namespace Shadowsocks.View
         private HotkeySettingsForm hotkeySettingsForm;
         private OnlineConfigForm onlineConfigForm;
 
-        private ServerSharingWindow serverSharingWindow;
+        private System.Windows.Window serverSharingWindow;
 
         // color definition for icon color transformation
         private readonly Color colorMaskBlue = Color.FromArgb(255, 25, 125, 191);
@@ -106,7 +107,7 @@ namespace Shadowsocks.View
 
             LoadCurrentConfiguration();
 
-            Configuration config = controller.GetConfigurationCopy();
+            Configuration config = controller.GetCurrentConfiguration();
 
             if (config.firstRun)
             {
@@ -123,7 +124,7 @@ namespace Shadowsocks.View
 
         private void UpdateTrayIconAndNotifyText()
         {
-            Configuration config = controller.GetConfigurationCopy();
+            Configuration config = controller.GetCurrentConfiguration();
             bool enabled = config.enabled;
             bool global = config.global;
 
@@ -349,7 +350,7 @@ namespace Shadowsocks.View
 
         private void LoadCurrentConfiguration()
         {
-            Configuration config = controller.GetConfigurationCopy();
+            Configuration config = controller.GetCurrentConfiguration();
             UpdateServersMenu();
             UpdateSystemProxyItemsEnabledStatus(config);
             ShareOverLANItem.Checked = config.shareOverLan;
@@ -537,7 +538,7 @@ namespace Shadowsocks.View
 
         private void CheckUpdateForFirstRun()
         {
-            Configuration config = controller.GetConfigurationCopy();
+            Configuration config = controller.GetCurrentConfiguration();
             if (config.firstRun)
                 return;
             _isStartupChecking = true;
@@ -555,7 +556,7 @@ namespace Shadowsocks.View
 
         void controller_ShareOverLANStatusChanged(object sender, EventArgs e)
         {
-            ShareOverLANItem.Checked = controller.GetConfigurationCopy().shareOverLan;
+            ShareOverLANItem.Checked = controller.GetCurrentConfiguration().shareOverLan;
         }
 
         private void proxyItem_Click(object sender, EventArgs e)
@@ -612,19 +613,19 @@ namespace Shadowsocks.View
 
         private void controller_EnableStatusChanged(object sender, EventArgs e)
         {
-            disableItem.Checked = !controller.GetConfigurationCopy().enabled;
+            disableItem.Checked = !controller.GetCurrentConfiguration().enabled;
         }
 
         private void EnableItem_Click(object sender, EventArgs e)
         {
             controller.ToggleEnable(false);
-            Configuration config = controller.GetConfigurationCopy();
+            Configuration config = controller.GetCurrentConfiguration();
             UpdateSystemProxyItemsEnabledStatus(config);
         }
 
         void controller_EnableGlobalChanged(object sender, EventArgs e)
         {
-            globalModeItem.Checked = controller.GetConfigurationCopy().global;
+            globalModeItem.Checked = controller.GetCurrentConfiguration().global;
             PACModeItem.Checked = !globalModeItem.Checked;
         }
 
@@ -647,7 +648,7 @@ namespace Shadowsocks.View
         {
             controller.ToggleEnable(true);
             controller.ToggleGlobal(true);
-            Configuration config = controller.GetConfigurationCopy();
+            Configuration config = controller.GetCurrentConfiguration();
             UpdateSystemProxyItemsEnabledStatus(config);
         }
 
@@ -655,7 +656,7 @@ namespace Shadowsocks.View
         {
             controller.ToggleEnable(true);
             controller.ToggleGlobal(false);
-            Configuration config = controller.GetConfigurationCopy();
+            Configuration config = controller.GetCurrentConfiguration();
             UpdateSystemProxyItemsEnabledStatus(config);
         }
 
@@ -684,7 +685,7 @@ namespace Shadowsocks.View
             items.Add(strategyCount++, new MenuItem("-"));
 
             int serverCount = 0;
-            Configuration configuration = controller.GetConfigurationCopy();
+            Configuration configuration = controller.GetCurrentConfiguration();
             foreach (var server in configuration.configs)
             {
                 try
@@ -747,7 +748,13 @@ namespace Shadowsocks.View
         {
             if (serverSharingWindow == null)
             {
-                serverSharingWindow = new ServerSharingWindow();
+                serverSharingWindow = new System.Windows.Window()
+                {
+                    Title = "Server Sharing",
+                    Height = 400,
+                    Width = 660,
+                    Content = new ServerSharingView()
+                };
                 serverSharingWindow.Closed += ServerSharingWindow_Closed;
                 serverSharingWindow.Show();
             }
@@ -870,11 +877,11 @@ namespace Shadowsocks.View
         {
             if (!onlinePACItem.Checked)
             {
-                if (string.IsNullOrEmpty(controller.GetConfigurationCopy().pacUrl))
+                if (string.IsNullOrEmpty(controller.GetCurrentConfiguration().pacUrl))
                 {
                     UpdateOnlinePACURLItem_Click(sender, e);
                 }
-                if (!string.IsNullOrEmpty(controller.GetConfigurationCopy().pacUrl))
+                if (!string.IsNullOrEmpty(controller.GetCurrentConfiguration().pacUrl))
                 {
                     localPACItem.Checked = false;
                     onlinePACItem.Checked = true;
@@ -886,7 +893,7 @@ namespace Shadowsocks.View
 
         private void UpdateOnlinePACURLItem_Click(object sender, EventArgs e)
         {
-            string origPacUrl = controller.GetConfigurationCopy().pacUrl;
+            string origPacUrl = controller.GetCurrentConfiguration().pacUrl;
             string pacUrl = Microsoft.VisualBasic.Interaction.InputBox(
                 I18N.GetString("Please input PAC Url"),
                 I18N.GetString("Edit Online PAC URL"),
@@ -899,13 +906,13 @@ namespace Shadowsocks.View
 
         private void SecureLocalPacUrlToggleItem_Click(object sender, EventArgs e)
         {
-            Configuration configuration = controller.GetConfigurationCopy();
+            Configuration configuration = controller.GetCurrentConfiguration();
             controller.ToggleSecureLocalPac(!configuration.secureLocalPac);
         }
 
         private void RegenerateLocalPacOnUpdateItem_Click(object sender, EventArgs e)
         {
-            var config = controller.GetConfigurationCopy();
+            var config = controller.GetCurrentConfiguration();
             controller.ToggleRegeneratePacOnUpdate(!config.regeneratePacOnUpdate);
         }
 
@@ -974,12 +981,12 @@ namespace Shadowsocks.View
 
         void controller_VerboseLoggingStatusChanged(object sender, EventArgs e)
         {
-            VerboseLoggingToggleItem.Checked = controller.GetConfigurationCopy().isVerboseLogging;
+            VerboseLoggingToggleItem.Checked = controller.GetCurrentConfiguration().isVerboseLogging;
         }
 
         void controller_ShowPluginOutputChanged(object sender, EventArgs e)
         {
-            ShowPluginOutputToggleItem.Checked = controller.GetConfigurationCopy().showPluginOutput;
+            ShowPluginOutputToggleItem.Checked = controller.GetCurrentConfiguration().showPluginOutput;
         }
 
         private void VerboseLoggingToggleItem_Click(object sender, EventArgs e)
@@ -1023,28 +1030,28 @@ namespace Shadowsocks.View
 
         private void UpdateUpdateMenu()
         {
-            Configuration configuration = controller.GetConfigurationCopy();
+            Configuration configuration = controller.GetCurrentConfiguration();
             autoCheckUpdatesToggleItem.Checked = configuration.autoCheckUpdate;
             checkPreReleaseToggleItem.Checked = configuration.checkPreRelease;
         }
 
         private void autoCheckUpdatesToggleItem_Click(object sender, EventArgs e)
         {
-            Configuration configuration = controller.GetConfigurationCopy();
+            Configuration configuration = controller.GetCurrentConfiguration();
             controller.ToggleCheckingUpdate(!configuration.autoCheckUpdate);
             UpdateUpdateMenu();
         }
 
         private void checkPreReleaseToggleItem_Click(object sender, EventArgs e)
         {
-            Configuration configuration = controller.GetConfigurationCopy();
+            Configuration configuration = controller.GetCurrentConfiguration();
             controller.ToggleCheckingPreRelease(!configuration.checkPreRelease);
             UpdateUpdateMenu();
         }
 
         private void checkUpdatesItem_Click(object sender, EventArgs e)
         {
-            updateChecker.CheckUpdate(controller.GetConfigurationCopy());
+            updateChecker.CheckUpdate(controller.GetCurrentConfiguration());
         }
 
         private void AboutItem_Click(object sender, EventArgs e)

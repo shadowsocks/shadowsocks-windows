@@ -40,7 +40,7 @@ namespace Shadowsocks.View
 
         private void LoadCurrentConfiguration()
         {
-            _modifiedHotkeyConfig = _controller.GetConfigurationCopy().hotkey;
+            _modifiedHotkeyConfig = _controller.GetCurrentConfiguration().hotkey;
             SetConfigToUI(_modifiedHotkeyConfig);
         }
 

@@ -24,7 +24,7 @@ namespace Shadowsocks.View
 
         private void LoadConfig()
         {
-            config = controller.GetConfigurationCopy();
+            config = controller.GetCurrentConfiguration();
             var idx = UrlListBox.SelectedIndex;
             UrlListBox.Items.Clear();
 

@@ -41,7 +41,7 @@ namespace Shadowsocks.View
 
         private void LoadCurrentConfiguration()
         {
-            _modifiedProxyConfig = controller.GetConfigurationCopy().proxy;
+            _modifiedProxyConfig = controller.GetCurrentConfiguration().proxy;
             UseProxyCheckBox.Checked = _modifiedProxyConfig.useProxy;
             ProxyServerTextBox.Text = _modifiedProxyConfig.proxyServer;
             ProxyPortTextBox.Text = _modifiedProxyConfig.proxyPort.ToString();

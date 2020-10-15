@@ -257,9 +257,6 @@
     <Compile Include="Controller\Strategy\IStrategy.cs" />
     <Compile Include="Controller\Service\Sip003Plugin.cs" />
     <Compile Include="Proxy\Socks5Proxy.cs" />
-    <Compile Include="ServerSharingWindow.xaml.cs">
-      <DependentUpon>ServerSharingWindow.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Settings.cs" />
     <Compile Include="Controller\System\Hotkeys\Hotkeys.cs" />
     <Compile Include="Util\ProcessManagement\Job.cs" />
@@ -415,10 +412,6 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <Page Include="ServerSharingWindow.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
     <Page Include="Views\ServerSharingView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

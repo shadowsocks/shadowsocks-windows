@@ -250,22 +250,8 @@ namespace Shadowsocks.Controller
             Errored?.Invoke(this, new ErrorEventArgs(e));
         }
 
-        public Server GetCurrentServer()
-        {
-            return _config.GetCurrentServer();
-        }
-
-        // always return copy
-        public Configuration GetConfigurationCopy()
-        {
-            return Configuration.Load();
-        }
-
-        // always return current instance
-        public Configuration GetCurrentConfiguration()
-        {
-            return _config;
-        }
+        public Server GetCurrentServer() => _config.GetCurrentServer();
+        public Configuration GetCurrentConfiguration() => _config;
 
         public Server GetAServer(IStrategyCallerType type, IPEndPoint localIPEndPoint, EndPoint destEndPoint)
         {

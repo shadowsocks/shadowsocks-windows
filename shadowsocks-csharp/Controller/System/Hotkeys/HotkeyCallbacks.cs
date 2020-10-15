@@ -46,21 +46,20 @@ namespace Shadowsocks.Controller.Hotkeys
 
         private void SwitchSystemProxyCallback()
         {
-            bool enabled = _controller.GetConfigurationCopy().enabled;
+            bool enabled = _controller.GetCurrentConfiguration().enabled;
             _controller.ToggleEnable(!enabled);
         }
 
         private void SwitchSystemProxyModeCallback()
         {
-            var config = _controller.GetConfigurationCopy();
-            if (config.enabled == false) return;
-            var currStatus = config.global;
-            _controller.ToggleGlobal(!currStatus);
+            var config = _controller.GetCurrentConfiguration();
+            if (config.enabled)
+                _controller.ToggleGlobal(!config.global);
         }
 
         private void SwitchAllowLanCallback()
         {
-            var status = _controller.GetConfigurationCopy().shareOverLan;
+            var status = _controller.GetCurrentConfiguration().shareOverLan;
             _controller.ToggleShareOverLAN(!status);
         }
 

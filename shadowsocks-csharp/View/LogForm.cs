@@ -62,7 +62,7 @@ namespace Shadowsocks.View
                 LogMessageTextBox.AppendText("Cannot get the log file name from NLog config file. Please check if the nlog config file exists with corresponding XML nodes.");
             }
 
-            LogViewerConfig config = controller.GetConfigurationCopy().logViewer;
+            LogViewerConfig config = controller.GetCurrentConfiguration().logViewer;
 
             topMostTrigger = config.topMost;
             wrapTextTrigger = config.wrapText;
@@ -244,7 +244,7 @@ namespace Shadowsocks.View
             timer.Tick += Timer_Tick;
             timer.Start();
 
-            LogViewerConfig config = controller.GetConfigurationCopy().logViewer;
+            LogViewerConfig config = controller.GetCurrentConfiguration().logViewer;
 
             Height = config.Height;
             Width = config.Width;
@@ -270,7 +270,7 @@ namespace Shadowsocks.View
         {
             timer.Stop();
             controller.TrafficChanged -= controller_TrafficChanged;
-            LogViewerConfig config = controller.GetConfigurationCopy().logViewer;
+            LogViewerConfig config = controller.GetCurrentConfiguration().logViewer;
 
             config.topMost = topMostTrigger;
             config.wrapText = wrapTextTrigger;
