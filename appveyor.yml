@@ -112,30 +112,15 @@ after_build:
         return $text
     }
 
-    $WorkingFolder = "$env:APPVEYOR_BUILD_FOLDER\working"
-    $ExeFileName = "Shadowsocks-$env:APPVEYOR_BUILD_VERSION-$env:CONFIGURATION.exe"
-    $ExeFile = "$WorkingFolder\$ExeFileName"
-    $ExeHashFile = "$Exefile.hash"
-
-    New-Item "$WorkingFolder" -ItemType Directory -Force
-    Copy-Item "$env:APPVEYOR_BUILD_FOLDER\shadowsocks-csharp\bin\$env:PLATFORM\$env:CONFIGURATION\Shadowsocks.exe" "$WorkingFolder\Shadowsocks.exe"
-    Copy-Item "$WorkingFolder\Shadowsocks.exe" "$ExeFile"
-
-    CalculateHash -file "$Exefile" | Out-File -FilePath "$ExeHashFile"
-
-    Push-AppveyorArtifact "$ExeFile"
-    Push-AppveyorArtifact "$ExeHashFile"
-
-    # Create and deploy the release zip
-
+    $WorkingFolder = "$env:APPVEYOR_BUILD_FOLDER\shadowsocks-csharp\bin\$env:PLATFORM\$env:CONFIGURATION"
     $ReleaseFile = "$WorkingFolder\Shadowsocks.exe"
     $ReleaseHashFile = "$ReleaseFile.hash"
+    $ReleaseLocalizationFiles = "$WorkingFolder\*\"
     $ZipFile = "$WorkingFolder\Shadowsocks-$env:APPVEYOR_BUILD_VERSION.zip"
     $ZipHashFile = "$ZipFile.hash"
 
-    # Calculate exe Hash and archieve both exe and hash to zip
     CalculateHash -file "$ReleaseFile" | Out-File -FilePath "$ReleaseHashFile"
-    7z a "$ZipFile" "$ReleaseFile" "$ReleaseHashFile"
+    7z a "$ZipFile" "$ReleaseFile" "$ReleaseHashFile" "$ReleaseLocalizationFiles"
     Push-AppveyorArtifact "$ZipFile"
 
     # Calculate packed zip Hash
