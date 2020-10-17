@@ -1,5 +1,6 @@
 ﻿using NLog;
 using Shadowsocks.Controller;
+using Shadowsocks.Localization;
 using Shadowsocks.Model;
 using Shadowsocks.Properties;
 using Shadowsocks.Util;
@@ -11,6 +12,8 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+using System.Windows.Forms.Integration;
+using System.Windows.Threading;
 using ZXing;
 using ZXing.Common;
 using ZXing.QrCode;
@@ -19,18 +22,14 @@ namespace Shadowsocks.View
 {
     public class MenuViewController
     {
-        private static Logger logger = LogManager.GetCurrentClassLogger();
-        // yes this is just a menu view controller
-        // when config form is closed, it moves away from RAM
-        // and it should just do anything related to the config form
+        private readonly Logger logger = LogManager.GetCurrentClassLogger();
 
         private ShadowsocksController controller;
-        private UpdateChecker updateChecker;
+        public UpdateChecker updateChecker;
 
         private NotifyIcon _notifyIcon;
         private Icon icon, icon_in, icon_out, icon_both, previousIcon;
 
-        private bool _isStartupChecking;
         private string _urlToOpen;
 
         private ContextMenu contextMenu1;
@@ -61,12 +60,12 @@ namespace Shadowsocks.View
         private MenuItem onlineConfigItem;
 
         private ConfigForm configForm;
-        private ProxyForm proxyForm;
         private LogForm logForm;
-        private HotkeySettingsForm hotkeySettingsForm;
-        private OnlineConfigForm onlineConfigForm;
 
         private System.Windows.Window serverSharingWindow;
+        private System.Windows.Window hotkeysWindow;
+        private System.Windows.Window forwardProxyWindow;
+        private System.Windows.Window onlineConfigWindow;
 
         // color definition for icon color transformation
         private readonly Color colorMaskBlue = Color.FromArgb(255, 25, 125, 191);
@@ -102,7 +101,7 @@ namespace Shadowsocks.View
             _notifyIcon.BalloonTipClosed += _notifyIcon_BalloonTipClosed;
             controller.TrafficChanged += controller_TrafficChanged;
 
-            this.updateChecker = new UpdateChecker();
+            updateChecker = new UpdateChecker();
             updateChecker.CheckUpdateCompleted += updateChecker_CheckUpdateCompleted;
 
             LoadCurrentConfiguration();
@@ -115,8 +114,7 @@ namespace Shadowsocks.View
             }
             else if (config.autoCheckUpdate)
             {
-                _isStartupChecking = true;
-                updateChecker.CheckUpdate(config, 3000);
+                Dispatcher.CurrentDispatcher.Invoke(() => updateChecker.CheckForVersionUpdate(3000));
             }
         }
 
@@ -383,36 +381,6 @@ namespace Shadowsocks.View
             }
         }
 
-        private void ShowProxyForm()
-        {
-            if (proxyForm != null)
-            {
-                proxyForm.Activate();
-            }
-            else
-            {
-                proxyForm = new ProxyForm(controller);
-                proxyForm.Show();
-                proxyForm.Activate();
-                proxyForm.FormClosed += proxyForm_FormClosed;
-            }
-        }
-
-        private void ShowHotKeySettingsForm()
-        {
-            if (hotkeySettingsForm != null)
-            {
-                hotkeySettingsForm.Activate();
-            }
-            else
-            {
-                hotkeySettingsForm = new HotkeySettingsForm(controller);
-                hotkeySettingsForm.Show();
-                hotkeySettingsForm.Activate();
-                hotkeySettingsForm.FormClosed += hotkeySettingsForm_FormClosed;
-            }
-        }
-
         private void ShowLogForm()
         {
             if (logForm != null)
@@ -425,22 +393,6 @@ namespace Shadowsocks.View
                 logForm.Show();
                 logForm.Activate();
                 logForm.FormClosed += logForm_FormClosed;
-            }
-        }
-
-        private void ShowOnlineConfigForm()
-        {
-
-            if (onlineConfigForm != null)
-            {
-                onlineConfigForm.Activate();
-            }
-            else
-            {
-                onlineConfigForm = new OnlineConfigForm(controller);
-                onlineConfigForm.Show();
-                onlineConfigForm.Activate();
-                onlineConfigForm.FormClosed += onlineConfigForm_FormClosed;
             }
         }
 
@@ -468,24 +420,6 @@ namespace Shadowsocks.View
             }
         }
 
-        void proxyForm_FormClosed(object sender, FormClosedEventArgs e)
-        {
-            proxyForm.Dispose();
-            proxyForm = null;
-        }
-
-        void hotkeySettingsForm_FormClosed(object sender, FormClosedEventArgs e)
-        {
-            hotkeySettingsForm.Dispose();
-            hotkeySettingsForm = null;
-        }
-
-        void onlineConfigForm_FormClosed(object sender, FormClosedEventArgs e)
-        {
-            onlineConfigForm.Dispose();
-            onlineConfigForm = null;
-        }
-
         #endregion
 
         #region Misc
@@ -500,23 +434,10 @@ namespace Shadowsocks.View
 
         void notifyIcon1_BalloonTipClicked(object sender, EventArgs e)
         {
-            if (updateChecker.NewVersionFound)
-            {
-                updateChecker.NewVersionFound = false; /* Reset the flag */
-                if (File.Exists(updateChecker.LatestVersionLocalName))
-                {
-                    string argument = "/select, \"" + updateChecker.LatestVersionLocalName + "\"";
-                    Process.Start("explorer.exe", argument);
-                }
-            }
         }
 
         private void _notifyIcon_BalloonTipClosed(object sender, EventArgs e)
         {
-            if (updateChecker.NewVersionFound)
-            {
-                updateChecker.NewVersionFound = false; /* Reset the flag */
-            }
         }
 
         private void notifyIcon1_Click(object sender, MouseEventArgs e)
@@ -541,8 +462,7 @@ namespace Shadowsocks.View
             Configuration config = controller.GetCurrentConfiguration();
             if (config.firstRun)
                 return;
-            _isStartupChecking = true;
-            updateChecker.CheckUpdate(config, 3000);
+            Dispatcher.CurrentDispatcher.Invoke(() => updateChecker.CheckForVersionUpdate(3000));
         }
 
         public void ShowLogForm_HotKey()
@@ -561,18 +481,82 @@ namespace Shadowsocks.View
 
         private void proxyItem_Click(object sender, EventArgs e)
         {
-            ShowProxyForm();
+            if (forwardProxyWindow == null)
+            {
+                forwardProxyWindow = new System.Windows.Window()
+                {
+                    Title = LocalizationProvider.GetLocalizedValue<string>("ForwardProxy"),
+                    Height = 400,
+                    Width = 280,
+                    MinHeight = 400,
+                    MinWidth = 280,
+                    Content = new ForwardProxyView()
+                };
+                forwardProxyWindow.Closed += ForwardProxyWindow_Closed;
+                ElementHost.EnableModelessKeyboardInterop(forwardProxyWindow);
+                forwardProxyWindow.Show();
+            }
+            forwardProxyWindow.Activate();
         }
+
+        private void ForwardProxyWindow_Closed(object sender, EventArgs e)
+        {
+            forwardProxyWindow = null;
+        }
+
+        public void CloseForwardProxyWindow() => forwardProxyWindow.Close();
 
         private void OnlineConfig_Click(object sender, EventArgs e)
         {
-            ShowOnlineConfigForm();
+            if (onlineConfigWindow == null)
+            {
+                onlineConfigWindow = new System.Windows.Window()
+                {
+                    Title = LocalizationProvider.GetLocalizedValue<string>("OnlineConfigDelivery"),
+                    Height = 510,
+                    Width = 480,
+                    MinHeight = 510,
+                    MinWidth = 480,
+                    Content = new OnlineConfigView()
+                };
+                onlineConfigWindow.Closed += OnlineConfigWindow_Closed;
+                ElementHost.EnableModelessKeyboardInterop(onlineConfigWindow);
+                onlineConfigWindow.Show();
+            }
+            onlineConfigWindow.Activate();
+        }
+
+        private void OnlineConfigWindow_Closed(object sender, EventArgs e)
+        {
+            onlineConfigWindow = null;
         }
 
         private void hotKeyItem_Click(object sender, EventArgs e)
         {
-            ShowHotKeySettingsForm();
+            if (hotkeysWindow == null)
+            {
+                hotkeysWindow = new System.Windows.Window()
+                {
+                    Title = LocalizationProvider.GetLocalizedValue<string>("Hotkeys"),
+                    Height = 260,
+                    Width = 320,
+                    MinHeight = 260,
+                    MinWidth = 320,
+                    Content = new HotkeysView()
+                };
+                hotkeysWindow.Closed += HotkeysWindow_Closed;
+                ElementHost.EnableModelessKeyboardInterop(hotkeysWindow);
+                hotkeysWindow.Show();
+            }
+            hotkeysWindow.Activate();
         }
+
+        private void HotkeysWindow_Closed(object sender, EventArgs e)
+        {
+            hotkeysWindow = null;
+        }
+
+        public void CloseHotkeysWindow() => hotkeysWindow.Close();
 
         private void ShareOverLANItem_Click(object sender, EventArgs e)
         {
@@ -750,12 +734,15 @@ namespace Shadowsocks.View
             {
                 serverSharingWindow = new System.Windows.Window()
                 {
-                    Title = "Server Sharing",
+                    Title = LocalizationProvider.GetLocalizedValue<string>("ServerSharing"),
                     Height = 400,
                     Width = 660,
+                    MinHeight = 400,
+                    MinWidth = 660,
                     Content = new ServerSharingView()
                 };
                 serverSharingWindow.Closed += ServerSharingWindow_Closed;
+                ElementHost.EnableModelessKeyboardInterop(serverSharingWindow);
                 serverSharingWindow.Show();
             }
             serverSharingWindow.Activate();
@@ -1017,15 +1004,10 @@ namespace Shadowsocks.View
 
         void updateChecker_CheckUpdateCompleted(object sender, EventArgs e)
         {
-            if (updateChecker.NewVersionFound)
-            {
-                ShowBalloonTip(I18N.GetString("Shadowsocks {0} Update Found", updateChecker.LatestVersionNumber + updateChecker.LatestVersionSuffix), I18N.GetString("Click here to update"), ToolTipIcon.Info, 5000);
-            }
-            else if (!_isStartupChecking)
+            if (updateChecker.NewReleaseZipFilename == null)
             {
                 ShowBalloonTip(I18N.GetString("Shadowsocks"), I18N.GetString("No update is available"), ToolTipIcon.Info, 5000);
             }
-            _isStartupChecking = false;
         }
 
         private void UpdateUpdateMenu()
@@ -1049,9 +1031,9 @@ namespace Shadowsocks.View
             UpdateUpdateMenu();
         }
 
-        private void checkUpdatesItem_Click(object sender, EventArgs e)
+        private async void checkUpdatesItem_Click(object sender, EventArgs e)
         {
-            updateChecker.CheckUpdate(controller.GetCurrentConfiguration());
+            await updateChecker.CheckForVersionUpdate();
         }
 
         private void AboutItem_Click(object sender, EventArgs e)

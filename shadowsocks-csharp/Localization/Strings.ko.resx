@@ -117,4 +117,64 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="Password" xml:space="preserve">
+    <value>비밀번호</value>
+  </data>
+  <data name="Type" xml:space="preserve">
+    <value>유형</value>
+  </data>
+  <data name="Address" xml:space="preserve">
+    <value>주소</value>
+  </data>
+  <data name="Port" xml:space="preserve">
+    <value>포트</value>
+  </data>
+  <data name="Timeout" xml:space="preserve">
+    <value>시간 초과</value>
+  </data>
+  <data name="cancelButton_Content" xml:space="preserve">
+    <value>취소</value>
+  </data>
+  <data name="okButton_Content" xml:space="preserve">
+    <value>확인</value>
+  </data>
+  <data name="ToggleSystemProxy" xml:space="preserve">
+    <value>시스템 프록시 전환</value>
+  </data>
+  <data name="ToggleProxyMode" xml:space="preserve">
+    <value>시스템 프록시 모드 전환</value>
+  </data>
+  <data name="AllowClientsFromLAN" xml:space="preserve">
+    <value>LAN으로부터 클라이언트 허용</value>
+  </data>
+  <data name="OpenLogsWindow" xml:space="preserve">
+    <value>로그 보기…</value>
+  </data>
+  <data name="SwitchToPreviousServer" xml:space="preserve">
+    <value>이전 서버로 전환</value>
+  </data>
+  <data name="SwitchToNextServer" xml:space="preserve">
+    <value>다음 서버로 전환</value>
+  </data>
+  <data name="RegisterHotkeysAtStartup" xml:space="preserve">
+    <value>모두 등록</value>
+  </data>
+  <data name="registerAllButton_Content" xml:space="preserve">
+    <value>시스템 시작 시 단축키 등록</value>
+  </data>
+  <data name="addButton_Content" xml:space="preserve">
+    <value>추가</value>
+  </data>
+  <data name="skipVersionButton_Content" xml:space="preserve">
+    <value>버전 건너 뛰기</value>
+  </data>
+  <data name="copyLinkButton_Content" xml:space="preserve">
+    <value>링크 복사</value>
+  </data>
+  <data name="updateButton_Content" xml:space="preserve">
+    <value>새롭게 함</value>
+  </data>
+  <data name="Copy" xml:space="preserve">
+    <value>부</value>
+  </data>
 </root>

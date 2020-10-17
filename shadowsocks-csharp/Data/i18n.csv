@@ -81,13 +81,6 @@ Move D&own,Ниже,下移(&O),下移 (&O),下に移動 (&O),아래로 (&O),Desc
 deprecated,Устаревшее,不推荐,不推薦,非推奨,더 이상 사용되지 않음,Obsolète
 "Encryption method {0} not exist, will replace with {1}",,加密方法{0}不存在，将使用{1}代替,,暗号化方式{0}が存在しません，{1}に置換します,{0} 암호화 방식이 존재하지 않으므로 {1}로 대체될 것입니다.,"Méthode de chiffrement {0} n'existe pas, sera remplacée par {1}"
 ,,,,,,
-# Online Config Form,,,,,,
-,,,,,,
-Online config,,在线配置,線上配置,,,
-Online config URL,,在线配置链接,線上配置鏈接,,,
-&Update,,更新,更新,,,
-U&pdate All,,全部更新,全部更新,,,
-,,,,,,
 #Statistics Config,,,,,,
 ,,,,,,
 Enable Statistics,Включить сбор статистики,启用统计,,統計を有効にする,통계 활성화,Activer statistiques
@@ -118,18 +111,6 @@ Chart Mode,График,图表模式,,図表モード,차트 모드,Mode graphiq
 24h,24ч,24小时,,24時間,24시간,24h
 all,За все время,全部,,すべて,전체,tout
 ,,,,,,
-# Proxy Form,,,,,,
-,,,,,,
-Edit Proxy,Редактирование прокси,代理设置,編輯 Proxy,プロキシの編集,프록시 수정,Modifier le proxy
-Use Proxy,Использовать прокси,使用代理,使用 Proxy,プロキシを使用する,프록시 사용,Utiliser un proxy
-Proxy Type,Тип прокси,代理类型,Proxy 類型,プロキシタイプ,프록시 종류,Type de proxy
-Proxy Addr,Адрес прокси,代理地址,Proxy 位址,プロキシアドレス,프록시 주소,Adresse de proxy
-Proxy Port,Порт прокси,代理端口,Proxy 連接埠,プロキシポート,프록시 포트,Port de proxy
-"If server has a plugin, proxy will not be used","Если сервер использует плагины, прокси НЕ будет использоваться",若服务器含有插件，代理将不被使用,若伺服器含有外掛程式，Proxy 將不被使用,サーバーにプラグインがある場合、プロキシは使用されません,서버에 플러그인이 설치 되어 있는 경우 프록시를 사용할 수 없습니다.,"Si le serveur a un plugin, le proxy ne sera pas utilisé"
-Use Auth,Требуется авторизация,使用认证,使用認證,認証を使用する,서버 인증 사용,Utiliser l'authentification
-User Name,Пользователь,用户名,認證用戶,ユーザ名,사용자 이름,Nom d'utilisateur
-Auth Pwd,Пароль,认证密码,認證口令,パスワード,비밀번호,Mot de passe d'authentification
-,,,,,,
 # Log Form,,,,,,
 ,,,,,,
 &File,Файл,文件(&F),檔案 (&F),ファイル (&F),파일 (&F),Fichier
@@ -155,17 +136,6 @@ Edit Online PAC URL,Изменение URL удаленного PAC,编辑在线
 Edit Online PAC URL...,Редактировать URL удаленного PAC…,编辑在线 PAC 网址...,編輯線上 PAC 網址...,オンライン PAC URL の編集...,온라인 프록시 자동 구성 URL 수정…,Modifier l'URL du PAC en ligne ...
 Please input PAC Url,Введите URL адрес для PAC-файла,请输入 PAC 网址,請輸入 PAC 網址,PAC URLを入力して下さい,프록시 자동 구성 URL을 입력하세요,Veuillez saisir l'URL PAC
 ,,,,,,
-# HotkeySettings Form,,,,,,
-,,,,,,
-Switch system proxy,ВКЛ/ВЫКЛ системный прокси-сервер,切换系统代理状态,切換系統 Proxy 狀態,システム プロキシの状態を切り替える,시스템 프록시 전환,Changer l'état de proxy système
-Switch system proxy mode,Переключение режима прокси-сервера,切换系统代理模式,切換系統 Proxy 模式,プロキシモードを切り替える,시스템 프록시 모드 전환,Changer le mode de proxy système
-Allow Clients from LAN,Общий доступ к подключению,切换局域网共享,切換區域網路共用,LAN からのアクセスの許可を切り替える,LAN으로부터 클라이언트 허용,Autoriser les clients du LAN
-Show Logs...,Просмотр журналов,显示日志,顯示記錄檔,ログの表示,로그 보기…,Afficher les journaux
-Switch to previous server,Переключить на пред. сервер,切换上个服务器,切換上一個伺服器,前のサーバーに切り替える,이전 서버로 전환,Passer au serveur précédent
-Switch to next server,Переключить на след. сервер,切换下个服务器,切換下一個伺服器,次のサーバーに切り替える,다음 서버로 전환,Passer au serveur suivant
-Reg All,Применить все,注册全部快捷键,註冊所有快速鍵,全部登録する,모두 등록,Enregistrer tout
-Reg Hotkeys At Startup,Применять при запуске программы,启动时注册快捷键,啟動時註冊快速鍵,起動時にホットキーを登録する,시스템 시작 시 단축키 등록,Enregistrer tout au démarrage
-,,,,,,
 # Messages,,,,,,
 ,,,,,,
 Shadowsocks Error: {0},Ошибка Shadowsocks: {0},Shadowsocks 错误: {0},Shadowsocks 錯誤: {0},Shadowsocks エラー: {0},Shadowsocks 오류: {0},Erreur shadowsocks: {0}
@@ -178,9 +148,7 @@ Server IP can not be blank,IP-адрес сервера не может быть
 Password can not be blank,Пароль не может быть пустым,密码不能为空,密碼不能為空,パスワードが指定されていません。,비밀번호는 비어있으면 안됩니다.,Le mot de passe ne peut pas être vide
 Port out of range,Порт выходит за допустимый диапазон,端口超出范围,連接埠號碼超出範圍,ポート番号は範囲外です。,올바른 포트 범위가 아닙니다.,Port hors de portée
 Port can't be 8123,Адрес порта 8123 не может быть использован,端口不能为 8123,連接埠號碼不能為 8123,8123 番以外のポート番号を指定して下さい。,8123번 포트는 사용할 수 없습니다.,Le port ne peut pas être 8123
-Shadowsocks {0} Update Found,Обнаружена новая версия Shadowsocks: {0},Shadowsocks {0} 更新,Shadowsocks {0} 更新,Shadowsocks バージョン {0} は利用できます。,Shadowsocks {0} 업데이트가 있습니다.,Shadowsocks {0} Mise à jour trouvée
 No update is available,Обновлений не обнаружено,没有可用的更新,沒有可用的更新,お使いのバージョンは最新です。,사용 가능한 업데이트가 없습니다.,Aucune mise à jour n'est disponible
-Click here to update,Нажмите сюда для обновления,点击这里升级,點按此處升級,クリックしてアップデートします。,여기를 클릭하여 업데이트,Cliquez ici pour mettre à jour
 Shadowsocks is here,Shadowsocks находится здесь,Shadowsocks 在这里,Shadowsocks 在這裡,Shadowsocks はここです。,Shadowsocks는 여기에 있습니다,Veuillez trouver Shadowsocks ici
 You can turn on/off Shadowsocks in the context menu,Вы можете управлять Shadowsocks из контекстного меню,可以在右键菜单中开关 Shadowsocks,可以在右鍵選項單中開關 Shadowsocks,コンテキストメニューを使って、Shadowsocks を有効または無効にすることができます。,프로그램 메뉴에서 Shadowsocks를 끄고 켤 수 있습니다.,Vous pouvez activer / désactiver Shadowsocks dans le menu contextuel
 System Proxy Enabled,Системный прокси включен,系统代理已启用,系統 Proxy 已啟用,システム プロキシが有効です。,시스템 프록시가 활성화되었습니다.,Proxy système activé
@@ -219,5 +187,3 @@ Whether to discard unconfigured servers,Внесенные изменения б
 ,,,,タイムアウト値のフォーマットが無効なため、オートセーブできません。変更を破棄しますか,,
 "Error occured when process proxy setting, do you want reset current setting and retry?",Произошла ошибка при обработке настроек. Хотите сбросить текущие настройки и попробовать снова?,处理代理设置时发生错误，是否重置当前代理设置并重试？,,プロキシ設定の処理にエラーが発生しました、現在のプロキシ設定をリセットし、再試行してもいいですか,프록시 설정을 처리하는데에 오류가 발생했습니다. 현재 설정을 폐기하고 다시 시도하시겠습니까?,Une erreur s'est produite lors du processus de configuration du proxy. Voulez-vous réinitialiser le paramètre actuel et réessayer?
 "Unrecoverable proxy setting error occured, see log for detail","Произошла серьезная ошибка, подробности можно узнать в журналах",发生不可恢复的代理设置错误，查看日志以取得详情,,プロキシ設定に回復不能なエラーが発生しました、ログで詳細をご確認ください,복구 불가능한 프록시 설정 오류가 발생했습니다. 자세한 정보는 로그를 참조하세요.,"Une erreur de paramètre de proxy irrécupérable s'est produite, consultez le journal pour plus de détails"
-Auth user can not be blank,Пользователь не может быть пустым,认证用户不能为空,認證用戶不能為空,認証ユーザが指定されていません。,인증 정보의 사용자 이름은 비어있을 수 없습니다.,L'utilisateur d'authentification ne peut pas être vide
-Auth pwd can not be blank,Пароль не может быть пустым,认证密码不能为空,認證口令不能為空,認証パスワードが指定されていません。,인증 정보의 비밀번호는 비어있을 수 없습니다.,Le mot de passe d'authentification ne peut pas être vide

@@ -35,8 +35,6 @@ namespace Shadowsocks.Controller
 
         private static readonly string DATABASE_PATH = Utils.GetTempPath("dlc.dat");
 
-        private static HttpClientHandler httpClientHandler;
-        private static HttpClient httpClient;
         private static readonly string GEOSITE_URL = "https://github.com/v2fly/domain-list-community/raw/release/dlc.dat";
         private static readonly string GEOSITE_SHA256SUM_URL = "https://github.com/v2fly/domain-list-community/raw/release/dlc.dat.sha256sum";
         private static byte[] geositeDB;
@@ -82,29 +80,14 @@ namespace Shadowsocks.Controller
             SHA256 mySHA256 = SHA256.Create();
             var config = Program.MainController.GetCurrentConfiguration();
             bool blacklist = config.geositePreferDirect;
-            
+            var httpClient = Program.MainController.GetHttpClient();
+
             if (!string.IsNullOrWhiteSpace(config.geositeUrl))
             {
                 logger.Info("Found custom Geosite URL in config file");
                 geositeUrl = config.geositeUrl;
             }
             logger.Info($"Checking Geosite from {geositeUrl}");
-
-            // use System.Net.Http.HttpClient to download GeoSite db.
-            // NASTY workaround: new HttpClient every update
-            // because we can't change proxy on existing socketsHttpHandler instance
-            httpClientHandler = new HttpClientHandler();
-            httpClient = new HttpClient(httpClientHandler);
-            if (!string.IsNullOrWhiteSpace(config.userAgentString))
-                httpClient.DefaultRequestHeaders.Add("User-Agent", config.userAgentString);
-            if (config.enabled)
-            {
-                httpClientHandler.Proxy = new WebProxy(
-                    config.isIPv6Enabled
-                    ? $"[{IPAddress.IPv6Loopback}]"
-                    : IPAddress.Loopback.ToString(),
-                    config.localPort);
-            }
 
             try
             {
@@ -153,19 +136,6 @@ namespace Shadowsocks.Controller
             catch (Exception ex)
             {
                 Error?.Invoke(null, new ErrorEventArgs(ex));
-            }
-            finally
-            {
-                if (httpClientHandler != null)
-                {
-                    httpClientHandler.Dispose();
-                    httpClientHandler = null;
-                }
-                if (httpClient != null)
-                {
-                    httpClient.Dispose();
-                    httpClient = null;
-                }
             }
         }
 

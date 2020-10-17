@@ -11,28 +11,15 @@ namespace Shadowsocks.Controller.Service
 {
     public class OnlineConfigResolver
     {
-        public static async Task<List<Server>> GetOnline(string url, string userAgentString, IWebProxy proxy = null)
+        public static async Task<List<Server>> GetOnline(string url)
         {
-            var httpClientHandler = new HttpClientHandler()
-            {
-                Proxy = proxy
-            };
-            var httpClient = new HttpClient(httpClientHandler)
-            {
-                Timeout = TimeSpan.FromSeconds(15)
-            };
-            if (!string.IsNullOrWhiteSpace(userAgentString))
-                httpClient.DefaultRequestHeaders.Add("User-Agent", userAgentString);
-
+            var httpClient = Program.MainController.GetHttpClient();
             string server_json = await httpClient.GetStringAsync(url);
-
             var servers = server_json.GetServers();
-
             foreach (var server in servers)
             {
                 server.group = url;
             }
-
             return servers.ToList();
         }
     }

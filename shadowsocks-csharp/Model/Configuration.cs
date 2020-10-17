@@ -40,6 +40,7 @@ namespace Shadowsocks.Model
         public bool availabilityStatistics;
         public bool autoCheckUpdate;
         public bool checkPreRelease;
+        public string skippedUpdateVersion; // skip the update with this version number
         public bool isVerboseLogging;
 
         // hidden options
@@ -53,7 +54,7 @@ namespace Shadowsocks.Model
 
         //public NLogConfig.LogLevel logLevel;
         public LogViewerConfig logViewer;
-        public ProxyConfig proxy;
+        public ForwardProxyConfig proxy;
         public HotkeyConfig hotkey;
 
         [JsonIgnore]
@@ -78,6 +79,7 @@ namespace Shadowsocks.Model
             availabilityStatistics = false;
             autoCheckUpdate = false;
             checkPreRelease = false;
+            skippedUpdateVersion = "";
             isVerboseLogging = false;
 
             // hidden options
@@ -97,7 +99,7 @@ namespace Shadowsocks.Model
             userAgent = "ShadowsocksWindows/$version";
 
             logViewer = new LogViewerConfig();
-            proxy = new ProxyConfig();
+            proxy = new ForwardProxyConfig();
             hotkey = new HotkeyConfig();
 
             firstRunOnNewVersion = false;
@@ -193,7 +195,9 @@ namespace Shadowsocks.Model
                 ResetGeositeProxiedGroup(ref config.geositeProxiedGroups);
 
             // Mark the first run of a new version.
-            if (UpdateChecker.Asset.CompareVersion(UpdateChecker.Version, config.version ?? "0") > 0)
+            var appVersion = new Version(UpdateChecker.Version);
+            var configVersion = new Version(config.version);
+            if (appVersion.CompareTo(configVersion) > 0)
             {
                 config.firstRunOnNewVersion = true;
             }
@@ -316,6 +320,12 @@ namespace Shadowsocks.Model
             geositeProxiedGroups.Add("geolocation-!cn");
         }
 
+        public static void ResetUserAgent(Configuration config)
+        {
+            config.userAgent = "ShadowsocksWindows/$version";
+            config.userAgentString = config.userAgent.Replace("$version", config.version);
+        }
+
         public static Server AddDefaultServerOrServer(Configuration config, Server server = null, int? index = null)
         {
             if (config?.configs != null)
@@ -367,18 +377,6 @@ namespace Shadowsocks.Model
             if (timeout <= 0 || timeout > maxTimeout)
                 throw new ArgumentException(
                     I18N.GetString("Timeout is invalid, it should not exceed {0}", maxTimeout));
-        }
-
-        public static void CheckProxyAuthUser(string user)
-        {
-            if (string.IsNullOrEmpty(user))
-                throw new ArgumentException(I18N.GetString("Auth user can not be blank"));
-        }
-
-        public static void CheckProxyAuthPwd(string pwd)
-        {
-            if (string.IsNullOrEmpty(pwd))
-                throw new ArgumentException(I18N.GetString("Auth pwd can not be blank"));
         }
     }
 }

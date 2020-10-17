@@ -1,10 +1,13 @@
 ﻿using ReactiveUI;
+using ReactiveUI.Fody.Helpers;
 using Shadowsocks.Model;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Reactive;
+using System.Windows;
 using System.Windows.Media.Imaging;
 
 namespace Shadowsocks.ViewModels
@@ -17,18 +20,30 @@ namespace Shadowsocks.ViewModels
         public ServerSharingViewModel()
         {
             _config = Program.MainController.GetCurrentConfiguration();
-            _servers = _config.configs;
-            _selectedServer = _servers.First();
-            //_selectedServerUrlImage = new BitmapImage();
-            UpdateUrlAndImage();
+            Servers = _config.configs;
+            SelectedServer = Servers[0];
+
+            this.WhenAnyValue(x => x.SelectedServer)
+                .Subscribe(_ => UpdateUrlAndImage());
+
+            CopyLink = ReactiveCommand.Create(() => Clipboard.SetText(SelectedServerUrl));
         }
 
         private readonly Configuration _config;
 
-        private List<Server> _servers;
-        private Server _selectedServer;
-        private string _selectedServerUrl;
-        private BitmapImage _selectedServerUrlImage;
+        public ReactiveCommand<Unit, Unit> CopyLink { get; }
+
+        [Reactive]
+        public List<Server> Servers { get; private set; }
+
+        [Reactive]
+        public Server SelectedServer { get; set; }
+
+        [Reactive]
+        public string SelectedServerUrl { get; private set; }
+
+        [Reactive]
+        public BitmapImage SelectedServerUrlImage { get; private set; }
 
         /// <summary>
         /// Called when SelectedServer changed
@@ -37,10 +52,10 @@ namespace Shadowsocks.ViewModels
         private void UpdateUrlAndImage()
         {
             // update SelectedServerUrl
-            SelectedServerUrl = _selectedServer.GetURL(_config.generateLegacyUrl);
+            SelectedServerUrl = SelectedServer.GetURL(_config.generateLegacyUrl);
 
             // generate QR code
-            var qrCode = ZXing.QrCode.Internal.Encoder.encode(_selectedServerUrl, ZXing.QrCode.Internal.ErrorCorrectionLevel.L);
+            var qrCode = ZXing.QrCode.Internal.Encoder.encode(SelectedServerUrl, ZXing.QrCode.Internal.ErrorCorrectionLevel.L);
             var byteMatrix = qrCode.Matrix;
 
             // paint bitmap
@@ -76,34 +91,6 @@ namespace Shadowsocks.ViewModels
                 bitmapImage.EndInit();
             }
             SelectedServerUrlImage = bitmapImage;
-        }
-
-        public List<Server> Servers
-        {
-            get => _servers;
-            set => this.RaiseAndSetIfChanged(ref _servers, value);
-        }
-
-        public Server SelectedServer
-        {
-            get => _selectedServer;
-            set
-            {
-                this.RaiseAndSetIfChanged(ref _selectedServer, value);
-                UpdateUrlAndImage();
-            }
-        }
-
-        public string SelectedServerUrl
-        {
-            get => _selectedServerUrl;
-            set => this.RaiseAndSetIfChanged(ref _selectedServerUrl, value);
-        }
-
-        public BitmapImage SelectedServerUrlImage
-        {
-            get => _selectedServerUrlImage;
-            set => this.RaiseAndSetIfChanged(ref _selectedServerUrlImage, value);
         }
     }
 }

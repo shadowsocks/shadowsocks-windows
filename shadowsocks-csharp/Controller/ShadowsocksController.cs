@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
@@ -20,7 +21,8 @@ namespace Shadowsocks.Controller
 {
     public class ShadowsocksController
     {
-        private static Logger logger = LogManager.GetCurrentClassLogger();
+        private readonly Logger logger;
+        private readonly HttpClient httpClient;
 
         // controller:
         // handle user actions
@@ -91,6 +93,8 @@ namespace Shadowsocks.Controller
 
         public ShadowsocksController()
         {
+            logger = LogManager.GetCurrentClassLogger();
+            httpClient = new HttpClient();
             _config = Configuration.Load();
             Configuration.Process(ref _config);
             StatisticsConfiguration = StatisticsStrategyConfiguration.Load();
@@ -167,6 +171,19 @@ namespace Shadowsocks.Controller
             Configuration.Process(ref _config);
 
             NLogConfig.LoadConfiguration();
+
+            // set User-Agent for httpClient
+            try
+            {
+                if (!string.IsNullOrWhiteSpace(_config.userAgentString))
+                    httpClient.DefaultRequestHeaders.Add("User-Agent", _config.userAgentString);
+            }
+            catch
+            {
+                // reset userAgent to default and reapply
+                Configuration.ResetUserAgent(_config);
+                httpClient.DefaultRequestHeaders.Add("User-Agent", _config.userAgentString);
+            }
 
             StatisticsConfiguration = StatisticsStrategyConfiguration.Load();
 
@@ -250,6 +267,7 @@ namespace Shadowsocks.Controller
             Errored?.Invoke(this, new ErrorEventArgs(e));
         }
 
+        public HttpClient GetHttpClient() => httpClient;
         public Server GetCurrentServer() => _config.GetCurrentServer();
         public Configuration GetCurrentConfiguration() => _config;
 
@@ -310,7 +328,7 @@ namespace Shadowsocks.Controller
             EnableGlobalChanged?.Invoke(this, new EventArgs());
         }
 
-        public void SaveProxy(ProxyConfig proxyConfig)
+        public void SaveProxy(ForwardProxyConfig proxyConfig)
         {
             _config.proxy = proxyConfig;
             SaveConfig(_config);
@@ -478,6 +496,12 @@ namespace Shadowsocks.Controller
             ConfigChanged?.Invoke(this, new EventArgs());
         }
 
+        public void SaveSkippedUpdateVerion(string version)
+        {
+            _config.skippedUpdateVersion = version;
+            Configuration.Save(_config);
+        }
+
         public void SaveLogViewerConfig(LogViewerConfig newConfig)
         {
             _config.logViewer = newConfig;
@@ -497,7 +521,7 @@ namespace Shadowsocks.Controller
 
         #endregion
 
-        #region Statistic
+        #region Statistics
 
         public void SelectStrategy(string strategyID)
         {
@@ -672,7 +696,7 @@ namespace Shadowsocks.Controller
 
         public async Task<int> UpdateOnlineConfigInternal(string url)
         {
-            var onlineServer = await OnlineConfigResolver.GetOnline(url, _config.userAgentString, _config.WebProxy);
+            var onlineServer = await OnlineConfigResolver.GetOnline(url);
             _config.configs = Configuration.SortByOnlineConfig(
                 _config.configs
                 .Where(c => c.group != url)
@@ -699,10 +723,10 @@ namespace Shadowsocks.Controller
             return true;
         }
 
-        public async Task<int> UpdateAllOnlineConfig()
+        public async Task<List<string>> UpdateAllOnlineConfig()
         {
             var selected = GetCurrentServer();
-            int failCount = 0;
+            var failedUrls = new List<string>();
             foreach (var url in _config.onlineConfigSource)
             {
                 try
@@ -712,18 +736,18 @@ namespace Shadowsocks.Controller
                 catch (Exception e)
                 {
                     logger.LogUsefulException(e);
-                    failCount++;
+                    failedUrls.Add(url);
                 }
             }
 
             _config.index = _config.configs.IndexOf(selected);
             SaveConfig(_config);
-            return failCount;
+            return failedUrls;
         }
 
-        public void SaveOnlineConfigSource(IEnumerable<string> vs)
+        public void SaveOnlineConfigSource(List<string> sources)
         {
-            _config.onlineConfigSource = vs.ToList();
+            _config.onlineConfigSource = sources;
             SaveConfig(_config);
         }
 

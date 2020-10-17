@@ -1,5 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\packages\ReactiveUI.Fody.11.5.35\build\ReactiveUI.Fody.props" Condition="Exists('..\packages\ReactiveUI.Fody.11.5.35\build\ReactiveUI.Fody.props')" />
   <Import Project="..\packages\Costura.Fody.4.1.0\build\Costura.Fody.props" Condition="Exists('..\packages\Costura.Fody.4.1.0\build\Costura.Fody.props')" />
   <Import Project="..\packages\Caseless.Fody.1.9.0\build\Caseless.Fody.props" Condition="Exists('..\packages\Caseless.Fody.1.9.0\build\Caseless.Fody.props')" />
   <PropertyGroup>
@@ -87,6 +88,12 @@
     <Reference Include="Google.Protobuf, Version=3.13.0.0, Culture=neutral, PublicKeyToken=a7d26565bac4d604, processorArchitecture=MSIL">
       <HintPath>..\packages\Google.Protobuf.3.13.0\lib\net45\Google.Protobuf.dll</HintPath>
     </Reference>
+    <Reference Include="ICSharpCode.AvalonEdit, Version=6.0.1.278, Culture=neutral, PublicKeyToken=9cc39be672370310, processorArchitecture=MSIL">
+      <HintPath>..\packages\AvalonEdit.6.0.1\lib\net45\ICSharpCode.AvalonEdit.dll</HintPath>
+    </Reference>
+    <Reference Include="MdXaml, Version=1.6.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\MdXaml.1.6.0\lib\net45\MdXaml.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="Microsoft.VisualBasic" />
     <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
@@ -95,16 +102,29 @@
     <Reference Include="NLog, Version=4.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c, processorArchitecture=MSIL">
       <HintPath>..\packages\NLog.4.7.5\lib\net45\NLog.dll</HintPath>
     </Reference>
+    <Reference Include="Pharmacist.Common, Version=1.8.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Pharmacist.Common.1.8.1\lib\netstandard2.0\Pharmacist.Common.dll</HintPath>
+    </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
+    <Reference Include="PresentationFramework.Aero" />
     <Reference Include="ReactiveUI, Version=11.5.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\ReactiveUI.11.5.35\lib\net461\ReactiveUI.dll</HintPath>
+    </Reference>
+    <Reference Include="ReactiveUI.Events.WPF, Version=11.5.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\ReactiveUI.Events.WPF.11.5.35\lib\net472\ReactiveUI.Events.WPF.dll</HintPath>
+    </Reference>
+    <Reference Include="ReactiveUI.Fody.Helpers, Version=11.5.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\ReactiveUI.Fody.11.5.35\lib\net461\ReactiveUI.Fody.Helpers.dll</HintPath>
+    </Reference>
+    <Reference Include="ReactiveUI.Validation, Version=1.7.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\ReactiveUI.Validation.1.7.1\lib\net461\ReactiveUI.Validation.dll</HintPath>
     </Reference>
     <Reference Include="ReactiveUI.WPF, Version=11.5.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\ReactiveUI.WPF.11.5.35\lib\net472\ReactiveUI.WPF.dll</HintPath>
     </Reference>
-    <Reference Include="Splat, Version=9.5.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Splat.9.5.49\lib\net461\Splat.dll</HintPath>
+    <Reference Include="Splat, Version=9.6.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Splat.9.6.1\lib\net461\Splat.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Buffers, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
@@ -184,6 +204,12 @@
     <Reference Include="UIAutomationProvider" />
     <Reference Include="WindowsBase" />
     <Reference Include="WindowsFormsIntegration" />
+    <Reference Include="WPFLocalizeExtension, Version=3.8.0.0, Culture=neutral, PublicKeyToken=c726e0262981a1eb, processorArchitecture=MSIL">
+      <HintPath>..\packages\WPFLocalizeExtension.3.8.0\lib\net452\WPFLocalizeExtension.dll</HintPath>
+    </Reference>
+    <Reference Include="XAMLMarkupExtensions, Version=2.0.0.0, Culture=neutral, PublicKeyToken=c726e0262981a1eb, processorArchitecture=MSIL">
+      <HintPath>..\packages\XAMLMarkupExtensions.2.0.0\lib\net472\XAMLMarkupExtensions.dll</HintPath>
+    </Reference>
     <Reference Include="zxing, Version=0.16.6.0, Culture=neutral, PublicKeyToken=4e88037ac681fe60, processorArchitecture=MSIL">
       <HintPath>..\packages\ZXing.Net.0.16.6\lib\net47\zxing.dll</HintPath>
     </Reference>
@@ -218,10 +244,16 @@
     <Compile Include="Encryption\Stream\StreamMbedTLSEncryptor.cs" />
     <Compile Include="Encryption\Stream\StreamOpenSSLEncryptor.cs" />
     <Compile Include="Encryption\Stream\StreamSodiumEncryptor.cs" />
+    <Compile Include="Localization\LocalizationProvider.cs" />
+    <Compile Include="Localization\Strings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Strings.resx</DependentUpon>
+    </Compile>
     <Compile Include="Model\Geosite\Geosite.cs" />
     <Compile Include="Model\HotKeyConfig.cs" />
     <Compile Include="Model\NLogConfig.cs" />
-    <Compile Include="Model\ProxyConfig.cs" />
+    <Compile Include="Model\ForwardProxyConfig.cs" />
     <Compile Include="Model\SysproxyConfig.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -268,7 +300,23 @@
     <Compile Include="Util\SystemProxy\Sysproxy.cs" />
     <Compile Include="Util\Util.cs" />
     <Compile Include="Util\ViewUtils.cs" />
+    <Compile Include="ViewModels\ForwardProxyViewModel.cs" />
+    <Compile Include="ViewModels\HotkeysViewModel.cs" />
+    <Compile Include="ViewModels\OnlineConfigViewModel.cs" />
     <Compile Include="ViewModels\ServerSharingViewModel.cs" />
+    <Compile Include="ViewModels\VersionUpdatePromptViewModel.cs" />
+    <Compile Include="Views\ForwardProxyView.xaml.cs">
+      <DependentUpon>ForwardProxyView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\HotkeysView.xaml.cs">
+      <DependentUpon>HotkeysView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\OnlineConfigView.xaml.cs">
+      <DependentUpon>OnlineConfigView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\VersionUpdatePromptView.xaml.cs">
+      <DependentUpon>VersionUpdatePromptView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="View\ConfigForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -287,12 +335,6 @@
     <Compile Include="View\CalculationControl.Designer.cs">
       <DependentUpon>CalculationControl.cs</DependentUpon>
     </Compile>
-    <Compile Include="View\HotkeySettingsForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="View\HotkeySettingsForm.designer.cs">
-      <DependentUpon>HotkeySettingsForm.cs</DependentUpon>
-    </Compile>
     <Compile Include="View\LogForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -300,18 +342,6 @@
       <DependentUpon>LogForm.cs</DependentUpon>
     </Compile>
     <Compile Include="View\MenuViewController.cs" />
-    <Compile Include="View\OnlineConfigForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="View\OnlineConfigForm.Designer.cs">
-      <DependentUpon>OnlineConfigForm.cs</DependentUpon>
-    </Compile>
-    <Compile Include="View\ProxyForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="View\ProxyForm.Designer.cs">
-      <DependentUpon>ProxyForm.cs</DependentUpon>
-    </Compile>
     <Compile Include="View\QRCodeSplashForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -324,29 +354,30 @@
     <Compile Include="View\StatisticsStrategyConfigurationForm.Designer.cs">
       <DependentUpon>StatisticsStrategyConfigurationForm.cs</DependentUpon>
     </Compile>
+    <EmbeddedResource Include="Localization\Strings.fr.resx" />
+    <EmbeddedResource Include="Localization\Strings.ja.resx" />
+    <EmbeddedResource Include="Localization\Strings.ko.resx" />
+    <EmbeddedResource Include="Localization\Strings.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Strings.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Localization\Strings.ru.resx" />
+    <EmbeddedResource Include="Localization\Strings.zh-Hans.resx" />
+    <EmbeddedResource Include="Localization\Strings.zh-Hant.resx" />
     <EmbeddedResource Include="View\ConfigForm.resx">
       <DependentUpon>ConfigForm.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
+      <Generator>PublicResXFileCodeGenerator</Generator>
       <SubType>Designer</SubType>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <EmbeddedResource Include="View\CalculationControl.resx">
       <DependentUpon>CalculationControl.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="View\HotkeySettingsForm.resx">
-      <DependentUpon>HotkeySettingsForm.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="View\LogForm.resx">
       <DependentUpon>LogForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="View\OnlineConfigForm.resx">
-      <DependentUpon>OnlineConfigForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="View\ProxyForm.resx">
-      <DependentUpon>ProxyForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="View\StatisticsStrategyConfigurationForm.resx">
       <DependentUpon>StatisticsStrategyConfigurationForm.cs</DependentUpon>
@@ -412,22 +443,39 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
+    <Page Include="Views\ForwardProxyView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\HotkeysView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\OnlineConfigView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\ServerSharingView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\VersionUpdatePromptView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <Import Project="..\packages\Fody.6.2.6\build\Fody.targets" Condition="Exists('..\packages\Fody.6.2.6\build\Fody.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
-    <Error Condition="!Exists('..\packages\Fody.6.2.6\build\Fody.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Fody.6.2.6\build\Fody.targets'))" />
     <Error Condition="!Exists('..\packages\Caseless.Fody.1.9.0\build\Caseless.Fody.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Caseless.Fody.1.9.0\build\Caseless.Fody.props'))" />
     <Error Condition="!Exists('..\packages\Costura.Fody.4.1.0\build\Costura.Fody.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Costura.Fody.4.1.0\build\Costura.Fody.props'))" />
+    <Error Condition="!Exists('..\packages\Fody.6.3.0\build\Fody.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Fody.6.3.0\build\Fody.targets'))" />
+    <Error Condition="!Exists('..\packages\ReactiveUI.Fody.11.5.35\build\ReactiveUI.Fody.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\ReactiveUI.Fody.11.5.35\build\ReactiveUI.Fody.props'))" />
   </Target>
+  <Import Project="..\packages\Fody.6.3.0\build\Fody.targets" Condition="Exists('..\packages\Fody.6.3.0\build\Fody.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
