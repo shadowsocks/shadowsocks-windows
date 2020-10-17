@@ -130,7 +130,7 @@
     <value>포트</value>
   </data>
   <data name="Timeout" xml:space="preserve">
-    <value>시간 초과</value>
+    <value>시간 초과 (초)</value>
   </data>
   <data name="cancelButton_Content" xml:space="preserve">
     <value>취소</value>

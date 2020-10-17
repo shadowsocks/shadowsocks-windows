@@ -130,7 +130,7 @@
     <value>adresse</value>
   </data>
   <data name="Timeout" xml:space="preserve">
-    <value>Délai d'attente</value>
+    <value>Délai d'attente (sec)</value>
   </data>
   <data name="cancelButton_Content" xml:space="preserve">
     <value>Annuler</value>

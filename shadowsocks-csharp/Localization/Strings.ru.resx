@@ -130,7 +130,7 @@
     <value>порт</value>
   </data>
   <data name="Timeout" xml:space="preserve">
-    <value>Таймаут</value>
+    <value>Таймаут (сек)</value>
   </data>
   <data name="cancelButton_Content" xml:space="preserve">
     <value>Отмена</value>

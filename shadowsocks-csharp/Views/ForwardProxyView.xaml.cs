@@ -40,6 +40,18 @@ namespace Shadowsocks.Views
                     viewModel => viewModel.Timeout,
                     view => view.timeoutTextBox.Text)
                     .DisposeWith(disposables);
+                this.OneWayBind(ViewModel,
+                    viewModel => viewModel.CanModifyDetails,
+                    view => view.addressTextBox.IsEnabled)
+                    .DisposeWith(disposables);
+                this.OneWayBind(ViewModel,
+                    viewModel => viewModel.CanModifyDetails,
+                    view => view.portTextBox.IsEnabled)
+                    .DisposeWith(disposables);
+                this.OneWayBind(ViewModel,
+                    viewModel => viewModel.CanModifyDetails,
+                    view => view.timeoutTextBox.IsEnabled)
+                    .DisposeWith(disposables);
 
                 this.Bind(ViewModel,
                     viewModel => viewModel.Username,

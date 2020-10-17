@@ -139,7 +139,7 @@
     <value>Port</value>
   </data>
   <data name="Timeout" xml:space="preserve">
-    <value>Timeout</value>
+    <value>Timeout (sec)</value>
   </data>
   <data name="CredentialsOptional" xml:space="preserve">
     <value>Credentials (optional)</value>

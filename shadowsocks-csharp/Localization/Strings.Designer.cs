@@ -340,7 +340,7 @@ namespace Shadowsocks.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Timeout.
+        ///   Looks up a localized string similar to Timeout (sec).
         /// </summary>
         internal static string Timeout {
             get {

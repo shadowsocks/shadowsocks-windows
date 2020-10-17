@@ -148,7 +148,7 @@
     <value>端口</value>
   </data>
   <data name="Timeout" xml:space="preserve">
-    <value>超时</value>
+    <value>超时 (秒)</value>
   </data>
   <data name="okButton_Content" xml:space="preserve">
     <value>确定</value>

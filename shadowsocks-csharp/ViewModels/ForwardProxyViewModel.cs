@@ -33,6 +33,9 @@ namespace Shadowsocks.ViewModels
             Username = _config.proxy.authUser;
             Password = _config.proxy.authPwd;
 
+            this.WhenAnyValue(x => x.NoProxy, x => !x)
+                .ToPropertyEx(this, x => x.CanModifyDetails);
+
             AddressRule = this.ValidationRule(
                 viewModel => viewModel.Address,
                 address => !string.IsNullOrWhiteSpace(address),
@@ -72,6 +75,9 @@ namespace Shadowsocks.ViewModels
 
         public ReactiveCommand<Unit, Unit> Save { get; }
         public ReactiveCommand<Unit, Unit> Cancel { get; }
+
+        [ObservableAsProperty]
+        public bool CanModifyDetails { get; }
 
         [Reactive]
         public bool NoProxy { get; set; }
