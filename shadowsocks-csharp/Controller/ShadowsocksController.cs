@@ -16,6 +16,7 @@ using Shadowsocks.Controller.Service;
 using Shadowsocks.Controller.Strategy;
 using Shadowsocks.Model;
 using Shadowsocks.Util;
+using WPFLocalizeExtension.Engine;
 
 namespace Shadowsocks.Controller
 {
@@ -171,6 +172,8 @@ namespace Shadowsocks.Controller
             Configuration.Process(ref _config);
 
             NLogConfig.LoadConfiguration();
+
+            logger.Info($"WPF Localization Extension|Current culture: {LocalizeDictionary.CurrentCulture}");
 
             // set User-Agent for httpClient
             try
