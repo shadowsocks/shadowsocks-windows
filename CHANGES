@@ -1,3 +1,9 @@
+4.3.0.0 2020-10-19
+- Cleanup and update dependencies (#2983)
+- Geosite group validation + PAC regeneration on version update (#2988)
+- PAC: add options for direct and proxied groups (#2990)
+- Transition to WPF: ForwardProxyView + HotkeysView + OnlineConfigView + VersionUpdatePromptView (#2991)
+
 4.2.1.0 2020-10-12
 - SIP008 support (#2942)
 - Exclude @cn from PAC proxied list (#2982)
