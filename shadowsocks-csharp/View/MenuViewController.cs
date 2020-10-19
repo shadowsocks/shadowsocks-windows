@@ -265,7 +265,6 @@ namespace Shadowsocks.View
                 this.ServersItem = CreateMenuGroup("Servers", new MenuItem[] {
                     this.SeperatorItem = new MenuItem("-"),
                     this.ConfigItem = CreateMenuItem("Edit Servers...", new EventHandler(this.Config_Click)),
-                    CreateMenuItem("Statistics Config...", StatisticsConfigItem_Click),
                     new MenuItem("-"),
                     CreateMenuItem("Share Server Config...", new EventHandler(this.QRCodeItem_Click)),
                     CreateMenuItem("Scan QRCode from Screen...", new EventHandler(this.ScanQRCodeItem_Click)),
@@ -723,12 +722,6 @@ namespace Shadowsocks.View
         void openURLFromQRCode(object sender, FormClosedEventArgs e)
         {
             Process.Start(_urlToOpen);
-        }
-
-        private void StatisticsConfigItem_Click(object sender, EventArgs e)
-        {
-            StatisticsStrategyConfigurationForm form = new StatisticsStrategyConfigurationForm(controller);
-            form.Show();
         }
 
         private void QRCodeItem_Click(object sender, EventArgs e)

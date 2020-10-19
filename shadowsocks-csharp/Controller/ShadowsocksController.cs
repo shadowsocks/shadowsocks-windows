@@ -40,9 +40,6 @@ namespace Shadowsocks.Controller
         private PrivoxyRunner privoxyRunner;
         private readonly ConcurrentDictionary<Server, Sip003Plugin> _pluginsByServer;
 
-        public AvailabilityStatistics availabilityStatistics = AvailabilityStatistics.Instance;
-        public StatisticsStrategyConfiguration StatisticsConfiguration { get; private set; }
-
         private long _inboundCounter = 0;
         private long _outboundCounter = 0;
         public long InboundCounter => Interlocked.Read(ref _inboundCounter);
@@ -98,7 +95,6 @@ namespace Shadowsocks.Controller
             httpClient = new HttpClient();
             _config = Configuration.Load();
             Configuration.Process(ref _config);
-            StatisticsConfiguration = StatisticsStrategyConfiguration.Load();
             _strategyManager = new StrategyManager(this);
             _pluginsByServer = new ConcurrentDictionary<Server, Sip003Plugin>();
             StartTrafficStatistics(61);
@@ -188,8 +184,6 @@ namespace Shadowsocks.Controller
                 httpClient.DefaultRequestHeaders.Add("User-Agent", _config.userAgentString);
             }
 
-            StatisticsConfiguration = StatisticsStrategyConfiguration.Load();
-
             privoxyRunner = privoxyRunner ?? new PrivoxyRunner();
 
             _pacDaemon = _pacDaemon ?? new PACDaemon(_config);
@@ -202,7 +196,6 @@ namespace Shadowsocks.Controller
             GeositeUpdater.UpdateCompleted += PacServer_PACUpdateCompleted;
             GeositeUpdater.Error += PacServer_PACUpdateError;
 
-            availabilityStatistics.UpdateConfiguration(this);
             _listener?.Stop();
             StopPlugins();
 
@@ -220,7 +213,6 @@ namespace Shadowsocks.Controller
                 privoxyRunner.Start(_config);
 
                 TCPRelay tcpRelay = new TCPRelay(this, _config);
-                tcpRelay.OnConnected += UpdateLatency;
                 tcpRelay.OnInbound += UpdateInboundCounter;
                 tcpRelay.OnOutbound += UpdateOutboundCounter;
                 tcpRelay.OnFailed += (o, e) => GetCurrentStrategy()?.SetFailure(e.server);
@@ -524,19 +516,13 @@ namespace Shadowsocks.Controller
 
         #endregion
 
-        #region Statistics
+        #region Strategy
 
         public void SelectStrategy(string strategyID)
         {
             _config.index = -1;
             _config.strategy = strategyID;
             SaveConfig(_config);
-        }
-
-        public void SaveStrategyConfigurations(StatisticsStrategyConfiguration configuration)
-        {
-            StatisticsConfiguration = configuration;
-            StatisticsStrategyConfiguration.Save(configuration);
         }
 
         public IList<IStrategy> GetStrategies()
@@ -556,43 +542,16 @@ namespace Shadowsocks.Controller
             return null;
         }
 
-        public void UpdateStatisticsConfiguration(bool enabled)
-        {
-            if (availabilityStatistics != null)
-            {
-                availabilityStatistics.UpdateConfiguration(this);
-                _config.availabilityStatistics = enabled;
-                SaveConfig(_config);
-            }
-        }
-
-        public void UpdateLatency(object sender, SSTCPConnectedEventArgs args)
-        {
-            GetCurrentStrategy()?.UpdateLatency(args.server, args.latency);
-            if (_config.availabilityStatistics)
-            {
-                availabilityStatistics.UpdateLatency(args.server, (int)args.latency.TotalMilliseconds);
-            }
-        }
-
         public void UpdateInboundCounter(object sender, SSTransmitEventArgs args)
         {
             GetCurrentStrategy()?.UpdateLastRead(args.server);
             Interlocked.Add(ref _inboundCounter, args.length);
-            if (_config.availabilityStatistics)
-            {
-                availabilityStatistics.UpdateInboundCounter(args.server, args.length);
-            }
         }
 
         public void UpdateOutboundCounter(object sender, SSTransmitEventArgs args)
         {
             GetCurrentStrategy()?.UpdateLastWrite(args.server);
             Interlocked.Add(ref _outboundCounter, args.length);
-            if (_config.availabilityStatistics)
-            {
-                availabilityStatistics.UpdateOutboundCounter(args.server, args.length);
-            }
         }
 
         #endregion

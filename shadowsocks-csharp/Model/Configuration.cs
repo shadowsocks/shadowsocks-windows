@@ -37,7 +37,6 @@ namespace Shadowsocks.Model
         public bool useOnlinePac;
         public bool secureLocalPac; // enable secret for PAC server
         public bool regeneratePacOnUpdate; // regenerate pac.txt on version update
-        public bool availabilityStatistics;
         public bool autoCheckUpdate;
         public bool checkPreRelease;
         public string skippedUpdateVersion; // skip the update with this version number
@@ -76,7 +75,6 @@ namespace Shadowsocks.Model
             useOnlinePac = false;
             secureLocalPac = true;
             regeneratePacOnUpdate = true;
-            availabilityStatistics = false;
             autoCheckUpdate = false;
             checkPreRelease = false;
             skippedUpdateVersion = "";

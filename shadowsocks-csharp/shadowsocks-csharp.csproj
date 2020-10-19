@@ -268,9 +268,7 @@
     <Compile Include="Proxy\DirectConnect.cs" />
     <Compile Include="Proxy\HttpProxy.cs" />
     <Compile Include="Proxy\IProxy.cs" />
-    <Compile Include="Controller\Service\AvailabilityStatistics.cs" />
     <Compile Include="Controller\Strategy\HighAvailabilityStrategy.cs" />
-    <Compile Include="Controller\Strategy\StatisticsStrategy.cs" />
     <Compile Include="Controller\System\AutoStartup.cs" />
     <Compile Include="Controller\FileManager.cs" />
     <Compile Include="Controller\I18N.cs" />
@@ -282,8 +280,6 @@
     <Compile Include="Model\LogViewerConfig.cs" />
     <Compile Include="Model\Server.cs" />
     <Compile Include="Model\Configuration.cs" />
-    <Compile Include="Model\StatisticsRecord.cs" />
-    <Compile Include="Model\StatisticsStrategyConfiguration.cs" />
     <Compile Include="Controller\Strategy\BalancingStrategy.cs" />
     <Compile Include="Controller\Strategy\StrategyManager.cs" />
     <Compile Include="Controller\Strategy\IStrategy.cs" />
@@ -329,12 +325,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Controller\ShadowsocksController.cs" />
     <Compile Include="Controller\System\SystemProxy.cs" />
-    <Compile Include="View\CalculationControl.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="View\CalculationControl.Designer.cs">
-      <DependentUpon>CalculationControl.cs</DependentUpon>
-    </Compile>
     <Compile Include="View\LogForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -347,12 +337,6 @@
     </Compile>
     <Compile Include="Views\ServerSharingView.xaml.cs">
       <DependentUpon>ServerSharingView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="View\StatisticsStrategyConfigurationForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="View\StatisticsStrategyConfigurationForm.Designer.cs">
-      <DependentUpon>StatisticsStrategyConfigurationForm.cs</DependentUpon>
     </Compile>
     <EmbeddedResource Include="Localization\Strings.fr.resx" />
     <EmbeddedResource Include="Localization\Strings.ja.resx" />
@@ -373,14 +357,8 @@
       <SubType>Designer</SubType>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <EmbeddedResource Include="View\CalculationControl.resx">
-      <DependentUpon>CalculationControl.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="View\LogForm.resx">
       <DependentUpon>LogForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="View\StatisticsStrategyConfigurationForm.resx">
-      <DependentUpon>StatisticsStrategyConfigurationForm.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="app.config" />
     <None Include="app.manifest">
@@ -397,7 +375,6 @@
     <None Include="Data\sysproxy.exe.gz" />
     <None Include="Data\sysproxy64.exe.gz" />
     <None Include="packages.config" />
-    <None Include="Properties\DataSources\Shadowsocks.Model.StatisticsStrategyConfiguration.datasource" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
