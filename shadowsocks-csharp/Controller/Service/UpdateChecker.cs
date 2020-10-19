@@ -54,6 +54,8 @@ namespace Shadowsocks.Controller
             // delay
             logger.Info($"Waiting for {millisecondsDelay}ms before checking for version update.");
             await Task.Delay(millisecondsDelay);
+            // update _config so we would know if the user checked or unchecked pre-release checks
+            _config = Program.MainController.GetCurrentConfiguration();
             // start
             logger.Info($"Checking for version update.");
             try

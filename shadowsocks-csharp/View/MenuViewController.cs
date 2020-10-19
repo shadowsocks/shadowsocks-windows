@@ -30,6 +30,7 @@ namespace Shadowsocks.View
         private NotifyIcon _notifyIcon;
         private Icon icon, icon_in, icon_out, icon_both, previousIcon;
 
+        private bool _isStartupCheck;
         private string _urlToOpen;
 
         private ContextMenu contextMenu1;
@@ -114,6 +115,7 @@ namespace Shadowsocks.View
             }
             else if (config.autoCheckUpdate)
             {
+                _isStartupCheck = true;
                 Dispatcher.CurrentDispatcher.Invoke(() => updateChecker.CheckForVersionUpdate(3000));
             }
         }
@@ -462,6 +464,7 @@ namespace Shadowsocks.View
             Configuration config = controller.GetCurrentConfiguration();
             if (config.firstRun)
                 return;
+            _isStartupCheck = true;
             Dispatcher.CurrentDispatcher.Invoke(() => updateChecker.CheckForVersionUpdate(3000));
         }
 
@@ -1004,10 +1007,11 @@ namespace Shadowsocks.View
 
         void updateChecker_CheckUpdateCompleted(object sender, EventArgs e)
         {
-            if (updateChecker.NewReleaseZipFilename == null)
+            if (!_isStartupCheck && updateChecker.NewReleaseZipFilename == null)
             {
                 ShowBalloonTip(I18N.GetString("Shadowsocks"), I18N.GetString("No update is available"), ToolTipIcon.Info, 5000);
             }
+            _isStartupCheck = false;
         }
 
         private void UpdateUpdateMenu()
