@@ -128,7 +128,7 @@ No QRCode found. Try to zoom in or move it to the center of the screen.,QRCode �
 Shadowsocks is already running.,Shadowsocks уже запущен.,Shadowsocks 已经在运行。,Shadowsocks 已經在執行。,Shadowsocks 実行中,Shadowsocks가 이미 실행 중입니다.,Shadowsocks est déjà en cours d'exécution.
 Find Shadowsocks icon in your notify tray.,Значок Shadowsocks можно найти в области уведомлений.,请在任务栏里寻找 Shadowsocks 图标。,請在工作列裡尋找 Shadowsocks 圖示。,通知領域には Shadowsocks のアイコンがあります。,트레이에서 Shadowsocks를 찾아주세요.,Trouvez l'icône Shadowsocks dans votre barre de notification.
 "If you want to start multiple Shadowsocks, make a copy in another directory.","Если вы хотите запустить несколько копий Shadowsocks одновременно, создайте отдельную папку на каждую копию.",如果想同时启动多个，可以另外复制一份到别的目录。,如果想同時啟動多個，可以另外複製一份至別的目錄。,複数起動したい場合は、プログラムファイルを別のフォルダーにコピーしてから、もう一度実行して下さい。,"만약 여러 개의 Shadowsocks를 사용하고 싶으시다면, 파일을 다른 곳에 복사해주세요.","Si vous souhaitez démarrer plusieurs Shadowsocks, faites une copie dans un autre répertoire."
-Failed to decode QRCode,Не удалось распознать QRCode,无法解析二维码,QR 碼解碼失敗,QR コードの読み取りに失敗しました。,QR코드를 해석하는데에 실패했습니다.,Impossible de décoder le QRCode
+Invalid QR Code content: {0},,无效二维码内容: {0},無效二維碼內容: {0},,,
 Failed to update registry,Не удалось обновить запись в реестре,无法修改注册表,無法修改登錄檔,レジストリの更新に失敗しました。,레지스트리를 업데이트하는데에 실패했습니다.,Impossible de mettre à jour de la base de registre
 Import from URL: {0} ?,импортировать из адреса: {0} ?,从URL导入: {0} ?,從URL匯入: {0} ?,{0}：このURLからインポートしますか？,,
 Successfully imported from {0},Успешно импортировано из {0},导入成功：{0},導入成功：{0},{0}：インポートしました。,,

@@ -332,9 +332,6 @@
       <DependentUpon>LogForm.cs</DependentUpon>
     </Compile>
     <Compile Include="View\MenuViewController.cs" />
-    <Compile Include="View\QRCodeSplashForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
     <Compile Include="Views\ServerSharingView.xaml.cs">
       <DependentUpon>ServerSharingView.xaml</DependentUpon>
     </Compile>
