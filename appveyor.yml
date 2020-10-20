@@ -125,19 +125,23 @@ after_build:
     # Publish and deploy
 
     # Normal package
-    dotnet publish -f netcoreapp3.1 -c $env:CONFIGURATION $env:APPVEYOR_BUILD_FOLDER\shadowsocks-csharp\shadowsocks-csharp.csproj
+    dotnet publish -c $env:CONFIGURATION $env:APPVEYOR_BUILD_FOLDER\shadowsocks-csharp\shadowsocks-csharp.csproj
     # Package into a self-contained single-file executable
-    dotnet publish -f netcoreapp3.1 -r win-x64 -c $env:CONFIGURATION -p:PublishSingleFile=true -p:PublishTrimmed=true $env:APPVEYOR_BUILD_FOLDER\shadowsocks-csharp\shadowsocks-csharp.csproj
-    dotnet publish -f netcoreapp3.1 -r win-x86 -c $env:CONFIGURATION -p:PublishSingleFile=true -p:PublishTrimmed=true $env:APPVEYOR_BUILD_FOLDER\shadowsocks-csharp\shadowsocks-csharp.csproj
+    dotnet publish -r win-x64 -c $env:CONFIGURATION -p:PublishSingleFile=true -p:PublishTrimmed=true $env:APPVEYOR_BUILD_FOLDER\shadowsocks-csharp\shadowsocks-csharp.csproj
+    dotnet publish -r win-x86 -c $env:CONFIGURATION -p:PublishSingleFile=true -p:PublishTrimmed=true $env:APPVEYOR_BUILD_FOLDER\shadowsocks-csharp\shadowsocks-csharp.csproj
+    $ZipDev = "$WorkingFolder\shadowsocks-windows-$env:APPVEYOR_BUILD_VERSION-dev.zip"
     $ZipMinimal = "$WorkingFolder\shadowsocks-windows-$env:APPVEYOR_BUILD_VERSION-minimal.zip"
     $ZipSingleExeX64 = "$WorkingFolder\shadowsocks-windows-$env:APPVEYOR_BUILD_VERSION-portable-x64.zip"
     $ZipSingleExeX86 = "$WorkingFolder\shadowsocks-windows-$env:APPVEYOR_BUILD_VERSION-portable-x86.zip"
+    7z a $ZipDev "$env:APPVEYOR_BUILD_FOLDER\shadowsocks-csharp\bin\$env:CONFIGURATION\netcoreapp3.1\*"
     7z a $ZipMinimal "$env:APPVEYOR_BUILD_FOLDER\shadowsocks-csharp\bin\Any CPU\$env:CONFIGURATION\netcoreapp3.1\publish\*"
     7z a $ZipSingleExeX64 "$env:APPVEYOR_BUILD_FOLDER\shadowsocks-csharp\bin\Any CPU\$env:CONFIGURATION\netcoreapp3.1\win-x64\publish\Shadowsocks.exe"
     7z a $ZipSingleExeX86 "$env:APPVEYOR_BUILD_FOLDER\shadowsocks-csharp\bin\Any CPU\$env:CONFIGURATION\netcoreapp3.1\win-x86\publish\Shadowsocks.exe"
+    Calculate-Hash -file $ZipDev | Out-File -FilePath $HashFile -Append
     Calculate-Hash -file $ZipMinimal | Out-File -FilePath $HashFile -Append
     Calculate-Hash -file $ZipSingleExeX64 | Out-File -FilePath $HashFile -Append
     Calculate-Hash -file $ZipSingleExeX86 | Out-File -FilePath $HashFile -Append
+    Push-AppveyorArtifact $ZipDev
     Push-AppveyorArtifact $ZipMinimal
     Push-AppveyorArtifact $ZipSingleExeX64
     Push-AppveyorArtifact $ZipSingleExeX86
