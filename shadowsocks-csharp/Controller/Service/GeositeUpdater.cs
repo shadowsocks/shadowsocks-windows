@@ -35,8 +35,6 @@ namespace Shadowsocks.Controller
 
         private static readonly string DATABASE_PATH = Utils.GetTempPath("dlc.dat");
 
-        private static SocketsHttpHandler socketsHttpHandler;
-        private static HttpClient httpClient;
         private static readonly string GEOSITE_URL = "https://github.com/v2fly/domain-list-community/raw/release/dlc.dat";
         private static readonly string GEOSITE_SHA256SUM_URL = "https://github.com/v2fly/domain-list-community/raw/release/dlc.dat.sha256sum";
         private static byte[] geositeDB;
@@ -45,9 +43,6 @@ namespace Shadowsocks.Controller
 
         static GeositeUpdater()
         {
-            //socketsHttpHandler = new SocketsHttpHandler();
-            //httpClient = new HttpClient(socketsHttpHandler);
-            
             if (File.Exists(DATABASE_PATH) && new FileInfo(DATABASE_PATH).Length > 0)
             {
                 geositeDB = File.ReadAllBytes(DATABASE_PATH);
@@ -68,7 +63,7 @@ namespace Shadowsocks.Controller
             var list = GeositeList.Parser.ParseFrom(geositeDB);
             foreach (var item in list.Entries)
             {
-                Geosites[item.GroupName.ToLower()] = item.Domains;
+                Geosites[item.GroupName.ToLowerInvariant()] = item.Domains;
             }
         }
 
@@ -84,30 +79,15 @@ namespace Shadowsocks.Controller
             string geositeSha256sumUrl = GEOSITE_SHA256SUM_URL;
             SHA256 mySHA256 = SHA256.Create();
             var config = Program.MainController.GetCurrentConfiguration();
-            string group = config.geositeGroup;
-            bool blacklist = config.geositeBlacklistMode;
-            
+            bool blacklist = config.geositePreferDirect;
+            var httpClient = Program.MainController.GetHttpClient();
+
             if (!string.IsNullOrWhiteSpace(config.geositeUrl))
             {
                 logger.Info("Found custom Geosite URL in config file");
                 geositeUrl = config.geositeUrl;
             }
             logger.Info($"Checking Geosite from {geositeUrl}");
-
-            // use System.Net.Http.HttpClient to download GeoSite db.
-            // NASTY workaround: new HttpClient every update
-            // because we can't change proxy on existing socketsHttpHandler instance
-            socketsHttpHandler = new SocketsHttpHandler();
-            httpClient = new HttpClient(socketsHttpHandler);
-            if (config.enabled)
-            {
-                socketsHttpHandler.UseProxy = true;
-                socketsHttpHandler.Proxy = new WebProxy(
-                    config.isIPv6Enabled
-                    ? $"[{IPAddress.IPv6Loopback}]"
-                    : IPAddress.Loopback.ToString(),
-                    config.localPort);
-            }
 
             try
             {
@@ -150,32 +130,26 @@ namespace Shadowsocks.Controller
                 // update stuff
                 geositeDB = downloadedBytes;
                 LoadGeositeList();
-                bool pacFileChanged = MergeAndWritePACFile(group, blacklist);
+                bool pacFileChanged = MergeAndWritePACFile(config.geositeDirectGroups, config.geositeProxiedGroups, blacklist);
                 UpdateCompleted?.Invoke(null, new GeositeResultEventArgs(pacFileChanged));
             }
             catch (Exception ex)
             {
                 Error?.Invoke(null, new ErrorEventArgs(ex));
             }
-            finally
-            {
-                if (socketsHttpHandler != null)
-                {
-                    socketsHttpHandler.Dispose();
-                    socketsHttpHandler = null;
-                }
-                if (httpClient != null)
-                {
-                    httpClient.Dispose();
-                    httpClient = null;
-                }
-            }
         }
 
-        public static bool MergeAndWritePACFile(string group, bool blacklist)
+        /// <summary>
+        /// Merge and write pac.txt from geosite.
+        /// Used at multiple places.
+        /// </summary>
+        /// <param name="directGroups">A list of geosite groups configured for direct connection.</param>
+        /// <param name="proxiedGroups">A list of geosite groups configured for proxied connection.</param>
+        /// <param name="blacklist">Whether to use blacklist mode. False for whitelist.</param>
+        /// <returns></returns>
+        public static bool MergeAndWritePACFile(List<string> directGroups, List<string> proxiedGroups, bool blacklist)
         {
-            IList<DomainObject> domains = Geosites[group];
-            string abpContent = MergePACFile(domains, blacklist);
+            string abpContent = MergePACFile(directGroups, proxiedGroups, blacklist);
             if (File.Exists(PACDaemon.PAC_FILE))
             {
                 string original = FileManager.NonExclusiveReadAllText(PACDaemon.PAC_FILE, Encoding.UTF8);
@@ -188,7 +162,44 @@ namespace Shadowsocks.Controller
             return true;
         }
 
-        private static string MergePACFile(IList<DomainObject> domains, bool blacklist)
+        /// <summary>
+        /// Checks if the specified group exists in GeoSite database.
+        /// </summary>
+        /// <param name="group">The group name to check for.</param>
+        /// <returns>True if the group exists. False if the group doesn't exist.</returns>
+        public static bool CheckGeositeGroup(string group) => SeparateAttributeFromGroupName(group, out string groupName, out _) && Geosites.ContainsKey(groupName);
+
+        /// <summary>
+        /// Separates the attribute (e.g. @cn) from a group name.
+        /// No checks are performed.
+        /// </summary>
+        /// <param name="group">A group name potentially with a trailing attribute.</param>
+        /// <param name="groupName">The group name with the attribute stripped.</param>
+        /// <param name="attribute">The attribute.</param>
+        /// <returns>True for success. False for more than one '@'.</returns>
+        private static bool SeparateAttributeFromGroupName(string group, out string groupName, out string attribute)
+        {
+            var splitGroupAttributeList = group.Split('@');
+            if (splitGroupAttributeList.Length == 1) // no attribute
+            {
+                groupName = splitGroupAttributeList[0];
+                attribute = "";
+            }
+            else if (splitGroupAttributeList.Length == 2) // has attribute
+            {
+                groupName = splitGroupAttributeList[0];
+                attribute = splitGroupAttributeList[1];
+            }
+            else
+            {
+                groupName = "";
+                attribute = "";
+                return false;
+            }    
+            return true;
+        }
+
+        private static string MergePACFile(List<string> directGroups, List<string> proxiedGroups, bool blacklist)
         {
             string abpContent;
             if (File.Exists(PACDaemon.USER_ABP_FILE))
@@ -204,27 +215,25 @@ namespace Shadowsocks.Controller
             if (File.Exists(PACDaemon.USER_RULE_FILE))
             {
                 string userrulesString = FileManager.NonExclusiveReadAllText(PACDaemon.USER_RULE_FILE, Encoding.UTF8);
-                userruleLines = PreProcessGFWList(userrulesString);
+                userruleLines = ProcessUserRules(userrulesString);
             }
 
-            List<string> gfwLines = GeositeToGFWList(domains, blacklist);
+            List<string> ruleLines = GenerateRules(directGroups, proxiedGroups, blacklist);
             abpContent =
 $@"var __USERRULES__ = {JsonConvert.SerializeObject(userruleLines, Formatting.Indented)};
-var __RULES__ = {JsonConvert.SerializeObject(gfwLines, Formatting.Indented)};
+var __RULES__ = {JsonConvert.SerializeObject(ruleLines, Formatting.Indented)};
 {abpContent}";
             return abpContent;
         }
 
-        private static readonly IEnumerable<char> IgnoredLineBegins = new[] { '!', '[' };
-
-        private static List<string> PreProcessGFWList(string content)
+        private static List<string> ProcessUserRules(string content)
         {
             List<string> valid_lines = new List<string>();
-            using (var sr = new StringReader(content))
+            using (var stringReader = new StringReader(content))
             {
-                foreach (var line in sr.NonWhiteSpaceLines())
+                for (string line = stringReader.ReadLine(); line != null; line = stringReader.ReadLine())
                 {
-                    if (line.BeginWithAny(IgnoredLineBegins))
+                    if (string.IsNullOrWhiteSpace(line) || line.StartsWith("!") || line.StartsWith("["))
                         continue;
                     valid_lines.Add(line);
                 }
@@ -232,44 +241,105 @@ var __RULES__ = {JsonConvert.SerializeObject(gfwLines, Formatting.Indented)};
             return valid_lines;
         }
 
-        private static List<string> GeositeToGFWList(IList<DomainObject> domains, bool blacklist)
+        /// <summary>
+        /// Generates rule lines based on user preference.
+        /// </summary>
+        /// <param name="directGroups">A list of geosite groups configured for direct connection.</param>
+        /// <param name="proxiedGroups">A list of geosite groups configured for proxied connection.</param>
+        /// <param name="blacklist">Whether to use blacklist mode. False for whitelist.</param>
+        /// <returns>A list of rule lines.</returns>
+        private static List<string> GenerateRules(List<string> directGroups, List<string> proxiedGroups, bool blacklist)
         {
-            return blacklist ? GeositeToGFWListBlack(domains) : GeositeToGFWListWhite(domains);
-        }
-
-        private static List<string> GeositeToGFWListBlack(IList<DomainObject> domains)
-        {
-            List<string> ret = new List<string>(domains.Count + 100);// 100 overhead
-            foreach (var d in domains)
+            List<string> ruleLines;
+            if (blacklist) // blocking + exception rules
             {
-                string domain = d.Value;
-
-                switch (d.Type)
-                {
-                    case DomainObject.Types.Type.Plain:
-                        ret.Add(domain);
-                        break;
-                    case DomainObject.Types.Type.Regex:
-                        ret.Add($"/{domain}/");
-                        break;
-                    case DomainObject.Types.Type.Domain:
-                        ret.Add($"||{domain}");
-                        break;
-                    case DomainObject.Types.Type.Full:
-                        ret.Add($"|http://{domain}");
-                        ret.Add($"|https://{domain}");
-                        break;
-                }
+                ruleLines = GenerateBlockingRules(proxiedGroups);
+                ruleLines.AddRange(GenerateExceptionRules(directGroups));
             }
-            return ret;
+            else // proxy all + exception rules
+            {
+                ruleLines = new List<string>()
+                {
+                    "/.*/" // block/proxy all unmatched domains
+                };
+                ruleLines.AddRange(GenerateExceptionRules(directGroups));
+            }
+            return ruleLines;
         }
 
-        private static List<string> GeositeToGFWListWhite(IList<DomainObject> domains)
+        /// <summary>
+        /// Generates rules that match domains that should be proxied.
+        /// </summary>
+        /// <param name="groups">A list of source groups.</param>
+        /// <returns>A list of rule lines.</returns>
+        private static List<string> GenerateBlockingRules(List<string> groups)
         {
-            return GeositeToGFWListBlack(domains)
-                .Select(r => $"@@{r}") // convert to whitelist
-                .Prepend("/.*/") // blacklist all other site
-                .ToList();
+            List<string> ruleLines = new List<string>();
+            foreach (var group in groups)
+            {
+                // separate group name and attribute
+                SeparateAttributeFromGroupName(group, out string groupName, out string attribute);
+                var domainObjects = Geosites[groupName];
+                if (!string.IsNullOrEmpty(attribute)) // has attribute
+                {
+                    var attributeObject = new DomainObject.Types.Attribute
+                    {
+                        Key = attribute,
+                        BoolValue = true
+                    };
+                    foreach (var domainObject in domainObjects)
+                    {
+                        if (domainObject.Attribute.Contains(attributeObject))
+                            switch (domainObject.Type)
+                            {
+                                case DomainObject.Types.Type.Plain:
+                                    ruleLines.Add(domainObject.Value);
+                                    break;
+                                case DomainObject.Types.Type.Regex:
+                                    ruleLines.Add($"/{domainObject.Value}/");
+                                    break;
+                                case DomainObject.Types.Type.Domain:
+                                    ruleLines.Add($"||{domainObject.Value}");
+                                    break;
+                                case DomainObject.Types.Type.Full:
+                                    ruleLines.Add($"|http://{domainObject.Value}");
+                                    ruleLines.Add($"|https://{domainObject.Value}");
+                                    break;
+                            }
+                    }
+                }
+                else // no attribute
+                    foreach (var domainObject in domainObjects)
+                    {
+                        switch (domainObject.Type)
+                        {
+                            case DomainObject.Types.Type.Plain:
+                                ruleLines.Add(domainObject.Value);
+                                break;
+                            case DomainObject.Types.Type.Regex:
+                                ruleLines.Add($"/{domainObject.Value}/");
+                                break;
+                            case DomainObject.Types.Type.Domain:
+                                ruleLines.Add($"||{domainObject.Value}");
+                                break;
+                            case DomainObject.Types.Type.Full:
+                                ruleLines.Add($"|http://{domainObject.Value}");
+                                ruleLines.Add($"|https://{domainObject.Value}");
+                                break;
+                        }
+                    }
+            }
+            return ruleLines;
         }
+
+        /// <summary>
+        /// Generates rules that match domains that should be connected directly without a proxy.
+        /// </summary>
+        /// <param name="groups">A list of source groups.</param>
+        /// <returns>A list of rule lines.</returns>
+        private static List<string> GenerateExceptionRules(List<string> groups)
+            => GenerateBlockingRules(groups)
+                .Select(r => $"@@{r}") // convert blocking rules to exception rules
+                .ToList();
     }
 }

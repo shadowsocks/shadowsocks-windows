@@ -117,4 +117,73 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="Password" xml:space="preserve">
+    <value>密碼</value>
+  </data>
+  <data name="Port" xml:space="preserve">
+    <value>Port</value>
+  </data>
+  <data name="Type" xml:space="preserve">
+    <value>類型</value>
+  </data>
+  <data name="Address" xml:space="preserve">
+    <value>位址</value>
+  </data>
+  <data name="Timeout" xml:space="preserve">
+    <value>逾時 (秒)</value>
+  </data>
+  <data name="cancelButton_Content" xml:space="preserve">
+    <value>取消</value>
+  </data>
+  <data name="okButton_Content" xml:space="preserve">
+    <value>確定</value>
+  </data>
+  <data name="ToggleSystemProxy" xml:space="preserve">
+    <value>切換系統 Proxy 狀態</value>
+  </data>
+  <data name="ToggleProxyMode" xml:space="preserve">
+    <value>切換系統 Proxy 模式</value>
+  </data>
+  <data name="AllowClientsFromLAN" xml:space="preserve">
+    <value>切換區域網路共用</value>
+  </data>
+  <data name="OpenLogsWindow" xml:space="preserve">
+    <value>顯示記錄檔</value>
+  </data>
+  <data name="SwitchToPreviousServer" xml:space="preserve">
+    <value>切換上一個伺服器</value>
+  </data>
+  <data name="SwitchToNextServer" xml:space="preserve">
+    <value>切換下一個伺服器</value>
+  </data>
+  <data name="RegisterHotkeysAtStartup" xml:space="preserve">
+    <value>註冊所有快速鍵</value>
+  </data>
+  <data name="registerAllButton_Content" xml:space="preserve">
+    <value>啟動時註冊快速鍵</value>
+  </data>
+  <data name="updateButton_Content" xml:space="preserve">
+    <value>更新</value>
+  </data>
+  <data name="updateAllButton_Content" xml:space="preserve">
+    <value>全部更新</value>
+  </data>
+  <data name="addButton_Content" xml:space="preserve">
+    <value>新增</value>
+  </data>
+  <data name="skipVersionButton_Content" xml:space="preserve">
+    <value>跳過版本</value>
+  </data>
+  <data name="notNowButton_Content" xml:space="preserve">
+    <value>暫不更新</value>
+  </data>
+  <data name="updatePromptTitle" xml:space="preserve">
+    <value>發現可用更新</value>
+  </data>
+  <data name="copyLinkButton_Content" xml:space="preserve">
+    <value>複製鏈接</value>
+  </data>
+  <data name="Copy" xml:space="preserve">
+    <value>複製</value>
+  </data>
 </root>

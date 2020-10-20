@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
@@ -15,12 +16,14 @@ using Shadowsocks.Controller.Service;
 using Shadowsocks.Controller.Strategy;
 using Shadowsocks.Model;
 using Shadowsocks.Util;
+using WPFLocalizeExtension.Engine;
 
 namespace Shadowsocks.Controller
 {
     public class ShadowsocksController
     {
-        private static Logger logger = LogManager.GetCurrentClassLogger();
+        private readonly Logger logger;
+        private readonly HttpClient httpClient;
 
         // controller:
         // handle user actions
@@ -37,9 +40,6 @@ namespace Shadowsocks.Controller
         private StrategyManager _strategyManager;
         private PrivoxyRunner privoxyRunner;
         private readonly ConcurrentDictionary<Server, Sip003Plugin> _pluginsByServer;
-
-        public AvailabilityStatistics availabilityStatistics = AvailabilityStatistics.Instance;
-        public StatisticsStrategyConfiguration StatisticsConfiguration { get; private set; }
 
         private long _inboundCounter = 0;
         private long _outboundCounter = 0;
@@ -92,8 +92,10 @@ namespace Shadowsocks.Controller
 
         public ShadowsocksController()
         {
+            logger = LogManager.GetCurrentClassLogger();
+            httpClient = new HttpClient();
             _config = Configuration.Load();
-            StatisticsConfiguration = StatisticsStrategyConfiguration.Load();
+            Configuration.Process(ref _config);
             _strategyManager = new StrategyManager(this);
             _pluginsByServer = new ConcurrentDictionary<Server, Sip003Plugin>();
             StartTrafficStatistics(61);
@@ -106,23 +108,34 @@ namespace Shadowsocks.Controller
 
         #region Basic
 
-        public void Start(bool regHotkeys = true)
+        public void Start(bool systemWakeUp = false)
         {
-            if (_config.updated && regHotkeys)
+            if (_config.firstRunOnNewVersion && !systemWakeUp)
             {
-                _config.updated = false;
                 ProgramUpdated.Invoke(this, new UpdatedEventArgs()
                 {
                     OldVersion = _config.version,
                     NewVersion = UpdateChecker.Version,
                 });
+                // delete pac.txt when regeneratePacOnUpdate is true
+                if (_config.regeneratePacOnUpdate)
+                    try
+                    {
+                        File.Delete(PACDaemon.PAC_FILE);
+                        logger.Info("Deleted pac.txt from previous version.");
+                    }
+                    catch (Exception e)
+                    {
+                        logger.LogUsefulException(e);
+                    }
+                // finish up first run of new version
+                _config.firstRunOnNewVersion = false;
+                _config.version = UpdateChecker.Version;
                 Configuration.Save(_config);
             }
             Reload();
-            if (regHotkeys)
-            {
+            if (!systemWakeUp)
                 HotkeyReg.RegAllHotkeys();
-            }
         }
 
         public void Stop()
@@ -150,10 +163,24 @@ namespace Shadowsocks.Controller
             Encryption.RNG.Reload();
             // some logic in configuration updated the config when saving, we need to read it again
             _config = Configuration.Load();
+            Configuration.Process(ref _config);
 
             NLogConfig.LoadConfiguration();
 
-            StatisticsConfiguration = StatisticsStrategyConfiguration.Load();
+            logger.Info($"WPF Localization Extension|Current culture: {LocalizeDictionary.CurrentCulture}");
+
+            // set User-Agent for httpClient
+            try
+            {
+                if (!string.IsNullOrWhiteSpace(_config.userAgentString))
+                    httpClient.DefaultRequestHeaders.Add("User-Agent", _config.userAgentString);
+            }
+            catch
+            {
+                // reset userAgent to default and reapply
+                Configuration.ResetUserAgent(_config);
+                httpClient.DefaultRequestHeaders.Add("User-Agent", _config.userAgentString);
+            }
 
             privoxyRunner = privoxyRunner ?? new PrivoxyRunner();
 
@@ -167,7 +194,6 @@ namespace Shadowsocks.Controller
             GeositeUpdater.UpdateCompleted += PacServer_PACUpdateCompleted;
             GeositeUpdater.Error += PacServer_PACUpdateError;
 
-            availabilityStatistics.UpdateConfiguration(this);
             _tcpListener?.Stop();
             _udpListener?.Stop();
             StopPlugins();
@@ -186,7 +212,6 @@ namespace Shadowsocks.Controller
                 privoxyRunner.Start(_config);
 
                 TCPRelay tcpRelay = new TCPRelay(this, _config);
-                tcpRelay.OnConnected += UpdateLatency;
                 tcpRelay.OnInbound += UpdateInboundCounter;
                 tcpRelay.OnOutbound += UpdateOutboundCounter;
                 tcpRelay.OnFailed += (o, e) => GetCurrentStrategy()?.SetFailure(e.server);
@@ -239,22 +264,9 @@ namespace Shadowsocks.Controller
             Errored?.Invoke(this, new ErrorEventArgs(e));
         }
 
-        public Server GetCurrentServer()
-        {
-            return _config.GetCurrentServer();
-        }
-
-        // always return copy
-        public Configuration GetConfigurationCopy()
-        {
-            return Configuration.Load();
-        }
-
-        // always return current instance
-        public Configuration GetCurrentConfiguration()
-        {
-            return _config;
-        }
+        public HttpClient GetHttpClient() => httpClient;
+        public Server GetCurrentServer() => _config.GetCurrentServer();
+        public Configuration GetCurrentConfiguration() => _config;
 
         public Server GetAServer(IStrategyCallerType type, IPEndPoint localIPEndPoint, EndPoint destEndPoint)
         {
@@ -270,19 +282,19 @@ namespace Shadowsocks.Controller
             return GetCurrentServer();
         }
 
-        public void SelectServerIndex(int index)
-        {
-            _config.index = index;
-            _config.strategy = null;
-            SaveConfig(_config);
-        }
-
         public void SaveServers(List<Server> servers, int localPort, bool portableMode)
         {
             _config.configs = servers;
             _config.localPort = localPort;
             _config.portableMode = portableMode;
             Configuration.Save(_config);
+        }
+
+        public void SelectServerIndex(int index)
+        {
+            _config.index = index;
+            _config.strategy = null;
+            SaveConfig(_config);
         }
 
         public void ToggleShareOverLAN(bool enabled)
@@ -313,7 +325,7 @@ namespace Shadowsocks.Controller
             EnableGlobalChanged?.Invoke(this, new EventArgs());
         }
 
-        public void SaveProxy(ProxyConfig proxyConfig)
+        public void SaveProxy(ForwardProxyConfig proxyConfig)
         {
             _config.proxy = proxyConfig;
             SaveConfig(_config);
@@ -346,7 +358,7 @@ namespace Shadowsocks.Controller
         private static readonly IEnumerable<char> IgnoredLineBegins = new[] { '!', '[' };
         private void PacDaemon_UserRuleFileChanged(object sender, EventArgs e)
         {
-            GeositeUpdater.MergeAndWritePACFile(_config.geositeGroup, _config.geositeBlacklistMode);
+            GeositeUpdater.MergeAndWritePACFile(_config.geositeDirectGroups, _config.geositeProxiedGroups, _config.geositePreferDirect);
             UpdateSystemProxy();
         }
 
@@ -393,6 +405,13 @@ namespace Shadowsocks.Controller
             ConfigChanged?.Invoke(this, new EventArgs());
         }
 
+        public void ToggleRegeneratePacOnUpdate(bool enabled)
+        {
+            _config.regeneratePacOnUpdate = enabled;
+            SaveConfig(_config);
+            ConfigChanged?.Invoke(this, new EventArgs());
+        }
+
         #endregion
 
         #region SIP002
@@ -419,7 +438,7 @@ namespace Shadowsocks.Controller
         {
             try
             {
-                if (ssURL.IsNullOrEmpty() || ssURL.IsWhiteSpace())
+                if (string.IsNullOrWhiteSpace(ssURL))
                     return false;
 
                 var servers = Server.GetServers(ssURL);
@@ -474,6 +493,12 @@ namespace Shadowsocks.Controller
             ConfigChanged?.Invoke(this, new EventArgs());
         }
 
+        public void SaveSkippedUpdateVerion(string version)
+        {
+            _config.skippedUpdateVersion = version;
+            Configuration.Save(_config);
+        }
+
         public void SaveLogViewerConfig(LogViewerConfig newConfig)
         {
             _config.logViewer = newConfig;
@@ -493,19 +518,13 @@ namespace Shadowsocks.Controller
 
         #endregion
 
-        #region Statistic
+        #region Strategy
 
         public void SelectStrategy(string strategyID)
         {
             _config.index = -1;
             _config.strategy = strategyID;
             SaveConfig(_config);
-        }
-
-        public void SaveStrategyConfigurations(StatisticsStrategyConfiguration configuration)
-        {
-            StatisticsConfiguration = configuration;
-            StatisticsStrategyConfiguration.Save(configuration);
         }
 
         public IList<IStrategy> GetStrategies()
@@ -525,43 +544,16 @@ namespace Shadowsocks.Controller
             return null;
         }
 
-        public void UpdateStatisticsConfiguration(bool enabled)
-        {
-            if (availabilityStatistics != null)
-            {
-                availabilityStatistics.UpdateConfiguration(this);
-                _config.availabilityStatistics = enabled;
-                SaveConfig(_config);
-            }
-        }
-
-        public void UpdateLatency(object sender, SSTCPConnectedEventArgs args)
-        {
-            GetCurrentStrategy()?.UpdateLatency(args.server, args.latency);
-            if (_config.availabilityStatistics)
-            {
-                availabilityStatistics.UpdateLatency(args.server, (int)args.latency.TotalMilliseconds);
-            }
-        }
-
         public void UpdateInboundCounter(object sender, SSTransmitEventArgs args)
         {
             GetCurrentStrategy()?.UpdateLastRead(args.server);
             Interlocked.Add(ref _inboundCounter, args.length);
-            if (_config.availabilityStatistics)
-            {
-                availabilityStatistics.UpdateInboundCounter(args.server, args.length);
-            }
         }
 
         public void UpdateOutboundCounter(object sender, SSTransmitEventArgs args)
         {
             GetCurrentStrategy()?.UpdateLastWrite(args.server);
             Interlocked.Add(ref _outboundCounter, args.length);
-            if (_config.availabilityStatistics)
-            {
-                availabilityStatistics.UpdateOutboundCounter(args.server, args.length);
-            }
         }
 
         #endregion
@@ -620,7 +612,7 @@ namespace Shadowsocks.Controller
         }
 
         #endregion
-        
+
         #region Traffic Statistics
 
         private void StartTrafficStatistics(int queueMaxSize)
@@ -668,7 +660,7 @@ namespace Shadowsocks.Controller
 
         public async Task<int> UpdateOnlineConfigInternal(string url)
         {
-            var onlineServer = await OnlineConfigResolver.GetOnline(url, _config.WebProxy);
+            var onlineServer = await OnlineConfigResolver.GetOnline(url);
             _config.configs = Configuration.SortByOnlineConfig(
                 _config.configs
                 .Where(c => c.group != url)
@@ -695,10 +687,10 @@ namespace Shadowsocks.Controller
             return true;
         }
 
-        public async Task<int> UpdateAllOnlineConfig()
+        public async Task<List<string>> UpdateAllOnlineConfig()
         {
             var selected = GetCurrentServer();
-            int failCount = 0;
+            var failedUrls = new List<string>();
             foreach (var url in _config.onlineConfigSource)
             {
                 try
@@ -708,18 +700,18 @@ namespace Shadowsocks.Controller
                 catch (Exception e)
                 {
                     logger.LogUsefulException(e);
-                    failCount++;
+                    failedUrls.Add(url);
                 }
             }
 
             _config.index = _config.configs.IndexOf(selected);
             SaveConfig(_config);
-            return failCount;
+            return failedUrls;
         }
 
-        public void SaveOnlineConfigSource(IEnumerable<string> vs)
+        public void SaveOnlineConfigSource(List<string> sources)
         {
-            _config.onlineConfigSource = vs.ToList();
+            _config.onlineConfigSource = sources;
             SaveConfig(_config);
         }
 

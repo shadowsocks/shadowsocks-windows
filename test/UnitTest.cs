@@ -15,18 +15,6 @@ namespace Shadowsocks.Test
     public class UnitTest
     {
         [TestMethod]
-        public void TestCompareVersion()
-        {
-            Assert.IsTrue(UpdateChecker.Asset.CompareVersion("2.3.1.0", "2.3.1") == 0);
-            Assert.IsTrue(UpdateChecker.Asset.CompareVersion("1.2", "1.3") < 0);
-            Assert.IsTrue(UpdateChecker.Asset.CompareVersion("1.3", "1.2") > 0);
-            Assert.IsTrue(UpdateChecker.Asset.CompareVersion("1.3", "1.3") == 0);
-            Assert.IsTrue(UpdateChecker.Asset.CompareVersion("1.2.1", "1.2") > 0);
-            Assert.IsTrue(UpdateChecker.Asset.CompareVersion("2.3.1", "2.4") < 0);
-            Assert.IsTrue(UpdateChecker.Asset.CompareVersion("1.3.2", "1.3.1") > 0);
-        }
-
-        [TestMethod]
         public void TestHotKey2Str()
         {
             Assert.AreEqual("Ctrl+A", HotKeys.HotKey2Str(Key.A, ModifierKeys.Control));

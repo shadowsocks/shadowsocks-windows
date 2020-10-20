@@ -229,7 +229,7 @@ namespace Shadowsocks.View
         {
             password = null;
             string outPassword;
-            if ((outPassword = PasswordTextBox.Text).IsNullOrWhiteSpace())
+            if (string.IsNullOrWhiteSpace(outPassword = PasswordTextBox.Text))
             {
                 if (!isSave && !isCopy && ServersListBox.Items.Count > 1 && I18N.GetString("New server").Equals(ServersListBox.Items[_lastSelectedIndex].ToString()))
                 {
@@ -352,7 +352,7 @@ namespace Shadowsocks.View
 
         private void LoadCurrentConfiguration()
         {
-            _modifiedConfiguration = controller.GetConfigurationCopy();
+            _modifiedConfiguration = controller.GetCurrentConfiguration();
             LoadServerNameListToUI(_modifiedConfiguration);
 
             _lastSelectedIndex = _modifiedConfiguration.index;

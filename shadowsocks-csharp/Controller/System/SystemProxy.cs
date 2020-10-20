@@ -31,7 +31,7 @@ namespace Shadowsocks.Controller
                     else
                     {
                         string pacUrl;
-                        if (config.useOnlinePac && !config.pacUrl.IsNullOrEmpty())
+                        if (config.useOnlinePac && !string.IsNullOrEmpty(config.pacUrl))
                         {
                             pacUrl = config.pacUrl;
                         }

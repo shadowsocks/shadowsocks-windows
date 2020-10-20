@@ -122,12 +122,13 @@ namespace Shadowsocks.Controller.Service
 
         public string ExpandEnvironmentVariables(string name, StringDictionary environmentVariables = null)
         {
+            name = name.ToLower();
             // Expand the environment variables from the new process itself
             if (environmentVariables != null)
             {
                 foreach(string key in environmentVariables.Keys)
                 {
-                    name = name.Replace($"%{key}%", environmentVariables[key], StringComparison.OrdinalIgnoreCase);
+                    name = name.Replace($"%{key.ToLower()}%", environmentVariables[key]);
                 }
             }
             // Also expand the environment variables from current main process (system)

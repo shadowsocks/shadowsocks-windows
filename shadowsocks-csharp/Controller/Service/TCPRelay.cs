@@ -239,7 +239,7 @@ namespace Shadowsocks.Controller
         public DateTime lastActivity;
 
         private readonly ShadowsocksController _controller;
-        private readonly ProxyConfig _config;
+        private readonly ForwardProxyConfig _config;
         private readonly Socket _connection;
 
         private IEncryptor encryptor;
@@ -708,10 +708,10 @@ namespace Shadowsocks.Controller
                 {
                     switch (_config.proxyType)
                     {
-                        case ProxyConfig.PROXY_SOCKS5:
+                        case ForwardProxyConfig.PROXY_SOCKS5:
                             remote = new Socks5Proxy();
                             break;
-                        case ProxyConfig.PROXY_HTTP:
+                        case ForwardProxyConfig.PROXY_HTTP:
                             remote = new HttpProxy();
                             break;
                         default:
