@@ -32,15 +32,6 @@ namespace Shadowsocks.Controller
         public string NewReleaseVersion { get; private set; }
         public string NewReleaseZipFilename { get; private set; }
 
-        private void Timer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
-        {
-            CheckUpdateTimer timer = (CheckUpdateTimer)sender;
-            Configuration config = timer.config;
-            timer.Elapsed -= Timer_Elapsed;
-            timer.Enabled = false;
-            timer.Dispose();
-            CheckUpdate(config);
-        }
         public event EventHandler CheckUpdateCompleted;
 
         public static readonly string Version = Assembly.GetEntryAssembly().GetName().Version.ToString();

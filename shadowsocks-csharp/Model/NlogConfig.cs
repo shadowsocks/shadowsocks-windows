@@ -25,7 +25,7 @@ namespace Shadowsocks.Model
         {
             get
             {
-                if (_NLOG_CONFIG_FILE_NAME.IsNullOrEmpty())
+                if (string.IsNullOrEmpty(_NLOG_CONFIG_FILE_NAME))
                 {
                     _NLOG_CONFIG_FILE_NAME = Path.Combine(Environment.CurrentDirectory, "NLog.config");
                 }

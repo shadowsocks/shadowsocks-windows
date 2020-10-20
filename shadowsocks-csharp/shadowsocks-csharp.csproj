@@ -4,6 +4,7 @@
     <OutputType>WinExe</OutputType>
     <TargetFrameworks>netcoreapp3.1</TargetFrameworks>
     <RootNamespace>Shadowsocks</RootNamespace>
+    <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
     <Authors>clowwindy &amp; community 2020</Authors>
     <PackageId>Shadowsocks</PackageId>
@@ -76,22 +77,23 @@
     <PackageReference Include="Caseless.Fody" Version="1.9.0" />
     <PackageReference Include="CommandLineParser" Version="2.8.0" />
     <PackageReference Include="Costura.Fody" Version="4.1.0" />
-    <PackageReference Include="Fody" Version="6.2.0">
-      <PrivateAssets>all</PrivateAssets>
+    <PackageReference Include="Fody" Version="6.3.0">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Google.Protobuf" Version="3.12.3" />
+    <PackageReference Include="Google.Protobuf" Version="3.13.0" />
+    <PackageReference Include="MdXaml" Version="1.6.0" />
     <PackageReference Include="Microsoft.VisualBasic" Version="10.3.0" />
    
     <PackageReference Include="NaCl.Core" Version="1.2.0" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
-    <PackageReference Include="NLog" Version="4.7.2" />
-    <PackageReference Include="System.Data.SqlClient" Version="4.8.1" />
-    <PackageReference Include="ZXing.Net" Version="0.16.5" />
-    <PackageReference Include="StringEx.CS" Version="0.3.1">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
+    <PackageReference Include="NLog" Version="4.7.5" />
+    <PackageReference Include="ReactiveUI.Events.WPF" Version="11.5.35" />
+    <PackageReference Include="ReactiveUI.Fody" Version="11.5.35" />
+    <PackageReference Include="ReactiveUI.Validation" Version="1.8.1" />
+    <PackageReference Include="ReactiveUI.WPF" Version="11.5.35" />
+    <PackageReference Include="System.Data.SqlClient" Version="4.8.2" />
+    <PackageReference Include="WPFLocalizeExtension" Version="3.8.0" />
+    <PackageReference Include="ZXing.Net" Version="0.16.6" />
     <PackageReference Include="System.Management" Version="4.7.0" />
   </ItemGroup>
 

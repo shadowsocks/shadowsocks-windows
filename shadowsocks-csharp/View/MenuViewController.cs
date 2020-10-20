@@ -460,7 +460,7 @@ namespace Shadowsocks.View
             }
         }
 
-        void notifyIcon1_BalloonTipClicked(object sender, EventArgs e)
+        private void CheckUpdateForFirstRun()
         {
             Configuration config = controller.GetCurrentConfiguration();
             if (config.firstRun)
@@ -604,80 +604,6 @@ namespace Shadowsocks.View
             disableItem.Checked = !controller.GetCurrentConfiguration().enabled;
         }
 
-        private void CheckUpdateForFirstRun()
-        {
-            Configuration config = controller.GetConfigurationCopy();
-            if (config.isDefault) return;
-            _isStartupChecking = true;
-            updateChecker.CheckUpdate(config, 3000);
-        }
-
-        #endregion
-
-        #region Main menu
-
-        void controller_ShareOverLANStatusChanged(object sender, EventArgs e)
-        {
-            ShareOverLANItem.Checked = controller.GetConfigurationCopy().shareOverLan;
-        }
-
-        private void proxyItem_Click(object sender, EventArgs e)
-        {
-            ShowProxyForm();
-        }
-
-        private void OnlineConfig_Click(object sender, EventArgs e)
-        {
-            ShowOnlineConfigForm();
-        }
-
-        private void hotKeyItem_Click(object sender, EventArgs e)
-        {
-            ShowHotKeySettingsForm();
-        }
-
-        private void ShareOverLANItem_Click(object sender, EventArgs e)
-        {
-            ShareOverLANItem.Checked = !ShareOverLANItem.Checked;
-            controller.ToggleShareOverLAN(ShareOverLANItem.Checked);
-        }
-
-        private void AutoStartupItem_Click(object sender, EventArgs e)
-        {
-            AutoStartupItem.Checked = !AutoStartupItem.Checked;
-            if (!AutoStartup.Set(AutoStartupItem.Checked))
-            {
-                MessageBox.Show(I18N.GetString("Failed to update registry"));
-            }
-            LoadCurrentConfiguration();
-        }
-
-        private void ProtocolHandlerItem_Click(object sender, EventArgs e)
-        {
-            ProtocolHandlerItem.Checked = !ProtocolHandlerItem.Checked;
-            if (!ProtocolHandler.Set(ProtocolHandlerItem.Checked))
-            {
-                MessageBox.Show(I18N.GetString("Failed to update registry"));
-            }
-            LoadCurrentConfiguration();
-        }
-
-        private void Quit_Click(object sender, EventArgs e)
-        {
-            controller.Stop();
-            _notifyIcon.Visible = false;
-            Application.Exit();
-        }
-
-        #endregion
-
-        #region System proxy
-
-        private void controller_EnableStatusChanged(object sender, EventArgs e)
-        {
-            disableItem.Checked = !controller.GetConfigurationCopy().enabled;
-        }
-
         private void EnableItem_Click(object sender, EventArgs e)
         {
             controller.ToggleEnable(false);
@@ -757,8 +683,9 @@ namespace Shadowsocks.View
             Configuration configuration = controller.GetCurrentConfiguration();
             foreach (var server in configuration.configs)
             {
-                if (Configuration.ChecksServer(server))
+                try
                 {
+                    Configuration.CheckServer(server);
                     var name = server.ToString();
                     if (!items.OfType<ToolStripMenuItem>().Any(ts => ts.Text == name))
                     {
@@ -768,6 +695,9 @@ namespace Shadowsocks.View
                         items.Add(item);
                         serverCount++;
                     }
+                }
+                catch
+                {
                 }
             }
 
@@ -807,7 +737,7 @@ namespace Shadowsocks.View
             ShowConfigForm();
         }
 
-        void openURLFromQRCode(object sender, FormClosedEventArgs e)
+        void openURLFromQRCode()
         {
             Utils.OpenInBrowser(_urlToOpen);
         }
