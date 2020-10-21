@@ -10,15 +10,16 @@ var userrules = [];
 var rules = [];
 
 // convert to abp grammar
+var re = /^(@@)?\|\|.*?[^\^]$/;
 for (var i = 0; i < __RULES__.length; i++) {
     var s = __RULES__[i];
-    if (s.substring(0, 2) == "||") s += "^";
+    if (s.match(re)) s += "^";
     rules.push(s);
 }
 
 for (var i = 0; i < __USERRULES__.length; i++) {
     var s = __USERRULES__[i];
-    if (s.substring(0, 2) == "||") s += "^";
+    if (s.match(re))  s += "^";
     userrules.push(s);
 }
 
