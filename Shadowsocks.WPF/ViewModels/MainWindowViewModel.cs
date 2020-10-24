@@ -1,5 +1,4 @@
 using ReactiveUI;
-using Shadowsocks.Controller.Service;
 
 using System;
 
