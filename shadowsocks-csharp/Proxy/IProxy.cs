@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Net;
 using System.Net.Sockets;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Shadowsocks.Proxy
 {
@@ -13,23 +15,13 @@ namespace Shadowsocks.Proxy
 
         EndPoint DestEndPoint { get; }
 
-        void BeginConnectProxy(EndPoint remoteEP, AsyncCallback callback, object state);
+        Task ConnectProxyAsync(EndPoint remoteEP, NetworkCredential auth = null, CancellationToken token = default);
 
-        void EndConnectProxy(IAsyncResult asyncResult);
+        Task ConnectRemoteAsync(EndPoint destEndPoint, CancellationToken token = default);
 
-        void BeginConnectDest(EndPoint destEndPoint, AsyncCallback callback, object state, NetworkCredential auth = null);
+        Task<int> SendAsync(ReadOnlyMemory<byte> buffer, CancellationToken token = default);
 
-        void EndConnectDest(IAsyncResult asyncResult);
-
-        void BeginSend(byte[] buffer, int offset, int size, SocketFlags socketFlags, AsyncCallback callback,
-            object state);
-
-        int EndSend(IAsyncResult asyncResult);
-
-        void BeginReceive(byte[] buffer, int offset, int size, SocketFlags socketFlags, AsyncCallback callback,
-            object state);
-
-        int EndReceive(IAsyncResult asyncResult);
+        Task<int> ReceiveAsync(Memory<byte> buffer, CancellationToken token = default);
 
         void Shutdown(SocketShutdown how);
 

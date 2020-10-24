@@ -43,6 +43,9 @@ namespace Shadowsocks.Crypto.AEAD
         // Is first chunk(tcp request)
         protected bool tcpRequestSent;
 
+        // [len(2)][lentag][data][datatag]
+        private int ChunkOverhead => tagLen * 2 + 2;
+
         public AEADCrypto(string method, string password)
             : base(method, password)
         {
@@ -119,17 +122,6 @@ namespace Shadowsocks.Crypto.AEAD
                 outlength = saltLen;
             }
 
-            if (!tcpRequestSent)
-            {
-                tcpRequestSent = true;
-
-                // read addr byte to encrypt
-                int encAddrBufLength = ChunkEncrypt(tmp.Slice(0, AddressBufferLength), cipher.Slice(outlength));
-                tmp = tmp.Slice(AddressBufferLength);
-                outlength += encAddrBufLength;
-            }
-
-            // handle other chunks
             while (true)
             {
                 // calculate next chunk size
@@ -147,7 +139,7 @@ namespace Shadowsocks.Crypto.AEAD
 
                 // check if we have enough space for outbuf
                 // if not, keep buf for next run, at this condition, buffer is not empty
-                if (outlength + TCPParameter.ChunkOverheadSize > TCPParameter.BufferSize)
+                if (outlength + ChunkOverhead > cipher.Length)
                 {
                     logger.Debug("enc outbuf almost full, giving up");
 
@@ -234,7 +226,7 @@ namespace Shadowsocks.Crypto.AEAD
                 outlength += len;
 
                 // logger.Debug("aead dec outlength " + outlength);
-                if (outlength + 100 > TCPParameter.BufferSize)
+                if (outlength + ChunkOverhead > cipher.Length)
                 {
                     logger.Trace($"{instanceId} output almost full, write {tmp.Length} byte back to buffer.");
                     tmp.CopyTo(buffer);

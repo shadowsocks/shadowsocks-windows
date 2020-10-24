@@ -1,11 +1,13 @@
 ﻿using System;
+using System.Net.Sockets;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Shadowsocks.Util.Sockets
 {
     public class LineReader
     {
-        private readonly WrappedSocket _socket;
+        private readonly Socket _socket;
         private readonly Func<string, object, bool> _onLineRead;
         private readonly Action<Exception, object> _onException;
         private readonly Action<byte[], int, int, object> _onFinish;
@@ -20,7 +22,10 @@ namespace Shadowsocks.Util.Sockets
 
         private int _bufferIndex;
 
-        public LineReader(WrappedSocket socket, Func<string, object, bool> onLineRead, Action<Exception, object> onException,
+        private readonly TaskCompletionSource<int> finishPromise = new TaskCompletionSource<int>();
+        public Task Finished => finishPromise.Task;
+
+        public LineReader(Socket socket, Func<string, object, bool> onLineRead, Action<Exception, object> onException,
             Action<byte[], int, int, object> onFinish, Encoding encoding, string delimiter, int maxLineBytes, object state)
         {
             if (socket == null)
@@ -80,6 +85,7 @@ namespace Shadowsocks.Util.Sockets
                 if (bytesRead == 0)
                 {
                     OnFinish(length);
+                    finishPromise.TrySetResult(0);
                     return;
                 }
 
@@ -128,6 +134,7 @@ namespace Shadowsocks.Util.Sockets
 
         private void OnException(Exception ex)
         {
+            finishPromise.TrySetException(ex);
             _onException?.Invoke(ex, _state);
         }
 

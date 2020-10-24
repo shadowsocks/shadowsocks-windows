@@ -2,6 +2,7 @@
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
+using System.Threading.Tasks;
 using Shadowsocks.Util.Sockets;
 
 namespace Shadowsocks.Proxy
@@ -31,60 +32,12 @@ namespace Shadowsocks.Proxy
             }
         }
 
-        private WrappedSocket _remote = new WrappedSocket();
+        private readonly Socket _remote = new Socket(SocketType.Stream, ProtocolType.Tcp);
 
         public EndPoint LocalEndPoint => _remote.LocalEndPoint;
 
         public EndPoint ProxyEndPoint { get; } = new FakeEndPoint();
         public EndPoint DestEndPoint { get; private set; }
-
-        public void BeginConnectProxy(EndPoint remoteEP, AsyncCallback callback, object state)
-        {
-            // do nothing
-
-            var r = new FakeAsyncResult(state);
-            callback?.Invoke(r);
-        }
-
-        public void EndConnectProxy(IAsyncResult asyncResult)
-        {
-            // do nothing
-        }
-
-        public void BeginConnectDest(EndPoint destEndPoint, AsyncCallback callback, object state, NetworkCredential auth = null)
-        {
-            DestEndPoint = destEndPoint;
-
-            _remote.BeginConnect(destEndPoint, callback, state);
-        }
-
-        public void EndConnectDest(IAsyncResult asyncResult)
-        {
-            _remote.EndConnect(asyncResult);
-            _remote.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, true);
-        }
-
-        public void BeginSend(byte[] buffer, int offset, int size, SocketFlags socketFlags, AsyncCallback callback,
-            object state)
-        {
-            _remote.BeginSend(buffer, offset, size, socketFlags, callback, state);
-        }
-
-        public int EndSend(IAsyncResult asyncResult)
-        {
-            return _remote.EndSend(asyncResult);
-        }
-
-        public void BeginReceive(byte[] buffer, int offset, int size, SocketFlags socketFlags, AsyncCallback callback,
-            object state)
-        {
-            _remote.BeginReceive(buffer, offset, size, socketFlags, callback, state);
-        }
-
-        public int EndReceive(IAsyncResult asyncResult)
-        {
-            return _remote.EndReceive(asyncResult);
-        }
 
         public void Shutdown(SocketShutdown how)
         {
@@ -94,6 +47,27 @@ namespace Shadowsocks.Proxy
         public void Close()
         {
             _remote.Dispose();
+        }
+
+        public Task ConnectProxyAsync(EndPoint remoteEP, NetworkCredential auth = null, CancellationToken token = default)
+        {
+            return Task.CompletedTask;
+        }
+
+        public async Task ConnectRemoteAsync(EndPoint destEndPoint, CancellationToken token = default)
+        {
+            DestEndPoint = destEndPoint;
+            await _remote.ConnectAsync(destEndPoint);
+        }
+
+        public async Task<int> SendAsync(ReadOnlyMemory<byte> buffer, CancellationToken token = default)
+        {
+            return await _remote.SendAsync(buffer, SocketFlags.None, token);
+        }
+
+        public async Task<int> ReceiveAsync(Memory<byte> buffer, CancellationToken token = default)
+        {
+            return await _remote.ReceiveAsync(buffer, SocketFlags.None, token);
         }
     }
 }

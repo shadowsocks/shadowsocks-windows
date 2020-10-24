@@ -62,12 +62,12 @@ namespace Shadowsocks.Crypto
                     _registeredEncryptors.Add(method.Key, typeof(AEADAesGcmNativeCrypto));
                 }
             }
-            foreach (var method in AEADNaClCrypto.SupportedCiphers())
+            foreach (var method in AEADBouncyCastleCrypto.SupportedCiphers())
             {
                 if (!_registeredEncryptors.ContainsKey(method.Key))
                 {
                     ciphers.Add(method.Key, method.Value);
-                    _registeredEncryptors.Add(method.Key, typeof(AEADNaClCrypto));
+                    _registeredEncryptors.Add(method.Key, typeof(AEADBouncyCastleCrypto));
                 }
             }
         }
