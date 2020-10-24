@@ -55,10 +55,7 @@ namespace Shadowsocks.Test
             {
                 IEncryptor encryptor = (IEncryptor)ector.Invoke(new object[] { method, password });
                 IEncryptor decryptor = (IEncryptor)dctor.Invoke(new object[] { method, password });
-                encryptor.AddressBufferLength = 1 + 4 + 2;// ADDR_ATYP_LEN + 4 + ADDR_PORT_LEN;
-                decryptor.AddressBufferLength = 1 + 4 + 2;// ADDR_ATYP_LEN + 4 + ADDR_PORT_LEN;
-
-
+                
                 for (int i = 0; i < 16; i++)
                 {
                     RunEncryptionRound(encryptor, decryptor);

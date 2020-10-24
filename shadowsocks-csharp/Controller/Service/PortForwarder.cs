@@ -46,7 +46,7 @@ namespace Shadowsocks.Controller
             private byte[] _firstPacket;
             private int _firstPacketLength;
             private Socket _local;
-            private WrappedSocket _remote;
+            private Socket _remote;
             private bool _closed = false;
             private bool _localShutdown = false;
             private bool _remoteShutdown = false;
@@ -70,7 +70,7 @@ namespace Shadowsocks.Controller
                     EndPoint remoteEP = SocketUtil.GetEndPoint(_local.AddressFamily == AddressFamily.InterNetworkV6 ? "[::1]" : "127.0.0.1", targetPort);
 
                     // Connect to the remote endpoint.
-                    _remote = new WrappedSocket();
+                    _remote = new Socket(SocketType.Stream, ProtocolType.Tcp);
                     _remote.BeginConnect(remoteEP, ConnectCallback, null);
                 }
                 catch (Exception e)
