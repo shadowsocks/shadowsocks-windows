@@ -1,3 +1,9 @@
+4.3.1.0 2020-10-25
+- Update abp.js (#2999)
+- Separate QR code scanning from MenuViewController (#2995)
+- Remove statistics strategy (#2994)
+- Other minor bug fixes and improvements
+
 4.3.0.0 2020-10-19
 - Cleanup and update dependencies (#2983)
 - Geosite group validation + PAC regeneration on version update (#2988)
