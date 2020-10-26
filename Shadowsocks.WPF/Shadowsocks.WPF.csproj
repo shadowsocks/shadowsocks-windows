@@ -1,0 +1,70 @@
+<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <Authors>clowwindy &amp; community 2020</Authors>
+    <PackageId>Shadowsocks.WPF</PackageId>
+    <Product>Shadowsocks WPF GUI</Product>
+    <AssemblyVersion>5.0.0.0</AssemblyVersion>
+    <Version>1.0.0</Version>
+    <ApplicationIcon>Assets\shadowsocks.ico</ApplicationIcon>
+    <NoWin32Manifest>true</NoWin32Manifest>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MaterialDesignThemes" Version="3.2.0" />
+    <PackageReference Include="OxyPlot.Wpf" Version="2.0.0" />
+    <PackageReference Include="ReactiveUI.Events.WPF" Version="12.1.1" />
+    <PackageReference Include="ReactiveUI.Fody" Version="12.1.1" />
+    <PackageReference Include="ReactiveUI.Validation" Version="1.8.6" />
+    <PackageReference Include="ReactiveUI.WPF" Version="12.1.1" />
+    <PackageReference Include="WPFLocalizeExtension" Version="3.8.0" />
+    <PackageReference Include="ZXing.Net" Version="0.16.6" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Shadowsocks\Shadowsocks.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Assets\ss128.pdn" />
+    <Resource Include="Assets\ss32.pdn" />
+    <Resource Include="Assets\ss32Fill.png" />
+    <Resource Include="Assets\ss32In.png" />
+    <Resource Include="Assets\ss32Out.png" />
+    <Resource Include="Assets\ss32Outline.png" />
+    <Resource Include="Assets\ssw128.png" />
+    <Resource Include="Assets\shadowsocks.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Localization\Strings.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Strings.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Resource.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resource.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Localization\Strings.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Strings.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resource.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resource.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Resources\" />
+  </ItemGroup>
+
+</Project>

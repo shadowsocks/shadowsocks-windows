@@ -1,0 +1,61 @@
+﻿<reactiveui:ReactiveUserControl
+    x:Class="Shadowsocks.WPF.Views.OnlineConfigView"
+    x:TypeArguments="vms:OnlineConfigViewModel"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+    xmlns:local="clr-namespace:Shadowsocks.WPF.Views"
+    xmlns:vms="clr-namespace:Shadowsocks.WPF.ViewModels"
+    xmlns:reactiveui="http://reactiveui.net"
+    xmlns:lex="http://wpflocalizeextension.codeplex.com"
+    lex:LocalizeDictionary.DesignCulture="en"
+    lex:ResxLocalizationProvider.DefaultAssembly="Shadowsocks"
+    lex:ResxLocalizationProvider.DefaultDictionary="Strings"
+    mc:Ignorable="d" 
+    d:DesignHeight="500" d:DesignWidth="480">
+    <Grid Margin="8">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
+
+        <ListBox x:Name="sourcesListBox" Margin="8 8 4 4"
+                 Grid.Row="0"
+                 Grid.Column="0"
+                 Grid.ColumnSpan="2">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <TextBlock Text="{Binding}"/>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+        <StackPanel Grid.Row="0" Grid.Column="2">
+            <Button x:Name="updateButton" Margin="4 8 8 4"
+                    MinWidth="75" Content="{lex:Loc}"/>
+            <Button x:Name="updateAllButton" Margin="4 4 8 4"
+                    MinWidth="75" Content="{lex:Loc}"/>
+            <Button x:Name="copyLinkButton" Margin="4 4 8 8"
+                    MinWidth="75" Content="{lex:Loc}"/>
+            <Button x:Name="removeButton" Margin="4 8 8 8"
+                    MinWidth="75" Content="{lex:Loc}"/>
+        </StackPanel>
+        
+        <TextBlock Margin="8 4 4 8"
+                   Grid.Row="1"
+                   Grid.Column="0">URL</TextBlock>
+        <TextBox x:Name="urlTextBox" Margin="4 4 4 8"
+                 Grid.Row="1"
+                 Grid.Column="1"/>
+        <Button x:Name="addButton" Margin="4 4 8 8"
+                Grid.Row="1"
+                Grid.Column="2"
+                MinWidth="75"
+                Content="{lex:Loc}"/>
+    </Grid>
+</reactiveui:ReactiveUserControl>

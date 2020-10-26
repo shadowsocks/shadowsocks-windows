@@ -12,6 +12,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ShadowsocksTest", "test\Sha
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{7BD54B24-BBD7-4DD8-99EF-DAEE6684B673}"
 	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
 		.gitignore = .gitignore
 		appveyor.yml = appveyor.yml
 		appveyor.yml.obsolete = appveyor.yml.obsolete
@@ -22,6 +23,14 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		LICENSE.txt = LICENSE.txt
 		README.md = README.md
 	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Shadowsocks.Common", "Shadowsocks.Common\Shadowsocks.Common.csproj", "{61AF0616-8E90-46C4-908A-E182A5001AB5}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Shadowsocks.Crypto", "Shadowsocks.Crypto\Shadowsocks.Crypto.csproj", "{AD8974F4-EFDC-4EC5-A147-54CD4934D295}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Shadowsocks", "Shadowsocks\Shadowsocks.csproj", "{85C2FC93-91F0-454F-AF0A-522FCD20827A}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Shadowsocks.WPF", "Shadowsocks.WPF\Shadowsocks.WPF.csproj", "{EA1FB2D4-B5A7-47A6-B097-2F4D29E23010}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -37,6 +46,22 @@ Global
 		{45913187-0685-4903-B250-DCEF0479CD86}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{45913187-0685-4903-B250-DCEF0479CD86}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{45913187-0685-4903-B250-DCEF0479CD86}.Release|Any CPU.Build.0 = Release|Any CPU
+		{61AF0616-8E90-46C4-908A-E182A5001AB5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{61AF0616-8E90-46C4-908A-E182A5001AB5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{61AF0616-8E90-46C4-908A-E182A5001AB5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{61AF0616-8E90-46C4-908A-E182A5001AB5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AD8974F4-EFDC-4EC5-A147-54CD4934D295}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AD8974F4-EFDC-4EC5-A147-54CD4934D295}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AD8974F4-EFDC-4EC5-A147-54CD4934D295}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AD8974F4-EFDC-4EC5-A147-54CD4934D295}.Release|Any CPU.Build.0 = Release|Any CPU
+		{85C2FC93-91F0-454F-AF0A-522FCD20827A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{85C2FC93-91F0-454F-AF0A-522FCD20827A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{85C2FC93-91F0-454F-AF0A-522FCD20827A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{85C2FC93-91F0-454F-AF0A-522FCD20827A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EA1FB2D4-B5A7-47A6-B097-2F4D29E23010}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EA1FB2D4-B5A7-47A6-B097-2F4D29E23010}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EA1FB2D4-B5A7-47A6-B097-2F4D29E23010}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EA1FB2D4-B5A7-47A6-B097-2F4D29E23010}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
