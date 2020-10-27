@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Text;
 
-using Shadowsocks.Common.Crypto;
-using Shadowsocks.Common.Model;
 using Shadowsocks.Crypto.AEAD;
 using Shadowsocks.Crypto.Stream;
 
