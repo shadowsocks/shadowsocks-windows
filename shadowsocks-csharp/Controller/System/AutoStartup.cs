@@ -14,7 +14,7 @@ namespace Shadowsocks.Controller
 
         // Don't use Application.ExecutablePath
         // see https://stackoverflow.com/questions/12945805/odd-c-sharp-path-issue
-        
+
         private static string Key = "Shadowsocks_" + Program.ExecutablePath.GetHashCode();
 
         public static bool Set(bool enabled)
@@ -27,6 +27,17 @@ namespace Shadowsocks.Controller
                 {
                     logger.Error(@"Cannot find HKCU\Software\Microsoft\Windows\CurrentVersion\Run");
                     return false;
+                }
+                // Remove other startup keys with the same executable path. fixes #3011
+                foreach (var valueName in runKey.GetValueNames())
+                {
+                    if (valueName == Key)
+                        continue;
+
+                    if (string.Equals(runKey.GetValue(valueName).ToString(), Program.ExecutablePath, StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        runKey.DeleteValue(valueName);
+                    }
                 }
                 if (enabled)
                 {
