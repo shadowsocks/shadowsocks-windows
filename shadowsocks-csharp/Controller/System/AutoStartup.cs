@@ -28,17 +28,6 @@ namespace Shadowsocks.Controller
                     logger.Error(@"Cannot find HKCU\Software\Microsoft\Windows\CurrentVersion\Run");
                     return false;
                 }
-                // Remove other startup keys with the same executable path. fixes #3011
-                foreach (var valueName in runKey.GetValueNames())
-                {
-                    if (valueName == Key)
-                        continue;
-
-                    if (string.Equals(runKey.GetValue(valueName).ToString(), Program.ExecutablePath, StringComparison.InvariantCultureIgnoreCase))
-                    {
-                        runKey.DeleteValue(valueName);
-                    }
-                }
                 if (enabled)
                 {
                     runKey.SetValue(Key, Program.ExecutablePath);
@@ -82,21 +71,21 @@ namespace Shadowsocks.Controller
                     logger.Error(@"Cannot find HKCU\Software\Microsoft\Windows\CurrentVersion\Run");
                     return false;
                 }
-                string[] runList = runKey.GetValueNames();
-                foreach (string item in runList)
+                // Remove other startup keys with the same executable path. fixes #3011 and also assures compatibility with older versions
+                foreach (var valueName in runKey.GetValueNames())
+                {
+                    if (valueName == Key)
+                        continue;
+
+                    if (string.Equals(runKey.GetValue(valueName).ToString(), Program.ExecutablePath, StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        runKey.DeleteValue(valueName);
+                    }
+                }
+                foreach (string item in runKey.GetValueNames())
                 {
                     if (item.Equals(Key, StringComparison.OrdinalIgnoreCase))
                         return true;
-                    else if (item.Equals("Shadowsocks", StringComparison.OrdinalIgnoreCase)) // Compatibility with older versions
-                    {
-                        string value = Convert.ToString(runKey.GetValue(item));
-                        if (Program.ExecutablePath.Equals(value, StringComparison.OrdinalIgnoreCase))
-                        {
-                            runKey.DeleteValue(item);
-                            runKey.SetValue(Key, Program.ExecutablePath);
-                            return true;
-                        }
-                    }
                 }
                 return false;
             }
