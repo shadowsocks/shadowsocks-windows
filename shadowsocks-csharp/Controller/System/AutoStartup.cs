@@ -71,23 +71,22 @@ namespace Shadowsocks.Controller
                     logger.Error(@"Cannot find HKCU\Software\Microsoft\Windows\CurrentVersion\Run");
                     return false;
                 }
-                // Remove other startup keys with the same executable path. fixes #3011 and also assures compatibility with older versions
+                var check = false;
                 foreach (var valueName in runKey.GetValueNames())
                 {
-                    if (valueName == Key)
+                    if (string.Equals(valueName, Key, StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        check = true;
                         continue;
+                    }
 
+                    // Remove other startup keys with the same executable path. fixes #3011 and also assures compatibility with older versions
                     if (string.Equals(runKey.GetValue(valueName).ToString(), Program.ExecutablePath, StringComparison.InvariantCultureIgnoreCase))
                     {
                         runKey.DeleteValue(valueName);
                     }
                 }
-                foreach (string item in runKey.GetValueNames())
-                {
-                    if (item.Equals(Key, StringComparison.OrdinalIgnoreCase))
-                        return true;
-                }
-                return false;
+                return check;
             }
             catch (Exception e)
             {
