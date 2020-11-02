@@ -84,6 +84,8 @@ namespace Shadowsocks.Controller
                     if (string.Equals(runKey.GetValue(valueName).ToString(), Program.ExecutablePath, StringComparison.InvariantCultureIgnoreCase))
                     {
                         runKey.DeleteValue(valueName);
+                        runKey.SetValue(Key, Program.ExecutablePath);
+                        check = true;
                     }
                 }
                 return check;
