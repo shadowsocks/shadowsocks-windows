@@ -74,14 +74,14 @@ namespace Shadowsocks.Controller
                 var check = false;
                 foreach (var valueName in runKey.GetValueNames())
                 {
-                    if (string.Equals(valueName, Key, StringComparison.InvariantCultureIgnoreCase))
+                    if (valueName.Equals(Key, StringComparison.InvariantCultureIgnoreCase))
                     {
                         check = true;
                         continue;
                     }
 
                     // Remove other startup keys with the same executable path. fixes #3011 and also assures compatibility with older versions
-                    if (string.Equals(runKey.GetValue(valueName).ToString(), Program.ExecutablePath, StringComparison.InvariantCultureIgnoreCase))
+                    if (Program.ExecutablePath.Equals(runKey.GetValue(valueName).ToString(), StringComparison.InvariantCultureIgnoreCase))
                     {
                         runKey.DeleteValue(valueName);
                         runKey.SetValue(Key, Program.ExecutablePath);
