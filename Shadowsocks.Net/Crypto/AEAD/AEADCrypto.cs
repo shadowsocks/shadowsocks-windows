@@ -1,5 +1,6 @@
 using Shadowsocks.Net.Crypto.Exception;
 using Shadowsocks.Net.Crypto.Stream;
+using Splat;
 using System;
 using System.Collections.Generic;
 using System.Net;
@@ -8,9 +9,8 @@ using System.Text;
 
 namespace Shadowsocks.Net.Crypto.AEAD
 {
-    public abstract class AEADCrypto : CryptoBase
+    public abstract class AEADCrypto : CryptoBase, IEnableLogger
     {
-        private static readonly Logger logger = LogManager.GetCurrentClassLogger();
         // We are using the same saltLen and keyLen
         private const string Info = "ss-subkey";
         private static readonly byte[] InfoBytes = Encoding.ASCII.GetBytes(Info);
@@ -60,8 +60,8 @@ namespace Shadowsocks.Net.Crypto.AEAD
             // Initialize all-zero nonce for each connection
             nonce = new byte[nonceLen];
 
-            logger.Dump($"masterkey {instanceId}", masterKey, keyLen);
-            logger.Dump($"nonce {instanceId}", nonce, keyLen);
+            this.Log().Debug($"masterkey {instanceId} {masterKey} {keyLen}");
+            this.Log().Debug($"nonce {instanceId} {nonce} {keyLen}");
         }
 
         protected abstract Dictionary<string, CipherInfo> GetCiphers();
@@ -92,8 +92,8 @@ namespace Shadowsocks.Net.Crypto.AEAD
 
             CryptoUtils.HKDF(keyLen, masterKey, salt, InfoBytes).CopyTo(sessionKey, 0);
 
-            logger.Dump($"salt {instanceId}", salt, saltLen);
-            logger.Dump($"sessionkey {instanceId}", sessionKey, keyLen);
+            this.Log().Debug($"salt {instanceId}", salt, saltLen);
+            this.Log().Debug($"sessionkey {instanceId}", sessionKey, keyLen);
         }
 
         public abstract int CipherEncrypt(ReadOnlySpan<byte> plain, Span<byte> cipher);
@@ -138,7 +138,7 @@ namespace Shadowsocks.Net.Crypto.AEAD
                 // if not, keep buf for next run, at this condition, buffer is not empty
                 if (outlength + ChunkOverhead > cipher.Length)
                 {
-                    logger.Debug("enc outbuf almost full, giving up");
+                    this.Log().Debug("enc outbuf almost full, giving up");
 
                     // write rest data to head of shared buffer
                     tmp.CopyTo(buffer);
@@ -150,7 +150,7 @@ namespace Shadowsocks.Net.Crypto.AEAD
                 bufSize = tmp.Length;
                 if (bufSize <= 0)
                 {
-                    logger.Debug("No more data to encrypt, leaving");
+                    this.Log().Debug("No more data to encrypt, leaving");
                     return outlength;
                 }
             }
@@ -165,7 +165,7 @@ namespace Shadowsocks.Net.Crypto.AEAD
             cipher.CopyTo(tmp.Slice(bufPtr));
             int bufSize = tmp.Length;
 
-            logger.Debug($"{instanceId} decrypt tcp, read salt: {!saltReady}");
+            this.Log().Debug($"{instanceId} decrypt tcp, read salt: {!saltReady}");
             if (!saltReady)
             {
                 // check if we get the leading salt
@@ -191,7 +191,7 @@ namespace Shadowsocks.Net.Crypto.AEAD
                 // check if we have any data
                 if (bufSize <= 0)
                 {
-                    logger.Trace("No data in buffer");
+                    this.Log().Debug("No data in buffer");
                     return outlength;
                 }
 
@@ -200,23 +200,23 @@ namespace Shadowsocks.Net.Crypto.AEAD
                 {
                     // so we only have chunk length and its tag?
                     // wait more
-                    logger.Trace($"{instanceId} not enough data to decrypt chunk. write {tmp.Length} byte back to buffer.");
+                    this.Log().Debug($"{instanceId} not enough data to decrypt chunk. write {tmp.Length} byte back to buffer.");
                     tmp.CopyTo(buffer);
                     bufPtr = tmp.Length;
                     return outlength;
                 }
-                logger.Trace($"{instanceId} try decrypt to offset {outlength}");
+                this.Log().Debug($"{instanceId} try decrypt to offset {outlength}");
                 int len = ChunkDecrypt(plain.Slice(outlength), tmp);
                 if (len <= 0)
                 {
-                    logger.Trace($"{instanceId} no chunk decrypted, write {tmp.Length} byte back to buffer.");
+                    this.Log().Debug($"{instanceId} no chunk decrypted, write {tmp.Length} byte back to buffer.");
 
                     // no chunk decrypted
                     tmp.CopyTo(buffer);
                     bufPtr = tmp.Length;
                     return outlength;
                 }
-                logger.Trace($"{instanceId} decrypted {len} to offset {outlength}");
+                this.Log().Debug($"{instanceId} decrypted {len} to offset {outlength}");
 
                 // drop decrypted data
                 tmp = tmp.Slice(ChunkLengthBytes + tagLen + len + tagLen);
@@ -225,7 +225,7 @@ namespace Shadowsocks.Net.Crypto.AEAD
                 // logger.Debug("aead dec outlength " + outlength);
                 if (outlength + ChunkOverhead > cipher.Length)
                 {
-                    logger.Trace($"{instanceId} output almost full, write {tmp.Length} byte back to buffer.");
+                    this.Log().Debug($"{instanceId} output almost full, write {tmp.Length} byte back to buffer.");
                     tmp.CopyTo(buffer);
                     bufPtr = tmp.Length;
                     return outlength;
@@ -235,7 +235,7 @@ namespace Shadowsocks.Net.Crypto.AEAD
                 if (bufSize <= 0)
                 {
                     bufPtr = 0;
-                    logger.Debug($"{instanceId} no data in buffer, already all done");
+                    this.Log().Debug($"{instanceId} no data in buffer, already all done");
                     return outlength;
                 }
             }
@@ -266,7 +266,7 @@ namespace Shadowsocks.Net.Crypto.AEAD
         {
             if (plain.Length > ChunkLengthMask)
             {
-                logger.Error("enc chunk too big");
+                this.Log().Error("enc chunk too big");
                 throw new CryptoErrorException();
             }
 
@@ -289,14 +289,14 @@ namespace Shadowsocks.Net.Crypto.AEAD
             if (chunkLength > ChunkLengthMask)
             {
                 // we get invalid chunk
-                logger.Error($"{instanceId} Invalid chunk length: {chunkLength}");
+                this.Log().Error($"{instanceId} Invalid chunk length: {chunkLength}");
                 throw new CryptoErrorException();
             }
             // logger.Debug("Get the real chunk len:" + chunkLength);
             int bufSize = cipher.Length;
             if (bufSize < ChunkLengthBytes + tagLen /* we haven't remove them */+ chunkLength + tagLen)
             {
-                logger.Debug($"{instanceId} need {ChunkLengthBytes + tagLen + chunkLength + tagLen}, but have {cipher.Length}");
+                this.Log().Debug($"{instanceId} need {ChunkLengthBytes + tagLen + chunkLength + tagLen}, but have {cipher.Length}");
                 return 0;
             }
             CryptoUtils.SodiumIncrement(nonce);
@@ -304,7 +304,7 @@ namespace Shadowsocks.Net.Crypto.AEAD
             // drop chunk len and its tag from buffer
             int len = CipherDecrypt(plain, cipher.Slice(ChunkLengthBytes + tagLen, chunkLength + tagLen));
             CryptoUtils.SodiumIncrement(nonce);
-            logger.Trace($"{instanceId} decrypted {len} byte chunk used {ChunkLengthBytes + tagLen + chunkLength + tagLen} from {cipher.Length}");
+            this.Log().Debug($"{instanceId} decrypted {len} byte chunk used {ChunkLengthBytes + tagLen + chunkLength + tagLen} from {cipher.Length}");
             return len;
         }
     }

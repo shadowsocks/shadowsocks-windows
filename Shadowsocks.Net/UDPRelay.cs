@@ -1,3 +1,6 @@
+using Shadowsocks.Models;
+using Shadowsocks.Net.Crypto;
+using Splat;
 using System;
 using System.Buffers;
 using System.Collections.Generic;
@@ -6,24 +9,21 @@ using System.Net.Sockets;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
-using NLog;
-using Shadowsocks.Net.Crypto;
 
-namespace Shadowsocks.Controller
+namespace Shadowsocks.Net
 {
     class UDPRelay : DatagramService
     {
-        private ShadowsocksController _controller;
-
+        Server _server;
         // TODO: choose a smart number
         private LRUCache<IPEndPoint, UDPHandler> _cache = new LRUCache<IPEndPoint, UDPHandler>(512);
 
         public long outbound = 0;
         public long inbound = 0;
 
-        public UDPRelay(ShadowsocksController controller)
+        public UDPRelay(Server server)
         {
-            this._controller = controller;
+            _server = server;
         }
 
         public override async Task<bool> Handle(Memory<byte> packet, Socket socket, EndPoint client)
@@ -40,7 +40,7 @@ namespace Shadowsocks.Controller
             UDPHandler handler = _cache.get(remoteEndPoint);
             if (handler == null)
             {
-                handler = new UDPHandler(socket, _controller.GetAServer(IStrategyCallerType.UDP, remoteEndPoint, null/*TODO: fix this*/), remoteEndPoint);
+                handler = new UDPHandler(socket, _server, remoteEndPoint);
                 handler.Receive();
                 _cache.add(remoteEndPoint, handler);
             }
@@ -48,9 +48,8 @@ namespace Shadowsocks.Controller
             return true;
         }
 
-        public class UDPHandler
+        public class UDPHandler : IEnableLogger
         {
-            private static Logger logger = LogManager.GetCurrentClassLogger();
             private static MemoryPool<byte> pool = MemoryPool<byte>.Shared;
             private Socket _local;
             private Socket _remote;
@@ -81,25 +80,25 @@ namespace Shadowsocks.Controller
                 _localEndPoint = localEndPoint;
 
                 // TODO async resolving
-                bool parsed = IPAddress.TryParse(server.server, out IPAddress ipAddress);
+                bool parsed = IPAddress.TryParse(server.Host, out IPAddress ipAddress);
                 if (!parsed)
                 {
-                    IPHostEntry ipHostInfo = Dns.GetHostEntry(server.server);
+                    IPHostEntry ipHostInfo = Dns.GetHostEntry(server.Host);
                     ipAddress = ipHostInfo.AddressList[0];
                 }
-                _remoteEndPoint = new IPEndPoint(ipAddress, server.server_port);
+                _remoteEndPoint = new IPEndPoint(ipAddress, server.Port);
                 _remote = new Socket(_remoteEndPoint.AddressFamily, SocketType.Dgram, ProtocolType.Udp);
                 _remote.Bind(new IPEndPoint(ListenAddress, 0));
             }
 
             public async Task SendAsync(ReadOnlyMemory<byte> data)
             {
-                IEncryptor encryptor = EncryptorFactory.GetEncryptor(_server.method, _server.password);
+                ICrypto encryptor = CryptoFactory.GetEncryptor(_server.Method, _server.Password);
                 using IMemoryOwner<byte> mem = pool.Rent(data.Length + 1000);
 
                 // byte[] dataOut = new byte[slicedData.Length + 1000];
                 int outlen = encryptor.EncryptUDP(data.Span[3..], mem.Memory.Span);
-                logger.Debug(_localEndPoint, _remoteEndPoint, outlen, "UDP Relay up");
+                this.Log().Debug($"{_localEndPoint} {_remoteEndPoint} {outlen} UDP Relay up");
                 if (!MemoryMarshal.TryGetArray(mem.Memory[..outlen], out ArraySegment<byte> outData))
                 {
                     throw new InvalidOperationException("Can't extract underly array segment");
@@ -110,7 +109,7 @@ namespace Shadowsocks.Controller
             public async Task ReceiveAsync()
             {
                 EndPoint remoteEndPoint = new IPEndPoint(ListenAddress, 0);
-                logger.Debug($"++++++Receive Server Port, size:" + _buffer.Length);
+                this.Log().Debug($"++++++Receive Server Port, size:" + _buffer.Length);
                 try
                 {
                     while (true)
@@ -121,9 +120,9 @@ namespace Shadowsocks.Controller
                         using IMemoryOwner<byte> owner = pool.Rent(bytesRead + 3);
                         Memory<byte> o = owner.Memory;
 
-                        IEncryptor encryptor = EncryptorFactory.GetEncryptor(_server.method, _server.password);
+                        ICrypto encryptor = CryptoFactory.GetEncryptor(_server.Method, _server.Password);
                         int outlen = encryptor.DecryptUDP(o.Span[3..], _buffer.AsSpan(0, bytesRead));
-                        logger.Debug(_remoteEndPoint, _localEndPoint, outlen, "UDP Relay down");
+                        this.Log().Debug($"{_remoteEndPoint} {_localEndPoint} {outlen} UDP Relay down");
                         if (!MemoryMarshal.TryGetArray(o[..(outlen + 3)], out ArraySegment<byte> data))
                         {
                             throw new InvalidOperationException("Can't extract underly array segment");
@@ -134,7 +133,7 @@ namespace Shadowsocks.Controller
                 }
                 catch (Exception e)
                 {
-                    logger.LogUsefulException(e);
+                    this.Log().Warn(e, "");
                 }
             }
 

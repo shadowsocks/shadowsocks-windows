@@ -1,45 +1,36 @@
+using Splat;
+using Shadowsocks.Net.Crypto;
+using Shadowsocks.Net.Crypto.AEAD;
+using Shadowsocks.Net.Proxy;
 using System;
 using System.Buffers;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
-using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-using NLog;
-
-using Shadowsocks.Controller.Strategy;
-using Shadowsocks.Net.Crypto;
-using Shadowsocks.Net.Crypto.AEAD;
-using Shadowsocks.Model;
-using Shadowsocks.Net.Proxy;
-using Shadowsocks.Net.Sockets;
-
 using static Shadowsocks.Net.Crypto.CryptoBase;
+using Shadowsocks.Models;
 
 namespace Shadowsocks.Net
 {
-    class TCPRelay : StreamService
+    class TCPRelay : StreamService, IEnableLogger
     {
         public event EventHandler<SSTCPConnectedEventArgs> OnConnected;
         public event EventHandler<SSTransmitEventArgs> OnInbound;
         public event EventHandler<SSTransmitEventArgs> OnOutbound;
         public event EventHandler<SSRelayEventArgs> OnFailed;
 
-        private static readonly Logger logger = LogManager.GetCurrentClassLogger();
-        private readonly ShadowsocksController _controller;
+        private Server _server;
         private DateTime _lastSweepTime;
-        private readonly Configuration _config;
 
         public ISet<TCPHandler> Handlers { get; set; }
 
-        public TCPRelay(ShadowsocksController controller, Configuration conf)
+        public TCPRelay(Server server)
         {
-            _controller = controller;
-            _config = conf;
+            _server = server;
             Handlers = new HashSet<TCPHandler>();
             _lastSweepTime = DateTime.Now;
         }
@@ -58,7 +49,7 @@ namespace Shadowsocks.Net
 
             socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, true);
 
-            TCPHandler handler = new TCPHandler(_controller, _config, socket);
+            TCPHandler handler = new TCPHandler(_server, socket);
 
             IList<TCPHandler> handlersToClose = new List<TCPHandler>();
             lock (Handlers)
@@ -75,7 +66,7 @@ namespace Shadowsocks.Net
             }
             foreach (TCPHandler handler1 in handlersToClose)
             {
-                logger.Debug("Closing timed out TCP connection.");
+                this.Log().Debug("Closing timed out TCP connection.");
                 handler1.Close();
             }
 
@@ -102,7 +93,7 @@ namespace Shadowsocks.Net
             }
 
             socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, true);
-            TCPHandler handler = new TCPHandler(_controller, _config, socket);
+            TCPHandler handler = new TCPHandler(_server, socket);
 
             handler.OnConnected += OnConnected;
             handler.OnInbound += OnInbound;
@@ -135,7 +126,7 @@ namespace Shadowsocks.Net
             }
             foreach (TCPHandler handler1 in handlersToClose)
             {
-                logger.Debug("Closing timed out TCP connection.");
+                this.Log().Debug("Closing timed out TCP connection.");
                 handler1.Close();
             }
 
@@ -191,15 +182,13 @@ namespace Shadowsocks.Net
         }
     }
 
-    internal class TCPHandler
+    internal class TCPHandler : IEnableLogger
     {
         public event EventHandler<SSTCPConnectedEventArgs> OnConnected;
         public event EventHandler<SSTransmitEventArgs> OnInbound;
         public event EventHandler<SSTransmitEventArgs> OnOutbound;
         public event EventHandler<SSRelayEventArgs> OnClosed;
         public event EventHandler<SSRelayEventArgs> OnFailed;
-
-        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
         private readonly int _serverTimeout;
         private readonly int _proxyTimeout;
@@ -216,14 +205,14 @@ namespace Shadowsocks.Net
 
         public DateTime lastActivity;
 
-        private readonly ShadowsocksController _controller;
-        private readonly ForwardProxyConfig _config;
+        // TODO: forward proxy
+        //private readonly ForwardProxyConfig _config;
+        private readonly Server _server;
         private readonly Socket _connection;
         private IProxy _remote;
-        private IEncryptor encryptor;
+        private ICrypto encryptor;
         // workaround
-        private IEncryptor decryptor;
-        private Server _server;
+        private ICrypto decryptor;
 
         private byte[] _firstPacket;
         private int _firstPacketLength;
@@ -240,28 +229,25 @@ namespace Shadowsocks.Net
         private readonly object _closeConnLock = new object();
 
         // TODO: decouple controller
-        public TCPHandler(ShadowsocksController controller, Configuration config, Socket socket)
+        public TCPHandler(Server server, Socket socket)
         {
-            _controller = controller;
-            _config = config.proxy;
+            _server = server;
             _connection = socket;
-            _proxyTimeout = config.proxy.proxyTimeout * 1000;
-            _serverTimeout = config.GetCurrentServer().timeout * 1000;
+            _proxyTimeout = 5000;
+            _serverTimeout = 5000;
 
             lastActivity = DateTime.Now;
         }
 
         public void CreateRemote(EndPoint destination)
         {
-            Server server = _controller.GetAServer(IStrategyCallerType.TCP, (IPEndPoint)_connection.RemoteEndPoint, destination);
-            if (server == null || server.server == "")
+            if (_server == null || _server.Host == "")
             {
                 throw new ArgumentException("No server configured");
             }
 
-            encryptor = EncryptorFactory.GetEncryptor(server.method, server.password);
-            decryptor = EncryptorFactory.GetEncryptor(server.method, server.password);
-            _server = server;
+            encryptor = CryptoFactory.GetEncryptor(_server.Method, _server.Password);
+            decryptor = CryptoFactory.GetEncryptor(_server.Method, _server.Password);
         }
 
         public async Task StartAsync(byte[] firstPacket, int length)
@@ -283,7 +269,7 @@ namespace Shadowsocks.Net
 
         private void ErrorClose(Exception e)
         {
-            Logger.LogUsefulException(e);
+            this.Log().Error(e, "");
             Close();
         }
 
@@ -308,7 +294,7 @@ namespace Shadowsocks.Net
             }
             catch (Exception e)
             {
-                Logger.LogUsefulException(e);
+                this.Log().Error(e, "");
             }
         }
 
@@ -330,7 +316,7 @@ namespace Shadowsocks.Net
             {
                 // reject socks 4
                 response = new byte[] { 0, 91 };
-                Logger.Error("socks 5 protocol error");
+                this.Log().Error("socks5 protocol error");
             }
             await _connection.SendAsync(response, SocketFlags.None);
 
@@ -452,11 +438,12 @@ namespace Shadowsocks.Net
             CreateRemote(destination);
             IProxy remote;
             EndPoint proxyEP = null;
-            EndPoint serverEP = new DnsEndPoint(_server.server, _server.server_port);
-            EndPoint pluginEP = _controller.GetPluginLocalEndPointIfConfigured(_server);
+            EndPoint serverEP = new DnsEndPoint(_server.Host, _server.Port);
+            EndPoint pluginEP = null; // TODO: plugin local end point
 
+            remote = new DirectConnect(); // TODO: forward proxy
             NetworkCredential auth = null;
-            if (_config.useAuth)
+            /*if (_config.useAuth)
             {
                 auth = new NetworkCredential(_config.authUser, _config.authPwd);
             }
@@ -478,8 +465,7 @@ namespace Shadowsocks.Net
             else
             {
                 remote = new DirectConnect();
-            }
-
+            }*/
 
             CancellationTokenSource cancelProxy = new CancellationTokenSource(_proxyTimeout * 1000);
 
@@ -488,13 +474,13 @@ namespace Shadowsocks.Net
 
             if (!(remote is DirectConnect))
             {
-                Logger.Debug($"Socket connected to proxy {remote.ProxyEndPoint}");
+                this.Log().Debug($"Socket connected to proxy {remote.ProxyEndPoint}");
             }
 
             var _startConnectTime = DateTime.Now;
             CancellationTokenSource cancelServer = new CancellationTokenSource(_serverTimeout * 1000);
             await remote.ConnectRemoteAsync(serverEP, cancelServer.Token);
-            Logger.Debug($"Socket connected to ss server: {_server}");
+            this.Log().Debug($"Socket connected to ss server: {_server}");
             TimeSpan latency = DateTime.Now - _startConnectTime;
             OnConnected?.Invoke(this, new SSTCPConnectedEventArgs(_server, latency));
 

@@ -1,3 +1,4 @@
+using Splat;
 using System;
 using System.Net;
 using System.Net.Sockets;
@@ -5,14 +6,11 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using NLog;
 
 namespace Shadowsocks.Net.Proxy
 {
-    public class HttpProxy : IProxy
+    public class HttpProxy : IProxy, IEnableLogger
     {
-        private static readonly Logger logger = LogManager.GetCurrentClassLogger();
-
         public EndPoint LocalEndPoint => _remote.LocalEndPoint;
         public EndPoint ProxyEndPoint { get; private set; }
         public EndPoint DestEndPoint { get; private set; }
@@ -45,7 +43,7 @@ namespace Shadowsocks.Net.Proxy
 
         private bool OnLineRead(string line, object state)
         {
-            logger.Trace(line);
+            this.Log().Debug(line);
 
             if (_respondLineCount == 0)
             {

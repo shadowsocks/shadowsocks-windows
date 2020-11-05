@@ -1,4 +1,4 @@
-using NLog;
+using Splat;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -28,10 +28,8 @@ namespace Shadowsocks.Net
         public virtual void Stop() { }
     }
 
-    public class TCPListener
+    public class TCPListener : IEnableLogger
     {
-        private static Logger logger = LogManager.GetCurrentClassLogger();
-
         public class UDPState
         {
             public UDPState(Socket s)
@@ -44,15 +42,13 @@ namespace Shadowsocks.Net
             public EndPoint remoteEndPoint;
         }
 
-        Configuration _config;
-        bool _shareOverLAN;
+        IPEndPoint _localEndPoint;
         Socket _tcpSocket;
         IEnumerable<IStreamService> _services;
 
-        public TCPListener(Configuration config, IEnumerable<IStreamService> services)
+        public TCPListener(IPEndPoint localEndPoint, IEnumerable<IStreamService> services)
         {
-            _config = config;
-            _shareOverLAN = config.shareOverLan;
+            _localEndPoint = localEndPoint;
             _services = services;
         }
 
@@ -64,28 +60,22 @@ namespace Shadowsocks.Net
 
         public void Start()
         {
-            if (CheckIfPortInUse(_config.localPort))
-            {
-                throw new Exception(I18N.GetString("Port {0} already in use", this._config.localPort));
-            }
+            if (CheckIfPortInUse(_localEndPoint.Port))
+                throw new Exception($"Port {_localEndPoint.Port} already in use");
 
             try
             {
                 // Create a TCP/IP socket.
-                _tcpSocket = new Socket(_config.isIPv6Enabled ? AddressFamily.InterNetworkV6 : AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                _tcpSocket = new Socket(_localEndPoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
                 _tcpSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
-                IPEndPoint localEndPoint = null;
-                localEndPoint = _shareOverLAN
-                    ? new IPEndPoint(_config.isIPv6Enabled ? IPAddress.IPv6Any : IPAddress.Any, this._config.localPort)
-                    : new IPEndPoint(_config.isIPv6Enabled ? IPAddress.IPv6Loopback : IPAddress.Loopback, this._config.localPort);
 
                 // Bind the socket to the local endpoint and listen for incoming connections.
-                _tcpSocket.Bind(localEndPoint);
+                _tcpSocket.Bind(_localEndPoint);
                 _tcpSocket.Listen(1024);
 
                 // Start an asynchronous socket to listen for connections.
-                logger.Info($"Shadowsocks started TCP ({UpdateChecker.Version})");
-                logger.Debug(Encryption.EncryptorFactory.DumpRegisteredEncryptor());
+                this.Log().Info($"Shadowsocks started TCP");
+                this.Log().Debug(Crypto.CryptoFactory.DumpRegisteredEncryptor());
                 _tcpSocket.BeginAccept(new AsyncCallback(AcceptCallback), _tcpSocket);
             }
             catch (SocketException)
@@ -126,7 +116,7 @@ namespace Shadowsocks.Net
             }
             catch (Exception e)
             {
-                logger.LogUsefulException(e);
+                this.Log().Error(e, "");
             }
             finally
             {
@@ -142,7 +132,7 @@ namespace Shadowsocks.Net
                 }
                 catch (Exception e)
                 {
-                    logger.LogUsefulException(e);
+                    this.Log().Error(e, "");
                 }
             }
         }
@@ -177,7 +167,7 @@ namespace Shadowsocks.Net
             }
             catch (Exception e)
             {
-                logger.LogUsefulException(e);
+                this.Log().Error(e, "");
                 conn.Close();
             }
         }

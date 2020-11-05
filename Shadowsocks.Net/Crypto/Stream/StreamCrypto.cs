@@ -1,3 +1,4 @@
+using Splat;
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
@@ -5,10 +6,8 @@ using System.Text;
 
 namespace Shadowsocks.Net.Crypto.Stream
 {
-    public abstract class StreamCrypto : CryptoBase
+    public abstract class StreamCrypto : CryptoBase, IEnableLogger
     {
-        private static readonly Logger logger = LogManager.GetCurrentClassLogger();
-
         // shared by TCP decrypt UDP encrypt and decrypt
         protected static byte[] sharedBuffer = new byte[65536];
 
@@ -34,7 +33,7 @@ namespace Shadowsocks.Net.Crypto.Stream
 
             InitKey(password);
 
-            logger.Dump($"key {instanceId}", key, keyLen);
+            this.Log().Debug($"key {instanceId} {key} {keyLen}");
         }
 
         protected abstract Dictionary<string, CipherInfo> GetCiphers();
@@ -93,7 +92,7 @@ namespace Shadowsocks.Net.Crypto.Stream
         public override int Encrypt(ReadOnlySpan<byte> plain, Span<byte> cipher)
         {
             int cipherOffset = 0;
-            logger.Trace($"{instanceId} encrypt TCP, generate iv: {!ivReady}");
+            this.Log().Debug($"{instanceId} encrypt TCP, generate iv: {!ivReady}");
             if (!ivReady)
             {
                 // Generate IV
@@ -106,9 +105,9 @@ namespace Shadowsocks.Net.Crypto.Stream
             }
             int clen = CipherEncrypt(plain, cipher);
 
-            logger.DumpBase64($"plain {instanceId}", plain);
-            logger.DumpBase64($"cipher {instanceId}", cipher.Slice(0, clen));
-            logger.Dump($"iv {instanceId}", iv, ivLen);
+            this.Log().Debug($"plain {instanceId} {Convert.ToBase64String(plain)}");
+            this.Log().Debug($"cipher {instanceId} {Convert.ToBase64String(cipher.Slice(0, clen))}");
+            this.Log().Debug($"iv {instanceId} {iv} {ivLen}");
             return clen + cipherOffset;
         }
 
@@ -116,7 +115,7 @@ namespace Shadowsocks.Net.Crypto.Stream
         [MethodImpl(MethodImplOptions.Synchronized)]
         public override int Decrypt(Span<byte> plain, ReadOnlySpan<byte> cipher)
         {
-            logger.Trace($"{instanceId} decrypt TCP, read iv: {!ivReady}");
+            this.Log().Debug($"{instanceId} decrypt TCP, read iv: {!ivReady}");
 
             int cipherOffset = 0;
             // is first packet, need read iv
@@ -149,9 +148,9 @@ namespace Shadowsocks.Net.Crypto.Stream
             // read all data from buffer
             int len = CipherDecrypt(plain, cipher.Slice(cipherOffset));
 
-            logger.DumpBase64($"cipher {instanceId}", cipher.Slice(cipherOffset));
-            logger.DumpBase64($"plain {instanceId}", plain.Slice(0, len));
-            logger.Dump($"iv {instanceId}", iv, ivLen);
+            this.Log().Debug($"cipher {instanceId} {Convert.ToBase64String(cipher.Slice(cipherOffset))}");
+            this.Log().Debug($"plain {instanceId} {Convert.ToBase64String(plain.Slice(0, len))}");
+            this.Log().Debug($"iv {instanceId} {iv} {ivLen}");
             return len;
         }
 
