@@ -71,23 +71,23 @@ namespace Shadowsocks.WPF.Behaviors
                     logger.Error(@"Cannot find HKCU\Software\Microsoft\Windows\CurrentVersion\Run");
                     return false;
                 }
-                string[] runList = runKey.GetValueNames();
-                foreach (string item in runList)
+                var check = false;
+                foreach (var valueName in runKey.GetValueNames())
                 {
-                    if (item.Equals(Key, StringComparison.OrdinalIgnoreCase))
-                        return true;
-                    else if (item.Equals("Shadowsocks", StringComparison.OrdinalIgnoreCase)) // Compatibility with older versions
+                    if (valueName.Equals(Key, StringComparison.InvariantCultureIgnoreCase))
                     {
-                        string value = Convert.ToString(runKey.GetValue(item));
-                        if (Program.ExecutablePath.Equals(value, StringComparison.OrdinalIgnoreCase))
-                        {
-                            runKey.DeleteValue(item);
-                            runKey.SetValue(Key, Program.ExecutablePath);
-                            return true;
-                        }
+                        check = true;
+                        continue;
+                    }
+                    // Remove other startup keys with the same executable path. fixes #3011 and also assures compatibility with older versions
+                    if (Program.ExecutablePath.Equals(runKey.GetValue(valueName).ToString(), StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        runKey.DeleteValue(valueName);
+                        runKey.SetValue(Key, Program.ExecutablePath);
+                        check = true;
                     }
                 }
-                return false;
+                return check;
             }
             catch (Exception e)
             {

@@ -102,6 +102,10 @@ namespace Shadowsocks.Controller
 
             ProgramUpdated += (o, e) =>
             {
+                // version update precedures
+                if (e.OldVersion == "4.3.0.0" || e.OldVersion == "4.3.1.0")
+                    _config.geositeDirectGroups.Add("private");
+
                 logger.Info($"Updated from {e.OldVersion} to {e.NewVersion}");
             };
         }
