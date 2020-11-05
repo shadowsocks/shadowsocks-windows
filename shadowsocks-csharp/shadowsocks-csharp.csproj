@@ -20,22 +20,7 @@
   <ItemGroup>
     <None Remove="app.config" />
     <None Remove="app.manifest" />
-    <None Remove="Data\abp.js" />
-    <None Remove="Data\default-abp-rule.js" />
     <None Remove="Data\i18n.csv" />
-    <None Remove="Data\libsscrypto.dll.gz" />
-    <None Remove="Data\NLog.config" />
-    <None Remove="Data\privoxy.exe.gz" />
-    <None Remove="Data\privoxy_conf.txt" />
-    <None Remove="Data\user-rule.txt" />
-    <None Remove="Resources\ss128.pdn" />
-    <None Remove="Resources\ss32.pdn" />
-    <None Remove="Resources\ss32Fill.png" />
-    <None Remove="Resources\ss32In.png" />
-    <None Remove="Resources\ss32Out.png" />
-    <None Remove="Resources\ss32Outline.png" />
-    <None Remove="Resources\ssw128.png" />
-    <None Remove="shadowsocks.ico" />
   </ItemGroup>
 
   <ItemGroup>
@@ -71,21 +56,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Resource Include="Data\abp.js" />
-    <Resource Include="Data\dlc.dat" />
+    <ProjectReference Include="..\Shadowsocks.WPF\Shadowsocks.WPF.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Resource Include="Data\i18n.csv" />
-    <Resource Include="Data\NLog.config" />
-    <Resource Include="Data\privoxy.exe.gz" />
-    <Resource Include="Data\privoxy_conf.txt" />
-    <Resource Include="Data\user-rule.txt" />
-    <Resource Include="Resources\ss128.pdn" />
-    <Resource Include="Resources\ss32.pdn" />
-    <Resource Include="Resources\ss32Fill.png" />
-    <Resource Include="Resources\ss32In.png" />
-    <Resource Include="Resources\ss32Out.png" />
-    <Resource Include="Resources\ss32Outline.png" />
-    <Resource Include="Resources\ssw128.png" />
-    <Resource Include="shadowsocks.ico" />
   </ItemGroup>
 
   <ItemGroup>

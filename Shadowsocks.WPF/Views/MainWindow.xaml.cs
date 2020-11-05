@@ -12,6 +12,11 @@ namespace Shadowsocks.WPF.Views
         public MainWindow()
         {
             InitializeComponent();
+            ViewModel = new MainWindowViewModel();
+            this.WhenActivated(disposables =>
+            {
+
+            });
         }
     }
 }

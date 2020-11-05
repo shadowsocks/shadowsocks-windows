@@ -1,15 +1,19 @@
 <reactiveui:ReactiveWindow x:Class="Shadowsocks.WPF.Views.MainWindow"
-                           xmlns:reactiveui="http://reactiveui.net"
-                           xmlns:vm="clr-namespace:Shadowsocks.WPF.ViewModels"
-                           x:TypeArguments="vm:MainWindowViewModel"
+                           x:TypeArguments="vms:MainWindowViewModel"
                            xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                           xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
                            xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                           xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
                            xmlns:local="clr-namespace:Shadowsocks.WPF"
-                           xmlns:md="http://materialdesigninxaml.net/winfx/xaml/themes"
+                           xmlns:vms="clr-namespace:Shadowsocks.WPF.ViewModels"
+                           xmlns:reactiveui="http://reactiveui.net"
+                           xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+                           xmlns:lex="http://wpflocalizeextension.codeplex.com"
+                           lex:LocalizeDictionary.DesignCulture="en"
+                           lex:ResxLocalizationProvider.DefaultAssembly="Shadowsocks"
+                           lex:ResxLocalizationProvider.DefaultDictionary="Strings"
                            mc:Ignorable="d"
-                           Title="Shadowsocks" Width="800" Height="600"
+                           Title="Shadowsocks" Width="800" Height="600" MinWidth="800" MinHeight="600"
                            TextElement.Foreground="{DynamicResource MaterialDesignBody}"
                            TextElement.FontWeight="Regular"
                            TextElement.FontSize="13"
@@ -17,5 +21,47 @@
                            TextOptions.TextRenderingMode="Auto" 
                            Background="{DynamicResource MaterialDesignPaper}"
                            FontFamily="{DynamicResource MaterialDesignFont}">
-
+    <materialDesign:DialogHost Identifier="RootDialog" SnackbarMessageQueue="{Binding ElementName=MainSnackbar, Path=MessageQueue}" Style="{StaticResource MaterialDesignEmbeddedDialogHost}">
+        <Grid>
+            <TabControl Style="{StaticResource MaterialDesignNavigatilRailTabControl}">
+                <TabItem x:Name="dashboardTabItem"
+                         Style="{StaticResource MaterialDesignNavigationRailTabItem}">
+                    <TabItem.Header>
+                        <materialDesign:PackIcon
+                            Kind="Speedometer"
+                            Width="24"
+                            Height="24" />
+                    </TabItem.Header>
+                </TabItem>
+                <TabItem x:Name="serversTabItem"
+                         Style="{StaticResource MaterialDesignNavigationRailTabItem}">
+                    <TabItem.Header>
+                        <materialDesign:PackIcon
+                            Kind="Server"
+                            Width="24"
+                            Height="24" />
+                    </TabItem.Header>
+                </TabItem>
+                <TabItem x:Name="routingTabItem"
+                         Style="{StaticResource MaterialDesignNavigationRailTabItem}">
+                    <TabItem.Header>
+                        <materialDesign:PackIcon
+                            Kind="RouterNetwork"
+                            Width="24"
+                            Height="24" />
+                    </TabItem.Header>
+                </TabItem>
+                <TabItem x:Name="settingsTabItem"
+                         Style="{StaticResource MaterialDesignNavigationRailTabItem}">
+                    <TabItem.Header>
+                        <materialDesign:PackIcon
+                            Kind="SettingsOutline"
+                            Width="24"
+                            Height="24" />
+                    </TabItem.Header>
+                </TabItem>
+            </TabControl>
+            <materialDesign:Snackbar MessageQueue="{materialDesign:MessageQueue}" x:Name="MainSnackbar" />
+        </Grid>
+    </materialDesign:DialogHost>
 </reactiveui:ReactiveWindow>

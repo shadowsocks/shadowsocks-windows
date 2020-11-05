@@ -1,9 +1,9 @@
-﻿using ReactiveUI;
+using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using ReactiveUI.Validation.Extensions;
 using ReactiveUI.Validation.Helpers;
 using Shadowsocks.Controller;
-using Shadowsocks.Localization;
+using Shadowsocks.WPF.Localization;
 using Shadowsocks.Model;
 using Shadowsocks.View;
 using System;
