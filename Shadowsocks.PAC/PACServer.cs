@@ -1,18 +1,17 @@
+using Shadowsocks.Net;
+using Shadowsocks.Utilities;
+using Shadowsocks.Net.Crypto;
+using Splat;
 using System;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
-using NLog;
-using Shadowsocks.Net;
-using Shadowsocks.Utilities;
-using Shadowsocks.Net.Crypto;
+using System.Reflection;
 
 namespace Shadowsocks.PAC
 {
-    public class PACServer : StreamService
+    public class PACServer : StreamService, IEnableLogger
     {
-        private static Logger logger = LogManager.GetCurrentClassLogger();
-
         public const string RESOURCE_NAME = "pac";
 
         private string PacSecret
@@ -27,23 +26,23 @@ namespace Shadowsocks.PAC
             }
         }
         private string _cachedPacSecret = "";
+        private bool _PACServerEnableSecret;
         public string PacUrl { get; private set; } = "";
 
-        private Configuration _config;
         private PACDaemon _pacDaemon;
 
-        public PACServer(PACDaemon pacDaemon)
+        public PACServer(PACDaemon pacDaemon, bool PACServerEnableSecret)
         {
             _pacDaemon = pacDaemon;
+            _PACServerEnableSecret = PACServerEnableSecret;
         }
 
-        public void UpdatePACURL(Configuration config)
+        public void UpdatePACURL(EndPoint localEndPoint)
         {
-            _config = config;
-            string usedSecret = _config.secureLocalPac ? $"&secret={PacSecret}" : "";
+            string usedSecret = _PACServerEnableSecret ? $"&secret={PacSecret}" : "";
             string contentHash = GetHash(_pacDaemon.GetPACContent());
-            PacUrl = $"http://{config.LocalHost}:{config.localPort}/{RESOURCE_NAME}?hash={contentHash}{usedSecret}";
-            logger.Debug("Set PAC URL:" + PacUrl);
+            PacUrl = $"http://{localEndPoint}/{RESOURCE_NAME}?hash={contentHash}{usedSecret}";
+            this.Log().Debug("Setting PAC URL: {PacUrl}");
         }
 
         private static string GetHash(string content)
@@ -81,7 +80,7 @@ namespace Shadowsocks.PAC
                 string request = Encoding.UTF8.GetString(firstPacket, 0, length);
                 string[] lines = request.Split('\r', '\n');
                 bool hostMatch = false, pathMatch = false, useSocks = false;
-                bool secretMatch = !_config.secureLocalPac;
+                bool secretMatch = !_PACServerEnableSecret;
 
                 if (lines.Length < 2)   // need at lease RequestLine + Host
                 {
@@ -172,7 +171,7 @@ namespace Shadowsocks.PAC
                 string pacContent = $"var __PROXY__ = '{proxy}';\n" + _pacDaemon.GetPACContent();
                 string responseHead =
 $@"HTTP/1.1 200 OK
-Server: ShadowsocksWindows/{UpdateChecker.Version}
+Server: ShadowsocksPAC/{Assembly.GetExecutingAssembly().GetName().Version}
 Content-Type: application/x-ns-proxy-autoconfig
 Content-Length: { Encoding.UTF8.GetBytes(pacContent).Length}
 Connection: Close
@@ -183,7 +182,7 @@ Connection: Close
             }
             catch (Exception e)
             {
-                logger.LogUsefulException(e);
+                this.Log().Error(e, "");
                 socket.Close();
             }
         }
@@ -199,11 +198,6 @@ Connection: Close
             { }
         }
 
-        private string GetPACAddress(IPEndPoint localEndPoint, bool useSocks)
-        {
-            return localEndPoint.AddressFamily == AddressFamily.InterNetworkV6
-                ? $"{(useSocks ? "SOCKS5" : "PROXY")} [{localEndPoint.Address}]:{_config.localPort};"
-                : $"{(useSocks ? "SOCKS5" : "PROXY")} {localEndPoint.Address}:{_config.localPort};";
-        }
+        private string GetPACAddress(IPEndPoint localEndPoint, bool useSocks) => $"{(useSocks ? "SOCKS5" : "PROXY")} {localEndPoint};";
     }
 }

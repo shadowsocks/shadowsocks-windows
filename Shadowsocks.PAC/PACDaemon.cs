@@ -1,11 +1,6 @@
-using NLog;
-using Shadowsocks.Model;
-using Shadowsocks.Properties;
-using Shadowsocks.Util;
+using Splat;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -15,14 +10,11 @@ namespace Shadowsocks.PAC
     /// <summary>
     /// Processing the PAC file content
     /// </summary>
-    public class PACDaemon
+    public class PACDaemon : IEnableLogger
     {
-        private static Logger logger = LogManager.GetCurrentClassLogger();
-
         public const string PAC_FILE = "pac.txt";
         public const string USER_RULE_FILE = "user-rule.txt";
         public const string USER_ABP_FILE = "abp.txt";
-        private Configuration config;
 
         FileSystemWatcher PACFileWatcher;
         FileSystemWatcher UserRuleFileWatcher;
@@ -30,14 +22,17 @@ namespace Shadowsocks.PAC
         public event EventHandler PACFileChanged;
         public event EventHandler UserRuleFileChanged;
 
-        public PACDaemon(Configuration config)
+        private PACSettings _PACSettings;
+        private GeositeUpdater _geositeUpdater;
+
+        public PACDaemon(PACSettings pACSettings, string workingDirectory, string dlcPath)
         {
-            this.config = config;
+            _PACSettings = pACSettings;
+            _geositeUpdater = new GeositeUpdater(dlcPath);
             TouchPACFile();
             TouchUserRuleFile();
-
-            this.WatchPacFile();
-            this.WatchUserRuleFile();
+            WatchPacFile(workingDirectory);
+            WatchUserRuleFile(workingDirectory);
         }
 
 
@@ -45,7 +40,7 @@ namespace Shadowsocks.PAC
         {
             if (!File.Exists(PAC_FILE))
             {
-                GeositeUpdater.MergeAndWritePACFile(config.geositeDirectGroups, config.geositeProxiedGroups, config.geositePreferDirect);
+                _geositeUpdater.MergeAndWritePACFile(_PACSettings.GeositeDirectGroups, _PACSettings.GeositeProxiedGroups, _PACSettings.PACDefaultToDirect);
             }
             return PAC_FILE;
         }
@@ -54,7 +49,7 @@ namespace Shadowsocks.PAC
         {
             if (!File.Exists(USER_RULE_FILE))
             {
-                File.WriteAllText(USER_RULE_FILE, Resources.user_rule);
+                File.WriteAllText(USER_RULE_FILE, Properties.Resources.user_rule);
             }
             return USER_RULE_FILE;
         }
@@ -63,16 +58,16 @@ namespace Shadowsocks.PAC
         {
             if (!File.Exists(PAC_FILE))
             {
-                GeositeUpdater.MergeAndWritePACFile(config.geositeDirectGroups, config.geositeProxiedGroups, config.geositePreferDirect);
+                _geositeUpdater.MergeAndWritePACFile(_PACSettings.GeositeDirectGroups, _PACSettings.GeositeProxiedGroups, _PACSettings.PACDefaultToDirect);
             }
             return File.ReadAllText(PAC_FILE, Encoding.UTF8);
         }
 
 
-        private void WatchPacFile()
+        private void WatchPacFile(string workingDirectory)
         {
             PACFileWatcher?.Dispose();
-            PACFileWatcher = new FileSystemWatcher(Program.WorkingDirectory);
+            PACFileWatcher = new FileSystemWatcher(workingDirectory);
             PACFileWatcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.DirectoryName;
             PACFileWatcher.Filter = PAC_FILE;
             PACFileWatcher.Changed += PACFileWatcher_Changed;
@@ -82,10 +77,10 @@ namespace Shadowsocks.PAC
             PACFileWatcher.EnableRaisingEvents = true;
         }
 
-        private void WatchUserRuleFile()
+        private void WatchUserRuleFile(string workingDirectory)
         {
             UserRuleFileWatcher?.Dispose();
-            UserRuleFileWatcher = new FileSystemWatcher(Program.WorkingDirectory);
+            UserRuleFileWatcher = new FileSystemWatcher(workingDirectory);
             UserRuleFileWatcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.DirectoryName;
             UserRuleFileWatcher.Filter = USER_RULE_FILE;
             UserRuleFileWatcher.Changed += UserRuleFileWatcher_Changed;
@@ -103,7 +98,7 @@ namespace Shadowsocks.PAC
         {
             if (PACFileChanged != null)
             {
-                logger.Info($"Detected: PAC file '{e.Name}' was {e.ChangeType.ToString().ToLower()}.");
+                this.Log().Info($"Detected: PAC file '{e.Name}' was {e.ChangeType.ToString().ToLower()}.");
                 Task.Factory.StartNew(() =>
                 {
                     ((FileSystemWatcher)sender).EnableRaisingEvents = false;
@@ -118,7 +113,7 @@ namespace Shadowsocks.PAC
         {
             if (UserRuleFileChanged != null)
             {
-                logger.Info($"Detected: User Rule file '{e.Name}' was {e.ChangeType.ToString().ToLower()}.");
+                this.Log().Info($"Detected: User Rule file '{e.Name}' was {e.ChangeType.ToString().ToLower()}.");
                 Task.Factory.StartNew(() =>
                 {
                     ((FileSystemWatcher)sender).EnableRaisingEvents = false;

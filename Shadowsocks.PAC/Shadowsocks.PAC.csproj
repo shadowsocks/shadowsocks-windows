@@ -5,8 +5,36 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Shadowsocks.Net\Shadowsocks.Net.csproj" />
+    <None Remove="Resources\abp.js" />
+    <None Remove="Resources\dlc.dat" />
+    <None Remove="Resources\user-rule.txt" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Shadowsocks\Shadowsocks.csproj" />
+    <ProjectReference Include="..\Shadowsocks.Net\Shadowsocks.Net.csproj" />
+    <ProjectReference Include="..\Shadowsocks.Protobuf\Shadowsocks.Protobuf.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Resources\abp.js" />
+    <Resource Include="Resources\dlc.dat" />
+    <Resource Include="Resources\user-rule.txt" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Properties\Resources.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
   </ItemGroup>
 
 </Project>

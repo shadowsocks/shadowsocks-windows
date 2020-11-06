@@ -1,17 +1,13 @@
-using NLog;
-using Shadowsocks.Properties;
-using Shadowsocks.Util;
+using Splat;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using Newtonsoft.Json;
-using Shadowsocks.Model;
-using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Security.Cryptography;
+using System.Text.Json;
 
 namespace Shadowsocks.PAC
 {
@@ -25,32 +21,31 @@ namespace Shadowsocks.PAC
         }
     }
 
-    public static class GeositeUpdater
+    public class GeositeUpdater : IEnableLogger
     {
-        private static Logger logger = LogManager.GetCurrentClassLogger();
+        public event EventHandler<GeositeResultEventArgs> UpdateCompleted;
 
-        public static event EventHandler<GeositeResultEventArgs> UpdateCompleted;
+        public event ErrorEventHandler Error;
 
-        public static event ErrorEventHandler Error;
+        private readonly string DATABASE_PATH;
 
-        private static readonly string DATABASE_PATH = Utils.GetTempPath("dlc.dat");
+        private readonly string GEOSITE_URL = "https://github.com/v2fly/domain-list-community/raw/release/dlc.dat";
+        private readonly string GEOSITE_SHA256SUM_URL = "https://github.com/v2fly/domain-list-community/raw/release/dlc.dat.sha256sum";
+        private byte[] geositeDB;
 
-        private static readonly string GEOSITE_URL = "https://github.com/v2fly/domain-list-community/raw/release/dlc.dat";
-        private static readonly string GEOSITE_SHA256SUM_URL = "https://github.com/v2fly/domain-list-community/raw/release/dlc.dat.sha256sum";
-        private static byte[] geositeDB;
+        public readonly Dictionary<string, IList<DomainObject>> Geosites = new Dictionary<string, IList<DomainObject>>();
 
-        public static readonly Dictionary<string, IList<DomainObject>> Geosites = new Dictionary<string, IList<DomainObject>>();
-
-        static GeositeUpdater()
+        public GeositeUpdater(string dlcPath)
         {
+            DATABASE_PATH = dlcPath;
             if (File.Exists(DATABASE_PATH) && new FileInfo(DATABASE_PATH).Length > 0)
             {
                 geositeDB = File.ReadAllBytes(DATABASE_PATH);
             }
             else
             {
-                geositeDB = Resources.dlc_dat;
-                File.WriteAllBytes(DATABASE_PATH, Resources.dlc_dat);
+                geositeDB = Properties.Resources.dlc;
+                File.WriteAllBytes(DATABASE_PATH, Properties.Resources.dlc);
             }
             LoadGeositeList();
         }
@@ -58,7 +53,7 @@ namespace Shadowsocks.PAC
         /// <summary>
         /// load new GeoSite data from geositeDB
         /// </summary>
-        static void LoadGeositeList()
+        private void LoadGeositeList()
         {
             var list = GeositeList.Parser.ParseFrom(geositeDB);
             foreach (var item in list.Entries)
@@ -67,42 +62,41 @@ namespace Shadowsocks.PAC
             }
         }
 
-        public static void ResetEvent()
+        public void ResetEvent()
         {
             UpdateCompleted = null;
             Error = null;
         }
 
-        public static async Task UpdatePACFromGeosite()
+        public async Task UpdatePACFromGeosite(PACSettings pACSettings)
         {
             string geositeUrl = GEOSITE_URL;
             string geositeSha256sumUrl = GEOSITE_SHA256SUM_URL;
             SHA256 mySHA256 = SHA256.Create();
-            var config = Program.MainController.GetCurrentConfiguration();
-            bool blacklist = config.geositePreferDirect;
-            var httpClient = Program.MainController.GetHttpClient();
+            bool blacklist = pACSettings.PACDefaultToDirect;
+            var httpClient = Locator.Current.GetService<HttpClient>();
 
-            if (!string.IsNullOrWhiteSpace(config.geositeUrl))
+            if (!string.IsNullOrWhiteSpace(pACSettings.CustomGeositeUrl))
             {
-                logger.Info("Found custom Geosite URL in config file");
-                geositeUrl = config.geositeUrl;
+                this.Log().Info("Found custom Geosite URL in config file");
+                geositeUrl = pACSettings.CustomGeositeUrl;
             }
-            logger.Info($"Checking Geosite from {geositeUrl}");
+            this.Log().Info($"Checking Geosite from {geositeUrl}");
 
             try
             {
                 // download checksum first
                 var geositeSha256sum = await httpClient.GetStringAsync(geositeSha256sumUrl);
                 geositeSha256sum = geositeSha256sum.Substring(0, 64).ToUpper();
-                logger.Info($"Got Sha256sum: {geositeSha256sum}");
+                this.Log().Info($"Got Sha256sum: {geositeSha256sum}");
                 // compare downloaded checksum with local geositeDB
                 byte[] localDBHashBytes = mySHA256.ComputeHash(geositeDB);
                 string localDBHash = BitConverter.ToString(localDBHashBytes).Replace("-", String.Empty);
-                logger.Info($"Local Sha256sum: {localDBHash}");
+                this.Log().Info($"Local Sha256sum: {localDBHash}");
                 // if already latest
                 if (geositeSha256sum == localDBHash)
                 {
-                    logger.Info("Local GeoSite DB is up to date.");
+                    this.Log().Info("Local GeoSite DB is up to date.");
                     return;
                 }
 
@@ -112,15 +106,15 @@ namespace Shadowsocks.PAC
                 // verify sha256sum
                 byte[] downloadedDBHashBytes = mySHA256.ComputeHash(downloadedBytes);
                 string downloadedDBHash = BitConverter.ToString(downloadedDBHashBytes).Replace("-", String.Empty);
-                logger.Info($"Actual Sha256sum: {downloadedDBHash}");
+                this.Log().Info($"Actual Sha256sum: {downloadedDBHash}");
                 if (geositeSha256sum != downloadedDBHash)
                 {
-                    logger.Info("Sha256sum Verification: FAILED. Downloaded GeoSite DB is corrupted. Aborting the update.");
+                    this.Log().Info("Sha256sum Verification: FAILED. Downloaded GeoSite DB is corrupted. Aborting the update.");
                     throw new Exception("Sha256sum mismatch");
                 }
                 else
                 {
-                    logger.Info("Sha256sum Verification: PASSED. Applying to local GeoSite DB.");
+                    this.Log().Info("Sha256sum Verification: PASSED. Applying to local GeoSite DB.");
                 }
 
                 // write to geosite file
@@ -130,7 +124,7 @@ namespace Shadowsocks.PAC
                 // update stuff
                 geositeDB = downloadedBytes;
                 LoadGeositeList();
-                bool pacFileChanged = MergeAndWritePACFile(config.geositeDirectGroups, config.geositeProxiedGroups, blacklist);
+                bool pacFileChanged = MergeAndWritePACFile(pACSettings.GeositeDirectGroups, pACSettings.GeositeProxiedGroups, blacklist);
                 UpdateCompleted?.Invoke(null, new GeositeResultEventArgs(pacFileChanged));
             }
             catch (Exception ex)
@@ -147,12 +141,12 @@ namespace Shadowsocks.PAC
         /// <param name="proxiedGroups">A list of geosite groups configured for proxied connection.</param>
         /// <param name="blacklist">Whether to use blacklist mode. False for whitelist.</param>
         /// <returns></returns>
-        public static bool MergeAndWritePACFile(List<string> directGroups, List<string> proxiedGroups, bool blacklist)
+        public bool MergeAndWritePACFile(List<string> directGroups, List<string> proxiedGroups, bool blacklist)
         {
             string abpContent = MergePACFile(directGroups, proxiedGroups, blacklist);
             if (File.Exists(PACDaemon.PAC_FILE))
             {
-                string original = FileManager.NonExclusiveReadAllText(PACDaemon.PAC_FILE, Encoding.UTF8);
+                string original = File.ReadAllText(PACDaemon.PAC_FILE);
                 if (original == abpContent)
                 {
                     return false;
@@ -167,7 +161,7 @@ namespace Shadowsocks.PAC
         /// </summary>
         /// <param name="group">The group name to check for.</param>
         /// <returns>True if the group exists. False if the group doesn't exist.</returns>
-        public static bool CheckGeositeGroup(string group) => SeparateAttributeFromGroupName(group, out string groupName, out _) && Geosites.ContainsKey(groupName);
+        public bool CheckGeositeGroup(string group) => SeparateAttributeFromGroupName(group, out string groupName, out _) && Geosites.ContainsKey(groupName);
 
         /// <summary>
         /// Separates the attribute (e.g. @cn) from a group name.
@@ -177,7 +171,7 @@ namespace Shadowsocks.PAC
         /// <param name="groupName">The group name with the attribute stripped.</param>
         /// <param name="attribute">The attribute.</param>
         /// <returns>True for success. False for more than one '@'.</returns>
-        private static bool SeparateAttributeFromGroupName(string group, out string groupName, out string attribute)
+        private bool SeparateAttributeFromGroupName(string group, out string groupName, out string attribute)
         {
             var splitGroupAttributeList = group.Split('@');
             if (splitGroupAttributeList.Length == 1) // no attribute
@@ -199,34 +193,39 @@ namespace Shadowsocks.PAC
             return true;
         }
 
-        private static string MergePACFile(List<string> directGroups, List<string> proxiedGroups, bool blacklist)
+        private string MergePACFile(List<string> directGroups, List<string> proxiedGroups, bool blacklist)
         {
             string abpContent;
             if (File.Exists(PACDaemon.USER_ABP_FILE))
             {
-                abpContent = FileManager.NonExclusiveReadAllText(PACDaemon.USER_ABP_FILE, Encoding.UTF8);
+                abpContent = File.ReadAllText(PACDaemon.USER_ABP_FILE);
             }
             else
             {
-                abpContent = Resources.abp_js;
+                abpContent = Properties.Resources.abp;
             }
 
             List<string> userruleLines = new List<string>();
             if (File.Exists(PACDaemon.USER_RULE_FILE))
             {
-                string userrulesString = FileManager.NonExclusiveReadAllText(PACDaemon.USER_RULE_FILE, Encoding.UTF8);
+                string userrulesString = File.ReadAllText(PACDaemon.USER_RULE_FILE);
                 userruleLines = ProcessUserRules(userrulesString);
             }
 
             List<string> ruleLines = GenerateRules(directGroups, proxiedGroups, blacklist);
+
+            var jsonSerializerOptions = new JsonSerializerOptions()
+            {
+                WriteIndented = true,
+            };
             abpContent =
-$@"var __USERRULES__ = {JsonConvert.SerializeObject(userruleLines, Formatting.Indented)};
-var __RULES__ = {JsonConvert.SerializeObject(ruleLines, Formatting.Indented)};
+$@"var __USERRULES__ = {JsonSerializer.Serialize(userruleLines, jsonSerializerOptions)};
+var __RULES__ = {JsonSerializer.Serialize(ruleLines, jsonSerializerOptions)};
 {abpContent}";
             return abpContent;
         }
 
-        private static List<string> ProcessUserRules(string content)
+        private List<string> ProcessUserRules(string content)
         {
             List<string> valid_lines = new List<string>();
             using (var stringReader = new StringReader(content))
@@ -248,7 +247,7 @@ var __RULES__ = {JsonConvert.SerializeObject(ruleLines, Formatting.Indented)};
         /// <param name="proxiedGroups">A list of geosite groups configured for proxied connection.</param>
         /// <param name="blacklist">Whether to use blacklist mode. False for whitelist.</param>
         /// <returns>A list of rule lines.</returns>
-        private static List<string> GenerateRules(List<string> directGroups, List<string> proxiedGroups, bool blacklist)
+        private List<string> GenerateRules(List<string> directGroups, List<string> proxiedGroups, bool blacklist)
         {
             List<string> ruleLines;
             if (blacklist) // blocking + exception rules
@@ -272,7 +271,7 @@ var __RULES__ = {JsonConvert.SerializeObject(ruleLines, Formatting.Indented)};
         /// </summary>
         /// <param name="groups">A list of source groups.</param>
         /// <returns>A list of rule lines.</returns>
-        private static List<string> GenerateBlockingRules(List<string> groups)
+        private List<string> GenerateBlockingRules(List<string> groups)
         {
             List<string> ruleLines = new List<string>();
             foreach (var group in groups)
@@ -337,7 +336,7 @@ var __RULES__ = {JsonConvert.SerializeObject(ruleLines, Formatting.Indented)};
         /// </summary>
         /// <param name="groups">A list of source groups.</param>
         /// <returns>A list of rule lines.</returns>
-        private static List<string> GenerateExceptionRules(List<string> groups)
+        private List<string> GenerateExceptionRules(List<string> groups)
             => GenerateBlockingRules(groups)
                 .Select(r => $"@@{r}") // convert blocking rules to exception rules
                 .ToList();
