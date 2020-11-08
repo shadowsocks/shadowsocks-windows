@@ -42,12 +42,12 @@ namespace Shadowsocks.Net.Crypto
                     _registeredEncryptors.Add(method.Key, typeof(StreamAesCfbBouncyCastleCrypto));
                 }
             }
-            foreach (var method in StreamChachaNaClCrypto.SupportedCiphers())
+            foreach (var method in StreamChachaBouncyCastleCrypto.SupportedCiphers())
             {
                 if (!_registeredEncryptors.ContainsKey(method.Key))
                 {
                     ciphers.Add(method.Key, method.Value);
-                    _registeredEncryptors.Add(method.Key, typeof(StreamChachaNaClCrypto));
+                    _registeredEncryptors.Add(method.Key, typeof(StreamChachaBouncyCastleCrypto));
                 }
             }
 
