@@ -1,21 +1,18 @@
-using Org.BouncyCastle.Crypto.Engines;
-using Org.BouncyCastle.Crypto.Modes;
+﻿using Org.BouncyCastle.Crypto.Engines;
 using Org.BouncyCastle.Crypto.Parameters;
+using Shadowsocks.Net.Crypto.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
 namespace Shadowsocks.Net.Crypto.Stream
 {
-
     public class StreamAesCfbBouncyCastleCrypto : StreamCrypto
     {
-        readonly byte[] cfbBuf = new byte[MaxInputSize + 128];
-        int ptr = 0;
-        readonly ExtendedCfbBlockCipher b;
+        private readonly MyCfbBlockCipher b;
         public StreamAesCfbBouncyCastleCrypto(string method, string password) : base(method, password)
         {
-            b = new ExtendedCfbBlockCipher(new AesEngine(), 128);
+            b = new MyCfbBlockCipher(new AesEngine(), 128);
         }
 
         protected override void InitCipher(byte[] iv, bool isEncrypt)
@@ -26,49 +23,22 @@ namespace Shadowsocks.Net.Crypto.Stream
 
         protected override int CipherEncrypt(ReadOnlySpan<byte> plain, Span<byte> cipher)
         {
-            CipherUpdate(plain, cipher);
-            return plain.Length;
+            return CipherUpdate(plain, cipher);
         }
 
         protected override int CipherDecrypt(Span<byte> plain, ReadOnlySpan<byte> cipher)
         {
-            CipherUpdate(cipher, plain);
-            return cipher.Length;
+            return CipherUpdate(cipher, plain);
         }
 
-        [MethodImpl( MethodImplOptions.AggressiveInlining)]
-        private void CipherUpdate(ReadOnlySpan<byte> i, Span<byte> o)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private int CipherUpdate(ReadOnlySpan<byte> input, Span<byte> output)
         {
-            Span<byte> ob = new byte[o.Length + 128];
-            i.CopyTo(cfbBuf.AsSpan(ptr));
-            // TODO: standard CFB, maybe with native aes
-            int total = i.Length + ptr;
-
-            int blkSize = b.GetBlockSize();
-
-            int blkCount = total / blkSize;
-            int restSize = total % blkSize;
-            int readPtr = 0;
-
-            byte[] tmp = new byte[blkSize];
-            for (int j = 0; j < blkCount; j++)
-            {
-                b.ProcessBlock(cfbBuf, readPtr, tmp, 0);
-                tmp.CopyTo(ob.Slice(readPtr));
-                readPtr += blkSize;
-            }
-            if (restSize != 0)
-            {
-                readPtr = blkSize * blkCount;
-                // process last (partial) block without update state
-                b.ProcessBlock(cfbBuf, readPtr, tmp, 0, false);
-                tmp.CopyTo(ob.Slice(readPtr));
-                // write back the partial block block
-                Array.Copy(cfbBuf, readPtr, cfbBuf, 0, restSize);
-            }
-            // cut correct part to output
-            ob.Slice(ptr, o.Length).CopyTo(o);
-            ptr = restSize;
+            var i = input.ToArray();
+            var o = new byte[i.Length];
+            var res = b.ProcessBlock(i, 0, o, 0);
+            o.CopyTo(output);
+            return res;
         }
 
         #region Cipher Info
