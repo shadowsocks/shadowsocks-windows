@@ -11,15 +11,46 @@
     <Version>1.0.0</Version>
     <ApplicationIcon>Assets\shadowsocks.ico</ApplicationIcon>
     <NoWin32Manifest>true</NoWin32Manifest>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Resources\NLog.config" />
+    <None Remove="Resources\privoxy.exe.gz" />
+    <None Remove="Resources\privoxy_conf.txt" />
+    <None Remove="Resources\RobotoMono\RobotoMono-Bold.ttf" />
+    <None Remove="Resources\RobotoMono\RobotoMono-BoldItalic.ttf" />
+    <None Remove="Resources\RobotoMono\RobotoMono-ExtraLight.ttf" />
+    <None Remove="Resources\RobotoMono\RobotoMono-ExtraLightItalic.ttf" />
+    <None Remove="Resources\RobotoMono\RobotoMono-Italic.ttf" />
+    <None Remove="Resources\RobotoMono\RobotoMono-Light.ttf" />
+    <None Remove="Resources\RobotoMono\RobotoMono-LightItalic.ttf" />
+    <None Remove="Resources\RobotoMono\RobotoMono-Medium.ttf" />
+    <None Remove="Resources\RobotoMono\RobotoMono-MediumItalic.ttf" />
+    <None Remove="Resources\RobotoMono\RobotoMono-Regular.ttf" />
+    <None Remove="Resources\RobotoMono\RobotoMono-SemiBold.ttf" />
+    <None Remove="Resources\RobotoMono\RobotoMono-SemiBoldItalic.ttf" />
+    <None Remove="Resources\RobotoMono\RobotoMono-Thin.ttf" />
+    <None Remove="Resources\RobotoMono\RobotoMono-ThinItalic.ttf" />
+    <None Remove="Resources\shadowsocks.ico" />
+    <None Remove="Resources\ss128.pdn" />
+    <None Remove="Resources\ss32.pdn" />
+    <None Remove="Resources\ss32Fill.png" />
+    <None Remove="Resources\ss32In.png" />
+    <None Remove="Resources\ss32Out.png" />
+    <None Remove="Resources\ss32Outline.png" />
+    <None Remove="Resources\ssw128.png" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="MaterialDesignThemes" Version="3.2.0" />
+    <PackageReference Include="MdXaml" Version="1.6.0" />
     <PackageReference Include="OxyPlot.Wpf" Version="2.0.0" />
-    <PackageReference Include="ReactiveUI.Events.WPF" Version="12.1.1" />
-    <PackageReference Include="ReactiveUI.Fody" Version="12.1.1" />
+    <PackageReference Include="ReactiveUI.Events.WPF" Version="12.1.5" />
+    <PackageReference Include="ReactiveUI.Fody" Version="12.1.5" />
     <PackageReference Include="ReactiveUI.Validation" Version="1.8.6" />
-    <PackageReference Include="ReactiveUI.WPF" Version="12.1.1" />
+    <PackageReference Include="ReactiveUI.WPF" Version="12.1.5" />
+    <PackageReference Include="Splat.NLog" Version="9.6.1" />
     <PackageReference Include="System.CommandLine" Version="2.0.0-beta1.20371.2" />
     <PackageReference Include="WPFLocalizeExtension" Version="3.8.0" />
     <PackageReference Include="ZXing.Net" Version="0.16.6" />
@@ -31,6 +62,11 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Strings.resx</DependentUpon>
     </Compile>
+    <Compile Update="Properties\Resources.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
   </ItemGroup>
 
   <ItemGroup>
@@ -38,15 +74,43 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Strings.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Resources\" />
+    <EmbeddedResource Update="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Shadowsocks.Net\Shadowsocks.Net.csproj" />
     <ProjectReference Include="..\Shadowsocks\Shadowsocks.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Resources\NLog.config" />
+    <Resource Include="Resources\privoxy.exe.gz" />
+    <Resource Include="Resources\privoxy_conf.txt" />
+    <Resource Include="Resources\RobotoMono\RobotoMono-Bold.ttf" />
+    <Resource Include="Resources\RobotoMono\RobotoMono-BoldItalic.ttf" />
+    <Resource Include="Resources\RobotoMono\RobotoMono-ExtraLight.ttf" />
+    <Resource Include="Resources\RobotoMono\RobotoMono-ExtraLightItalic.ttf" />
+    <Resource Include="Resources\RobotoMono\RobotoMono-Italic.ttf" />
+    <Resource Include="Resources\RobotoMono\RobotoMono-Light.ttf" />
+    <Resource Include="Resources\RobotoMono\RobotoMono-LightItalic.ttf" />
+    <Resource Include="Resources\RobotoMono\RobotoMono-Medium.ttf" />
+    <Resource Include="Resources\RobotoMono\RobotoMono-MediumItalic.ttf" />
+    <Resource Include="Resources\RobotoMono\RobotoMono-Regular.ttf" />
+    <Resource Include="Resources\RobotoMono\RobotoMono-SemiBold.ttf" />
+    <Resource Include="Resources\RobotoMono\RobotoMono-SemiBoldItalic.ttf" />
+    <Resource Include="Resources\RobotoMono\RobotoMono-Thin.ttf" />
+    <Resource Include="Resources\RobotoMono\RobotoMono-ThinItalic.ttf" />
+    <Resource Include="Resources\shadowsocks.ico" />
+    <Resource Include="Resources\ss128.pdn" />
+    <Resource Include="Resources\ss32.pdn" />
+    <Resource Include="Resources\ss32Fill.png" />
+    <Resource Include="Resources\ss32In.png" />
+    <Resource Include="Resources\ss32Out.png" />
+    <Resource Include="Resources\ss32Outline.png" />
+    <Resource Include="Resources\ssw128.png" />
   </ItemGroup>
 
 </Project>

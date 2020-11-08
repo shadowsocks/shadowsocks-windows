@@ -189,13 +189,14 @@ Connection: Close
 
         private void SendCallback(IAsyncResult ar)
         {
-            Socket conn = (Socket)ar.AsyncState;
+            Socket? conn = ar.AsyncState as Socket;
             try
             {
-                conn.Shutdown(SocketShutdown.Send);
+                conn?.Shutdown(SocketShutdown.Send);
             }
             catch
-            { }
+            {
+            }
         }
 
         private string GetPACAddress(IPEndPoint localEndPoint, bool useSocks) => $"{(useSocks ? "SOCKS5" : "PROXY")} {localEndPoint};";

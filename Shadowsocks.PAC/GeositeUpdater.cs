@@ -23,9 +23,9 @@ namespace Shadowsocks.PAC
 
     public class GeositeUpdater : IEnableLogger
     {
-        public event EventHandler<GeositeResultEventArgs> UpdateCompleted;
+        public event EventHandler<GeositeResultEventArgs>? UpdateCompleted;
 
-        public event ErrorEventHandler Error;
+        public event ErrorEventHandler? Error;
 
         private readonly string DATABASE_PATH;
 
@@ -230,7 +230,7 @@ var __RULES__ = {JsonSerializer.Serialize(ruleLines, jsonSerializerOptions)};
             List<string> valid_lines = new List<string>();
             using (var stringReader = new StringReader(content))
             {
-                for (string line = stringReader.ReadLine(); line != null; line = stringReader.ReadLine())
+                for (string? line = stringReader.ReadLine(); line != null; line = stringReader.ReadLine())
                 {
                     if (string.IsNullOrWhiteSpace(line) || line.StartsWith("!") || line.StartsWith("["))
                         continue;

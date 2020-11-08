@@ -85,6 +85,15 @@ cache:
 # "project" is relative to the original build directory and not influenced by directory changes in "before_build".
 build:
   # parallel: true                  # enable MSBuild parallel builds
+  # project: MyTestAzureCS.sln      # path to Visual Studio solution or project
+  # publish_wap: true               # package Web Application Projects (WAP) for Web Deploy
+  # publish_wap_xcopy: true         # package Web Application Projects (WAP) for XCopy deployment
+  # publish_wap_beanstalk: true     # Package Web Applications for AWS Elastic Beanstalk deployment
+  # publish_wap_octopus: true       # Package Web Applications for Octopus deployment
+  # publish_azure_webjob: true      # Package Azure WebJobs for Zip Push deployment
+  # publish_azure: true             # package Azure Cloud Service projects and push to artifacts
+  # publish_aspnet_core: true       # Package ASP.NET Core projects
+  # publish_core_console: true      # Package .NET Core console projects
   # publish_nuget: true             # package projects with .nuspec files and push to artifacts
   # publish_nuget_symbols: true     # generate and publish NuGet symbol packages
   # include_nuget_references: true  # add -IncludeReferencedProjects option while packaging NuGet artifacts
@@ -121,22 +130,24 @@ after_build:
     $WorkingFolder = "$env:APPVEYOR_BUILD_FOLDER\working"
     New-Item $WorkingFolder -ItemType Directory -Force
     $HashFile = "all.hash"
+    $TargetProjectFile = "$env:APPVEYOR_BUILD_FOLDER\Shadowsocks.WPF\Shadowsocks.WPF.csproj"
 
     # Publish and deploy
 
     # Normal package
-    dotnet publish -c $env:CONFIGURATION $env:APPVEYOR_BUILD_FOLDER\shadowsocks-csharp\shadowsocks-csharp.csproj
+    dotnet publish -c $env:CONFIGURATION $TargetProjectFile
     # Package into a self-contained single-file executable
-    dotnet publish -r win-x64 -c $env:CONFIGURATION -p:PublishSingleFile=true -p:PublishTrimmed=true $env:APPVEYOR_BUILD_FOLDER\shadowsocks-csharp\shadowsocks-csharp.csproj
-    dotnet publish -r win-x86 -c $env:CONFIGURATION -p:PublishSingleFile=true -p:PublishTrimmed=true $env:APPVEYOR_BUILD_FOLDER\shadowsocks-csharp\shadowsocks-csharp.csproj
+    dotnet publish -r win-x64 -c $env:CONFIGURATION -p:PublishSingleFile=true -p:PublishTrimmed=true $TargetProjectFile
+    dotnet publish -r win-x86 -c $env:CONFIGURATION -p:PublishSingleFile=true -p:PublishTrimmed=true $TargetProjectFile
+
     $ZipDev = "$WorkingFolder\shadowsocks-windows-$env:APPVEYOR_BUILD_VERSION-dev.zip"
     $ZipMinimal = "$WorkingFolder\shadowsocks-windows-$env:APPVEYOR_BUILD_VERSION-minimal.zip"
     $ZipSingleExeX64 = "$WorkingFolder\shadowsocks-windows-$env:APPVEYOR_BUILD_VERSION-portable-x64.zip"
     $ZipSingleExeX86 = "$WorkingFolder\shadowsocks-windows-$env:APPVEYOR_BUILD_VERSION-portable-x86.zip"
-    7z a $ZipDev "$env:APPVEYOR_BUILD_FOLDER\shadowsocks-csharp\bin\$env:CONFIGURATION\netcoreapp3.1\*"
-    7z a $ZipMinimal "$env:APPVEYOR_BUILD_FOLDER\shadowsocks-csharp\bin\Any CPU\$env:CONFIGURATION\netcoreapp3.1\publish\*"
-    7z a $ZipSingleExeX64 "$env:APPVEYOR_BUILD_FOLDER\shadowsocks-csharp\bin\Any CPU\$env:CONFIGURATION\netcoreapp3.1\win-x64\publish\Shadowsocks.exe"
-    7z a $ZipSingleExeX86 "$env:APPVEYOR_BUILD_FOLDER\shadowsocks-csharp\bin\Any CPU\$env:CONFIGURATION\netcoreapp3.1\win-x86\publish\Shadowsocks.exe"
+    7z a $ZipDev "$env:APPVEYOR_BUILD_FOLDER\Shadowsocks.WPF\bin\$env:CONFIGURATION\netcoreapp3.1\*"
+    7z a $ZipMinimal "$env:APPVEYOR_BUILD_FOLDER\Shadowsocks.WPF\bin\Any CPU\$env:CONFIGURATION\netcoreapp3.1\publish\*"
+    7z a $ZipSingleExeX64 "$env:APPVEYOR_BUILD_FOLDER\Shadowsocks.WPF\bin\Any CPU\$env:CONFIGURATION\netcoreapp3.1\win-x64\publish\Shadowsocks.exe"
+    7z a $ZipSingleExeX86 "$env:APPVEYOR_BUILD_FOLDER\Shadowsocks.WPF\bin\Any CPU\$env:CONFIGURATION\netcoreapp3.1\win-x86\publish\Shadowsocks.exe"
     Calculate-Hash -file $ZipDev | Out-File -FilePath $HashFile -Append
     Calculate-Hash -file $ZipMinimal | Out-File -FilePath $HashFile -Append
     Calculate-Hash -file $ZipSingleExeX64 | Out-File -FilePath $HashFile -Append
