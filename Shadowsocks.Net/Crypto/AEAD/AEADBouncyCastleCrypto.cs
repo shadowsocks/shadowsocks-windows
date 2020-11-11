@@ -1,6 +1,7 @@
-using Org.BouncyCastle.Crypto.Engines;
+﻿using Org.BouncyCastle.Crypto.Engines;
 using Org.BouncyCastle.Crypto.Modes;
 using Org.BouncyCastle.Crypto.Parameters;
+using Shadowsocks.Net.Crypto.Extensions;
 using System;
 using System.Collections.Generic;
 
@@ -16,6 +17,7 @@ namespace Shadowsocks.Net.Crypto.AEAD
             {
                 CipherFamily.AesGcm => new GcmBlockCipher(new AesEngine()),
                 CipherFamily.Chacha20Poly1305 => new ChaCha20Poly1305(),
+                CipherFamily.XChacha20Poly1305 => new XChaCha20Poly1305(),
                 _ => throw new NotSupportedException(),
             };
         }
@@ -27,6 +29,7 @@ namespace Shadowsocks.Net.Crypto.AEAD
             {"aes-192-gcm", new CipherInfo("aes-192-gcm", 24, 24, 12, 16, CipherFamily.AesGcm)},
             {"aes-256-gcm", new CipherInfo("aes-256-gcm", 32, 32, 12, 16, CipherFamily.AesGcm)},
             {"chacha20-ietf-poly1305", new CipherInfo("chacha20-ietf-poly1305",32, 32, 12, 16, CipherFamily.Chacha20Poly1305)},
+            {"xchacha20-ietf-poly1305", new CipherInfo("xchacha20-ietf-poly1305",32, 32, 24, 16, CipherFamily.XChacha20Poly1305)},
         };
 
         protected override Dictionary<string, CipherInfo> GetCiphers()
