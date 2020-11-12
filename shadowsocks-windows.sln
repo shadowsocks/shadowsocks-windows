@@ -31,6 +31,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Shadowsocks.Protobuf", "Sha
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Shadowsocks.WPF", "Shadowsocks.WPF\Shadowsocks.WPF.csproj", "{EA1FB2D4-B5A7-47A6-B097-2F4D29E23010}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shadowsocks.Interop", "Shadowsocks.Interop\Shadowsocks.Interop.csproj", "{1CC6E8A9-1875-430C-B2BB-F227ACD711B1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -61,6 +63,10 @@ Global
 		{EA1FB2D4-B5A7-47A6-B097-2F4D29E23010}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EA1FB2D4-B5A7-47A6-B097-2F4D29E23010}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EA1FB2D4-B5A7-47A6-B097-2F4D29E23010}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1CC6E8A9-1875-430C-B2BB-F227ACD711B1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1CC6E8A9-1875-430C-B2BB-F227ACD711B1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1CC6E8A9-1875-430C-B2BB-F227ACD711B1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1CC6E8A9-1875-430C-B2BB-F227ACD711B1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

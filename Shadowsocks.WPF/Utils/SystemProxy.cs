@@ -1,14 +1,11 @@
-using NLog;
 using Shadowsocks.Net.SystemProxy;
 using Shadowsocks.WPF.Services.SystemProxy;
 using System.Windows;
 
-namespace Shadowsocks.WPF.Behaviors
+namespace Shadowsocks.WPF.Utils
 {
     public static class SystemProxy
     {
-        private static Logger logger = LogManager.GetCurrentClassLogger();
-
         public static void Update(Configuration config, bool forceDisable, PACServer pacSrv, bool noRetry = false)
         {
             bool global = config.global;

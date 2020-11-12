@@ -1,11 +1,10 @@
-﻿using ReactiveUI;
+using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
-using Shadowsocks.Model;
+using Shadowsocks.Models;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
-using System.Linq;
 using System.Reactive;
 using System.Windows;
 using System.Windows.Media.Imaging;
@@ -17,10 +16,9 @@ namespace Shadowsocks.WPF.ViewModels
         /// <summary>
         /// The view model class for the server sharing user control.
         /// </summary>
-        public ServerSharingViewModel()
+        public ServerSharingViewModel(List<Server> servers)
         {
-            _config = Program.MainController.GetCurrentConfiguration();
-            Servers = _config.configs;
+            Servers = servers;
             SelectedServer = Servers[0];
 
             this.WhenAnyValue(x => x.SelectedServer)
@@ -28,8 +26,6 @@ namespace Shadowsocks.WPF.ViewModels
 
             CopyLink = ReactiveCommand.Create(() => Clipboard.SetText(SelectedServerUrl));
         }
-
-        private readonly Configuration _config;
 
         public ReactiveCommand<Unit, Unit> CopyLink { get; }
 
@@ -40,10 +36,10 @@ namespace Shadowsocks.WPF.ViewModels
         public Server SelectedServer { get; set; }
 
         [Reactive]
-        public string SelectedServerUrl { get; private set; }
+        public string SelectedServerUrl { get; private set; } = null!;
 
         [Reactive]
-        public BitmapImage SelectedServerUrlImage { get; private set; }
+        public BitmapImage SelectedServerUrlImage { get; private set; } = null!;
 
         /// <summary>
         /// Called when SelectedServer changed
@@ -52,7 +48,7 @@ namespace Shadowsocks.WPF.ViewModels
         private void UpdateUrlAndImage()
         {
             // update SelectedServerUrl
-            SelectedServerUrl = SelectedServer.GetURL(_config.generateLegacyUrl);
+            SelectedServerUrl = SelectedServer.ToUrl().AbsoluteUri;
 
             // generate QR code
             var qrCode = ZXing.QrCode.Internal.Encoder.encode(SelectedServerUrl, ZXing.QrCode.Internal.ErrorCorrectionLevel.L);

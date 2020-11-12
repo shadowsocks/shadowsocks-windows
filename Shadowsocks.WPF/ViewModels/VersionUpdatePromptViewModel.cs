@@ -1,19 +1,23 @@
-﻿using Newtonsoft.Json.Linq;
 using ReactiveUI;
-using Shadowsocks.Controller;
+using Shadowsocks.WPF.Services;
+using Splat;
 using System.Reactive;
+using System.Text.Json;
 
 namespace Shadowsocks.WPF.ViewModels
 {
     public class VersionUpdatePromptViewModel : ReactiveObject
     {
-        public VersionUpdatePromptViewModel(JToken releaseObject)
+        public VersionUpdatePromptViewModel(JsonElement releaseObject)
         {
-            _updateChecker = Program.MenuController.updateChecker;
+            _updateChecker = Locator.Current.GetService<UpdateChecker>();
             _releaseObject = releaseObject;
+            var releaseTagName = _releaseObject.GetProperty("tag_name").GetString();
+            var releaseNotes = _releaseObject.GetProperty("body").GetString();
+            var releaseIsPrerelease = _releaseObject.GetProperty("prerelease").GetBoolean();
             ReleaseNotes = string.Concat(
-                $"# {((bool)_releaseObject["prerelease"] ? "⚠ Pre-release" : "ℹ Release")} {(string)_releaseObject["tag_name"] ?? "Failed to get tag name"}\r\n",
-                (string)_releaseObject["body"] ?? "Failed to get release notes");
+                $"# {(releaseIsPrerelease ? "⚠ Pre-release" : "ℹ Release")} {releaseTagName ?? "Failed to get tag name"}\r\n",
+                releaseNotes ?? "Failed to get release notes");
 
             Update = ReactiveCommand.CreateFromTask(_updateChecker.DoUpdate);
             SkipVersion = ReactiveCommand.Create(_updateChecker.SkipUpdate);
@@ -21,7 +25,7 @@ namespace Shadowsocks.WPF.ViewModels
         }
 
         private readonly UpdateChecker _updateChecker;
-        private readonly JToken _releaseObject;
+        private readonly JsonElement _releaseObject;
 
         public string ReleaseNotes { get; }
 

@@ -1,11 +1,10 @@
+using Shadowsocks.Models;
 using System;
 using System.Collections.Specialized;
 using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
-using Shadowsocks.Model;
-using Shadowsocks.Util.ProcessManagement;
 
 namespace Shadowsocks.WPF.Services
 {
@@ -27,17 +26,17 @@ namespace Shadowsocks.WPF.Services
                 throw new ArgumentNullException(nameof(server));
             }
 
-            if (string.IsNullOrWhiteSpace(server.plugin))
+            if (string.IsNullOrWhiteSpace(server.Plugin))
             {
                 return null;
             }
 
             return new Sip003Plugin(
-                server.plugin,
-                server.plugin_opts,
+                server.Plugin,
+                server.PluginOpts,
                 server.plugin_args,
-                server.server,
-                server.server_port,
+                server.Host,
+                server.Port,
                 showPluginOutput);
         }
 
@@ -63,7 +62,7 @@ namespace Shadowsocks.WPF.Services
                     CreateNoWindow = !showPluginOutput,
                     ErrorDialog = false,
                     WindowStyle = ProcessWindowStyle.Hidden,
-                    WorkingDirectory = Program.WorkingDirectory ?? Environment.CurrentDirectory,
+                    WorkingDirectory = Utils.Utilities.WorkingDirectory ?? Environment.CurrentDirectory,
                     Environment =
                     {
                         ["SS_REMOTE_HOST"] = serverAddress,
@@ -106,11 +105,10 @@ namespace Shadowsocks.WPF.Services
                     //  https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-erref/18d8fbe8-a967-4f1c-ae50-99ca8e491d2d
                     if (ex.NativeErrorCode == 0x00000002)
                     {
-                        throw new FileNotFoundException(I18N.GetString("Cannot find the plugin program file"), _pluginProcess.StartInfo.FileName, ex);
+                        throw new FileNotFoundException("Cannot find the plugin program file", _pluginProcess.StartInfo.FileName, ex);
                     }
-                    throw new ApplicationException(I18N.GetString("Plugin Program"), ex);
+                    throw new ApplicationException("Plugin Program", ex);
                 }
-                _pluginJob.AddProcess(_pluginProcess.Handle);
                 _started = true;
             }
 
@@ -162,7 +160,6 @@ namespace Shadowsocks.WPF.Services
                 try
                 {
                     _pluginProcess.Dispose();
-                    _pluginJob.Dispose();
                 }
                 catch (Exception) { }
 

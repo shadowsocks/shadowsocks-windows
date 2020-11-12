@@ -25,8 +25,6 @@ namespace Shadowsocks.PAC
     {
         public event EventHandler<GeositeResultEventArgs>? UpdateCompleted;
 
-        public event ErrorEventHandler? Error;
-
         private readonly string DATABASE_PATH;
 
         private readonly string GEOSITE_URL = "https://github.com/v2fly/domain-list-community/raw/release/dlc.dat";
@@ -65,7 +63,6 @@ namespace Shadowsocks.PAC
         public void ResetEvent()
         {
             UpdateCompleted = null;
-            Error = null;
         }
 
         public async Task UpdatePACFromGeosite(PACSettings pACSettings)
@@ -127,9 +124,9 @@ namespace Shadowsocks.PAC
                 bool pacFileChanged = MergeAndWritePACFile(pACSettings.GeositeDirectGroups, pACSettings.GeositeProxiedGroups, blacklist);
                 UpdateCompleted?.Invoke(null, new GeositeResultEventArgs(pacFileChanged));
             }
-            catch (Exception ex)
+            catch (Exception e)
             {
-                Error?.Invoke(null, new ErrorEventArgs(ex));
+                this.Log().Error(e, "An error occurred while updating PAC.");
             }
         }
 

@@ -16,6 +16,7 @@ namespace Shadowsocks.PAC
             RegeneratePacOnVersionUpdate = true;
             CustomPACUrl = "";
             CustomGeositeUrl = "";
+            CustomGeositeSha256SumUrl = "";
             GeositeDirectGroups = new List<string>()
             {
                 "private",
@@ -66,6 +67,12 @@ namespace Shadowsocks.PAC
         /// Leave empty to use the default source.
         /// </summary>
         public string CustomGeositeUrl { get; set; }
+
+        /// <summary>
+        /// Specifies the custom Geosite database's corresponding SHA256 checksum download URL.
+        /// Leave empty to disable checksum verification for your custom Geosite database.
+        /// </summary>
+        public string CustomGeositeSha256SumUrl { get; set; }
 
         /// <summary>
         /// A list of Geosite groups

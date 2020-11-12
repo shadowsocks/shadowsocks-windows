@@ -1,15 +1,13 @@
-using NLog;
+using Splat;
 using System;
 using System.IO;
 using System.IO.Compression;
 using System.Text;
 
-namespace Shadowsocks.WPF.Behaviors
+namespace Shadowsocks.WPF.Utils
 {
     public static class FileManager
     {
-        private static Logger logger = LogManager.GetCurrentClassLogger();
-
         public static bool ByteArrayToFile(string fileName, byte[] content)
         {
             try
@@ -20,7 +18,7 @@ namespace Shadowsocks.WPF.Behaviors
             }
             catch (Exception ex)
             {
-                logger.Error(ex);
+                LogHost.Default.Error(ex, "");
             }
             return false;
         }
@@ -60,7 +58,7 @@ namespace Shadowsocks.WPF.Behaviors
             }
             catch (Exception ex)
             {
-                logger.Error(ex);
+                LogHost.Default.Error(ex, "");
                 throw ex;
             }
         }

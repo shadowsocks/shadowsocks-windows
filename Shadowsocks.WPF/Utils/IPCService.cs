@@ -3,7 +3,7 @@ using System.IO.Pipes;
 using System.Net;
 using System.Text;
 
-namespace Shadowsocks.WPF.Behaviors
+namespace Shadowsocks.WPF.Utils
 {
     class RequestAddUrlEventArgs : EventArgs
     {
@@ -19,7 +19,7 @@ namespace Shadowsocks.WPF.Behaviors
     {
         private const int INT32_LEN = 4;
         private const int OP_OPEN_URL = 1;
-        private static readonly string PIPE_PATH = $"Shadowsocks\\{Program.ExecutablePath.GetHashCode()}";
+        private static readonly string PIPE_PATH = $"Shadowsocks\\{Utilities.ExecutablePath.GetHashCode()}";
 
         public event EventHandler<RequestAddUrlEventArgs> OpenUrlRequested;
 

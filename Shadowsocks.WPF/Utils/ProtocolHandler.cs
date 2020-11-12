@@ -1,14 +1,12 @@
 using Microsoft.Win32;
-using NLog;
+using Splat;
 using System;
 
-namespace Shadowsocks.WPF.Behaviors
+namespace Shadowsocks.WPF.Utils
 {
     static class ProtocolHandler
     {
         const string ssURLRegKey = @"SOFTWARE\Classes\ss";
-
-        private static Logger logger = LogManager.GetCurrentClassLogger();
 
         public static bool Set(bool enabled)
         {
@@ -19,7 +17,7 @@ namespace Shadowsocks.WPF.Behaviors
                 ssURLAssociation = Registry.CurrentUser.CreateSubKey(ssURLRegKey, RegistryKeyPermissionCheck.ReadWriteSubTree);
                 if (ssURLAssociation == null)
                 {
-                    logger.Error(@"Failed to create HKCU\SOFTWARE\Classes\ss to register ss:// association.");
+                    LogHost.Default.Error(@"Failed to create HKCU\SOFTWARE\Classes\ss to register ss:// association.");
                     return false;
                 }
                 if (enabled)
@@ -27,19 +25,19 @@ namespace Shadowsocks.WPF.Behaviors
                     ssURLAssociation.SetValue("", "URL:Shadowsocks");
                     ssURLAssociation.SetValue("URL Protocol", "");
                     var shellOpen = ssURLAssociation.CreateSubKey("shell").CreateSubKey("open").CreateSubKey("command");
-                    shellOpen.SetValue("", $"{Program.ExecutablePath} --open-url %1");
-                    logger.Info(@"Successfully added ss:// association.");
+                    shellOpen.SetValue("", $"{Utilities.ExecutablePath} --open-url %1");
+                    LogHost.Default.Info(@"Successfully added ss:// association.");
                 }
                 else
                 {
                     Registry.CurrentUser.DeleteSubKeyTree(ssURLRegKey);
-                    logger.Info(@"Successfully removed ss:// association.");
+                    LogHost.Default.Info(@"Successfully removed ss:// association.");
                 }
                 return true;
             }
             catch (Exception e)
             {
-                logger.LogUsefulException(e);
+                LogHost.Default.Error(e, "An error occurred while setting ss:// association registry entries.");
                 return false;
             }
             finally
@@ -52,7 +50,9 @@ namespace Shadowsocks.WPF.Behaviors
                         ssURLAssociation.Dispose();
                     }
                     catch (Exception e)
-                    { logger.LogUsefulException(e); }
+                    {
+                        LogHost.Default.Error(e, "An error occurred while setting ss:// association registry entries.");
+                    }
                 }
             }
         }
@@ -70,11 +70,11 @@ namespace Shadowsocks.WPF.Behaviors
                 }
 
                 var shellOpen = ssURLAssociation.OpenSubKey("shell").OpenSubKey("open").OpenSubKey("command");
-                return (string)shellOpen.GetValue("") == $"{Program.ExecutablePath} --open-url %1";
+                return (string)shellOpen.GetValue("") == $"{Utilities.ExecutablePath} --open-url %1";
             }
             catch (Exception e)
             {
-                logger.LogUsefulException(e);
+                LogHost.Default.Error(e, "An error occurred while checking ss:// association registry entries.");
                 return false;
             }
             finally
@@ -87,7 +87,9 @@ namespace Shadowsocks.WPF.Behaviors
                         ssURLAssociation.Dispose();
                     }
                     catch (Exception e)
-                    { logger.LogUsefulException(e); }
+                    {
+                        LogHost.Default.Error(e, "An error occurred while checking ss:// association registry entries.");
+                    }
                 }
             }
         }

@@ -1,36 +1,32 @@
+using Microsoft.Win32;
+using Splat;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
-using Microsoft.Win32;
-using NLog;
-using Shadowsocks.Util;
 
-namespace Shadowsocks.WPF.Behaviors
+namespace Shadowsocks.WPF.Utils
 {
-    static class AutoStartup
+    public static class AutoStartup
     {
-        private static Logger logger = LogManager.GetCurrentClassLogger();
-
-        // Don't use Application.ExecutablePath
-        // see https://stackoverflow.com/questions/12945805/odd-c-sharp-path-issue
-        
-        private static string Key = "Shadowsocks_" + Program.ExecutablePath.GetHashCode();
+        private static readonly string registryRunKey = @"Software\Microsoft\Windows\CurrentVersion\Run";
+        private static readonly string Key = "Shadowsocks_" + Utilities.ExecutablePath.GetHashCode();
 
         public static bool Set(bool enabled)
         {
             RegistryKey runKey = null;
             try
             {
-                runKey = Utils.OpenRegKey(@"Software\Microsoft\Windows\CurrentVersion\Run", true);
+                runKey = Registry.CurrentUser.CreateSubKey(registryRunKey, RegistryKeyPermissionCheck.ReadWriteSubTree);
                 if (runKey == null)
                 {
-                    logger.Error(@"Cannot find HKCU\Software\Microsoft\Windows\CurrentVersion\Run");
+                    LogHost.Default.Error(@"Cannot find HKCU\{registryRunKey}.");
                     return false;
                 }
                 if (enabled)
                 {
-                    runKey.SetValue(Key, Program.ExecutablePath);
+                    runKey.SetValue(Key, Process.GetCurrentProcess().MainModule?.FileName);
                 }
                 else
                 {
@@ -42,7 +38,7 @@ namespace Shadowsocks.WPF.Behaviors
             }
             catch (Exception e)
             {
-                logger.LogUsefulException(e);
+                LogHost.Default.Error(e, "An error occurred while setting auto startup registry entry.");
                 return false;
             }
             finally
@@ -55,7 +51,9 @@ namespace Shadowsocks.WPF.Behaviors
                         runKey.Dispose();
                     }
                     catch (Exception e)
-                    { logger.LogUsefulException(e); }
+                    {
+                        LogHost.Default.Error(e, "An error occurred while setting auto startup registry entry.");
+                    }
                 }
             }
         }
@@ -65,10 +63,10 @@ namespace Shadowsocks.WPF.Behaviors
             RegistryKey runKey = null;
             try
             {
-                runKey = Utils.OpenRegKey(@"Software\Microsoft\Windows\CurrentVersion\Run", true);
+                runKey = Registry.CurrentUser.CreateSubKey(registryRunKey, RegistryKeyPermissionCheck.ReadWriteSubTree);
                 if (runKey == null)
                 {
-                    logger.Error(@"Cannot find HKCU\Software\Microsoft\Windows\CurrentVersion\Run");
+                    LogHost.Default.Error(@"Cannot find HKCU\{registryRunKey}.");
                     return false;
                 }
                 var check = false;
@@ -80,10 +78,11 @@ namespace Shadowsocks.WPF.Behaviors
                         continue;
                     }
                     // Remove other startup keys with the same executable path. fixes #3011 and also assures compatibility with older versions
-                    if (Program.ExecutablePath.Equals(runKey.GetValue(valueName).ToString(), StringComparison.InvariantCultureIgnoreCase))
+                    if (Utilities.ExecutablePath.Equals(runKey.GetValue(valueName).ToString(), StringComparison.InvariantCultureIgnoreCase)
+                        is bool matchedDuplicate && matchedDuplicate)
                     {
                         runKey.DeleteValue(valueName);
-                        runKey.SetValue(Key, Program.ExecutablePath);
+                        runKey.SetValue(Key, Utilities.ExecutablePath);
                         check = true;
                     }
                 }
@@ -91,7 +90,7 @@ namespace Shadowsocks.WPF.Behaviors
             }
             catch (Exception e)
             {
-                logger.LogUsefulException(e);
+                LogHost.Default.Error(e, "An error occurred while checking auto startup registry entries.");
                 return false;
             }
             finally
@@ -104,7 +103,9 @@ namespace Shadowsocks.WPF.Behaviors
                         runKey.Dispose();
                     }
                     catch (Exception e)
-                    { logger.LogUsefulException(e); }
+                    {
+                        LogHost.Default.Error(e, "An error occurred while checking auto startup registry entries.");
+                    }
                 }
             }
         }
@@ -132,7 +133,7 @@ namespace Shadowsocks.WPF.Behaviors
             if (register && !Check())
             {
                 // escape command line parameter
-                string[] args = new List<string>(Program.Args)
+                string[] args = new List<string>(Environment.GetCommandLineArgs())
                     .Select(p => p.Replace("\"", "\\\""))                   // escape " to \"
                     .Select(p => p.IndexOf(" ") >= 0 ? "\"" + p + "\"" : p) // encapsule with "
                     .ToArray();
@@ -140,13 +141,13 @@ namespace Shadowsocks.WPF.Behaviors
                 // first parameter is process command line parameter
                 // needn't include the name of the executable in the command line
                 RegisterApplicationRestart(cmdline, (int)(ApplicationRestartFlags.RESTART_NO_CRASH | ApplicationRestartFlags.RESTART_NO_HANG));
-                logger.Debug("Register restart after system reboot, command line:" + cmdline);
+                LogHost.Default.Debug("Register restart after system reboot, command line:" + cmdline);
             }
             // requested unregister, which has no side effect
             else if (!register)
             {
                 UnregisterApplicationRestart();
-                logger.Debug("Unregister restart after system reboot");
+                LogHost.Default.Debug("Unregister restart after system reboot");
             }
         }
     }

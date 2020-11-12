@@ -1,8 +1,8 @@
+using Shadowsocks.Net;
+using Splat;
 using System;
 using System.Net;
 using System.Net.Sockets;
-using NLog;
-using Shadowsocks.Net;
 
 namespace Shadowsocks.WPF.Services
 {
@@ -39,10 +39,8 @@ namespace Shadowsocks.WPF.Services
             return true;
         }
 
-        private class Handler
+        private class Handler : IEnableLogger
         {
-            private static Logger logger = LogManager.GetCurrentClassLogger();
-
             private byte[] _firstPacket;
             private int _firstPacketLength;
             private Socket _local;
@@ -74,7 +72,7 @@ namespace Shadowsocks.WPF.Services
                 }
                 catch (Exception e)
                 {
-                    logger.LogUsefulException(e);
+                    this.Log().Error(e, "");
                     Close();
                 }
             }
@@ -93,7 +91,7 @@ namespace Shadowsocks.WPF.Services
                 }
                 catch (Exception e)
                 {
-                    logger.LogUsefulException(e);
+                    this.Log().Error(e, "");
                     Close();
                 }
             }
@@ -110,7 +108,7 @@ namespace Shadowsocks.WPF.Services
                 }
                 catch (Exception e)
                 {
-                    logger.LogUsefulException(e);
+                    this.Log().Error(e, "");
                     Close();
                 }
             }
@@ -131,7 +129,7 @@ namespace Shadowsocks.WPF.Services
                 }
                 catch (Exception e)
                 {
-                    logger.LogUsefulException(e);
+                    this.Log().Error(e, "");
                     Close();
                 }
             }
@@ -158,7 +156,7 @@ namespace Shadowsocks.WPF.Services
                 }
                 catch (Exception e)
                 {
-                    logger.LogUsefulException(e);
+                    this.Log().Error(e, "");
                     Close();
                 }
             }
@@ -185,7 +183,7 @@ namespace Shadowsocks.WPF.Services
                 }
                 catch (Exception e)
                 {
-                    logger.LogUsefulException(e);
+                    this.Log().Error(e, "");
                     Close();
                 }
             }
@@ -204,7 +202,7 @@ namespace Shadowsocks.WPF.Services
                 }
                 catch (Exception e)
                 {
-                    logger.LogUsefulException(e);
+                    this.Log().Error(e, "");
                     Close();
                 }
             }
@@ -223,7 +221,7 @@ namespace Shadowsocks.WPF.Services
                 }
                 catch (Exception e)
                 {
-                    logger.LogUsefulException(e);
+                    this.Log().Error(e, "");
                     Close();
                 }
             }
@@ -255,7 +253,7 @@ namespace Shadowsocks.WPF.Services
                     }
                     catch (Exception e)
                     {
-                        logger.LogUsefulException(e);
+                        this.Log().Error(e, "");
                     }
                 }
                 if (_remote != null)
@@ -267,7 +265,7 @@ namespace Shadowsocks.WPF.Services
                     }
                     catch (SocketException e)
                     {
-                        logger.LogUsefulException(e);
+                        this.Log().Error(e, "");
                     }
                 }
             }

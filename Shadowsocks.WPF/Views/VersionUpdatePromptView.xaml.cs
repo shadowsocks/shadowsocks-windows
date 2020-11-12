@@ -1,7 +1,7 @@
-﻿using Newtonsoft.Json.Linq;
 using ReactiveUI;
 using Shadowsocks.WPF.ViewModels;
 using System.Reactive.Disposables;
+using System.Text.Json;
 
 namespace Shadowsocks.WPF.Views
 {
@@ -10,7 +10,7 @@ namespace Shadowsocks.WPF.Views
     /// </summary>
     public partial class VersionUpdatePromptView : ReactiveUserControl<VersionUpdatePromptViewModel>
     {
-        public VersionUpdatePromptView(JToken releaseObject)
+        public VersionUpdatePromptView(JsonElement releaseObject)
         {
             InitializeComponent();
             ViewModel = new VersionUpdatePromptViewModel(releaseObject);

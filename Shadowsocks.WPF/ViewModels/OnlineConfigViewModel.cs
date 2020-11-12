@@ -2,10 +2,7 @@ using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using ReactiveUI.Validation.Extensions;
 using ReactiveUI.Validation.Helpers;
-using Shadowsocks.Controller;
 using Shadowsocks.WPF.Localization;
-using Shadowsocks.Model;
-using Shadowsocks.View;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -21,10 +18,6 @@ namespace Shadowsocks.WPF.ViewModels
     {
         public OnlineConfigViewModel()
         {
-            _config = Program.MainController.GetCurrentConfiguration();
-            _controller = Program.MainController;
-            _menuViewController = Program.MenuController;
-
             Sources = new ObservableCollection<string>(_config.onlineConfigSource);
             SelectedSource = "";
             Address = "";
@@ -90,10 +83,6 @@ namespace Shadowsocks.WPF.ViewModels
                     }
                 });
         }
-
-        private readonly Configuration _config;
-        private readonly ShadowsocksController _controller;
-        private readonly MenuViewController _menuViewController;
 
         public ValidationHelper AddressRule { get; }
 

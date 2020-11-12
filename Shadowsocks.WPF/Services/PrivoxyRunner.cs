@@ -1,3 +1,6 @@
+using Shadowsocks.Net.Settings;
+using Shadowsocks.WPF.Utils;
+using Splat;
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -5,42 +8,35 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
-using System.Windows.Forms;
-using NLog;
-using Shadowsocks.Model;
-using Shadowsocks.Properties;
-using Shadowsocks.Util;
-using Shadowsocks.Util.ProcessManagement;
 
 namespace Shadowsocks.WPF.Services
 {
-    class PrivoxyRunner
+    public class PrivoxyRunner : IEnableLogger
     {
-        private static Logger logger = LogManager.GetCurrentClassLogger();
-
         private static int _uid;
-        private static string _uniqueConfigFile;
-        private Process _process;
+        private static string _uniqueConfigFile = "";
+        private Process? _process;
         private int _runningPort;
 
-        static PrivoxyRunner()
+        public PrivoxyRunner()
         {
             try
             {
-                _uid = Program.WorkingDirectory.GetHashCode(); // Currently we use ss's StartupPath to identify different Privoxy instance.
+                _uid = Utils.Utilities.WorkingDirectory.GetHashCode(); // Currently we use ss's StartupPath to identify different Privoxy instance.
                 _uniqueConfigFile = $"privoxy_{_uid}.conf";
 
-                FileManager.UncompressFile(Utils.GetTempPath("ss_privoxy.exe"), Resources.privoxy_exe);
+                FileManager.UncompressFile(Utils.Utilities.GetTempPath("ss_privoxy.exe"), Properties.Resources.privoxy_exe);
             }
             catch (IOException e)
             {
-                logger.LogUsefulException(e);
+                this.Log().Error(e, "An error occurred while starting Privoxy.");
+                _uniqueConfigFile = "";
             }
         }
 
         public int RunningPort => _runningPort;
 
-        public void Start(Configuration configuration)
+        public void Start(NetSettings netSettings)
         {
             if (_process == null)
             {
@@ -49,16 +45,13 @@ namespace Shadowsocks.WPF.Services
                 {
                     KillProcess(p);
                 }
-                string privoxyConfig = Resources.privoxy_conf;
-                _runningPort = GetFreePort(configuration.isIPv6Enabled);
-                privoxyConfig = privoxyConfig.Replace("__SOCKS_PORT__", configuration.localPort.ToString());
+                string privoxyConfig = Properties.Resources.privoxy_conf;
+                _runningPort = GetFreePort(netSettings);
+                privoxyConfig = privoxyConfig.Replace("__SOCKS_PORT__", netSettings.Socks5ListeningPort.ToString());
                 privoxyConfig = privoxyConfig.Replace("__PRIVOXY_BIND_PORT__", _runningPort.ToString());
-                privoxyConfig = configuration.isIPv6Enabled
-                    ? privoxyConfig.Replace("__PRIVOXY_BIND_IP__", configuration.shareOverLan ? "[::]" : "[::1]")
-                    .Replace("__SOCKS_HOST__", "[::1]")
-                    : privoxyConfig.Replace("__PRIVOXY_BIND_IP__", configuration.shareOverLan ? "0.0.0.0" : "127.0.0.1")
-                    .Replace("__SOCKS_HOST__", "127.0.0.1");
-                FileManager.ByteArrayToFile(Utils.GetTempPath(_uniqueConfigFile), Encoding.UTF8.GetBytes(privoxyConfig));
+                privoxyConfig = privoxyConfig.Replace("__PRIVOXY_BIND_IP__", $"[{netSettings.Socks5ListeningAddress}]")
+                    .Replace("__SOCKS_HOST__", "[::1]"); // TODO: make sure it's correct
+                FileManager.ByteArrayToFile(Utils.Utilities.GetTempPath(_uniqueConfigFile), Encoding.UTF8.GetBytes(privoxyConfig));
 
                 _process = new Process
                 {
@@ -67,7 +60,7 @@ namespace Shadowsocks.WPF.Services
                     {
                         FileName = "ss_privoxy.exe",
                         Arguments = _uniqueConfigFile,
-                        WorkingDirectory = Utils.GetTempPath(),
+                        WorkingDirectory = Utils.Utilities.GetTempPath(),
                         WindowStyle = ProcessWindowStyle.Hidden,
                         UseShellExecute = true,
                         CreateNoWindow = true
@@ -87,7 +80,7 @@ namespace Shadowsocks.WPF.Services
             }
         }
 
-        private static void KillProcess(Process p)
+        private void KillProcess(Process p)
         {
             try
             {
@@ -101,7 +94,7 @@ namespace Shadowsocks.WPF.Services
             }
             catch (Exception e)
             {
-                logger.LogUsefulException(e);
+                this.Log().Error(e, "An error occurred while stopping Privoxy.");
             }
         }
 
@@ -115,16 +108,16 @@ namespace Shadowsocks.WPF.Services
          * UID is hash of ss's location.
          */
 
-        private static bool IsChildProcess(Process process)
+        private bool IsChildProcess(Process process)
         {
             try
             {
                 /*
                  * Under PortableMode, we could identify it by the path of ss_privoxy.exe.
                  */
-                var path = process.MainModule.FileName;
+                var path = process.MainModule?.FileName;
 
-                return Utils.GetTempPath("ss_privoxy.exe").Equals(path);
+                return Utils.Utilities.GetTempPath("ss_privoxy.exe").Equals(path);
 
             }
             catch (Exception ex)
@@ -134,18 +127,18 @@ namespace Shadowsocks.WPF.Services
                  * are already dead, and that will cause exceptions here.
                  * We could simply ignore those exceptions.
                  */
-                logger.LogUsefulException(ex);
+                this.Log().Error(ex, "");
                 return false;
             }
         }
 
-        private int GetFreePort(bool isIPv6 = false)
+        private int GetFreePort(NetSettings netSettings)
         {
             int defaultPort = 8123;
             try
             {
                 // TCP stack please do me a favor
-                TcpListener l = new TcpListener(isIPv6 ? IPAddress.IPv6Loopback : IPAddress.Loopback, 0);
+                TcpListener l = new TcpListener(IPAddress.Parse(netSettings.Socks5ListeningAddress), 0);
                 l.Start();
                 var port = ((IPEndPoint)l.LocalEndpoint).Port;
                 l.Stop();
@@ -154,7 +147,7 @@ namespace Shadowsocks.WPF.Services
             catch (Exception e)
             {
                 // in case access denied
-                logger.LogUsefulException(e);
+                this.Log().Error(e, "");
                 return defaultPort;
             }
         }

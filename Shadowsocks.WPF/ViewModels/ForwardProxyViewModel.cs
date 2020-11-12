@@ -1,10 +1,8 @@
-﻿using ReactiveUI;
+using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using ReactiveUI.Validation.Extensions;
 using ReactiveUI.Validation.Helpers;
-using Shadowsocks.Controller;
-using Shadowsocks.Model;
-using Shadowsocks.View;
+using Shadowsocks.WPF.Models;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
@@ -15,10 +13,6 @@ namespace Shadowsocks.WPF.ViewModels
     {
         public ForwardProxyViewModel()
         {
-            _config = Program.MainController.GetCurrentConfiguration();
-            _controller = Program.MainController;
-            _menuViewController = Program.MenuController;
-
             if (!_config.proxy.useProxy)
                 NoProxy = true;
             else if (_config.proxy.proxyType == 0)
@@ -63,10 +57,6 @@ namespace Shadowsocks.WPF.ViewModels
             }, canSave);
             Cancel = ReactiveCommand.Create(_menuViewController.CloseForwardProxyWindow);
         }
-
-        private readonly Configuration _config;
-        private readonly ShadowsocksController _controller;
-        private readonly MenuViewController _menuViewController;
 
         public ValidationHelper AddressRule { get; }
         public ValidationHelper PortRule { get; }

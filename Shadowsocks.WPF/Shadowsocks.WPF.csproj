@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net5.0-windows</TargetFramework>
     <UseWPF>true</UseWPF>
     <Authors>clowwindy &amp; community 2020</Authors>
     <PackageId>Shadowsocks.WPF</PackageId>
@@ -50,7 +50,7 @@
     <PackageReference Include="ReactiveUI.Fody" Version="12.1.5" />
     <PackageReference Include="ReactiveUI.Validation" Version="1.8.6" />
     <PackageReference Include="ReactiveUI.WPF" Version="12.1.5" />
-    <PackageReference Include="Splat.NLog" Version="9.6.1" />
+    <PackageReference Include="Splat.NLog" Version="9.7.1" />
     <PackageReference Include="System.CommandLine" Version="2.0.0-beta1.20371.2" />
     <PackageReference Include="WPFLocalizeExtension" Version="3.8.0" />
     <PackageReference Include="ZXing.Net" Version="0.16.6" />
@@ -81,7 +81,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Shadowsocks.Interop\Shadowsocks.Interop.csproj" />
     <ProjectReference Include="..\Shadowsocks.Net\Shadowsocks.Net.csproj" />
+    <ProjectReference Include="..\Shadowsocks.PAC\Shadowsocks.PAC.csproj" />
     <ProjectReference Include="..\Shadowsocks\Shadowsocks.csproj" />
   </ItemGroup>
 
@@ -111,6 +113,10 @@
     <Resource Include="Resources\ss32Out.png" />
     <Resource Include="Resources\ss32Outline.png" />
     <Resource Include="Resources\ssw128.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Properties\PublishProfiles\" />
   </ItemGroup>
 
 </Project>

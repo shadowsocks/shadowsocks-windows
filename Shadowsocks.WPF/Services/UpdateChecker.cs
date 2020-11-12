@@ -1,23 +1,20 @@
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Net;
 using System.Net.Http;
 using System.Reflection;
-using System.Text.RegularExpressions;
+using System.Text.Json;
 using System.Threading.Tasks;
 using System.Windows;
-using Newtonsoft.Json.Linq;
 using NLog;
-using Shadowsocks.Localization;
-using Shadowsocks.Model;
-using Shadowsocks.Util;
-using Shadowsocks.Views;
+using Shadowsocks.WPF.Localization;
+using Shadowsocks.WPF.Models;
+using Shadowsocks.WPF.Views;
+using Splat;
 
 namespace Shadowsocks.WPF.Services
 {
-    public class UpdateChecker
+    public class UpdateChecker : IEnableLogger
     {
         private readonly Logger logger;
         private readonly HttpClient httpClient;
@@ -25,24 +22,24 @@ namespace Shadowsocks.WPF.Services
         // https://developer.github.com/v3/repos/releases/
         private const string UpdateURL = "https://api.github.com/repos/shadowsocks/shadowsocks-windows/releases";
 
-        private Configuration _config;
-        private Window versionUpdatePromptWindow;
-        private JToken _releaseObject;
+        private Window? versionUpdatePromptWindow;
+        private JsonElement _releaseObject;
 
         public string NewReleaseVersion { get; private set; }
         public string NewReleaseZipFilename { get; private set; }
 
-        public event EventHandler CheckUpdateCompleted;
+        public event EventHandler? CheckUpdateCompleted;
 
-        public static readonly string Version = Assembly.GetEntryAssembly().GetName().Version.ToString();
+        public static readonly string Version = Assembly.GetEntryAssembly()?.GetName().Version?.ToString() ?? "5.0.0";
         private readonly Version _version;
 
         public UpdateChecker()
         {
             logger = LogManager.GetCurrentClassLogger();
-            httpClient = Program.MainController.GetHttpClient();
+            httpClient = Locator.Current.GetService<HttpClient>();
             _version = new Version(Version);
-            _config = Program.MainController.GetCurrentConfiguration();
+            NewReleaseVersion = "";
+            NewReleaseZipFilename = "";
         }
 
         /// <summary>
@@ -55,30 +52,33 @@ namespace Shadowsocks.WPF.Services
             // delay
             logger.Info($"Waiting for {millisecondsDelay}ms before checking for version update.");
             await Task.Delay(millisecondsDelay);
-            // update _config so we would know if the user checked or unchecked pre-release checks
-            _config = Program.MainController.GetCurrentConfiguration();
             // start
             logger.Info($"Checking for version update.");
+            var appSettings = Locator.Current.GetService<AppSettings>();
             try
             {
                 // list releases via API
-                var releasesListJsonString = await httpClient.GetStringAsync(UpdateURL);
+                var releasesListJsonStream = await httpClient.GetStreamAsync(UpdateURL);
                 // parse
-                var releasesJArray = JArray.Parse(releasesListJsonString);
-                foreach (var releaseObject in releasesJArray)
+                using (JsonDocument jsonDocument = await JsonDocument.ParseAsync(releasesListJsonStream))
                 {
-                    var releaseTagName = (string)releaseObject["tag_name"];
-                    var releaseVersion = new Version(releaseTagName);
-                    if (releaseTagName == _config.skippedUpdateVersion) // finished checking
-                        break;
-                    if (releaseVersion.CompareTo(_version) > 0 &&
-                        (!(bool)releaseObject["prerelease"] || _config.checkPreRelease && (bool)releaseObject["prerelease"])) // selected
+                    var releasesList = jsonDocument.RootElement;
+                    foreach (var releaseObject in releasesList.EnumerateArray())
                     {
-                        logger.Info($"Found new version {releaseTagName}.");
-                        _releaseObject = releaseObject;
-                        NewReleaseVersion = releaseTagName;
-                        AskToUpdate(releaseObject);
-                        return;
+                        var releaseTagName = releaseObject.GetProperty("tag_name").GetString();
+                        var releaseVersion = new Version(releaseTagName ?? "5.0.0");
+                        var releaseIsPrerelease = releaseObject.GetProperty("prerelease").GetBoolean();
+                        if (releaseTagName == appSettings.SkippedUpdateVersion) // finished checking
+                            break;
+                        if (releaseVersion.CompareTo(_version) > 0 &&
+                            (!releaseIsPrerelease || appSettings.VersionUpdateCheckForPrerelease && releaseIsPrerelease)) // selected
+                        {
+                            logger.Info($"Found new version {releaseTagName}.");
+                            _releaseObject = releaseObject;
+                            NewReleaseVersion = releaseTagName ?? "";
+                            AskToUpdate(releaseObject);
+                            return;
+                        }
                     }
                 }
                 logger.Info($"No new versions found.");
@@ -86,7 +86,7 @@ namespace Shadowsocks.WPF.Services
             }
             catch (Exception e)
             {
-                logger.LogUsefulException(e);
+                this.Log().Error(e, "An error occurred while checking for version updates.");
             }
         }
 
@@ -94,7 +94,7 @@ namespace Shadowsocks.WPF.Services
         /// Opens a window to show the update's information.
         /// </summary>
         /// <param name="releaseObject">The update release object.</param>
-        private void AskToUpdate(JToken releaseObject)
+        private void AskToUpdate(JsonElement releaseObject)
         {
             if (versionUpdatePromptWindow == null)
             {
@@ -113,7 +113,7 @@ namespace Shadowsocks.WPF.Services
             versionUpdatePromptWindow.Activate();
         }
 
-        private void VersionUpdatePromptWindow_Closed(object sender, EventArgs e)
+        private void VersionUpdatePromptWindow_Closed(object? sender, EventArgs e)
         {
             versionUpdatePromptWindow = null;
         }
@@ -126,14 +126,14 @@ namespace Shadowsocks.WPF.Services
         {
             try
             {
-                var assets = (JArray)_releaseObject["assets"];
+                var assets = _releaseObject.GetProperty("assets");
                 // download all assets
-                foreach (JObject asset in assets)
+                foreach (var asset in assets.EnumerateArray())
                 {
-                    var filename = (string)asset["name"];
-                    var browser_download_url = (string)asset["browser_download_url"];
+                    var filename = asset.GetProperty("name").GetString();
+                    var browser_download_url = asset.GetProperty("browser_download_url").GetString();
                     var response = await httpClient.GetAsync(browser_download_url);
-                    using (var downloadedFileStream = File.Create(Utils.GetTempPath(filename)))
+                    using (var downloadedFileStream = File.Create(Utils.Utilities.GetTempPath(filename)))
                         await response.Content.CopyToAsync(downloadedFileStream);
                     logger.Info($"Downloaded {filename}.");
                     // store .zip filename
@@ -143,11 +143,11 @@ namespace Shadowsocks.WPF.Services
                 logger.Info("Finished downloading.");
                 // notify user
                 CloseVersionUpdatePromptWindow();
-                Process.Start("explorer.exe", $"/select, \"{Utils.GetTempPath(NewReleaseZipFilename)}\"");
+                Process.Start("explorer.exe", $"/select, \"{Utils.Utilities.GetTempPath(NewReleaseZipFilename)}\"");
             }
             catch (Exception e)
             {
-                logger.LogUsefulException(e);
+                this.Log().Error(e, "An error occurred while downloading the version update.");
             }
         }
 
@@ -156,10 +156,13 @@ namespace Shadowsocks.WPF.Services
         /// </summary>
         public void SkipUpdate()
         {
-            var version = (string)_releaseObject["tag_name"] ?? "";
-            _config.skippedUpdateVersion = version;
-            Program.MainController.SaveSkippedUpdateVerion(version);
-            logger.Info($"The update {version} has been skipped and will be ignored next time.");
+            var appSettings = Locator.Current.GetService<AppSettings>();
+            if (_releaseObject.TryGetProperty("tag_name", out var tagNameJsonElement) && tagNameJsonElement.GetString() is string version)
+            {
+                appSettings.SkippedUpdateVersion = version;
+                // TODO: signal settings change
+                logger.Info($"The update {version} has been skipped and will be ignored next time.");
+            }
             CloseVersionUpdatePromptWindow();
         }
 
