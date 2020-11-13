@@ -2,7 +2,9 @@ using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using ReactiveUI.Validation.Extensions;
 using ReactiveUI.Validation.Helpers;
+using Shadowsocks.Net.Settings;
 using Shadowsocks.WPF.Models;
+using Splat;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
@@ -13,19 +15,18 @@ namespace Shadowsocks.WPF.ViewModels
     {
         public ForwardProxyViewModel()
         {
-            if (!_config.proxy.useProxy)
-                NoProxy = true;
-            else if (_config.proxy.proxyType == 0)
-                UseSocks5Proxy = true;
-            else
-                UseHttpProxy = true;
+            _forwardProxySettings = Locator.Current.GetService<Settings>().Net.ForwardProxy;
 
-            Address = _config.proxy.proxyServer;
-            Port = _config.proxy.proxyPort;
-            Timeout = _config.proxy.proxyTimeout;
+            NoProxy = _forwardProxySettings.NoProxy;
+            UseSocks5Proxy = _forwardProxySettings.UseSocks5Proxy;
+            UseHttpProxy = _forwardProxySettings.UseHttpProxy;
 
-            Username = _config.proxy.authUser;
-            Password = _config.proxy.authPwd;
+            Address = _forwardProxySettings.Address;
+            Port = _forwardProxySettings.Port;
+            Timeout = 5;
+
+            Username = _forwardProxySettings.Username;
+            Password = _forwardProxySettings.Password;
 
             this.WhenAnyValue(x => x.NoProxy, x => !x)
                 .ToPropertyEx(this, x => x.CanModifyDetails);
@@ -52,11 +53,12 @@ namespace Shadowsocks.WPF.ViewModels
 
             Save = ReactiveCommand.Create(() =>
             {
-                _controller.SaveProxy(GetForwardProxyConfig());
-                _menuViewController.CloseForwardProxyWindow();
+                // TODO: save settings
             }, canSave);
-            Cancel = ReactiveCommand.Create(_menuViewController.CloseForwardProxyWindow);
+            //Cancel = ReactiveCommand.Create(_menuViewController.CloseForwardProxyWindow);
         }
+
+        private ForwardProxySettings _forwardProxySettings;
 
         public ValidationHelper AddressRule { get; }
         public ValidationHelper PortRule { get; }
@@ -93,29 +95,16 @@ namespace Shadowsocks.WPF.ViewModels
         [Reactive]
         public string Password { get; set; }
 
-        private ForwardProxyConfig GetForwardProxyConfig()
-        {
-            var forwardProxyConfig = new ForwardProxyConfig()
+        private ForwardProxySettings GetForwardProxySettings()
+            => new ForwardProxySettings()
             {
-                proxyServer = Address,
-                proxyPort = Port,
-                proxyTimeout = Timeout,
-                authUser = Username,
-                authPwd = Password
+                NoProxy = NoProxy,
+                UseSocks5Proxy = UseSocks5Proxy,
+                UseHttpProxy = UseHttpProxy,
+                Address = Address,
+                Port = Port,
+                Username = Username,
+                Password = Password,
             };
-            if (NoProxy)
-                forwardProxyConfig.useProxy = false;
-            else if (UseSocks5Proxy)
-            {
-                forwardProxyConfig.useProxy = true;
-                forwardProxyConfig.proxyType = 0;
-            }
-            else
-            {
-                forwardProxyConfig.useProxy = true;
-                forwardProxyConfig.proxyType = 1;
-            }
-            return forwardProxyConfig;
-        }
     }
 }

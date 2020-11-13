@@ -18,7 +18,7 @@ namespace Shadowsocks.WPF.ViewModels
     {
         public OnlineConfigViewModel()
         {
-            Sources = new ObservableCollection<string>(_config.onlineConfigSource);
+            Sources = new ObservableCollection<string>();
             SelectedSource = "";
             Address = "";
 
@@ -39,8 +39,8 @@ namespace Shadowsocks.WPF.ViewModels
                 address => Uri.IsWellFormedUriString(address, UriKind.Absolute) &&
                 (address.StartsWith("https://") || address.StartsWith("http://")));
 
-            Update = ReactiveCommand.CreateFromTask(() => _controller.UpdateOnlineConfig(SelectedSource), canUpdateCopyRemove);
-            UpdateAll = ReactiveCommand.CreateFromTask(_controller.UpdateAllOnlineConfig, canUpdateAll);
+            //Update = ReactiveCommand.CreateFromTask(() => _controller.UpdateOnlineConfig(SelectedSource), canUpdateCopyRemove);
+            //UpdateAll = ReactiveCommand.CreateFromTask(_controller.UpdateAllOnlineConfig, canUpdateAll);
             CopyLink = ReactiveCommand.Create(() => Clipboard.SetText(SelectedSource), canUpdateCopyRemove);
             Remove = ReactiveCommand.Create(() =>
             {
@@ -50,13 +50,13 @@ namespace Shadowsocks.WPF.ViewModels
                 {
                     result = Sources.Remove(urlToRemove);
                 } while (result);
-                _controller.RemoveOnlineConfig(urlToRemove);
+                //_controller.RemoveOnlineConfig(urlToRemove);
             }, canUpdateCopyRemove);
             Add = ReactiveCommand.Create(() =>
             {
                 Sources.Add(Address);
                 SelectedSource = Address;
-                _controller.SaveOnlineConfigSource(Sources.ToList());
+                //_controller.SaveOnlineConfigSource(Sources.ToList());
                 Address = "";
             }, canAdd);
 

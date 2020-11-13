@@ -133,12 +133,15 @@ namespace Shadowsocks.WPF.Services
                     var filename = asset.GetProperty("name").GetString();
                     var browser_download_url = asset.GetProperty("browser_download_url").GetString();
                     var response = await httpClient.GetAsync(browser_download_url);
-                    using (var downloadedFileStream = File.Create(Utils.Utilities.GetTempPath(filename)))
-                        await response.Content.CopyToAsync(downloadedFileStream);
-                    logger.Info($"Downloaded {filename}.");
-                    // store .zip filename
-                    if (filename.EndsWith(".zip"))
-                        NewReleaseZipFilename = filename;
+                    if (filename is string)
+                    {
+                        using (var downloadedFileStream = File.Create(Utils.Utilities.GetTempPath(filename)))
+                            await response.Content.CopyToAsync(downloadedFileStream);
+                        logger.Info($"Downloaded {filename}.");
+                        // store .zip filename
+                        if (filename.EndsWith(".zip"))
+                            NewReleaseZipFilename = filename;
+                    }
                 }
                 logger.Info("Finished downloading.");
                 // notify user

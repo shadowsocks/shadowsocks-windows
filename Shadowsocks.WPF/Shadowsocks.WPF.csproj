@@ -1,17 +1,21 @@
-<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net5.0-windows</TargetFramework>
     <UseWPF>true</UseWPF>
-    <Authors>clowwindy &amp; community 2020</Authors>
-    <PackageId>Shadowsocks.WPF</PackageId>
-    <Product>Shadowsocks WPF GUI</Product>
-    <AssemblyVersion>5.0.0.0</AssemblyVersion>
-    <Version>1.0.0</Version>
+    <ApplicationManifest>App.manifest</ApplicationManifest>
+    <Product>Shadowsocks for Windows WPF GUI</Product>
+    <Authors>Clowwindy &amp; The Community</Authors>
+    <Version>5.0.0</Version>
     <ApplicationIcon>Assets\shadowsocks.ico</ApplicationIcon>
-    <NoWin32Manifest>true</NoWin32Manifest>
     <Nullable>enable</Nullable>
+    <Copyright>© 2020 Clowwindy &amp; The Community</Copyright>
+    <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
+    <PackageProjectUrl>https://github.com/shadowsocks/shadowsocks-windows</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/shadowsocks/shadowsocks-windows</RepositoryUrl>
+    <RepositoryType>Public</RepositoryType>
+    <Description>If you want to keep a secret, you must also hide it from yourself.</Description>
   </PropertyGroup>
 
   <ItemGroup>
@@ -40,6 +44,10 @@
     <None Remove="Resources\ss32Out.png" />
     <None Remove="Resources\ss32Outline.png" />
     <None Remove="Resources\ssw128.png" />
+    <None Include="..\LICENSE.txt">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
   </ItemGroup>
 
   <ItemGroup>
@@ -113,10 +121,6 @@
     <Resource Include="Resources\ss32Out.png" />
     <Resource Include="Resources\ss32Outline.png" />
     <Resource Include="Resources\ssw128.png" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Properties\PublishProfiles\" />
   </ItemGroup>
 
 </Project>

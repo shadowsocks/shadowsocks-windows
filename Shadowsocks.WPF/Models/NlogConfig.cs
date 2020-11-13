@@ -36,8 +36,8 @@ namespace Shadowsocks.WPF.Models
         const string LOGGER_FILE_NAME_ATTRIBUTE = "fileName";
 
         XmlDocument doc = new XmlDocument();
-        XmlElement logFileNameElement;
-        XmlElement logLevelElement;
+        XmlElement? logFileNameElement;
+        XmlElement? logLevelElement;
 
         /// <summary>
         /// Load the NLog config xml file content
@@ -46,8 +46,8 @@ namespace Shadowsocks.WPF.Models
         {
             NLogConfig config = new NLogConfig();
             config.doc.Load(NLOG_CONFIG_FILE_NAME);
-            config.logLevelElement = (XmlElement)SelectSingleNode(config.doc, "//nlog:logger[@name='*']");
-            config.logFileNameElement = (XmlElement)SelectSingleNode(config.doc, "//nlog:target[@name='file']");
+            config.logLevelElement = (XmlElement?)SelectSingleNode(config.doc, "//nlog:logger[@name='*']");
+            config.logFileNameElement = (XmlElement?)SelectSingleNode(config.doc, "//nlog:target[@name='file']");
             return config;
         }
 
@@ -105,7 +105,7 @@ namespace Shadowsocks.WPF.Models
         /// <param name="doc"></param>
         /// <param name="xpath"></param>
         /// <returns></returns>
-        private static XmlNode SelectSingleNode(XmlDocument doc, string xpath)
+        private static XmlNode? SelectSingleNode(XmlDocument doc, string xpath)
         {
             XmlNamespaceManager manager = new XmlNamespaceManager(doc.NameTable);
             manager.AddNamespace("nlog", "http://www.nlog-project.org/schemas/NLog.xsd");
@@ -121,7 +121,7 @@ namespace Shadowsocks.WPF.Models
       
             if (!File.Exists(NLOG_CONFIG_FILE_NAME))
             {
-                File.WriteAllText(NLOG_CONFIG_FILE_NAME, Properties.Resources.NLog_config);
+                File.WriteAllText(NLOG_CONFIG_FILE_NAME, Properties.Resources.NLog);
                 LogManager.LoadConfiguration(NLOG_CONFIG_FILE_NAME);
             }
         }

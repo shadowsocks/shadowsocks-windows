@@ -12,6 +12,8 @@ namespace Shadowsocks.Net.Settings
         public string HttpListeningAddress { get; set; }
         public int Socks5ListeningPort { get; set; }
         public int HttpListeningPort { get; set; }
+
+        public ForwardProxySettings ForwardProxy { get; set; }
         
         public NetSettings()
         {
@@ -21,6 +23,8 @@ namespace Shadowsocks.Net.Settings
             HttpListeningAddress = "::1";
             Socks5ListeningPort = 1080;
             HttpListeningPort = 1080;
+
+            ForwardProxy = new ForwardProxySettings();
         }
     }
 }
