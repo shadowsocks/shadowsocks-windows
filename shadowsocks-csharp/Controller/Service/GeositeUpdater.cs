@@ -75,52 +75,67 @@ namespace Shadowsocks.Controller
 
         public static async Task UpdatePACFromGeosite()
         {
-            string geositeUrl = GEOSITE_URL;
-            string geositeSha256sumUrl = GEOSITE_SHA256SUM_URL;
-            SHA256 mySHA256 = SHA256.Create();
+            var geositeUrl = GEOSITE_URL;
+            var geositeSha256sumUrl = GEOSITE_SHA256SUM_URL;
+            var geositeVerifySha256 = true;
+            var geositeSha256sum = "";
+            var mySHA256 = SHA256.Create();
             var config = Program.MainController.GetCurrentConfiguration();
-            bool blacklist = config.geositePreferDirect;
+            var blacklist = config.geositePreferDirect;
             var httpClient = Program.MainController.GetHttpClient();
 
             if (!string.IsNullOrWhiteSpace(config.geositeUrl))
             {
                 logger.Info("Found custom Geosite URL in config file");
                 geositeUrl = config.geositeUrl;
+                geositeSha256sumUrl = config.geositeSha256sumUrl;
+                if (string.IsNullOrWhiteSpace(geositeSha256sumUrl))
+                {
+                    geositeVerifySha256 = false;
+                    logger.Info("Geosite SHA256 verification is disabled.");
+                }
             }
             logger.Info($"Checking Geosite from {geositeUrl}");
 
             try
             {
-                // download checksum first
-                var geositeSha256sum = await httpClient.GetStringAsync(geositeSha256sumUrl);
-                geositeSha256sum = geositeSha256sum.Substring(0, 64).ToUpper();
-                logger.Info($"Got Sha256sum: {geositeSha256sum}");
-                // compare downloaded checksum with local geositeDB
-                byte[] localDBHashBytes = mySHA256.ComputeHash(geositeDB);
-                string localDBHash = BitConverter.ToString(localDBHashBytes).Replace("-", String.Empty);
-                logger.Info($"Local Sha256sum: {localDBHash}");
-                // if already latest
-                if (geositeSha256sum == localDBHash)
+                // Use sha256sum to check if local database is already latest.
+                if (geositeVerifySha256)
                 {
-                    logger.Info("Local GeoSite DB is up to date.");
-                    return;
+                    // download checksum first
+                    geositeSha256sum = await httpClient.GetStringAsync(geositeSha256sumUrl);
+                    geositeSha256sum = geositeSha256sum.Substring(0, 64).ToUpper();
+                    logger.Info($"Got Sha256sum: {geositeSha256sum}");
+                    // compare downloaded checksum with local geositeDB
+                    byte[] localDBHashBytes = mySHA256.ComputeHash(geositeDB);
+                    string localDBHash = BitConverter.ToString(localDBHashBytes).Replace("-", String.Empty);
+                    logger.Info($"Local Sha256sum: {localDBHash}");
+                    // if already latest
+                    if (geositeSha256sum == localDBHash)
+                    {
+                        logger.Info("Local GeoSite DB is up to date.");
+                        return;
+                    }
                 }
 
                 // not latest. download new DB
                 var downloadedBytes = await httpClient.GetByteArrayAsync(geositeUrl);
 
                 // verify sha256sum
-                byte[] downloadedDBHashBytes = mySHA256.ComputeHash(downloadedBytes);
-                string downloadedDBHash = BitConverter.ToString(downloadedDBHashBytes).Replace("-", String.Empty);
-                logger.Info($"Actual Sha256sum: {downloadedDBHash}");
-                if (geositeSha256sum != downloadedDBHash)
+                if (geositeVerifySha256)
                 {
-                    logger.Info("Sha256sum Verification: FAILED. Downloaded GeoSite DB is corrupted. Aborting the update.");
-                    throw new Exception("Sha256sum mismatch");
-                }
-                else
-                {
-                    logger.Info("Sha256sum Verification: PASSED. Applying to local GeoSite DB.");
+                    byte[] downloadedDBHashBytes = mySHA256.ComputeHash(downloadedBytes);
+                    string downloadedDBHash = BitConverter.ToString(downloadedDBHashBytes).Replace("-", String.Empty);
+                    logger.Info($"Actual Sha256sum: {downloadedDBHash}");
+                    if (geositeSha256sum != downloadedDBHash)
+                    {
+                        logger.Info("Sha256sum Verification: FAILED. Downloaded GeoSite DB is corrupted. Aborting the update.");
+                        throw new Exception("Sha256sum mismatch");
+                    }
+                    else
+                    {
+                        logger.Info("Sha256sum Verification: PASSED. Applying to local GeoSite DB.");
+                    }
                 }
 
                 // write to geosite file
