@@ -9,10 +9,8 @@
     <PackageId>Shadowsocks.Legacy</PackageId>
     <Product>Shadowsocks Legacy Project</Product>
     <Version>4.3.0.0</Version>
-    <AssemblyName>Shadowsocks</AssemblyName>
     <ApplicationIcon>shadowsocks.ico</ApplicationIcon>
     <StartupObject>Shadowsocks.Program</StartupObject>
-    <Nullable>disable</Nullable>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <RootNamespace>Shadowsocks.Legacy</RootNamespace>
   </PropertyGroup>
