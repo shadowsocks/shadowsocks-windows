@@ -1,6 +1,6 @@
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
-using Shadowsocks.Models;
+using Shadowsocks.WPF.Models;
 using System;
 using System.Collections.Generic;
 using System.Drawing;

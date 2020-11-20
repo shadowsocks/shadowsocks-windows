@@ -5,7 +5,7 @@ using System.Text.Json.Serialization;
 
 namespace Shadowsocks.Models
 {
-    public class Server
+    public class Server : IServer
     {
         [JsonPropertyName("server")]
         public string Host { get; set; }
@@ -52,8 +52,8 @@ namespace Shadowsocks.Models
             Uuid = uuid;
         }
 
-        public override bool Equals(object? obj) => obj is Server server && Uuid == server.Uuid;
-        public override int GetHashCode() => base.GetHashCode();
+        public bool Equals(IServer? other) => other is Server anotherServer && Uuid == anotherServer.Uuid;
+        public override int GetHashCode() => Uuid.GetHashCode();
         public override string ToString() => Name;
 
         /// <summary>

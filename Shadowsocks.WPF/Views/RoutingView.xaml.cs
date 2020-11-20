@@ -18,7 +18,7 @@ namespace Shadowsocks.WPF.Views
     /// <summary>
     /// Interaction logic for RoutingView.xaml
     /// </summary>
-    public partial class RoutingView : ReactiveUserControl<RoutingViewModel>
+    public partial class RoutingView
     {
         public RoutingView()
         {

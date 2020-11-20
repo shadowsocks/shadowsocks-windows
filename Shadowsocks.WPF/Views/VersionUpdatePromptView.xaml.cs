@@ -8,12 +8,11 @@ namespace Shadowsocks.WPF.Views
     /// <summary>
     /// Interaction logic for VersionUpdatePromptView.xaml
     /// </summary>
-    public partial class VersionUpdatePromptView : ReactiveUserControl<VersionUpdatePromptViewModel>
+    public partial class VersionUpdatePromptView
     {
-        public VersionUpdatePromptView(JsonElement releaseObject)
+        public VersionUpdatePromptView()
         {
             InitializeComponent();
-            ViewModel = new VersionUpdatePromptViewModel(releaseObject);
             DataContext = ViewModel; // for compatibility with MdXaml
             this.WhenActivated(disposables =>
             {

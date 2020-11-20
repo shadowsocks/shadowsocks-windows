@@ -13,7 +13,7 @@
                            lex:ResxLocalizationProvider.DefaultAssembly="Shadowsocks"
                            lex:ResxLocalizationProvider.DefaultDictionary="Strings"
                            mc:Ignorable="d"
-                           Title="Shadowsocks" Width="800" Height="600" MinWidth="800" MinHeight="600"
+                           Title="Shadowsocks" Width="960" Height="720" MinWidth="800" MinHeight="600"
                            TextElement.Foreground="{DynamicResource MaterialDesignBody}"
                            TextElement.FontWeight="Regular"
                            TextElement.FontSize="13"
@@ -25,7 +25,9 @@
         <Grid>
             <TabControl Style="{StaticResource MaterialDesignNavigatilRailTabControl}">
                 <TabItem x:Name="dashboardTabItem"
-                         Style="{StaticResource MaterialDesignNavigationRailTabItem}">
+                         Style="{StaticResource MaterialDesignNavigationRailTabItem}"
+                         Height="56"
+                         Width="56">
                     <TabItem.Header>
                         <materialDesign:PackIcon
                             Kind="Speedometer"
@@ -34,7 +36,9 @@
                     </TabItem.Header>
                 </TabItem>
                 <TabItem x:Name="serversTabItem"
-                         Style="{StaticResource MaterialDesignNavigationRailTabItem}">
+                         Style="{StaticResource MaterialDesignNavigationRailTabItem}"
+                         Height="56"
+                         Width="56">
                     <TabItem.Header>
                         <materialDesign:PackIcon
                             Kind="Server"
@@ -43,7 +47,9 @@
                     </TabItem.Header>
                 </TabItem>
                 <TabItem x:Name="routingTabItem"
-                         Style="{StaticResource MaterialDesignNavigationRailTabItem}">
+                         Style="{StaticResource MaterialDesignNavigationRailTabItem}"
+                         Height="56"
+                         Width="56">
                     <TabItem.Header>
                         <materialDesign:PackIcon
                             Kind="RouterNetwork"
@@ -52,7 +58,9 @@
                     </TabItem.Header>
                 </TabItem>
                 <TabItem x:Name="settingsTabItem"
-                         Style="{StaticResource MaterialDesignNavigationRailTabItem}">
+                         Style="{StaticResource MaterialDesignNavigationRailTabItem}"
+                         Height="56"
+                         Width="56">
                     <TabItem.Header>
                         <materialDesign:PackIcon
                             Kind="SettingsOutline"

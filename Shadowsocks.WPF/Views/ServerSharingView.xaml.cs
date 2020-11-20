@@ -1,4 +1,4 @@
-﻿using ReactiveUI;
+using ReactiveUI;
 using Shadowsocks.WPF.ViewModels;
 using System.Reactive.Disposables;
 using System.Windows.Input;
@@ -8,12 +8,11 @@ namespace Shadowsocks.WPF.Views
     /// <summary>
     /// Interaction logic for ServerSharingView.xaml
     /// </summary>
-    public partial class ServerSharingView : ReactiveUserControl<ServerSharingViewModel>
+    public partial class ServerSharingView
     {
         public ServerSharingView()
         {
             InitializeComponent();
-            ViewModel = new ServerSharingViewModel();
             this.WhenActivated(disposables =>
             {
                 this.OneWayBind(ViewModel,

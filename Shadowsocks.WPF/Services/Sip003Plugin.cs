@@ -1,4 +1,4 @@
-using Shadowsocks.Models;
+using Shadowsocks.WPF.Models;
 using System;
 using System.Collections.Specialized;
 using System.Diagnostics;
@@ -34,7 +34,7 @@ namespace Shadowsocks.WPF.Services
             return new Sip003Plugin(
                 server.Plugin,
                 server.PluginOpts,
-                server.plugin_args,
+                server.PluginArgs,
                 server.Host,
                 server.Port,
                 showPluginOutput);

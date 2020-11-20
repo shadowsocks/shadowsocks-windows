@@ -1,10 +1,7 @@
 using Shadowsocks.Interop.Settings;
-using Shadowsocks.Models;
 using Shadowsocks.Net.Settings;
 using Shadowsocks.PAC;
-using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace Shadowsocks.WPF.Models
 {

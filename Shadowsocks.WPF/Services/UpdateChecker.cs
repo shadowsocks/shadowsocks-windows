@@ -9,6 +9,7 @@ using System.Windows;
 using NLog;
 using Shadowsocks.WPF.Localization;
 using Shadowsocks.WPF.Models;
+using Shadowsocks.WPF.ViewModels;
 using Shadowsocks.WPF.Views;
 using Splat;
 
@@ -98,6 +99,10 @@ namespace Shadowsocks.WPF.Services
         {
             if (versionUpdatePromptWindow == null)
             {
+                var versionUpdatePromptView = new VersionUpdatePromptView()
+                {
+                    ViewModel = new VersionUpdatePromptViewModel(releaseObject),
+                };
                 versionUpdatePromptWindow = new Window()
                 {
                     Title = LocalizationProvider.GetLocalizedValue<string>("VersionUpdate"),
@@ -105,7 +110,7 @@ namespace Shadowsocks.WPF.Services
                     Width = 640,
                     MinHeight = 480,
                     MinWidth = 640,
-                    Content = new VersionUpdatePromptView(releaseObject)
+                    Content = versionUpdatePromptView,
                 };
                 versionUpdatePromptWindow.Closed += VersionUpdatePromptWindow_Closed;
                 versionUpdatePromptWindow.Show();

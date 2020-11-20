@@ -18,7 +18,7 @@ namespace Shadowsocks.WPF.Views
     /// <summary>
     /// Interaction logic for ServersView.xaml
     /// </summary>
-    public partial class ServersView : ReactiveUserControl<ServersViewModel>
+    public partial class ServersView
     {
         public ServersView()
         {

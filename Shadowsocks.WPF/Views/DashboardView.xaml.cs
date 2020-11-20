@@ -18,7 +18,7 @@ namespace Shadowsocks.WPF.Views
     /// <summary>
     /// Interaction logic for DashboardView.xaml
     /// </summary>
-    public partial class DashboardView : ReactiveUserControl<DashboardViewModel>
+    public partial class DashboardView
     {
         public DashboardView()
         {

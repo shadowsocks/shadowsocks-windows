@@ -1,4 +1,4 @@
-﻿using ReactiveUI;
+using ReactiveUI;
 using Shadowsocks.WPF.ViewModels;
 using System.Reactive.Disposables;
 
@@ -7,7 +7,7 @@ namespace Shadowsocks.WPF.Views
     /// <summary>
     /// Interaction logic for ForwardProxyView.xaml
     /// </summary>
-    public partial class ForwardProxyView : ReactiveUserControl<ForwardProxyViewModel>
+    public partial class ForwardProxyView
     {
         public ForwardProxyView()
         {

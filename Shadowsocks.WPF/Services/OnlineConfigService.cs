@@ -1,4 +1,4 @@
-using Shadowsocks.Models;
+using Shadowsocks.WPF.Models;
 using Splat;
 using System;
 using System.Collections.Generic;

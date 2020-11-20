@@ -2,13 +2,13 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net5.0-windows</TargetFramework>
+    <TargetFramework>net5.0-windows10.0.19041.0</TargetFramework>
     <UseWPF>true</UseWPF>
     <ApplicationManifest>App.manifest</ApplicationManifest>
     <Product>Shadowsocks for Windows WPF GUI</Product>
     <Authors>Clowwindy &amp; The Community</Authors>
     <Version>5.0.0</Version>
-    <ApplicationIcon>Assets\shadowsocks.ico</ApplicationIcon>
+    <ApplicationIcon>shadowsocks.ico</ApplicationIcon>
     <Nullable>enable</Nullable>
     <Copyright>© 2020 Clowwindy &amp; The Community</Copyright>
     <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
@@ -36,7 +36,6 @@
     <None Remove="Resources\RobotoMono\RobotoMono-SemiBoldItalic.ttf" />
     <None Remove="Resources\RobotoMono\RobotoMono-Thin.ttf" />
     <None Remove="Resources\RobotoMono\RobotoMono-ThinItalic.ttf" />
-    <None Remove="Resources\shadowsocks.ico" />
     <None Remove="Resources\ss128.pdn" />
     <None Remove="Resources\ss32.pdn" />
     <None Remove="Resources\ss32Fill.png" />
@@ -60,6 +59,7 @@
     <PackageReference Include="ReactiveUI.WPF" Version="12.1.5" />
     <PackageReference Include="Splat.NLog" Version="9.7.1" />
     <PackageReference Include="System.CommandLine" Version="2.0.0-beta1.20371.2" />
+    <PackageReference Include="System.Reactive" Version="5.0.0" />
     <PackageReference Include="WPFLocalizeExtension" Version="3.8.0" />
     <PackageReference Include="ZXing.Net" Version="0.16.6" />
   </ItemGroup>
@@ -113,7 +113,6 @@
     <Resource Include="Resources\RobotoMono\RobotoMono-SemiBoldItalic.ttf" />
     <Resource Include="Resources\RobotoMono\RobotoMono-Thin.ttf" />
     <Resource Include="Resources\RobotoMono\RobotoMono-ThinItalic.ttf" />
-    <Resource Include="Resources\shadowsocks.ico" />
     <Resource Include="Resources\ss128.pdn" />
     <Resource Include="Resources\ss32.pdn" />
     <Resource Include="Resources\ss32Fill.png" />
