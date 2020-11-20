@@ -146,8 +146,8 @@ after_build:
     $ZipSingleExeX86 = "$WorkingFolder\shadowsocks-windows-$env:APPVEYOR_BUILD_VERSION-portable-x86.zip"
     7z a $ZipDev "$env:APPVEYOR_BUILD_FOLDER\Shadowsocks.WPF\bin\$env:CONFIGURATION\net5.0-windows10.0.19041.0\*"
     7z a $ZipMinimal "$env:APPVEYOR_BUILD_FOLDER\Shadowsocks.WPF\bin\Any CPU\$env:CONFIGURATION\net5.0-windows10.0.19041.0\publish\*"
-    7z a $ZipSingleExeX64 "$env:APPVEYOR_BUILD_FOLDER\Shadowsocks.WPF\bin\Any CPU\$env:CONFIGURATION\net5.0-windows10.0.19041.0\win-x64\publish\Shadowsocks.exe"
-    7z a $ZipSingleExeX86 "$env:APPVEYOR_BUILD_FOLDER\Shadowsocks.WPF\bin\Any CPU\$env:CONFIGURATION\net5.0-windows10.0.19041.0\win-x86\publish\Shadowsocks.exe"
+    7z a $ZipSingleExeX64 "$env:APPVEYOR_BUILD_FOLDER\Shadowsocks.WPF\bin\Any CPU\$env:CONFIGURATION\net5.0-windows10.0.19041.0\win-x64\publish\*"
+    7z a $ZipSingleExeX86 "$env:APPVEYOR_BUILD_FOLDER\Shadowsocks.WPF\bin\Any CPU\$env:CONFIGURATION\net5.0-windows10.0.19041.0\win-x86\publish\*"
     Calculate-Hash -file $ZipDev | Out-File -FilePath $HashFile -Append
     Calculate-Hash -file $ZipMinimal | Out-File -FilePath $HashFile -Append
     Calculate-Hash -file $ZipSingleExeX64 | Out-File -FilePath $HashFile -Append
