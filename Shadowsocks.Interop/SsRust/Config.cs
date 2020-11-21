@@ -1,16 +1,117 @@
-using System;
+using Shadowsocks.Models;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Text.Json.Serialization;
 
 namespace Shadowsocks.Interop.SsRust
 {
-    public class Config
+    public class Config : IGroup<Server>
     {
+        /// <inheritdoc/>
+        public int Version { get; set; }
+
+        /// <inheritdoc/>
+        [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
+        public List<Server> Servers { get; set; }
+
+        /// <summary>
+        /// Gets or sets the listening address.
+        /// </summary>
+        public string LocalAddress { get; set; }
+
+        /// <summary>
+        /// Gets or sets the listening port.
+        /// </summary>
+        [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
+        public int LocalPort { get; set; }
+
+        /// <summary>
+        /// Gets or sets the timeout for UDP associations in seconds.
+        /// Defaults to 300 seconds (5 minutes).
+        /// </summary>
+        public int UdpTimeout { get; set; }
+
+        /// <summary>
+        /// Gets or sets the maximum number of UDP associations.
+        /// Defaults to 0 (unlimited).
+        /// </summary>
+        public int UdpMaxAssociations { get; set; }
+
+        /// <summary>
+        /// Gets or sets the server manager address.
+        /// </summary>
+        public string ManagerAddress { get; set; }
+
+        /// <summary>
+        /// Gets or sets the server manager port.
+        /// </summary>
+        public int ManagerPort { get; set; }
+
+        /// <summary>
+        /// Gets or sets the DNS server used to resolve hostnames.
+        /// </summary>
+        public string Dns { get; set; }
+
+        /// <summary>
+        /// Gets or sets the mode.
+        /// Defaults to tcp_only.
+        /// Can also be tcp_and_udp or udp_only.
+        /// </summary>
+        public string Mode { get; set; }
+
+        /// <summary>
+        /// Gets or sets TCP_NODELAY.
+        /// Defaults to false.
+        /// </summary>
+        public bool NoDelay { get; set; }
+
+        /// <summary>
+        /// Gets or sets the soft and hard limit of file descriptors.
+        /// </summary>
+        public int Nofile { get; set; }
+
+        /// <summary>
+        /// Gets or sets whether IPv6 addresses take precedence over IPv4 addresses for resolved hostnames.
+        /// Defaults to false.
+        /// </summary>
+        public bool Ipv6First { get; set; }
+        
         public Config()
         {
-
+            Version = 1;
+            Servers = new();
+            LocalAddress = "";
+            LocalPort = 1080;
+            UdpTimeout = 300;
+            UdpMaxAssociations = 0;
+            ManagerAddress = "";
+            ManagerPort = 0;
+            Dns = "";
+            Mode = "tcp_only";
+            NoDelay = false;
+            Nofile = 0;
+            Ipv6First = false;
         }
+
+        /// <summary>
+        /// Gets the default configuration for Linux.
+        /// </summary>
+        public static Config DefaultLinux => new()
+        {
+            LocalAddress = "::1",
+            Mode = "tcp_and_udp",
+            NoDelay = true,
+            Nofile = 32768,
+            Ipv6First = true,
+        };
+
+        /// <summary>
+        /// Gets the default configuration for Windows.
+        /// </summary>
+        public static Config DefaultWindows => new()
+        {
+            LocalAddress = "::1",
+            Mode = "tcp_and_udp",
+            Ipv6First = true,
+        };
     }
 }
