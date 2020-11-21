@@ -16,11 +16,11 @@ namespace Shadowsocks.PAC
         public const string USER_RULE_FILE = "user-rule.txt";
         public const string USER_ABP_FILE = "abp.txt";
 
-        FileSystemWatcher PACFileWatcher;
-        FileSystemWatcher UserRuleFileWatcher;
+        FileSystemWatcher? PACFileWatcher;
+        FileSystemWatcher? UserRuleFileWatcher;
 
-        public event EventHandler PACFileChanged;
-        public event EventHandler UserRuleFileChanged;
+        public event EventHandler? PACFileChanged;
+        public event EventHandler? UserRuleFileChanged;
 
         private PACSettings _PACSettings;
         private GeositeUpdater _geositeUpdater;

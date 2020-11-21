@@ -21,15 +21,15 @@ namespace Shadowsocks.WPF.Views
                     view => releaseNotesMarkdownScrollViewer.Markdown)
                     .DisposeWith(disposables);*/
 
-                this.BindCommand(ViewModel,
+                this.BindCommand(ViewModel!,
                     viewModel => viewModel.Update,
                     view => view.updateButton)
                     .DisposeWith(disposables);
-                this.BindCommand(ViewModel,
+                this.BindCommand(ViewModel!,
                     viewModel => viewModel.SkipVersion,
                     view => view.skipVersionButton)
                     .DisposeWith(disposables);
-                this.BindCommand(ViewModel,
+                this.BindCommand(ViewModel!,
                     viewModel => viewModel.NotNow,
                     view => view.notNowButton)
                     .DisposeWith(disposables);

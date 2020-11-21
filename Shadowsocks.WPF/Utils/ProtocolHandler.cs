@@ -10,7 +10,7 @@ namespace Shadowsocks.WPF.Utils
 
         public static bool Set(bool enabled)
         {
-            RegistryKey ssURLAssociation = null;
+            RegistryKey? ssURLAssociation = null;
 
             try
             {
@@ -59,7 +59,7 @@ namespace Shadowsocks.WPF.Utils
 
         public static bool Check()
         {
-            RegistryKey ssURLAssociation = null;
+            RegistryKey? ssURLAssociation = null;
             try
             {
                 ssURLAssociation = Registry.CurrentUser.OpenSubKey(ssURLRegKey, true);
@@ -69,8 +69,8 @@ namespace Shadowsocks.WPF.Utils
                     return false;
                 }
 
-                var shellOpen = ssURLAssociation.OpenSubKey("shell").OpenSubKey("open").OpenSubKey("command");
-                return (string)shellOpen.GetValue("") == $"{Utilities.ExecutablePath} --open-url %1";
+                var shellOpen = ssURLAssociation.OpenSubKey("shell")?.OpenSubKey("open")?.OpenSubKey("command");
+                return shellOpen?.GetValue("") as string == $"{Utilities.ExecutablePath} --open-url %1";
             }
             catch (Exception e)
             {

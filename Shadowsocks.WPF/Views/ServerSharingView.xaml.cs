@@ -32,7 +32,7 @@ namespace Shadowsocks.WPF.Views
                     view => view.urlTextBox.Text)
                     .DisposeWith(disposables);
 
-                this.BindCommand(ViewModel,
+                this.BindCommand(ViewModel!,
                     viewModel => viewModel.CopyLink,
                     view => view.copyLinkButton)
                     .DisposeWith(disposables);

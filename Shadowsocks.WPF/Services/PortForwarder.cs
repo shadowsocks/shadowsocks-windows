@@ -6,6 +6,7 @@ using System.Net.Sockets;
 
 namespace Shadowsocks.WPF.Services
 {
+#nullable disable
     public class PortForwarder : StreamService
     {
         private readonly int _targetPort;

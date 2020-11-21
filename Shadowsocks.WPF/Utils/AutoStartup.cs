@@ -15,7 +15,7 @@ namespace Shadowsocks.WPF.Utils
 
         public static bool Set(bool enabled)
         {
-            RegistryKey runKey = null;
+            RegistryKey? runKey = null;
             try
             {
                 runKey = Registry.CurrentUser.CreateSubKey(registryRunKey, RegistryKeyPermissionCheck.ReadWriteSubTree);
@@ -26,7 +26,7 @@ namespace Shadowsocks.WPF.Utils
                 }
                 if (enabled)
                 {
-                    runKey.SetValue(Key, Process.GetCurrentProcess().MainModule?.FileName);
+                    runKey.SetValue(Key, Utilities.ExecutablePath);
                 }
                 else
                 {
@@ -60,7 +60,7 @@ namespace Shadowsocks.WPF.Utils
 
         public static bool Check()
         {
-            RegistryKey runKey = null;
+            RegistryKey? runKey = null;
             try
             {
                 runKey = Registry.CurrentUser.CreateSubKey(registryRunKey, RegistryKeyPermissionCheck.ReadWriteSubTree);
@@ -78,7 +78,7 @@ namespace Shadowsocks.WPF.Utils
                         continue;
                     }
                     // Remove other startup keys with the same executable path. fixes #3011 and also assures compatibility with older versions
-                    if (Utilities.ExecutablePath.Equals(runKey.GetValue(valueName).ToString(), StringComparison.InvariantCultureIgnoreCase)
+                    if (Utilities.ExecutablePath.Equals(runKey.GetValue(valueName)?.ToString(), StringComparison.InvariantCultureIgnoreCase)
                         is bool matchedDuplicate && matchedDuplicate)
                     {
                         runKey.DeleteValue(valueName);

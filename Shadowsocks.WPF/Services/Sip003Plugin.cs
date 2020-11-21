@@ -12,7 +12,7 @@ namespace Shadowsocks.WPF.Services
     // https://github.com/shadowsocks/shadowsocks-org/wiki/Plugin
     public sealed class Sip003Plugin : IDisposable
     {
-        public IPEndPoint LocalEndPoint { get; private set; }
+        public IPEndPoint? LocalEndPoint { get; private set; }
         public int ProcessId => _started ? _pluginProcess.Id : 0;
 
         private readonly object _startProcessLock = new object();
@@ -20,7 +20,7 @@ namespace Shadowsocks.WPF.Services
         private bool _started;
         private bool _disposed;
 
-        public static Sip003Plugin CreateIfConfigured(Server server, bool showPluginOutput)
+        public static Sip003Plugin? CreateIfConfigured(Server server, bool showPluginOutput)
         {
             if (server == null)
             {
@@ -119,7 +119,7 @@ namespace Shadowsocks.WPF.Services
             return true;
         }
 
-        public string ExpandEnvironmentVariables(string name, StringDictionary environmentVariables = null)
+        public string ExpandEnvironmentVariables(string name, StringDictionary? environmentVariables = null)
         {
             // Expand the environment variables from the new process itself
             if (environmentVariables != null)

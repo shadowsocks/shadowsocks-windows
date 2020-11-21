@@ -59,7 +59,7 @@ namespace Shadowsocks.WPF.Utils
             catch (Exception ex)
             {
                 LogHost.Default.Error(ex, "");
-                throw ex;
+                throw;
             }
         }
     }

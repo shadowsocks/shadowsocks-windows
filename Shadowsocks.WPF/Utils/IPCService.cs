@@ -21,7 +21,7 @@ namespace Shadowsocks.WPF.Utils
         private const int OP_OPEN_URL = 1;
         private static readonly string PIPE_PATH = $"Shadowsocks\\{Utilities.ExecutablePath.GetHashCode()}";
 
-        public event EventHandler<RequestAddUrlEventArgs> OpenUrlRequested;
+        public event EventHandler<RequestAddUrlEventArgs>? OpenUrlRequested;
 
         public async void RunServer()
         {

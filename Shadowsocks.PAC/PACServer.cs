@@ -124,7 +124,7 @@ namespace Shadowsocks.PAC
                     {
                         if (kv[0] == "Host")
                         {
-                            if (kv[1].Trim() == ((IPEndPoint)socket.LocalEndPoint).ToString())
+                            if (kv[1].Trim() == (socket.LocalEndPoint as IPEndPoint)?.ToString())
                             {
                                 hostMatch = true;
                             }
@@ -164,7 +164,7 @@ namespace Shadowsocks.PAC
         {
             try
             {
-                IPEndPoint localEndPoint = (IPEndPoint)socket.LocalEndPoint;
+                IPEndPoint localEndPoint = socket.LocalEndPoint as IPEndPoint ?? throw new ArgumentException("Invalid socket local endpoint.", nameof(socket));
 
                 string proxy = GetPACAddress(localEndPoint, useSocks);
 

@@ -42,7 +42,7 @@ namespace Shadowsocks.WPF.Services.SystemProxy
             // pointer to full path and file name of phone-book file
             string lpszPhonebook,
             // buffer to receive phone-book entries
-            [In, Out] RasEntryName[] lprasentryname,
+            [In, Out] RasEntryName[]? lprasentryname,
             // size in bytes of buffer
             ref int lpcb,
             // number of entries written to buffer
@@ -55,14 +55,14 @@ namespace Shadowsocks.WPF.Services.SystemProxy
             int entryNameSize = 0;
             int lpSize = 0;
             uint retval = ESuccess;
-            RasEntryName[] names = null;
+            RasEntryName[] names = Array.Empty<RasEntryName>();
 
             entryNameSize = Marshal.SizeOf(typeof(RasEntryName));
 
             // Windows Vista or later:  To determine the required buffer size, call RasEnumEntries
             // with lprasentryname set to NULL. The variable pointed to by lpcb should be set to zero.
             // The function will return the required buffer size in lpcb and an error code of ERROR_BUFFER_TOO_SMALL.
-            retval = RasEnumEntries(null, null, null, ref lpSize, out lpNames);
+            retval = RasEnumEntries("", "", null, ref lpSize, out lpNames);
             if (retval == EBufferTooSmall)
             {
                 names = new RasEntryName[lpNames];
@@ -71,7 +71,7 @@ namespace Shadowsocks.WPF.Services.SystemProxy
                     names[i].dwSize = entryNameSize;
                 }
 
-                retval = RasEnumEntries(null, null, names, ref lpSize, out lpNames);
+                retval = RasEnumEntries("", "", names, ref lpSize, out lpNames);
             }
 
             if (retval == ESuccess)

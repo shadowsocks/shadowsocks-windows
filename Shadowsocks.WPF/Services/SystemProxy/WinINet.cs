@@ -136,7 +136,7 @@ namespace Shadowsocks.WPF.Services.SystemProxy
         {
             try
             {
-                Record();
+                initialSetting = Query();
             }
             catch (DllNotFoundException)
             {
@@ -153,8 +153,13 @@ namespace Shadowsocks.WPF.Services.SystemProxy
                 }
                 else
                 {
-                    throw we;
+                    throw;
                 }
+            }
+            finally
+            {
+                if (initialSetting == null)
+                    initialSetting = new();
             }
         }
 
@@ -186,11 +191,6 @@ namespace Shadowsocks.WPF.Services.SystemProxy
                 GetOption(InternetPerConnectionOptionEnum.Flags,InternetPerConnectionFlags.Direct),
             };
             Exec(options);
-        }
-
-        private static void Record()
-        {
-            initialSetting ??= Query();
         }
 
         public static void Restore()
@@ -231,7 +231,7 @@ namespace Shadowsocks.WPF.Services.SystemProxy
                 new InternetPerConnectionOption{dwOption = (int)InternetPerConnectionOptionEnum.AutoConfigUrl},
             };
 
-            (IntPtr unmanagedList, int listSize) = PrepareOptionList(options, null);
+            (IntPtr unmanagedList, int listSize) = PrepareOptionList(options, "");
             bool ok = InternetQueryOption(IntPtr.Zero, (int)InternetOptions.PerConnectionOption, unmanagedList, ref listSize);
             if (!ok)
             {
@@ -260,13 +260,13 @@ namespace Shadowsocks.WPF.Services.SystemProxy
                         proxy.Flags = (InternetPerConnectionFlags)o.Value.dwValue;
                         break;
                     case InternetPerConnectionOptionEnum.AutoConfigUrl:
-                        proxy.AutoConfigUrl = Marshal.PtrToStringAuto(o.Value.pszValue);
+                        proxy.AutoConfigUrl = Marshal.PtrToStringAuto(o.Value.pszValue) ?? "";
                         break;
                     case InternetPerConnectionOptionEnum.ProxyBypass:
-                        proxy.ProxyBypass = Marshal.PtrToStringAuto(o.Value.pszValue);
+                        proxy.ProxyBypass = Marshal.PtrToStringAuto(o.Value.pszValue) ?? "";
                         break;
                     case InternetPerConnectionOptionEnum.ProxyServer:
-                        proxy.ProxyServer = Marshal.PtrToStringAuto(o.Value.pszValue);
+                        proxy.ProxyServer = Marshal.PtrToStringAuto(o.Value.pszValue) ?? "";
                         break;
                     default:
                         break;
@@ -343,7 +343,7 @@ namespace Shadowsocks.WPF.Services.SystemProxy
 
         private static void Exec(List<InternetPerConnectionOption> options)
         {
-            Exec(options, null);
+            Exec(options, "");
             foreach (string conn in RAS.GetAllConnections())
             {
                 Exec(options, conn);
