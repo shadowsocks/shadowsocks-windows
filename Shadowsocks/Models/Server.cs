@@ -7,16 +7,39 @@ namespace Shadowsocks.Models
 {
     public class Server : IServer
     {
+        /// <inheritdoc/>
         [JsonPropertyName("server")]
         public string Host { get; set; }
+
+        /// <inheritdoc/>
         [JsonPropertyName("server_port")]
         public int Port { get; set; }
+
+        /// <inheritdoc/>
         public string Password { get; set; }
+
+        /// <inheritdoc/>
         public string Method { get; set; }
+
+        /// <inheritdoc/>
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
         public string Plugin { get; set; }
+
+        /// <inheritdoc/>
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
         public string PluginOpts { get; set; }
+
+        /// <summary>
+        /// Gets or sets the arguments passed to the plugin process.
+        /// </summary>
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+        public List<string> PluginArgs { get; set; }
+
+        /// <inheritdoc/>
         [JsonPropertyName("remarks")]
         public string Name { get; set; }
+
+        /// <inheritdoc/>
         [JsonPropertyName("id")]
         public string Uuid { get; set; }
 
@@ -28,28 +51,9 @@ namespace Shadowsocks.Models
             Method = "chacha20-ietf-poly1305";
             Plugin = "";
             PluginOpts = "";
+            PluginArgs = new();
             Name = "";
             Uuid = "";
-        }
-
-        public Server(
-            string name,
-            string uuid,
-            string host,
-            int port,
-            string password,
-            string method,
-            string plugin = "",
-            string pluginOpts = "")
-        {
-            Host = host;
-            Port = port;
-            Password = password;
-            Method = method;
-            Plugin = plugin;
-            PluginOpts = pluginOpts;
-            Name = name;
-            Uuid = uuid;
         }
 
         public bool Equals(IServer? other) => other is Server anotherServer && Uuid == anotherServer.Uuid;
@@ -95,7 +99,15 @@ namespace Shadowsocks.Models
                 var userinfoSplitArray = userinfo.Split(':', 2);
                 var method = userinfoSplitArray[0];
                 var password = userinfoSplitArray[1];
-                server = new Server(uri.Fragment, new Guid().ToString(), uri.Host, uri.Port, password, method);
+                server = new Server()
+                {
+                    Name = uri.Fragment,
+                    Uuid = new Guid().ToString(),
+                    Host = uri.Host,
+                    Port = uri.Port,
+                    Password = password,
+                    Method = method,
+                };
                 // find the plugin query
                 var parsedQueriesArray = uri.Query.Split("?&");
                 var pluginQueryContent = "";

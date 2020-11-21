@@ -3,28 +3,19 @@ namespace Shadowsocks.WPF.Models
     public class Server : Shadowsocks.Models.Server
     {
         /// <summary>
-        /// Gets or sets the arguments passed to the plugin process.
+        /// Gets or sets the amount of data ingress in bytes.
         /// </summary>
-        public string PluginArgs { get; set; }
+        public ulong BytesIngress { get; set; }
+
+        /// <summary>
+        /// Gets or sets the amount of data egress in bytes.
+        /// </summary>
+        public ulong BytesEgress { get; set; }
 
         public Server()
         {
-            PluginArgs = "";
-        }
-
-        public Server(
-            string name,
-            string uuid,
-            string host,
-            int port,
-            string password,
-            string method,
-            string plugin = "",
-            string pluginOpts = "",
-            string pluginArgs = "")
-            : base(name, uuid, host, port, password, method, plugin, pluginOpts)
-        {
-            PluginArgs = pluginArgs;
+            BytesIngress = 0UL;
+            BytesEgress = 0UL;
         }
     }
 }

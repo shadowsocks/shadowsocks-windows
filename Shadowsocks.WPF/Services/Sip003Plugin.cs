@@ -1,5 +1,6 @@
 using Shadowsocks.WPF.Models;
 using System;
+using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Diagnostics;
 using System.IO;
@@ -40,7 +41,7 @@ namespace Shadowsocks.WPF.Services
                 showPluginOutput);
         }
 
-        private Sip003Plugin(string plugin, string pluginOpts, string pluginArgs, string serverAddress, int serverPort, bool showPluginOutput)
+        private Sip003Plugin(string plugin, string pluginOpts, List<string> pluginArgs, string serverAddress, int serverPort, bool showPluginOutput)
         {
             if (plugin == null) throw new ArgumentNullException(nameof(plugin));
             if (string.IsNullOrWhiteSpace(serverAddress))
@@ -52,24 +53,27 @@ namespace Shadowsocks.WPF.Services
                 throw new ArgumentOutOfRangeException("serverPort");
             }
 
-            _pluginProcess = new Process
+            var pluginProcessStartInfo = new ProcessStartInfo
             {
-                StartInfo = new ProcessStartInfo
-                {
-                    FileName = plugin,
-                    Arguments = pluginArgs,
-                    UseShellExecute = false,
-                    CreateNoWindow = !showPluginOutput,
-                    ErrorDialog = false,
-                    WindowStyle = ProcessWindowStyle.Hidden,
-                    WorkingDirectory = Utils.Utilities.WorkingDirectory ?? Environment.CurrentDirectory,
-                    Environment =
+                FileName = plugin,
+                UseShellExecute = false,
+                CreateNoWindow = !showPluginOutput,
+                ErrorDialog = false,
+                WindowStyle = ProcessWindowStyle.Hidden,
+                WorkingDirectory = Utils.Utilities.WorkingDirectory ?? Environment.CurrentDirectory,
+                Environment =
                     {
                         ["SS_REMOTE_HOST"] = serverAddress,
                         ["SS_REMOTE_PORT"] = serverPort.ToString(),
                         ["SS_PLUGIN_OPTIONS"] = pluginOpts
                     }
-                }
+            };
+            foreach (var arg in pluginArgs)
+                pluginProcessStartInfo.ArgumentList.Add(arg);
+
+            _pluginProcess = new Process()
+            {
+                StartInfo = pluginProcessStartInfo,
             };
         }
 
