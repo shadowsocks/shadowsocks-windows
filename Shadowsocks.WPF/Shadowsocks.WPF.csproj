@@ -19,7 +19,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Resources\NLog.config" />
     <None Remove="Resources\privoxy.exe.gz" />
     <None Remove="Resources\privoxy_conf.txt" />
     <None Remove="Resources\RobotoMono\RobotoMono-Bold.ttf" />
@@ -96,7 +95,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Resource Include="Resources\NLog.config" />
     <Resource Include="Resources\privoxy.exe.gz" />
     <Resource Include="Resources\privoxy_conf.txt" />
     <Resource Include="Resources\RobotoMono\RobotoMono-Bold.ttf" />
