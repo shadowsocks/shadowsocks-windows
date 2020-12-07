@@ -21,7 +21,7 @@ Download the latest release from [release page].
 
 ## Requirements
 
-Microsoft [.NET Framework 4.7.2] or higher, Microsoft [Visual C++ 2015 Redistributable] (x86) .
+.NET Framework 4.8 or higher, Microsoft [Visual C++ 2015 Redistributable] (x86) .
 
 ## Basics
 
@@ -127,7 +127,7 @@ Please visit [Servers] for more information.
 
 ## Development
 
-1. [Visual Studio 2019] & [.NET Framework 4.7.2 Developer Pack] are required.
+1. Visual Studio 2019 & .NET Framework 4.8 SDK are required.
 2. It is recommended to share your idea on the Issue Board before you start to work,
 especially for feature development.
 
@@ -164,9 +164,6 @@ Sysproxy ()            https://github.com/Noisyfox/sysproxy
 [GeoSite]:      https://github.com/v2fly/domain-list-community
 [Servers]:      https://github.com/shadowsocks/shadowsocks/wiki/Ports-and-Clients#linux--server-side
 [中文说明]:     https://github.com/shadowsocks/shadowsocks-windows/wiki/Shadowsocks-Windows-%E4%BD%BF%E7%94%A8%E8%AF%B4%E6%98%8E
-[Visual Studio 2017]:   https://www.visualstudio.com/downloads/
-[.NET Framework 4.7.2]: https://dotnet.microsoft.com/download/dotnet-framework/net472
-[.NET Framework 4.7.2 Developer Pack]: https://dotnet.microsoft.com/download/dotnet-framework/net472
 [Visual C++ 2015 Redistributable]:     https://www.microsoft.com/en-us/download/details.aspx?id=53840
 [GPLv3]:        https://github.com/shadowsocks/shadowsocks-windows/blob/master/LICENSE.txt
 [Working with non SIP003 standard Plugin]: https://github.com/shadowsocks/shadowsocks-windows/wiki/Working-with-non-SIP003-standard-Plugin

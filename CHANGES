@@ -1,3 +1,8 @@
+4.3.3.0 2020-12-07
+- PAC: Add option for custom sha256sum URL of custom geosite source (#3026)
+- Update to .NET Framework 4.8
+- Other minor bug fixes and improvements
+
 4.3.2.0 2020-11-05
 - PAC: direct connection for private IP ranges by @studentmain (#3008)
 - Remove duplicate startup entries (#3012)
