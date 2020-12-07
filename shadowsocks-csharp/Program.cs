@@ -91,10 +91,10 @@ namespace Shadowsocks
             // Check .NET Framework version
             if (!Utils.IsSupportedRuntimeVersion())
             {
-                if (DialogResult.OK == MessageBox.Show(I18N.GetString("Unsupported .NET Framework, please update to {0} or later.", "4.7.2"),
+                if (DialogResult.OK == MessageBox.Show(I18N.GetString("Unsupported .NET Framework, please update to {0} or later.", "4.8"),
                 "Shadowsocks Error", MessageBoxButtons.OKCancel, MessageBoxIcon.Error))
                 {
-                    Process.Start("https://dotnet.microsoft.com/download/dotnet-framework/net472");
+                    Process.Start("https://dotnet.microsoft.com/download/dotnet-framework/net48");
                 }
                 return;
             }
