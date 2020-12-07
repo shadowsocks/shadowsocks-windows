@@ -73,13 +73,14 @@ namespace Shadowsocks.Properties {
         ///var rules = [];
         ///
         ///// convert to abp grammar
+        ///var re = /^(@@)?\|\|.*?[^\^]$/;
         ///for (var i = 0; i &lt; __RULES__.length; i++) {
         ///    var s = __RULES__[i];
-        ///    if (s.substring(0, 2) == &quot;||&quot;) s += &quot;^&quot;;
+        ///    if (s.match(re)) s += &quot;^&quot;;
         ///    rules.push(s);
         ///}
         ///
-        ///for (var i = 0; i &lt; [rest of string was truncated]&quot;;.
+        /// [rest of string was truncated]&quot;;.
         /// </summary>
         public static string abp_js {
             get {
