@@ -41,7 +41,7 @@ namespace Shadowsocks.WPF.Services
                 showPluginOutput);
         }
 
-        private Sip003Plugin(string plugin, string pluginOpts, List<string> pluginArgs, string serverAddress, int serverPort, bool showPluginOutput)
+        private Sip003Plugin(string plugin, string? pluginOpts, List<string>? pluginArgs, string serverAddress, int serverPort, bool showPluginOutput)
         {
             if (plugin == null) throw new ArgumentNullException(nameof(plugin));
             if (string.IsNullOrWhiteSpace(serverAddress))
@@ -50,7 +50,7 @@ namespace Shadowsocks.WPF.Services
             }
             if (serverPort <= 0 || serverPort > 65535)
             {
-                throw new ArgumentOutOfRangeException("serverPort");
+                throw new ArgumentOutOfRangeException(nameof(serverPort));
             }
 
             var pluginProcessStartInfo = new ProcessStartInfo
@@ -68,8 +68,9 @@ namespace Shadowsocks.WPF.Services
                         ["SS_PLUGIN_OPTIONS"] = pluginOpts
                     }
             };
-            foreach (var arg in pluginArgs)
-                pluginProcessStartInfo.ArgumentList.Add(arg);
+            if (pluginArgs != null)
+                foreach (var arg in pluginArgs)
+                    pluginProcessStartInfo.ArgumentList.Add(arg);
 
             _pluginProcess = new Process()
             {
@@ -119,7 +120,7 @@ namespace Shadowsocks.WPF.Services
             return true;
         }
 
-        public string ExpandEnvironmentVariables(string name, StringDictionary? environmentVariables = null)
+        public static string ExpandEnvironmentVariables(string name, StringDictionary? environmentVariables = null)
         {
             // Expand the environment variables from the new process itself
             if (environmentVariables != null)
@@ -134,11 +135,11 @@ namespace Shadowsocks.WPF.Services
             return name;
         }
 
-        static int GetNextFreeTcpPort()
+        public static int GetNextFreeTcpPort()
         {
             var l = new TcpListener(IPAddress.Loopback, 0);
             l.Start();
-            int port = ((IPEndPoint)l.LocalEndpoint).Port;
+            var port = ((IPEndPoint)l.LocalEndpoint).Port;
             l.Stop();
             return port;
         }

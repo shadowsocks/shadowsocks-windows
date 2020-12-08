@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Text.Json.Serialization;
 
 namespace Shadowsocks.Models
@@ -23,17 +22,17 @@ namespace Shadowsocks.Models
 
         /// <inheritdoc/>
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
-        public string Plugin { get; set; }
+        public string? Plugin { get; set; }
 
         /// <inheritdoc/>
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
-        public string PluginOpts { get; set; }
+        public string? PluginOpts { get; set; }
 
         /// <summary>
         /// Gets or sets the arguments passed to the plugin process.
         /// </summary>
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
-        public List<string> PluginArgs { get; set; }
+        public List<string>? PluginArgs { get; set; }
 
         /// <inheritdoc/>
         [JsonPropertyName("remarks")]
@@ -49,9 +48,6 @@ namespace Shadowsocks.Models
             Port = 8388;
             Password = "";
             Method = "chacha20-ietf-poly1305";
-            Plugin = "";
-            PluginOpts = "";
-            PluginArgs = new();
             Name = "";
             Uuid = "";
         }
@@ -66,7 +62,7 @@ namespace Shadowsocks.Models
         /// <returns></returns>
         public Uri ToUrl()
         {
-            UriBuilder uriBuilder = new UriBuilder("ss", Host, Port)
+            UriBuilder uriBuilder = new("ss", Host, Port)
             {
                 UserName = Utilities.Base64Url.Encode($"{Method}:{Password}"),
                 Fragment = Name,
@@ -99,17 +95,20 @@ namespace Shadowsocks.Models
                 var userinfoSplitArray = userinfo.Split(':', 2);
                 var method = userinfoSplitArray[0];
                 var password = userinfoSplitArray[1];
+                var host = uri.HostNameType == UriHostNameType.IPv6 ? uri.Host[1..^1] : uri.Host;
+                var escapedFragment = string.IsNullOrEmpty(uri.Fragment) ? uri.Fragment : uri.Fragment[1..];
+                var name = Uri.UnescapeDataString(escapedFragment);
                 server = new Server()
                 {
-                    Name = uri.Fragment,
+                    Name = name,
                     Uuid = new Guid().ToString(),
-                    Host = uri.Host,
+                    Host = host,
                     Port = uri.Port,
                     Password = password,
                     Method = method,
                 };
                 // find the plugin query
-                var parsedQueriesArray = uri.Query.Split("?&");
+                var parsedQueriesArray = uri.Query.Split('?', '&');
                 var pluginQueryContent = "";
                 foreach (var query in parsedQueriesArray)
                 {
@@ -118,9 +117,15 @@ namespace Shadowsocks.Models
                         pluginQueryContent = query[7..]; // remove "plugin="
                     }
                 }
+                if (string.IsNullOrEmpty(pluginQueryContent)) // no plugin
+                    return true;
                 var unescapedpluginQuery = Uri.UnescapeDataString(pluginQueryContent);
                 var parsedPluginQueryArray = unescapedpluginQuery.Split(';', 2);
-                if (parsedPluginQueryArray.Length == 2) // is valid plugin query
+                if (parsedPluginQueryArray.Length == 1)
+                {
+                    server.Plugin = parsedPluginQueryArray[0];
+                }
+                else if (parsedPluginQueryArray.Length == 2) // is valid plugin query
                 {
                     server.Plugin = parsedPluginQueryArray[0];
                     server.PluginOpts = parsedPluginQueryArray[1];
@@ -129,7 +134,7 @@ namespace Shadowsocks.Models
             }
             catch
             {
-                server = new Server();
+                server = new();
                 return false;
             }
         }

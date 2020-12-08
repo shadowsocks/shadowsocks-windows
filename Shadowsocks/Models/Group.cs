@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Text.Json.Serialization;
 
 namespace Shadowsocks.Models
@@ -27,12 +26,14 @@ namespace Shadowsocks.Models
         /// Gets or sets the data usage in bytes.
         /// The value is fetched from SIP008 provider.
         /// </summary>
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
         public ulong BytesUsed { get; set; }
 
         /// <summary>
         /// Gets or sets the data remaining to be used in bytes.
         /// The value is fetched from SIP008 provider.
         /// </summary>
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
         public ulong BytesRemaining { get; set; }
 
         public Group() : this(string.Empty)

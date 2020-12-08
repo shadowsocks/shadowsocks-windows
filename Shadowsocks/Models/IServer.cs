@@ -31,13 +31,13 @@ namespace Shadowsocks.Models
         /// Gets or sets the plugin executable filename.
         /// </summary>
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
-        public string Plugin { get; set; }
+        public string? Plugin { get; set; }
 
         /// <summary>
         /// Gets or sets the plugin options passed as environment variables.
         /// </summary>
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
-        public string PluginOpts { get; set; }
+        public string? PluginOpts { get; set; }
 
         /// <summary>
         /// Gets or sets the server name.
