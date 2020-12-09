@@ -7,27 +7,32 @@ namespace Shadowsocks.Interop.V2Ray.Protocols.Socks
     {
         public string Address { get; set; }
         public int Port { get; set; }
-        public List<UserObject> Users { get; set; }
+        public List<UserObject>? Users { get; set; }
 
         public ServerObject()
         {
             Address = "";
             Port = 0;
-            Users = new();
         }
 
-        public ServerObject(DnsEndPoint socksEndPoint, string username = "", string password = "")
+        public ServerObject(DnsEndPoint socksEndPoint, string? username = null, string? password = null)
         {
             Address = socksEndPoint.Host;
             Port = socksEndPoint.Port;
             Users = new();
             var hasCredential = !string.IsNullOrEmpty(username) && !string.IsNullOrEmpty(password);
             if (hasCredential)
-                Users.Add(new()
+            {
+                var user = new UserObject()
                 {
-                    User = username,
-                    Pass = password,
-                });
+                    User = username!, // null check already performed at line 23.
+                    Pass = password!,
+                };
+                Users = new()
+                {
+                    user,
+                };
+            }
         }
     }
 }

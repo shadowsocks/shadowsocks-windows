@@ -8,22 +8,17 @@ namespace Shadowsocks.Interop.V2Ray
     public class OutboundObject
     {
         public string Tag { get; set; }
-        public string SendThrough { get; set; }
+        public string? SendThrough { get; set; }
         public string Protocol { get; set; }
         public object? Settings { get; set; }
-        public StreamSettingsObject StreamSettings { get; set; }
-        public ProxySettingsObject ProxySettings { get; set; }
-        public MuxObject Mux { get; set; }
+        public StreamSettingsObject? StreamSettings { get; set; }
+        public ProxySettingsObject? ProxySettings { get; set; }
+        public MuxObject? Mux { get; set; }
 
         public OutboundObject()
         {
             Tag = "";
-            SendThrough = "0.0.0.0";
             Protocol = "";
-            Settings = null;
-            StreamSettings = new();
-            ProxySettings = new();
-            Mux = new();
         }
 
         /// <summary>

@@ -5,8 +5,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="BouncyCastle.NetCore" Version="1.8.6" />
-    <PackageReference Include="Splat" Version="9.6.1" />
+    <PackageReference Include="BouncyCastle.NetCore" Version="1.8.8" />
+    <PackageReference Include="Splat" Version="9.8.1" />
   </ItemGroup>
 
   <ItemGroup>

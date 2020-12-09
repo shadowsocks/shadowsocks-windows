@@ -4,13 +4,11 @@ namespace Shadowsocks.Interop.V2Ray.Transport
     {
         public int Mark { get; set; }
         public bool TcpFastOpen { get; set; }
-        public string Tproxy { get; set; }
+        public string? Tproxy { get; set; }
 
-        public SockoptObject()
+        public static SockoptObject DefaultLinux => new()
         {
-            Mark = 0;
-            TcpFastOpen = false;
-            Tproxy = "off";
-        }
+            Tproxy = "off",
+        };
     }
 }

@@ -11,12 +11,11 @@ namespace Shadowsocks.Interop.V2Ray.Reverse
         /// Gets or sets the domain name for the bridge.
         /// Can be omitted.
         /// </summary>
-        public string Domain { get; set; }
+        public string? Domain { get; set; }
 
         public BridgeObject()
         {
             Tag = "";
-            Domain = "";
         }
     }
 }

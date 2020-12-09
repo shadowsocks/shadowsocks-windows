@@ -10,7 +10,6 @@ namespace Shadowsocks.Interop.SsRust
         public int Version { get; set; }
 
         /// <inheritdoc/>
-        [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
         public List<Server> Servers { get; set; }
 
         /// <summary>
@@ -21,14 +20,13 @@ namespace Shadowsocks.Interop.SsRust
         /// <summary>
         /// Gets or sets the listening port.
         /// </summary>
-        [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
         public int LocalPort { get; set; }
 
         /// <summary>
         /// Gets or sets the timeout for UDP associations in seconds.
         /// Defaults to 300 seconds (5 minutes).
         /// </summary>
-        public int UdpTimeout { get; set; }
+        public int? UdpTimeout { get; set; }
 
         /// <summary>
         /// Gets or sets the maximum number of UDP associations.
@@ -39,7 +37,7 @@ namespace Shadowsocks.Interop.SsRust
         /// <summary>
         /// Gets or sets the server manager address.
         /// </summary>
-        public string ManagerAddress { get; set; }
+        public string? ManagerAddress { get; set; }
 
         /// <summary>
         /// Gets or sets the server manager port.
@@ -49,7 +47,7 @@ namespace Shadowsocks.Interop.SsRust
         /// <summary>
         /// Gets or sets the DNS server used to resolve hostnames.
         /// </summary>
-        public string Dns { get; set; }
+        public string? Dns { get; set; }
 
         /// <summary>
         /// Gets or sets the mode.
@@ -81,15 +79,7 @@ namespace Shadowsocks.Interop.SsRust
             Servers = new();
             LocalAddress = "";
             LocalPort = 1080;
-            UdpTimeout = 300;
-            UdpMaxAssociations = 0;
-            ManagerAddress = "";
-            ManagerPort = 0;
-            Dns = "";
             Mode = "tcp_only";
-            NoDelay = false;
-            Nofile = 0;
-            Ipv6First = false;
         }
 
         /// <summary>

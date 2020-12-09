@@ -19,5 +19,10 @@ namespace Shadowsocks.Interop.V2Ray.Transport
             AcceptProxyProtocol = false;
             Header = new HeaderObject();
         }
+
+        public static TcpObject DefaultHttp => new()
+        {
+            Header = new HttpHeaderObject(),
+        };
     }
 }

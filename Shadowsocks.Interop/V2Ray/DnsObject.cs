@@ -18,6 +18,13 @@ namespace Shadowsocks.Interop.V2Ray
         /// </summary>
         public List<object> Servers { get; set; }
 
+        /// <summary>
+        /// Gets or sets the client IP used when sending requests to DNS server.
+        /// </summary>
+        public string? ClientIp { get; set; }
+
+        public string? Tag { get; set; }
+
         public DnsObject()
         {
             Hosts = new();

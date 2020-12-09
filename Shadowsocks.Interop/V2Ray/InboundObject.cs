@@ -6,24 +6,18 @@ namespace Shadowsocks.Interop.V2Ray
     public class InboundObject
     {
         public string Tag { get; set; }
-        public string Listen { get; set; }
-        public object Port { get; set; }
+        public string? Listen { get; set; }
+        public object? Port { get; set; }
         public string Protocol { get; set; }
         public object? Settings { get; set; }
-        public StreamSettingsObject StreamSettings { get; set; }
-        public SniffingObject Sniffing { get; set; }
-        public AllocateObject Allocate { get; set; }
+        public StreamSettingsObject? StreamSettings { get; set; }
+        public SniffingObject? Sniffing { get; set; }
+        public AllocateObject? Allocate { get; set; }
 
         public InboundObject()
         {
             Tag = "";
-            Listen = "0.0.0.0";
-            Port = "";
             Protocol = "";
-            Settings = null;
-            StreamSettings = new();
-            Sniffing = new();
-            Allocate = new();
         }
 
         public static InboundObject DefaultLocalSocks => new()
