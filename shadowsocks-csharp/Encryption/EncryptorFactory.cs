@@ -26,7 +26,7 @@ namespace Shadowsocks.Encryption
             {
                 AEADSodiumEncryptorSupportedCiphers.Remove("aes-256-gcm");
             }
-
+#if I_KNOW_STREAM_CIPHER_IS_UNSAFE
             // XXX: sequence matters, OpenSSL > Sodium > MbedTLS
             foreach (string method in StreamOpenSSLEncryptor.SupportedCiphers())
             {
@@ -45,8 +45,8 @@ namespace Shadowsocks.Encryption
                 if (!_registeredEncryptors.ContainsKey(method))
                     _registeredEncryptors.Add(method, typeof(StreamMbedTLSEncryptor));
             }
-
-
+#endif
+    
             foreach (string method in AEADOpenSSLEncryptor.SupportedCiphers())
             {
                 if (!_registeredEncryptors.ContainsKey(method))
