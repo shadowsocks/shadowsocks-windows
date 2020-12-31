@@ -10,7 +10,7 @@
     <Version>5.0.0</Version>
     <ApplicationIcon>shadowsocks.ico</ApplicationIcon>
     <Nullable>enable</Nullable>
-    <Copyright>© 2020 Clowwindy &amp; The Community</Copyright>
+    <Copyright>© 2021 Clowwindy &amp; The Community</Copyright>
     <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
     <PackageProjectUrl>https://github.com/shadowsocks/shadowsocks-windows</PackageProjectUrl>
     <RepositoryUrl>https://github.com/shadowsocks/shadowsocks-windows</RepositoryUrl>
