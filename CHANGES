@@ -1,5 +1,6 @@
 4.4.0.0 2021-01-01
 - Security: remove infrastructure of stream ciphers (#3048)
+- Show warning message when importing from deprecated legacy ss:// links.
 - Other minor bug fixes and improvements
 
 4.3.3.0 2020-12-07

@@ -29,10 +29,6 @@ namespace Shadowsocks.Model
         public int server_port;
         public string password;
         public string method;
-        
-
-
-
         // optional fields
         [DefaultValue("")]
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore, DefaultValueHandling = DefaultValueHandling.IgnoreAndPopulate)]
@@ -52,6 +48,9 @@ namespace Shadowsocks.Model
         public string group;
 
         public int timeout;
+
+        // Set to true when imported from a legacy ss:// URL.
+        public bool warnLegacyUrl;
 
         public override int GetHashCode()
         {
@@ -177,6 +176,7 @@ namespace Shadowsocks.Model
             server.password = details.Groups["password"].Value;
             server.server = details.Groups["hostname"].Value;
             server.server_port = int.Parse(details.Groups["port"].Value);
+            server.warnLegacyUrl = true;
             return server;
         }
 

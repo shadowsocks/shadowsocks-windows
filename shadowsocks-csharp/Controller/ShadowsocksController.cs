@@ -450,6 +450,8 @@ namespace Shadowsocks.Controller
                 foreach (var server in servers)
                 {
                     _config.configs.Add(server);
+                    if (server.warnLegacyUrl)
+                        MessageBox.Show(I18N.GetString("Warning: importing {0} from a legacy ss:// link. Support for legacy ss:// links will be dropped in version 5. Make sure to update your ss:// links.", server.ToString()));
                 }
                 _config.index = _config.configs.Count - 1;
                 SaveConfig(_config);
