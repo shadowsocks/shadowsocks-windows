@@ -11,7 +11,7 @@
 
 # version format
 # Build version format is taken from UI if it is not set
-version: 4.3.3.{build}
+version: 4.4.0.{build}
 
 # # branches to build
 # branches:

@@ -1,3 +1,7 @@
+4.4.0.0 2021-01-01
+- Security: remove infrastructure of stream ciphers (#3048)
+- Other minor bug fixes and improvements
+
 4.3.3.0 2020-12-07
 - PAC: Add option for custom sha256sum URL of custom geosite source (#3026)
 - Update to .NET Framework 4.8
