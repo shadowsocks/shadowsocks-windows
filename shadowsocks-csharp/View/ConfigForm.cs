@@ -25,23 +25,6 @@ namespace Shadowsocks.View
             public readonly bool deprecated;
 
             // Edit here to add/delete encryption method displayed in UI
-            private static string[] deprecatedMethod = new string[]
-            {
-                "rc4-md5",
-                "salsa20",
-                "chacha20",
-                "bf-cfb",
-                "chacha20-ietf",
-                "aes-256-cfb",
-                "aes-192-cfb",
-                "aes-128-cfb",
-                "aes-256-ctr",
-                "aes-192-ctr",
-                "aes-128-ctr",
-                "camellia-256-cfb",
-                "camellia-192-cfb",
-                "camellia-128-cfb",
-            };
             private static string[] inuseMethod = new string[]
             {
                 "aes-256-gcm",
@@ -66,7 +49,6 @@ namespace Shadowsocks.View
                 var all = new List<EncryptionMethod>();
 
                 all.AddRange(inuseMethod.Select(i => new EncryptionMethod(i, false)));
-                all.AddRange(deprecatedMethod.Select(d => new EncryptionMethod(d, true)));
 
                 allMethods = all.ToArray();
                 foreach (var item in all)

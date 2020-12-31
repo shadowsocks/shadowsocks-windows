@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Text;
 using Shadowsocks.Encryption.AEAD;
-using Shadowsocks.Encryption.Stream;
 
 namespace Shadowsocks.Encryption
 {
@@ -26,27 +25,7 @@ namespace Shadowsocks.Encryption
             {
                 AEADSodiumEncryptorSupportedCiphers.Remove("aes-256-gcm");
             }
-#if I_KNOW_STREAM_CIPHER_IS_UNSAFE
-            // XXX: sequence matters, OpenSSL > Sodium > MbedTLS
-            foreach (string method in StreamOpenSSLEncryptor.SupportedCiphers())
-            {
-                if (!_registeredEncryptors.ContainsKey(method))
-                    _registeredEncryptors.Add(method, typeof(StreamOpenSSLEncryptor));
-            }
 
-            foreach (string method in StreamSodiumEncryptor.SupportedCiphers())
-            {
-                if (!_registeredEncryptors.ContainsKey(method))
-                    _registeredEncryptors.Add(method, typeof(StreamSodiumEncryptor));
-            }
-
-            foreach (string method in StreamMbedTLSEncryptor.SupportedCiphers())
-            {
-                if (!_registeredEncryptors.ContainsKey(method))
-                    _registeredEncryptors.Add(method, typeof(StreamMbedTLSEncryptor));
-            }
-#endif
-    
             foreach (string method in AEADOpenSSLEncryptor.SupportedCiphers())
             {
                 if (!_registeredEncryptors.ContainsKey(method))

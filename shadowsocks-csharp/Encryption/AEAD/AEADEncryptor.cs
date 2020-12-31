@@ -7,7 +7,6 @@ using System.Text;
 using Shadowsocks.Encryption.CircularBuffer;
 using Shadowsocks.Controller;
 using Shadowsocks.Encryption.Exception;
-using Shadowsocks.Encryption.Stream;
 
 namespace Shadowsocks.Encryption.AEAD
 {
@@ -98,7 +97,24 @@ namespace Shadowsocks.Encryption.AEAD
 
         public void DeriveKey(byte[] password, byte[] key, int keylen)
         {
-            StreamEncryptor.LegacyDeriveKey(password, key, keylen);
+            byte[] result = new byte[password.Length + MD5_LEN];
+            int i = 0;
+            byte[] md5sum = null;
+            while (i < keylen)
+            {
+                if (i == 0)
+                {
+                    md5sum = MbedTLS.MD5(password);
+                }
+                else
+                {
+                    Array.Copy(md5sum, 0, result, 0, MD5_LEN);
+                    Array.Copy(password, 0, result, MD5_LEN, password.Length);
+                    md5sum = MbedTLS.MD5(result);
+                }
+                Array.Copy(md5sum, 0, key, i, Math.Min(MD5_LEN, keylen - i));
+                i += MD5_LEN;
+            }
         }
 
         public void DeriveSessionKey(byte[] salt, byte[] masterKey, byte[] sessionKey)

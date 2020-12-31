@@ -240,10 +240,6 @@
     <Compile Include="Encryption\OpenSSL.cs" />
     <Compile Include="Encryption\RNG.cs" />
     <Compile Include="Encryption\Sodium.cs" />
-    <Compile Include="Encryption\Stream\StreamEncryptor.cs" />
-    <Compile Include="Encryption\Stream\StreamMbedTLSEncryptor.cs" />
-    <Compile Include="Encryption\Stream\StreamOpenSSLEncryptor.cs" />
-    <Compile Include="Encryption\Stream\StreamSodiumEncryptor.cs" />
     <Compile Include="Localization\LocalizationProvider.cs" />
     <Compile Include="Localization\Strings.Designer.cs">
       <AutoGen>True</AutoGen>
