@@ -8,20 +8,151 @@
     xmlns:local="clr-namespace:Shadowsocks.WPF.Views"
     xmlns:vms="clr-namespace:Shadowsocks.WPF.ViewModels"
     xmlns:reactiveui="http://reactiveui.net"
+    xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
     xmlns:lex="http://wpflocalizeextension.codeplex.com"
     lex:LocalizeDictionary.DesignCulture="en"
     lex:ResxLocalizationProvider.DefaultAssembly="Shadowsocks"
     lex:ResxLocalizationProvider.DefaultDictionary="Strings"
     mc:Ignorable="d" 
     d:DesignHeight="450" d:DesignWidth="800">
-    <Grid Margin="8">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-        </Grid.RowDefinitions>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="Auto" />
-            <ColumnDefinition Width="Auto" />
-        </Grid.ColumnDefinitions>
-    </Grid>
+    <ScrollViewer materialDesign:ScrollViewerAssist.IsAutoHideEnabled="True"
+                  HorizontalScrollBarVisibility="Auto"
+                  VerticalScrollBarVisibility="Auto">
+        <Grid Margin="16">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            
+            <TextBlock Grid.Row="0"
+                       Grid.Column="0"
+                       Margin="8 0 8 8"
+                       FontSize="28">
+                Settings
+            </TextBlock>
+            
+            <TextBlock Grid.Row="1"
+                       Grid.Column="0"
+                       Margin="8"
+                       Style="{StaticResource MaterialDesignHeadline6TextBlock}">
+                UI
+            </TextBlock>
+            
+            <TextBlock Grid.Row="2"
+                       Grid.Column="0"
+                       Style="{StaticResource MaterialDesignBody2TextBlock}"
+                       VerticalAlignment="Center"
+                       Margin="8">
+                Color Mode
+            </TextBlock>
+            <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal">
+                <RadioButton Style="{StaticResource MaterialDesignChoiceChipPrimaryOutlineRadioButton}"
+                             GroupName="ColorMode">
+                    System
+                </RadioButton>
+                <RadioButton Style="{StaticResource MaterialDesignChoiceChipPrimaryOutlineRadioButton}"
+                             GroupName="ColorMode">
+                    Light
+                </RadioButton>
+                <RadioButton Style="{StaticResource MaterialDesignChoiceChipPrimaryOutlineRadioButton}"
+                             GroupName="ColorMode">
+                    Dark
+                </RadioButton>
+            </StackPanel>
+            
+            <TextBlock Grid.Row="3"
+                       Grid.Column="0"
+                       Margin="8"
+                       Style="{StaticResource MaterialDesignHeadline6TextBlock}">
+                Backend
+            </TextBlock>
+            <TextBlock Grid.Row="4"
+                       Grid.Column="0"
+                       Style="{StaticResource MaterialDesignBody2TextBlock}"
+                       VerticalAlignment="Center"
+                       Margin="8">
+                Start on boot
+            </TextBlock>
+            <ToggleButton Grid.Row="4"
+                          Grid.Column="1"
+                          x:Name="startOnBootToggleButton"
+                          Margin="8"
+                          HorizontalAlignment="Left"/>
+            
+            <TextBlock Grid.Row="5"
+                       Grid.Column="0"
+                       Style="{StaticResource MaterialDesignBody2TextBlock}"
+                       VerticalAlignment="Center"
+                       Margin="8">
+                <Span FontFamily="pack://application:,,,/Resources/RobotoMono/#Roboto Mono">shadowsocks-rust</Span> Path
+            </TextBlock>
+            <TextBox Grid.Row="5"
+                     Grid.Column="1"
+                     x:Name="ssRustPathTextBox"
+                     Margin="2,8,2,8"
+                     Width="400"
+                     materialDesign:HintAssist.Hint="Path to shadowsocks-rust executable"/>
+            <Button Grid.Row="5"
+                    Grid.Column="2"
+                    x:Name="ssRustPathBrowseButton"
+                    Margin="2,0,8,0"
+                    Style="{StaticResource MaterialDesignFlatButton}">
+                Browse
+            </Button>
+            
+            <TextBlock Grid.Row="6"
+                       Grid.Column="0"
+                       Style="{StaticResource MaterialDesignBody2TextBlock}"
+                       VerticalAlignment="Center"
+                       Margin="8,8,8,8">
+                <Span FontFamily="pack://application:,,,/Resources/RobotoMono/#Roboto Mono">V2Ray</Span> Path
+            </TextBlock>
+            <TextBox Grid.Row="6"
+                     Grid.Column="1"
+                     x:Name="v2rayPathTextBox"
+                     Margin="2,8,2,8"
+                     Width="400"
+                     materialDesign:HintAssist.Hint="Path to v2ray-core executable"/>
+            <Button Grid.Row="6"
+                    Grid.Column="2"
+                    x:Name="v2rayPathBrowseButton"
+                    Margin="2,0,8,0"
+                    Style="{StaticResource MaterialDesignFlatButton}">
+                Browse
+            </Button>
+            
+            <TextBlock Grid.Row="7"
+                       Grid.Column="0"
+                       Margin="8"
+                       Style="{StaticResource MaterialDesignHeadline6TextBlock}">
+                Network
+            </TextBlock>
+            <TextBlock Grid.Row="8"
+                       Grid.Column="0"
+                       Style="{StaticResource MaterialDesignBody2TextBlock}"
+                       VerticalAlignment="Center"
+                       Margin="8,8,8,8">
+                Forward Proxy
+            </TextBlock>
+            <Button Grid.Row="8"
+                    Grid.Column="1"
+                    x:Name="forwardProxySettingsButton"
+                    Margin="2,0,8,0"
+                    Style="{StaticResource MaterialDesignRaisedAccentButton}">
+                Open settings
+            </Button>
+        </Grid>
+    </ScrollViewer>
 </reactiveui:ReactiveUserControl>

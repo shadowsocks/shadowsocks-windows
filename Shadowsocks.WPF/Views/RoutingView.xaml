@@ -8,20 +8,102 @@
     xmlns:local="clr-namespace:Shadowsocks.WPF.Views"
     xmlns:vms="clr-namespace:Shadowsocks.WPF.ViewModels"
     xmlns:reactiveui="http://reactiveui.net"
+    xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
     xmlns:lex="http://wpflocalizeextension.codeplex.com"
     lex:LocalizeDictionary.DesignCulture="en"
     lex:ResxLocalizationProvider.DefaultAssembly="Shadowsocks"
     lex:ResxLocalizationProvider.DefaultDictionary="Strings"
     mc:Ignorable="d" 
     d:DesignHeight="450" d:DesignWidth="800">
-    <Grid Margin="8">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-        </Grid.RowDefinitions>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="Auto" />
-            <ColumnDefinition Width="Auto" />
-        </Grid.ColumnDefinitions>
-    </Grid>
+    <ScrollViewer materialDesign:ScrollViewerAssist.IsAutoHideEnabled="True"
+                  HorizontalScrollBarVisibility="Auto"
+                  VerticalScrollBarVisibility="Auto">
+        <Grid Margin="16">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Row="0"
+                       Grid.Column="0"
+                       Margin="8 0 8 8"
+                       FontSize="28">
+                Routing
+            </TextBlock>
+            
+            <TextBlock Grid.Row="1"
+                       Grid.Column="0"
+                       Margin="8"
+                       Style="{StaticResource MaterialDesignSubtitle1TextBlock}"
+                       FontWeight="Medium"
+                       VerticalAlignment="Center">
+                Preset
+            </TextBlock>
+            <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal">
+                <ListBox Margin="8"
+                         x:Name="presetListBox"
+                         Style="{StaticResource MaterialDesignChoiceChipPrimaryOutlineListBox}"/>
+                <Button x:Name="addPresetButton"
+                        Style="{StaticResource MaterialDesignIconForegroundButton}"
+                        ToolTip="Add a preset">
+                    <materialDesign:PackIcon Kind="Plus"/>
+                </Button>
+                <Button x:Name="deletePresetButton"
+                        Style="{StaticResource MaterialDesignIconForegroundButton}"
+                        ToolTip="Delete the preset">
+                    <materialDesign:PackIcon Kind="Minus"/>
+                </Button>
+                <Button x:Name="editPresetButton"
+                        Style="{StaticResource MaterialDesignIconForegroundButton}"
+                        ToolTip="Edit the preset">
+                    <materialDesign:PackIcon Kind="Edit"/>
+                </Button>
+            </StackPanel>
+            
+            <TextBlock Grid.Row="2"
+                       Grid.Column="0"
+                       Margin="8"
+                       Style="{StaticResource MaterialDesignBody2TextBlock}"
+                       VerticalAlignment="Center">
+                Domain strategy
+            </TextBlock>
+            <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal">
+                <RadioButton Style="{StaticResource MaterialDesignChoiceChipAccentOutlineRadioButton}"
+                             GroupName="DomainStrategy"
+                             FontFamily="pack://application:,,,/Resources/RobotoMono/#Roboto Mono">
+                    AsIs
+                </RadioButton>
+                <RadioButton Style="{StaticResource MaterialDesignChoiceChipAccentOutlineRadioButton}"
+                             GroupName="DomainStrategy"
+                             FontFamily="pack://application:,,,/Resources/RobotoMono/#Roboto Mono">
+                    IPIfNonMatch
+                </RadioButton>
+                <RadioButton Style="{StaticResource MaterialDesignChoiceChipAccentOutlineRadioButton}"
+                             GroupName="DomainStrategy"
+                             FontFamily="pack://application:,,,/Resources/RobotoMono/#Roboto Mono">
+                    IPOnDemand
+                </RadioButton>
+            </StackPanel>
+            
+            <TextBlock Grid.Row="3"
+                       Grid.Column="0"
+                       Margin="8"
+                       Style="{StaticResource MaterialDesignBody2TextBlock}"
+                       VerticalAlignment="Center">
+                Rules
+            </TextBlock>
+            <ListBox Grid.Row="4"
+                     Grid.Column="0"
+                     Grid.ColumnSpan="2"
+                     Margin="8"
+                     x:Name="rulesListBox"
+                     Style="{StaticResource MaterialDesignCardsListBox}"/>
+        </Grid>
+    </ScrollViewer>
 </reactiveui:ReactiveUserControl>

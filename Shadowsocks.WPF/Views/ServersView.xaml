@@ -8,20 +8,31 @@
     xmlns:local="clr-namespace:Shadowsocks.WPF.Views"
     xmlns:vms="clr-namespace:Shadowsocks.WPF.ViewModels"
     xmlns:reactiveui="http://reactiveui.net"
+    xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
     xmlns:lex="http://wpflocalizeextension.codeplex.com"
     lex:LocalizeDictionary.DesignCulture="en"
     lex:ResxLocalizationProvider.DefaultAssembly="Shadowsocks"
     lex:ResxLocalizationProvider.DefaultDictionary="Strings"
     mc:Ignorable="d" 
     d:DesignHeight="450" d:DesignWidth="800">
-    <Grid Margin="8">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-        </Grid.RowDefinitions>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="Auto" />
-            <ColumnDefinition Width="Auto" />
-        </Grid.ColumnDefinitions>
-    </Grid>
+    <ScrollViewer materialDesign:ScrollViewerAssist.IsAutoHideEnabled="True"
+                  HorizontalScrollBarVisibility="Auto"
+                  VerticalScrollBarVisibility="Auto">
+        <Grid Margin="16">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Row="0"
+                       Grid.Column="0"
+                       Margin="8 0 8 8"
+                       FontSize="28">
+                Servers
+            </TextBlock>
+        </Grid>
+    </ScrollViewer>
 </reactiveui:ReactiveUserControl>
