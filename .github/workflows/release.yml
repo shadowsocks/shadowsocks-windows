@@ -1,0 +1,53 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  publish_upload:
+    name: Publish and upload
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Restore dependencies
+        run: dotnet restore
+      - name: Build
+        run: dotnet build --no-restore
+      - name: Test
+        run: dotnet test --no-build --verbosity normal
+      # Publish
+      - name: Publish framework-dependent
+        run: dotnet publish Shadowsocks.WPF -c Release --no-restore
+      # - name: Publish self-contained for Windows ARM64
+      #   run: dotnet publish Shadowsocks.WPF -c Release -p:PublishTrimmed=true -r win-arm64 --self-contained
+      - name: Publish self-contained for Windows x64
+        run: dotnet publish Shadowsocks.WPF -c Release -p:PublishTrimmed=true -r win-x64 --self-contained
+      # Get version
+      - name: Get version
+        id: get_version
+        shell: bash
+        run: echo ::set-output name=VERSION::$(echo $GITHUB_REF | cut -d / -f 3)
+      # Package
+      - name: Package for Windows
+        run: |
+          cd Shadowsocks.WPF/bin/Release/net5.0-windows10.0.19041.0/publish
+          7z a -tzip -mx=9 -mfb=128 ../shadowsocks-wpf-${{ steps.get_version.outputs.VERSION }}-windows.zip .
+          7z a -t7z -m0=lzma2 -mx=9 -mfb=64 -md=64m -ms=on ../shadowsocks-wpf-${{ steps.get_version.outputs.VERSION }}-windows.7z .
+          # cd ../win-arm64/publish
+          # 7z a -tzip -mx=9 -mfb=128 ../../shadowsocks-wpf-${{ steps.get_version.outputs.VERSION }}-windows-arm64.zip .
+          # 7z a -t7z -m0=lzma2 -mx=9 -mfb=64 -md=64m -ms=on ../../shadowsocks-wpf-${{ steps.get_version.outputs.VERSION }}-windows-arm64.7z .
+          cd ../../win-x64/publish
+          7z a -tzip -mx=9 -mfb=128 ../../shadowsocks-wpf-${{ steps.get_version.outputs.VERSION }}-windows-x64.zip .
+          7z a -t7z -m0=lzma2 -mx=9 -mfb=64 -md=64m -ms=on ../../shadowsocks-wpf-${{ steps.get_version.outputs.VERSION }}-windows-x64.7z .
+      # Release
+      - name: Upload release assets for Windows
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: Shadowsocks.WPF/bin/Release/net5.0-windows10.0.19041.0/shadowsocks-wpf-*
+          tag: ${{ github.ref }}
+          file_glob: true
+          prerelease: true
