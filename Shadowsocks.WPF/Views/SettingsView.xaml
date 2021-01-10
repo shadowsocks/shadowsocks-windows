@@ -96,7 +96,7 @@
                        Style="{StaticResource MaterialDesignBody2TextBlock}"
                        VerticalAlignment="Center"
                        Margin="8">
-                <Span FontFamily="pack://application:,,,/Resources/RobotoMono/#Roboto Mono">shadowsocks-rust</Span> Path
+                <Span FontFamily="pack://application:,,,/Resources/RobotoMono/#Roboto Mono">shadowsocks-rust</Span> path
             </TextBlock>
             <TextBox Grid.Row="5"
                      Grid.Column="1"
@@ -117,7 +117,7 @@
                        Style="{StaticResource MaterialDesignBody2TextBlock}"
                        VerticalAlignment="Center"
                        Margin="8,8,8,8">
-                <Span FontFamily="pack://application:,,,/Resources/RobotoMono/#Roboto Mono">V2Ray</Span> Path
+                <Span FontFamily="pack://application:,,,/Resources/RobotoMono/#Roboto Mono">v2ray-core</Span> path
             </TextBlock>
             <TextBox Grid.Row="6"
                      Grid.Column="1"
