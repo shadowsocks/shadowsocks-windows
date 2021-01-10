@@ -33,9 +33,9 @@ jobs:
       - name: Publish framework-dependent
         run: dotnet publish Shadowsocks.WPF -c Release --no-restore
       # - name: Publish self-contained for Windows ARM64
-      #   run: dotnet publish Shadowsocks.WPF -c Release -p:PublishTrimmed=true -r win-arm64 --self-contained
+      #   run: dotnet publish Shadowsocks.WPF -c Release -r win-arm64 --self-contained
       - name: Publish self-contained for Windows x64
-        run: dotnet publish Shadowsocks.WPF -c Release -p:PublishTrimmed=true -r win-x64 --self-contained
+        run: dotnet publish Shadowsocks.WPF -c Release -r win-x64 --self-contained
       # Upload
       # - name: Upload artifacts for Windows ARM64
       #   uses: actions/upload-artifact@v2
