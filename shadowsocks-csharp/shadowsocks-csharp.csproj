@@ -43,7 +43,7 @@
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
     <PackageReference Include="NLog" Version="4.7.5" />
     <PackageReference Include="ReactiveUI.Events.WPF" Version="11.5.35" />
-    <PackageReference Include="ReactiveUI.Fody" Version="11.5.35" />
+    <PackageReference Include="ReactiveUI.Fody" Version="13.0.38" />
     <PackageReference Include="ReactiveUI.Validation" Version="1.8.1" />
     <PackageReference Include="ReactiveUI.WPF" Version="13.0.38" />
     <PackageReference Include="System.Data.SqlClient" Version="4.8.2" />
