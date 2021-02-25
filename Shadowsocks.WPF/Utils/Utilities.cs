@@ -39,7 +39,7 @@ namespace Shadowsocks.WPF.Utils
                 }
                 catch (Exception e)
                 {
-                    LogHost.Default.Error(e);
+                    LogHost.Default.Error(e, "Error: failed to create temporary directory.");
                     throw;
                 }
             }
