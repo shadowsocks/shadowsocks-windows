@@ -114,6 +114,7 @@ namespace Shadowsocks.Controller
                     if (geositeSha256sum == localDBHash)
                     {
                         logger.Info("Local GeoSite DB is up to date.");
+                        UpdateCompleted?.Invoke(null, new GeositeResultEventArgs(false));
                         return;
                     }
                 }
