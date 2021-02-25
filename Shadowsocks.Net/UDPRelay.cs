@@ -93,7 +93,7 @@ namespace Shadowsocks.Net
 
             public async Task SendAsync(ReadOnlyMemory<byte> data)
             {
-                ICrypto encryptor = CryptoFactory.GetEncryptor(_server.Method, _server.Password);
+                using ICrypto encryptor = CryptoFactory.GetEncryptor(_server.Method, _server.Password);
                 using IMemoryOwner<byte> mem = pool.Rent(data.Length + 1000);
 
                 // byte[] dataOut = new byte[slicedData.Length + 1000];
@@ -120,7 +120,7 @@ namespace Shadowsocks.Net
                         using IMemoryOwner<byte> owner = pool.Rent(bytesRead + 3);
                         Memory<byte> o = owner.Memory;
 
-                        ICrypto encryptor = CryptoFactory.GetEncryptor(_server.Method, _server.Password);
+                        using ICrypto encryptor = CryptoFactory.GetEncryptor(_server.Method, _server.Password);
                         int outlen = encryptor.DecryptUDP(o.Span[3..], _buffer.AsSpan(0, bytesRead));
                         this.Log().Debug($"{_remoteEndPoint} {_localEndPoint} {outlen} UDP Relay down");
                         if (!MemoryMarshal.TryGetArray(o[..(outlen + 3)], out ArraySegment<byte> data))

@@ -1,3 +1,4 @@
+using CryptoBase;
 using Shadowsocks.Net.Crypto.Exception;
 using Shadowsocks.Net.Crypto.Stream;
 using Splat;
@@ -5,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Runtime.CompilerServices;
+using System.Security.Cryptography;
 using System.Text;
 
 namespace Shadowsocks.Net.Crypto.AEAD
@@ -90,7 +92,7 @@ namespace Shadowsocks.Net.Crypto.AEAD
             this.salt = new byte[saltLen];
             Array.Copy(salt, this.salt, saltLen);
 
-            CryptoUtils.HKDF(keyLen, masterKey, salt, InfoBytes).CopyTo(sessionKey, 0);
+            HKDF.DeriveKey(HashAlgorithmName.SHA1, masterKey, sessionKey, salt, InfoBytes);
 
             this.Log().Debug($"salt {instanceId}", salt, saltLen);
             this.Log().Debug($"sessionkey {instanceId}", sessionKey, keyLen);
@@ -272,9 +274,9 @@ namespace Shadowsocks.Net.Crypto.AEAD
 
             byte[] lenbuf = BitConverter.GetBytes((ushort)IPAddress.HostToNetworkOrder((short)plain.Length));
             int cipherLenSize = CipherEncrypt(lenbuf, cipher);
-            CryptoUtils.SodiumIncrement(nonce);
+            nonce.Increment();
             int cipherDataSize = CipherEncrypt(plain, cipher.Slice(cipherLenSize));
-            CryptoUtils.SodiumIncrement(nonce);
+            nonce.Increment();
 
             return cipherLenSize + cipherDataSize;
         }
@@ -299,11 +301,11 @@ namespace Shadowsocks.Net.Crypto.AEAD
                 this.Log().Debug($"{instanceId} need {ChunkLengthBytes + tagLen + chunkLength + tagLen}, but have {cipher.Length}");
                 return 0;
             }
-            CryptoUtils.SodiumIncrement(nonce);
+            nonce.Increment();
             // we have enough data to decrypt one chunk
             // drop chunk len and its tag from buffer
             int len = CipherDecrypt(plain, cipher.Slice(ChunkLengthBytes + tagLen, chunkLength + tagLen));
-            CryptoUtils.SodiumIncrement(nonce);
+            nonce.Increment();
             this.Log().Debug($"{instanceId} decrypted {len} byte chunk used {ChunkLengthBytes + tagLen + chunkLength + tagLen} from {cipher.Length}");
             return len;
         }

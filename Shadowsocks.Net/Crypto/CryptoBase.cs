@@ -44,5 +44,7 @@ namespace Shadowsocks.Net.Crypto
         public abstract int DecryptUDP(Span<byte> plain, ReadOnlySpan<byte> cipher);
 
         public int AddressBufferLength { get; set; } = -1;
+
+        public abstract void Dispose();
     }
 }

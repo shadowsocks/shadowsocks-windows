@@ -291,6 +291,9 @@ namespace Shadowsocks.Net
             {
                 _connection.Shutdown(SocketShutdown.Both);
                 _connection.Close();
+
+                encryptor?.Dispose();
+                decryptor?.Dispose();
             }
             catch (Exception e)
             {

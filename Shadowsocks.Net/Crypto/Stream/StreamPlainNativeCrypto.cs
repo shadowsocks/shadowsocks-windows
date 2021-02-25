@@ -39,5 +39,7 @@ namespace Shadowsocks.Net.Crypto.Stream
             return _ciphers;
         }
         #endregion
+
+        public override void Dispose() { }
     }
 }

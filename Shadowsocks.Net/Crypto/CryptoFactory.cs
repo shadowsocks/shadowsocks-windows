@@ -26,46 +26,22 @@ namespace Shadowsocks.Net.Crypto
                     _registeredEncryptors.Add(method.Key, typeof(StreamPlainNativeCrypto));
                 }
             }
-            foreach (var method in StreamRc4NativeCrypto.SupportedCiphers())
+
+            foreach (var method in StreamCryptoBaseCrypto.SupportedCiphers())
             {
                 if (!_registeredEncryptors.ContainsKey(method.Key))
                 {
                     ciphers.Add(method.Key, method.Value);
-                    _registeredEncryptors.Add(method.Key, typeof(StreamRc4NativeCrypto));
-                }
-            }
-            foreach (var method in StreamAesCfbBouncyCastleCrypto.SupportedCiphers())
-            {
-                if (!_registeredEncryptors.ContainsKey(method.Key))
-                {
-                    ciphers.Add(method.Key, method.Value);
-                    _registeredEncryptors.Add(method.Key, typeof(StreamAesCfbBouncyCastleCrypto));
-                }
-            }
-            foreach (var method in StreamChachaBouncyCastleCrypto.SupportedCiphers())
-            {
-                if (!_registeredEncryptors.ContainsKey(method.Key))
-                {
-                    ciphers.Add(method.Key, method.Value);
-                    _registeredEncryptors.Add(method.Key, typeof(StreamChachaBouncyCastleCrypto));
+                    _registeredEncryptors.Add(method.Key, typeof(StreamCryptoBaseCrypto));
                 }
             }
 
-
-            foreach (var method in AEADAesGcmNativeCrypto.SupportedCiphers())
+            foreach (var method in AEADCryptoBaseCrypto.SupportedCiphers())
             {
                 if (!_registeredEncryptors.ContainsKey(method.Key))
                 {
                     ciphers.Add(method.Key, method.Value);
-                    _registeredEncryptors.Add(method.Key, typeof(AEADAesGcmNativeCrypto));
-                }
-            }
-            foreach (var method in AEADBouncyCastleCrypto.SupportedCiphers())
-            {
-                if (!_registeredEncryptors.ContainsKey(method.Key))
-                {
-                    ciphers.Add(method.Key, method.Value);
-                    _registeredEncryptors.Add(method.Key, typeof(AEADBouncyCastleCrypto));
+                    _registeredEncryptors.Add(method.Key, typeof(AEADCryptoBaseCrypto));
                 }
             }
         }
