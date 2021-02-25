@@ -8,22 +8,57 @@ on:
 jobs:
   publish_upload:
     name: Publish and upload
-    runs-on: windows-latest
+    strategy:
+      matrix:
+        os: [ubuntu-20.04, windows-latest]
+      fail-fast: false
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
 
     steps:
       - uses: actions/checkout@v2
       - name: Restore dependencies
+        if: matrix.os == 'windows-latest'
         run: dotnet restore
       - name: Build
+        if: matrix.os == 'windows-latest'
         run: dotnet build --no-restore
       - name: Test
+        if: matrix.os == 'windows-latest'
         run: dotnet test --no-build --verbosity normal
-      # Publish
-      - name: Publish framework-dependent
+      # Publish CLI
+      - name: Define MSBuild properties
+        run: echo "MSBUILD_PROPS=-p:PublishSingleFile=true -p:PublishTrimmed=true -p:TrimMode=link -p:DebuggerSupport=false -p:EnableUnsafeBinaryFormatterSerialization=false -p:EnableUnsafeUTF7Encoding=false -p:InvariantGlobalization=true" >> $GITHUB_ENV
+      - name: Publish CLI framework-dependent
+        run: |
+          dotnet publish Shadowsocks.CLI -c Release
+      - name: Publish CLI self-contained for Linux ARM64
+        if: matrix.os == 'ubuntu-20.04'
+        run: |
+          dotnet publish Shadowsocks.CLI -c Release $MSBUILD_PROPS -r linux-arm64 --self-contained
+      - name: Publish CLI self-contained for Linux x64
+        if: matrix.os == 'ubuntu-20.04'
+        run: |
+          dotnet publish Shadowsocks.CLI -c Release $MSBUILD_PROPS -r linux-x64 --self-contained
+      - name: Publish CLI self-contained for Windows ARM64
+        if: matrix.os == 'windows-latest'
+        run: |
+          dotnet publish Shadowsocks.CLI -c Release $MSBUILD_PROPS -r win-arm64 --self-contained
+      - name: Publish CLI self-contained for Windows x64
+        if: matrix.os == 'windows-latest'
+        run: |
+          dotnet publish Shadowsocks.CLI -c Release $MSBUILD_PROPS -r win-x64 --self-contained
+      # Publish WPF
+      - name: Publish WPF framework-dependent
+        if: matrix.os == 'windows-latest'
         run: dotnet publish Shadowsocks.WPF -c Release --no-restore
-      # - name: Publish self-contained for Windows ARM64
+      # - name: Publish WPF self-contained for Windows ARM64
+      #   if: matrix.os == 'windows-latest'
       #   run: dotnet publish Shadowsocks.WPF -c Release -r win-arm64 --self-contained
-      - name: Publish self-contained for Windows x64
+      - name: Publish WPF self-contained for Windows x64
+        if: matrix.os == 'windows-latest'
         run: dotnet publish Shadowsocks.WPF -c Release -r win-x64 --self-contained
       # Get version
       - name: Get version
@@ -31,8 +66,23 @@ jobs:
         shell: bash
         run: echo ::set-output name=VERSION::$(echo $GITHUB_REF | cut -d / -f 3)
       # Package
-      - name: Package for Windows
+      - name: Package for Linux
+        if: matrix.os == 'ubuntu-20.04'
+        env:
+          ZSTD_CLEVEL: 19
+          ZSTD_NBTHREADS: 2
         run: |
+          # Shadowsocks.CLI
+          cd Shadowsocks.CLI/bin/Release/net5.0/publish
+          tar -acf ../shadowsocks-cli-${{ steps.get_version.outputs.VERSION }}-linux.tar.zst .
+          cd ../linux-arm64/publish
+          tar -acf ../../shadowsocks-cli-${{ steps.get_version.outputs.VERSION }}-linux-arm64.tar.zst .
+          cd ../../linux-x64/publish
+          tar -acf ../../shadowsocks-cli-${{ steps.get_version.outputs.VERSION }}-linux-x64.tar.zst .
+      - name: Package for Windows
+        if: matrix.os == 'windows-latest'
+        run: |
+          # WPF
           cd Shadowsocks.WPF/bin/Release/net5.0-windows10.0.19041.0/publish
           7z a -tzip -mx=9 -mfb=128 ../shadowsocks-wpf-${{ steps.get_version.outputs.VERSION }}-windows.zip .
           7z a -t7z -m0=lzma2 -mx=9 -mfb=64 -md=64m -ms=on ../shadowsocks-wpf-${{ steps.get_version.outputs.VERSION }}-windows.7z .
@@ -42,8 +92,37 @@ jobs:
           cd ../../win-x64/publish
           7z a -tzip -mx=9 -mfb=128 ../../shadowsocks-wpf-${{ steps.get_version.outputs.VERSION }}-windows-x64.zip .
           7z a -t7z -m0=lzma2 -mx=9 -mfb=64 -md=64m -ms=on ../../shadowsocks-wpf-${{ steps.get_version.outputs.VERSION }}-windows-x64.7z .
+          # CLI
+          cd ../../../../../Shadowsocks.CLI/bin/Release/net5.0/publish
+          7z a -tzip -mx=9 -mfb=128 ../shadowsocks-cli-${{ steps.get_version.outputs.VERSION }}-windows.zip .
+          7z a -t7z -m0=lzma2 -mx=9 -mfb=64 -md=64m -ms=on ../shadowsocks-cli-${{ steps.get_version.outputs.VERSION }}-windows.7z .
+          cd ../win-arm64/publish
+          7z a -tzip -mx=9 -mfb=128 ../../shadowsocks-cli-${{ steps.get_version.outputs.VERSION }}-windows-arm64.zip .
+          7z a -t7z -m0=lzma2 -mx=9 -mfb=64 -md=64m -ms=on ../../shadowsocks-cli-${{ steps.get_version.outputs.VERSION }}-windows-arm64.7z .
+          cd ../../win-x64/publish
+          7z a -tzip -mx=9 -mfb=128 ../../shadowsocks-cli-${{ steps.get_version.outputs.VERSION }}-windows-x64.zip .
+          7z a -t7z -m0=lzma2 -mx=9 -mfb=64 -md=64m -ms=on ../../shadowsocks-cli-${{ steps.get_version.outputs.VERSION }}-windows-x64.7z .
       # Release
-      - name: Upload release assets for Windows
+      - name: Upload release assets for Linux
+        uses: svenstaro/upload-release-action@v2
+        if: matrix.os == 'ubuntu-20.04'
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: Shadowsocks.CLI/bin/Release/net5.0/*.tar.zst
+          tag: ${{ github.ref }}
+          file_glob: true
+          prerelease: true
+      - name: Upload CLI release assets for Windows
+        if: matrix.os == 'windows-latest'
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: Shadowsocks.CLI/bin/Release/net5.0/shadowsocks-wpf-*
+          tag: ${{ github.ref }}
+          file_glob: true
+          prerelease: true
+      - name: Upload WPF release assets for Windows
+        if: matrix.os == 'windows-latest'
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}

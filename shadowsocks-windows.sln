@@ -33,9 +33,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Shadowsocks.WPF", "Shadowso
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Shadowsocks.Interop", "Shadowsocks.Interop\Shadowsocks.Interop.csproj", "{1CC6E8A9-1875-430C-B2BB-F227ACD711B1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shadowsocks.Tests", "Shadowsocks.Tests\Shadowsocks.Tests.csproj", "{8923E1ED-2594-4668-A4FA-DC2CFF7EA1CA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Shadowsocks.Tests", "Shadowsocks.Tests\Shadowsocks.Tests.csproj", "{8923E1ED-2594-4668-A4FA-DC2CFF7EA1CA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shadowsocks.WPF.Tests", "Shadowsocks.WPF.Tests\Shadowsocks.WPF.Tests.csproj", "{97C056B0-2AEB-4467-AAC9-E0FE0639BA9E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Shadowsocks.WPF.Tests", "Shadowsocks.WPF.Tests\Shadowsocks.WPF.Tests.csproj", "{97C056B0-2AEB-4467-AAC9-E0FE0639BA9E}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Shadowsocks.CLI", "Shadowsocks.CLI\Shadowsocks.CLI.csproj", "{78EB3006-81B0-4C13-9B80-E91766874A57}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shadowsocks.Protocol", "Shadowsocks.Protocol\Shadowsocks.Protocol.csproj", "{94DE5045-4D09-437B-BDE3-679FCAF07A2D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -79,6 +83,14 @@ Global
 		{97C056B0-2AEB-4467-AAC9-E0FE0639BA9E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{97C056B0-2AEB-4467-AAC9-E0FE0639BA9E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{97C056B0-2AEB-4467-AAC9-E0FE0639BA9E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{78EB3006-81B0-4C13-9B80-E91766874A57}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{78EB3006-81B0-4C13-9B80-E91766874A57}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{78EB3006-81B0-4C13-9B80-E91766874A57}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{78EB3006-81B0-4C13-9B80-E91766874A57}.Release|Any CPU.Build.0 = Release|Any CPU
+		{94DE5045-4D09-437B-BDE3-679FCAF07A2D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{94DE5045-4D09-437B-BDE3-679FCAF07A2D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{94DE5045-4D09-437B-BDE3-679FCAF07A2D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{94DE5045-4D09-437B-BDE3-679FCAF07A2D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

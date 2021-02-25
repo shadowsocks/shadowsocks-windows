@@ -1,0 +1,40 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net5.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <AssemblyName>sscli</AssemblyName>
+    <PackageId>Shadowsocks.CLI</PackageId>
+    <Authors>Clowwindy &amp; The Community</Authors>
+    <Product>Shadowsocks CLI</Product>
+    <Description>CLI for Shadowsocks server and client implementation in C#.</Description>
+    <Copyright>© 2021 Clowwindy &amp; The Community</Copyright>
+    <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
+    <PackageProjectUrl>https://github.com/shadowsocks/shadowsocks-windows</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/shadowsocks/shadowsocks-windows</RepositoryUrl>
+    <RepositoryType>Public</RepositoryType>
+    <PackageIcon>ssw128.png</PackageIcon>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\LICENSE.txt">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+    <None Include="..\Shadowsocks.WPF\Resources\ssw128.png">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.CommandLine" Version="2.0.0-beta1.20574.7" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Shadowsocks.Interop\Shadowsocks.Interop.csproj" />
+    <ProjectReference Include="..\Shadowsocks.Protocol\Shadowsocks.Protocol.csproj" />
+  </ItemGroup>
+
+</Project>
