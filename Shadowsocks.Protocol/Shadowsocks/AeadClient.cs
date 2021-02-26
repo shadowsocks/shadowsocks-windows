@@ -42,7 +42,7 @@ namespace Shadowsocks.Protocol.Shadowsocks
 
         public async Task ConvertUplink(IDuplexPipe client, IDuplexPipe server)
         {
-            var up = cryptoParameter.GetCrypto();
+            using var up = cryptoParameter.GetCrypto();
             var pmp = new ProtocolMessagePipe(server);
             var salt = new SaltMessage(16, true);
             await pmp.WriteAsync(salt);
@@ -77,7 +77,7 @@ namespace Shadowsocks.Protocol.Shadowsocks
 
         public async Task ConvertDownlink(IDuplexPipe client, IDuplexPipe server)
         {
-            var down = cryptoParameter.GetCrypto();
+            using var down = cryptoParameter.GetCrypto();
 
             var pmp = new ProtocolMessagePipe(server);
             var salt = await pmp.ReadAsync(new SaltMessage(cryptoParameter.KeySize));

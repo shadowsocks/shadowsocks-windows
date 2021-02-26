@@ -6,7 +6,6 @@ namespace Shadowsocks.Protocol.Shadowsocks.Crypto
     {
         public UnsafeNoneCrypto(CryptoParameter parameter)
         {
-            
         }
 
         public int Decrypt(ReadOnlySpan<byte> nonce, Span<byte> plain, ReadOnlySpan<byte> cipher)
@@ -22,6 +21,10 @@ namespace Shadowsocks.Protocol.Shadowsocks.Crypto
         }
 
         public void Init(byte[] key, byte[] iv)
+        {
+        }
+
+        public void Dispose()
         {
         }
     }

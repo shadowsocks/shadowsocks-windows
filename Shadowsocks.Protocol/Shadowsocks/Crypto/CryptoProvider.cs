@@ -7,6 +7,8 @@ namespace Shadowsocks.Protocol.Shadowsocks.Crypto
     {
         static Dictionary<string, CryptoParameter> parameters = new Dictionary<string, CryptoParameter>
         {
+            ["xchacha20-ietf-poly1305"] = new CryptoParameter { KeySize = 32, NonceSize = 24, TagSize = 16, Crypto = typeof(AeadXChaCha20Poly1305Crypto) },
+            ["chacha20-ietf-poly1305"] = new CryptoParameter { KeySize = 32, NonceSize = 12, TagSize = 16, Crypto = typeof(AeadChaCha20Poly1305Crypto) },
             ["aes-256-gcm"] = new CryptoParameter { KeySize = 32, NonceSize = 12, TagSize = 16, Crypto = typeof(AeadAesGcmCrypto) },
             ["aes-192-gcm"] = new CryptoParameter { KeySize = 24, NonceSize = 12, TagSize = 16, Crypto = typeof(AeadAesGcmCrypto) },
             ["aes-128-gcm"] = new CryptoParameter { KeySize = 16, NonceSize = 12, TagSize = 16, Crypto = typeof(AeadAesGcmCrypto) },
