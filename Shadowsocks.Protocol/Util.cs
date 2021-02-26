@@ -28,18 +28,9 @@ namespace Shadowsocks.Protocol
 
         public static ArgumentException BufferTooSmall(int expected, int actual, string name) => new ArgumentException($"Require {expected} byte buffer, received {actual} byte", name);
 
-        public static bool MemEqual(Memory<byte> m1, Memory<byte> m2)
-        {
-            if (m1.Length != m2.Length) return false;
-            for (var i = 0; i < m1.Length; i++)
-            {
-                if (m1.Span[i] != m2.Span[i]) return false;
-            }
+        public static bool SequenceEqual(this Memory<byte> m1, ReadOnlyMemory<byte> m2) => m1.Span.SequenceEqual(m2.Span);
 
-            return true;
-        }
-
-        public static void SodiumIncrement(Span<byte> salt)
+        public static void SodiumIncrement(this Span<byte> salt)
         {
             for (var i = 0; i < salt.Length; ++i)
             {

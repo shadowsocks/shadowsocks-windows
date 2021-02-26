@@ -36,7 +36,7 @@ namespace Shadowsocks.Protocol.Socks5
             if (other is null) return false;
             if (ReferenceEquals(this, other)) return true;
             if (other.GetType() != GetType()) return false;
-            return Util.MemEqual(Auth, ((Socks5VersionIdentifierMessage) other).Auth);
+            return Auth.SequenceEqual(((Socks5VersionIdentifierMessage) other).Auth);
         }
     }
 }

@@ -41,7 +41,7 @@ namespace Shadowsocks.Protocol.Socks5
             if (ReferenceEquals(this, other)) return true;
             if (other.GetType() != GetType()) return false;
             var msg = (Socks5UserPasswordRequestMessage) other;
-            return Util.MemEqual(User, msg.User) && Util.MemEqual(Password, msg.Password);
+            return User.SequenceEqual(msg.User) && Password.SequenceEqual(msg.Password);
         }
     }
 }

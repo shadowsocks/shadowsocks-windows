@@ -31,10 +31,10 @@ namespace Shadowsocks.Protocol.Shadowsocks
             m.Span[0] = (byte)(Data.Length / 256);
             m.Span[1] = (byte)(Data.Length % 256);
             var len1 = aead.Encrypt(nonce.Span, m.Span, buffer.Span);
-            Util.SodiumIncrement(nonce.Span);
+            nonce.Span.SodiumIncrement();
             buffer = buffer.Slice(len1);
             aead.Encrypt(nonce.Span, Data.Span, buffer.Span);
-            Util.SodiumIncrement(nonce.Span);
+            nonce.Span.SodiumIncrement();
             return len;
         }
 
@@ -48,7 +48,7 @@ namespace Shadowsocks.Protocol.Shadowsocks
                 // decrypt length
                 Memory<byte> m = new byte[2];
                 len = aead.Decrypt(nonce.Span, m.Span, buffer.Span);
-                Util.SodiumIncrement(nonce.Span);
+                nonce.Span.SodiumIncrement();
                 if (len != 2) return (false, 0);
 
                 expectedDataLength = m.Span[0] * 256 + m.Span[1];
@@ -61,7 +61,7 @@ namespace Shadowsocks.Protocol.Shadowsocks
             var dataBuffer = buffer.Slice(tagLength + 2);
             Data = new byte[expectedDataLength];
             len = aead.Decrypt(nonce.Span, Data.Span, dataBuffer.Span);
-            Util.SodiumIncrement(nonce.Span);
+            nonce.Span.SodiumIncrement();
             if (len != expectedDataLength) return (false, 0);
             return (true, totalLength);
         }
