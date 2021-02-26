@@ -1,6 +1,7 @@
 using Shadowsocks.Protocol.Shadowsocks.Crypto;
 using System;
 using System.Diagnostics.CodeAnalysis;
+using System.Security.Cryptography;
 
 namespace Shadowsocks.Protocol.Shadowsocks
 {
@@ -15,7 +16,7 @@ namespace Shadowsocks.Protocol.Shadowsocks
             if (roll)
             {
                 Salt = new byte[length];
-                CryptoUtils.RandomSpan(Salt.Span);
+                RandomNumberGenerator.Fill(Salt.Span);
             }
         }
 

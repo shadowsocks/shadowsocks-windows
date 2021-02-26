@@ -1,11 +1,11 @@
 using Shadowsocks.Protocol.Shadowsocks.Crypto;
 using System;
+using System.Collections.Generic;
 using System.IO.Pipelines;
 using System.Net;
 using System.Runtime.InteropServices;
-using System.Text;
+using System.Security.Cryptography;
 using System.Threading.Tasks;
-using System.Collections.Generic;
 
 namespace Shadowsocks.Protocol.Shadowsocks
 {
@@ -13,7 +13,14 @@ namespace Shadowsocks.Protocol.Shadowsocks
     {
         private CryptoParameter cryptoParameter;
         private readonly byte[] mainKey;
-        private static readonly byte[] _ssSubKeyInfo = Encoding.ASCII.GetBytes("ss-subkey");
+
+        /// <summary>
+        /// ss-subkey
+        /// </summary>
+        private static ReadOnlySpan<byte> _ssSubKeyInfo => new byte[]
+        {
+            0x73, 0x73, 0x2d, 0x73, 0x75, 0x62, 0x6b, 0x65, 0x79
+        };
 
         public AeadClient(CryptoParameter parameter, string password)
         {
@@ -40,7 +47,8 @@ namespace Shadowsocks.Protocol.Shadowsocks
             var salt = new SaltMessage(16, true);
             await pmp.WriteAsync(salt);
 
-            var key = CryptoUtils.HKDF(cryptoParameter.KeySize, mainKey, salt.Salt.ToArray(), _ssSubKeyInfo);
+            var key = new byte[cryptoParameter.KeySize];
+            HKDF.DeriveKey(HashAlgorithmName.SHA1, mainKey, key, salt.Salt.Span, _ssSubKeyInfo);
             up.Init(key, null);
             Memory<byte> nonce = new byte[cryptoParameter.NonceSize];
             nonce.Span.Fill(0);
@@ -74,7 +82,8 @@ namespace Shadowsocks.Protocol.Shadowsocks
             var pmp = new ProtocolMessagePipe(server);
             var salt = await pmp.ReadAsync(new SaltMessage(cryptoParameter.KeySize));
 
-            var key = CryptoUtils.HKDF(cryptoParameter.KeySize, mainKey, salt.Salt.ToArray(), _ssSubKeyInfo);
+            var key = new byte[cryptoParameter.KeySize];
+            HKDF.DeriveKey(HashAlgorithmName.SHA1, mainKey, key, salt.Salt.Span, _ssSubKeyInfo);
             down.Init(key, null);
             Memory<byte> nonce = new byte[cryptoParameter.NonceSize];
             nonce.Span.Fill(0);
