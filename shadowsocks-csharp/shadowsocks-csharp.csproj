@@ -28,7 +28,7 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="CommandLineParser" Version="2.8.0" />
-    <PackageReference Include="Costura.Fody" Version="4.1.0">
+    <PackageReference Include="Costura.Fody" Version="5.0.2">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="Fody" Version="6.3.0">
