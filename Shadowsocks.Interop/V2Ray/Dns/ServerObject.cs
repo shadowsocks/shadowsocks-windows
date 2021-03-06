@@ -17,6 +17,12 @@ namespace Shadowsocks.Interop.V2Ray.Dns
         public int Port { get; set; }
 
         /// <summary>
+        /// Gets or sets the client IP
+        /// to include in DNS queries.
+        /// </summary>
+        public string? ClientIp { get; set; }
+
+        /// <summary>
         /// Gets or sets the list of domains
         /// that prefers this DNS server.
         /// </summary>

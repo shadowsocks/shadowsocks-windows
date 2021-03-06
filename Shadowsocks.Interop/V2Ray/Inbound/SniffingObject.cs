@@ -15,6 +15,14 @@ namespace Shadowsocks.Interop.V2Ray.Inbound
         /// </summary>
         public List<string> DestOverride { get; set; }
 
+        /// <summary>
+        /// Gets or sets whether the target address is sniffed
+        /// solely based on metadata.
+        /// Defaults to false.
+        /// Change to true to use FakeDNS.
+        /// </summary>
+        public bool MetadataOnly { get; set; }
+
         public SniffingObject()
         {
             Enabled = true;
@@ -24,5 +32,27 @@ namespace Shadowsocks.Interop.V2Ray.Inbound
                 "tls",
             };
         }
+
+        public static SniffingObject Default => new()
+        {
+            Enabled = false,
+            DestOverride = new()
+            {
+                "http",
+                "tls",
+            },
+        };
+
+        public static SniffingObject DefaultFakeDns => new()
+        {
+            Enabled = true,
+            DestOverride = new()
+            {
+                "http",
+                "tls",
+                "fakedns",
+            },
+            MetadataOnly = true,
+        };
     }
 }

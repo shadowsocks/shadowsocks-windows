@@ -27,10 +27,7 @@ namespace Shadowsocks.Interop.V2Ray
             Port = 1080,
             Protocol = "socks",
             Settings = Protocols.Socks.InboundConfigurationObject.Default,
-            Sniffing = new()
-            {
-                Enabled = false,
-            },
+            Sniffing = SniffingObject.Default,
         };
 
         public static InboundObject DefaultLocalHttp => new()
@@ -39,10 +36,7 @@ namespace Shadowsocks.Interop.V2Ray
             Listen = "127.0.0.1",
             Port = 8080,
             Protocol = "http",
-            Sniffing = new()
-            {
-                Enabled = false,
-            },
+            Sniffing = SniffingObject.Default,
         };
     }
 }

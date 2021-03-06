@@ -23,6 +23,15 @@ namespace Shadowsocks.Interop.V2Ray
         /// </summary>
         public string? ClientIp { get; set; }
 
+        /// <summary>
+        /// Gets or sets whether to disable internal DNS cache.
+        /// Defaults to false, or DNS cache is enabled.
+        /// </summary>
+        public bool DisableCache { get; set; }
+
+        /// <summary>
+        /// Gets or sets the inbound tag for DNS traffic.
+        /// </summary>
         public string? Tag { get; set; }
 
         public DnsObject()
