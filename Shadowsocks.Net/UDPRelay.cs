@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace Shadowsocks.Net
 {
-    class UDPRelay : DatagramService
+    public class UDPRelay : DatagramService
     {
         Server _server;
         // TODO: choose a smart number

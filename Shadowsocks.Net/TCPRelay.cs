@@ -16,7 +16,7 @@ using Shadowsocks.Models;
 
 namespace Shadowsocks.Net
 {
-    class TCPRelay : StreamService, IEnableLogger
+    public class TCPRelay : StreamService, IEnableLogger
     {
         public event EventHandler<SSTCPConnectedEventArgs> OnConnected;
         public event EventHandler<SSTransmitEventArgs> OnInbound;
@@ -182,7 +182,7 @@ namespace Shadowsocks.Net
         }
     }
 
-    internal class TCPHandler : IEnableLogger
+    public class TCPHandler : IEnableLogger
     {
         public event EventHandler<SSTCPConnectedEventArgs> OnConnected;
         public event EventHandler<SSTransmitEventArgs> OnInbound;

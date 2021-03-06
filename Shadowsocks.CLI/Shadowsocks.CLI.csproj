@@ -34,6 +34,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Shadowsocks.Interop\Shadowsocks.Interop.csproj" />
+    <ProjectReference Include="..\Shadowsocks.Net\Shadowsocks.Net.csproj" />
     <ProjectReference Include="..\Shadowsocks.Protocol\Shadowsocks.Protocol.csproj" />
   </ItemGroup>
 
