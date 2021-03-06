@@ -1,6 +1,7 @@
 using Shadowsocks.Interop.V2Ray.Outbound;
 using Shadowsocks.Interop.V2Ray.Transport;
 using Shadowsocks.Models;
+using System;
 using System.Net;
 
 namespace Shadowsocks.Interop.V2Ray
@@ -38,16 +39,22 @@ namespace Shadowsocks.Interop.V2Ray
 
         /// <summary>
         /// Gets the <see cref="OutboundObject"/> for the Shadowsocks server.
-        /// Plugins are not supported. Plugin information is silently discarded.
+        /// Plugins are not supported.
         /// </summary>
         /// <param name="server"></param>
         /// <returns></returns>
-        public static OutboundObject GetShadowsocks(IServer server) => new()
+        public static OutboundObject GetShadowsocks(IServer server)
         {
-            Tag = server.Name,
-            Protocol = "shadowsocks",
-            Settings = new Protocols.Shadowsocks.OutboundConfigurationObject(server.Host, server.Port, server.Method, server.Password),
-        };
+            if (!string.IsNullOrEmpty(server.Plugin))
+                throw new InvalidOperationException("V2Ray doesn't support SIP003 plugins.");
+            
+            return new()
+            {
+                Tag = server.Name,
+                Protocol = "shadowsocks",
+                Settings = new Protocols.Shadowsocks.OutboundConfigurationObject(server.Host, server.Port, server.Method, server.Password),
+            };
+        }
 
         /// <summary>
         /// Gets the <see cref="OutboundObject"/> for the Trojan server.
