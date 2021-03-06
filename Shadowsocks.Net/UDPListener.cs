@@ -63,6 +63,7 @@ namespace Shadowsocks.Net
             // Create a TCP/IP socket.
             _udpSocket = new Socket(_localEndPoint.AddressFamily, SocketType.Dgram, ProtocolType.Udp);
             _udpSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
+            _udpSocket.SetSocketOption(SocketOptionLevel.IPv6, SocketOptionName.IPv6Only, false);
 
             // Bind the socket to the local endpoint and listen for incoming connections.
             _udpSocket.Bind(_localEndPoint);
