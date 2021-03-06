@@ -46,7 +46,7 @@ namespace Shadowsocks.Interop.V2Ray
         {
             Tag = server.Name,
             Protocol = "shadowsocks",
-            Settings = new Protocols.Shadowsocks.OutboundConfigurationObject(),
+            Settings = new Protocols.Shadowsocks.OutboundConfigurationObject(server.Host, server.Port, server.Method, server.Password),
         };
 
         /// <summary>

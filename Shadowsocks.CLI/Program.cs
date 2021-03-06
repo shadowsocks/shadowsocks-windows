@@ -1,9 +1,11 @@
 using Shadowsocks.Protocol;
 using System;
+using System.Collections.Generic;
 using System.CommandLine;
 using System.CommandLine.Invocation;
 using System.Net;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Shadowsocks.CLI
@@ -46,7 +48,59 @@ namespace Shadowsocks.CLI
                     Console.WriteLine("Not implemented.");
                 });
 
-            var utilitiesCommand = new Command("utilities", "Shadowsocks-related utilities.");
+            var convertConfigCommand = new Command("convert-config", "Convert between different config formats. Supported formats: SIP002 links, SIP008 delivery JSON, and V2Ray JSON (outbound only).");
+            convertConfigCommand.AddOption(new Option<string[]?>("--from-urls", "URL conversion sources. Multiple URLs are supported. Supported protocols are ss:// and https://."));
+            convertConfigCommand.AddOption(new Option<string[]?>("--from-sip008-json", "SIP008 JSON conversion sources. Multiple JSON files are supported."));
+            convertConfigCommand.AddOption(new Option<string[]?>("--from-v2ray-json", "V2Ray JSON conversion sources. Multiple JSON files are supported."));
+            convertConfigCommand.AddOption(new Option<bool>("--prefix-group-name", "Whether to prefix group name to server names after conversion."));
+            convertConfigCommand.AddOption(new Option<bool>("--to-urls", "Convert to ss:// links and print."));
+            convertConfigCommand.AddOption(new Option<string?>("--to-sip008-json", "Convert to SIP008 JSON and save to the specified path."));
+            convertConfigCommand.AddOption(new Option<string?>("--to-v2ray-json", "Convert to V2Ray JSON and save to the specified path."));
+            convertConfigCommand.Handler = CommandHandler.Create(
+                async (string[]? fromUrls, string[]? fromSip008Json, string[]? fromV2rayJson, bool prefixGroupName, bool toUrls, string? toSip008Json, string? toV2rayJson, CancellationToken cancellationToken) =>
+                {
+                    var configConverter = new ConfigConverter(prefixGroupName);
+
+                    try
+                    {
+                        if (fromUrls != null)
+                        {
+                            var uris = new List<Uri>();
+                            foreach (var url in fromUrls)
+                            {
+                                if (Uri.TryCreate(url, UriKind.Absolute, out var uri))
+                                    uris.Add(uri);
+                                else
+                                    Console.WriteLine($"Invalid URL: {url}");
+                            }
+                            await configConverter.FromUrls(uris, cancellationToken);
+                        }
+                        if (fromSip008Json != null)
+                            await configConverter.FromSip008Json(fromSip008Json, cancellationToken);
+                        if (fromV2rayJson != null)
+                            await configConverter.FromV2rayJson(fromV2rayJson, cancellationToken);
+
+                        if (toUrls)
+                        {
+                            var uris = configConverter.ToUrls();
+                            foreach (var uri in uris)
+                                Console.WriteLine(uri.AbsoluteUri);
+                        }
+                        if (!string.IsNullOrEmpty(toSip008Json))
+                            await configConverter.ToSip008Json(toSip008Json, cancellationToken);
+                        if (!string.IsNullOrEmpty(toV2rayJson))
+                            await configConverter.ToV2rayJson(toV2rayJson, cancellationToken);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.Message);
+                    }
+                });
+
+            var utilitiesCommand = new Command("utilities", "Shadowsocks-related utilities.")
+            {
+                convertConfigCommand,
+            };
             utilitiesCommand.AddAlias("u");
             utilitiesCommand.AddAlias("util");
             utilitiesCommand.AddAlias("utils");

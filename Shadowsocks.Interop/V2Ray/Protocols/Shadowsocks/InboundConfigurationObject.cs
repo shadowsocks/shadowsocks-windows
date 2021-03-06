@@ -18,7 +18,7 @@ namespace Shadowsocks.Interop.V2Ray.Protocols.Shadowsocks
         public InboundConfigurationObject()
         {
             Method = "chacha20-ietf-poly1305";
-            Password = new Guid().ToString();
+            Password = Guid.NewGuid().ToString();
             Network = "tcp,udp";
         }
     }

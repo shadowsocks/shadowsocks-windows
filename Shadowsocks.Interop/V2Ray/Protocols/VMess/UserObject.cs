@@ -18,7 +18,7 @@ namespace Shadowsocks.Interop.V2Ray.Protocols.VMess
 
         public static UserObject Default => new()
         {
-            Id = new Guid().ToString(),
+            Id = Guid.NewGuid().ToString(),
         };
     }
 }

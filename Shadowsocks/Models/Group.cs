@@ -36,13 +36,10 @@ namespace Shadowsocks.Models
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
         public ulong BytesRemaining { get; set; }
 
-        public Group() : this(string.Empty)
-        { }
-
-        public Group(string name)
+        public Group(string name = "")
         {
             Name = name;
-            Id = new Guid();
+            Id = Guid.NewGuid();
             Version = 1;
             BytesUsed = 0UL;
             BytesRemaining = 0UL;

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Text.Json.Serialization;
 
 namespace Shadowsocks.Models
@@ -49,7 +50,7 @@ namespace Shadowsocks.Models
             Password = "";
             Method = "chacha20-ietf-poly1305";
             Name = "";
-            Uuid = "";
+            Uuid = Guid.NewGuid().ToString();
         }
 
         public bool Equals(IServer? other) => other is Server anotherServer && Uuid == anotherServer.Uuid;
@@ -81,15 +82,31 @@ namespace Shadowsocks.Models
         /// <param name="url">The ss:// URL to parse.</param>
         /// <param name="server">
         /// A Server object represented by the URL.
-        /// A new empty Server object if the URL is invalid.</param>
+        /// A new empty Server object if the URL is invalid.
+        /// </param>
         /// <returns>True for success. False for failure.</returns>
-        public static bool TryParse(string url, out Server server)
+        public static bool TryParse(string url, [NotNullWhen(true)] out Server? server)
         {
+            server = null;
+            return Uri.TryCreate(url, UriKind.Absolute, out var uri) && TryParse(uri, out server);
+        }
+
+        /// <summary>
+        /// Tries to parse an ss:// URL into a Server object.
+        /// </summary>
+        /// <param name="uri">The ss:// URL to parse.</param>
+        /// <param name="server">
+        /// A Server object represented by the URL.
+        /// A new empty Server object if the URL is invalid.
+        /// </param>
+        /// <returns>True for success. False for failure.</returns>
+        public static bool TryParse(Uri uri, [NotNullWhen(true)] out Server? server)
+        {
+            server = null;
             try
             {
-                var uri = new Uri(url);
                 if (uri.Scheme != "ss")
-                    throw new ArgumentException("Wrong URL scheme");
+                    return false;
                 var userinfo_base64url = uri.UserInfo;
                 var userinfo = Utilities.Base64Url.DecodeToString(userinfo_base64url);
                 var userinfoSplitArray = userinfo.Split(':', 2);
@@ -101,7 +118,7 @@ namespace Shadowsocks.Models
                 server = new Server()
                 {
                     Name = name,
-                    Uuid = new Guid().ToString(),
+                    Uuid = Guid.NewGuid().ToString(),
                     Host = host,
                     Port = uri.Port,
                     Password = password,
@@ -134,7 +151,6 @@ namespace Shadowsocks.Models
             }
             catch
             {
-                server = new();
                 return false;
             }
         }
