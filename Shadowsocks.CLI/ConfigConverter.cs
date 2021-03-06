@@ -55,8 +55,10 @@ namespace Shadowsocks.CLI
 
             if (sip008Links.Count > 0)
             {
-                var httpClient = new HttpClient();
-                httpClient.Timeout = TimeSpan.FromSeconds(30.0);
+                var httpClient = new HttpClient
+                {
+                    Timeout = TimeSpan.FromSeconds(30.0)
+                };
                 var tasks = sip008Links.Select(async x => await httpClient.GetFromJsonAsync<Group>(x, JsonHelper.snakeCaseJsonDeserializerOptions, cancellationToken))
                                        .ToList();
                 while (tasks.Count > 0)
@@ -108,18 +110,23 @@ namespace Shadowsocks.CLI
                     foreach (var outbound in v2rayConfig.Outbounds)
                     {
                         if (outbound.Protocol == "shadowsocks"
-                            && outbound.Settings is Interop.V2Ray.Protocols.Shadowsocks.OutboundConfigurationObject ssConfig)
+                            && outbound.Settings is JsonElement jsonElement)
                         {
-                            foreach (var ssServer in ssConfig.Servers)
-                            {
-                                var server = new Server();
-                                server.Name = outbound.Tag;
-                                server.Host = ssServer.Address;
-                                server.Port = ssServer.Port;
-                                server.Method = ssServer.Method;
-                                server.Password = ssServer.Password;
-                                Servers.Add(server);
-                            }
+                            var jsonText = jsonElement.GetRawText();
+                            var ssConfig = JsonSerializer.Deserialize<Interop.V2Ray.Protocols.Shadowsocks.OutboundConfigurationObject>(jsonText, JsonHelper.camelCaseJsonDeserializerOptions);
+                            if (ssConfig != null)
+                                foreach (var ssServer in ssConfig.Servers)
+                                {
+                                    var server = new Server
+                                    {
+                                        Name = outbound.Tag,
+                                        Host = ssServer.Address,
+                                        Port = ssServer.Port,
+                                        Method = ssServer.Method,
+                                        Password = ssServer.Password
+                                    };
+                                    Servers.Add(server);
+                                }
                         }
                     }
                 }
@@ -168,8 +175,10 @@ namespace Shadowsocks.CLI
         /// <returns>A task that represents the asynchronous write operation.</returns>
         public Task ToV2rayJson(string path, CancellationToken cancellationToken = default)
         {
-            var v2rayConfig = new Interop.V2Ray.Config();
-            v2rayConfig.Outbounds = new();
+            var v2rayConfig = new Interop.V2Ray.Config
+            {
+                Outbounds = new()
+            };
 
             foreach (var server in Servers)
             {
