@@ -22,6 +22,29 @@ namespace Shadowsocks.Interop.SsRust
         /// </summary>
         public int LocalPort { get; set; }
 
+        /// <inheritdoc cref="Server.Host"/>
+        [JsonPropertyName("server")]
+        public string? Host { get; set; }
+
+        /// <inheritdoc cref="Server.Port"/>
+        [JsonPropertyName("server_port")]
+        public int Port { get; set; }
+
+        /// <inheritdoc cref="Server.Password"/>
+        public string? Password { get; set; }
+
+        /// <inheritdoc cref="Server.Method"/>
+        public string? Method { get; set; }
+
+        /// <inheritdoc cref="Server.Plugin"/>
+        public string? Plugin { get; set; }
+
+        /// <inheritdoc cref="Server.PluginOpts"/>
+        public string? PluginOpts { get; set; }
+
+        /// <inheritdoc cref="Server.PluginArgs"/>
+        public List<string>? PluginArgs { get; set; }
+
         /// <summary>
         /// Gets or sets the timeout for UDP associations in seconds.
         /// Defaults to 300 seconds (5 minutes).
@@ -101,6 +124,7 @@ namespace Shadowsocks.Interop.SsRust
         {
             LocalAddress = "::1",
             Mode = "tcp_and_udp",
+            NoDelay = true,
             Ipv6First = true,
         };
     }
