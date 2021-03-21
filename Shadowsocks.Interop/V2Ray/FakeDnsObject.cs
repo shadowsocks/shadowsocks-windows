@@ -5,7 +5,7 @@ namespace Shadowsocks.Interop.V2Ray
         /// <summary>
         /// Gets or sets the IP pool CIDR.
         /// </summary>
-        public string IpPool { get; set; } = "240.0.0.0/8";
+        public string IpPool { get; set; } = "198.18.0.0/15";
 
         /// <summary>
         /// Gets or sets the IP pool size.
