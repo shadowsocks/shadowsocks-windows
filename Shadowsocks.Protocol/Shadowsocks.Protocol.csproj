@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="CryptoBase" Version="1.2.1" />
+    <PackageReference Include="CryptoBase" Version="1.2.2" />
     <PackageReference Include="Pipelines.Sockets.Unofficial" Version="2.2.0" />
   </ItemGroup>
 
