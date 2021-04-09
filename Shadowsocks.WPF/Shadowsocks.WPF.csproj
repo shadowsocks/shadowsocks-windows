@@ -52,7 +52,7 @@
     <PackageReference Include="MaterialDesignThemes" Version="4.0.0" />
     <PackageReference Include="MdXaml" Version="1.9.0" />
     <PackageReference Include="OxyPlot.Wpf" Version="2.0.0" />
-    <PackageReference Include="ReactiveUI.Events.WPF" Version="13.2.10" />
+    <PackageReference Include="ReactiveUI.Events.WPF" Version="13.2.18" />
     <PackageReference Include="ReactiveUI.Fody" Version="13.2.10" />
     <PackageReference Include="ReactiveUI.Validation" Version="2.1.1" />
     <PackageReference Include="ReactiveUI.WPF" Version="13.2.10" />
