@@ -55,7 +55,7 @@
     <PackageReference Include="ReactiveUI.Events.WPF" Version="13.2.10" />
     <PackageReference Include="ReactiveUI.Fody" Version="13.2.10" />
     <PackageReference Include="ReactiveUI.Validation" Version="2.1.1" />
-    <PackageReference Include="ReactiveUI.WPF" Version="13.2.10" />
+    <PackageReference Include="ReactiveUI.WPF" Version="13.2.18" />
     <PackageReference Include="Splat.NLog" Version="11.0.1" />
     <PackageReference Include="System.CommandLine" Version="2.0.0-beta1.21208.1" />
     <PackageReference Include="System.Reactive" Version="5.0.0" />
