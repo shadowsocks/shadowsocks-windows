@@ -29,7 +29,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.CommandLine" Version="2.0.0-beta1.21212.2" />
+    <PackageReference Include="System.CommandLine" Version="2.0.0-beta1.21214.1" />
   </ItemGroup>
 
   <ItemGroup>
