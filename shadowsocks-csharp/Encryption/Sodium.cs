@@ -12,7 +12,12 @@ namespace Shadowsocks.Encryption
     {
         private static Logger logger = LogManager.GetCurrentClassLogger();
 
+#if AMD64
+        private const string DPDLLNAME = "libcrypto-3-x64.dll";
+        private const string DLLNAME = "libsscrypto64.dll";
+#else
         private const string DLLNAME = "libsscrypto.dll";
+#endif
 
         private static bool _initialized = false;
         private static readonly object _initLock = new object();
@@ -22,9 +27,19 @@ namespace Shadowsocks.Encryption
         static Sodium()
         {
             string dllPath = Utils.GetTempPath(DLLNAME);
+#if AMD64
+            string dpDllPath = Utils.GetTempPath(DPDLLNAME);
+
+#endif
             try
             {
+#if AMD64
+                FileManager.UncompressFile(dpDllPath, Resources.libcrypto_3_x64_dll);
+                FileManager.UncompressFile(dllPath, Resources.libsscrypto64_dll);
+#else
                 FileManager.UncompressFile(dllPath, Resources.libsscrypto_dll);
+#endif
+
             }
             catch (IOException)
             {
@@ -33,6 +48,10 @@ namespace Shadowsocks.Encryption
             {
                 logger.LogUsefulException(e);
             }
+#if AMD64
+            LoadLibrary(dpDllPath);
+
+#endif
             LoadLibrary(dllPath);
 
             lock (_initLock)

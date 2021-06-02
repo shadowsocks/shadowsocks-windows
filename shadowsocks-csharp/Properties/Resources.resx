@@ -127,6 +127,12 @@
   <data name="i18n_csv" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Data\i18n.csv;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
   </data>
+  <data name="libcrypto_3_x64_dll" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Data\libcrypto-3-x64.dll.gz;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="libsscrypto64_dll" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Data\libsscrypto64.dll.gz;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
   <data name="libsscrypto_dll" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Data\libsscrypto.dll.gz;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
