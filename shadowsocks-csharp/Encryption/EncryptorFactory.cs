@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Text;
 using Shadowsocks.Encryption.AEAD;
+using Shadowsocks.Encryption.Stream;
 
 namespace Shadowsocks.Encryption
 {
@@ -16,6 +17,8 @@ namespace Shadowsocks.Encryption
         {
             var AEADMbedTLSEncryptorSupportedCiphers = AEADMbedTLSEncryptor.SupportedCiphers();
             var AEADSodiumEncryptorSupportedCiphers = AEADSodiumEncryptor.SupportedCiphers();
+            var PlainEncryptorSupportedCiphers = PlainEncryptor.SupportedCiphers();
+
             if (Sodium.AES256GCMAvailable)
             {
                 // prefer to aes-256-gcm in libsodium
@@ -42,6 +45,12 @@ namespace Shadowsocks.Encryption
             {
                 if (!_registeredEncryptors.ContainsKey(method))
                     _registeredEncryptors.Add(method, typeof(AEADMbedTLSEncryptor));
+            }
+
+            foreach (string method in PlainEncryptorSupportedCiphers)
+            {
+                if (!_registeredEncryptors.ContainsKey(method))
+                    _registeredEncryptors.Add(method, typeof(PlainEncryptor));
             }
         }
 
