@@ -240,6 +240,7 @@
     <Compile Include="Encryption\OpenSSL.cs" />
     <Compile Include="Encryption\RNG.cs" />
     <Compile Include="Encryption\Sodium.cs" />
+    <Compile Include="Encryption\Stream\PlainEncryptor.cs" />
     <Compile Include="Localization\LocalizationProvider.cs" />
     <Compile Include="Localization\Strings.Designer.cs">
       <AutoGen>True</AutoGen>

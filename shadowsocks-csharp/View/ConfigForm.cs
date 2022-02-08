@@ -27,6 +27,8 @@ namespace Shadowsocks.View
             // Edit here to add/delete encryption method displayed in UI
             private static string[] inuseMethod = new string[]
             {
+                "none",
+                "plain",
                 "aes-256-gcm",
                 "aes-192-gcm",
                 "aes-128-gcm",
@@ -610,6 +612,11 @@ namespace Shadowsocks.View
         private void UsePluginArgCheckBox_CheckedChanged(object sender, EventArgs e)
         {
             ShowHidePluginArgInput(NeedPluginArgCheckBox.Checked);
+        }
+
+        private void EncryptionSelect_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
         }
     }
 }
