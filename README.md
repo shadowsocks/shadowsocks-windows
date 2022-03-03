@@ -48,7 +48,7 @@ Download from [releases](https://github.com/shadowsocks/shadowsocks-windows/rele
 
 ### Build
 
-1. Clone the repository recursively.
+1. Clone this repository recursively.
 ```bash
 $ git clone --recursive https://github.com/shadowsocks/shadowsocks-windows.git
 ```
