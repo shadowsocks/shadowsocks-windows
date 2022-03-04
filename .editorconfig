@@ -32,6 +32,9 @@ dotnet_naming_symbols.private_static_readonly_symbols.applicable_accessibilities
 dotnet_naming_symbols.private_static_readonly_symbols.applicable_kinds = field
 dotnet_naming_symbols.private_static_readonly_symbols.required_modifiers = static,readonly
 dotnet_style_parentheses_in_arithmetic_binary_operators = never_if_unnecessary:none
+
+
+你好啊我试试
 dotnet_style_parentheses_in_other_binary_operators = never_if_unnecessary:none
 dotnet_style_parentheses_in_relational_binary_operators = never_if_unnecessary:none
 dotnet_style_qualification_for_event = false:warning
