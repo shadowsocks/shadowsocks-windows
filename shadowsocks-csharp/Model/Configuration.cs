@@ -116,6 +116,7 @@ namespace Shadowsocks.Model
         NLogConfig nLogConfig;
 
         private static readonly string CONFIG_FILE = "gui-config.json";
+        private static readonly string CONFIG_FILE_BAK = "gui-config_bak.json";
 #if DEBUG
         private static readonly NLogConfig.LogLevel verboseLogLevel = NLogConfig.LogLevel.Trace;
 #else
@@ -161,21 +162,34 @@ namespace Shadowsocks.Model
         public static Configuration Load()
         {
             Configuration config;
+            List<Exception> errors = new List<Exception>();
             if (File.Exists(CONFIG_FILE))
             {
-                try
+
+                string configContent = File.ReadAllText(CONFIG_FILE);
+                config = JsonConvert.DeserializeObject<Configuration>(configContent, new JsonSerializerSettings()
                 {
-                    string configContent = File.ReadAllText(CONFIG_FILE);
-                    config = JsonConvert.DeserializeObject<Configuration>(configContent, new JsonSerializerSettings()
+                    ObjectCreationHandling = ObjectCreationHandling.Replace,
+                    Error = delegate (object sender, Newtonsoft.Json.Serialization.ErrorEventArgs args)
                     {
-                        ObjectCreationHandling = ObjectCreationHandling.Replace
-                    });
+                        errors.Add(args.ErrorContext.Error);
+                    },
+                });
+                if (errors.Count == 0)
+                {
+                    try
+                    {
+                        File.WriteAllText(CONFIG_FILE_BAK, configContent);
+                    }
+                    catch (Exception) { };
                     return config;
                 }
-                catch (Exception e)
+                else
                 {
-                    if (!(e is FileNotFoundException))
-                        logger.LogUsefulException(e);
+                    foreach(Exception error in errors)
+                    {
+                        logger.LogUsefulException(error);
+                    };
                 }
             }
             config = new Configuration();
