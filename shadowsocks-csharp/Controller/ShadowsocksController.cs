@@ -175,18 +175,9 @@ namespace Shadowsocks.Controller
 
             logger.Info($"WPF Localization Extension|Current culture: {LocalizeDictionary.CurrentCulture}");
 
-            // set User-Agent for httpClient
-            try
-            {
-                if (!string.IsNullOrWhiteSpace(_config.userAgentString))
-                    httpClient.DefaultRequestHeaders.Add("User-Agent", _config.userAgentString);
-            }
-            catch
-            {
-                // reset userAgent to default and reapply
-                Configuration.ResetUserAgent(_config);
+            httpClient.DefaultRequestHeaders.Remove("User-Agent");
+            if (!string.IsNullOrWhiteSpace(_config.userAgentString))
                 httpClient.DefaultRequestHeaders.Add("User-Agent", _config.userAgentString);
-            }
 
             privoxyRunner = privoxyRunner ?? new PrivoxyRunner();
 
