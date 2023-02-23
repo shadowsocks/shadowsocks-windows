@@ -322,12 +322,6 @@ namespace Shadowsocks.Model
             geositeProxiedGroups.Add("geolocation-!cn");
         }
 
-        public static void ResetUserAgent(Configuration config)
-        {
-            config.userAgent = "ShadowsocksWindows/$version";
-            config.userAgentString = config.userAgent.Replace("$version", config.version);
-        }
-
         public static Server AddDefaultServerOrServer(Configuration config, Server server = null, int? index = null)
         {
             if (config?.configs != null)
