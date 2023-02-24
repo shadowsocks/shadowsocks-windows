@@ -59,6 +59,7 @@ namespace Shadowsocks.View
         private MenuItem ShowPluginOutputToggleItem;
         private MenuItem WriteI18NFileItem;
         private MenuItem onlineConfigItem;
+        private MenuItem PacBlacklist;
 
         private ConfigForm configForm;
         private LogForm logForm;
@@ -277,6 +278,7 @@ namespace Shadowsocks.View
                     this.editLocalPACItem = CreateMenuItem("Edit Local PAC File...", new EventHandler(this.EditPACFileItem_Click)),
                     this.updateFromGeositeItem = CreateMenuItem("Update Local PAC from Geosite", new EventHandler(this.UpdatePACFromGeositeItem_Click)),
                     this.editGFWUserRuleItem = CreateMenuItem("Edit User Rule for Geosite...", new EventHandler(this.EditUserRuleFileForGeositeItem_Click)),
+                    this.PacBlacklist = CreateMenuItem("Blacklist instead of whitelist mode",new EventHandler(this.PacWhitelist_Click)),
                     this.secureLocalPacUrlToggleItem = CreateMenuItem("Secure Local PAC", new EventHandler(this.SecureLocalPacUrlToggleItem_Click)),
                     this.regenerateLocalPacOnUpdateItem = CreateMenuItem("Regenerate local PAC on version update", new EventHandler(this.RegenerateLocalPacOnUpdateItem_Click)),
                     CreateMenuItem("Copy Local PAC URL", new EventHandler(this.CopyLocalPacUrlItem_Click)),
@@ -309,7 +311,11 @@ namespace Shadowsocks.View
         }
 
         #endregion
-
+        private void PacWhitelist_Click(object sender, EventArgs e)
+        {
+            var config = controller.GetCurrentConfiguration();
+            controller.PacWhiteModeOnUpdate(!config.geositePreferDirect);
+        }
         private void controller_TrafficChanged(object sender, EventArgs e)
         {
             if (icon == null)
@@ -361,6 +367,8 @@ namespace Shadowsocks.View
             localPACItem.Checked = !onlinePACItem.Checked;
             secureLocalPacUrlToggleItem.Checked = config.secureLocalPac;
             regenerateLocalPacOnUpdateItem.Checked = config.regeneratePacOnUpdate;
+            PacBlacklist.Checked = config.geositePreferDirect;
+
             UpdatePACItemsEnabledStatus();
             UpdateUpdateMenu();
         }
