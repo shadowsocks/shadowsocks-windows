@@ -406,7 +406,12 @@ namespace Shadowsocks.Controller
 
             ConfigChanged?.Invoke(this, new EventArgs());
         }
-
+        public void PacWhiteModeOnUpdate(bool enabled)
+        {
+            _config.geositePreferDirect = enabled;
+            SaveConfig(_config);
+            ConfigChanged?.Invoke(this, new EventArgs());
+        }
         public void ToggleRegeneratePacOnUpdate(bool enabled)
         {
             _config.regeneratePacOnUpdate = enabled;
