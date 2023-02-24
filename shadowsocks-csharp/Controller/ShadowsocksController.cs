@@ -408,6 +408,14 @@ namespace Shadowsocks.Controller
         }
         public void PacWhiteModeOnUpdate(bool enabled)
         {
+            try
+            {
+                File.Delete(PACDaemon.PAC_FILE);
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show(I18N.GetString("Failed to delete pac file") + Environment.NewLine + e.Message, I18N.GetString("Operation failure"));
+            }
             _config.geositePreferDirect = enabled;
             SaveConfig(_config);
             ConfigChanged?.Invoke(this, new EventArgs());
