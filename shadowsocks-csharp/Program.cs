@@ -125,7 +125,7 @@ namespace Shadowsocks
             bool LangNull = true;
             foreach (InputLanguage lang in InputLanguage.InstalledInputLanguages)
             {
-                if ("zh-CHS,en,zh-CHT,ja,ru,fr".Contains(lang.Culture.Parent.Name))
+                if ("zh-CHS,en,zh-CHT,ja,ru,fr,ko,zh-Hans,zh-Hant".Contains(lang.Culture.Parent.Name))
                 {
                     LocalizeDictionary.Instance.Culture = lang.Culture;
                     LangNull = false;
