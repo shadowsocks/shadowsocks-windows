@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.IO.Pipes;
 using System.Net;
@@ -121,7 +122,20 @@ namespace Shadowsocks
             // We have to manually set the culture for the LocalizeDictionary instance.
             // https://stackoverflow.com/questions/374518/localizing-a-winforms-application-with-embedded-wpf-user-controls
             // https://stackoverflow.com/questions/14668640/wpf-localize-extension-translate-window-at-run-time
-            LocalizeDictionary.Instance.Culture = Thread.CurrentThread.CurrentCulture;
+            bool LangNull = true;
+            foreach (InputLanguage lang in InputLanguage.InstalledInputLanguages)
+            {
+                if ("zh-CHS,en,zh-CHT,ja,ru,fr,ko,zh-Hans,zh-Hant".Contains(lang.Culture.Parent.Name))
+                {
+                    LocalizeDictionary.Instance.Culture = lang.Culture;
+                    LangNull = false;
+                    break;
+                }
+            }
+            if (LangNull)
+            {
+                LocalizeDictionary.Instance.Culture = InputLanguage.InstalledInputLanguages[0].Culture;
+            }
 
 #if DEBUG
             // truncate privoxy log file while debugging
