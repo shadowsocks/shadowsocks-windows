@@ -125,19 +125,16 @@ namespace Shadowsocks
             bool LangNull = true;
             foreach (InputLanguage lang in InputLanguage.InstalledInputLanguages)
             {
-                if ("zh-CHS,en,zh-CHT,ja,ru,fr".Contains(lang.Culture.Parent.ToString()))
+                if ("zh-CHS,en,zh-CHT,ja,ru,fr".Contains(lang.Culture.Parent.Name))
                 {
-
-                    LocalizeDictionary.Instance.Culture = new CultureInfo(lang.Culture.ToString());
+                    LocalizeDictionary.Instance.Culture = lang.Culture;
                     LangNull = false;
                     break;
                 }
-
-
             }
             if (LangNull)
             {
-                LocalizeDictionary.Instance.Culture = Thread.CurrentThread.CurrentCulture;
+                LocalizeDictionary.Instance.Culture = InputLanguage.InstalledInputLanguages[0].Culture;
             }
 
 #if DEBUG
