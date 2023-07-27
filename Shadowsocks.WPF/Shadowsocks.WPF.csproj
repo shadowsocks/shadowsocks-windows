@@ -49,18 +49,19 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="MaterialDesignThemes" Version="4.0.0" />
-    <PackageReference Include="MdXaml" Version="1.10.0" />
-    <PackageReference Include="OxyPlot.Wpf" Version="2.0.0" />
-    <PackageReference Include="ReactiveUI.Events.WPF" Version="13.2.18" />
-    <PackageReference Include="ReactiveUI.Fody" Version="13.2.18" />
-    <PackageReference Include="ReactiveUI.Validation" Version="2.1.1" />
-    <PackageReference Include="ReactiveUI.WPF" Version="13.2.18" />
-    <PackageReference Include="Splat.NLog" Version="11.0.1" />
+    <PackageReference Include="MaterialDesignThemes" Version="4.9.0" />
+    <PackageReference Include="MdXaml" Version="1.21.0" />
+    <PackageReference Include="OxyPlot.Wpf" Version="2.1.2" />
+    <PackageReference Include="ReactiveUI.Events.WPF" Version="15.1.1" />
+    <PackageReference Include="ReactiveUI.Fody" Version="19.4.1" />
+    <PackageReference Include="ReactiveUI.Validation" Version="3.1.7" />
+    <PackageReference Include="ReactiveUI.WPF" Version="19.4.1" />
+    <PackageReference Include="Splat.NLog" Version="14.7.1" />
     <PackageReference Include="System.CommandLine" Version="2.0.0-beta1.21223.1" />
-    <PackageReference Include="System.Reactive" Version="5.0.0" />
-    <PackageReference Include="WPFLocalizeExtension" Version="3.8.0" />
-    <PackageReference Include="ZXing.Net" Version="0.16.6" />
+    <PackageReference Include="System.Reactive" Version="6.0.0" />
+    <PackageReference Include="WPFLocalizeExtension" Version="3.10.0" />
+    <PackageReference Include="ZXing.Net" Version="0.16.9" />
+    <PackageReference Include="ZXing.Net.Bindings.Windows.Compatibility" Version="0.16.12" />
   </ItemGroup>
 
   <ItemGroup>
