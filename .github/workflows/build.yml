@@ -77,53 +77,53 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: shadowsocks-cli-${{ github.sha }}-linux-arm64
-          path: Shadowsocks.CLI/bin/Release/net5.0/linux-arm64/publish/
+          path: Shadowsocks.CLI/bin/Release/net7.0/linux-arm64/publish/
       - name: Upload CLI artifacts for Linux x64
         if: matrix.os == 'ubuntu-20.04'
         uses: actions/upload-artifact@v3
         with:
           name: shadowsocks-cli-${{ github.sha }}-linux-x64
-          path: Shadowsocks.CLI/bin/Release/net5.0/linux-x64/publish/
+          path: Shadowsocks.CLI/bin/Release/net7.0/linux-x64/publish/
       - name: Upload CLI artifacts for Linux framework-dependent
         if: matrix.os == 'ubuntu-20.04'
         uses: actions/upload-artifact@v3
         with:
           name: shadowsocks-cli-${{ github.sha }}-linux
-          path: Shadowsocks.CLI/bin/Release/net5.0/publish/
+          path: Shadowsocks.CLI/bin/Release/net7.0/publish/
       - name: Upload CLI artifacts for Windows ARM64
         if: matrix.os == 'windows-latest'
         uses: actions/upload-artifact@v3
         with:
           name: shadowsocks-cli-${{ github.sha }}-windows-arm64
-          path: Shadowsocks.CLI/bin/Release/net5.0/win-arm64/publish/
+          path: Shadowsocks.CLI/bin/Release/net7.0/win-arm64/publish/
       - name: Upload CLI artifacts for Windows x64
         if: matrix.os == 'windows-latest'
         uses: actions/upload-artifact@v3
         with:
           name: shadowsocks-cli-${{ github.sha }}-windows-x64
-          path: Shadowsocks.CLI/bin/Release/net5.0/win-x64/publish/
+          path: Shadowsocks.CLI/bin/Release/net7.0/win-x64/publish/
       - name: Upload CLI artifacts for Windows framework-dependent
         if: matrix.os == 'windows-latest'
         uses: actions/upload-artifact@v3
         with:
           name: shadowsocks-cli-${{ github.sha }}-windows
-          path: Shadowsocks.CLI/bin/Release/net5.0/publish/
+          path: Shadowsocks.CLI/bin/Release/net7.0/publish/
       # Upload WPF
       # - name: Upload WPF artifacts for Windows ARM64
       #   if: matrix.os == 'windows-latest'
       #   uses: actions/upload-artifact@v3
       #   with:
       #     name: shadowsocks-wpf-${{ github.sha }}-windows-arm64
-      #     path: Shadowsocks.WPF/bin/Release/net5.0-windows10.0.19041.0/win-arm64/publish/
+      #     path: Shadowsocks.WPF/bin/Release/net7.0-windows/win-arm64/publish/
       - name: Upload WPF artifacts for Windows x64
         if: matrix.os == 'windows-latest'
         uses: actions/upload-artifact@v3
         with:
           name: shadowsocks-wpf-${{ github.sha }}-windows-x64
-          path: Shadowsocks.WPF/bin/Release/net5.0-windows10.0.19041.0/win-x64/publish/
+          path: Shadowsocks.WPF/bin/Release/net7.0-windows/win-x64/publish/
       - name: Upload WPF artifacts for Windows framework-dependent
         if: matrix.os == 'windows-latest'
         uses: actions/upload-artifact@v3
         with:
           name: shadowsocks-wpf-${{ github.sha }}-windows
-          path: Shadowsocks.WPF/bin/Release/net5.0-windows10.0.19041.0/publish/
+          path: Shadowsocks.WPF/bin/Release/net7.0-windows/publish/
