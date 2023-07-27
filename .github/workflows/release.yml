@@ -18,7 +18,7 @@ jobs:
         shell: bash
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Restore dependencies
         if: matrix.os == 'windows-latest'
         run: dotnet restore
