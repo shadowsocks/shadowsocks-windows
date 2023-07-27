@@ -26,13 +26,15 @@ namespace Shadowsocks.Protocol.Shadowsocks.Crypto
                 {
                     if (i == 0)
                     {
-                        MD5Utils.Default(pw, md5Sum);
+                        using DefaultMD5Digest md5 = new();
+                        md5.UpdateFinal(pw, md5Sum);
                     }
                     else
                     {
                         md5Sum.CopyTo(result);
                         pw.CopyTo(result.Slice(md5Length));
-                        MD5Utils.Default(result, md5Sum);
+                        using DefaultMD5Digest md5 = new();
+                        md5.UpdateFinal(result, md5Sum);
                     }
 
                     var length = Math.Min(16, keylen - i);

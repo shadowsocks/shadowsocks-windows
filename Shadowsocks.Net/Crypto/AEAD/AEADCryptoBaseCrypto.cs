@@ -1,5 +1,5 @@
 #nullable enable
-using CryptoBase;
+using CryptoBase.SymmetricCryptos.AEADCryptos;
 using CryptoBase.Abstractions.SymmetricCryptos;
 using System;
 using System.Collections.Generic;

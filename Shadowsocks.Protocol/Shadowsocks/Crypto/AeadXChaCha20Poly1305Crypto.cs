@@ -1,4 +1,4 @@
-using CryptoBase;
+using CryptoBase.SymmetricCryptos.AEADCryptos;
 
 namespace Shadowsocks.Protocol.Shadowsocks.Crypto
 {

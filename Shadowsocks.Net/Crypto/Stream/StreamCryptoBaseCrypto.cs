@@ -1,5 +1,6 @@
 #nullable enable
 using CryptoBase;
+using CryptoBase.SymmetricCryptos.StreamCryptos;
 using CryptoBase.Abstractions.SymmetricCryptos;
 using CryptoBase.Digests.MD5;
 using System;
@@ -27,7 +28,8 @@ namespace Shadowsocks.Net.Crypto.Stream
                 var realKey = new byte[MD5Length];
                 key.CopyTo(temp);
                 iv.CopyTo(temp.Slice(keyLen));
-                MD5Utils.Fast440(temp, realKey);
+                using Fast440MD5Digest md5 = new();
+                md5.UpdateFinal(temp, realKey);
 
                 _crypto = StreamCryptoCreate.Rc4(realKey);
                 return;
