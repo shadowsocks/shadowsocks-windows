@@ -1,16 +1,9 @@
 using System.Collections.Generic;
 
-namespace Shadowsocks.Interop.V2Ray.Transport
-{
-    public class HttpObject
-    {
-        public List<string> Host { get; set; }
-        public string Path { get; set; }
+namespace Shadowsocks.Interop.V2Ray.Transport;
 
-        public HttpObject()
-        {
-            Host = new();
-            Path = "/";
-        }
-    }
+public class HttpObject
+{
+    public List<string> Host { get; set; } = new();
+    public string Path { get; set; } = "/";
 }

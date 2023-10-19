@@ -13,20 +13,19 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace Shadowsocks.WPF.Views
-{
-    /// <summary>
-    /// Interaction logic for DashboardView.xaml
-    /// </summary>
-    public partial class DashboardView
-    {
-        public DashboardView()
-        {
-            InitializeComponent();
-            this.WhenActivated(disposables =>
-            {
+namespace Shadowsocks.WPF.Views;
 
-            });
-        }
+/// <summary>
+/// Interaction logic for DashboardView.xaml
+/// </summary>
+public partial class DashboardView
+{
+    public DashboardView()
+    {
+        InitializeComponent();
+        this.WhenActivated(disposables =>
+        {
+
+        });
     }
 }

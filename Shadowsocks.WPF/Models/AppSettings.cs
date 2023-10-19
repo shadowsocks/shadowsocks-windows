@@ -1,22 +1,9 @@
-using System;
-using System.Collections.Generic;
-using System.Text;
+namespace Shadowsocks.WPF.Models;
 
-namespace Shadowsocks.WPF.Models
+public class AppSettings
 {
-    public class AppSettings
-    {
-        public bool StartOnBoot { get; set; }
-        public bool AssociateSsLinks { get; set; }
-        public bool VersionUpdateCheckForPrerelease { get; set; }
-        public string SkippedUpdateVersion { get; set; }
-
-        public AppSettings()
-        {
-            StartOnBoot = false;
-            AssociateSsLinks = false;
-            VersionUpdateCheckForPrerelease = false;
-            SkippedUpdateVersion = "";
-        }
-    }
+    public bool StartOnBoot { get; set; } = false;
+    public bool AssociateSsLinks { get; set; } = false;
+    public bool VersionUpdateCheckForPreRelease { get; set; } = false;
+    public string SkippedUpdateVersion { get; set; } = "";
 }

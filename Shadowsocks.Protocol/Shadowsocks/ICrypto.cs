@@ -1,12 +1,11 @@
 using System;
 
-namespace Shadowsocks.Protocol.Shadowsocks
+namespace Shadowsocks.Protocol.Shadowsocks;
+
+// stream cipher simply ignore nonce
+public interface ICrypto : IDisposable
 {
-    // stream cipher simply ignore nonce
-    public interface ICrypto : IDisposable
-    {
-        void Init(byte[] key, byte[] iv);
-        int Encrypt(ReadOnlySpan<byte> nonce, ReadOnlySpan<byte> plain, Span<byte> cipher);
-        int Decrypt(ReadOnlySpan<byte> nonce, Span<byte> plain, ReadOnlySpan<byte> cipher);
-    }
+    public void Init(byte[] key, byte[] iv);
+    public int Encrypt(ReadOnlySpan<byte> nonce, ReadOnlySpan<byte> plain, Span<byte> cipher);
+    public int Decrypt(ReadOnlySpan<byte> nonce, Span<byte> plain, ReadOnlySpan<byte> cipher);
 }

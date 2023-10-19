@@ -1,10 +1,9 @@
-namespace Shadowsocks.CLI
+namespace Shadowsocks.CLI;
+
+public enum Backend
 {
-    public enum Backend
-    {
-        SsRust,
-        V2Ray,
-        Legacy,
-        Pipelines,
-    }
+    SsRust = 0,
+    V2Ray = 1,
+    Legacy = 2,
+    Pipelines = 3,
 }

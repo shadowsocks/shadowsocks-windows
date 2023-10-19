@@ -3,27 +3,17 @@ using Shadowsocks.Net.Settings;
 using Shadowsocks.PAC;
 using System.Collections.Generic;
 
-namespace Shadowsocks.WPF.Models
+namespace Shadowsocks.WPF.Models;
+
+public class Settings
 {
-    public class Settings
-    {
-        public AppSettings App { get; set; }
+    public AppSettings App { get; set; } = new();
 
-        public InteropSettings Interop { get; set; }
-        
-        public NetSettings Net { get; set; }
+    public InteropSettings Interop { get; set; } = new();
 
-        public PACSettings PAC { get; set; }
-        
-        public List<Group> Groups { get; set; }
-        
-        public Settings()
-        {
-            App = new AppSettings();
-            Interop = new InteropSettings();
-            Net = new NetSettings();
-            PAC = new PACSettings();
-            Groups = new List<Group>();
-        }
-    }
+    public NetSettings Net { get; set; } = new();
+
+    public PacSettings Pac { get; set; } = new();
+
+    public List<Group> Groups { get; set; } = [];
 }
