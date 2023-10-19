@@ -73,7 +73,7 @@ jobs:
           ZSTD_NBTHREADS: 2
         run: |
           # Shadowsocks.CLI
-          cd Shadowsocks.CLI/bin/Release/net5.0/publish
+          cd Shadowsocks.CLI/bin/Release/net8.0/publish
           tar -acf ../shadowsocks-cli-${{ steps.get_version.outputs.VERSION }}-linux.tar.zst .
           cd ../linux-arm64/publish
           tar -acf ../../shadowsocks-cli-${{ steps.get_version.outputs.VERSION }}-linux-arm64.tar.zst .
@@ -83,7 +83,7 @@ jobs:
         if: matrix.os == 'windows-latest'
         run: |
           # WPF
-          cd Shadowsocks.WPF/bin/Release/net5.0-windows10.0.19041.0/publish
+          cd Shadowsocks.WPF/bin/Release/net8.0-windows10.0.19041.0/publish
           7z a -tzip -mx=9 -mfb=128 ../shadowsocks-wpf-${{ steps.get_version.outputs.VERSION }}-windows.zip .
           7z a -t7z -m0=lzma2 -mx=9 -mfb=64 -md=64m -ms=on ../shadowsocks-wpf-${{ steps.get_version.outputs.VERSION }}-windows.7z .
           # cd ../win-arm64/publish
@@ -93,7 +93,7 @@ jobs:
           7z a -tzip -mx=9 -mfb=128 ../../shadowsocks-wpf-${{ steps.get_version.outputs.VERSION }}-windows-x64.zip .
           7z a -t7z -m0=lzma2 -mx=9 -mfb=64 -md=64m -ms=on ../../shadowsocks-wpf-${{ steps.get_version.outputs.VERSION }}-windows-x64.7z .
           # CLI
-          cd ../../../../../Shadowsocks.CLI/bin/Release/net5.0/publish
+          cd ../../../../../Shadowsocks.CLI/bin/Release/net8.0/publish
           7z a -tzip -mx=9 -mfb=128 ../shadowsocks-cli-${{ steps.get_version.outputs.VERSION }}-windows.zip .
           7z a -t7z -m0=lzma2 -mx=9 -mfb=64 -md=64m -ms=on ../shadowsocks-cli-${{ steps.get_version.outputs.VERSION }}-windows.7z .
           cd ../win-arm64/publish
@@ -108,7 +108,7 @@ jobs:
         if: matrix.os == 'ubuntu-20.04'
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: Shadowsocks.CLI/bin/Release/net5.0/*.tar.zst
+          file: Shadowsocks.CLI/bin/Release/net8.0/*.tar.zst
           tag: ${{ github.ref }}
           file_glob: true
           prerelease: true
@@ -117,7 +117,7 @@ jobs:
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: Shadowsocks.CLI/bin/Release/net5.0/shadowsocks-wpf-*
+          file: Shadowsocks.CLI/bin/Release/net8.0/shadowsocks-wpf-*
           tag: ${{ github.ref }}
           file_glob: true
           prerelease: true
@@ -126,7 +126,7 @@ jobs:
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: Shadowsocks.WPF/bin/Release/net5.0-windows10.0.19041.0/shadowsocks-wpf-*
+          file: Shadowsocks.WPF/bin/Release/net8.0-windows10.0.19041.0/shadowsocks-wpf-*
           tag: ${{ github.ref }}
           file_glob: true
           prerelease: true
