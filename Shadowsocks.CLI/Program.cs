@@ -27,6 +27,7 @@ internal class Program
         clientCommand.AddOption(new Option<string?>("--plugin", "Plugin binary path."));
         clientCommand.AddOption(new Option<string?>("--plugin-opts", "Plugin options."));
         clientCommand.AddOption(new Option<string?>("--plugin-args", "Plugin startup arguments."));
+        
         clientCommand.Handler = CommandHandler.Create(
             async (Backend backend, string? listen, string? listenSocks, string? listenHttp, string serverAddress, int serverPort, string method, string? password, string? key, string? plugin, string? pluginOpts, string? pluginArgs, CancellationToken cancellationToken) =>
             {
