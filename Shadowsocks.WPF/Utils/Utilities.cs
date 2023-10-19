@@ -8,6 +8,7 @@ using System.Windows;
 using ZXing;
 using ZXing.Common;
 using ZXing.QrCode;
+using ZXing.Windows.Compatibility;
 
 namespace Shadowsocks.WPF.Utils;
 

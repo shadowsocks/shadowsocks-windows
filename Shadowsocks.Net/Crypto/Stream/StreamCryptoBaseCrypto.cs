@@ -1,7 +1,7 @@
 #nullable enable
-using CryptoBase;
 using CryptoBase.Abstractions.SymmetricCryptos;
 using CryptoBase.Digests.MD5;
+using CryptoBase.SymmetricCryptos.StreamCryptos;
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
@@ -23,7 +23,8 @@ public class StreamCryptoBaseCrypto(string method, string password) : StreamCryp
             var realKey = new byte[MD5Length];
             key.CopyTo(temp);
             iv.CopyTo(temp.Slice(keyLen));
-            MD5Utils.Fast440(temp, realKey);
+            using Fast440MD5Digest md5 = new();
+            md5.UpdateFinal(temp, realKey);
 
             _crypto = StreamCryptoCreate.Rc4(realKey);
             return;
