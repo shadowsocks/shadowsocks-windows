@@ -1,30 +1,16 @@
 using Shadowsocks.Interop.V2Ray.Transport.Header;
 
-namespace Shadowsocks.Interop.V2Ray.Transport
-{
-    public class KcpObject
-    {
-        public int Mtu { get; set; }
-        public int Tti { get; set; }
-        public int UplinkCapacity { get; set; }
-        public int DownlinkCapacity { get; set; }
-        public bool Congestion { get; set; }
-        public int ReadBufferSize { get; set; }
-        public int WriteBufferSize { get; set; }
-        public HeaderObject Header { get; set; }
-        public string Seed { get; set; }
+namespace Shadowsocks.Interop.V2Ray.Transport;
 
-        public KcpObject()
-        {
-            Mtu = 1350;
-            Tti = 50;
-            UplinkCapacity = 5;
-            DownlinkCapacity = 20;
-            Congestion = false;
-            ReadBufferSize = 2;
-            WriteBufferSize = 2;
-            Header = new();
-            Seed = "";
-        }
-    }
+public class KcpObject
+{
+    public int Mtu { get; set; } = 1350;
+    public int Tti { get; set; } = 50;
+    public int UplinkCapacity { get; set; } = 5;
+    public int DownLinkCapacity { get; set; } = 20;
+    public bool Congestion { get; set; } = false;
+    public int ReadBufferSize { get; set; } = 2;
+    public int WriteBufferSize { get; set; } = 2;
+    public HeaderObject Header { get; set; } = new();
+    public string Seed { get; set; } = "";
 }

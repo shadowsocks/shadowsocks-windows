@@ -1,11 +1,10 @@
 using System.IO.Pipelines;
 using System.Threading.Tasks;
 
-namespace Shadowsocks.Protocol
+namespace Shadowsocks.Protocol;
+
+public interface IStreamService
 {
-    public interface IStreamService
-    {
-        Task<bool> IsMyClient(IDuplexPipe pipe);
-        Task<IDuplexPipe> Handle(IDuplexPipe pipe);
-    }
+    Task<bool> IsMyClient(IDuplexPipe pipe);
+    Task<IDuplexPipe> Handle(IDuplexPipe pipe);
 }

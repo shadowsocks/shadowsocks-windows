@@ -1,6 +1,3 @@
-namespace Shadowsocks.Interop.V2Ray
-{
-    public class StatsObject
-    {
-    }
-}
+namespace Shadowsocks.Interop.V2Ray;
+
+public class StatsObject;

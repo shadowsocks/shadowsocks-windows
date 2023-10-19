@@ -1,24 +1,18 @@
 using System;
 
-namespace Shadowsocks.Interop.V2Ray.Protocols.VMess
+namespace Shadowsocks.Interop.V2Ray.Protocols.VMess;
+
+/// <summary>
+/// The user object for VMess AEAD.
+/// </summary>
+public class UserObject(string id = "")
 {
-    /// <summary>
-    /// The user object for VMess AEAD.
-    /// </summary>
-    public class UserObject
+    public string Id { get; set; } = id;
+    public string? Email { get; set; }
+    public int Level { get; set; }
+
+    public static UserObject Default => new()
     {
-        public string Id { get; set; }
-        public string? Email { get; set; }
-        public int Level { get; set; }
-
-        public UserObject(string id = "")
-        {
-            Id = id;
-        }
-
-        public static UserObject Default => new()
-        {
-            Id = Guid.NewGuid().ToString(),
-        };
-    }
+        Id = Guid.NewGuid().ToString(),
+    };
 }

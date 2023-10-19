@@ -1,12 +1,11 @@
 using System.IO.Pipelines;
 using System.Threading.Tasks;
 
-namespace Shadowsocks.Protocol.Direct
-{
-    public class PortForwardService : IStreamService
-    {
-        public async Task<IDuplexPipe> Handle(IDuplexPipe pipe) => await Task.FromResult<IDuplexPipe>(null);
+namespace Shadowsocks.Protocol.Direct;
 
-        public Task<bool> IsMyClient(IDuplexPipe pipe) => Task.FromResult(true);
-    }
+public class PortForwardService : IStreamService
+{
+    public async Task<IDuplexPipe> Handle(IDuplexPipe pipe) => await Task.FromResult<IDuplexPipe>(null);
+
+    public Task<bool> IsMyClient(IDuplexPipe pipe) => Task.FromResult(true);
 }

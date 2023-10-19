@@ -1,17 +1,10 @@
-namespace Shadowsocks.Net.Crypto.Exception
+namespace Shadowsocks.Net.Crypto.Exception;
+
+public class CryptoErrorException : System.Exception
 {
-    public class CryptoErrorException : System.Exception
-    {
-        public CryptoErrorException()
-        {
-        }
+    public CryptoErrorException() { }
 
-        public CryptoErrorException(string msg) : base(msg)
-        {
-        }
+    public CryptoErrorException(string msg) : base(msg) { }
 
-        public CryptoErrorException(string message, System.Exception innerException) : base(message, innerException)
-        {
-        }
-    }
+    public CryptoErrorException(string message, System.Exception innerException) : base(message, innerException) { }
 }

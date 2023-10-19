@@ -13,20 +13,19 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace Shadowsocks.WPF.Views
-{
-    /// <summary>
-    /// Interaction logic for RoutingView.xaml
-    /// </summary>
-    public partial class RoutingView
-    {
-        public RoutingView()
-        {
-            InitializeComponent();
-            this.WhenActivated(disposables =>
-            {
+namespace Shadowsocks.WPF.Views;
 
-            });
-        }
+/// <summary>
+/// Interaction logic for RoutingView.xaml
+/// </summary>
+public partial class RoutingView
+{
+    public RoutingView()
+    {
+        InitializeComponent();
+        this.WhenActivated(disposables =>
+        {
+
+        });
     }
 }

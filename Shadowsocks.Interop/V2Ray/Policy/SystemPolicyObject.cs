@@ -1,18 +1,17 @@
-namespace Shadowsocks.Interop.V2Ray.Policy
-{
-    public class SystemPolicyObject
-    {
-        public bool StatsInboundUplink { get; set; }
-        public bool StatsInboundDownlink { get; set; }
-        public bool StatsOutboundUplink { get; set; }
-        public bool StatsOutboundDownlink { get; set; }
+namespace Shadowsocks.Interop.V2Ray.Policy;
 
-        public static SystemPolicyObject Default => new()
-        {
-            StatsInboundUplink = true,
-            StatsInboundDownlink = true,
-            StatsOutboundUplink = true,
-            StatsOutboundDownlink = true,
-        };
-    }
+public class SystemPolicyObject
+{
+    public bool StatsInboundUplink { get; set; }
+    public bool StatsInboundDownLink { get; set; }
+    public bool StatsOutboundUplink { get; set; }
+    public bool StatsOutboundDownLink { get; set; }
+
+    public static SystemPolicyObject Default => new()
+    {
+        StatsInboundUplink = true,
+        StatsInboundDownLink = true,
+        StatsOutboundUplink = true,
+        StatsOutboundDownLink = true,
+    };
 }

@@ -5,16 +5,15 @@ using Splat;
 using System.Reflection;
 using System.Windows;
 
-namespace Shadowsocks.WPF
+namespace Shadowsocks.WPF;
+
+/// <summary>
+/// Interaction logic for App.xaml
+/// </summary>
+public partial class App : Application
 {
-    /// <summary>
-    /// Interaction logic for App.xaml
-    /// </summary>
-    public partial class App : Application
+    public App()
     {
-        public App()
-        {
-            Locator.CurrentMutable.RegisterViewsForViewModels(Assembly.GetCallingAssembly());
-        }
+        Locator.CurrentMutable.RegisterViewsForViewModels(Assembly.GetCallingAssembly());
     }
 }

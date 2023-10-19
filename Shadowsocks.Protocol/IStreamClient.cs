@@ -2,10 +2,9 @@ using System.IO.Pipelines;
 using System.Net;
 using System.Threading.Tasks;
 
-namespace Shadowsocks.Protocol
+namespace Shadowsocks.Protocol;
+
+internal interface IStreamClient
 {
-    interface IStreamClient
-    {
-        Task Connect(EndPoint destination, IDuplexPipe client, IDuplexPipe server);
-    }
+    Task Connect(EndPoint destination, IDuplexPipe client, IDuplexPipe server);
 }

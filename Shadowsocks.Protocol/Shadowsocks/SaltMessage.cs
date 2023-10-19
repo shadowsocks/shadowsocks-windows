@@ -1,38 +1,36 @@
-using Shadowsocks.Protocol.Shadowsocks.Crypto;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Security.Cryptography;
 
-namespace Shadowsocks.Protocol.Shadowsocks
+namespace Shadowsocks.Protocol.Shadowsocks;
+
+public class SaltMessage : IProtocolMessage
 {
-    public class SaltMessage : IProtocolMessage
+    private readonly int length;
+    public Memory<byte> Salt { get; private set; }
+
+    public SaltMessage(int length, bool roll = false)
     {
-        private readonly int length;
-        public Memory<byte> Salt { get; private set; }
-
-        public SaltMessage(int length, bool roll = false)
+        this.length = length;
+        if (roll)
         {
-            this.length = length;
-            if (roll)
-            {
-                Salt = new byte[length];
-                RandomNumberGenerator.Fill(Salt.Span);
-            }
+            Salt = new byte[length];
+            RandomNumberGenerator.Fill(Salt.Span);
         }
+    }
 
-        public bool Equals([AllowNull] IProtocolMessage other) => throw new NotImplementedException();
+    public bool Equals([AllowNull] IProtocolMessage other) => throw new NotImplementedException();
 
-        public int Serialize(Memory<byte> buffer)
-        {
-            Salt.CopyTo(buffer);
-            return length;
-        }
+    public int Serialize(Memory<byte> buffer)
+    {
+        Salt.CopyTo(buffer);
+        return length;
+    }
 
-        public (bool success, int length) TryLoad(ReadOnlyMemory<byte> buffer)
-        {
-            if (buffer.Length < length) return (false, length);
-            buffer.Slice(0, length).CopyTo(Salt);
-            return (true, length);
-        }
+    public (bool success, int length) TryLoad(ReadOnlyMemory<byte> buffer)
+    {
+        if (buffer.Length < length) return (false, length);
+        buffer.Slice(0, length).CopyTo(Salt);
+        return (true, length);
     }
 }

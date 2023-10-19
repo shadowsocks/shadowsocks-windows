@@ -1,18 +1,17 @@
 using Shadowsocks.Interop.V2Ray.Transport.Header.Http;
 
-namespace Shadowsocks.Interop.V2Ray.Transport.Header
+namespace Shadowsocks.Interop.V2Ray.Transport.Header;
+
+public class HttpHeaderObject : HeaderObject
 {
-    public class HttpHeaderObject : HeaderObject
+    public HttpRequestObject Request { get; set; }
+
+    public HttpResponseObject Response { get; set; }
+
+    public HttpHeaderObject()
     {
-        public HttpRequestObject request { get; set; }
-
-        public HttpResponseObject response { get; set; }
-
-        public HttpHeaderObject()
-        {
-            Type = "http";
-            request = new();
-            response = new();
-        }
+        Type = "http";
+        Request = new();
+        Response = new();
     }
 }

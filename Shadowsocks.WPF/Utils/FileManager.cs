@@ -4,63 +4,58 @@ using System.IO;
 using System.IO.Compression;
 using System.Text;
 
-namespace Shadowsocks.WPF.Utils
+namespace Shadowsocks.WPF.Utils;
+
+public static class FileManager
 {
-    public static class FileManager
+    public static bool ByteArrayToFile(string fileName, byte[] content)
     {
-        public static bool ByteArrayToFile(string fileName, byte[] content)
+        try
         {
-            try
-            {
-                using (var fs = new FileStream(fileName, FileMode.Create, FileAccess.Write))
-                    fs.Write(content, 0, content.Length);
-                return true;
-            }
-            catch (Exception ex)
-            {
-                LogHost.Default.Error(ex, "");
-            }
-            return false;
+            using var fs = new FileStream(fileName, FileMode.Create, FileAccess.Write);
+            fs.Write(content, 0, content.Length);
+            return true;
         }
-
-        public static void UncompressFile(string fileName, byte[] content)
+        catch (Exception ex)
         {
-            // Because the uncompressed size of the file is unknown,
-            // we are using an arbitrary buffer size.
-            byte[] buffer = new byte[4096];
-            int n;
-
-            using(var fs = File.Create(fileName))
-            using (var input = new GZipStream(new MemoryStream(content),
-                    CompressionMode.Decompress, false))
-            {
-                while ((n = input.Read(buffer, 0, buffer.Length)) > 0)
-                {
-                    fs.Write(buffer, 0, n);
-                }
-            }
+            LogHost.Default.Error(ex, "");
         }
+        return false;
+    }
 
-        public static string NonExclusiveReadAllText(string path)
+    public static void UncompressFile(string fileName, byte[] content)
+    {
+        // Because the uncompressed size of the file is unknown,
+        // we are using an arbitrary buffer size.
+        var buffer = new byte[4096];
+        int n;
+
+        using var fs = File.Create(fileName);
+        using var input = new GZipStream
+        (
+            new MemoryStream(content),
+            CompressionMode.Decompress, false
+        );
+        while ((n = input.Read(buffer, 0, buffer.Length)) > 0)
         {
-            return NonExclusiveReadAllText(path, Encoding.Default);
+            fs.Write(buffer, 0, n);
         }
+    }
 
-        public static string NonExclusiveReadAllText(string path, Encoding encoding)
+    public static string NonExclusiveReadAllText(string path) => NonExclusiveReadAllText(path, Encoding.Default);
+
+    public static string NonExclusiveReadAllText(string path, Encoding encoding)
+    {
+        try
         {
-            try
-            {
-                using (var fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
-                using (var sr = new StreamReader(fs, encoding))
-                {
-                    return sr.ReadToEnd();
-                }
-            }
-            catch (Exception ex)
-            {
-                LogHost.Default.Error(ex, "");
-                throw;
-            }
+            using var fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+            using var sr = new StreamReader(fs, encoding);
+            return sr.ReadToEnd();
+        }
+        catch (Exception ex)
+        {
+            LogHost.Default.Error(ex, "");
+            throw;
         }
     }
 }

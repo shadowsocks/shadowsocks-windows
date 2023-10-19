@@ -7,113 +7,112 @@ using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
 
-namespace Shadowsocks.Protocol.Shadowsocks
+namespace Shadowsocks.Protocol.Shadowsocks;
+
+public class AeadClient : IStreamClient
 {
-    public class AeadClient : IStreamClient
+    private CryptoParameter _cryptoParameter;
+    private readonly byte[] _mainKey;
+
+    /// <summary>
+    /// ss-subkey
+    /// </summary>
+    private static ReadOnlySpan<byte> SsSubKeyInfo => new byte[]
     {
-        private CryptoParameter cryptoParameter;
-        private readonly byte[] mainKey;
+        0x73, 0x73, 0x2d, 0x73, 0x75, 0x62, 0x6b, 0x65, 0x79
+    };
 
-        /// <summary>
-        /// ss-subkey
-        /// </summary>
-        private static ReadOnlySpan<byte> _ssSubKeyInfo => new byte[]
+    public AeadClient(CryptoParameter parameter, string password)
+    {
+        _cryptoParameter = parameter;
+        _mainKey = CryptoUtils.SSKDF(password, parameter.KeySize);
+        if (!parameter.IsAead)
+            throw new NotSupportedException("Unsupported method.");
+    }
+
+    public AeadClient(CryptoParameter parameter, byte[] key)
+    {
+        _cryptoParameter = parameter;
+        _mainKey = key;
+    }
+
+    public Task Connect(EndPoint destination, IDuplexPipe client, IDuplexPipe server) =>
+        // destination is ignored, this is just a converter
+        Task.WhenAll(ConvertUplink(client, server), ConvertDownLink(client, server));
+
+    public async Task ConvertUplink(IDuplexPipe client, IDuplexPipe server)
+    {
+        using var up = _cryptoParameter.GetCrypto();
+        var pmp = new ProtocolMessagePipe(server);
+        var salt = new SaltMessage(16, true);
+        await pmp.WriteAsync(salt);
+
+        var key = new byte[_cryptoParameter.KeySize];
+        HKDF.DeriveKey(HashAlgorithmName.SHA1, _mainKey, key, salt.Salt.Span, SsSubKeyInfo);
+        up.Init(key, null);
+        Memory<byte> nonce = new byte[_cryptoParameter.NonceSize];
+        nonce.Span.Fill(0);
+        // TODO write salt with data
+        while (true)
         {
-            0x73, 0x73, 0x2d, 0x73, 0x75, 0x62, 0x6b, 0x65, 0x79
-        };
+            var result = await client.Input.ReadAsync();
+            if (result.IsCanceled || result.IsCompleted) return;
 
-        public AeadClient(CryptoParameter parameter, string password)
-        {
-            cryptoParameter = parameter;
-            mainKey = CryptoUtils.SSKDF(password, parameter.KeySize);
-            if (!parameter.IsAead)
-                throw new NotSupportedException($"Unsupported method.");
-        }
+            // TODO compress into one chunk when possible
 
-        public AeadClient(CryptoParameter parameter, byte[] key)
-        {
-            cryptoParameter = parameter;
-            mainKey = key;
-        }
-
-        public Task Connect(EndPoint destination, IDuplexPipe client, IDuplexPipe server) =>
-            // destination is ignored, this is just a converter
-            Task.WhenAll(ConvertUplink(client, server), ConvertDownlink(client, server));
-
-        public async Task ConvertUplink(IDuplexPipe client, IDuplexPipe server)
-        {
-            using var up = cryptoParameter.GetCrypto();
-            var pmp = new ProtocolMessagePipe(server);
-            var salt = new SaltMessage(16, true);
-            await pmp.WriteAsync(salt);
-
-            var key = new byte[cryptoParameter.KeySize];
-            HKDF.DeriveKey(HashAlgorithmName.SHA1, mainKey, key, salt.Salt.Span, _ssSubKeyInfo);
-            up.Init(key, null);
-            Memory<byte> nonce = new byte[cryptoParameter.NonceSize];
-            nonce.Span.Fill(0);
-            // TODO write salt with data
-            while (true)
+            foreach (var item in result.Buffer)
             {
-                var result = await client.Input.ReadAsync();
-                if (result.IsCanceled || result.IsCompleted) return;
-
-                // TODO compress into one chunk when possible
-
-                foreach (var item in result.Buffer)
+                foreach (var i in SplitBigChunk(item))
                 {
-                    foreach (var i in SplitBigChunk(item))
+                    await pmp.WriteAsync(new AeadBlockMessage(up, nonce, _cryptoParameter)
                     {
-                        await pmp.WriteAsync(new AeadBlockMessage(up, nonce, cryptoParameter)
-                        {
-                            // in send routine, Data is readonly
-                            Data = MemoryMarshal.AsMemory(i),
-                        });
-                    }
+                        // in send routine, Data is readonly
+                        Data = MemoryMarshal.AsMemory(i),
+                    });
                 }
-                client.Input.AdvanceTo(result.Buffer.End);
             }
+            client.Input.AdvanceTo(result.Buffer.End);
         }
+    }
 
-        public async Task ConvertDownlink(IDuplexPipe client, IDuplexPipe server)
+    public async Task ConvertDownLink(IDuplexPipe client, IDuplexPipe server)
+    {
+        using var down = _cryptoParameter.GetCrypto();
+
+        var pmp = new ProtocolMessagePipe(server);
+        var salt = await pmp.ReadAsync(new SaltMessage(_cryptoParameter.KeySize));
+
+        var key = new byte[_cryptoParameter.KeySize];
+        HKDF.DeriveKey(HashAlgorithmName.SHA1, _mainKey, key, salt.Salt.Span, SsSubKeyInfo);
+        down.Init(key, null);
+        Memory<byte> nonce = new byte[_cryptoParameter.NonceSize];
+        nonce.Span.Fill(0);
+
+        while (true)
         {
-            using var down = cryptoParameter.GetCrypto();
-
-            var pmp = new ProtocolMessagePipe(server);
-            var salt = await pmp.ReadAsync(new SaltMessage(cryptoParameter.KeySize));
-
-            var key = new byte[cryptoParameter.KeySize];
-            HKDF.DeriveKey(HashAlgorithmName.SHA1, mainKey, key, salt.Salt.Span, _ssSubKeyInfo);
-            down.Init(key, null);
-            Memory<byte> nonce = new byte[cryptoParameter.NonceSize];
-            nonce.Span.Fill(0);
-
-            while (true)
+            try
             {
-                try
-                {
-                    var block = await pmp.ReadAsync(new AeadBlockMessage(down, nonce, cryptoParameter));
-                    await client.Output.WriteAsync(block.Data);
-                    client.Output.Advance(block.Data.Length);
-                }
-                catch (FormatException)
-                {
-                    return;
-                }
+                var block = await pmp.ReadAsync(new AeadBlockMessage(down, nonce, _cryptoParameter));
+                await client.Output.WriteAsync(block.Data);
+                client.Output.Advance(block.Data.Length);
+            }
+            catch (FormatException)
+            {
+                return;
             }
         }
+    }
 
-        public List<ReadOnlyMemory<byte>> SplitBigChunk(ReadOnlyMemory<byte> mem)
+    public List<ReadOnlyMemory<byte>> SplitBigChunk(ReadOnlyMemory<byte> mem)
+    {
+        var l = new List<ReadOnlyMemory<byte>>(mem.Length / 0x3fff + 1);
+        while (mem.Length > 0x3fff)
         {
-            var l = new List<ReadOnlyMemory<byte>>(mem.Length / 0x3fff + 1);
-            while (mem.Length > 0x3fff)
-            {
 
-                l.Add(mem.Slice(0, 0x3fff));
-                mem = mem.Slice(0x4000);
-            }
-            l.Add(mem);
-            return l;
+            l.Add(mem.Slice(0, 0x3fff));
+            mem = mem.Slice(0x4000);
         }
+        l.Add(mem);
+        return l;
     }
 }

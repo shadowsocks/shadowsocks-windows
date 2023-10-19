@@ -3,14 +3,13 @@ using System.IO.Pipelines;
 using System.Net;
 using System.Threading.Tasks;
 
-namespace Shadowsocks.Protocol
+namespace Shadowsocks.Protocol;
+
+public class TcpPipeClient : IStreamClient
 {
-    public class TcpPipeClient : IStreamClient
+    public async Task Connect(EndPoint destination, IDuplexPipe client, IDuplexPipe server)
     {
-        public async Task Connect(EndPoint destination, IDuplexPipe client, IDuplexPipe server)
-        {
-            var sc = await SocketConnection.ConnectAsync(destination);
-            await DuplexPipe.CopyDuplexPipe(client, sc);
-        }
+        var sc = await SocketConnection.ConnectAsync(destination);
+        await DuplexPipe.CopyDuplexPipe(client, sc);
     }
 }

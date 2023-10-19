@@ -1,9 +1,3 @@
-using System;
-using Xunit;
+namespace Shadowsocks.WPF.Tests;
 
-namespace Shadowsocks.WPF.Tests
-{
-    public class DataUsageTests
-    {
-    }
-}
+public class DataUsageTests;

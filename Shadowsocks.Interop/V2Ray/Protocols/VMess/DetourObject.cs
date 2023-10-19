@@ -1,12 +1,6 @@
-namespace Shadowsocks.Interop.V2Ray.Protocols.VMess
-{
-    public class DetourObject
-    {
-        public string To { get; set; }
+namespace Shadowsocks.Interop.V2Ray.Protocols.VMess;
 
-        public DetourObject()
-        {
-            To = "";
-        }
-    }
+public class DetourObject
+{
+    public string To { get; set; } = "";
 }

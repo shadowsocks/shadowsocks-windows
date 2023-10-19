@@ -1,4 +1,4 @@
-﻿syntax = "proto3";
+syntax = "proto3";
 
 // DomainObject for routing decision.
 message DomainObject {

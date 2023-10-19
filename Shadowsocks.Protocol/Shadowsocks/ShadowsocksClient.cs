@@ -3,39 +3,38 @@ using System.IO.Pipelines;
 using System.Net;
 using System.Threading.Tasks;
 
-namespace Shadowsocks.Protocol.Shadowsocks
+namespace Shadowsocks.Protocol.Shadowsocks;
+
+internal class ShadowsocksClient : IStreamClient
 {
-    internal class ShadowsocksClient : IStreamClient
+    private readonly IStreamClient _shadow;
+    private readonly PayloadProtocolClient _socks = new();
+    private readonly PipePair _pipe = new();
+
+    public ShadowsocksClient(string method, string password)
     {
-        private readonly IStreamClient shadow;
-        private readonly PayloadProtocolClient socks = new PayloadProtocolClient();
-        private readonly PipePair p = new PipePair();
-
-        public ShadowsocksClient(string method, string password)
+        var param = CryptoProvider.GetCrypto(method);
+        if (param.IsAead)
         {
-            var param = CryptoProvider.GetCrypto(method);
-            if (param.IsAead)
-            {
-                shadow = new AeadClient(param, password);
-            }
-            else
-            {
-                shadow = new UnsafeClient(param, password);
-            }
+            _shadow = new AeadClient(param, password);
         }
-
-        public ShadowsocksClient(string method, byte[] key)
+        else
         {
-            var param = CryptoProvider.GetCrypto(method);
-            shadow = new AeadClient(param, key);
+            _shadow = new UnsafeClient(param, password);
         }
+    }
 
-        public Task Connect(EndPoint destination, IDuplexPipe client, IDuplexPipe server)
-        {
-            var tShadow = shadow.Connect(null, p.UpSide, server);
-            var tSocks = socks.Connect(destination, client, p.UpSide);
+    public ShadowsocksClient(string method, byte[] key)
+    {
+        var param = CryptoProvider.GetCrypto(method);
+        _shadow = new AeadClient(param, key);
+    }
 
-            return Task.WhenAll(tShadow, tSocks);
-        }
+    public Task Connect(EndPoint destination, IDuplexPipe client, IDuplexPipe server)
+    {
+        var tShadow = _shadow.Connect(null, _pipe.UpSide, server);
+        var tSocks = _socks.Connect(destination, client, _pipe.UpSide);
+
+        return Task.WhenAll(tShadow, tSocks);
     }
 }

@@ -4,270 +4,240 @@ using System;
 using System.Net;
 using System.Net.Sockets;
 
-namespace Shadowsocks.WPF.Services
-{
+namespace Shadowsocks.WPF.Services;
 #nullable disable
-    public class PortForwarder : StreamService
+public class PortForwarder(int targetPort) : StreamService
+{
+    public override bool Handle(CachedNetworkStream stream, object state)
     {
-        private readonly int _targetPort;
+        var fp = new byte[256];
+        var len = stream.ReadFirstBlock(fp);
 
-        public PortForwarder(int targetPort)
+        if (stream.Socket.ProtocolType != ProtocolType.Tcp)
         {
-            _targetPort = targetPort;
+            return false;
+        }
+        new Handler().Start(fp, len, stream.Socket, targetPort);
+        return true;
+    }
+
+    [Obsolete]
+    public override bool Handle(byte[] firstPacket, int length, Socket socket, object state)
+    {
+        if (socket.ProtocolType != ProtocolType.Tcp)
+        {
+            return false;
+        }
+        new Handler().Start(firstPacket, length, socket, targetPort);
+        return true;
+    }
+
+    private class Handler : IEnableLogger
+    {
+        private byte[] _firstPacket;
+        private int _firstPacketLength;
+        private Socket _local;
+        private Socket _remote;
+        private bool _closed = false;
+        private bool _localShutdown = false;
+        private bool _remoteShutdown = false;
+        private const int RECV_SIZE = 2048;
+        // remote receive buffer
+        private byte[] remoteRecvBuffer = new byte[RECV_SIZE];
+        // connection receive buffer
+        private readonly byte[] _connetionRecvBuffer = new byte[RECV_SIZE];
+
+        // instance-based lock
+        private readonly object _lock = new();
+
+        public void Start(byte[] firstPacket, int length, Socket socket, int targetPort)
+        {
+            _firstPacket = firstPacket;
+            _firstPacketLength = length;
+            _local = socket;
+            try
+            {
+                // Local Port Forward use IP as is
+                EndPoint remoteEP = new IPEndPoint(_local.AddressFamily == AddressFamily.InterNetworkV6 ? IPAddress.IPv6Loopback : IPAddress.Loopback, targetPort);
+                // Connect to the remote endpoint.
+                _remote = new Socket(SocketType.Stream, ProtocolType.Tcp);
+                _remote.BeginConnect(remoteEP, ConnectCallback, null);
+            }
+            catch (Exception e)
+            {
+                this.Log().Error(e, "");
+                Close();
+            }
         }
 
-        public override bool Handle(CachedNetworkStream stream, object state)
+        private void ConnectCallback(IAsyncResult ar)
         {
-            byte[] fp = new byte[256];
-            int len = stream.ReadFirstBlock(fp);
-
-            if (stream.Socket.ProtocolType != ProtocolType.Tcp)
+            if (_closed)
             {
-                return false;
+                return;
             }
-            new Handler().Start(fp, len, stream.Socket, _targetPort);
-            return true;
+            try
+            {
+                _remote.EndConnect(ar);
+                _remote.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, true);
+                HandshakeReceive();
+            }
+            catch (Exception e)
+            {
+                this.Log().Error(e, "");
+                Close();
+            }
         }
 
-        [Obsolete]
-        public override bool Handle(byte[] firstPacket, int length, Socket socket, object state)
+        private void HandshakeReceive()
         {
-            if (socket.ProtocolType != ProtocolType.Tcp)
+            if (_closed) { return; }
+            try
             {
-                return false;
+                _remote.BeginSend(_firstPacket, 0, _firstPacketLength, 0, StartPipe, null);
             }
-            new Handler().Start(firstPacket, length, socket, _targetPort);
-            return true;
+            catch (Exception e)
+            {
+                this.Log().Error(e, "");
+                Close();
+            }
         }
 
-        private class Handler : IEnableLogger
+        private void StartPipe(IAsyncResult ar)
         {
-            private byte[] _firstPacket;
-            private int _firstPacketLength;
-            private Socket _local;
-            private Socket _remote;
-            private bool _closed = false;
-            private bool _localShutdown = false;
-            private bool _remoteShutdown = false;
-            private const int RecvSize = 2048;
-            // remote receive buffer
-            private byte[] remoteRecvBuffer = new byte[RecvSize];
-            // connection receive buffer
-            private byte[] connetionRecvBuffer = new byte[RecvSize];
-
-            // instance-based lock
-            private readonly object _Lock = new object();
-
-            public void Start(byte[] firstPacket, int length, Socket socket, int targetPort)
+            if (_closed) { return; }
+            try
             {
-                _firstPacket = firstPacket;
-                _firstPacketLength = length;
-                _local = socket;
-                try
+                _remote.EndSend(ar);
+                _remote.BeginReceive(remoteRecvBuffer, 0, RECV_SIZE, 0,
+                    PipeRemoteReceiveCallback, null);
+                _local.BeginReceive(_connetionRecvBuffer, 0, RECV_SIZE, 0,
+                    PipeConnectionReceiveCallback, null);
+            }
+            catch (Exception e)
+            {
+                this.Log().Error(e, "");
+                Close();
+            }
+        }
+
+        private void PipeRemoteReceiveCallback(IAsyncResult ar)
+        {
+            if (_closed) { return; }
+            try
+            {
+                var bytesRead = _remote.EndReceive(ar);
+                if (bytesRead > 0)
                 {
-                    // Local Port Forward use IP as is
-                    EndPoint remoteEP = new IPEndPoint(_local.AddressFamily == AddressFamily.InterNetworkV6 ? IPAddress.IPv6Loopback : IPAddress.Loopback, targetPort);
-                    // Connect to the remote endpoint.
-                    _remote = new Socket(SocketType.Stream, ProtocolType.Tcp);
-                    _remote.BeginConnect(remoteEP, ConnectCallback, null);
+                    _local.BeginSend(remoteRecvBuffer, 0, bytesRead, 0, PipeConnectionSendCallback, null);
                 }
-                catch (Exception e)
+                else
                 {
-                    this.Log().Error(e, "");
-                    Close();
+                    _local.Shutdown(SocketShutdown.Send);
+                    _localShutdown = true;
+                    CheckClose();
                 }
             }
+            catch (Exception e)
+            {
+                this.Log().Error(e, "");
+                Close();
+            }
+        }
 
-            private void ConnectCallback(IAsyncResult ar)
+        private void PipeConnectionReceiveCallback(IAsyncResult ar)
+        {
+            if (_closed) { return; }
+            try
+            {
+                int bytesRead = _local.EndReceive(ar);
+                if (bytesRead > 0)
+                {
+                    _remote.BeginSend(_connetionRecvBuffer, 0, bytesRead, 0, PipeRemoteSendCallback, null);
+                }
+                else
+                {
+                    _remote.Shutdown(SocketShutdown.Send);
+                    _remoteShutdown = true;
+                    CheckClose();
+                }
+            }
+            catch (Exception e)
+            {
+                this.Log().Error(e, "");
+                Close();
+            }
+        }
+
+        private void PipeRemoteSendCallback(IAsyncResult ar)
+        {
+            if (_closed) { return; }
+            try
+            {
+                _remote.EndSend(ar);
+                _local.BeginReceive(_connetionRecvBuffer, 0, RECV_SIZE, 0,
+                    PipeConnectionReceiveCallback, null);
+            }
+            catch (Exception e)
+            {
+                this.Log().Error(e, "");
+                Close();
+            }
+        }
+
+        private void PipeConnectionSendCallback(IAsyncResult ar)
+        {
+            if (_closed) { return; }
+            try
+            {
+                _local.EndSend(ar);
+                _remote.BeginReceive(remoteRecvBuffer, 0, RECV_SIZE, 0,
+                    PipeRemoteReceiveCallback, null);
+            }
+            catch (Exception e)
+            {
+                this.Log().Error(e, "");
+                Close();
+            }
+        }
+
+        private void CheckClose()
+        {
+            if (_localShutdown && _remoteShutdown) { Close(); }
+        }
+
+        public void Close()
+        {
+            lock (_lock)
             {
                 if (_closed)
                 {
                     return;
                 }
+                _closed = true;
+            }
+            if (_local != null)
+            {
                 try
                 {
-                    _remote.EndConnect(ar);
-                    _remote.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, true);
-                    HandshakeReceive();
+                    _local.Shutdown(SocketShutdown.Both);
+                    _local.Close();
                 }
                 catch (Exception e)
                 {
                     this.Log().Error(e, "");
-                    Close();
                 }
             }
-
-            private void HandshakeReceive()
+            if (_remote != null)
             {
-                if (_closed)
-                {
-                    return;
-                }
                 try
                 {
-                    _remote.BeginSend(_firstPacket, 0, _firstPacketLength, 0, StartPipe, null);
+                    _remote.Shutdown(SocketShutdown.Both);
+                    _remote.Dispose();
                 }
-                catch (Exception e)
+                catch (SocketException e)
                 {
                     this.Log().Error(e, "");
-                    Close();
-                }
-            }
-
-            private void StartPipe(IAsyncResult ar)
-            {
-                if (_closed)
-                {
-                    return;
-                }
-                try
-                {
-                    _remote.EndSend(ar);
-                    _remote.BeginReceive(remoteRecvBuffer, 0, RecvSize, 0,
-                        PipeRemoteReceiveCallback, null);
-                    _local.BeginReceive(connetionRecvBuffer, 0, RecvSize, 0,
-                        PipeConnectionReceiveCallback, null);
-                }
-                catch (Exception e)
-                {
-                    this.Log().Error(e, "");
-                    Close();
-                }
-            }
-
-            private void PipeRemoteReceiveCallback(IAsyncResult ar)
-            {
-                if (_closed)
-                {
-                    return;
-                }
-                try
-                {
-                    int bytesRead = _remote.EndReceive(ar);
-                    if (bytesRead > 0)
-                    {
-                        _local.BeginSend(remoteRecvBuffer, 0, bytesRead, 0, PipeConnectionSendCallback, null);
-                    }
-                    else
-                    {
-                        _local.Shutdown(SocketShutdown.Send);
-                        _localShutdown = true;
-                        CheckClose();
-                    }
-                }
-                catch (Exception e)
-                {
-                    this.Log().Error(e, "");
-                    Close();
-                }
-            }
-
-            private void PipeConnectionReceiveCallback(IAsyncResult ar)
-            {
-                if (_closed)
-                {
-                    return;
-                }
-                try
-                {
-                    int bytesRead = _local.EndReceive(ar);
-                    if (bytesRead > 0)
-                    {
-                        _remote.BeginSend(connetionRecvBuffer, 0, bytesRead, 0, PipeRemoteSendCallback, null);
-                    }
-                    else
-                    {
-                        _remote.Shutdown(SocketShutdown.Send);
-                        _remoteShutdown = true;
-                        CheckClose();
-                    }
-                }
-                catch (Exception e)
-                {
-                    this.Log().Error(e, "");
-                    Close();
-                }
-            }
-
-            private void PipeRemoteSendCallback(IAsyncResult ar)
-            {
-                if (_closed)
-                {
-                    return;
-                }
-                try
-                {
-                    _remote.EndSend(ar);
-                    _local.BeginReceive(connetionRecvBuffer, 0, RecvSize, 0,
-                        PipeConnectionReceiveCallback, null);
-                }
-                catch (Exception e)
-                {
-                    this.Log().Error(e, "");
-                    Close();
-                }
-            }
-
-            private void PipeConnectionSendCallback(IAsyncResult ar)
-            {
-                if (_closed)
-                {
-                    return;
-                }
-                try
-                {
-                    _local.EndSend(ar);
-                    _remote.BeginReceive(remoteRecvBuffer, 0, RecvSize, 0,
-                        PipeRemoteReceiveCallback, null);
-                }
-                catch (Exception e)
-                {
-                    this.Log().Error(e, "");
-                    Close();
-                }
-            }
-
-            private void CheckClose()
-            {
-                if (_localShutdown && _remoteShutdown)
-                {
-                    Close();
-                }
-            }
-
-            public void Close()
-            {
-                lock (_Lock)
-                {
-                    if (_closed)
-                    {
-                        return;
-                    }
-                    _closed = true;
-                }
-                if (_local != null)
-                {
-                    try
-                    {
-                        _local.Shutdown(SocketShutdown.Both);
-                        _local.Close();
-                    }
-                    catch (Exception e)
-                    {
-                        this.Log().Error(e, "");
-                    }
-                }
-                if (_remote != null)
-                {
-                    try
-                    {
-                        _remote.Shutdown(SocketShutdown.Both);
-                        _remote.Dispose();
-                    }
-                    catch (SocketException e)
-                    {
-                        this.Log().Error(e, "");
-                    }
                 }
             }
         }

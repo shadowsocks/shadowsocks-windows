@@ -10,220 +10,192 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
-namespace Shadowsocks.Net
+namespace Shadowsocks.Net;
+
+public class UdpRelay(Server server) : DatagramService
 {
-    public class UDPRelay : DatagramService
+    // TODO: choose a smart number
+    private readonly LruCache<IPEndPoint, UdpHandler> _cache = new(512);
+
+    public long outbound = 0;
+    public long inbound = 0;
+
+    public override async Task<bool> Handle(Memory<byte> packet, Socket socket, EndPoint client)
     {
-        Server _server;
-        // TODO: choose a smart number
-        private LRUCache<IPEndPoint, UDPHandler> _cache = new LRUCache<IPEndPoint, UDPHandler>(512);
+        if (socket.ProtocolType != ProtocolType.Udp || packet.Length < 4) { return false; }
 
-        public long outbound = 0;
-        public long inbound = 0;
-
-        public UDPRelay(Server server)
+        var remoteEndPoint = (IPEndPoint)client;
+        var handler = _cache.get(remoteEndPoint);
+        if (handler == null)
         {
+            handler = new UdpHandler(socket, server, remoteEndPoint);
+            handler.Receive();
+            _cache.Add(remoteEndPoint, handler);
+        }
+        await handler.SendAsync(packet);
+        return true;
+    }
+
+    public class UdpHandler : IEnableLogger
+    {
+        private static readonly MemoryPool<byte> _pool = MemoryPool<byte>.Shared;
+        private readonly Socket _local;
+        private readonly Socket _remote;
+
+        private readonly Server _server;
+        private readonly byte[] _buffer = new byte[65536];
+
+        private readonly IPEndPoint _localEndPoint;
+        private readonly IPEndPoint _remoteEndPoint;
+
+        private IPAddress ListenAddress
+        => _remote.AddressFamily switch
+        {
+            AddressFamily.InterNetwork => IPAddress.Any,
+            AddressFamily.InterNetworkV6 => IPAddress.IPv6Any,
+            _ => throw new NotSupportedException(),
+        };
+
+        public UdpHandler(Socket local, Server server, IPEndPoint localEndPoint)
+        {
+            _local = local;
             _server = server;
+            _localEndPoint = localEndPoint;
+
+            // TODO async resolving
+            var parsed = IPAddress.TryParse(server.Host, out var ipAddress);
+            if (!parsed)
+            {
+                var ipHostInfo = Dns.GetHostEntry(server.Host);
+                ipAddress = ipHostInfo.AddressList[0];
+            }
+            _remoteEndPoint = new IPEndPoint(ipAddress, server.Port);
+            _remote = new Socket(_remoteEndPoint.AddressFamily, SocketType.Dgram, ProtocolType.Udp);
+            _remote.Bind(new IPEndPoint(ListenAddress, 0));
         }
 
-        public override async Task<bool> Handle(Memory<byte> packet, Socket socket, EndPoint client)
+        public async Task SendAsync(ReadOnlyMemory<byte> data)
         {
-            if (socket.ProtocolType != ProtocolType.Udp)
+            using var encryptor = CryptoFactory.GetEncryptor(_server.Method, _server.Password);
+            using var mem = _pool.Rent(data.Length + 1000);
+
+            // byte[] dataOut = new byte[slicedData.Length + 1000];
+            int outlen = encryptor.EncryptUDP(data.Span[3..], mem.Memory.Span);
+            this.Log().Debug($"{_localEndPoint} {_remoteEndPoint} {outlen} UDP Relay up");
+            if (!MemoryMarshal.TryGetArray(mem.Memory[..outlen], out ArraySegment<byte> outData))
             {
-                return false;
-            }
-            if (packet.Length < 4)
-            {
-                return false;
-            }
-            IPEndPoint remoteEndPoint = (IPEndPoint)client;
-            UDPHandler handler = _cache.get(remoteEndPoint);
-            if (handler == null)
-            {
-                handler = new UDPHandler(socket, _server, remoteEndPoint);
-                handler.Receive();
-                _cache.add(remoteEndPoint, handler);
-            }
-            await handler.SendAsync(packet);
-            return true;
+                throw new InvalidOperationException("Can't extract underly array segment");
+            };
+            await _remote?.SendToAsync(outData, SocketFlags.None, _remoteEndPoint);
         }
 
-        public class UDPHandler : IEnableLogger
+        public async Task ReceiveAsync()
         {
-            private static MemoryPool<byte> pool = MemoryPool<byte>.Shared;
-            private Socket _local;
-            private Socket _remote;
-
-            private Server _server;
-            private byte[] _buffer = new byte[65536];
-
-            private IPEndPoint _localEndPoint;
-            private IPEndPoint _remoteEndPoint;
-
-            private IPAddress ListenAddress
+            EndPoint remoteEndPoint = new IPEndPoint(ListenAddress, 0);
+            this.Log().Debug($"++++++Receive Server Port, size:" + _buffer.Length);
+            try
             {
-                get
+                while (true)
                 {
-                    return _remote.AddressFamily switch
+                    var result = await _remote.ReceiveFromAsync(_buffer, SocketFlags.None, remoteEndPoint);
+                    var bytesRead = result.ReceivedBytes;
+
+                    using var owner = _pool.Rent(bytesRead + 3);
+                    var o = owner.Memory;
+
+                    using ICrypto encryptor = CryptoFactory.GetEncryptor(_server.Method, _server.Password);
+                    var outlen = encryptor.DecryptUDP(o.Span[3..], _buffer.AsSpan(0, bytesRead));
+                    this.Log().Debug($"{_remoteEndPoint} {_localEndPoint} {outlen} UDP Relay down");
+                    if (!MemoryMarshal.TryGetArray(o[..(outlen + 3)], out ArraySegment<byte> data))
                     {
-                        AddressFamily.InterNetwork => IPAddress.Any,
-                        AddressFamily.InterNetworkV6 => IPAddress.IPv6Any,
-                        _ => throw new NotSupportedException(),
+                        throw new InvalidOperationException("Can't extract underly array segment");
                     };
+                    await _local?.SendToAsync(data, SocketFlags.None, _localEndPoint);
+
                 }
             }
-
-            public UDPHandler(Socket local, Server server, IPEndPoint localEndPoint)
+            catch (Exception e)
             {
-                _local = local;
-                _server = server;
-                _localEndPoint = localEndPoint;
-
-                // TODO async resolving
-                bool parsed = IPAddress.TryParse(server.Host, out IPAddress ipAddress);
-                if (!parsed)
-                {
-                    IPHostEntry ipHostInfo = Dns.GetHostEntry(server.Host);
-                    ipAddress = ipHostInfo.AddressList[0];
-                }
-                _remoteEndPoint = new IPEndPoint(ipAddress, server.Port);
-                _remote = new Socket(_remoteEndPoint.AddressFamily, SocketType.Dgram, ProtocolType.Udp);
-                _remote.Bind(new IPEndPoint(ListenAddress, 0));
+                this.Log().Warn(e, "");
             }
+        }
 
-            public async Task SendAsync(ReadOnlyMemory<byte> data)
+        public void Receive()
+        {
+            _ = ReceiveAsync();
+        }
+
+        public void Close()
+        {
+            try
             {
-                using ICrypto encryptor = CryptoFactory.GetEncryptor(_server.Method, _server.Password);
-                using IMemoryOwner<byte> mem = pool.Rent(data.Length + 1000);
-
-                // byte[] dataOut = new byte[slicedData.Length + 1000];
-                int outlen = encryptor.EncryptUDP(data.Span[3..], mem.Memory.Span);
-                this.Log().Debug($"{_localEndPoint} {_remoteEndPoint} {outlen} UDP Relay up");
-                if (!MemoryMarshal.TryGetArray(mem.Memory[..outlen], out ArraySegment<byte> outData))
-                {
-                    throw new InvalidOperationException("Can't extract underly array segment");
-                };
-                await _remote?.SendToAsync(outData, SocketFlags.None, _remoteEndPoint);
+                _remote?.Close();
             }
-
-            public async Task ReceiveAsync()
+            catch (ObjectDisposedException)
             {
-                EndPoint remoteEndPoint = new IPEndPoint(ListenAddress, 0);
-                this.Log().Debug($"++++++Receive Server Port, size:" + _buffer.Length);
-                try
-                {
-                    while (true)
-                    {
-                        var result = await _remote.ReceiveFromAsync(_buffer, SocketFlags.None, remoteEndPoint);
-                        int bytesRead = result.ReceivedBytes;
-
-                        using IMemoryOwner<byte> owner = pool.Rent(bytesRead + 3);
-                        Memory<byte> o = owner.Memory;
-
-                        using ICrypto encryptor = CryptoFactory.GetEncryptor(_server.Method, _server.Password);
-                        int outlen = encryptor.DecryptUDP(o.Span[3..], _buffer.AsSpan(0, bytesRead));
-                        this.Log().Debug($"{_remoteEndPoint} {_localEndPoint} {outlen} UDP Relay down");
-                        if (!MemoryMarshal.TryGetArray(o[..(outlen + 3)], out ArraySegment<byte> data))
-                        {
-                            throw new InvalidOperationException("Can't extract underly array segment");
-                        };
-                        await _local?.SendToAsync(data, SocketFlags.None, _localEndPoint);
-
-                    }
-                }
-                catch (Exception e)
-                {
-                    this.Log().Warn(e, "");
-                }
+                // TODO: handle the ObjectDisposedException
             }
-
-            public void Receive()
+            catch (Exception)
             {
-                _ = ReceiveAsync();
-            }
-
-            public void Close()
-            {
-                try
-                {
-                    _remote?.Close();
-                }
-                catch (ObjectDisposedException)
-                {
-                    // TODO: handle the ObjectDisposedException
-                }
-                catch (Exception)
-                {
-                    // TODO: need more think about handle other Exceptions, or should remove this catch().
-                }
+                // TODO: need more think about handle other Exceptions, or should remove this catch().
             }
         }
     }
-
-    #region LRU cache
-
-    // cc by-sa 3.0 http://stackoverflow.com/a/3719378/1124054
-    class LRUCache<K, V> where V : UDPRelay.UDPHandler
-    {
-        private int capacity;
-        private Dictionary<K, LinkedListNode<LRUCacheItem<K, V>>> cacheMap = new Dictionary<K, LinkedListNode<LRUCacheItem<K, V>>>();
-        private LinkedList<LRUCacheItem<K, V>> lruList = new LinkedList<LRUCacheItem<K, V>>();
-
-        public LRUCache(int capacity)
-        {
-            this.capacity = capacity;
-        }
-
-        [MethodImpl(MethodImplOptions.Synchronized)]
-        public V get(K key)
-        {
-            LinkedListNode<LRUCacheItem<K, V>> node;
-            if (cacheMap.TryGetValue(key, out node))
-            {
-                V value = node.Value.value;
-                lruList.Remove(node);
-                lruList.AddLast(node);
-                return value;
-            }
-            return default(V);
-        }
-
-        [MethodImpl(MethodImplOptions.Synchronized)]
-        public void add(K key, V val)
-        {
-            if (cacheMap.Count >= capacity)
-            {
-                RemoveFirst();
-            }
-
-            LRUCacheItem<K, V> cacheItem = new LRUCacheItem<K, V>(key, val);
-            LinkedListNode<LRUCacheItem<K, V>> node = new LinkedListNode<LRUCacheItem<K, V>>(cacheItem);
-            lruList.AddLast(node);
-            cacheMap.Add(key, node);
-        }
-
-        private void RemoveFirst()
-        {
-            // Remove from LRUPriority
-            LinkedListNode<LRUCacheItem<K, V>> node = lruList.First;
-            lruList.RemoveFirst();
-
-            // Remove from cache
-            cacheMap.Remove(node.Value.key);
-            node.Value.value.Close();
-        }
-    }
-
-    class LRUCacheItem<K, V>
-    {
-        public LRUCacheItem(K k, V v)
-        {
-            key = k;
-            value = v;
-        }
-        public K key;
-        public V value;
-    }
-
-    #endregion
 }
+
+#region LRU cache
+
+// cc by-sa 3.0 http://stackoverflow.com/a/3719378/1124054
+internal class LruCache<TK, TV>(int capacity)
+    where TV : UdpRelay.UdpHandler
+{
+    private readonly Dictionary<TK, LinkedListNode<LruCacheItem<TK, TV>>> _cacheMap = [];
+    private readonly LinkedList<LruCacheItem<TK, TV>> _lruList = new();
+
+    [MethodImpl(MethodImplOptions.Synchronized)]
+    public TV get(TK key)
+    {
+        LinkedListNode<LruCacheItem<TK, TV>> node;
+        if (_cacheMap.TryGetValue(key, out node))
+        {
+            var value = node.Value.value;
+            _lruList.Remove(node);
+            _lruList.AddLast(node);
+            return value;
+        }
+        return default(TV);
+    }
+
+    [MethodImpl(MethodImplOptions.Synchronized)]
+    public void Add(TK key, TV val)
+    {
+        if (_cacheMap.Count >= capacity)
+        {
+            RemoveFirst();
+        }
+
+        var cacheItem = new LruCacheItem<TK, TV>(key, val);
+        var node = new LinkedListNode<LruCacheItem<TK, TV>>(cacheItem);
+        _lruList.AddLast(node);
+        _cacheMap.Add(key, node);
+    }
+
+    private void RemoveFirst()
+    {
+        // Remove from LRUPriority
+        var node = _lruList.First;
+        _lruList.RemoveFirst();
+
+        // Remove from cache
+        _cacheMap.Remove(node.Value.key);
+        node.Value.value.Close();
+    }
+}
+
+internal class LruCacheItem<TK, TV>(TK k, TV v)
+{
+    public TK key = k;
+    public TV value = v;
+}
+
+#endregion

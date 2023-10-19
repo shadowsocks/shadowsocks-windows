@@ -3,19 +3,18 @@ using System.IO.Pipelines;
 using System.Net;
 using System.Threading.Tasks;
 
-namespace Shadowsocks.Protocol.Shadowsocks
+namespace Shadowsocks.Protocol.Shadowsocks;
+
+// shadowsocks payload protocol client
+internal class PayloadProtocolClient : IStreamClient
 {
-    // shadowsocks payload protocol client
-    class PayloadProtocolClient : IStreamClient
+    public async Task Connect(EndPoint destination, IDuplexPipe client, IDuplexPipe server)
     {
-        public async Task Connect(EndPoint destination, IDuplexPipe client, IDuplexPipe server)
-        {
-            var addrMem = server.Output.GetMemory(512);
+        var addrMem = server.Output.GetMemory(512);
 
-            var addrLen = Socks5Message.SerializeAddress(addrMem, destination);
-            server.Output.Advance(addrLen);
+        var addrLen = Socks5Message.SerializeAddress(addrMem, destination);
+        server.Output.Advance(addrLen);
 
-            await DuplexPipe.CopyDuplexPipe(client, server);
-        }
+        await DuplexPipe.CopyDuplexPipe(client, server);
     }
 }
