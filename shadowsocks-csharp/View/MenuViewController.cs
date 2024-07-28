@@ -678,16 +678,20 @@ namespace Shadowsocks.View
             Configuration configuration = controller.GetCurrentConfiguration();
             for (int i = 0; i < configuration.configs.Count; i++)
             {
-                var server = configuration.configs[i];
                 try
                 {
                     if (overflow)
                     {
                         needAdd = configuration.index >= i;
+                        if (needAdd)
+                        {
+                            i = configuration.index;
+                        }
                     }
 
                     if (needAdd)
                     {
+                        var server = configuration.configs[i];
                         Configuration.CheckServer(server);
                         var item = new MenuItem(server.ToString());
                         item.Tag = i;
