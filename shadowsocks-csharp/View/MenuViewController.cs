@@ -670,18 +670,39 @@ namespace Shadowsocks.View
             // user wants a seperator item between strategy and servers menugroup
             items.Add(strategyCount++, new MenuItem("-"));
 
+            int maxCount = 20;
             int serverCount = 0;
+            bool overflow = false;
+            bool needAdd = true;
+            
             Configuration configuration = controller.GetCurrentConfiguration();
-            foreach (var server in configuration.configs)
+            for (int i = 0; i < configuration.configs.Count; i++)
             {
+                var server = configuration.configs[i];
                 try
                 {
-                    Configuration.CheckServer(server);
-                    MenuItem item = new MenuItem(server.ToString());
-                    item.Tag = configuration.configs.FindIndex(s => s == server);
-                    item.Click += AServerItem_Click;
-                    items.Add(strategyCount + serverCount, item);
-                    serverCount++;
+                    if (overflow)
+                    {
+                        needAdd = configuration.index >= i;
+                    }
+
+                    if (needAdd)
+                    {
+                        Configuration.CheckServer(server);
+                        var item = new MenuItem(server.ToString());
+                        item.Tag = i;
+                        item.Click += AServerItem_Click;
+                        items.Add(strategyCount + serverCount, item);
+                        serverCount++;
+                    }
+                    
+                    if (overflow)
+                    {
+                        items.Add(strategyCount + serverCount, new MenuItem($"... more than {maxCount} (total {configuration.configs.Count})", Config_Click));
+                        break;
+                    }
+
+                    overflow = serverCount > maxCount;
                 }
                 catch
                 {
