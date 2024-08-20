@@ -12,7 +12,7 @@
 - SIP003 plugins.
 - SIP008 online configuration delivery.
 
-## Downloads
+## Downloadss
 
 Download from [releases](https://github.com/shadowsocks/shadowsocks-windows/releases).
 
