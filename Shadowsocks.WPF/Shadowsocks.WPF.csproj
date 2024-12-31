@@ -50,7 +50,7 @@
 
   <ItemGroup>
     <PackageReference Include="MaterialDesignThemes" Version="4.9.0" />
-    <PackageReference Include="MdXaml" Version="1.21.0" />
+    <PackageReference Include="MdXaml" Version="1.27.0" />
     <PackageReference Include="OxyPlot.Wpf" Version="2.2.0" />
     <PackageReference Include="ReactiveUI.Events.WPF" Version="15.1.1" />
     <PackageReference Include="ReactiveUI.Fody" Version="19.5.41" />
