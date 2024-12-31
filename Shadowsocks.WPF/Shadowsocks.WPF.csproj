@@ -60,7 +60,7 @@
     <PackageReference Include="System.CommandLine" Version="2.0.0-beta1.21227.1" />
     <PackageReference Include="System.Reactive" Version="5.0.0" />
     <PackageReference Include="WPFLocalizeExtension" Version="3.8.0" />
-    <PackageReference Include="ZXing.Net" Version="0.16.6" />
+    <PackageReference Include="ZXing.Net" Version="0.16.9" />
   </ItemGroup>
 
   <ItemGroup>
