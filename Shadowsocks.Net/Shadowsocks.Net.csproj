@@ -6,7 +6,7 @@
 
   <ItemGroup>
     <PackageReference Include="CryptoBase" Version="1.7.2" />
-    <PackageReference Include="Splat" Version="14.7.1" />
+    <PackageReference Include="Splat" Version="15.2.22" />
   </ItemGroup>
 
   <ItemGroup>
