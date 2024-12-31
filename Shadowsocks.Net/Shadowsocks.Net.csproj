@@ -1,12 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>net7.0</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="CryptoBase" Version="1.2.2" />
-    <PackageReference Include="Splat" Version="11.0.1" />
+    <PackageReference Include="CryptoBase" Version="1.7.2" />
+    <PackageReference Include="Splat" Version="14.7.1" />
   </ItemGroup>
 
   <ItemGroup>
