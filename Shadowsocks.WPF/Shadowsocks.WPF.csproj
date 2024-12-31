@@ -57,7 +57,7 @@
     <PackageReference Include="ReactiveUI.Validation" Version="3.1.7" />
     <PackageReference Include="ReactiveUI.WPF" Version="19.4.1" />
     <PackageReference Include="Splat.NLog" Version="14.7.1" />
-    <PackageReference Include="System.CommandLine" Version="2.0.0-beta1.21223.1" />
+    <PackageReference Include="System.CommandLine" Version="2.0.0-beta4.24528.1" />
     <PackageReference Include="System.Reactive" Version="6.0.0" />
     <PackageReference Include="WPFLocalizeExtension" Version="3.10.0" />
     <PackageReference Include="ZXing.Net" Version="0.16.9" />
