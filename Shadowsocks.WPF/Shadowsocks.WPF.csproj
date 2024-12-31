@@ -53,7 +53,7 @@
     <PackageReference Include="MdXaml" Version="1.21.0" />
     <PackageReference Include="OxyPlot.Wpf" Version="2.2.0" />
     <PackageReference Include="ReactiveUI.Events.WPF" Version="15.1.1" />
-    <PackageReference Include="ReactiveUI.Fody" Version="19.4.1" />
+    <PackageReference Include="ReactiveUI.Fody" Version="19.5.41" />
     <PackageReference Include="ReactiveUI.Validation" Version="3.1.7" />
     <PackageReference Include="ReactiveUI.WPF" Version="19.4.1" />
     <PackageReference Include="Splat.NLog" Version="14.7.1" />
