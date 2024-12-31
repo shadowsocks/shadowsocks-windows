@@ -1,0 +1,70 @@
+version: 2
+updates:
+- package-ecosystem: nuget
+  directory: "/"
+  schedule:
+    interval: daily
+  open-pull-requests-limit: 10
+  ignore:
+  - dependency-name: System.CommandLine
+    versions:
+    - 2.0.0-beta1.21109.1
+    - 2.0.0-beta1.21172.1
+    - 2.0.0-beta1.21173.1
+    - 2.0.0-beta1.21174.1
+    - 2.0.0-beta1.21206.1
+  - dependency-name: Microsoft.NET.Test.Sdk
+    versions:
+    - 16.8.3
+    - 16.9.4
+  - dependency-name: ReactiveUI.WPF
+    versions:
+    - 13.2.10
+    - 13.2.2
+  - dependency-name: CryptoBase
+    versions:
+    - 1.2.2
+  - dependency-name: ReactiveUI.Fody
+    versions:
+    - 13.2.10
+    - 13.2.2
+  - dependency-name: ReactiveUI.Events.WPF
+    versions:
+    - 13.2.2
+  - dependency-name: Google.Protobuf
+    versions:
+    - 3.14.0
+    - 3.15.5
+  - dependency-name: MSTest.TestAdapter
+    versions:
+    - 2.1.2
+    - 2.2.1
+  - dependency-name: MSTest.TestFramework
+    versions:
+    - 2.1.2
+    - 2.2.1
+  - dependency-name: Costura.Fody
+    versions:
+    - 5.0.2
+  - dependency-name: NLog
+    versions:
+    - 4.7.7
+    - 4.7.8
+  - dependency-name: BouncyCastle
+    versions:
+    - 1.8.9
+  - dependency-name: System.Management
+    versions:
+    - 5.0.0
+  - dependency-name: System.Buffers
+    versions:
+    - 4.5.1
+  - dependency-name: System.Runtime.CompilerServices.Unsafe
+    versions:
+    - 5.0.0
+  - dependency-name: System.Memory
+    versions:
+    - 4.5.4
+  - dependency-name: System.Numerics.Vectors
+    versions:
+    - 4.5.0
